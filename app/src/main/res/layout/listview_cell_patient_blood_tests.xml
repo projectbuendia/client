@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="?android:dividerHorizontal"
+    android:dividerPadding="16dp"
+    android:showDividers="middle"
+    android:weightSum="4">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:padding="16dp">
+        <TextView
+            android:id="@+id/patient_detail_blood_tests_list_row_status_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ebola blood test"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/patient_detail_blood_tests_list_ago"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sample recieved two minutes ago"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"/>
+    </LinearLayout>
+    <TextView
+        android:id="@+id/patient_detail_blood_tests_list_row_contents"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:padding="16dp"
+        android:text="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem dolorum sunt, deserunt earum suscipit quisquam numquam sint."/>
+    <Button
+        android:id="@+id/patient_detail_blood_tests_list_row_done_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Add result"
+        android:layout_margin="8dp"/>
+</LinearLayout>

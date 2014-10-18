@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="green">#008000</color>
+    <color name="red">#FF0000</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="status_suspect">#fbb03b</color>
+    <color name="status_probable">#ffff00</color>
+    <color name="status_confirmed">#ff0000</color>
+    <color name="status_non_case">#39b54a</color>
+    <color name="status_convalescent">#009245</color>
+    <color name="status_unconfirmed_death">#666666</color>
+    <color name="status_confirmed_death">#000000</color>
+    <color name="status_can_be_discharged">#d9e021</color>
+    <color name="status_discharged">#b3b3b3</color>
+
+
+
+</resources>

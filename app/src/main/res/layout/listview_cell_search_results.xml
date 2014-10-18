@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/listview_cell_search_results_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:lines="1"
+            android:ellipsize="end"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/listview_cell_search_results_id"
+            android:layout_marginTop="6dp"
+            android:textColor="@android:color/darker_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/listview_cell_search_results_location"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="20dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="12dp">
+
+        <ImageView
+            android:id="@+id/listview_cell_search_results_gender"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <TextView
+            android:id="@+id/listview_cell_search_results_age"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        </LinearLayout>
+
+
+
+    <ImageView
+        android:layout_weight="0"
+        android:id="@+id/listview_cell_search_results_color_indicator"
+        android:layout_width="10dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_red_dark"/>
+
+</LinearLayout>

@@ -1,0 +1,90 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle" >@style/thick_ab_style</item>
+        <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
+        <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
+        <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+    </style>
+
+    <style name="thick_ab_style" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:height">100dp</item>
+    </style>
+    <style name="MenuActionBar" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+        <item name="android:paddingLeft">28dip</item>
+        <item name="android:paddingRight">28dip</item>
+    </style>
+
+    <style name="row">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:divider">?android:dividerVertical</item>
+    </style>
+    <style name="cell">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">16dp</item>
+    </style>
+    <style name="cell_heading">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+    <style name="cell_subheading">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="CustomTabPageIndicator" >
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/vpi__tab_indicator</item>
+        <item name="android:paddingTop">20dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.TabPageIndicator</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">#FF555555</item>
+    </style>
+
+    <style name="FormLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">22sp</item>
+        <!--<item name="android:textStyle">bold</item>-->
+        <item name="android:textColor">#ff747374</item>
+        <!--<item name="android:textAllCaps">true</item>-->
+        <item name="android:paddingLeft">8dp</item>
+    </style>
+
+    <style name="FormItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingTop">22dp</item>
+        <item name="android:paddingBottom">22dp</item>
+    </style>
+    <style name="FormInput">
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="vertical_small_horizontal_large">
+        <item name="android:orientation">vertical</item>
+    </style>
+    <style name="stacked_small">
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+</resources>
