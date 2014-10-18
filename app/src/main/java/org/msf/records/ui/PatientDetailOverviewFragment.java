@@ -47,6 +47,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
     @InjectView(R.id.patient_overview_estimated_days_infected) TextView mPatientDaysInfectedTV;
     @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
+    @InjectView(R.id.patient_overview_gender_age) TextView mPatientGenderAgeTV;
 
     View mPatientStatusContainer;
 
@@ -150,6 +151,10 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
     @Override
     public void onResponse(Patient response) {
         Log.d(TAG, "onResponse");
+
+        String mGender;
+        int mAge;
+
         mPatientNameTV.setText(response.given_name + " " + response.family_name);
         mPatientIdTV.setText("" + response.id);
         mPatientLocationTV.setText("" + getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()) + ", Tent " +
@@ -166,6 +171,19 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
         mPatientStatusIcon.setImageResource(Status.getStatus(response.status).roundIconId);
         mPatientStatusTV.setText(Status.getStatus(response.status).nameId);
 
+        if (response.gender.equals("M")) {
+            mGender = "Male";
+        } else {
+            mGender = "Female";
+        }
+
+        if (response.age.years == 0) {
+            mAge = response.age.months;
+        } else {
+            mAge = response.age.years;
+        }
+
+        mPatientGenderAgeTV.setText(mGender + ", " + mAge + " " + response.age.type);
 
 
         //important information

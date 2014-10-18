@@ -335,15 +335,15 @@ public class PatientListFragment extends ProgressFragment implements
                 holder.mPatientAge.setTextColor(getResources().getColor(R.color.transparent));
             }
 
-            if (patient.gender != null && patient.gender.equals("m")) {
+            if (patient.gender != null && patient.gender.equals("M")) {
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_man));
             }
 
-            if (patient.gender != null && patient.gender.equals("f")) {
+            if (patient.gender != null && patient.gender.equals("F") && patient.pregnancy_start_date == null) {
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_woman));
             }
 
-            if (patient.gender != null && patient.gender.equals("p")) {
+            if (patient.pregnancy_start_date != null) {
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_pregnant));
             }
 
