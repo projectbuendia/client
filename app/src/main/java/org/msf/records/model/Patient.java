@@ -14,6 +14,7 @@ public class Patient implements Serializable {
 
     public String important_information;
     public String status;
+    public String pregnancy_start_date;
 
     public String gender;
     public String movement;

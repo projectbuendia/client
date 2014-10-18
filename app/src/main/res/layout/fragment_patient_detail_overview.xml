@@ -71,7 +71,16 @@
                             android:textSize="18sp"
                             android:text="Probable, Tent 7, Bed 139"
                             android:gravity="center_vertical"
-                            android:clickable="true"/>
+                            android:clickable="true"
+                            android:layout_marginBottom="12dp"/>
+
+                        <TextView
+                            android:id="@+id/patient_overview_gender_age"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:textSize="18sp"
+                            android:text="Male, 18 years"
+                            android:gravity="center_vertical"/>
 
 
                     </LinearLayout>
