@@ -1,0 +1,21 @@
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ListView
+        android:id="@+id/patient_blood_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="org.msf.records.ui.PatientDetailFlagsFragment"
+        tools:listitem="@layout/listview_cell_patient_blood_tests"
+        tools:listheader="@layout/include_patient_detail_blood_tests_header"
+        android:clipToPadding="false"
+        android:background="@drawable/border_grey_1dp"
+        android:paddingLeft="22dp"
+        android:paddingRight="22dp"
+        android:paddingTop="22dp"
+        android:layout_margin="16dp"
+        android:scrollbarStyle="outsideInset"/>
+</LinearLayout>

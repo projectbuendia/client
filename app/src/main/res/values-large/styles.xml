@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="vertical_small_horizontal_large">
+        <item name="android:orientation">horizontal</item>
+    </style>
+    <style name="stacked_small">
+        <item name="android:layout_width">0dp</item>
+    </style>
+</resources>

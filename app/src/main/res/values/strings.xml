@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MSF Medical Records</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_patient_list">Patients</string>
+    <string name="title_patient_detail">Patient Detail</string>
+    <string name="detail_pager_overview">Overview</string>
+    <string name="detail_pager_flags">Flags</string>
+    <string name="detail_pager_blood">Lab tests</string>
+    <string name="detail_pager_notes">Notes</string>
+    <string name="detail_pager_logs">Logs</string>
+    <string name="title_activity_patient_add">New Patient</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+
+    <string name="status_suspect">Suspect</string>
+    <string name="status_probable">Probable</string>
+    <string name="status_confirmed">Confirmed</string>
+    <string name="status_non_case">Non-case</string>
+    <string name="status_convalescence">Convalescence</string>
+    <string name="status_can_be_discharged">Can be discharged</string>
+    <string name="status_discharged">Discharged</string>
+    <string name="status_unconfirmed_death">Unconfirmed death</string>
+    <string name="status_confirmed_death">Confirmed death</string>
+
+    <string name="location_all_zones">All zones</string>
+    <string name="location_triage">Triage</string>
+    <string name="location_suspected_zone">Suspected zone</string>
+    <string name="location_probable_zone">Probable zone</string>
+    <string name="location_confirmed_zone">Confirmed zone</string>
+    <string name="location_mortuary">Mortuary</string>
+    <string name="location_outside">Outside</string>
+
+</resources>

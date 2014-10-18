@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.msf.records.ui.PatientAddActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/horizontal_margin"
+            android:layout_marginRight="@dimen/horizontal_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/large_horizontal_margin"
+            android:paddingRight="@dimen/large_horizontal_margin"
+            android:paddingTop="50dp"
+            android:paddingBottom="50dp"
+            android:orientation="vertical"
+            android:background="#FFF">
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Basic Details"
+                android:layout_marginBottom="12dp"
+                android:textSize="22sp"/>
+
+            <include layout="@layout/include_patient_add_form_basic_details"/>
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Medical Details"
+                android:layout_marginBottom="12dp"
+                android:layout_marginTop="32dp"
+                android:textSize="22sp"/>
+
+            <include layout="@layout/include_patient_add_form_medical_details"/>
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Other Details"
+                android:layout_marginBottom="12dp"
+                android:layout_marginTop="32dp"
+                android:textSize="22sp"/>
+
+            <include layout="@layout/include_patient_add_form_other_details"/>
+
+        </LinearLayout>
+    </ScrollView>
+</RelativeLayout>
