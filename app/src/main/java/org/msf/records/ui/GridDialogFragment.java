@@ -1,6 +1,5 @@
 package org.msf.records.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -20,6 +19,7 @@ import android.widget.TextView;
 import org.msf.records.R;
 import org.msf.records.model.ListItem;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -28,8 +28,8 @@ import java.util.Arrays;
 public class GridDialogFragment extends DialogFragment {
 
     private static final String TAG = GridDialogFragment.class.getName();
-    private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
-    public static final int TYPE_PRIMARY = 0, TYPE_SECONDARY = 1;
+    public static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
+    public static final String GRID_ITEM_DONE_LISTENER = "GRID_ITEM_DONE_LISTENER";
 
     ArrayAdapterWithIcon mListAdapter;
     GridView mGridView;
@@ -38,8 +38,8 @@ public class GridDialogFragment extends DialogFragment {
     ListItem[] mIconListDialogs;
     OnItemClickListener mItemClickListener;
 
-    abstract OnItemClickListener {
-        public void onGridItemClick(int position, int type);
+    public static abstract class OnItemClickListener implements Serializable {
+        public abstract void onGridItemClick(int position);
     }
 
     @Override
@@ -49,20 +49,9 @@ public class GridDialogFragment extends DialogFragment {
         mListAdapter = new ArrayAdapterWithIcon(getActivity());
         Bundle bundle = getArguments();
         mParcelables = bundle.getParcelableArray(ITEM_LIST_KEY);
+        mItemClickListener = (OnItemClickListener) bundle.getSerializable(GRID_ITEM_DONE_LISTENER);
         mIconListDialogs = Arrays.copyOf(mParcelables, mParcelables.length, ListItem[].class);
         mListAdapter.addAll(mIconListDialogs);
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        // Activities containing this fragment must implement its callbacks.
-        if (!(getParentFragment() instanceof OnItemClickListener)) {
-            throw new IllegalStateException("Activity must implement fragment's callbacks.");
-        }
-
-        mItemClickListener = (OnItemClickListener) getParentFragment();
     }
 
     @Nullable
@@ -80,7 +69,7 @@ public class GridDialogFragment extends DialogFragment {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mItemClickListener.onGridItemClick(position, TYPE_PRIMARY);
+                mItemClickListener.onGridItemClick(position);
                 getDialog().dismiss();
             }
         });
