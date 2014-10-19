@@ -38,7 +38,7 @@ public class GridDialogFragment extends DialogFragment {
     ListItem[] mIconListDialogs;
     OnItemClickListener mItemClickListener;
 
-    interface OnItemClickListener {
+    abstract OnItemClickListener {
         public void onGridItemClick(int position, int type);
     }
 

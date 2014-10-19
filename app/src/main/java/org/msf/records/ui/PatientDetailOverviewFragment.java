@@ -111,9 +111,9 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
                 break;
             case R.id.patient_overview_location:
                 FragmentManager fragman = getChildFragmentManager();
-                ListDialogFragment dialogListFragment = new ListDialogFragment();
+                EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
                 Bundle b = new Bundle();
-                b.putParcelableArray(ITEM_LIST_KEY, Location.getLocation());
+                b.putString(ITEM_LIST_KEY, "Name");
                 dialogListFragment.setArguments(b);
                 dialogListFragment.show(fragman, null);
                 break;
