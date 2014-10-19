@@ -23,12 +23,13 @@ import java.util.HashMap;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 /**
  * Created by Gil on 03/10/2014.
  */
 
-public class PatientDetailOverviewFragment extends ProgressFragment implements View.OnClickListener, Response.Listener<Patient>, Response.ErrorListener, GridDialogFragment.OnItemClickListener, ListDialogFragment.OnItemClickListener {
+public class PatientDetailOverviewFragment extends ProgressFragment implements View.OnClickListener, Response.Listener<Patient>, Response.ErrorListener, ListDialogFragment.OnItemClickListener {
 
     private static final String TAG = PatientDetailOverviewFragment.class.getName();
 
@@ -48,8 +49,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
     @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
     @InjectView(R.id.patient_overview_gender_age) TextView mPatientGenderAgeTV;
-
-    View mPatientStatusContainer;
+    @InjectView(R.id.patient_overview_status) View mPatientStatusContainer;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -83,32 +83,42 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
 
         ButterKnife.inject(this, view);
 
-        mPatientStatusContainer = view.findViewById(R.id.patient_overview_status);
-        mPatientStatusContainer.setOnClickListener(this);
-
-        mPatientLocationTV.setOnClickListener(this);
-        view.findViewById(R.id.patient_overview_edit_btn).setOnClickListener(this);
-        view.findViewById(R.id.patient_overview_flag_btn).setOnClickListener(this);
-        view.findViewById(R.id.patient_overview_nfc_btn).setOnClickListener(this);
-
         App.getInstance().addToRequestQueue(new GsonRequest<Patient>(App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, this, this) {}, TAG);
 
+    }
+
+    private void updatePatient(HashMap<String, String> map){
+        App.getInstance().addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT, map, App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, PatientDetailOverviewFragment.this, PatientDetailOverviewFragment.this), TAG);
+    }
+
+
+    @OnClick(R.id.patient_overview_status)
+    public void patientOverviewStatusClick(){
+        Log.d(TAG, "patientOverviewStatusClick");
+        FragmentManager fm = getChildFragmentManager();
+        GridDialogFragment gridDialogFragment = new GridDialogFragment();
+        Bundle bundle = new Bundle();
+
+        bundle.putParcelableArray(GridDialogFragment.ITEM_LIST_KEY, Status.getStatus());
+        bundle.putSerializable(GridDialogFragment.GRID_ITEM_DONE_LISTENER, new GridDialogFragment.OnItemClickListener(){
+            @Override
+            public void onGridItemClick(int position) {
+
+                String statusName = Status.getStatus()[position].key;
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("status", statusName);
+                updatePatient(map);
+                Log.d(TAG, statusName);
+            }
+        });
+        gridDialogFragment.setArguments(bundle);
+        gridDialogFragment.show(fm, null);
     }
 
     @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.patient_overview_status:
-                FragmentManager fm = getChildFragmentManager();
-                GridDialogFragment gridDialogFragment = new GridDialogFragment();
-                Bundle bundle = new Bundle();
-
-                bundle.putParcelableArray(ITEM_LIST_KEY, Status.getStatus());
-
-                gridDialogFragment.setArguments(bundle);
-                gridDialogFragment.show(fm, null);
-                break;
             case R.id.patient_overview_location:
                 FragmentManager fragman = getChildFragmentManager();
                 EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
@@ -117,27 +127,9 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
                 dialogListFragment.setArguments(b);
                 dialogListFragment.show(fragman, null);
                 break;
-            case R.id.patient_overview_edit_btn:
-                //TODO: Do something here
-                break;
-            case R.id.patient_overview_flag_btn:
-                //TODO: Do something here
-                break;
-            case R.id.patient_overview_nfc_btn:
-                //TODO: Do something here
-                break;
         }
 
 
-    }
-
-    @Override
-    public void onGridItemClick(int position, int type) {
-        String statusName = Status.getStatus()[position].key;
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("status", statusName);
-        App.getInstance().addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT, map, App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, this, this), TAG);
-        Log.d(TAG, statusName);
     }
 
     @Override
