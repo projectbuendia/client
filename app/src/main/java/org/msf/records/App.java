@@ -31,7 +31,7 @@ public class App extends Application {
 
         API_ROOT_URL = PreferenceManager
                 .getDefaultSharedPreferences(this)
-                .getString("api_root_url", "");
+                .getString("api_root_url", API_ROOT_URL);
     }
 
     public static synchronized App getInstance() {

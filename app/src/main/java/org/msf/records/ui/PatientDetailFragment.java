@@ -26,8 +26,8 @@ public class PatientDetailFragment extends Fragment {
 
     public static final String PATIENT_ID_KEY = "PATIENT_ID_KEY";
 
-    private static final int COUNT = 4;
-    private static final int OVERVIEW = 0, FLAGS = 1, BLOOD = 2, LOGS = 3;
+    private static final int COUNT = 2;
+    private static final int OVERVIEW = 0, NOTES = 1;//FLAGS = 1, BLOOD = 2, LOGS = 3;
 
     public String mPatientId;
 
@@ -76,12 +76,12 @@ public class PatientDetailFragment extends Fragment {
             switch (position) {
                 case OVERVIEW:
                     return PatientDetailOverviewFragment.newInstance(mPatientId);
-                case BLOOD:
-                    return PatientDetailBloodFragment.newInstance(mPatientId);
-                case LOGS:
+                /*case BLOOD:
+                    return PatientDetailBloodFragment.newInstance(mPatientId);*/
+                case NOTES:
                     return PatientDetailLogsFragment.newInstance();
-                case FLAGS:
-                    return PatientDetailFlagsFragment.newInstance(mPatientId);
+                /*case FLAGS:
+                    return PatientDetailFlagsFragment.newInstance(mPatientId);*/
                 default:
                     return null;
 
@@ -93,12 +93,14 @@ public class PatientDetailFragment extends Fragment {
             switch (position) {
                 case OVERVIEW:
                     return getString(R.string.detail_pager_overview);
-                case BLOOD:
+                case NOTES:
+                    return "Notes";
+                /*case BLOOD:
                     return getString(R.string.detail_pager_blood);
                 case LOGS:
                     return getString(R.string.detail_pager_logs);
                 case FLAGS:
-                    return getString(R.string.detail_pager_flags);
+                    return getString(R.string.detail_pager_flags);*/
                 default:
                     return null;
 
