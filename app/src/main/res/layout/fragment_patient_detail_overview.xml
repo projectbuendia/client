@@ -90,7 +90,6 @@
                                 android:visibility="gone">
 
                                 <TextView
-                                    android:id="@+id/patient_overview_gender"
                                     android:layout_width="wrap_content"
                                     android:layout_height="match_parent"
                                     android:textSize="18sp"
@@ -99,7 +98,6 @@
                                     android:clickable="true"/>
 
                                 <TextView
-                                    android:id="@+id/patient_overview_age"
                                     android:layout_width="wrap_content"
                                     android:layout_height="match_parent"
                                     android:textSize="18sp"
@@ -257,8 +255,10 @@
                     <LinearLayout
                         style="@style/row">
                         <LinearLayout
+                            android:id="@+id/patient_overview_location_zone"
                             style="@style/cell">
                             <TextView
+                                android:id="@+id/patient_overview_location_zone_tv"
                                 style="@style/cell_heading"
                                 android:text="Probable"/>
                             <TextView
@@ -266,8 +266,10 @@
                                 android:text="Zone"/>
                         </LinearLayout>
                         <LinearLayout
+                            android:id="@+id/patient_overview_location_tent"
                             style="@style/cell">
                             <TextView
+                                android:id="@+id/patient_overview_location_tent_tv"
                                 style="@style/cell_heading"
                                 android:text="#7"/>
                             <TextView
@@ -275,8 +277,10 @@
                                 android:text="Tent"/>
                         </LinearLayout>
                         <LinearLayout
+                            android:id="@+id/patient_overview_location_bed"
                             style="@style/cell">
                             <TextView
+                                android:id="@+id/patient_overview_location_bed_tv"
                                 style="@style/cell_heading"
                                 android:text="#139"/>
                             <TextView
@@ -287,12 +291,14 @@
                     <LinearLayout
                         style="@style/row">
                         <LinearLayout
+                            android:id="@+id/patient_overview_gender"
                             style="@style/cell">
                             <TextView
                                 style="@style/cell_heading"
                                 android:text="Male"/>
                         </LinearLayout>
                         <LinearLayout
+                            android:id="@+id/patient_overview_age"
                             style="@style/cell">
                             <TextView
                                 style="@style/cell_heading"
