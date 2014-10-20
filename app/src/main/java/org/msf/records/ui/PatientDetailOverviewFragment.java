@@ -29,7 +29,7 @@ import butterknife.OnClick;
  * Created by Gil on 03/10/2014.
  */
 
-public class PatientDetailOverviewFragment extends ProgressFragment implements View.OnClickListener, Response.Listener<Patient>, Response.ErrorListener, ListDialogFragment.OnItemClickListener {
+public class PatientDetailOverviewFragment extends ProgressFragment implements Response.Listener<Patient>, Response.ErrorListener {
 
     private static final String TAG = PatientDetailOverviewFragment.class.getName();
 
@@ -48,7 +48,8 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
     @InjectView(R.id.patient_overview_estimated_days_infected) TextView mPatientDaysInfectedTV;
     @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
-    @InjectView(R.id.patient_overview_gender_age) TextView mPatientGenderAgeTV;
+    @InjectView(R.id.patient_overview_gender) TextView mPatientGenderTV;
+    @InjectView(R.id.patient_overview_age) TextView mPatientAgeTV;
     @InjectView(R.id.patient_overview_status) View mPatientStatusContainer;
 
     /**
@@ -91,7 +92,26 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
         App.getInstance().addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT, map, App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, PatientDetailOverviewFragment.this, PatientDetailOverviewFragment.this), TAG);
     }
 
+    @OnClick(R.id.patient_overview_name)
+    public void patientOverviewNameClick(){
+        FragmentManager fm = getChildFragmentManager();
+        EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
+        Bundle b = new Bundle();
+        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_name));
+        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER, new EditTextDialogFragment.OnItemClickListener() {
 
+            @Override
+            public void onPositiveButtonClick(String[] data) {
+
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("given_name", data[0]);
+                map.put("family_name", data[1]);
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
     @OnClick(R.id.patient_overview_status)
     public void patientOverviewStatusClick(){
         Log.d(TAG, "patientOverviewStatusClick");
@@ -114,30 +134,72 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
         gridDialogFragment.setArguments(bundle);
         gridDialogFragment.show(fm, null);
     }
+    @OnClick(R.id.patient_overview_location)
+    public void patientOverviewLocationClick() {
+        FragmentManager fm = getChildFragmentManager();
+        EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
+        Bundle b = new Bundle();
+        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_location));
+        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER, new EditTextDialogFragment.OnItemClickListener() {
 
-    @Override
-    public void onClick(View v) {
+            @Override
+            public void onPositiveButtonClick(String[] data) {
 
-        switch (v.getId()) {
-            case R.id.patient_overview_location:
-                FragmentManager fragman = getChildFragmentManager();
-                EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
-                Bundle b = new Bundle();
-                b.putString(ITEM_LIST_KEY, "Name");
-                dialogListFragment.setArguments(b);
-                dialogListFragment.show(fragman, null);
-                break;
-        }
-
-
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("assigned_location_zone_id", data[0]);
+                map.put("assigned_location_tent_id", data[1]);
+                map.put("assigned_location_bed", data[2]);
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
     }
-
-    @Override
-    public void onListItemClick(int position, int type) {
-        HashMap<String, String> map = new HashMap<String, String>();
-        map.put("zone", Integer.toString(position));
-        App.getInstance().addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT, map, App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, this, this), TAG);
-
+    @OnClick(R.id.patient_overview_gender)
+    public void patientOverviewGenderClick() {
+        FragmentManager fm = getChildFragmentManager();
+        ListDialogFragment dialogListFragment = new ListDialogFragment();
+        Bundle b = new Bundle();
+        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.add_patient_gender));
+        b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
+            @Override
+            public void onListItemClick(int position) {
+                String gender = getResources().getStringArray(R.array.add_patient_gender)[position];
+                String g;
+                if (gender.equals("Male")) {
+                    g = "M";
+                } else {
+                    g = "F";
+                }
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("gender", g);
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
+    @OnClick(R.id.patient_overview_age)
+    public void patientOverviewAgeClick() {
+        FragmentManager fm = getChildFragmentManager();
+        ListDialogFragment dialogListFragment = new ListDialogFragment();
+        Bundle b = new Bundle();
+        String[] ageArray = new String[100];
+        ageArray[0] = "Less than 1";
+        for (int i = 1; i < ageArray.length; i++) {
+            ageArray[i] = String.valueOf(i);
+        }
+        b.putStringArray(ITEM_LIST_KEY, ageArray);
+        b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
+            @Override
+            public void onListItemClick(int position) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("age_years", String.valueOf(position));
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
     }
 
     @Override
@@ -175,7 +237,8 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements V
             mAge = response.age.years;
         }
 
-        mPatientGenderAgeTV.setText(mGender + ", " + mAge + " " + response.age.type);
+        mPatientGenderTV.setText(mGender + ", ");
+        mPatientAgeTV.setText(mAge + " years old");
 
 
         //important information
