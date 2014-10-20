@@ -294,6 +294,7 @@
                             android:id="@+id/patient_overview_gender"
                             style="@style/cell">
                             <TextView
+                                android:id="@+id/patient_overview_gender_tv"
                                 style="@style/cell_heading"
                                 android:text="Male"/>
                         </LinearLayout>
@@ -301,6 +302,7 @@
                             android:id="@+id/patient_overview_age"
                             style="@style/cell">
                             <TextView
+                                android:id="@+id/patient_overview_age_tv"
                                 style="@style/cell_heading"
                                 android:text="18 years old"/>
                         </LinearLayout>
