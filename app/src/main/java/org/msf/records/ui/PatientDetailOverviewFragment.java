@@ -51,6 +51,9 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
     @InjectView(R.id.patient_overview_gender) TextView mPatientGenderTV;
     @InjectView(R.id.patient_overview_age) TextView mPatientAgeTV;
     @InjectView(R.id.patient_overview_status) View mPatientStatusContainer;
+    @InjectView(R.id.patient_overview_location_zone_tv) TextView mPatientLocationZoneTv;
+    @InjectView(R.id.patient_overview_location_tent_tv) TextView mPatientLocationTentTv;
+    @InjectView(R.id.patient_overview_location_bed_tv) TextView mPatientLocationBedTv;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -134,8 +137,12 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         gridDialogFragment.setArguments(bundle);
         gridDialogFragment.show(fm, null);
     }
-    @OnClick(R.id.patient_overview_location)
+    @OnClick({R.id.patient_overview_location_zone, R.id.patient_overview_location_tent, R.id.patient_overview_location_bed})
     public void patientOverviewLocationClick() {
+        editLocation();
+    }
+
+    private void editLocation() {
         FragmentManager fm = getChildFragmentManager();
         EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
         Bundle b = new Bundle();
@@ -155,6 +162,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         dialogListFragment.setArguments(b);
         dialogListFragment.show(fm, null);
     }
+
     @OnClick(R.id.patient_overview_gender)
     public void patientOverviewGenderClick() {
         FragmentManager fm = getChildFragmentManager();
@@ -211,8 +219,12 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
 
         mPatientNameTV.setText(response.given_name + " " + response.family_name);
         mPatientIdTV.setText("" + response.id);
-        mPatientLocationTV.setText("" + getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()) + ", Tent " +
-                response.assigned_location.tent + ", Bed " + response.assigned_location.bed);
+        mPatientLocationZoneTv.setText(getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()));
+        mPatientLocationTentTv.setText("#" + response.assigned_location.tent);
+        mPatientLocationBedTv.setText("#" + response.assigned_location.bed);
+
+        //mPatientLocationTV.setText("" + getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()) + ", Tent " +
+        //        response.assigned_location.tent + ", Bed " + response.assigned_location.bed);
         mPatientMovementTV.setText("" + response.movement);
         mPatientEatingTV.setText("" + response.eating);
         mPatientAdmissionDateTV.setText(Utils.timestampToDate(response.created_timestamp_utc));
