@@ -63,14 +63,14 @@
       <file leaf-file-name="PatientDetailOverviewFragment.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientDetailOverviewFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.92231077" vertical-offset="1423" max-vertical-offset="3660">
-              <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.7310757" vertical-offset="2873" max-vertical-offset="3660">
+              <caret line="250" column="51" selection-start-line="250" selection-start-column="51" selection-end-line="250" selection-end-column="51" />
               <folding>
-                <element signature="e#6164#6165#0" expanded="true" />
-                <element signature="e#6194#6195#0" expanded="true" />
-                <element signature="e#6574#7033#0" expanded="true" />
-                <element signature="e#6769#6785#0" expanded="true" />
-                <element signature="e#7022#7023#0" expanded="true" />
+                <element signature="e#5776#6194#0" expanded="true" />
+                <element signature="e#6183#6184#0" expanded="true" />
+                <element signature="e#6812#7271#0" expanded="true" />
+                <element signature="e#7007#7023#0" expanded="true" />
+                <element signature="e#7260#7261#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -99,7 +99,7 @@
       <file leaf-file-name="GridDialogFragment.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/GridDialogFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="915" max-vertical-offset="1605">
+            <state vertical-scroll-proportion="0.0" vertical-offset="400" max-vertical-offset="1215">
               <caret line="61" column="72" selection-start-line="61" selection-start-column="8" selection-end-line="61" selection-end-column="72" />
               <folding />
             </state>
@@ -125,8 +125,8 @@
             <state />
           </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-153.33333" vertical-offset="0" max-vertical-offset="7680">
-              <caret line="276" column="48" selection-start-line="276" selection-start-column="48" selection-end-line="276" selection-end-column="48" />
+            <state vertical-scroll-proportion="-11.407408" vertical-offset="4207" max-vertical-offset="7710">
+              <caret line="301" column="65" selection-start-line="301" selection-start-column="65" selection-end-line="301" selection-end-column="65" />
               <folding />
             </state>
           </provider>
@@ -1848,11 +1848,11 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="2259" max-vertical-offset="3675">
           <caret line="196" column="63" selection-start-line="196" selection-start-column="63" selection-end-line="196" selection-end-column="63" />
           <folding>
-            <element signature="e#6164#6165#0" expanded="true" />
-            <element signature="e#6194#6195#0" expanded="true" />
-            <element signature="e#6574#7033#0" expanded="true" />
-            <element signature="e#6769#6785#0" expanded="true" />
-            <element signature="e#7022#7023#0" expanded="true" />
+            <element signature="e#5776#6194#0" expanded="true" />
+            <element signature="e#6183#6184#0" expanded="true" />
+            <element signature="e#6812#7271#0" expanded="true" />
+            <element signature="e#7007#7023#0" expanded="true" />
+            <element signature="e#7260#7261#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1948,11 +1948,11 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="728" max-vertical-offset="2730">
           <caret line="102" column="60" selection-start-line="102" selection-start-column="60" selection-end-line="102" selection-end-column="60" />
           <folding>
-            <element signature="e#6164#6165#0" expanded="true" />
-            <element signature="e#6194#6195#0" expanded="true" />
-            <element signature="e#6574#7033#0" expanded="true" />
-            <element signature="e#6769#6785#0" expanded="true" />
-            <element signature="e#7022#7023#0" expanded="true" />
+            <element signature="e#5776#6194#0" expanded="true" />
+            <element signature="e#6183#6184#0" expanded="true" />
+            <element signature="e#6812#7271#0" expanded="true" />
+            <element signature="e#7007#7023#0" expanded="true" />
+            <element signature="e#7260#7261#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2040,11 +2040,11 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="1450" max-vertical-offset="3195">
           <caret line="107" column="0" selection-start-line="107" selection-start-column="0" selection-end-line="107" selection-end-column="0" />
           <folding>
-            <element signature="e#6164#6165#0" expanded="true" />
-            <element signature="e#6194#6195#0" expanded="true" />
-            <element signature="e#6574#7033#0" expanded="true" />
-            <element signature="e#6769#6785#0" expanded="true" />
-            <element signature="e#7022#7023#0" expanded="true" />
+            <element signature="e#5776#6194#0" expanded="true" />
+            <element signature="e#6183#6184#0" expanded="true" />
+            <element signature="e#6812#7271#0" expanded="true" />
+            <element signature="e#7007#7023#0" expanded="true" />
+            <element signature="e#7260#7261#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2228,14 +2228,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/GridDialogFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="1275">
-          <caret line="61" column="72" selection-start-line="61" selection-start-column="8" selection-end-line="61" selection-end-column="72" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/App.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2417154" vertical-offset="236" max-vertical-offset="1035">
@@ -2268,22 +2260,30 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-153.33333" vertical-offset="0" max-vertical-offset="7680">
-          <caret line="276" column="48" selection-start-line="276" selection-start-column="48" selection-end-line="276" selection-end-column="48" />
+        <state vertical-scroll-proportion="-11.407408" vertical-offset="4207" max-vertical-offset="7710">
+          <caret line="301" column="65" selection-start-line="301" selection-start-column="65" selection-end-line="301" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/GridDialogFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="1275">
+          <caret line="61" column="72" selection-start-line="61" selection-start-column="8" selection-end-line="61" selection-end-column="72" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientDetailOverviewFragment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.92231077" vertical-offset="1423" max-vertical-offset="3660">
-          <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.7310757" vertical-offset="2873" max-vertical-offset="3660">
+          <caret line="250" column="51" selection-start-line="250" selection-start-column="51" selection-end-line="250" selection-end-column="51" />
           <folding>
-            <element signature="e#6164#6165#0" expanded="true" />
-            <element signature="e#6194#6195#0" expanded="true" />
-            <element signature="e#6574#7033#0" expanded="true" />
-            <element signature="e#6769#6785#0" expanded="true" />
-            <element signature="e#7022#7023#0" expanded="true" />
+            <element signature="e#5776#6194#0" expanded="true" />
+            <element signature="e#6183#6184#0" expanded="true" />
+            <element signature="e#6812#7271#0" expanded="true" />
+            <element signature="e#7007#7023#0" expanded="true" />
+            <element signature="e#7260#7261#0" expanded="true" />
           </folding>
         </state>
       </provider>

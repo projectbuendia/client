@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -48,12 +49,15 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
     @InjectView(R.id.patient_overview_estimated_days_infected) TextView mPatientDaysInfectedTV;
     @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
-    @InjectView(R.id.patient_overview_gender) TextView mPatientGenderTV;
-    @InjectView(R.id.patient_overview_age) TextView mPatientAgeTV;
+    @InjectView(R.id.patient_overview_gender_tv) TextView mPatientGenderTV;
+    @InjectView(R.id.patient_overview_age_tv) TextView mPatientAgeTV;
     @InjectView(R.id.patient_overview_status) View mPatientStatusContainer;
     @InjectView(R.id.patient_overview_location_zone_tv) TextView mPatientLocationZoneTv;
     @InjectView(R.id.patient_overview_location_tent_tv) TextView mPatientLocationTentTv;
     @InjectView(R.id.patient_overview_location_bed_tv) TextView mPatientLocationBedTv;
+    @InjectView(R.id.patient_overview_location_zone) LinearLayout mPatientLocationZone;
+    @InjectView(R.id.patient_overview_location_tent) LinearLayout mPatientLocationTent;
+    @InjectView(R.id.patient_overview_location_bed) LinearLayout mPatientLocationBed;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -86,7 +90,6 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         super.onViewCreated(view, savedInstanceState);
 
         ButterKnife.inject(this, view);
-
         App.getInstance().addToRequestQueue(new GsonRequest<Patient>(App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, this, this) {}, TAG);
 
     }
@@ -139,10 +142,6 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
     }
     @OnClick({R.id.patient_overview_location_zone, R.id.patient_overview_location_tent, R.id.patient_overview_location_bed})
     public void patientOverviewLocationClick() {
-        editLocation();
-    }
-
-    private void editLocation() {
         FragmentManager fm = getChildFragmentManager();
         EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
         Bundle b = new Bundle();
@@ -162,7 +161,6 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         dialogListFragment.setArguments(b);
         dialogListFragment.show(fm, null);
     }
-
     @OnClick(R.id.patient_overview_gender)
     public void patientOverviewGenderClick() {
         FragmentManager fm = getChildFragmentManager();
@@ -249,7 +247,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
             mAge = response.age.years;
         }
 
-        mPatientGenderTV.setText(mGender + ", ");
+        mPatientGenderTV.setText(mGender);
         mPatientAgeTV.setText(mAge + " years old");
 
 
