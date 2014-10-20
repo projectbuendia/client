@@ -42,7 +42,7 @@ import butterknife.InjectView;
  */
 public class PatientListFragment extends ProgressFragment implements
         AdapterView.OnItemClickListener, Response.Listener<ArrayList<Patient>>,
-        SwipeRefreshLayout.OnRefreshListener, ListDialogFragment.OnItemClickListener {
+        SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
     private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
@@ -243,7 +243,7 @@ public class PatientListFragment extends ProgressFragment implements
         mCallbacks.onItemSelected(mPatientAdapter.getItem(position).id);
 
     }
-
+/**
     @Override
     public void onListItemClick(int position, int type) {
         Log.d(TAG, "position: " + position + " type: " + type);
@@ -256,6 +256,7 @@ public class PatientListFragment extends ProgressFragment implements
         changeState(State.LOADING);
         onRefresh();
     }
+ **/
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

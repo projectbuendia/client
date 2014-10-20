@@ -29,4 +29,19 @@
         <item>Years</item>
         <item>Months</item>
     </string-array>
+
+    <string-array name="patient_location">
+        <item>Zone</item>
+        <item>Tent Number</item>
+        <item>Bed Number</item>
+    </string-array>
+
+    <string-array name="patient_name">
+        <item>First Name</item>
+        <item>Given Name</item>
+    </string-array>
+
+
+
+
 </resources>
