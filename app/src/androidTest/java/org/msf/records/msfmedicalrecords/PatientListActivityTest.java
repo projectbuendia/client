@@ -1,8 +1,5 @@
 package org.msf.records.msfmedicalrecords;
 
-import android.test.ActivityInstrumentationTestCase2;
-import android.widget.ImageView;
-
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
@@ -10,7 +7,6 @@ import static com.google.android.apps.common.testing.ui.espresso.action.ViewActi
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
@@ -18,8 +14,9 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
+import android.test.ActivityInstrumentationTestCase2;
+
 import org.msf.records.R;
-import org.msf.records.ui.PatientDetailActivity;
 import org.msf.records.ui.PatientListActivity;
 
 /**
@@ -87,11 +84,12 @@ public class PatientListActivityTest extends
     onData(allOf(is(instanceOf(String.class)), is("Partially dependent"))).perform(click());
 
     // Other details
-    onView(withId(R.id.add_patient_important_information)).perform(scrollTo(),typeText("This is a functional test"));
-    onView(withId(R.id.add_patient_next_of_kin)).perform(scrollTo(),typeText("Please ignore"));
-    onView(withId(R.id.add_patient_area_district)).perform(scrollTo(),typeText("7"));
-    onView(withId(R.id.add_patient_area_chiefdom)).perform(scrollTo(),typeText("Alpha"));
-    onView(withId(R.id.add_patient_area_village)).perform(scrollTo(),typeText("Beta"));
+    onView(withId(R.id.add_patient_important_information))
+        .perform(scrollTo(), typeText("This is a functional test"));
+    onView(withId(R.id.add_patient_next_of_kin)).perform(scrollTo(), typeText("Please ignore"));
+    onView(withId(R.id.add_patient_area_district)).perform(scrollTo(), typeText("7"));
+    onView(withId(R.id.add_patient_area_chiefdom)).perform(scrollTo(), typeText("Alpha"));
+    onView(withId(R.id.add_patient_area_village)).perform(scrollTo(), typeText("Beta"));
     onView(withId(R.id.actionbar_cancel)).perform(click());
   }
 }
