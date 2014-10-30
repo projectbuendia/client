@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -46,8 +47,6 @@ public class PatientListActivity extends FragmentActivity
     private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
     private OnSearchListener mSearchListerner;
-
-
 
     interface OnSearchListener {
         void setQuerySubmited(String q);
@@ -146,63 +145,92 @@ public class PatientListActivity extends FragmentActivity
         if(!mTwoPane) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.main, menu);
-            mAddPatientBtn = menu.findItem(R.id.action_add).getActionView();
-            mSettingsBtn = menu.findItem(R.id.action_settings).getActionView();
-            mScanBtn = menu.findItem(R.id.action_scan).getActionView();
+
+            menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+              @Override
+              public boolean onMenuItemClick(MenuItem item) {
+                startActivity(PatientAddActivity.class);
+                return false;
+              }
+            });
+
+            menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+              @Override
+              public boolean onMenuItemClick(MenuItem item) {
+                startActivity(SettingsActivity.class);
+                return false;
+              }
+            });
+
+            menu.findItem(R.id.action_scan).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+              @Override
+              public boolean onMenuItemClick(MenuItem item) {
+                startScanBracelet();
+                return false;
+              }
+            });
 
             MenuItem searchMenuItem = menu.findItem(R.id.action_search);
             mSearchView = (SearchView) searchMenuItem.getActionView();
             mSearchView.setIconifiedByDefault(false);
 
             searchMenuItem.expandActionView();
+        } else {
+          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              startActivity(PatientAddActivity.class);
+            }
+          });
+
+          mSettingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              startActivity(SettingsActivity.class);
+            }
+          });
+
+          mScanBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              startScanBracelet();
+            }
+          });
         }
 
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
-        mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent patientAddIntent = new Intent(PatientListActivity.this, PatientAddActivity.class);
-                startActivity(patientAddIntent);
-            }
-        });
-
-        mSettingsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent settingsIntent = new Intent(PatientListActivity.this, SettingsActivity.class);
-                startActivity(settingsIntent);
-            }
-        });
-
-        mScanBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                final ProgressDialog progressDialog = ProgressDialog.show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
-                progressDialog.setCancelable(true);
-                progressDialog.show();
-            }
-        });
-
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
+          @Override
+          public boolean onQueryTextSubmit(String query) {
 
-                InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-                return true;
-            }
+            InputMethodManager mgr = (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+            mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+            return true;
+          }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if(mSearchListerner != null)
-                    mSearchListerner.setQuerySubmited(newText);
-                return true;
-            }
+          @Override
+          public boolean onQueryTextChange(String newText) {
+            if (mSearchListerner != null)
+              mSearchListerner.setQuerySubmited(newText);
+            return true;
+          }
         });
+
         return true;
     }
 
+    private void startScanBracelet() {
+      final ProgressDialog progressDialog = ProgressDialog
+          .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
+      progressDialog.setCancelable(true);
+      progressDialog.show();
+    }
+
+    private void startActivity(Class<?> activityClass) {
+      Intent intent = new Intent(PatientListActivity.this, activityClass);
+      startActivity(intent);
+    }
 }
