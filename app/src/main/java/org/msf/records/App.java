@@ -1,6 +1,7 @@
 package org.msf.records;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
@@ -9,6 +10,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
+import org.msf.records.net.BuendiaServer;
+import org.msf.records.net.OpenMrsServer;
+import org.msf.records.net.Server;
 import org.msf.records.utils.LruBitmapCache;
 
 /**
@@ -19,6 +23,7 @@ public class App extends Application {
 
     public static String API_ROOT_URL = "http://buendia.whitespell.com:8080/";
 
+    private Server mServer;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
 
@@ -29,9 +34,16 @@ public class App extends Application {
         super.onCreate();
         mInstance = this;
 
-        API_ROOT_URL = PreferenceManager
-                .getDefaultSharedPreferences(this)
+        SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        API_ROOT_URL = preferences
                 .getString("api_root_url", API_ROOT_URL);
+
+        if (preferences.getBoolean("use_openmrs", false)) {
+            mServer = new OpenMrsServer();
+        } else {
+            mServer = new BuendiaServer();
+        }
     }
 
     public static synchronized App getInstance() {
@@ -70,5 +82,9 @@ public class App extends Application {
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll(tag);
         }
+    }
+
+    public Server getServer() {
+        return mServer;
     }
 }
