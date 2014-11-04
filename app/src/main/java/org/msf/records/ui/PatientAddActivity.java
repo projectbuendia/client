@@ -19,7 +19,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
@@ -27,13 +26,25 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
-import org.msf.records.net.GsonRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+
+import static org.msf.records.net.Server.PATIENT_AGE_TYPE_KEY;
+import static org.msf.records.net.Server.PATIENT_DOB_MONTHS_KEY;
+import static org.msf.records.net.Server.PATIENT_DOB_YEARS_KEY;
+import static org.msf.records.net.Server.PATIENT_FAMILY_NAME_KEY;
+import static org.msf.records.net.Server.PATIENT_GENDER_KEY;
+import static org.msf.records.net.Server.PATIENT_GIVEN_NAME_KEY;
+import static org.msf.records.net.Server.PATIENT_IMPORTANT_INFORMATION_KEY;
+import static org.msf.records.net.Server.PATIENT_LOCATION_BED_KEY;
+import static org.msf.records.net.Server.PATIENT_LOCATION_TENT_KEY;
+import static org.msf.records.net.Server.PATIENT_LOCATION_ZONE_KEY;
+import static org.msf.records.net.Server.PATIENT_MOVEMENT_KEY;
+import static org.msf.records.net.Server.PATIENT_STATUS_KEY;
 
 
 public class PatientAddActivity extends Activity implements Response.ErrorListener, Response.Listener<Patient> {
@@ -58,16 +69,12 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
     @InjectView(R.id.add_patient_date_first_shown_symptoms) TextView mPatientDateFirstSymptomsTV;
     @InjectView(R.id.add_patient_movement) Spinner mPatientMovementSpinner;
 
-
     //other details
     @InjectView(R.id.add_patient_important_information) TextView mPatientImportantInfomationTV;
     @InjectView(R.id.add_patient_next_of_kin) TextView mPatientNextOfKinTV;
     @InjectView(R.id.add_patient_area_district) TextView mPatientAreaDistrictTV;
     @InjectView(R.id.add_patient_area_chiefdom) TextView mPatientAreaChiefdomTV;
     @InjectView(R.id.add_patient_area_village) TextView mPatientAreaVillageTV;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,23 +153,6 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
         mPatientStatusSpinner.setAdapter(adapter);
     }
 
-       public static final String PATIENT_ID_KEY = "id",
-                PATIENT_STATUS_KEY = "status",
-                PATIENT_GIVEN_NAME_KEY = "given_name",
-                PATIENT_FAMILY_NAME_KEY = "family_name",
-                PATIENT_DOB_YEARS_KEY = "age_years",
-                PATIENT_DOB_MONTHS_KEY = "age_months",
-                PATIENT_AGE_TYPE_KEY = "age_type",
-                PATIENT_GENDER_KEY = "gender",
-                PATIENT_IMPORTANT_INFORMATION_KEY = "important_information",
-                PATIENT_ORIGIN_LOCATION_KEY = "origin_location",
-                PATIENT_MOVEMENT_KEY = "movement",
-                PATIENT_LOCATION_ZONE_KEY = "assigned_location_zone_id",
-                PATIENT_LOCATION_TENT_KEY = "assigned_location_tent_id",
-                PATIENT_LOCATION_BED_KEY = "assigned_location_bed";
-
-
-
     ProgressDialog progressDialog;
     private void submit(){
         progressDialog = ProgressDialog.show(this, null, "Adding patient", true);
@@ -205,7 +195,6 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
         map.put(PATIENT_AGE_TYPE_KEY, mPatientAgeTypeSpinner.getSelectedItemPosition() == 0 ? "years" : "months");
         map.put(PATIENT_DOB_YEARS_KEY, "" + (mPatientAgeTypeSpinner.getSelectedItemPosition() == 0 ? mPatientDoBTV.getText().toString() : -1));
         map.put(PATIENT_DOB_MONTHS_KEY, "" + (mPatientAgeTypeSpinner.getSelectedItemPosition() == 1 ? mPatientDoBTV.getText().toString() : -1));
-        map.put(PATIENT_FAMILY_NAME_KEY, mPatientFamilyNameTV.getText().toString());
         map.put(PATIENT_MOVEMENT_KEY, mPatientMovementSpinner.getSelectedItem().toString().toLowerCase());
         map.put(PATIENT_STATUS_KEY, mPatientStatusSpinner.getSelectedItem().toString().toLowerCase().replaceAll(" ", "-"));
         map.put(PATIENT_LOCATION_ZONE_KEY, "" + mPatientZoneSpinner.getSelectedItemPosition());
@@ -213,9 +202,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
         map.put(PATIENT_LOCATION_BED_KEY, mPatientBedET.getText().toString());
         map.put(PATIENT_IMPORTANT_INFORMATION_KEY, mPatientImportantInfomationTV.getText().toString());
 
-        App.getInstance().addToRequestQueue(new GsonRequest<Patient>(Request.Method.POST, map, App.API_ROOT_URL + "patients/", Patient.class, false, null, this, this), TAG);
-
-
+        App.getInstance().getServer().addPatient(map, this, this, TAG);
     }
 
     @Override
