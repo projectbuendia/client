@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.volley.Request;
 import com.android.volley.Response;
 
 import org.msf.records.App;
@@ -17,7 +16,6 @@ import org.msf.records.R;
 import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
-import org.msf.records.net.GsonRequest;
 import org.msf.records.utils.Utils;
 
 import java.util.HashMap;
@@ -34,7 +32,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
 
     private static final String TAG = PatientDetailOverviewFragment.class.getName();
 
-    private String mPateintId;
+    private String mPatientId;
     private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
 
     @InjectView(R.id.patient_overview_name) TextView mPatientNameTV;
@@ -80,7 +78,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         super.onCreate(savedInstanceState);
 
         Bundle bundle = getArguments();
-        mPateintId = bundle.getString(PatientDetailFragment.PATIENT_ID_KEY);
+        mPatientId = bundle.getString(PatientDetailFragment.PATIENT_ID_KEY);
 
         setContentView(R.layout.fragment_patient_detail_overview);
     }
@@ -90,12 +88,12 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         super.onViewCreated(view, savedInstanceState);
 
         ButterKnife.inject(this, view);
-        App.getInstance().addToRequestQueue(new GsonRequest<Patient>(App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, this, this) {}, TAG);
-
+        App.getInstance().getServer().getPatient(mPatientId, this, this, TAG);
     }
 
     private void updatePatient(HashMap<String, String> map){
-        App.getInstance().addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT, map, App.API_ROOT_URL + "patients/" + mPateintId, Patient.class, false, null, PatientDetailOverviewFragment.this, PatientDetailOverviewFragment.this), TAG);
+        App.getInstance().getServer().updatePatient(mPatientId, map,
+                PatientDetailOverviewFragment.this, PatientDetailOverviewFragment.this, TAG);
     }
 
     @OnClick(R.id.patient_overview_name)
@@ -267,6 +265,4 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
 
         changeState(State.LOADED);
     }
-
-
 }

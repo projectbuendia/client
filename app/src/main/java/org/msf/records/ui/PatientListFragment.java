@@ -24,9 +24,8 @@ import org.msf.records.R;
 import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
-import org.msf.records.net.GsonRequest;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -41,7 +40,7 @@ import butterknife.InjectView;
  * interface.
  */
 public class PatientListFragment extends ProgressFragment implements
-        AdapterView.OnItemClickListener, Response.Listener<ArrayList<Patient>>,
+        AdapterView.OnItemClickListener, Response.Listener<List<Patient>>,
         SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
@@ -77,7 +76,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     String mFilterQueryTerm;
 
-    String mFilterState, mFilterZone;
+    String mFilterState;
 
 
 
@@ -129,7 +128,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     @Override
-    public void onResponse(ArrayList<Patient> patients) {
+    public void onResponse(List<Patient> patients) {
         Log.d(TAG, "onResponse ");
         if(isRefreshing){
             Log.d(TAG, "onResponse refresh");
@@ -156,13 +155,8 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
-        String vars = "?";
-        vars += mFilterState != null && !mFilterState.isEmpty() ? "state=" + mFilterState + "&" : "";
-        vars += mFilterLocation != null ? "assigned_location_zone_id=" + mFilterLocation + "&" : "";
-        vars += mFilterQueryTerm != null && !mFilterQueryTerm.isEmpty() ? "search=" + mFilterQueryTerm + "&" : "";
-        App.getInstance().addToRequestQueue(
-                new GsonRequest<ArrayList<Patient>>(App.API_ROOT_URL + "patients/" + vars, Patient.class, true, null, this, this),
-                TAG);
+        App.getInstance().getServer().listPatients(mFilterState, mFilterLocation, mFilterQueryTerm,
+                this, this, TAG);
     }
 
     @Override
@@ -243,20 +237,20 @@ public class PatientListFragment extends ProgressFragment implements
         mCallbacks.onItemSelected(mPatientAdapter.getItem(position).id);
 
     }
-/**
-    @Override
-    public void onListItemClick(int position, int type) {
-        Log.d(TAG, "position: " + position + " type: " + type);
-        if(position == 0)
-            mFilterLocation = null;
-        else
-            mFilterLocation = "" + (position - 1);
-        App.getInstance().cancelPendingRequests(TAG);
-        isRefreshing = false;
-        changeState(State.LOADING);
-        onRefresh();
-    }
- **/
+    /**
+     @Override
+     public void onListItemClick(int position, int type) {
+     Log.d(TAG, "position: " + position + " type: " + type);
+     if(position == 0)
+     mFilterLocation = null;
+     else
+     mFilterLocation = "" + (position - 1);
+     App.getInstance().cancelPendingRequests(TAG);
+     isRefreshing = false;
+     changeState(State.LOADING);
+     onRefresh();
+     }
+     **/
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -290,9 +284,6 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     class PatientAdapter extends ArrayAdapter<Patient> {
-
-        private static final int LOAD_COUNT = 100;
-
 
         public PatientAdapter(Context context, int resource) {
             super(context, resource);
