@@ -6,8 +6,11 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact based on your message history</string>
+    <!-- Open MRS preferences -->
+    <string name="pref_title_use_openmrs">Use OpenMRS</string>
+    <string name="pref_description_use_openmrs">Use OpenMRS as the data storage server</string>
+    <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
+    <string name="pref_description_openmrs_root_url">The root url for connecting to the OpenMRS server</string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
