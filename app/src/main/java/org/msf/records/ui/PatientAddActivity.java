@@ -26,6 +26,7 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
+import org.msf.records.net.VolleySingleton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -202,7 +203,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
         map.put(PATIENT_LOCATION_BED_KEY, mPatientBedET.getText().toString());
         map.put(PATIENT_IMPORTANT_INFORMATION_KEY, mPatientImportantInfomationTV.getText().toString());
 
-        App.getInstance().getServer().addPatient(map, this, this, TAG);
+        App.getServer().addPatient(map, this, this, TAG);
     }
 
     @Override
@@ -220,6 +221,6 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        App.getInstance().cancelPendingRequests(TAG);
+        App.getServer().cancelPendingRequests(TAG);
     }
 }
