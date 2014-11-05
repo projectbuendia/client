@@ -117,8 +117,6 @@ public class PatientListFragment extends ProgressFragment implements
 
     }
 
-
-
     @Override
     public void onRefresh() {
         if(!isRefreshing){
@@ -155,7 +153,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
-        App.getInstance().getServer().listPatients(mFilterState, mFilterLocation, mFilterQueryTerm,
+        App.getServer().listPatients(mFilterState, mFilterLocation, mFilterQueryTerm,
                 this, this, TAG);
     }
 
@@ -186,7 +184,7 @@ public class PatientListFragment extends ProgressFragment implements
         ((PatientListActivity)getActivity()).setOnSearchListener(new PatientListActivity.OnSearchListener() {
             @Override
             public void setQuerySubmited(String q) {
-                App.getInstance().cancelPendingRequests(TAG);
+                App.getServer().cancelPendingRequests(TAG);
                 isRefreshing = false;
                 mFilterQueryTerm = q;
                 changeState(State.LOADING);
