@@ -86,4 +86,10 @@ public interface Server {
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, String logTag);
+
+    /**
+     * Cancel all requests associated with the given tag.
+     * @param logTag
+     */
+    public void cancelPendingRequests(String logTag);
 }

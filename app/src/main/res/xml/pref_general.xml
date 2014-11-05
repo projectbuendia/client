@@ -25,7 +25,7 @@
     <EditTextPreference
         android:key="openmrs_root_url"
         android:title="@string/pref_title_openmrs_root_url"
-        android:defaultValue="http://localhost:8080/openmrs"
+        android:defaultValue="http://104.155.15.141:8080/openmrs/ws/rest/v1/"
         android:selectAllOnFocus="true"
         android:inputType="textCapWords"
         android:capitalize="words"

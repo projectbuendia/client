@@ -33,7 +33,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     public enum State {
         LOADING,
         LOADED,
-        ERROR;
+        ERROR
     }
 
     protected View mContent;
@@ -63,7 +63,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     @Override
     public void onDestroy() {
         super.onDestroy();
-        App.getInstance().cancelPendingRequests(TAG);
+        App.getServer().cancelPendingRequests(TAG);
     }
 
     @Override
