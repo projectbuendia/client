@@ -88,11 +88,11 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         super.onViewCreated(view, savedInstanceState);
 
         ButterKnife.inject(this, view);
-        App.getInstance().getServer().getPatient(mPatientId, this, this, TAG);
+        App.getServer().getPatient(mPatientId, this, this, TAG);
     }
 
     private void updatePatient(HashMap<String, String> map){
-        App.getInstance().getServer().updatePatient(mPatientId, map,
+        App.getServer().updatePatient(mPatientId, map,
                 PatientDetailOverviewFragment.this, PatientDetailOverviewFragment.this, TAG);
     }
 
