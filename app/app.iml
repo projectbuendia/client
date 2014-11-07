@@ -82,17 +82,16 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="cardview-v7-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="crashlytics-1.1.13" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
-    <orderEntry type="library" exported="" name="espresso-1.1-bundled" level="project" />
-    <orderEntry type="library" exported="" name="library-1.0.6" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="estimote-sdk-preview" level="project" />
     <orderEntry type="library" exported="" name="joda-time-2.5" level="project" />
     <orderEntry type="library" exported="" name="estimote-sdk-preview-javadoc" level="project" />
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
-    <orderEntry type="library" exported="" name="butterknife-5.1.2" level="project" />
+    <orderEntry type="library" exported="" name="library-1.0.6" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="butterknife-5.1.2" level="project" />
     <orderEntry type="module" module-name="ViewPagerIndicator" exported="" />
   </component>
 </module>
