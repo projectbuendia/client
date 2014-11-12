@@ -99,7 +99,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
 		        Cursor mCursor = null;
 		        // open the cursor within a try-catch block so it can always be closed. 
 		        try {
-		            mCursor = Collect.getInstance().getContentResolver()
+		            mCursor = Collect.getInstance().getApplication().getContentResolver()
 		                    .query(FormsColumns.CONTENT_URI, null, null, null, null);
 			        if (mCursor == null) {
 			            Log.e(t, "["+instance+"] Forms Content Provider returned NULL");
@@ -158,7 +158,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
 	                
 	                // update in content provider
 	                int count =
-	                        Collect.getInstance().getContentResolver()
+	                        Collect.getInstance().getApplication().getContentResolver()
 	                                .update(updateUri, values, null, null);
 	                    Log.i(t, "["+instance+"] " + count + " records successfully updated");
 		        }
@@ -196,7 +196,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
 		        	try {
 		        		// insert failures are OK and expected if multiple 
 		        		// DiskSync scanners are active.
-		        		Collect.getInstance().getContentResolver()
+		        		Collect.getInstance().getApplication().getContentResolver()
 		            				.insert(FormsColumns.CONTENT_URI, values);
 		        	} catch ( SQLException e ) {
 		        		Log.i(t, "["+instance+"] " + e.toString());
@@ -206,7 +206,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
 	        if ( errors.length() != 0 ) {
 	        	statusMessage = errors.toString();
 	        } else {
-	        	statusMessage = Collect.getInstance().getString(R.string.finished_disk_scan);
+	        	statusMessage = Collect.getInstance().getApplication().getString(R.string.finished_disk_scan);
 	        }
 	        return statusMessage;
     	} finally {
@@ -223,7 +223,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
         String selection = FormsColumns.FORM_FILE_PATH + "=?";
         Cursor c = null;
         try {
-        	c = Collect.getInstance().getContentResolver()
+        	c = Collect.getInstance().getApplication().getContentResolver()
     				.query(FormsColumns.CONTENT_URI, projection, selection, selectionArgs, null);
         	return ( c.getCount() > 0 );
         } finally {
@@ -270,13 +270,13 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
         if (title != null) {
             updateValues.put(FormsColumns.DISPLAY_NAME, title);
         } else {
-        	throw new IllegalArgumentException(Collect.getInstance().getString(R.string.xform_parse_error,
+        	throw new IllegalArgumentException(Collect.getInstance().getApplication().getString(R.string.xform_parse_error,
         			formDefFile.getName(), "title"));
         }
         if (formid != null) {
             updateValues.put(FormsColumns.JR_FORM_ID, formid);
         } else {
-        	throw new IllegalArgumentException(Collect.getInstance().getString(R.string.xform_parse_error,
+        	throw new IllegalArgumentException(Collect.getInstance().getApplication().getString(R.string.xform_parse_error,
         			formDefFile.getName(), "id"));
         }
         if (version != null) {

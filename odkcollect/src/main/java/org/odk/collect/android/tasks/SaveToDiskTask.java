@@ -80,7 +80,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
 
         FormController formController = Collect.getInstance().getFormController();
 
-        publishProgress(Collect.getInstance().getString(R.string.survey_saving_validating_message));
+        publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_saving_validating_message));
 
         try {
             int validateStatus = formController.validateAnswers(mMarkCompleted);
@@ -159,8 +159,8 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
         values.put(InstanceColumns.CAN_EDIT_WHEN_COMPLETE, Boolean.toString(canEditAfterCompleted));
 
         // If FormEntryActivity was started with an Instance, just update that instance
-        if (Collect.getInstance().getContentResolver().getType(mUri).equals(InstanceColumns.CONTENT_ITEM_TYPE)) {
-            int updated = Collect.getInstance().getContentResolver().update(mUri, values, null, null);
+        if (Collect.getInstance().getApplication().getContentResolver().getType(mUri).equals(InstanceColumns.CONTENT_ITEM_TYPE)) {
+            int updated = Collect.getInstance().getApplication().getContentResolver().update(mUri, values, null, null);
             if (updated > 1) {
                 Log.w(t, "Updated more than one entry, that's not good: " + mUri.toString());
             } else if (updated == 1) {
@@ -168,7 +168,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
             } else {
                 Log.e(t, "Instance doesn't exist but we have its Uri!! " + mUri.toString());
             }
-        } else if (Collect.getInstance().getContentResolver().getType(mUri).equals(FormsColumns.CONTENT_ITEM_TYPE)) {
+        } else if (Collect.getInstance().getApplication().getContentResolver().getType(mUri).equals(FormsColumns.CONTENT_ITEM_TYPE)) {
             // If FormEntryActivity was started with a form, then it's likely the first time we're
             // saving.
             // However, it could be a not-first time saving if the user has been using the manual
@@ -180,7 +180,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
             		instancePath
             };
             int updated =
-                Collect.getInstance().getContentResolver()
+                Collect.getInstance().getApplication().getContentResolver()
                         .update(InstanceColumns.CONTENT_URI, values, where, whereArgs);
             if (updated > 1) {
                 Log.w(t, "Updated more than one entry, that's not good: " + instancePath);
@@ -193,7 +193,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
                 Cursor c = null;
                 try {
                 	// retrieve the form definition...
-                	c = Collect.getInstance().getContentResolver().query(mUri, null, null, null, null);
+                	c = Collect.getInstance().getApplication().getContentResolver().query(mUri, null, null, null, null);
 	                c.moveToFirst();
 	                String jrformid = c.getString(c.getColumnIndex(FormsColumns.JR_FORM_ID));
 	                String jrversion = c.getString(c.getColumnIndex(FormsColumns.JR_VERSION));
@@ -218,7 +218,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
                         c.close();
                     }
                 }
-                mUri = Collect.getInstance().getContentResolver()
+                mUri = Collect.getInstance().getApplication().getContentResolver()
                 			.insert(InstanceColumns.CONTENT_URI, values);
             }
         }
@@ -246,13 +246,13 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
     private void exportData(boolean markCompleted) throws IOException, EncryptionException {
         FormController formController = Collect.getInstance().getFormController();
 
-        publishProgress(Collect.getInstance().getString(R.string.survey_saving_collecting_message));
+        publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_saving_collecting_message));
 
         ByteArrayPayload payload = formController.getFilledInFormXml();
         // write out xml
         String instancePath = formController.getInstancePath().getAbsolutePath();
 
-        publishProgress(Collect.getInstance().getString(R.string.survey_saving_saving_message));
+        publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_saving_saving_message));
 
         exportXmlFile(payload, instancePath);
 
@@ -279,7 +279,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
 
             // write out submission.xml -- the data to actually submit to aggregate
 
-            publishProgress(Collect.getInstance().getString(R.string.survey_saving_finalizing_message));
+            publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_saving_finalizing_message));
 
             exportXmlFile(payload, submissionXml.getAbsolutePath());
 
@@ -291,7 +291,7 @@ public class SaveToDiskTask extends AsyncTask<Void, String, SaveResult> {
                 canEditAfterCompleted = false;
                 // and encrypt the submission (this is a one-way operation)...
 
-                publishProgress(Collect.getInstance().getString(R.string.survey_saving_encrypting_message));
+                publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_saving_encrypting_message));
 
                 EncryptionUtils.generateEncryptedSubmission(instanceXml, submissionXml, formInfo);
                 isEncrypted = true;

@@ -42,7 +42,7 @@ import java.io.File;
  *
  * @author carlhartung
  */
-public class Collect extends Application {
+public class Collect {
 
     // Storage paths
     public static final String ODK_ROOT = Environment.getExternalStorageDirectory()
@@ -65,6 +65,8 @@ public class Collect extends Application {
     private ActivityLogger mActivityLogger;
     private FormController mFormController = null;
     private ExternalDataManager externalDataManager;
+    // The root application when embedded as a library
+    private Application mApplication;
 
     private static Collect singleton = null;
 
@@ -74,6 +76,14 @@ public class Collect extends Application {
 
     public ActivityLogger getActivityLogger() {
         return mActivityLogger;
+    }
+
+    private Collect(Application mApplication) {
+        this.mApplication = mApplication;
+    }
+
+    public Application getApplication() {
+        return mApplication;
     }
 
     public FormController getFormController() {
@@ -94,7 +104,7 @@ public class Collect extends Application {
 
     public static int getQuestionFontsize() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(Collect
-                .getInstance());
+                .getInstance().getApplication());
         String question_font = settings.getString(PreferencesActivity.KEY_FONT_SIZE,
                 Collect.DEFAULT_FONTSIZE);
         int questionFontsize = Integer.valueOf(question_font);
@@ -105,7 +115,8 @@ public class Collect extends Application {
         String versionDetail = "";
         try {
             PackageInfo pinfo;
-            pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            pinfo = getApplication().getPackageManager().getPackageInfo(
+                    getApplication().getPackageName(), 0);
             int versionNumber = pinfo.versionCode;
             String versionName = pinfo.versionName;
             versionDetail = " " + versionName + " (" + versionNumber + ")";
@@ -113,7 +124,7 @@ public class Collect extends Application {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return getString(R.string.app_name) + versionDetail;
+        return getApplication().getString(R.string.app_name) + versionDetail;
     }
 
     /**
@@ -124,7 +135,8 @@ public class Collect extends Application {
     public static void createODKDirs() throws RuntimeException {
         String cardstatus = Environment.getExternalStorageState();
         if (!cardstatus.equals(Environment.MEDIA_MOUNTED)) {
-            throw new RuntimeException(Collect.getInstance().getString(R.string.sdcard_unmounted, cardstatus));
+            throw new RuntimeException(Collect.getInstance().getApplication().getString(
+                    R.string.sdcard_unmounted, cardstatus));
         }
 
         String[] dirs = {
@@ -201,9 +213,8 @@ public class Collect extends Application {
         return cookieStore;
     }
     
-    @Override
-    public void onCreate() {
-        singleton = this;
+    public static void onCreate(Application application) {
+        singleton = new Collect(application);
 
         // // set up logging defaults for apache http component stack
         // Log log;
@@ -218,15 +229,19 @@ public class Collect extends Application {
         // log.enableInfo(false);
         // log.enableDebug(false);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        super.onCreate();
+        initialisePreferences(application);
 
-        PropertyManager mgr = new PropertyManager(this);
+        PropertyManager mgr = new PropertyManager(application);
 
         FormController.initializeJavaRosa(mgr);
         
-        mActivityLogger = new ActivityLogger(
+        singleton.mActivityLogger = new ActivityLogger(
                 mgr.getSingularProperty(PropertyManager.DEVICE_ID_PROPERTY));
+    }
+
+    private static void initialisePreferences(Application application) {
+        PreferenceManager.setDefaultValues(application, R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(application, R.xml.admin_preferences, false);
     }
 
 }

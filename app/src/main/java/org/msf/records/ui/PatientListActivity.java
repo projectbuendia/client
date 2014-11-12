@@ -2,9 +2,11 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -16,9 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
+
 import com.crashlytics.android.Crashlytics;
 
 import org.msf.records.R;
+import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.provider.FormsProviderAPI;
+import org.odk.collect.android.tasks.DiskSyncTask;
 
 
 /**
@@ -223,10 +229,22 @@ public class PatientListActivity extends FragmentActivity
     }
 
     private void startScanBracelet() {
-      final ProgressDialog progressDialog = ProgressDialog
-          .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
-      progressDialog.setCancelable(true);
-      progressDialog.show();
+
+        boolean playWithOdk = false;
+        if (playWithOdk) {
+            // Sync the local sdcard forms into the database
+            new DiskSyncTask().execute((Void[]) null);
+
+            Intent intent = new Intent(this, FormEntryActivity.class);
+            Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, 1);
+            intent.setData(formUri);
+            startActivity(intent);
+        } else {
+            final ProgressDialog progressDialog = ProgressDialog
+                    .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
+            progressDialog.setCancelable(true);
+            progressDialog.show();
+        }
     }
 
     private void startActivity(Class<?> activityClass) {

@@ -87,7 +87,6 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
      * @param id
      * @param instanceFilePath
      * @param toUpdate - Instance URL for recording status update.
-     * @param httpclient - client connection
      * @param localContext - context (e.g., credentials, cookies) for client connection
      * @param uriRemap - mapping of Uris to avoid redirects on subsequent invocations
      * @return false if credentials are required and we should terminate immediately.
@@ -165,7 +164,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                                             + uNew.toString());
                                 cv.put(InstanceColumns.STATUS,
                                     InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                                Collect.getInstance().getContentResolver()
+                                Collect.getInstance().getApplication().getContentResolver()
                                         .update(toUpdate, cv, null, null);
                                 return true;
                             }
@@ -174,7 +173,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                             outcome.mResults.put(id, fail + urlString + " " + e.toString());
                             cv.put(InstanceColumns.STATUS,
                                 InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                            Collect.getInstance().getContentResolver()
+                            Collect.getInstance().getApplication().getContentResolver()
                                     .update(toUpdate, cv, null, null);
                             return true;
                         }
@@ -191,7 +190,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                                     + "Invalid status code on Head request.  If you have a web proxy, you may need to login to your network. ");
                         cv.put(InstanceColumns.STATUS,
                             InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                        Collect.getInstance().getContentResolver()
+                        Collect.getInstance().getApplication().getContentResolver()
                                 .update(toUpdate, cv, null, null);
                         return true;
                     }
@@ -202,7 +201,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 WebUtils.clearHttpConnectionManager();
                 outcome.mResults.put(id, fail + "Client Protocol Exception");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             } catch (ConnectTimeoutException e) {
                 e.printStackTrace();
@@ -210,7 +209,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 WebUtils.clearHttpConnectionManager();
                 outcome.mResults.put(id, fail + "Connection Timeout");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -218,7 +217,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 WebUtils.clearHttpConnectionManager();
                 outcome.mResults.put(id, fail + e.toString() + " :: Network Connection Failed");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             } catch (SocketTimeoutException e) {
                 e.printStackTrace();
@@ -226,7 +225,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 WebUtils.clearHttpConnectionManager();
                 outcome.mResults.put(id, fail + "Connection Timeout");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             } catch (HttpHostConnectException e) {
                 e.printStackTrace();
@@ -234,7 +233,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 WebUtils.clearHttpConnectionManager();
                 outcome.mResults.put(id, fail + "Network Connection Refused");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -246,7 +245,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 }
                 outcome.mResults.put(id, fail + "Generic Exception: " + msg);
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             }
         }
@@ -281,7 +280,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
         if (!instanceFile.exists() && !submissionFile.exists()) {
         	outcome.mResults.put(id, fail + "instance XML file does not exist!");
             cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-            Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+            Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
             return true;
         }
 
@@ -453,7 +452,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                     }
                     cv.put(InstanceColumns.STATUS,
                         InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                    Collect.getInstance().getContentResolver()
+                    Collect.getInstance().getApplication().getContentResolver()
                             .update(toUpdate, cv, null, null);
                     return true;
                 }
@@ -467,15 +466,15 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 }
                 outcome.mResults.put(id, fail + "Generic Exception: " + msg);
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
-                Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+                Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
             }
         }
 
         // if it got here, it must have worked
-        outcome.mResults.put(id, Collect.getInstance().getString(R.string.success));
+        outcome.mResults.put(id, Collect.getInstance().getApplication().getString(R.string.success));
         cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMITTED);
-        Collect.getInstance().getContentResolver().update(toUpdate, cv, null, null);
+        Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
         return true;
     }
 
@@ -495,8 +494,9 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
 	        }
         }
 
-        String deviceId = new PropertyManager(Collect.getInstance().getApplicationContext())
-        						.getSingularProperty(PropertyManager.OR_DEVICE_ID_PROPERTY);
+        String deviceId = new PropertyManager(
+                Collect.getInstance().getApplication().getApplicationContext())
+                .getSingularProperty(PropertyManager.OR_DEVICE_ID_PROPERTY);
 
         // get shared HttpContext so that authentication and cookies are retained.
         HttpContext localContext = Collect.getInstance().getHttpContext();
@@ -505,7 +505,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
 
         Cursor c = null;
         try {
-        	c = Collect.getInstance().getContentResolver()
+        	c = Collect.getInstance().getApplication().getContentResolver()
                     .query(InstanceColumns.CONTENT_URI, null, selection, selectionArgs, null);
 
 	        if (c.getCount() > 0) {
@@ -523,16 +523,17 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
 	                String urlString = c.isNull(subIdx) ? null : c.getString(subIdx);
 	                if (urlString == null) {
 	                    SharedPreferences settings =
-	                        PreferenceManager.getDefaultSharedPreferences(Collect.getInstance());
+	                        PreferenceManager.getDefaultSharedPreferences(
+                                    Collect.getInstance().getApplication());
 	                    urlString = settings.getString(PreferencesActivity.KEY_SERVER_URL,
-	                    				Collect.getInstance().getString(R.string.default_server_url));
+	                    				Collect.getInstance().getApplication().getString(R.string.default_server_url));
 	                    if ( urlString.charAt(urlString.length()-1) == '/') {
 	                    	urlString = urlString.substring(0, urlString.length()-1);
 	                    }
 	                    // NOTE: /submission must not be translated! It is the well-known path on the server.
 	                    String submissionUrl =
 	                        settings.getString(PreferencesActivity.KEY_SUBMISSION_URL,
-	                        		Collect.getInstance().getString(R.string.default_odk_submission));
+	                        		Collect.getInstance().getApplication().getString(R.string.default_odk_submission));
 	                    if ( submissionUrl.charAt(0) != '/') {
 	                    	submissionUrl = "/" + submissionUrl;
 	                    }
@@ -593,6 +594,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                     try {
                         results = Collect
                                 .getInstance()
+                                .getApplication()
                                 .getContentResolver()
                                 .query(InstanceColumns.CONTENT_URI, null, selection.toString(),
                                         selectionArgs, null);
@@ -608,11 +610,11 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                             }
 
                             boolean deleteFlag = PreferenceManager.getDefaultSharedPreferences(
-                                    Collect.getInstance().getApplicationContext()).getBoolean(
+                                    Collect.getInstance().getApplication().getApplicationContext()).getBoolean(
                                     PreferencesActivity.KEY_DELETE_AFTER_SEND, false);
                             if (deleteFlag) {
                                 DeleteInstancesTask dit = new DeleteInstancesTask();
-                                dit.setContentResolver(Collect.getInstance().getContentResolver());
+                                dit.setContentResolver(Collect.getInstance().getApplication().getContentResolver());
                                 dit.execute(toDelete);
                             }
 

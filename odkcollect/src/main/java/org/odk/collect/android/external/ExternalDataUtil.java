@@ -111,18 +111,18 @@ public final class ExternalDataUtil {
                         if (xPathFuncExpr.args.length == 1 || xPathFuncExpr.args.length == 4 || xPathFuncExpr.args.length == 6) {
                             return xPathFuncExpr;
                         } else {
-                            throw new InvalidSyntaxException(Collect.getInstance().getString(R.string.ext_search_wrong_arguments_error));
+                            throw new InvalidSyntaxException(Collect.getInstance().getApplication().getString(R.string.ext_search_wrong_arguments_error));
                         }
                     } else {
                         // this might mean a problem in the regex above. Unit tests required.
-                        throw new InvalidSyntaxException(Collect.getInstance().getString(R.string.ext_search_wrong_function_error, xPathFuncExpr.id.name));
+                        throw new InvalidSyntaxException(Collect.getInstance().getApplication().getString(R.string.ext_search_wrong_function_error, xPathFuncExpr.id.name));
                     }
                 } else {
                     // this might mean a problem in the regex above. Unit tests required.
-                    throw new InvalidSyntaxException(Collect.getInstance().getString(R.string.ext_search_bad_function_error, function));
+                    throw new InvalidSyntaxException(Collect.getInstance().getApplication().getString(R.string.ext_search_bad_function_error, function));
                 }
             } catch (XPathSyntaxException e) {
-                throw new InvalidSyntaxException(Collect.getInstance().getString(R.string.ext_search_generic_error, appearance), e);
+                throw new InvalidSyntaxException(Collect.getInstance().getApplication().getString(R.string.ext_search_generic_error, appearance), e);
             }
         } else {
             return null;
@@ -163,7 +163,7 @@ public final class ExternalDataUtil {
                             returnedChoices.add(dynamicChoice);
                         }
                     } else {
-                        throw new ExternalDataException(Collect.getInstance().getString(R.string.ext_search_return_error, eval.getClass().getName()));
+                        throw new ExternalDataException(Collect.getInstance().getApplication().getString(R.string.ext_search_return_error, eval.getClass().getName()));
                     }
                 }
             }

@@ -154,10 +154,10 @@ public class NetworkReceiver extends BroadcastReceiver implements InstanceUpload
         running = false;
 
         StringBuilder message = new StringBuilder();
-        message.append(Collect.getInstance().getString(R.string.odk_auto_note) + " :: \n\n");
+        message.append(Collect.getInstance().getApplication().getString(R.string.odk_auto_note) + " :: \n\n");
 
         if (result == null) {
-            message.append(Collect.getInstance().getString(R.string.odk_auth_auth_fail));
+            message.append(Collect.getInstance().getApplication().getString(R.string.odk_auth_auth_fail));
         } else {
 
             StringBuilder selection = new StringBuilder();
@@ -180,6 +180,7 @@ public class NetworkReceiver extends BroadcastReceiver implements InstanceUpload
                 try {
                     results = Collect
                             .getInstance()
+                            .getApplication()
                             .getContentResolver()
                             .query(InstanceColumns.CONTENT_URI, null, selection.toString(),
                                     selectionArgs, null);
@@ -201,24 +202,30 @@ public class NetworkReceiver extends BroadcastReceiver implements InstanceUpload
             }
         }
 
-        Intent notifyIntent = new Intent(Collect.getInstance(), NotificationActivity.class);
+        Intent notifyIntent = new Intent(
+                Collect.getInstance().getApplication(), NotificationActivity.class);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         notifyIntent.putExtra(NotificationActivity.NOTIFICATION_KEY, message.toString().trim());
 
-        PendingIntent pendingNotify = PendingIntent.getActivity(Collect.getInstance(), 0,
+        PendingIntent pendingNotify = PendingIntent.getActivity(
+                Collect.getInstance().getApplication(), 0,
                 notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(Collect.getInstance())
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+                Collect.getInstance().getApplication())
                 .setSmallIcon(R.drawable.notes)
-                .setContentTitle(Collect.getInstance().getString(R.string.odk_auto_note))
+                .setContentTitle(Collect.getInstance().getApplication()
+                        .getString(R.string.odk_auto_note))
                 .setContentIntent(pendingNotify)
                 .setContentText(message.toString().trim())
                 .setAutoCancel(true)
                 .setLargeIcon(
-                        BitmapFactory.decodeResource(Collect.getInstance().getResources(),
+                        BitmapFactory.decodeResource(Collect.getInstance().getApplication()
+                                        .getResources(),
                                 android.R.drawable.ic_dialog_info));
 
         NotificationManager mNotificationManager = (NotificationManager)Collect.getInstance()
+                .getApplication()
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(1328974928, mBuilder.build());
     }

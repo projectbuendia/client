@@ -124,7 +124,7 @@ public class ExternalAppsUtils {
                         String selectionArgs[] = {path};
                         
                         String instanceProviderID = "-1";
-                        Cursor c = Collect.getInstance().getContentResolver().query(InstanceColumns.CONTENT_URI, null, selection, selectionArgs, null);
+                        Cursor c = Collect.getInstance().getApplication().getContentResolver().query(InstanceColumns.CONTENT_URI, null, selection, selectionArgs, null);
                         if (c != null && c.getCount() > 0) {
                             // should only ever be one
                             c.moveToFirst();
