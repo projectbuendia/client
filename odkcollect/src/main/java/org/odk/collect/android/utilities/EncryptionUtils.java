@@ -296,7 +296,7 @@ public class EncryptionUtils {
 	 */
 	public static EncryptedFormInformation getEncryptedFormInformation(Uri mUri, InstanceMetadata instanceMetadata) {
 
-		ContentResolver cr = Collect.getInstance().getContentResolver();
+		ContentResolver cr = Collect.getInstance().getApplication().getContentResolver();
 
 		// fetch the form information
 		String formId;

@@ -392,14 +392,14 @@ public class FileUtils {
             Log.e(t, "The media folder is already there and it is a FILE!! We will need to delete it and create a folder instead");
             boolean deleted = mediaDir.delete();
             if (!deleted) {
-                throw new RuntimeException(Collect.getInstance().getString(R.string.fs_delete_media_path_if_file_error, mediaDir.getAbsolutePath()));
+                throw new RuntimeException(Collect.getInstance().getApplication().getString(R.string.fs_delete_media_path_if_file_error, mediaDir.getAbsolutePath()));
             }
         }
 
         // the directory case
         boolean createdOrExisted = createFolder(mediaDir.getAbsolutePath());
         if (!createdOrExisted) {
-            throw new RuntimeException(Collect.getInstance().getString(R.string.fs_create_media_folder_error, mediaDir.getAbsolutePath()));
+            throw new RuntimeException(Collect.getInstance().getApplication().getString(R.string.fs_create_media_folder_error, mediaDir.getAbsolutePath()));
         }
     }
 

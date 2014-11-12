@@ -62,12 +62,12 @@ public class DownloadFormListTask extends AsyncTask<Void, String, HashMap<String
     @Override
     protected HashMap<String, FormDetails> doInBackground(Void... values) {
         SharedPreferences settings =
-            PreferenceManager.getDefaultSharedPreferences(Collect.getInstance().getBaseContext());
+            PreferenceManager.getDefaultSharedPreferences(Collect.getInstance().getApplication().getBaseContext());
         String downloadListUrl =
             settings.getString(PreferencesActivity.KEY_SERVER_URL,
-                Collect.getInstance().getString(R.string.default_server_url));
+                Collect.getInstance().getApplication().getString(R.string.default_server_url));
         // NOTE: /formlist must not be translated! It is the well-known path on the server.
-        String formListUrl = Collect.getInstance().getApplicationContext().getString(R.string.default_odk_formlist);
+        String formListUrl = Collect.getInstance().getApplication().getApplicationContext().getString(R.string.default_odk_formlist);
         String downloadPath = settings.getString(PreferencesActivity.KEY_FORMLIST_URL, formListUrl);
         downloadListUrl += downloadPath;
 
@@ -102,7 +102,7 @@ public class DownloadFormListTask extends AsyncTask<Void, String, HashMap<String
                 Log.e(t, "Parsing OpenRosa reply -- " + error);
                 formList.put(
                     DL_ERROR_MSG,
-                    new FormDetails(Collect.getInstance().getString(
+                    new FormDetails(Collect.getInstance().getApplication().getString(
                         R.string.parse_openrosa_formlist_failed, error)));
                 return formList;
             }
@@ -112,7 +112,7 @@ public class DownloadFormListTask extends AsyncTask<Void, String, HashMap<String
                 Log.e(t, "Parsing OpenRosa reply -- " + error);
                 formList.put(
                     DL_ERROR_MSG,
-                    new FormDetails(Collect.getInstance().getString(
+                    new FormDetails(Collect.getInstance().getApplication().getString(
                         R.string.parse_openrosa_formlist_failed, error)));
                 return formList;
             }
@@ -199,7 +199,7 @@ public class DownloadFormListTask extends AsyncTask<Void, String, HashMap<String
                     formList.clear();
                     formList.put(
                         DL_ERROR_MSG,
-                        new FormDetails(Collect.getInstance().getString(
+                        new FormDetails(Collect.getInstance().getApplication().getString(
                             R.string.parse_openrosa_formlist_failed, error)));
                     return formList;
                 }
@@ -242,7 +242,7 @@ public class DownloadFormListTask extends AsyncTask<Void, String, HashMap<String
                         formList.clear();
                         formList.put(
                             DL_ERROR_MSG,
-                            new FormDetails(Collect.getInstance().getString(
+                            new FormDetails(Collect.getInstance().getApplication().getString(
                                 R.string.parse_legacy_formlist_failed, error)));
                         return formList;
                     }

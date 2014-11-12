@@ -86,14 +86,14 @@ public class ExternalSQLiteOpenHelper extends ODKSQLiteOpenHelper {
         try {
             onCreateNamed(db, ExternalDataUtil.EXTERNAL_DATA_TABLE_NAME);
         } catch (Exception e) {
-            throw new ExternalDataException(Collect.getInstance().getString(R.string.ext_import_generic_error, dataSetFile.getName(), e.getMessage()), e);
+            throw new ExternalDataException(Collect.getInstance().getApplication().getString(R.string.ext_import_generic_error, dataSetFile.getName(), e.getMessage()), e);
         }
     }
 
     private void onCreateNamed(SQLiteDatabase db, String tableName) throws Exception {
         Log.w(ExternalDataUtil.LOGGER_NAME, "Reading data from '" + dataSetFile);
 
-        onProgress(Collect.getInstance().getString(R.string.ext_import_progress_message, dataSetFile.getName(), ""));
+        onProgress(Collect.getInstance().getApplication().getString(R.string.ext_import_progress_message, dataSetFile.getName(), ""));
 
         CSVReader reader = null;
         try {
@@ -101,7 +101,7 @@ public class ExternalSQLiteOpenHelper extends ODKSQLiteOpenHelper {
             String[] headerRow = reader.readNext();
 
             if (!ExternalDataUtil.containsAnyData(headerRow)) {
-                throw new ExternalDataException(Collect.getInstance().getString(R.string.ext_file_no_data_error));
+                throw new ExternalDataException(Collect.getInstance().getApplication().getString(R.string.ext_file_no_data_error));
             }
 
             List<String> conflictingColumns = ExternalDataUtil.findMatchingColumnsAfterSafeningNames(headerRow);
@@ -109,7 +109,7 @@ public class ExternalSQLiteOpenHelper extends ODKSQLiteOpenHelper {
             if (conflictingColumns != null && conflictingColumns.size() > 0) {
                 // this means that after removing invalid characters, some column names resulted with the same name,
                 // so the create table query will fail with "duplicate column" error.
-                throw new ExternalDataException(Collect.getInstance().getString(R.string.ext_conflicting_columns_error, conflictingColumns));
+                throw new ExternalDataException(Collect.getInstance().getApplication().getString(R.string.ext_conflicting_columns_error, conflictingColumns));
             }
 
             Map<String, String> columnNamesCache = new HashMap<String, String>();
@@ -193,7 +193,7 @@ public class ExternalSQLiteOpenHelper extends ODKSQLiteOpenHelper {
                         try {
                             values.put(safeColumnName, Double.parseDouble(columnValue));
                         } catch (NumberFormatException e) {
-                            throw new ExternalDataException(Collect.getInstance().getString(R.string.ext_sortBy_numeric_error, columnValue));
+                            throw new ExternalDataException(Collect.getInstance().getApplication().getString(R.string.ext_sortBy_numeric_error, columnValue));
                         }
                     } else {
                         values.put(safeColumnName, columnValue);
@@ -203,16 +203,16 @@ public class ExternalSQLiteOpenHelper extends ODKSQLiteOpenHelper {
                 row = reader.readNext();
                 rowCount++;
                 if (rowCount % 100 == 0) {
-                    onProgress(Collect.getInstance().getString(R.string.ext_import_progress_message, dataSetFile.getName(), " (" + rowCount + " records so far)"));
+                    onProgress(Collect.getInstance().getApplication().getString(R.string.ext_import_progress_message, dataSetFile.getName(), " (" + rowCount + " records so far)"));
                 }
             }
 
             if (formLoaderTask.isCancelled()) {
                 Log.w(ExternalDataUtil.LOGGER_NAME, "User canceled reading data from " + dataSetFile);
-                onProgress(Collect.getInstance().getString(R.string.ext_import_cancelled_message));
+                onProgress(Collect.getInstance().getApplication().getString(R.string.ext_import_cancelled_message));
             } else {
 
-                onProgress(Collect.getInstance().getString(R.string.ext_import_finalizing_message));
+                onProgress(Collect.getInstance().getApplication().getString(R.string.ext_import_finalizing_message));
 
                 // now create the indexes
                 for (String createIndexCommand : createIndexesCommands) {
@@ -221,7 +221,7 @@ public class ExternalSQLiteOpenHelper extends ODKSQLiteOpenHelper {
                 }
 
                 Log.w(ExternalDataUtil.LOGGER_NAME, "Read all data from " + dataSetFile);
-                onProgress(Collect.getInstance().getString(R.string.ext_import_completed_message));
+                onProgress(Collect.getInstance().getApplication().getString(R.string.ext_import_completed_message));
             }
         } finally {
             if (reader != null) {

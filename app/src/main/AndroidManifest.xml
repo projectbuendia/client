@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.msf.records" >
 
+    <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- used for ODK collect forms -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application

@@ -155,7 +155,7 @@ public class DownloadFormsTask extends
                         // this means we should delete the entire form together with the metadata
                         Uri uri = uriResult.getUri();
                         Log.w(t, "The form is new. We should delete the entire form.");
-                        int deletedCount = Collect.getInstance().getContentResolver().delete(uri, null, null);
+                        int deletedCount = Collect.getInstance().getApplication().getContentResolver().delete(uri, null, null);
                         Log.w(t, "Deleted " + deletedCount + " rows using uri " + uri);
                     }
 
@@ -178,7 +178,7 @@ public class DownloadFormsTask extends
 
     private void saveResult(HashMap<FormDetails, String> result, FormDetails fd, String message) {
         if (message.equalsIgnoreCase("")) {
-            message = Collect.getInstance().getString(R.string.success);
+            message = Collect.getInstance().getApplication().getString(R.string.success);
         }
         result.put(fd, message);
     }
@@ -231,6 +231,7 @@ public class DownloadFormsTask extends
             };
             String selection = FormsColumns.FORM_FILE_PATH + "=?";
             cursor = Collect.getInstance()
+                    .getApplication()
                     .getContentResolver()
                     .query(FormsColumns.CONTENT_URI, null, selection, selectionArgs,
                             null);
@@ -258,7 +259,7 @@ public class DownloadFormsTask extends
                 v.put(FormsColumns.SUBMISSION_URI, formInfo.get(FileUtils.SUBMISSIONURI));
                 v.put(FormsColumns.BASE64_RSA_PUBLIC_KEY, formInfo.get(FileUtils.BASE64_RSA_PUBLIC_KEY));
                 uri =
-                        Collect.getInstance().getContentResolver()
+                        Collect.getInstance().getApplication().getContentResolver()
                                 .insert(FormsColumns.CONTENT_URI, v);
                 Collect.getInstance().getActivityLogger().logAction(this, "insert", formFile.getAbsolutePath());
 
@@ -320,7 +321,7 @@ public class DownloadFormsTask extends
 
         Cursor c = null;
         try {
-        	c = Collect.getInstance().getContentResolver()
+        	c = Collect.getInstance().getApplication().getContentResolver()
                     .query(FormsColumns.CONTENT_URI, projection, selection, selectionArgs, null);
 	        if (c.getCount() > 0) {
 	            // Should be at most, 1
@@ -409,7 +410,7 @@ public class DownloadFormsTask extends
 	            		Collect.getInstance().getCookieStore().clear();
 	            	}
 	                String errMsg =
-	                    Collect.getInstance().getString(R.string.file_fetch_failed, downloadUrl,
+	                    Collect.getInstance().getApplication().getString(R.string.file_fetch_failed, downloadUrl,
 	                        response.getStatusLine().getReasonPhrase(), statusCode);
 	                Log.e(t, errMsg);
 	                throw new Exception(errMsg);
@@ -483,7 +484,7 @@ public class DownloadFormsTask extends
             Log.w(t, "Copied " + tempFile.getAbsolutePath() + " over " + file.getAbsolutePath());
             FileUtils.deleteAndReport(tempFile);
         } else {
-            String msg = Collect.getInstance().getString(R.string.fs_file_copy_error, tempFile.getAbsolutePath(), file.getAbsolutePath(), errorMessage);
+            String msg = Collect.getInstance().getApplication().getString(R.string.fs_file_copy_error, tempFile.getAbsolutePath(), file.getAbsolutePath(), errorMessage);
             Log.w(t, msg);
             throw new RuntimeException(msg);
         }
@@ -552,7 +553,7 @@ public class DownloadFormsTask extends
         if (fd.manifestUrl == null)
             return null;
 
-        publishProgress(Collect.getInstance().getString(R.string.fetching_manifest, fd.formName),
+        publishProgress(Collect.getInstance().getApplication().getString(R.string.fetching_manifest, fd.formName),
             Integer.valueOf(count).toString(), Integer.valueOf(total).toString());
 
         List<MediaFile> files = new ArrayList<MediaFile>();
@@ -568,10 +569,10 @@ public class DownloadFormsTask extends
             return result.errorMessage;
         }
 
-        String errMessage = Collect.getInstance().getString(R.string.access_error, fd.manifestUrl);
+        String errMessage = Collect.getInstance().getApplication().getString(R.string.access_error, fd.manifestUrl);
 
         if (!result.isOpenRosaResponse) {
-            errMessage += Collect.getInstance().getString(R.string.manifest_server_error);
+            errMessage += Collect.getInstance().getApplication().getString(R.string.manifest_server_error);
             Log.e(t, errMessage);
             return errMessage;
         }
@@ -580,14 +581,14 @@ public class DownloadFormsTask extends
         Element manifestElement = result.doc.getRootElement();
         if (!manifestElement.getName().equals("manifest")) {
             errMessage +=
-                Collect.getInstance().getString(R.string.root_element_error,
+                Collect.getInstance().getApplication().getString(R.string.root_element_error,
                     manifestElement.getName());
             Log.e(t, errMessage);
             return errMessage;
         }
         String namespace = manifestElement.getNamespace();
         if (!isXformsManifestNamespacedElement(manifestElement)) {
-            errMessage += Collect.getInstance().getString(R.string.root_namespace_error, namespace);
+            errMessage += Collect.getInstance().getApplication().getString(R.string.root_namespace_error, namespace);
             Log.e(t, errMessage);
             return errMessage;
         }
@@ -639,7 +640,7 @@ public class DownloadFormsTask extends
                 }
                 if (filename == null || downloadUrl == null || hash == null) {
                     errMessage +=
-                        Collect.getInstance().getString(R.string.manifest_tag_error,
+                        Collect.getInstance().getApplication().getString(R.string.manifest_tag_error,
                             Integer.toString(i));
                     Log.e(t, errMessage);
                     return errMessage;
@@ -661,7 +662,7 @@ public class DownloadFormsTask extends
             for (MediaFile toDownload : files) {
                 ++mediaCount;
                 publishProgress(
-                    Collect.getInstance().getString(R.string.form_download_progress, fd.formName,
+                    Collect.getInstance().getApplication().getString(R.string.form_download_progress, fd.formName,
                         mediaCount, files.size()), Integer.valueOf(count).toString(), Integer
                             .valueOf(total).toString());
 //                try {

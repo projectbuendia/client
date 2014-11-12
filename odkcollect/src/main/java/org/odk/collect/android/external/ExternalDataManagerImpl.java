@@ -48,7 +48,7 @@ public class ExternalDataManagerImpl implements ExternalDataManager {
         ExternalSQLiteOpenHelper sqLiteOpenHelper = dbMap.get(dataSetName);
         if (sqLiteOpenHelper == null) {
             if (mediaFolder == null) {
-                String msg = Collect.getInstance().getString(R.string.ext_not_initialized_error);
+                String msg = Collect.getInstance().getApplication().getString(R.string.ext_not_initialized_error);
                 Log.e(ExternalDataUtil.LOGGER_NAME, msg);
                 if (required) {
                     throw new ExternalDataException(msg);
@@ -58,7 +58,7 @@ public class ExternalDataManagerImpl implements ExternalDataManager {
             } else {
                 File dbFile = new File(mediaFolder, dataSetName + ".db");
                 if (!dbFile.exists()) {
-                    String msg = Collect.getInstance().getString(R.string.ext_import_csv_missing_error, dataSetName, dataSetName);
+                    String msg = Collect.getInstance().getApplication().getString(R.string.ext_import_csv_missing_error, dataSetName, dataSetName);
                     Log.e(ExternalDataUtil.LOGGER_NAME, msg);
                     if (required) {
                         throw new ExternalDataException(msg);

@@ -99,8 +99,9 @@ public class VideoWidget extends QuestionWidget implements IBinaryWidget {
 		mCaptureButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(Collect
-			                .getInstance());
+				SharedPreferences settings =
+                        PreferenceManager.getDefaultSharedPreferences(
+                                Collect.getInstance().getApplication());
 				Collect.getInstance()
 						.getActivityLogger()
 						.logInstanceAction(VideoWidget.this, "captureButton",

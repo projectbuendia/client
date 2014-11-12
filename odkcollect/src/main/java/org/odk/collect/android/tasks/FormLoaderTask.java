@@ -137,7 +137,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
         String formHash = FileUtils.getMd5Hash(formXml);
         File formBin = new File(Collect.CACHE_PATH + File.separator + formHash + ".formdef");
 
-        publishProgress(Collect.getInstance().getString(R.string.survey_loading_reading_form_message));
+        publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_loading_reading_form_message));
 
         if (formBin.exists()) {
             // if we have binary, deserialize binary
@@ -384,7 +384,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
 
             if (externalDataMap.size() > 0) {
 
-                publishProgress(Collect.getInstance().getString(R.string.survey_loading_reading_csv_message));
+                publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_loading_reading_csv_message));
 
                 ExternalDataReader externalDataReader = new ExternalDataReaderImpl(this);
                 externalDataReader.doImport(externalDataMap);
@@ -408,7 +408,7 @@ public class FormLoaderTask extends AsyncTask<String, String, FormLoaderTask.FEC
     }
 
     public boolean importData(File instanceFile, FormEntryController fec) {
-        publishProgress(Collect.getInstance().getString(R.string.survey_loading_reading_data_message));
+        publishProgress(Collect.getInstance().getApplication().getString(R.string.survey_loading_reading_data_message));
 
         // convert files into a byte array
         byte[] fileBytes = FileUtils.getFileAsBytes(instanceFile);
