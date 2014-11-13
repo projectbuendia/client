@@ -8,9 +8,9 @@ import org.msf.records.updater.DownloadedUpdateInfo;
  */
 public class UpdateDownloadedEvent {
 
-    public final DownloadedUpdateInfo mDownloadedUpdateInfo;
+    public final DownloadedUpdateInfo mUpdateInfo;
 
     public UpdateDownloadedEvent(DownloadedUpdateInfo downloadedUpdateInfo) {
-        mDownloadedUpdateInfo = downloadedUpdateInfo;
+        mUpdateInfo = downloadedUpdateInfo;
     }
 }

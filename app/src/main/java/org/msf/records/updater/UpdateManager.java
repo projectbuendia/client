@@ -1,19 +1,22 @@
 package org.msf.records.updater;
 
-import android.app.Application;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.squareup.otto.Bus;
-import com.squareup.otto.Produce;
 
 import org.joda.time.DateTime;
+import org.msf.records.App;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
+
+import java.io.File;
 
 /**
  * An object that manages auto-updating of the application from a configurable update server.
@@ -34,11 +37,10 @@ public class UpdateManager {
      */
     public static final int INVALID_VERSION_CODE = -1;
 
-    private final Application mApplication;
     private final PackageManager mPackageManager;
     private final int mCurrentVersionCode;
 
-    private DateTime mLastCheckForUpdateTime = null;
+    private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
 
     // TODO(dxchen): Consider caching this in SharedPreferences OR standardizing the location of it
@@ -47,9 +49,8 @@ public class UpdateManager {
 
     private boolean mIsDownloadInProgress = false;
 
-    public UpdateManager(Application application) {
-        mApplication = application;
-        mPackageManager = mApplication.getPackageManager();
+    public UpdateManager() {
+        mPackageManager = App.getInstance().getPackageManager();
         mCurrentVersionCode = getCurrentVersionCode();
     }
 
@@ -97,6 +98,17 @@ public class UpdateManager {
     }
 
     /**
+     * Installs a downloaded update.
+     */
+    public void installUpdate(DownloadedUpdateInfo updateInfo) {
+        Uri apkUri = Uri.fromFile(new File(updateInfo.mPath));
+        Intent installIntent = new Intent(Intent.ACTION_VIEW)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setDataAndType(apkUri, "application/vnd.android.package-archive");
+        App.getInstance().startActivity(installIntent);
+    }
+
+    /**
      * Returns whether a download is in progress.
      */
     public boolean isDownloadInProgress() {
@@ -110,12 +122,12 @@ public class UpdateManager {
         PackageInfo packageInfo;
         try {
             packageInfo =
-                    mPackageManager.getPackageInfo(mApplication.getPackageName(), 0 /*flags*/);
+                    mPackageManager.getPackageInfo(App.getInstance().getPackageName(), 0 /*flags*/);
         } catch (PackageManager.NameNotFoundException ex) {
             Log.wtf(
                     TAG,
-                    "No package found with the name " + mApplication.getPackageName() + ". This "
-                            + "should never happen.");
+                    "No package found with the name " + App.getInstance().getPackageName() + ". "
+                            + "This should never happen.");
             return INVALID_VERSION_CODE;
         }
 
@@ -143,9 +155,7 @@ public class UpdateManager {
                 // TODO(dxchen): Actually issue an RPC request to check for updates. For now, we
                 // will just fake it.
                 mLastAvailableUpdateInfo = new AvailableUpdateInfo(
-                        mCurrentVersionCode, mCurrentVersionCode + 1, Uri.EMPTY);
-
-                return null;
+                        mCurrentVersionCode, mCurrentVersionCode, Uri.EMPTY);
             }
 
             if (mLastAvailableUpdateInfo != null) {
@@ -154,7 +164,7 @@ public class UpdateManager {
                 // UpdateAvailableEvent.
                 if (mLastDownloadedUpdateInfo != null
                         && (mLastAvailableUpdateInfo.mAvailableVersionCode
-                                == mLastDownloadedUpdateInfo.mDownloadedVersionCode)) {
+                                <= mLastDownloadedUpdateInfo.mDownloadedVersionCode)) {
                     mBus.post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
                 } else {
                     mBus.post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
@@ -191,9 +201,10 @@ public class UpdateManager {
             try {
                 // TODO(dxchen): Actually issue an HTTP request to download the update. For now, we
                 // will just fake it.
-                DownloadedUpdateInfo updateInfo = new DownloadedUpdateInfo("fake/path");
+                mLastDownloadedUpdateInfo =
+                        new DownloadedUpdateInfo("/sdcard/org.msf.records/app-debug.apk");
 
-                mBus.post(new UpdateDownloadedEvent(updateInfo));
+                mBus.post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
 
                 return null;
             } finally {
