@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -26,11 +27,13 @@ import com.crashlytics.android.Crashlytics;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.net.OpenMrsXforms;
+import org.msf.records.net.OdkXformSyncTask;
+import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -242,7 +245,7 @@ public class PatientListActivity extends FragmentActivity
     }
 
     private void startScanBracelet() {
-        ScanAction scanAction = ScanAction.FETCH_XFORMS;
+        ScanAction scanAction = ScanAction.FAKE_SCAN;
         switch (scanAction) {
             case PLAY_WITH_ODK:
                 showFirstFormFromSdcard();
@@ -264,21 +267,42 @@ public class PatientListActivity extends FragmentActivity
                 Log.e(tag, error.toString());
             }
         };
-        App.getmOpenMrsXforms().listXforms(
-                new Response.Listener<List<OpenMrsXforms.XformIndexEntry>>() {
+        App.getmOpenMrsXformsConnection().listXforms(
+                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
-                    public void onResponse(List<OpenMrsXforms.XformIndexEntry> response) {
-                        // inline rather than extract in case stuff changed in the background
-                        if (!response.isEmpty()) {
-                            OpenMrsXforms.XformIndexEntry indexEntry = response.get(0);
-                            App.getmOpenMrsXforms().getXform(indexEntry.uuid, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    //TODO(nfortescue): feed into ODK.
-                                    Log.i(tag, response);
-                                }
-                            }, errorListener);
+                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                        if (response.isEmpty()) {
+                            return;
                         }
+                        // Cache all the forms into the ODK form cache
+                        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
+                            boolean displayed;
+
+                            @Override
+                            public void formWritten(File path) {
+                                Log.i(TAG, "wrote form " + path);
+
+                                // Just display one form.
+                                synchronized (this) {
+                                    if (displayed) {
+                                        return;
+                                    } else {
+                                        displayed = true;
+                                    }
+                                }
+
+                                // TODO(nfortescue): factor out this ODK database stuff to somewhere
+                                // common
+                                // Fetch it from the ODK database
+                                Cursor cursor = OdkXformSyncTask.getCursorForFormFile(
+                                        path, new String[]{
+                                                FormsProviderAPI.FormsColumns.JR_FORM_ID
+                                        });
+                                long formId = cursor.getLong(0);
+                                showOdkCollect(formId);
+
+                            }
+                        }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
                     }
                 }, errorListener);
     }
@@ -286,9 +310,12 @@ public class PatientListActivity extends FragmentActivity
     private void showFirstFormFromSdcard() {
         // Sync the local sdcard forms into the database
         new DiskSyncTask().execute((Void[]) null);
+        showOdkCollect(1L);
+    }
 
+    private void showOdkCollect(long formId) {
         Intent intent = new Intent(this, FormEntryActivity.class);
-        Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, 1);
+        Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
         startActivity(intent);
     }
