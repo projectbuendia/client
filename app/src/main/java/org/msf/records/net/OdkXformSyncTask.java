@@ -63,15 +63,18 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             if (!isNew) {
                 // TODO(nfortescue): add some logic based on version code to see if we should
-                // refetch.
+                // refetch. For now return existing form.
+                formWrittenListener.formWritten(proposedPath);
                 continue;
             }
 
+            Log.i(TAG, "fetching " + formInfo.uuid);
             // Doesn't exist, so insert it
             // Fetch the file from OpenMRS
             openMrsXformsConnection.getXform(formInfo.uuid, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
+                    Log.i(TAG, "adding form to db " + response);
                     new AddFormToDbAsyncTask(formWrittenListener).execute(new FormToWrite(response, proposedPath));
                 }
             }, new Response.ErrorListener() {
@@ -139,9 +142,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         @Override
         protected File doInBackground(FormToWrite[] params) {
             Preconditions.checkArgument(params.length != 0);
+
+            // really really hacky - fix the form problem, should be done server side
+            String form = params[0].form.replaceAll("&amp;", "&");
+
+
             File proposedPath = params[0].path;
             // Write file into OpenMRS forms directory.
-            if (!writeStringToFile(params[0].form, proposedPath)) {
+            if (!writeStringToFile(form, proposedPath)) {
                 // we failed to load it, just skip for now
                 return null;
             }

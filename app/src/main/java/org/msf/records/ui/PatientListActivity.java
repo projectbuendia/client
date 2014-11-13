@@ -9,6 +9,7 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import android.widget.SearchView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.crashlytics.android.Crashlytics;
+import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -245,7 +247,7 @@ public class PatientListActivity extends FragmentActivity
     }
 
     private void startScanBracelet() {
-        ScanAction scanAction = ScanAction.FAKE_SCAN;
+        ScanAction scanAction = ScanAction.FETCH_XFORMS;
         switch (scanAction) {
             case PLAY_WITH_ODK:
                 showFirstFormFromSdcard();
@@ -267,11 +269,13 @@ public class PatientListActivity extends FragmentActivity
                 Log.e(tag, error.toString());
             }
         };
+        Log.i(tag, "Fetching all forms");
         App.getmOpenMrsXformsConnection().listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
+                            Log.i(tag, "No forms found");
                             return;
                         }
                         // Cache all the forms into the ODK form cache
@@ -280,7 +284,7 @@ public class PatientListActivity extends FragmentActivity
 
                             @Override
                             public void formWritten(File path) {
-                                Log.i(TAG, "wrote form " + path);
+                                Log.i(tag, "wrote form " + path);
 
                                 // Just display one form.
                                 synchronized (this) {
@@ -294,13 +298,23 @@ public class PatientListActivity extends FragmentActivity
                                 // TODO(nfortescue): factor out this ODK database stuff to somewhere
                                 // common
                                 // Fetch it from the ODK database
-                                Cursor cursor = OdkXformSyncTask.getCursorForFormFile(
-                                        path, new String[]{
-                                                FormsProviderAPI.FormsColumns.JR_FORM_ID
-                                        });
-                                long formId = cursor.getLong(0);
+                                long formId;
+                                Cursor cursor = null;
+                                try {
+                                    cursor = OdkXformSyncTask.getCursorForFormFile(
+                                            path, new String[]{
+                                                    BaseColumns._ID
+                                            });
+                                    Preconditions.checkArgument(cursor.getCount() == 1);
+                                    Preconditions.checkArgument(cursor.getColumnCount() == 1);
+                                    cursor.moveToNext();
+                                    formId = cursor.getLong(0);
+                                } finally {
+                                   if (cursor != null) {
+                                       cursor.close();
+                                   }
+                                }
                                 showOdkCollect(formId);
-
                             }
                         }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
                     }
