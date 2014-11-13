@@ -9,6 +9,7 @@ import com.squareup.otto.Bus;
 import org.msf.records.events.MainThreadBus;
 import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsServer;
+import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.updater.UpdateManager;
 import org.odk.collect.android.application.Collect;
@@ -36,6 +37,7 @@ public class App extends Application {
     private static UpdateManager mUpdateManager;
 
     private static Server mServer;
+    private static OpenMrsXformsConnection mOpenMrsXformsConnection;
 
     @Override
     public void onCreate() {
@@ -57,6 +59,7 @@ public class App extends Application {
                 String apiRootUrl = preferences.getString("api_root_url", null);
                 mServer = new BuendiaServer(getApplicationContext(), apiRootUrl);
             }
+            mOpenMrsXformsConnection = new OpenMrsXformsConnection(getApplicationContext());
         }
     }
 
@@ -74,5 +77,9 @@ public class App extends Application {
 
     public static synchronized Server getServer() {
         return mServer;
+    }
+
+    public static synchronized OpenMrsXformsConnection getmOpenMrsXformsConnection() {
+        return mOpenMrsXformsConnection;
     }
 }

@@ -6,9 +6,11 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,12 +21,20 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.crashlytics.android.Crashlytics;
 
+import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.net.OdkXformSyncTask;
+import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.tasks.DiskSyncTask;
+
+import java.io.File;
+import java.util.List;
 
 
 /**
@@ -228,23 +238,93 @@ public class PatientListActivity extends FragmentActivity
         return true;
     }
 
+    private enum ScanAction {
+        PLAY_WITH_ODK,
+        FETCH_XFORMS,
+        FAKE_SCAN,
+    }
+
     private void startScanBracelet() {
-
-        boolean playWithOdk = false;
-        if (playWithOdk) {
-            // Sync the local sdcard forms into the database
-            new DiskSyncTask().execute((Void[]) null);
-
-            Intent intent = new Intent(this, FormEntryActivity.class);
-            Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, 1);
-            intent.setData(formUri);
-            startActivity(intent);
-        } else {
-            final ProgressDialog progressDialog = ProgressDialog
-                    .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
-            progressDialog.setCancelable(true);
-            progressDialog.show();
+        ScanAction scanAction = ScanAction.FAKE_SCAN;
+        switch (scanAction) {
+            case PLAY_WITH_ODK:
+                showFirstFormFromSdcard();
+                break;
+            case FAKE_SCAN:
+                showFakeScanProgress();
+                break;
+            case FETCH_XFORMS:
+                fetchXforms();
+                break;
         }
+    }
+
+    private void fetchXforms() {
+        final String tag = "fetchXforms";
+        final Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(tag, error.toString());
+            }
+        };
+        App.getmOpenMrsXformsConnection().listXforms(
+                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
+                    @Override
+                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                        if (response.isEmpty()) {
+                            return;
+                        }
+                        // Cache all the forms into the ODK form cache
+                        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
+                            boolean displayed;
+
+                            @Override
+                            public void formWritten(File path) {
+                                Log.i(TAG, "wrote form " + path);
+
+                                // Just display one form.
+                                synchronized (this) {
+                                    if (displayed) {
+                                        return;
+                                    } else {
+                                        displayed = true;
+                                    }
+                                }
+
+                                // TODO(nfortescue): factor out this ODK database stuff to somewhere
+                                // common
+                                // Fetch it from the ODK database
+                                Cursor cursor = OdkXformSyncTask.getCursorForFormFile(
+                                        path, new String[]{
+                                                FormsProviderAPI.FormsColumns.JR_FORM_ID
+                                        });
+                                long formId = cursor.getLong(0);
+                                showOdkCollect(formId);
+
+                            }
+                        }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
+                    }
+                }, errorListener);
+    }
+
+    private void showFirstFormFromSdcard() {
+        // Sync the local sdcard forms into the database
+        new DiskSyncTask().execute((Void[]) null);
+        showOdkCollect(1L);
+    }
+
+    private void showOdkCollect(long formId) {
+        Intent intent = new Intent(this, FormEntryActivity.class);
+        Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
+        intent.setData(formUri);
+        startActivity(intent);
+    }
+
+    private void showFakeScanProgress() {
+        final ProgressDialog progressDialog = ProgressDialog
+                .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
+        progressDialog.setCancelable(true);
+        progressDialog.show();
     }
 
     private void startActivity(Class<?> activityClass) {

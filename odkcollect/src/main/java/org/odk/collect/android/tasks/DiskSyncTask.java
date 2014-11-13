@@ -245,7 +245,7 @@ public class DiskSyncTask extends AsyncTask<Void, String, String> {
      * @return key-value list to update or insert into the content provider
      * @throws IllegalArgumentException if the file failed to parse or was missing fields
      */
-    public ContentValues buildContentValues(File formDefFile) throws IllegalArgumentException {
+    public static ContentValues buildContentValues(File formDefFile) throws IllegalArgumentException {
         // Probably someone overwrite the file on the sdcard
         // So re-parse it and update it's information
         ContentValues updateValues = new ContentValues();
