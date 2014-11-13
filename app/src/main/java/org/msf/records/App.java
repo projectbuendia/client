@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 
 import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsServer;
+import org.msf.records.net.OpenMrsXforms;
 import org.msf.records.net.Server;
 import org.odk.collect.android.application.Collect;
 
@@ -15,6 +16,7 @@ import org.odk.collect.android.application.Collect;
 public class App extends Application {
 
     private static Server mServer;
+    private static OpenMrsXforms mOpenMrsXforms;
 
     @Override
     public void onCreate() {
@@ -32,10 +34,15 @@ public class App extends Application {
                 String apiRootUrl = preferences.getString("api_root_url", null);
                 mServer = new BuendiaServer(getApplicationContext(), apiRootUrl);
             }
+            mOpenMrsXforms = new OpenMrsXforms(getApplicationContext());
         }
     }
 
     public static synchronized Server getServer() {
         return mServer;
+    }
+
+    public static synchronized OpenMrsXforms getmOpenMrsXforms() {
+        return mOpenMrsXforms;
     }
 }
