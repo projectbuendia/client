@@ -3,10 +3,8 @@ package org.msf.records.net;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -17,7 +15,6 @@ import org.json.JSONObject;
 import org.msf.records.model.Patient;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +23,8 @@ import java.util.Map;
  * Created by nfortescue on 11/3/14.
  */
 public class OpenMrsServer implements Server {
-
+    private static final String USERNAME = "buendiatest1";
+    private static final String PASSWORD = "Buendia123";
     private static final String DEFAULT_ROOT_URL = "http://104.155.15.141:8080/openmrs/ws/rest/v1/";
     private final String ROOT_URL;
     private final VolleySingleton mVolley;
@@ -58,7 +56,8 @@ public class OpenMrsServer implements Server {
             // So treat like NPE and rethrow.
             throw new RuntimeException(e);
         }
-        request = new OpenMrsRequest(
+        request = new OpenMrsJsonRequest(
+                USERNAME, PASSWORD,
                 ROOT_URL + "person",
                 requestBody,
                 new Response.Listener<JSONObject>() {
@@ -119,24 +118,5 @@ public class OpenMrsServer implements Server {
     @Override
     public void cancelPendingRequests(String logTag) {
         mVolley.cancelPendingRequests(logTag);
-    }
-
-    private static class OpenMrsRequest extends JsonObjectRequest {
-
-        public OpenMrsRequest(String url, JSONObject jsonRequest,
-                              Response.Listener<JSONObject> listener,
-                              Response.ErrorListener errorListener) {
-            super(url, jsonRequest, listener, errorListener);
-        }
-
-        @Override
-        public Map<String, String> getHeaders() throws AuthFailureError {
-            // TODO(nfortescue): work out how to do Auth properly
-            HashMap<String, String> params = new HashMap<String, String>();
-            String creds = String.format("%s:%s","buendiatest1","Buendia123");
-            String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
-            params.put("Authorization", auth);
-            return params;
-        }
     }
 }
