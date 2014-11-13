@@ -9,6 +9,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,12 +20,18 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.crashlytics.android.Crashlytics;
 
+import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.net.OpenMrsXforms;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.tasks.DiskSyncTask;
+
+import java.util.List;
 
 
 /**
@@ -228,23 +235,69 @@ public class PatientListActivity extends FragmentActivity
         return true;
     }
 
+    private enum ScanAction {
+        PLAY_WITH_ODK,
+        FETCH_XFORMS,
+        FAKE_SCAN,
+    }
+
     private void startScanBracelet() {
-
-        boolean playWithOdk = false;
-        if (playWithOdk) {
-            // Sync the local sdcard forms into the database
-            new DiskSyncTask().execute((Void[]) null);
-
-            Intent intent = new Intent(this, FormEntryActivity.class);
-            Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, 1);
-            intent.setData(formUri);
-            startActivity(intent);
-        } else {
-            final ProgressDialog progressDialog = ProgressDialog
-                    .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
-            progressDialog.setCancelable(true);
-            progressDialog.show();
+        ScanAction scanAction = ScanAction.FETCH_XFORMS;
+        switch (scanAction) {
+            case PLAY_WITH_ODK:
+                showFirstFormFromSdcard();
+                break;
+            case FAKE_SCAN:
+                showFakeScanProgress();
+                break;
+            case FETCH_XFORMS:
+                fetchXforms();
+                break;
         }
+    }
+
+    private void fetchXforms() {
+        final String tag = "fetchXforms";
+        final Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(tag, error.toString());
+            }
+        };
+        App.getmOpenMrsXforms().listXforms(
+                new Response.Listener<List<OpenMrsXforms.XformIndexEntry>>() {
+                    @Override
+                    public void onResponse(List<OpenMrsXforms.XformIndexEntry> response) {
+                        // inline rather than extract in case stuff changed in the background
+                        if (!response.isEmpty()) {
+                            OpenMrsXforms.XformIndexEntry indexEntry = response.get(0);
+                            App.getmOpenMrsXforms().getXform(indexEntry.uuid, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    //TODO(nfortescue): feed into ODK.
+                                    Log.i(tag, response);
+                                }
+                            }, errorListener);
+                        }
+                    }
+                }, errorListener);
+    }
+
+    private void showFirstFormFromSdcard() {
+        // Sync the local sdcard forms into the database
+        new DiskSyncTask().execute((Void[]) null);
+
+        Intent intent = new Intent(this, FormEntryActivity.class);
+        Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, 1);
+        intent.setData(formUri);
+        startActivity(intent);
+    }
+
+    private void showFakeScanProgress() {
+        final ProgressDialog progressDialog = ProgressDialog
+                .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
+        progressDialog.setCancelable(true);
+        progressDialog.show();
     }
 
     private void startActivity(Class<?> activityClass) {
