@@ -41,6 +41,10 @@ public class UpdateManager {
     private DateTime mLastCheckForUpdateTime = null;
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
 
+    // TODO(dxchen): Consider caching this in SharedPreferences OR standardizing the location of it
+    // so that we can check for it on application launch.
+    private DownloadedUpdateInfo mLastDownloadedUpdateInfo = null;
+
     private boolean mIsDownloadInProgress = false;
 
     public UpdateManager(Application application) {
@@ -50,25 +54,27 @@ public class UpdateManager {
     }
 
     /**
-     * Produces a {@link UpdateDownloadedEvent} if there exists a downloaded APK that has yet to be
-     * installed.
-     */
-    @Produce
-    protected UpdateDownloadedEvent produceUpdateDownloadedEvent() {
-        // TODO(dxchen): Check the disk for an available update whose version is greater than the
-        // current version code. For now, we're faking it.
-
-        DownloadedUpdateInfo downloadedUpdateInfo = new DownloadedUpdateInfo("/fake/path");
-
-        return new UpdateDownloadedEvent(downloadedUpdateInfo);
-    }
-
-    /**
-     * Asynchronously checks for available updates and, if an update is available, posts an
-     * {@link UpdateAvailableEvent} that should be handled by an activity to perform an update as
-     * soon as the user is able to do so.
+     * Asynchronously checks for available updates and posts the appropriate event.
      *
-     * The result of this method is cached for {@code CHECK_FOR_UPDATE_FREQUENCY_HOURS}.
+     * <p>The following events are posted:
+     * <ul>
+     *     <li>
+     *         {@link UpdateDownloadedEvent} - If an update has been downloaded and is as new as the
+     *         latest update available on the server. Note that if the update has not yet been
+     *         downloaded, this event is not fired.
+     *     </li>
+     *     <li>
+     *         {@link UpdateAvailableEvent} - If an update is available on the server and either no
+     *         update has been downloaded or the available update is newer than the downloaded
+     *         update.
+     *     </li>
+     *     <li>
+     *         {@link UpdateNotAvailableEvent} - If no update is available on the server and no
+     *         update has been downloaded.
+     *     </li>
+     * </ul>
+     *
+     * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_FREQUENCY_HOURS}.
      *
      * @param bus the event bus to which to post update available events. If called from an activity
      *            or a service, this should be an instance of
@@ -143,8 +149,16 @@ public class UpdateManager {
             }
 
             if (mLastAvailableUpdateInfo != null) {
-                // Post an event
-                mBus.post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+                // If there's already a downloaded update that is as recent as the available update,
+                // immediately post an UpdateDownloadedEvent; otherwise, post an
+                // UpdateAvailableEvent.
+                if (mLastDownloadedUpdateInfo != null
+                        && (mLastAvailableUpdateInfo.mAvailableVersionCode
+                                == mLastDownloadedUpdateInfo.mDownloadedVersionCode)) {
+                    mBus.post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
+                } else {
+                    mBus.post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+                }
             } else {
                 mBus.post(new UpdateNotAvailableEvent());
             }
