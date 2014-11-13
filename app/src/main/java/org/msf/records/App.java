@@ -34,7 +34,7 @@ public class App extends Application {
      */
     private static MainThreadBus sMainThreadBus;
 
-    private static UpdateManager mUpdateManager;
+    private static UpdateManager sUpdateManager;
 
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
@@ -51,6 +51,8 @@ public class App extends Application {
             sInstance = this;
             sBus = new Bus();
             sMainThreadBus = new MainThreadBus(sBus);
+
+            sUpdateManager = new UpdateManager();
 
             if (preferences.getBoolean("use_openmrs", false)) {
                 String openmrsRootUrl = preferences.getString("openmrs_root_url", null);
@@ -73,6 +75,10 @@ public class App extends Application {
 
     public static synchronized MainThreadBus getMainThreadBus() {
         return sMainThreadBus;
+    }
+
+    public static synchronized UpdateManager getUpdateManager() {
+        return sUpdateManager;
     }
 
     public static synchronized Server getServer() {
