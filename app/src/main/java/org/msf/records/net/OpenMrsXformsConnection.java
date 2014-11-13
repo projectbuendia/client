@@ -78,6 +78,7 @@ public class OpenMrsXformsConnection {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        Log.i(TAG, "got forms: " + response);
                         ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
                         try {
                             // This seems quite code heavy (parsing manually), but is reasonably
@@ -97,6 +98,7 @@ public class OpenMrsXformsConnection {
                             // results so far.
                             Log.e(TAG, "response was in bad format: " + response, e);
                         }
+                        Log.i(TAG, "returning response: " + response);
                         listener.onResponse(result);
                     }
                 },
