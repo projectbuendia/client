@@ -110,14 +110,14 @@ public class PatientListActivity extends FragmentActivity
         }
 
         updateAvailableSnackbar = Snackbar.with(this)
-                .text("Application update available")
-                .actionLabel("Download")
+                .text(getString(R.string.snackbar_update_available))
+                .actionLabel(getString(R.string.snackbar_action_download))
                 .swipeToDismiss(true)
                 .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
         updateDownloadedSnackbar = Snackbar.with(this)
-                .text("Application update downloaded")
-                .actionLabel("Install")
+                .text(getString(R.string.snackbar_update_downloaded))
+                .actionLabel(getString(R.string.snackbar_action_install))
                 .swipeToDismiss(true)
                 .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
