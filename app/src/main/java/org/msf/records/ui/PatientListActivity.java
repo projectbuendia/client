@@ -112,12 +112,14 @@ public class PatientListActivity extends FragmentActivity
         updateAvailableSnackbar = Snackbar.with(this)
                 .text("Application update available")
                 .actionLabel("Download")
-                .swipeToDismiss(false)
+                .swipeToDismiss(true)
+                .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
         updateDownloadedSnackbar = Snackbar.with(this)
                 .text("Application update downloaded")
                 .actionLabel("Install")
-                .swipeToDismiss(false)
+                .swipeToDismiss(true)
+                .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
 
         // TODO: If exposing deep links into your app, handle intents here.
@@ -136,6 +138,9 @@ public class PatientListActivity extends FragmentActivity
     protected void onPause() {
         App.getMainThreadBus().unregister(this);
 
+        updateAvailableSnackbar.dismiss();
+        updateDownloadedSnackbar.dismiss();
+
         super.onPause();
     }
 
@@ -145,7 +150,6 @@ public class PatientListActivity extends FragmentActivity
      */
     @Subscribe
     public void onUpdateAvailableEvent(final UpdateAvailableEvent event) {
-        updateDownloadedSnackbar.dismiss();
         updateAvailableSnackbar
                 .actionListener(new ActionClickListener() {
 
