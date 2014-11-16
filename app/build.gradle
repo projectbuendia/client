@@ -64,6 +64,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.android.support:recyclerview-v7:+'
+    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning.
     androidTestCompile files('libs/espresso-1.1-bundled.jar')
     compile project(':odkcollect')
     compile project(':snackbar')
