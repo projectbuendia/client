@@ -19,7 +19,7 @@ import java.util.Map;
 public class BuendiaServer implements Server {
 
     private static final String DEFAULT_ROOT_URL = "http://buendia.whitespell.com:8080/";
-    private final String ROOT_URL;
+    private final String mRootUrl;
     private final VolleySingleton mVolley;
 
     /**
@@ -29,7 +29,7 @@ public class BuendiaServer implements Server {
      */
     public BuendiaServer(Context context, @Nullable String rootUrl) {
         this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
-        ROOT_URL = TextUtils.isEmpty(rootUrl) ? DEFAULT_ROOT_URL : rootUrl;
+        mRootUrl = TextUtils.isEmpty(rootUrl) ? DEFAULT_ROOT_URL : rootUrl;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class BuendiaServer implements Server {
             Response.ErrorListener errorListener,
             String logTag) {
         mVolley.addToRequestQueue(new GsonRequest<Patient>(Request.Method.POST,
-                patientArguments, ROOT_URL + "patients/", Patient.class, false, null,
+                patientArguments, mRootUrl + "patients/", Patient.class, false, null,
                 patientListener, errorListener), logTag);
     }
 
@@ -50,7 +50,7 @@ public class BuendiaServer implements Server {
             Response.ErrorListener errorListener,
             String logTag) {
         mVolley.addToRequestQueue(new GsonRequest<Patient>(
-                ROOT_URL + "patients/" + patientId, Patient.class, false, null,
+                mRootUrl + "patients/" + patientId, Patient.class, false, null,
                 patientListener, errorListener) {
         }, logTag);
     }
@@ -62,7 +62,7 @@ public class BuendiaServer implements Server {
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener, String logTag) {
         mVolley.addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT,
-                        patientArguments, ROOT_URL + "patients/" + patientId, Patient.class, false,
+                        patientArguments, mRootUrl + "patients/" + patientId, Patient.class, false,
                         null,
                         patientListener, errorListener),
                 logTag);
@@ -80,7 +80,7 @@ public class BuendiaServer implements Server {
         vars += filterLocation != null ? "assigned_location_zone_id=" + filterLocation + "&" : "";
         vars += filterQueryTerm != null && !filterQueryTerm.isEmpty() ? "search=" + filterQueryTerm + "&" : "";
         mVolley.addToRequestQueue(
-                new GsonRequest<List<Patient>>(ROOT_URL + "patients/" + vars,
+                new GsonRequest<List<Patient>>(mRootUrl + "patients/" + vars,
                         Patient.class, true, null, patientListener, errorListener),
                 logTag);
 

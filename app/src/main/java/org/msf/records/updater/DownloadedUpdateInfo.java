@@ -3,6 +3,10 @@ package org.msf.records.updater;
 import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
+
+import com.github.zafarkhaja.semver.ParseException;
+import com.github.zafarkhaja.semver.Version;
 
 import org.msf.records.App;
 
@@ -12,26 +16,51 @@ import org.msf.records.App;
  */
 public class DownloadedUpdateInfo {
 
-    /**
-     * The path to the downloaded update.
-     */
+    private static final String TAG = DownloadedUpdateInfo.class.getName();
+
+    public final boolean mIsValid;
+    private final Version mCurrentVersion;
+    public Version mDownloadedVersion;
     public final String mPath;
 
-    /**
-     * The version code of the downloaded update or {@code INVALID_VERSION_CODE} if the update is
-     * invalid.
-     */
-    public final int mDownloadedVersionCode;
-
-    public DownloadedUpdateInfo(String path) {
-        mPath = path;
-        mDownloadedVersionCode = getVersionCode(mPath);
+    public static DownloadedUpdateInfo getInvalid(Version currentVersion) {
+        return new DownloadedUpdateInfo(
+                false /*isValid*/, currentVersion, UpdateManager.INVALID_VERSION, null /*path*/);
     }
 
-    private int getVersionCode(String mPath) {
-        PackageManager packageManager = App.getInstance().getPackageManager();
-        PackageInfo packageInfo = packageManager.getPackageArchiveInfo(mPath, 0 /*flags*/);
+    public static DownloadedUpdateInfo fromPath(Version currentVersion, String path) {
+        if (path == null || path.equals("")) {
+            Log.w(TAG, "Path was not specified.");
+            return getInvalid(currentVersion);
+        }
 
-        return packageInfo == null ? UpdateManager.INVALID_VERSION_CODE : packageInfo.versionCode;
+        PackageManager packageManager = App.getInstance().getPackageManager();
+        PackageInfo packageInfo = packageManager.getPackageArchiveInfo(path, 0 /*flags*/);
+        if (packageInfo == null) {
+            Log.w(TAG, path + " is not a valid APK.");
+            return getInvalid(currentVersion);
+        }
+
+        Version downloadedVersion;
+        try {
+            downloadedVersion = Version.valueOf(packageInfo.versionName);
+        } catch (ParseException e) {
+            Log.w(TAG, path + " has an invalid semantic version: " + packageInfo.versionName + ".");
+            return getInvalid(currentVersion);
+        }
+
+        return new DownloadedUpdateInfo(true /*isValid*/, currentVersion, downloadedVersion, path);
+    }
+
+    private DownloadedUpdateInfo(
+            boolean isValid, Version currentVersion, Version downloadedVersion, String path) {
+        mIsValid = isValid;
+        mCurrentVersion = currentVersion;
+        mDownloadedVersion = downloadedVersion;
+        mPath = path;
+    }
+
+    public boolean shouldInstall() {
+        return mIsValid && mDownloadedVersion.greaterThan(mCurrentVersion);
     }
 }
