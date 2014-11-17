@@ -4,6 +4,7 @@ import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -12,6 +13,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.github.zafarkhaja.semver.ParseException;
 import com.github.zafarkhaja.semver.Version;
 import com.squareup.otto.Bus;
@@ -41,7 +43,7 @@ public class UpdateManager {
      *
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_FOR_UPDATE_FREQUENCY_HOURS = 24;
+    public static final int CHECK_FOR_UPDATE_FREQUENCY_HOURS = 1;
 
     /**
      * An invalid semantic version.
@@ -51,6 +53,9 @@ public class UpdateManager {
      * never be installed over any the current application.
      */
     public static final Version INVALID_VERSION = Version.forIntegers(0);
+
+    private static final IntentFilter sDownloadCompleteIntentFilter =
+            new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
 
     private final Object mLock = new Object();
 
@@ -112,7 +117,8 @@ public class UpdateManager {
         if (now.isAfter(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
             mLastCheckForUpdateTime = now;
 
-            mServer.getAndroidUpdateInfo(new CheckForUpdateResponseListener(bus), null, null);
+            CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener(bus);
+            mServer.getAndroidUpdateInfo(listener, listener, null /*tag*/);
         }
     }
 
@@ -142,6 +148,9 @@ public class UpdateManager {
                                     "androidclient_"
                                             + availableUpdateInfo.mAvailableVersion.toString());
             mDownloadId = mDownloadManager.enqueue(request);
+
+            App.getInstance().registerReceiver(
+                    new DownloadUpdateReceiver(bus), sDownloadCompleteIntentFilter);
 
             return true;
         }
@@ -195,9 +204,10 @@ public class UpdateManager {
     }
 
     /**
-     * A {@link Response.Listener} that handles check-for-update responses.
+     * A listener that handles check-for-update responses.
      */
-    private class CheckForUpdateResponseListener implements Response.Listener<UpdateInfo> {
+    private class CheckForUpdateResponseListener
+            implements Response.Listener<UpdateInfo>, Response.ErrorListener {
 
         private final Bus mBus;
 
@@ -225,6 +235,11 @@ public class UpdateManager {
                     mBus.post(new UpdateNotAvailableEvent());
                 }
             }
+        }
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.w(TAG, "Unable to download update info. Retry will occur shortly.", error);
         }
     }
 
@@ -298,7 +313,7 @@ public class UpdateManager {
                     return;
                 }
 
-                // TODO(dxchen): Get the path from the local URI.
+                // TODO(dxchen): Extract path from the local URI.
                 mLastDownloadedUpdateInfo =
                         DownloadedUpdateInfo.fromPath(mCurrentVersion, uriString);
             }
