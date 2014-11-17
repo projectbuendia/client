@@ -99,8 +99,30 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void getPatient(String patientId, Response.Listener<Patient> patientListener,
-                           Response.ErrorListener errorListener, String logTag) {
+    public void getPatient(String patientId,
+                           final Response.Listener<Patient> patientListener,
+                           final Response.ErrorListener errorListener,
+                           final String logTag) {
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
+                "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
+                        "/patient/" + patientId,
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try {
+                            patientListener.onResponse(parsePatientJson(response));
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                errorListener);
+        mVolley.addToRequestQueue(request, logTag);
         errorListener.onErrorResponse(new VolleyError("Not yet implemented"));
     }
 
@@ -116,8 +138,6 @@ public class OpenMrsServer implements Server {
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, final String logTag) {
-
-
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
                 "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
@@ -131,18 +151,7 @@ public class OpenMrsServer implements Server {
                         try {
                             JSONArray results = response.getJSONArray("results");
                             for (int i=0; i<results.length(); i++) {
-                                Patient patient = gson.fromJson(results.getJSONObject(i).toString(),
-                                        Patient.class);
-
-                                // TODO(nfortescue): fill these in properly
-                                patient.assigned_location = new PatientLocation();
-                                patient.assigned_location.zone = 1;
-                                patient.assigned_location.bed = 2;
-                                patient.assigned_location.tent = 3;
-
-                                patient.age = new PatientAge();
-                                patient.age.type = "years";
-                                patient.age.years = 24;
+                                Patient patient = parsePatientJson(results.getJSONObject(i));
                                 result.add(patient);
                             }
                         } catch (JSONException e) {
@@ -153,6 +162,25 @@ public class OpenMrsServer implements Server {
                 },
                 errorListener);
         mVolley.addToRequestQueue(request, logTag);
+    }
+
+    private Patient parsePatientJson(JSONObject object) throws JSONException {
+        Patient patient = gson.fromJson(object.toString(),
+                Patient.class);
+
+        // TODO(nfortescue): fill these in properly
+        patient.assigned_location = new PatientLocation();
+        patient.assigned_location.zone = 1;
+        patient.assigned_location.bed = 2;
+        patient.assigned_location.tent = 3;
+
+        patient.age = new PatientAge();
+        patient.age.type = "years";
+        patient.age.years = 24;
+
+        patient.first_showed_symptoms_timestamp_utc = 0L;
+        patient.created_timestamp_utc /= 1000; // UI wants it in seconds, not millis
+        return patient;
     }
 
     @Override
