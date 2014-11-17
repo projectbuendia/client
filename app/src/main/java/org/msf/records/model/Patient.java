@@ -7,7 +7,6 @@ import java.io.Serializable;
  */
 public class Patient implements Serializable {
 
-
     public String id;
     public String given_name;
     public String family_name;
@@ -25,7 +24,6 @@ public class Patient implements Serializable {
 
     public String origin_location;
     public String next_of_kin;
-
 
     public PatientLocation assigned_location;
     public PatientAge age;
