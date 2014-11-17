@@ -26,7 +26,7 @@ public class UpdateInfo implements Serializable {
          * The latest version available on the server, as a string.
          */
         @SerializedName("latest_version")
-        String latestVersion;
+        public String latestVersionString;
 
         /**
          * The first time of day at which the update can be automatically installed, in 24-hour
@@ -56,7 +56,7 @@ public class UpdateInfo implements Serializable {
         @Nullable
         public Version getLatestVersion() {
             try {
-                return latestVersion == null ? null : Version.valueOf(latestVersion);
+                return latestVersionString == null ? null : Version.valueOf(latestVersionString);
             } catch (ParseException e) {
                 return null;
             }
