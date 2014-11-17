@@ -53,7 +53,7 @@ public class AvailableUpdateInfo {
             return getInvalid(currentVersion);
         }
 
-        String runEntry = response.androidClient.run.get(1);
+        String runEntry = response.androidClient.run.get(0);
         if (runEntry == null) {
             Log.w(TAG, "The androidclient update info response's run entry is null.");
             return getInvalid(currentVersion);

@@ -116,12 +116,18 @@ public class UpdateManager {
      */
     public void checkForUpdate(Bus bus) {
         DateTime now = DateTime.now();
-        if (now.isAfter(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
-            mLastCheckForUpdateTime = now;
+        if (now.isBefore(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
+            if (!mIsDownloadInProgress && mLastAvailableUpdateInfo.shouldUpdate()) {
+                bus.post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+            }
 
-            CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener(bus);
-            mServer.getAndroidUpdateInfo(listener, listener, null /*tag*/);
+            return;
         }
+
+        mLastCheckForUpdateTime = now;
+
+        CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener(bus);
+        mServer.getAndroidUpdateInfo(listener, listener, null /*tag*/);
     }
 
     /**
@@ -138,6 +144,10 @@ public class UpdateManager {
             if (mIsDownloadInProgress) {
                 return false;
             }
+            mIsDownloadInProgress = true;
+
+            App.getInstance().registerReceiver(
+                    new DownloadUpdateReceiver(bus), sDownloadCompleteIntentFilter);
 
             DownloadManager.Request request =
                     new DownloadManager.Request(availableUpdateInfo.mUpdateUri)
@@ -150,9 +160,6 @@ public class UpdateManager {
                                     "androidclient_"
                                             + availableUpdateInfo.mAvailableVersion.toString());
             mDownloadId = mDownloadManager.enqueue(request);
-
-            App.getInstance().registerReceiver(
-                    new DownloadUpdateReceiver(bus), sDownloadCompleteIntentFilter);
 
             return true;
         }
@@ -286,6 +293,10 @@ public class UpdateManager {
                     return;
                 }
 
+                // We have received the intent for our download, so we'll call the download finished
+                // and unregister the receiver.
+                mIsDownloadInProgress = false;
+                App.getInstance().unregisterReceiver(this);
 
                 Cursor cursor = mDownloadManager.query(
                         new DownloadManager.Query().setFilterById(receivedDownloadId));
