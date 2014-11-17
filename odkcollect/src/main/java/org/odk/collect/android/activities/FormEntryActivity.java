@@ -204,9 +204,6 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 
 	private FormLoaderTask mFormLoaderTask;
 	private SaveToDiskTask mSaveToDiskTask;
-//
-//	private ImageButton mNextButton;
-//	private ImageButton mBackButton;
 
     private String stepMessage = "";
 
@@ -247,24 +244,6 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 		// get admin preference settings
 		mAdminPreferences = getSharedPreferences(
 				AdminPreferencesActivity.ADMIN_PREFERENCES, 0);
-//
-//		mNextButton = (ImageButton) findViewById(R.id.form_forward_button);
-//		mNextButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				mBeenSwiped = true;
-//				showNextView();
-//			}
-//		});
-//
-//		mBackButton = (ImageButton) findViewById(R.id.form_back_button);
-//		mBackButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				mBeenSwiped = true;
-//				showPreviousView();
-//			}
-//		});
 
 		String startingXPath = null;
 		String waitingXPath = null;
@@ -1047,13 +1026,6 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 						formController.getFormTitle()));
 			}
 
-//			if (mBackButton.isShown()) {
-//				mBackButton.setEnabled(false);
-//			}
-//			if (mNextButton.isShown()) {
-//				mNextButton.setEnabled(true);
-//			}
-
 			return startView;
 		case FormEntryController.EVENT_END_OF_FORM:
 			View endView = View.inflate(this, R.layout.form_entry_end, null);
@@ -1168,13 +1140,6 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 							}
 						}
 					});
-//
-//			if (mBackButton.isShown()) {
-//				mBackButton.setEnabled(true);
-//			}
-//			if (mNextButton.isShown()) {
-//				mNextButton.setEnabled(false);
-//			}
 
 			return endView;
 		case FormEntryController.EVENT_QUESTION:
@@ -1214,11 +1179,6 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 					registerForContextMenu(qw);
 				}
 			}
-//
-//			if (mBackButton.isShown() && mNextButton.isShown()) {
-//				mBackButton.setEnabled(true);
-//				mNextButton.setEnabled(true);
-//			}
 			return odkv;
 		default:
 			Log.e(t, "Attempted to create a view that does not exist.");
@@ -2214,14 +2174,6 @@ public class FormEntryActivity extends Activity implements AnimationListener,
 		if (navigation.contains(PreferencesActivity.NAVIGATION_BUTTONS)) {
 			showButtons = true;
 		}
-//
-//		if (showButtons) {
-//			mBackButton.setVisibility(View.VISIBLE);
-//			mNextButton.setVisibility(View.VISIBLE);
-//		} else {
-//			mBackButton.setVisibility(View.GONE);
-//			mNextButton.setVisibility(View.GONE);
-//		}
 	}
 
 	@Override
