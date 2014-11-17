@@ -22,7 +22,7 @@ public class UpdateServer {
 
     public UpdateServer(@Nullable String rootUrl) {
         mVolley = VolleySingleton.getInstance(App.getInstance());
-        mRootUrl = rootUrl;
+        mRootUrl = rootUrl == null ? ROOT_URL : rootUrl;
     }
 
     /**
