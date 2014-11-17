@@ -131,7 +131,7 @@ public class OpenMrsServer implements Server {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
                 "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
-                        "/patient",
+                        "/patient?q=" + ((filterQueryTerm == null) ? "" : filterQueryTerm),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
