@@ -247,7 +247,7 @@ public class PatientListActivity extends FragmentActivity
     }
 
     private void startScanBracelet() {
-        ScanAction scanAction = ScanAction.FETCH_XFORMS;
+        ScanAction scanAction = ScanAction.PLAY_WITH_ODK;
         switch (scanAction) {
             case PLAY_WITH_ODK:
                 showFirstFormFromSdcard();
