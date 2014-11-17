@@ -35,7 +35,7 @@ public class FakeUpdateServer extends UpdateServer {
         mUpdateInfo.androidClient.latestVersionString = "0.1.1";
         mUpdateInfo.androidClient.installWindowHoursMin = 200;
         mUpdateInfo.androidClient.installWindowHoursMax = 400;
-        mUpdateInfo.androidClient.run = Arrays.asList("/foo/bar/baz.apk");
+        mUpdateInfo.androidClient.run = Arrays.asList("foo/bar/baz.apk");
     }
 
     @Override
