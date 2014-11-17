@@ -8,11 +8,14 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.msf.records.model.Patient;
+import org.msf.records.model.PatientAge;
+import org.msf.records.model.PatientLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,8 @@ public class OpenMrsServer implements Server {
     private static final String USERNAME = "buendiatest1";
     private static final String PASSWORD = "Buendia123";
     private static final String DEFAULT_ROOT_URL = "http://104.155.15.141:8080/openmrs/ws/rest/v1/";
+
+    private final Gson gson = new Gson();
     private final String ROOT_URL;
     private final VolleySingleton mVolley;
 
@@ -109,10 +114,45 @@ public class OpenMrsServer implements Server {
     @Override
     public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
-                             Response.Listener<List<Patient>> patientListener,
-                             Response.ErrorListener errorListener, String logTag) {
-        // TODO(nfortescue): actually get patients
-        patientListener.onResponse(new ArrayList<Patient>());
+                             final Response.Listener<List<Patient>> patientListener,
+                             Response.ErrorListener errorListener, final String logTag) {
+
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
+                "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
+                        "/patient",
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        ArrayList<Patient> result = new ArrayList<>();
+                        try {
+                            JSONArray results = response.getJSONArray("results");
+                            for (int i=0; i<results.length(); i++) {
+                                Patient patient = gson.fromJson(results.getJSONObject(i).toString(),
+                                        Patient.class);
+
+                                // TODO(nfortescue): fill these in properly
+                                patient.assigned_location = new PatientLocation();
+                                patient.assigned_location.zone = 1;
+                                patient.assigned_location.bed = 2;
+                                patient.assigned_location.tent = 3;
+
+                                patient.age = new PatientAge();
+                                patient.age.type = "years";
+                                patient.age.years = 24;
+                                result.add(patient);
+                            }
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                        }
+                        patientListener.onResponse(result);
+                    }
+                },
+                errorListener);
+        mVolley.addToRequestQueue(request, logTag);
     }
 
     @Override
