@@ -24,6 +24,7 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.updater.testing.FakeUpdateServer;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -76,7 +77,8 @@ public class UpdateManager {
     private long mDownloadId = -1;
 
     public UpdateManager() {
-        mServer = new UpdateServer(null /*rootUrl*/);
+//        mServer = new UpdateServer(null /*rootUrl*/);
+        mServer = new FakeUpdateServer();
         mPackageManager = App.getInstance().getPackageManager();
         mDownloadManager =
                 (DownloadManager) App.getInstance().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -239,7 +241,11 @@ public class UpdateManager {
 
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.w(TAG, "Unable to download update info. Retry will occur shortly.", error);
+            Log.w(
+                    TAG,
+                    "Server returned " + error.networkResponse.statusCode + " while downloading "
+                            + "update. Retry will occur shortly.",
+                    error);
         }
     }
 
