@@ -3,6 +3,30 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+    <LinearLayout
+        style="@style/FormItem">
+        <TextView
+            style="@style/FormLabel"
+            android:text="MSF ID"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <EditText
+                android:id="@+id/add_patient_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:hint="MSF Id"
+                android:ems="10"
+                android:layout_marginRight="12dp"
+                android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
     <LinearLayout
         style="@style/FormItem">
         <TextView
