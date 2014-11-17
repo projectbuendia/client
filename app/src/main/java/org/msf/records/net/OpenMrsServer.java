@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -42,49 +41,41 @@ public class OpenMrsServer implements Server {
     @Override
     public void addPatient(final Map<String, String> patientArguments,
                            final Response.Listener<Patient> patientListener,
-                           Response.ErrorListener errorListener, String logTag) {
+                           final Response.ErrorListener errorListener,
+                           final String logTag) {
 
-        // Temporary implementation. Ideally we'd want this logic at the server side, but we are
-        // doing it client side for a proof of concept.
-        JsonObjectRequest request;
         JSONObject requestBody = new JSONObject();
-        JSONObject name = new JSONObject();
         try {
-            putIfSet(patientArguments, Server.PATIENT_GIVEN_NAME_KEY, name, "givenName");
-            putIfSet(patientArguments, Server.PATIENT_FAMILY_NAME_KEY, name, "familyName");
-            JSONArray namesArray = new JSONArray();
-            namesArray.put(0, name);
-            putIfSet(patientArguments, Server.PATIENT_GENDER_KEY, requestBody, "gender");
-            requestBody.put("names", namesArray);
+            putIfSet(patientArguments, Server.PATIENT_ID_KEY, requestBody,
+                    Server.PATIENT_ID_KEY);
+            putIfSet(patientArguments, Server.PATIENT_GIVEN_NAME_KEY, requestBody,
+                    Server.PATIENT_GIVEN_NAME_KEY);
+            putIfSet(patientArguments, Server.PATIENT_FAMILY_NAME_KEY, requestBody,
+                    Server.PATIENT_FAMILY_NAME_KEY);
+            putIfSet(patientArguments, Server.PATIENT_GENDER_KEY, requestBody,
+                    Server.PATIENT_GENDER_KEY);
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
             // So treat like NPE and rethrow.
             throw new RuntimeException(e);
         }
-        request = new OpenMrsJsonRequest(
-                USERNAME, PASSWORD,
-                ROOT_URL + "person",
+
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
+                "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
+                        "/patient",
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i("org.msf.records", response.toString());
-                        // The response from OpenMSR is rubbish, and requires you to follow a link
-                        // to get a name. So we will assume it just worked, and use what was sent.
-                        Patient patient = new Patient();
-                        patient.id = response.optString("uuid");
-                        if (patientArguments.containsKey(Server.PATIENT_GIVEN_NAME_KEY)) {
-                            patient.given_name = patientArguments.get(Server.PATIENT_GIVEN_NAME_KEY);
+                        try {
+                            patientListener.onResponse(parsePatientJson(response));
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
                         }
-                        if (patientArguments.containsKey(Server.PATIENT_FAMILY_NAME_KEY)) {
-                            patient.family_name = patientArguments.get(Server.PATIENT_FAMILY_NAME_KEY);
-                        }
-                        if (patientArguments.containsKey(Server.PATIENT_GENDER_KEY)) {
-                            patient.gender = patientArguments.get(Server.PATIENT_GENDER_KEY);
-                        }
-                        // TODO(nfortescue): work out if utc is best for timestamps, and re-specify
-                        patient.created_timestamp_utc = System.currentTimeMillis() / 1000;
-                        patientListener.onResponse(patient);
                     }
                 },
                 errorListener);
@@ -123,7 +114,6 @@ public class OpenMrsServer implements Server {
                 },
                 errorListener);
         mVolley.addToRequestQueue(request, logTag);
-        errorListener.onErrorResponse(new VolleyError("Not yet implemented"));
     }
 
     @Override
@@ -179,7 +169,9 @@ public class OpenMrsServer implements Server {
         patient.age.years = 24;
 
         patient.first_showed_symptoms_timestamp_utc = 0L;
-        patient.created_timestamp_utc /= 1000; // UI wants it in seconds, not millis
+        if (patient.created_timestamp_utc != null) {
+            patient.created_timestamp_utc /= 1000; // UI wants it in seconds, not millis
+        }
         return patient;
     }
 
