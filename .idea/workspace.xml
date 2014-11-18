@@ -34,7 +34,11 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="app: org.msf.records" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b74fcda3-e969-48d5-82c5-8be07ebed69f" name="Default" comment="" />
+    <list default="true" id="b74fcda3-e969-48d5-82c5-8be07ebed69f" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml" afterPath="$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="android-client.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -56,41 +60,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="build.gradle" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="541" max-vertical-offset="1125">
-              <caret line="66" column="34" selection-start-line="66" selection-start-column="34" selection-end-line="67" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="odkcollect.iml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/odkcollect.iml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1695">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="QuestionWidget.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/QuestionWidget.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-6.9615383" vertical-offset="1544" max-vertical-offset="2970">
               <caret line="155" column="19" selection-start-line="155" selection-start-column="16" selection-end-line="155" selection-end-column="19" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="build.gradle" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/viewserver/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
-              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -115,16 +89,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="viewserver.iml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/viewserver/viewserver.iml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1425">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="build.gradle" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
@@ -138,11 +102,107 @@
       <file leaf-file-name="FormEntryActivity.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="5.664825" vertical-offset="30254" max-vertical-offset="40725">
-              <caret line="2263" column="26" selection-start-line="2263" selection-start-column="26" selection-end-line="2263" selection-end-column="26" />
+            <state vertical-scroll-proportion="0.17047451" vertical-offset="7193" max-vertical-offset="41745">
+              <caret line="498" column="44" selection-start-line="498" selection-start-column="44" selection-end-line="498" selection-end-column="44" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#13352#13430#0" expanded="true" />
+                <element signature="e#13510#13537#0" expanded="true" />
+                <element signature="e#14003#14050#0" expanded="true" />
+                <element signature="e#15365#15595#0" expanded="true" />
+                <element signature="e#15585#15586#0" expanded="true" />
+                <element signature="e#17044#17057#0" expanded="true" />
+                <element signature="e#17134#17147#0" expanded="true" />
+                <element signature="e#17606#17930#0" expanded="true" />
+                <element signature="e#17919#17920#0" expanded="true" />
+                <element signature="e#19013#19014#0" expanded="true" />
+                <element signature="e#19049#19050#0" expanded="true" />
+                <element signature="e#55923#55963#0" expanded="true" />
+                <element signature="e#56481#56522#0" expanded="true" />
+                <element signature="e#61960#61993#0" expanded="true" />
+                <element signature="e#62083#62476#0" expanded="true" />
+                <element signature="e#62471#62472#0" expanded="true" />
+                <element signature="e#62540#62562#0" expanded="true" />
+                <element signature="e#65297#65333#0" expanded="true" />
+                <element signature="e#66115#66147#0" expanded="true" />
+                <element signature="e#66165#66196#0" expanded="true" />
+                <element signature="e#66440#66515#0" expanded="true" />
+                <element signature="e#66539#66570#0" expanded="true" />
+                <element signature="e#66578#66878#0" expanded="true" />
+                <element signature="e#66869#66870#0" expanded="true" />
+                <element signature="e#66901#68754#0" expanded="true" />
+                <element signature="e#68747#68748#0" expanded="true" />
+                <element signature="e#70974#71010#0" expanded="true" />
+                <element signature="e#71224#71277#0" expanded="true" />
+                <element signature="e#71330#71993#0" expanded="true" />
+                <element signature="e#71988#71989#0" expanded="true" />
+                <element signature="e#72062#72096#0" expanded="true" />
+                <element signature="e#72139#72174#0" expanded="true" />
+                <element signature="e#75328#75791#0" expanded="true" />
+                <element signature="e#75785#75786#0" expanded="true" />
+                <element signature="e#75884#75916#0" expanded="true" />
+                <element signature="e#75949#75980#0" expanded="true" />
+                <element signature="e#76096#76135#0" expanded="true" />
+                <element signature="e#76505#76836#0" expanded="true" />
+                <element signature="e#76830#76831#0" expanded="true" />
+                <element signature="e#76929#76960#0" expanded="true" />
+                <element signature="e#76993#77024#0" expanded="true" />
+                <element signature="e#77119#77470#0" expanded="true" />
+                <element signature="e#77455#77456#0" expanded="true" />
+                <element signature="e#86311#86497#0" expanded="true" />
+                <element signature="e#86417#86451#0" expanded="true" />
+                <element signature="e#86491#86492#0" expanded="true" />
+                <element signature="e#87747#87778#0" expanded="true" />
+                <element signature="e#88098#88131#0" expanded="true" />
+                <element signature="e#88263#88296#0" expanded="true" />
+                <element signature="e#88541#88577#0" expanded="true" />
+                <element signature="e#88668#88704#0" expanded="true" />
+                <element signature="e#89868#89899#0" expanded="true" />
+                <element signature="e#96944#96994#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FormTraverser.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormTraverser.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="780">
+              <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="form_entry.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-9.518518" vertical-offset="253" max-vertical-offset="825">
+              <caret line="34" column="49" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="49" />
+              <folding />
+            </state>
+          </provider>
+          <provider editor-type-id="android-designer">
+            <state />
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FormController.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-7.56" vertical-offset="15591" max-vertical-offset="18045">
+              <caret line="1130" column="18" selection-start-line="1130" selection-start-column="18" selection-end-line="1130" selection-end-column="18" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ViewGroup.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/view/ViewGroup.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-7.4" vertical-offset="2425" max-vertical-offset="6420">
+              <caret line="175" column="16" selection-start-line="175" selection-start-column="16" selection-end-line="175" selection-end-column="16" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -1953,7 +2013,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="8496894764000" />
+        <entry key="$PROJECT_DIR$" value="8496921467000" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -2421,7 +2481,6 @@
         <option value="$PROJECT_DIR$/app/src/main/java/org/msf/records/App.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_patient_detail_overview.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientDetailOverviewFragment.java" />
-        <option value="$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/QuestionWidget.java" />
         <option value="$PROJECT_DIR$/settings.gradle" />
         <option value="$PROJECT_DIR$/viewserver/build.gradle" />
@@ -2429,6 +2488,7 @@
         <option value="$PROJECT_DIR$/odkcollect/build.gradle" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/views/MediaLayout.java" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/StringWidget.java" />
+        <option value="$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" />
       </list>
     </option>
@@ -2572,6 +2632,84 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="odkcollect" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="odkcollect" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="odkcollect" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="app" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -2595,6 +2733,62 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -2811,6 +3005,7 @@
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32844934" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287841" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32929516" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -2821,7 +3016,7 @@
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32599118" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.34251103" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.34251103" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -2834,7 +3029,6 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32904148" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -2857,39 +3051,24 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java</url>
+          <line>491</line>
+          <properties />
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java</url>
+          <line>498</line>
+          <properties />
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="7" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/EditTextDialogFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="735" max-vertical-offset="930">
-          <caret line="49" column="35" selection-start-line="49" selection-start-column="35" selection-end-line="49" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/GridDialogFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="480" max-vertical-offset="1605">
-          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="3855" max-vertical-offset="5685">
-          <caret line="257" column="5" selection-start-line="257" selection-start-column="5" selection-end-line="257" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/model/Patient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="585">
-          <caret line="16" column="39" selection-start-line="16" selection-start-column="39" selection-end-line="16" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/listview_cell_search_results.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="1125">
@@ -3280,12 +3459,100 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/view/ViewGroup.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.4" vertical-offset="2425" max-vertical-offset="6420">
+          <caret line="175" column="16" selection-start-line="175" selection-start-column="16" selection-end-line="175" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.56" vertical-offset="15591" max-vertical-offset="18045">
+          <caret line="1130" column="18" selection-start-line="1130" selection-start-column="18" selection-end-line="1130" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-9.518518" vertical-offset="253" max-vertical-offset="825">
+          <caret line="34" column="49" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormTraverser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="780">
+          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="5.664825" vertical-offset="30254" max-vertical-offset="40725">
-          <caret line="2263" column="26" selection-start-line="2263" selection-start-column="26" selection-end-line="2263" selection-end-column="26" />
+        <state vertical-scroll-proportion="0.17047451" vertical-offset="7193" max-vertical-offset="41745">
+          <caret line="498" column="44" selection-start-line="498" selection-start-column="44" selection-end-line="498" selection-end-column="44" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#13352#13430#0" expanded="true" />
+            <element signature="e#13510#13537#0" expanded="true" />
+            <element signature="e#14003#14050#0" expanded="true" />
+            <element signature="e#15365#15595#0" expanded="true" />
+            <element signature="e#15585#15586#0" expanded="true" />
+            <element signature="e#17044#17057#0" expanded="true" />
+            <element signature="e#17134#17147#0" expanded="true" />
+            <element signature="e#17606#17930#0" expanded="true" />
+            <element signature="e#17919#17920#0" expanded="true" />
+            <element signature="e#19013#19014#0" expanded="true" />
+            <element signature="e#19049#19050#0" expanded="true" />
+            <element signature="e#55923#55963#0" expanded="true" />
+            <element signature="e#56481#56522#0" expanded="true" />
+            <element signature="e#61960#61993#0" expanded="true" />
+            <element signature="e#62083#62476#0" expanded="true" />
+            <element signature="e#62471#62472#0" expanded="true" />
+            <element signature="e#62540#62562#0" expanded="true" />
+            <element signature="e#65297#65333#0" expanded="true" />
+            <element signature="e#66115#66147#0" expanded="true" />
+            <element signature="e#66165#66196#0" expanded="true" />
+            <element signature="e#66440#66515#0" expanded="true" />
+            <element signature="e#66539#66570#0" expanded="true" />
+            <element signature="e#66578#66878#0" expanded="true" />
+            <element signature="e#66869#66870#0" expanded="true" />
+            <element signature="e#66901#68754#0" expanded="true" />
+            <element signature="e#68747#68748#0" expanded="true" />
+            <element signature="e#70974#71010#0" expanded="true" />
+            <element signature="e#71224#71277#0" expanded="true" />
+            <element signature="e#71330#71993#0" expanded="true" />
+            <element signature="e#71988#71989#0" expanded="true" />
+            <element signature="e#72062#72096#0" expanded="true" />
+            <element signature="e#72139#72174#0" expanded="true" />
+            <element signature="e#75328#75791#0" expanded="true" />
+            <element signature="e#75785#75786#0" expanded="true" />
+            <element signature="e#75884#75916#0" expanded="true" />
+            <element signature="e#75949#75980#0" expanded="true" />
+            <element signature="e#76096#76135#0" expanded="true" />
+            <element signature="e#76505#76836#0" expanded="true" />
+            <element signature="e#76830#76831#0" expanded="true" />
+            <element signature="e#76929#76960#0" expanded="true" />
+            <element signature="e#76993#77024#0" expanded="true" />
+            <element signature="e#77119#77470#0" expanded="true" />
+            <element signature="e#77455#77456#0" expanded="true" />
+            <element signature="e#86311#86497#0" expanded="true" />
+            <element signature="e#86417#86451#0" expanded="true" />
+            <element signature="e#86491#86492#0" expanded="true" />
+            <element signature="e#87747#87778#0" expanded="true" />
+            <element signature="e#88098#88131#0" expanded="true" />
+            <element signature="e#88263#88296#0" expanded="true" />
+            <element signature="e#88541#88577#0" expanded="true" />
+            <element signature="e#88668#88704#0" expanded="true" />
+            <element signature="e#89868#89899#0" expanded="true" />
+            <element signature="e#96944#96994#0" expanded="true" />
           </folding>
         </state>
       </provider>
