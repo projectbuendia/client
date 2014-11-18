@@ -32,6 +32,7 @@ import android.util.Log;
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -152,7 +153,8 @@ public class FormEntryActivity
 	
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
-	private static final int MENU_SAVE = Menu.FIRST;
+    private static final int MENU_CANCEL = Menu.FIRST;
+	private static final int MENU_SAVE = MENU_CANCEL + 1;
 //	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
 
 	private static final int PROGRESS_DIALOG = 1;
@@ -220,7 +222,22 @@ public class FormEntryActivity
         mErrorMessage = null;
 
 //        mBeenSwiped = false;
-		mAlertDialog = null;
+		mAlertDialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setTitle(getString(R.string.title_confirm_cancel))
+                .setMessage(R.string.are_you_sure)
+                .setPositiveButton(
+                        R.string.yes,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                finish();
+                            }
+                        }
+                )
+                .setNegativeButton(R.string.no, null)
+                .create();;
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
@@ -482,7 +499,7 @@ public class FormEntryActivity
     private void populateViews() {
         List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
         final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
-                this, android.R.layout.simple_list_item_1, sidebarItems);
+                this, R.layout.large_list_item_1, R.id.text, sidebarItems);
 
         FormTraverser traverser = new FormTraverser.Builder()
                 .addVisitor(new QuestionHolderFormVisitor(sidebarItems))
@@ -537,25 +554,6 @@ public class FormEntryActivity
         @Override
         public String toString() {
             return mName;
-        }
-    }
-
-    private class SidebarFormVisitor implements FormVisitor {
-
-        private final List<?> mItems;
-
-        public SidebarFormVisitor(List<?> items) {
-            // TODO(giljulio): Pick right type for list.
-            this.mItems = items;
-        }
-
-        @Override
-        public void visit(int event, FormController formController) {
-            if (event != FormEntryController.EVENT_GROUP) {
-                return;
-            }
-
-            // TODO(giljulio): Add the appropriate element to the list.
         }
     }
 
@@ -791,17 +789,30 @@ public class FormEntryActivity
 //		}
 //	}
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            mAlertDialog.show();
+            return true;
+        }
+        else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Collect.getInstance().getActivityLogger()
 				.logInstanceAction(this, "onCreateOptionsMenu", "show");
 		super.onCreateOptionsMenu(menu);
 
+        CompatibilityUtils.setShowAsAction(
+                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
+                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+
 		CompatibilityUtils.setShowAsAction(
 				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
 				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-
-        // TODO(dxchen): Add cancel? Or should we just count on the user to press back?
 
 //		CompatibilityUtils.setShowAsAction(
 //				menu.add(0, MENU_HIERARCHY_VIEW, 0, R.string.view_hierarchy)
@@ -824,7 +835,8 @@ public class FormEntryActivity
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
 
-        menu.findItem(MENU_SAVE).setVisible(true).setEnabled(true);
+//        menu.findItem(MENU_CANCEL).setVisible(true).setEnabled(true);
+//        menu.findItem(MENU_SAVE).setVisible(true).setEnabled(true);
 //
 //		FormController formController = Collect.getInstance()
 //				.getFormController();
@@ -870,6 +882,9 @@ public class FormEntryActivity
 ////							"MENU_LANGUAGES");
 ////			createLanguageDialog();
 ////			return true;
+        case MENU_CANCEL:
+            mAlertDialog.show();
+            return true;
 		case MENU_SAVE:
 			Collect.getInstance()
 					.getActivityLogger()
@@ -1549,7 +1564,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("constraintMsg");
 				if (constraintText == null) {
-					constraintText = getString(R.string.invalid_answer_error);
+					constraintText = formController.getQuestionPrompt(index).getQuestionText() + " "
+                            + "is invalid.";
 				}
 			}
 			break;
@@ -1565,7 +1581,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("requiredMsg");
 				if (constraintText == null) {
-					constraintText = getString(R.string.required_answer_error);
+                    constraintText = formController.getQuestionPrompt(index).getQuestionText() + " "
+                            + " is required.";
 				}
 			}
 			break;
@@ -1821,97 +1838,23 @@ public class FormEntryActivity
 
         return true;
     }
-//
-//	/**
-//	 * Create a dialog with options to save and exit, save, or quit without
-//	 * saving
-//	 */
-//	private void createQuitDialog() {
-//		FormController formController = Collect.getInstance()
-//				.getFormController();
-//		String[] items;
-//        String[] two = { getString(R.string.keep_changes),
-//                getString(R.string.do_not_save) };
-//        items = two;
-//
-//		Collect.getInstance().getActivityLogger()
-//				.logInstanceAction(this, "createQuitDialog", "show");
-//		mAlertDialog = new AlertDialog.Builder(this)
-//				.setIcon(android.R.drawable.ic_dialog_info)
-//				.setTitle(
-//						getString(R.string.quit_application,
-//								formController.getFormTitle()))
-//				.setNeutralButton(getString(R.string.do_not_exit),
-//						new DialogInterface.OnClickListener() {
-//							@Override
-//							public void onClick(DialogInterface dialog, int id) {
-//
-//								Collect.getInstance()
-//										.getActivityLogger()
-//										.logInstanceAction(this,
-//												"createQuitDialog", "cancel");
-//								dialog.cancel();
-//
-//							}
-//						})
-//				.setItems(items, new DialogInterface.OnClickListener() {
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						switch (which) {
-//
-//						case 0: // save and exit
-////							// this is slightly complicated because if the
-////							// option is disabled in
-////							// the admin menu, then case 0 actually becomes
-////							// 'discard and exit'
-////							// whereas if it's enabled it's 'save and exit'
-////							if (mAdminPreferences
-////									.getBoolean(
-////											AdminPreferencesActivity.KEY_SAVE_MID,
-////											true)) {
-//                            Collect.getInstance()
-//                                    .getActivityLogger()
-//                                    .logInstanceAction(this,
-//                                            "createQuitDialog",
-//                                            "saveAndExit");
-//                            saveDataToDisk(EXIT, isInstanceComplete(false),
-//                                    null);
-////							} else {
-////								Collect.getInstance()
-////										.getActivityLogger()
-////										.logInstanceAction(this,
-////												"createQuitDialog",
-////												"discardAndExit");
-////								removeTempInstance();
-////								finishReturnInstance();
-////							}
-//							break;
-//
-//						case 1: // discard changes and exit
-//							Collect.getInstance()
-//									.getActivityLogger()
-//									.logInstanceAction(this,
-//											"createQuitDialog",
-//											"discardAndExit");
-//
-//                            // close all open databases of external data.
-//                            Collect.getInstance().getExternalDataManager().close();
-//
-//							removeTempInstance();
-//							finishReturnInstance();
-//							break;
-//
-//						case 2:// do nothing
-//							Collect.getInstance()
-//									.getActivityLogger()
-//									.logInstanceAction(this,
-//											"createQuitDialog", "cancel");
-//							break;
-//						}
-//					}
-//				}).create();
-//		mAlertDialog.show();
-//	}
+
+	/**
+	 * Create a dialog with options to save and exit, save, or quit without
+	 * saving
+	 */
+	private void createQuitDialog() {
+		FormController formController = Collect.getInstance()
+				.getFormController();
+		String[] items;
+        String[] two = { getString(R.string.keep_changes),
+                getString(R.string.do_not_save) };
+        items = two;
+
+		Collect.getInstance().getActivityLogger()
+				.logInstanceAction(this, "createQuitDialog", "show");
+		mAlertDialog.show();
+	}
 
 	/**
 	 * this method cleans up unneeded files when the user selects 'discard and
@@ -2486,19 +2429,20 @@ public class FormEntryActivity
 				formController.setInstancePath(new File(path + File.separator
 						+ file + "_" + time + ".xml"));
 			}
-		} else {
-			Intent reqIntent = getIntent();
-			boolean showFirst = reqIntent.getBooleanExtra("start", false);
-
-			if (!showFirst) {
-				// we've just loaded a saved form, so start in the hierarchy
-				// view
-				Intent i = new Intent(this, FormHierarchyActivity.class);
-				startActivity(i);
-				return; // so we don't show the intro screen before jumping to
-						// the hierarchy
-			}
 		}
+//        else {
+//			Intent reqIntent = getIntent();
+//			boolean showFirst = reqIntent.getBooleanExtra("start", false);
+//
+//			if (!showFirst) {
+//				// we've just loaded a saved form, so start in the hierarchy
+//				// view
+//				Intent i = new Intent(this, FormHierarchyActivity.class);
+//				startActivity(i);
+//				return; // so we don't show the intro screen before jumping to
+//						// the hierarchy
+//			}
+//		}
 
 		populateViews();
 	}
