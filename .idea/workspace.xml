@@ -30,9 +30,14 @@
       </layout>
     </layouts>
   </component>
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="app: org.msf.records" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="b74fcda3-e969-48d5-82c5-8be07ebed69f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/utilities/FileUtils.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/utilities/FileUtils.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OpenMrsXformsConnection.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OpenMrsXformsConnection.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="android-client.iws" />
@@ -61,72 +66,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ODKView.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/views/ODKView.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="2687" max-vertical-offset="5565">
-              <caret line="246" column="59" selection-start-line="246" selection-start-column="49" selection-end-line="246" selection-end-column="59" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="FormEntryActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.5" vertical-offset="39797" max-vertical-offset="42450">
+            <state vertical-scroll-proportion="0.0" vertical-offset="39797" max-vertical-offset="42450">
               <caret line="2654" column="17" selection-start-line="2654" selection-start-column="17" selection-end-line="2654" selection-end-column="17" />
-              <folding>
-                <element signature="e#0#98558#0" expanded="true" />
-                <element signature="imports" expanded="true" />
-                <element signature="e#13345#13423#0" expanded="true" />
-                <element signature="e#13503#13530#0" expanded="true" />
-                <element signature="e#13996#14043#0" expanded="true" />
-                <element signature="e#15358#15588#0" expanded="true" />
-                <element signature="e#15578#15579#0" expanded="true" />
-                <element signature="e#17037#17050#0" expanded="true" />
-                <element signature="e#17127#17140#0" expanded="true" />
-                <element signature="e#17599#17923#0" expanded="true" />
-                <element signature="e#17912#17913#0" expanded="true" />
-                <element signature="e#19006#19007#0" expanded="true" />
-                <element signature="e#19042#19043#0" expanded="true" />
-                <element signature="e#29480#29505#0" expanded="true" />
-                <element signature="e#34504#34528#0" expanded="true" />
-                <element signature="e#57229#57269#0" expanded="true" />
-                <element signature="e#57787#57828#0" expanded="true" />
-                <element signature="e#63266#63299#0" expanded="true" />
-                <element signature="e#63389#63782#0" expanded="true" />
-                <element signature="e#63777#63778#0" expanded="true" />
-                <element signature="e#63846#63868#0" expanded="true" />
-                <element signature="e#66566#66602#0" expanded="true" />
-                <element signature="e#72403#72439#0" expanded="true" />
-                <element signature="e#72653#72706#0" expanded="true" />
-                <element signature="e#72759#73422#0" expanded="true" />
-                <element signature="e#73417#73418#0" expanded="true" />
-                <element signature="e#73491#73525#0" expanded="true" />
-                <element signature="e#73568#73603#0" expanded="true" />
-                <element signature="e#76757#77220#0" expanded="true" />
-                <element signature="e#77214#77215#0" expanded="true" />
-                <element signature="e#77313#77345#0" expanded="true" />
-                <element signature="e#77378#77409#0" expanded="true" />
-                <element signature="e#77525#77564#0" expanded="true" />
-                <element signature="e#77934#78265#0" expanded="true" />
-                <element signature="e#78259#78260#0" expanded="true" />
-                <element signature="e#78358#78389#0" expanded="true" />
-                <element signature="e#78422#78453#0" expanded="true" />
-                <element signature="e#78548#78899#0" expanded="true" />
-                <element signature="e#78884#78885#0" expanded="true" />
-                <element signature="e#87740#87926#0" expanded="true" />
-                <element signature="e#87846#87880#0" expanded="true" />
-                <element signature="e#87920#87921#0" expanded="true" />
-                <element signature="e#89174#89205#0" expanded="true" />
-                <element signature="e#89525#89558#0" expanded="true" />
-                <element signature="e#89690#89723#0" expanded="true" />
-                <element signature="e#89968#90004#0" expanded="true" />
-                <element signature="e#90095#90131#0" expanded="true" />
-                <element signature="e#91297#91328#0" expanded="true" />
-                <element signature="e#98461#98511#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -134,18 +79,8 @@
       <file leaf-file-name="strings.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.5490196" vertical-offset="1739" max-vertical-offset="5010">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1739" max-vertical-offset="5010">
               <caret line="128" column="47" selection-start-line="128" selection-start-column="47" selection-end-line="128" selection-end-column="47" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="R.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/build/generated/source/r/debug/org/odk/collect/android/R.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.72" vertical-offset="27657" max-vertical-offset="84240">
-              <caret line="1860" column="26" selection-start-line="1860" selection-start-column="26" selection-end-line="1860" selection-end-column="26" />
               <folding />
             </state>
           </provider>
@@ -154,54 +89,91 @@
       <file leaf-file-name="SaveToDiskTask.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/SaveToDiskTask.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="638" max-vertical-offset="6240">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1170" max-vertical-offset="6600">
               <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#18102#0" expanded="true" />
-                <element signature="e#3051#3142#0" expanded="true" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PatientListActivity.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="PatientListActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.44874275" vertical-offset="4433" max-vertical-offset="5100">
-              <caret line="337" column="37" selection-start-line="337" selection-start-column="37" selection-end-line="337" selection-end-column="37" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="4200" max-vertical-offset="5025">
+              <caret line="317" column="24" selection-start-line="317" selection-start-column="24" selection-end-line="317" selection-end-column="24" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#10154#10337#0" expanded="true" />
+                <element signature="e#10326#10327#0" expanded="true" />
+                <element signature="e#10556#11736#0" expanded="true" />
+                <element signature="e#11717#11718#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Intent.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/content/Intent.class">
+      <file leaf-file-name="OdkXformSyncTask.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OdkXformSyncTask.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="4062" max-vertical-offset="8535">
-              <caret line="283" column="11" selection-start-line="283" selection-start-column="11" selection-end-line="283" selection-end-column="11" />
+            <state vertical-scroll-proportion="-4.0384617" vertical-offset="600" max-vertical-offset="2655">
+              <caret line="65" column="57" selection-start-line="65" selection-start-column="57" selection-end-line="65" selection-end-column="57" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FragmentActivity.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.0/classes.jar!/android/support/v4/app/FragmentActivity.class">
+      <file leaf-file-name="OpenMrsXformsConnection.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OpenMrsXformsConnection.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.72" vertical-offset="1347" max-vertical-offset="1890">
-              <caret line="102" column="16" selection-start-line="102" selection-start-column="16" selection-end-line="102" selection-end-column="16" />
+            <state vertical-scroll-proportion="0.564433" vertical-offset="591" max-vertical-offset="2370">
+              <caret line="67" column="46" selection-start-line="67" selection-start-column="46" selection-end-line="67" selection-end-column="46" />
+              <folding>
+                <element signature="e#2156#2972#0" expanded="true" />
+                <element signature="e#2953#2954#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DiskSyncTask.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/DiskSyncTask.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="3207" max-vertical-offset="4215">
+              <caret line="257" column="8" selection-start-line="257" selection-start-column="8" selection-end-line="257" selection-end-column="8" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FormSavedListener.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/listeners/FormSavedListener.java">
+      <file leaf-file-name="FileUtils.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/utilities/FileUtils.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
-              <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
+            <state vertical-scroll-proportion="-2.6538463" vertical-offset="246" max-vertical-offset="5985">
+              <caret line="57" column="76" selection-start-line="57" selection-start-column="76" selection-end-line="57" selection-end-column="76" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FragmentActivity.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0-sources.jar!/android/support/v4/app/FragmentActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="12615">
+              <caret line="55" column="34" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
+              <folding>
+                <element signature="e#0#32285#0" expanded="false" />
+                <element signature="imports" expanded="false" />
+                <element signature="e#3608#4157#0" expanded="false" />
+                <element signature="e#4149#4150#0" expanded="false" />
+                <element signature="e#4270#4431#0" expanded="false" />
+                <element signature="e#4424#4425#0" expanded="false" />
+                <element signature="e#16729#16730#0" expanded="false" />
+                <element signature="e#16772#16773#0" expanded="false" />
+                <element signature="e#21749#21750#0" expanded="false" />
+                <element signature="e#21776#21777#0" expanded="false" />
+                <element signature="e#29693#29694#0" expanded="false" />
+                <element signature="e#29726#29727#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -209,7 +181,7 @@
       <file leaf-file-name="FormController.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="10613" max-vertical-offset="18030">
+            <state vertical-scroll-proportion="0.0" vertical-offset="11865" max-vertical-offset="19200">
               <caret line="791" column="0" selection-start-line="791" selection-start-column="0" selection-end-line="791" selection-end-column="0" />
               <folding />
             </state>
@@ -2002,7 +1974,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="8496921467000" />
+        <entry key="$PROJECT_DIR$" value="8497798300000" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -2156,8 +2128,8 @@
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.1.1/5043bfebc3db072ed80fbd362e7caf00e885d8ae/commons-logging-1.1.1.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.4/5310da9f90e843883309e9e0bf5950faa79882a0/commons-codec-1.4-sources.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.4/4216af16d38465bbab0f3dff8efa14204f7a399a/commons-codec-1.4.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0.jar" />
                           </list>
                         </option>
                         <option name="path" value="$PROJECT_DIR$/ViewPagerIndicator" />
@@ -2242,15 +2214,15 @@
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.5/2bd5124dfb9198af70cad30eb9ccbfa9cd670163/joda-time-2.5-sources.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/joda-time/joda-time/2.5/c73038a3688525aad5cf33409df483178290cd64/joda-time-2.5.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.crashlytics.android/crashlytics/1.1.13/e821eafa1bf489a26bdb71f95078c26785b37a1/crashlytics-1.1.13.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/appcompat-v7/21.0.0/appcompat-v7-21.0.0.aar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/cardview-v7/21.0.0/cardview-v7-21.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/cardview-v7/21.0.0/cardview-v7-21.0.0.aar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/recyclerview-v7/21.0.0/recyclerview-v7-21.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/recyclerview-v7/21.0.0/recyclerview-v7-21.0.0.aar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0.aar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/appcompat-v7/21.0.0/appcompat-v7-21.0.0.aar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/cardview-v7/21.0.0/cardview-v7-21.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/cardview-v7/21.0.0/cardview-v7-21.0.0.aar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/recyclerview-v7/21.0.0/recyclerview-v7-21.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/recyclerview-v7/21.0.0/recyclerview-v7-21.0.0.aar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0.aar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0.jar" />
                             <option value="$MODULE_DIR$/libs/espresso-1.1-bundled.jar" />
                             <option value="$MODULE_DIR$/libs/estimote-sdk-preview-javadoc.jar" />
                             <option value="$MODULE_DIR$/libs/estimote-sdk-preview.jar" />
@@ -2330,9 +2302,9 @@
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.1.1/5043bfebc3db072ed80fbd362e7caf00e885d8ae/commons-logging-1.1.1.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.4/5310da9f90e843883309e9e0bf5950faa79882a0/commons-codec-1.4-sources.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.4/4216af16d38465bbab0f3dff8efa14204f7a399a/commons-codec-1.4.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/appcompat-v7/21.0.0/appcompat-v7-21.0.0.aar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0.aar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/appcompat-v7/21.0.0/appcompat-v7-21.0.0.aar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/21.0.0/support-v4-21.0.0.aar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.3/21e31b9298ed677b17fcac6dd0eb0a82ec35adc2/gson-2.3-sources.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.3/5fc52c41ef0239d1093a1eb7c3697036183677ce/gson-2.3.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.4/f2d8698c46d1167ff24b06a840a87d91a02db891/commons-io-2.4-sources.jar" />
@@ -2343,8 +2315,8 @@
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.opencsv/opencsv/2.3/c23708cdb9e80a144db433e23344a788a1fd6599/opencsv-2.3.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.2.5/c07ce7f6b153284a9ebaf58532c2442200cf3aa2/httpmime-4.2.5-sources.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpmime/4.2.5/412b9914d0adec6d5716df1ada8acbc4f6f2dd37/httpmime-4.2.5.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0-sources.jar" />
-                            <option value="/Applications/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0-sources.jar" />
+                            <option value="$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-annotations/21.0.0/support-annotations-21.0.0.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.2.4/c3ffe3a73348645042fb0b06303b6a3de194494e/httpcore-4.2.4-sources.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.2.4/3b7f38df6de5dd8b500e602ae8c2dd5ee446f883/httpcore-4.2.4.jar" />
                             <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.james/apache-mime4j-core/0.7.2/df2e64024dbe47fa357cbf4f0e15daa28dd7c14b/apache-mime4j-core-0.7.2-sources.jar" />
@@ -2482,14 +2454,18 @@
         <option value="$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" />
+        <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/utilities/FileUtils.java" />
+        <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/DiskSyncTask.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OpenMrsXformsConnection.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OdkXformSyncTask.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="22" />
-    <option name="width" value="1680" />
-    <option name="height" value="1024" />
+    <option name="y" value="107" />
+    <option name="width" value="1400" />
+    <option name="height" value="735" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -2517,6 +2493,9 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -2813,9 +2792,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -2828,8 +2804,8 @@
     <property name="recentsLimit" value="5" />
     <property name="android.project.structure.last.selected" value="SDK Location" />
     <property name="android.project.structure.proportion" value="0.15" />
-    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="CB5127474X" />
-    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="Nexus_7_API_21" />
+    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="emulator-5554" />
+    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="TABLET_7IN" />
     <property name="FullScreen" value="false" />
     <property name="OverrideImplement.combined" value="true" />
     <property name="OverrideImplement.overriding.sorted" value="false" />
@@ -2999,38 +2975,58 @@
     </task>
     <servers />
   </component>
+  <component name="TodoView" selected-index="0">
+    <todo-panel id="selected-file">
+      <are-packages-shown value="false" />
+      <are-modules-shown value="false" />
+      <flatten-packages value="false" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <are-modules-shown value="false" />
+      <flatten-packages value="false" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="default-changelist">
+      <are-packages-shown value="false" />
+      <are-modules-shown value="false" />
+      <flatten-packages value="false" />
+      <is-autoscroll-to-source value="false" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1680" height="1024" extended-state="6" />
+    <frame x="0" y="107" width="1400" height="735" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32844934" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287841" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32929516" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39977974" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3279483" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39970282" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32599118" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34251103" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37156704" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32956383" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24969475" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24786325" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2863436" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24742268" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2793462" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Memory Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32844934" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -3065,41 +3061,11 @@
           <properties />
           <option name="timeStamp" value="9" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java</url>
-          <line>341</line>
-          <properties />
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java</url>
-          <line>333</line>
-          <properties />
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
       </breakpoints>
       <option name="time" value="15" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/model/Patient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="585">
-          <caret line="16" column="39" selection-start-line="16" selection-start-column="39" selection-end-line="16" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/listview_cell_search_results.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="1125">
-          <caret line="21" column="37" selection-start-line="21" selection-start-column="37" selection-end-line="21" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_patient_detail_overview.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="1110" max-vertical-offset="6075">
@@ -3254,7 +3220,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="1275">
           <caret line="61" column="72" selection-start-line="61" selection-start-column="8" selection-end-line="61" selection-end-column="72" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3273,7 +3238,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.57894737" vertical-offset="0" max-vertical-offset="855">
           <caret line="33" column="18" selection-start-line="33" selection-start-column="18" selection-end-line="33" selection-end-column="18" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3281,7 +3245,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="3300" max-vertical-offset="4110">
           <caret line="220" column="0" selection-start-line="220" selection-start-column="0" selection-end-line="220" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3289,15 +3252,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="150" max-vertical-offset="780">
           <caret line="10" column="42" selection-start-line="10" selection-start-column="42" selection-end-line="10" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/widget/LinearLayout.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1064" max-vertical-offset="1620">
-          <caret line="91" column="15" selection-start-line="91" selection-start-column="15" selection-end-line="91" selection-end-column="15" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3337,7 +3291,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1425">
           <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3353,7 +3306,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1695">
           <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3369,7 +3321,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="742" max-vertical-offset="11745">
           <caret line="114" column="57" selection-start-line="114" selection-start-column="57" selection-end-line="114" selection-end-column="57" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3377,7 +3328,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-6.9615383" vertical-offset="1544" max-vertical-offset="2970">
           <caret line="155" column="19" selection-start-line="155" selection-start-column="16" selection-end-line="155" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3385,15 +3335,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="3878" max-vertical-offset="4950">
           <caret line="316" column="70" selection-start-line="316" selection-start-column="70" selection-end-line="316" selection-end-column="70" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/view/ViewGroup.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.4" vertical-offset="2425" max-vertical-offset="6420">
-          <caret line="175" column="16" selection-start-line="175" selection-start-column="16" selection-end-line="175" selection-end-column="16" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3401,7 +3342,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-9.518518" vertical-offset="253" max-vertical-offset="825">
           <caret line="34" column="49" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="49" />
-          <folding />
         </state>
       </provider>
       <provider editor-type-id="android-designer">
@@ -3412,7 +3352,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="780">
           <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -3420,16 +3359,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.8076925" vertical-offset="1949" max-vertical-offset="3030">
           <caret line="140" column="29" selection-start-line="140" selection-start-column="29" selection-end-line="140" selection-end-column="29" />
-          <folding>
-            <element signature="e#0#6348#0" expanded="true" />
-            <element signature="imports" expanded="true" />
-            <element signature="e#4335#4336#0" expanded="true" />
-            <element signature="e#4368#4369#0" expanded="true" />
-            <element signature="e#4535#4536#0" expanded="true" />
-            <element signature="e#4572#4573#0" expanded="true" />
-            <element signature="e#6168#6169#0" expanded="true" />
-            <element signature="e#6217#6218#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -3451,15 +3380,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/build/generated/source/r/debug/org/odk/collect/android/R.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.72" vertical-offset="27657" max-vertical-offset="84240">
-          <caret line="1860" column="26" selection-start-line="1860" selection-start-column="26" selection-end-line="1860" selection-end-column="26" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="27930" max-vertical-offset="84315">
+          <caret line="1862" column="26" selection-start-line="1862" selection-start-column="26" selection-end-line="1862" selection-end-column="26" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.5490196" vertical-offset="1739" max-vertical-offset="5010">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1739" max-vertical-offset="5010">
           <caret line="128" column="47" selection-start-line="128" selection-start-column="47" selection-end-line="128" selection-end-column="47" />
           <folding />
         </state>
@@ -3467,74 +3396,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.5" vertical-offset="39797" max-vertical-offset="42450">
+        <state vertical-scroll-proportion="0.0" vertical-offset="39797" max-vertical-offset="42450">
           <caret line="2654" column="17" selection-start-line="2654" selection-start-column="17" selection-end-line="2654" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#98558#0" expanded="true" />
-            <element signature="imports" expanded="true" />
-            <element signature="e#13345#13423#0" expanded="true" />
-            <element signature="e#13503#13530#0" expanded="true" />
-            <element signature="e#13996#14043#0" expanded="true" />
-            <element signature="e#15358#15588#0" expanded="true" />
-            <element signature="e#15578#15579#0" expanded="true" />
-            <element signature="e#17037#17050#0" expanded="true" />
-            <element signature="e#17127#17140#0" expanded="true" />
-            <element signature="e#17599#17923#0" expanded="true" />
-            <element signature="e#17912#17913#0" expanded="true" />
-            <element signature="e#19006#19007#0" expanded="true" />
-            <element signature="e#19042#19043#0" expanded="true" />
-            <element signature="e#29480#29505#0" expanded="true" />
-            <element signature="e#34504#34528#0" expanded="true" />
-            <element signature="e#57229#57269#0" expanded="true" />
-            <element signature="e#57787#57828#0" expanded="true" />
-            <element signature="e#63266#63299#0" expanded="true" />
-            <element signature="e#63389#63782#0" expanded="true" />
-            <element signature="e#63777#63778#0" expanded="true" />
-            <element signature="e#63846#63868#0" expanded="true" />
-            <element signature="e#66566#66602#0" expanded="true" />
-            <element signature="e#72403#72439#0" expanded="true" />
-            <element signature="e#72653#72706#0" expanded="true" />
-            <element signature="e#72759#73422#0" expanded="true" />
-            <element signature="e#73417#73418#0" expanded="true" />
-            <element signature="e#73491#73525#0" expanded="true" />
-            <element signature="e#73568#73603#0" expanded="true" />
-            <element signature="e#76757#77220#0" expanded="true" />
-            <element signature="e#77214#77215#0" expanded="true" />
-            <element signature="e#77313#77345#0" expanded="true" />
-            <element signature="e#77378#77409#0" expanded="true" />
-            <element signature="e#77525#77564#0" expanded="true" />
-            <element signature="e#77934#78265#0" expanded="true" />
-            <element signature="e#78259#78260#0" expanded="true" />
-            <element signature="e#78358#78389#0" expanded="true" />
-            <element signature="e#78422#78453#0" expanded="true" />
-            <element signature="e#78548#78899#0" expanded="true" />
-            <element signature="e#78884#78885#0" expanded="true" />
-            <element signature="e#87740#87926#0" expanded="true" />
-            <element signature="e#87846#87880#0" expanded="true" />
-            <element signature="e#87920#87921#0" expanded="true" />
-            <element signature="e#89174#89205#0" expanded="true" />
-            <element signature="e#89525#89558#0" expanded="true" />
-            <element signature="e#89690#89723#0" expanded="true" />
-            <element signature="e#89968#90004#0" expanded="true" />
-            <element signature="e#90095#90131#0" expanded="true" />
-            <element signature="e#91297#91328#0" expanded="true" />
-            <element signature="e#98461#98511#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.0/classes.jar!/android/support/v4/app/FragmentActivity.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.72" vertical-offset="1347" max-vertical-offset="1890">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1530" max-vertical-offset="1905">
           <caret line="102" column="16" selection-start-line="102" selection-start-column="16" selection-end-line="102" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/content/Intent.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="4062" max-vertical-offset="8535">
-          <caret line="283" column="11" selection-start-line="283" selection-start-column="11" selection-end-line="283" selection-end-column="11" />
           <folding />
         </state>
       </provider>
@@ -3551,19 +3422,76 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="638" max-vertical-offset="6240">
           <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/android-sdk-macosx/extras/android/m2repository/com/android/support/support-v4/18.0.0/support-v4-18.0.0-sources.jar!/android/support/v4/app/FragmentActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="12615">
+          <caret line="55" column="34" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
           <folding>
-            <element signature="e#0#18102#0" expanded="true" />
-            <element signature="e#3051#3142#0" expanded="true" />
+            <element signature="e#0#32285#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#3608#4157#0" expanded="false" />
+            <element signature="e#4149#4150#0" expanded="false" />
+            <element signature="e#4270#4431#0" expanded="false" />
+            <element signature="e#4424#4425#0" expanded="false" />
+            <element signature="e#16729#16730#0" expanded="false" />
+            <element signature="e#16772#16773#0" expanded="false" />
+            <element signature="e#21749#21750#0" expanded="false" />
+            <element signature="e#21776#21777#0" expanded="false" />
+            <element signature="e#29693#29694#0" expanded="false" />
+            <element signature="e#29726#29727#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/utilities/FileUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-2.6538463" vertical-offset="246" max-vertical-offset="5985">
+          <caret line="57" column="76" selection-start-line="57" selection-start-column="76" selection-end-line="57" selection-end-column="76" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/DiskSyncTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3207" max-vertical-offset="4215">
+          <caret line="257" column="8" selection-start-line="257" selection-start-column="8" selection-end-line="257" selection-end-column="8" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.44874275" vertical-offset="4433" max-vertical-offset="5100">
-          <caret line="337" column="37" selection-start-line="337" selection-start-column="37" selection-end-line="337" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="4200" max-vertical-offset="5025">
+          <caret line="317" column="24" selection-start-line="317" selection-start-column="24" selection-end-line="317" selection-end-column="24" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#10154#10337#0" expanded="true" />
+            <element signature="e#10326#10327#0" expanded="true" />
+            <element signature="e#10556#11736#0" expanded="true" />
+            <element signature="e#11717#11718#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OdkXformSyncTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.0384617" vertical-offset="600" max-vertical-offset="2655">
+          <caret line="65" column="57" selection-start-line="65" selection-start-column="57" selection-end-line="65" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/net/OpenMrsXformsConnection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.564433" vertical-offset="591" max-vertical-offset="2370">
+          <caret line="67" column="46" selection-start-line="67" selection-start-column="46" selection-end-line="67" selection-end-column="46" />
+          <folding>
+            <element signature="e#2156#2972#0" expanded="true" />
+            <element signature="e#2953#2954#0" expanded="true" />
           </folding>
         </state>
       </provider>
