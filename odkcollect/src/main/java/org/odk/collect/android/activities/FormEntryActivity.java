@@ -29,17 +29,17 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -170,6 +170,7 @@ public class FormEntryActivity
 //	private Animation mOutAnimation;
 //	private View mStaleView = null;
 
+    private ScrollView mScrollView;
 	private LinearLayout mQuestionHolder;
 	private View mCurrentView;
 
@@ -224,6 +225,7 @@ public class FormEntryActivity
 //		mInAnimation = null;
 //		mOutAnimation = null;
 //		mGestureDetector = new GestureDetector(this, this);
+        mScrollView = (ScrollView) findViewById(R.id.question_holder_scroller);
 		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
 		// get admin preference settings
@@ -478,22 +480,35 @@ public class FormEntryActivity
 	}
 
     private void populateViews() {
-        // TODO(giljulio): Choose right type.
-        List<Object> sidebarItems = new ArrayList<Object>();
-
-        // TODO(giljulio): Create a list item view resource.
-        ArrayAdapter<?> sidebarAdapter = new ArrayAdapter<Object>(this, 0, sidebarItems);
+        List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
+        final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
+                this, android.R.layout.simple_list_item_1, sidebarItems);
 
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new QuestionHolderFormVisitor())
-                .addVisitor(new SidebarFormVisitor(sidebarItems))
+                .addVisitor(new QuestionHolderFormVisitor(sidebarItems))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
-        // TODO(giljulio): Hook up sidebar list view to sidebarAdapter.
+        ListView sidebar = (ListView) findViewById(R.id.sidebar);
+        sidebar.setAdapter(sidebarAdapter);
+        sidebar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SidebarItem item = sidebarAdapter.getItem(position);
+                mScrollView.smoothScrollTo(0 /*x*/, item.mView.getTop());
+            }
+        });
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
+
+        private final List<SidebarItem> mSidebarItems;
+
+        public QuestionHolderFormVisitor(List<SidebarItem> sidebarItems) {
+            // TODO(giljulio): Pick right type for list.
+            mSidebarItems = sidebarItems;
+        }
 
         @Override
         public void visit(int event, FormController formController) {
@@ -501,6 +516,27 @@ public class FormEntryActivity
             if (view != null) {
                 mQuestionHolder.addView(view);
             }
+
+            if (event == FormEntryController.EVENT_GROUP) {
+                mSidebarItems.add(new SidebarItem(
+                        Collect.getInstance().getFormController().getLastGroupText(), view));
+            }
+        }
+    }
+
+    private static class SidebarItem {
+
+        public final String mName;
+        public final View mView;
+
+        public SidebarItem(String name, View view) {
+            mName = name;
+            mView = view;
+        }
+
+        @Override
+        public String toString() {
+            return mName;
         }
     }
 
