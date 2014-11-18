@@ -482,7 +482,7 @@ public class FormEntryActivity
     private void populateViews() {
         List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
         final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
-                this, android.R.layout.simple_list_item_1, sidebarItems);
+                this, R.layout.large_list_item_1, R.id.text, sidebarItems);
 
         FormTraverser traverser = new FormTraverser.Builder()
                 .addVisitor(new QuestionHolderFormVisitor(sidebarItems))

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- The size of a touch target; most UI elements should not be smaller than this. -->
+    <dimen name="touch_target">96dp</dimen>
+
+    <!-- The standard padding size. -->
+    <dimen name="padding_standard">16dp</dimen>
+
+    <dimen name="text_size_title">24sp</dimen>
+</resources>
