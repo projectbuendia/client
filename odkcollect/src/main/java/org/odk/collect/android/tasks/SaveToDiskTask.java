@@ -41,7 +41,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 /**
- * Background task for loading a form.
+ * Background task for savig a form to disk.
  *
  * @author Carl Hartung (carlhartung@gmail.com)
  * @author Yaw Anokwa (yanokwa@gmail.com)
