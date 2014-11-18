@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <application
         android:name="org.msf.records.App"
@@ -20,11 +21,11 @@
         <!-- Register providers for forms and form data. -->
         <provider
             android:name="org.odk.collect.android.provider.FormsProvider"
-            android:authorities="org.odk.collect.android.provider.odk.forms"
+            android:authorities="org.msf.projectbuendia.odk.collect.android.provider.odk.forms"
             android:exported="true" />
         <provider
             android:name="org.odk.collect.android.provider.InstanceProvider"
-            android:authorities="org.odk.collect.android.provider.odk.instances"
+            android:authorities="org.msf.projectbuendia.odk.collect.android.provider.odk.instances"
             android:exported="true" />
 
         <activity
