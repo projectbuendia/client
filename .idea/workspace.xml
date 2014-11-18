@@ -35,20 +35,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b74fcda3-e969-48d5-82c5-8be07ebed69f" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/views/MediaLayout.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/views/MediaLayout.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/QuestionWidget.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/QuestionWidget.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/StringWidget.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/StringWidget.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.iml" afterPath="$PROJECT_DIR$/app/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/build.gradle" afterPath="$PROJECT_DIR$/app/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/build.gradle" afterPath="$PROJECT_DIR$/odkcollect/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/gradle.xml" afterPath="$PROJECT_DIR$/.idea/gradle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/odkcollect.iml" afterPath="$PROJECT_DIR$/odkcollect/odkcollect.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/settings.gradle" afterPath="$PROJECT_DIR$/settings.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml" />
     </list>
     <ignored path="android-client.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -153,8 +140,8 @@
       <file leaf-file-name="FormEntryActivity.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-1.1270719" vertical-offset="3672" max-vertical-offset="40815">
-              <caret line="216" column="56" selection-start-line="216" selection-start-column="56" selection-end-line="216" selection-end-column="56" />
+            <state vertical-scroll-proportion="0.30570903" vertical-offset="33164" max-vertical-offset="40725">
+              <caret line="2263" column="26" selection-start-line="2263" selection-start-column="26" selection-end-line="2263" selection-end-column="26" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -3297,8 +3284,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.1270719" vertical-offset="3672" max-vertical-offset="40815">
-          <caret line="216" column="56" selection-start-line="216" selection-start-column="56" selection-end-line="216" selection-end-column="56" />
+        <state vertical-scroll-proportion="0.30570903" vertical-offset="33164" max-vertical-offset="40725">
+          <caret line="2263" column="26" selection-start-line="2263" selection-start-column="26" selection-end-line="2263" selection-end-column="26" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
