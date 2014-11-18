@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -33,11 +34,19 @@ import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
+import org.odk.collect.android.provider.InstanceProviderAPI;
+import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
+
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 
 /**
@@ -116,8 +125,6 @@ public class PatientListActivity extends FragmentActivity
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
-
-
     private void setupCustomActionBar(){
         final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -136,7 +143,6 @@ public class PatientListActivity extends FragmentActivity
         mSearchView.setIconifiedByDefault(false);
         actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
     }
 
     /**
@@ -253,7 +259,6 @@ public class PatientListActivity extends FragmentActivity
         PLAY_WITH_ODK,
         FETCH_XFORMS,
         FAKE_SCAN,
-        SEND_FORM_TO_SERVER,
     }
 
     private void startScanBracelet() {
@@ -264,9 +269,6 @@ public class PatientListActivity extends FragmentActivity
                 break;
             case FAKE_SCAN:
                 showFakeScanProgress();
-                break;
-            case SEND_FORM_TO_SERVER:
-                sendFormToServer();
                 break;
         }
     }
@@ -290,7 +292,6 @@ public class PatientListActivity extends FragmentActivity
 
     private void fetchXforms(final String uuidToShow) {
         final String tag = "fetchXforms";
-        Log.i(tag, "Fetching all forms");
         App.getmOpenMrsXformsConnection().listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
@@ -304,16 +305,22 @@ public class PatientListActivity extends FragmentActivity
                             @Override
                             public void formWritten(File path, String uuid) {
                                 Log.i(tag, "wrote form " + path);
-
-                                // Only show the requested form.
-                                if (uuid.equals(uuidToShow)) {
-                                    Log.i(tag, "showing form " + uuid);
-                                    showOdkCollect(OdkDatabase.getFormIdForPath(path));
-                                }
+                                showOdkCollect(OdkDatabase.getFormIdForPath(path));
                             }
-                        }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
+                        }).execute(findUuid(response, uuidToShow));
                     }
                 }, getErrorListenerForTag(tag));
+    }
+
+    // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
+    // return null if no xform is found.
+    private OpenMrsXformIndexEntry findUuid(List<OpenMrsXformIndexEntry> allEntries, String uuid) {
+        for (OpenMrsXformIndexEntry entry : allEntries) {
+            if (entry.uuid.equals(uuid)) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     private void showFirstFormFromSdcard() {
@@ -330,7 +337,75 @@ public class PatientListActivity extends FragmentActivity
             return;
         }
 
-        // TODO(nfortescue): FILL IN!
+        if (data == null || data.getData() == null) {
+            // Cancelled.
+            Log.i(TAG, "No data for form result, probably cancelled.");
+            return;
+        }
+
+        Uri uri = data.getData();
+
+        if (!getContentResolver().getType(uri).equals(
+                InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
+            Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
+            return;
+        }
+
+        Cursor instanceCursor = null;
+        try {
+            instanceCursor = getContentResolver().query(uri,
+                    null, null, null, null);
+            if (instanceCursor.getCount() != 1) {
+                Log.e(TAG, "The form that we tried to load did not exist: " + uri);
+                return;
+            }
+            instanceCursor.moveToFirst();
+            String instancePath = instanceCursor.getString(
+                    instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
+            if (instancePath == null) {
+                Log.e(TAG, "No file path for form instance: " + uri);
+                return;
+
+            }
+            int columnIndex = instanceCursor
+                    .getColumnIndex(InstanceProviderAPI.InstanceColumns._ID);
+            if (columnIndex == -1) {
+                Log.e(TAG, "No id to delete for after upload: " + uri);
+                return;
+            }
+            final long idToDelete = instanceCursor.getLong(columnIndex);
+
+            sendFormToServer(null /* create new patient */, readFromPath(instancePath),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.i(TAG, "Created new patient successfully on server"
+                                    + response.toString());
+
+                            // Code largely copied from InstanceUploaderTask to delete on upload
+                            DeleteInstancesTask dit = new DeleteInstancesTask();
+                            dit.setContentResolver(
+                                    Collect.getInstance().getApplication().getContentResolver());
+                            dit.execute(idToDelete);
+                        }
+                    });
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read xml form into a String " + uri, e);
+        } finally {
+            if (instanceCursor != null) {
+                instanceCursor.close();
+            }
+        }
+    }
+
+    private String readFromPath(String path) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        String line;
+        while((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
     }
 
     private void showOdkCollect(long formId) {
@@ -348,15 +423,11 @@ public class PatientListActivity extends FragmentActivity
         progressDialog.show();
     }
 
-    private void sendFormToServer() {
+    private void sendFormToServer(String patientId, String xml,
+                                  Response.Listener<JSONObject> successListener) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
-        connection.postXformInstance(Constants.makeNewPatientFormInstance("KH.31", "Fred", "West"),
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.i(TAG, "Created new patient successfully" + response.toString());
-                    }
-                },
+        connection.postXformInstance(patientId, xml,
+                successListener,
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
