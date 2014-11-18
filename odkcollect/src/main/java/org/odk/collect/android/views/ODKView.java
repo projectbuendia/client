@@ -64,7 +64,7 @@ import java.util.Set;
  * 
  * @author carlhartung
  */
-public class ODKView extends ScrollView implements OnLongClickListener {
+public class ODKView extends LinearLayout implements OnLongClickListener {
 
 	// starter random number for view IDs
     private final static int VIEW_ID = 12345;  

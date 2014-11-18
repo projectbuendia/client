@@ -18,7 +18,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,20 +28,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.ArrayAdapter;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,13 +51,13 @@ import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.exception.JavaRosaException;
-import org.odk.collect.android.listeners.AdvanceToNextListener;
 import org.odk.collect.android.listeners.FormLoaderListener;
 import org.odk.collect.android.listeners.FormSavedListener;
 import org.odk.collect.android.listeners.SavePointListener;
 import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.logic.FormController.FailedConstraint;
-import org.odk.collect.android.preferences.AdminPreferencesActivity;
+import org.odk.collect.android.logic.FormTraverser;
+import org.odk.collect.android.logic.FormVisitor;
 import org.odk.collect.android.preferences.PreferencesActivity;
 import org.odk.collect.android.provider.FormsProviderAPI.FormsColumns;
 import org.odk.collect.android.provider.InstanceProviderAPI;
@@ -79,8 +75,10 @@ import org.odk.collect.android.widgets.QuestionWidget;
 import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -92,13 +90,14 @@ import java.util.Locale;
  */
 public class FormEntryActivity
         extends Activity implements FormLoaderListener, FormSavedListener, SavePointListener {
-	private static final String t = "FormEntryActivity";
+
+	private static final String TAG = FormEntryActivity.class.getName();
 
 	// save with every swipe forward or back. Timings indicate this takes .25
 	// seconds.
 	// if it ever becomes an issue, this value can be changed to save every n'th
 	// screen.
-	private static final int SAVEPOINT_INTERVAL = 1;
+//	private static final int SAVEPOINT_INTERVAL = 1;
 
 	// Defines for FormEntryActivity
 	private static final boolean EXIT = true;
@@ -240,12 +239,12 @@ public class FormEntryActivity
 			}
 			if (savedInstanceState.containsKey(KEY_XPATH)) {
 				startingXPath = savedInstanceState.getString(KEY_XPATH);
-				Log.i(t, "startingXPath is: " + startingXPath);
+				Log.i(TAG, "startingXPath is: " + startingXPath);
 			}
 			if (savedInstanceState.containsKey(KEY_XPATH_WAITING_FOR_DATA)) {
 				waitingXPath = savedInstanceState
 						.getString(KEY_XPATH_WAITING_FOR_DATA);
-				Log.i(t, "waitingXPath is: " + waitingXPath);
+				Log.i(TAG, "waitingXPath is: " + waitingXPath);
 			}
 			if (savedInstanceState.containsKey(NEWFORM)) {
 				newForm = savedInstanceState.getBoolean(NEWFORM, true);
@@ -274,9 +273,9 @@ public class FormEntryActivity
 		} else if (data == null) {
 			if (!newForm) {
 				if (Collect.getInstance().getFormController() != null) {
-					populateEntryView();
+					populateViews();
 				} else {
-					Log.w(t, "Reloading form and restoring state.");
+					Log.w(TAG, "Reloading form and restoring state.");
 					// we need to launch the form loader to load the form
 					// controller...
 					mFormLoaderTask = new FormLoaderTask(instancePath,
@@ -458,7 +457,7 @@ public class FormEntryActivity
 						}
 					}
 				} else {
-					Log.e(t, "unrecognized URI");
+					Log.e(TAG, "unrecognized URI");
 					this.createErrorDialog("Unrecognized URI: " + uri, EXIT);
 					return;
 				}
@@ -473,15 +472,46 @@ public class FormEntryActivity
 		}
 	}
 
-    private void populateEntryView() {
-        FormController formController = Collect.getInstance().getFormController();
-        formController.jumpToIndex(FormIndex.createBeginningOfFormIndex());
+    private void populateViews() {
+        // TODO(giljulio): Choose right type.
+        List<Object> sidebarItems = new ArrayList<Object>();
 
-        int event = formController.getEvent();
+        // TODO(giljulio): Create a list item view resource.
+        ArrayAdapter<?> sidebarAdapter = new ArrayAdapter<Object>(this, 0, sidebarItems);
 
-        while (event != FormEntryController.EVENT_END_OF_FORM) {
+        FormTraverser traverser = new FormTraverser.Builder()
+                .addVisitor(new ScrollViewFormVisitor())
+                .addVisitor(new SidebarFormVisitor(sidebarItems))
+                .build();
+
+        // TODO(giljulio): Hook up sidebar list view to sidebarAdapter.
+    }
+
+    private class ScrollViewFormVisitor implements FormVisitor {
+
+        @Override
+        public void visit(int event, FormController formController) {
             View view = createView(event, false /*advancingPage*/);
             mScrollView.addView(view);
+        }
+    }
+
+    private class SidebarFormVisitor implements FormVisitor {
+
+        private final List<?> mItems;
+
+        public SidebarFormVisitor(List<?> items) {
+            // TODO(giljulio): Pick right type for list.
+            this.mItems = items;
+        }
+
+        @Override
+        public void visit(int event, FormController formController) {
+            if (event != FormEntryController.EVENT_GROUP) {
+                return;
+            }
+
+            // TODO(giljulio): Add the appropriate element to the list.
         }
     }
 
@@ -494,7 +524,7 @@ public class FormEntryActivity
             SavePointTask savePointTask = new SavePointTask(this);
             savePointTask.execute();
         } catch (Exception e) {
-            Log.e(t, "Could not schedule SavePointTask. Perhaps a lot of swiping is taking place?");
+            Log.e(TAG, "Could not schedule SavePointTask. Perhaps a lot of swiping is taking place?");
         }
     }
 
@@ -536,7 +566,7 @@ public class FormEntryActivity
 				mFormLoaderTask.setActivityResult(requestCode, resultCode,
 						intent);
 			} else {
-				Log.e(t,
+				Log.e(TAG,
 						"Got an activityResult without any pending form loader");
 			}
 			return;
@@ -572,7 +602,7 @@ public class FormEntryActivity
                 Bundle extras = intent.getExtras();
                 ((ODKView) mCurrentView).setDataForFields(extras);
             } catch (JavaRosaException e) {
-                Log.e(t, e.getMessage(), e);
+                Log.e(TAG, e.getMessage(), e);
                 createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
             }
             break;
@@ -597,9 +627,9 @@ public class FormEntryActivity
 
 			File nf = new File(s);
 			if (!fi.renameTo(nf)) {
-				Log.e(t, "Failed to rename " + fi.getAbsolutePath());
+				Log.e(TAG, "Failed to rename " + fi.getAbsolutePath());
 			} else {
-				Log.i(t,
+				Log.i(TAG,
 						"renamed " + fi.getAbsolutePath() + " to "
 								+ nf.getAbsolutePath());
 			}
@@ -622,9 +652,9 @@ public class FormEntryActivity
 
 			nf = new File(s);
 			if (!fi.renameTo(nf)) {
-				Log.e(t, "Failed to rename " + fi.getAbsolutePath());
+				Log.e(TAG, "Failed to rename " + fi.getAbsolutePath());
 			} else {
-				Log.i(t,
+				Log.i(TAG,
 						"renamed " + fi.getAbsolutePath() + " to "
 								+ nf.getAbsolutePath());
 			}
@@ -698,7 +728,7 @@ public class FormEntryActivity
 //				.getFormController();
 //		int event = formController.getEvent();
 //
-//		// When we refresh, repeat dialog state isn't maintained, so step back
+//		// When we refresh, repeat dialog state isn'TAG maintained, so step back
 //		// to the previous
 //		// question.
 //		// Also, if we're within a group labeled 'field list', step back to the
@@ -797,7 +827,7 @@ public class FormEntryActivity
 					.getActivityLogger()
 					.logInstanceAction(this, "onOptionsItemSelected",
 							"MENU_SAVE");
-			// don't exit
+			// don'TAG exit
 			saveDataToDisk(DO_NOT_EXIT, isInstanceComplete(false), null);
 			return true;
 		case MENU_HIERARCHY_VIEW:
@@ -846,7 +876,7 @@ public class FormEntryActivity
                     return false;
                 }
             } catch (JavaRosaException e) {
-                Log.e(t, e.getMessage(), e);
+                Log.e(TAG, e.getMessage(), e);
                 createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
                 return false;
             }
@@ -882,7 +912,7 @@ public class FormEntryActivity
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		/*
-		 * We don't have the right view here, so we store the View's ID as the
+		 * We don'TAG have the right view here, so we store the View's ID as the
 		 * item ID and loop through the possible views to find the one the user
 		 * clicked on.
 		 */
@@ -923,7 +953,7 @@ public class FormEntryActivity
 				&& mSaveToDiskTask.getStatus() != AsyncTask.Status.FINISHED)
 			return mSaveToDiskTask;
 
-		// mFormEntryController is static so we don't need to pass it.
+		// mFormEntryController is static so we don'TAG need to pass it.
 		if (formController != null && formController.currentPromptIsQuestion()) {
 			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
 		}
@@ -1146,7 +1176,7 @@ public class FormEntryActivity
 						.getGroupsForCurrentIndex();
 				odkv = new ODKView(this, formController.getQuestionPrompts(),
 						groups, advancingPage);
-				Log.i(t,
+				Log.i(TAG,
 						"created view for group "
 								+ (groups.length > 0 ? groups[groups.length - 1]
 										.getLongText() : "[top]")
@@ -1154,13 +1184,13 @@ public class FormEntryActivity
 								+ (prompts.length > 0 ? prompts[0]
 										.getQuestionText() : "[no question]"));
 			} catch (RuntimeException e) {
-				Log.e(t, e.getMessage(), e);
+				Log.e(TAG, e.getMessage(), e);
 				// this is badness to avoid a crash.
                 try {
                     event = formController.stepToNextScreenEvent();
                     createErrorDialog(e.getMessage(), DO_NOT_EXIT);
                 } catch (JavaRosaException e1) {
-                    Log.e(t, e1.getMessage(), e1);
+                    Log.e(TAG, e1.getMessage(), e1);
                     createErrorDialog(e.getMessage() + "\n\n" + e1.getCause().getMessage(), DO_NOT_EXIT);
                 }
                 return createView(event, advancingPage);
@@ -1175,13 +1205,13 @@ public class FormEntryActivity
 			return odkv;
 		default:
             return null;
-//			Log.e(t, "Attempted to create a view that does not exist.");
+//			Log.e(TAG, "Attempted to create a view that does not exist.");
 //			// this is badness to avoid a crash.
 //            try {
 //                event = formController.stepToNextScreenEvent();
 //                createErrorDialog(getString(R.string.survey_internal_error), EXIT);
 //            } catch (JavaRosaException e) {
-//                Log.e(t, e.getMessage(), e);
+//                Log.e(TAG, e.getMessage(), e);
 //                createErrorDialog(e.getCause().getMessage(), EXIT);
 //            }
 //            return createView(event, advancingPage);
@@ -1251,17 +1281,17 @@ public class FormEntryActivity
 //                    createRepeatDialog();
 //                    break;
 //                case FormEntryController.EVENT_REPEAT_JUNCTURE:
-//                    Log.i(t, "repeat juncture: "
+//                    Log.i(TAG, "repeat juncture: "
 //                            + formController.getFormIndex().getReference());
 //                    // skip repeat junctures until we implement them
 //                    break;
 //                default:
-//                    Log.w(t,
-//                            "JavaRosa added a new EVENT type and didn't tell us... shame on them.");
+//                    Log.w(TAG,
+//                            "JavaRosa added a new EVENT type and didn'TAG tell us... shame on them.");
 //                    break;
 //            }
 //        } catch (JavaRosaException e) {
-//            Log.e(t, e.getMessage(), e);
+//            Log.e(TAG, e.getMessage(), e);
 //            createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
 //        }
 //    }
@@ -1298,7 +1328,7 @@ public class FormEntryActivity
 //                mBeenSwiped = false;
 //            }
 //        } catch (JavaRosaException e) {
-//            Log.e(t, e.getMessage(), e);
+//            Log.e(TAG, e.getMessage(), e);
 //            createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
 //        }
 //    }
@@ -1687,7 +1717,7 @@ public class FormEntryActivity
         return saveDataToDisk(exit, complete, updatedSaveName, true);
     }
 
-    // but if you want save in the background, can't be current screen
+    // but if you want save in the background, can'TAG be current screen
     private boolean saveDataToDisk(boolean exit, boolean complete, String updatedSaveName,
             boolean current) {
         // save current answer
@@ -1841,7 +1871,7 @@ public class FormEntryActivity
 			// delete media first
 			String instanceFolder = formController.getInstancePath()
 					.getParent();
-			Log.i(t, "attempting to delete: " + instanceFolder);
+			Log.i(TAG, "attempting to delete: " + instanceFolder);
 			int images = MediaUtils
 					.deleteImagesInFolderFromMediaProvider(formController
 							.getInstancePath().getParentFile());
@@ -1852,13 +1882,13 @@ public class FormEntryActivity
 					.deleteVideoInFolderFromMediaProvider(formController
 							.getInstancePath().getParentFile());
 
-			Log.i(t, "removed from content providers: " + images
+			Log.i(TAG, "removed from content providers: " + images
 					+ " image files, " + audio + " audio files," + " and "
 					+ video + " video files.");
 			File f = new File(instanceFolder);
 			if (f.exists() && f.isDirectory()) {
 				for (File del : f.listFiles()) {
-					Log.i(t, "deleting file: " + del.getAbsolutePath());
+					Log.i(TAG, "deleting file: " + del.getAbsolutePath());
 					del.delete();
 				}
 				f.delete();
@@ -1959,7 +1989,7 @@ public class FormEntryActivity
 //								int updated = getContentResolver().update(
 //										FormsColumns.CONTENT_URI, values,
 //										selection, selectArgs);
-//								Log.i(t, "Updated language to: "
+//								Log.i(TAG, "Updated language to: "
 //										+ languages[whichButton] + " in "
 //										+ updated + " rows");
 //
@@ -2002,7 +2032,7 @@ public class FormEntryActivity
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case PROGRESS_DIALOG:
-			Log.e(t, "Creating PROGRESS_DIALOG");
+			Log.e(TAG, "Creating PROGRESS_DIALOG");
 			Collect.getInstance()
 					.getActivityLogger()
 					.logInstanceAction(this, "onCreateDialog.PROGRESS_DIALOG",
@@ -2033,7 +2063,7 @@ public class FormEntryActivity
 					loadingButtonListener);
 			return mProgressDialog;
 		case SAVING_DIALOG:
-            Log.e(t, "Creating SAVING_DIALOG");
+            Log.e(TAG, "Creating SAVING_DIALOG");
 			Collect.getInstance()
 					.getActivityLogger()
 					.logInstanceAction(this, "onCreateDialog.SAVING_DIALOG",
@@ -2073,7 +2103,7 @@ public class FormEntryActivity
         synchronized (saveDialogLock) {
             mSaveToDiskTask.setFormSavedListener(null);
             boolean cancelled = mSaveToDiskTask.cancel(true);
-            Log.w(t, "Cancelled SaveToDiskTask! (" + cancelled + ")");
+            Log.w(TAG, "Cancelled SaveToDiskTask! (" + cancelled + ")");
             mSaveToDiskTask = null;
         }
     }
@@ -2081,7 +2111,7 @@ public class FormEntryActivity
 	 * Dismiss any showing dialogs that we manually manage.
 	 */
 	private void dismissDialogs() {
-		Log.e(t, "Dismiss dialogs");
+		Log.e(TAG, "Dismiss dialogs");
 		if (mAlertDialog != null && mAlertDialog.isShowing()) {
 			mAlertDialog.dismiss();
 		}
@@ -2229,7 +2259,7 @@ public class FormEntryActivity
 //	private int mAnimationCompletionSet = 0;
 //
 //	private void afterAllAnimations() {
-//		Log.i(t, "afterAllAnimations");
+//		Log.i(TAG, "afterAllAnimations");
 //		if (mStaleView != null) {
 //			if (mStaleView instanceof ODKView) {
 //				// http://code.google.com/p/android/issues/detail?id=8488
@@ -2246,7 +2276,7 @@ public class FormEntryActivity
 //
 //	@Override
 //	public void onAnimationEnd(Animation animation) {
-//		Log.i(t, "onAnimationEnd "
+//		Log.i(TAG, "onAnimationEnd "
 //				+ ((animation == mInAnimation) ? "in"
 //						: ((animation == mOutAnimation) ? "out" : "other")));
 //		if (mInAnimation == animation) {
@@ -2254,7 +2284,7 @@ public class FormEntryActivity
 //		} else if (mOutAnimation == animation) {
 //			mAnimationCompletionSet |= 2;
 //		} else {
-//			Log.e(t, "Unexpected animation");
+//			Log.e(TAG, "Unexpected animation");
 //		}
 //
 //		if (mAnimationCompletionSet == 3) {
@@ -2265,7 +2295,7 @@ public class FormEntryActivity
 //	@Override
 //	public void onAnimationRepeat(Animation animation) {
 //		// Added by AnimationListener interface.
-//		Log.i(t, "onAnimationRepeat "
+//		Log.i(TAG, "onAnimationRepeat "
 //				+ ((animation == mInAnimation) ? "in"
 //						: ((animation == mOutAnimation) ? "out" : "other")));
 //	}
@@ -2273,7 +2303,7 @@ public class FormEntryActivity
 //	@Override
 //	public void onAnimationStart(Animation animation) {
 //		// Added by AnimationListener interface.
-//		Log.i(t, "onAnimationStart "
+//		Log.i(TAG, "onAnimationStart "
 //				+ ((animation == mInAnimation) ? "in"
 //						: ((animation == mOutAnimation) ? "out" : "other")));
 //	}
@@ -2337,7 +2367,7 @@ public class FormEntryActivity
 
 		if (pendingActivityResult) {
 			// set the current view to whatever group we were at...
-			populateEntryView();
+			populateViews();
 			// process the pending activity request...
 			onActivityResult(requestCode, resultCode, intent);
 			return;
@@ -2386,12 +2416,12 @@ public class FormEntryActivity
 				// view
 				Intent i = new Intent(this, FormHierarchyActivity.class);
 				startActivity(i);
-				return; // so we don't show the intro screen before jumping to
+				return; // so we don'TAG show the intro screen before jumping to
 						// the hierarchy
 			}
 		}
 
-		populateEntryView();
+		populateViews();
 	}
 
 	/**
@@ -2622,7 +2652,7 @@ public class FormEntryActivity
 //				mBeenSwiped = true;
 //				if (velocityX > 0) {
 //					if (e1.getX() > e2.getX()) {
-//						Log.e(t,
+//						Log.e(TAG,
 //								"showNextView VelocityX is bogus! " + e1.getX()
 //										+ " > " + e2.getX());
 //						Collect.getInstance().getActivityLogger()
@@ -2637,7 +2667,7 @@ public class FormEntryActivity
 //					}
 //				} else {
 //					if (e1.getX() < e2.getX()) {
-//						Log.e(t,
+//						Log.e(TAG,
 //								"showPreviousView VelocityX is bogus! "
 //										+ e1.getX() + " < " + e2.getX());
 //						Collect.getInstance()
@@ -2667,7 +2697,7 @@ public class FormEntryActivity
 //			float distanceY) {
 //		// The onFling() captures the 'up' event so our view thinks it gets long
 //		// pressed.
-//		// We don't wnat that, so cancel it.
+//		// We don'TAG wnat that, so cancel it.
 //        if (mCurrentView != null) {
 //            mCurrentView.cancelLongPress();
 //        }
