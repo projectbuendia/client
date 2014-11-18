@@ -58,6 +58,10 @@ public class OpenMrsXformsConnection {
                     public void onResponse(JSONObject response) {
                         try {
                             String xml = response.getString("xml");
+
+                            // TODO(akalachman): This is hacky and bad but handles a server bug.
+                            xml = xml.replaceFirst("xmlns:openmrs=\".*\"", "");
+
                             resultListener.onResponse(xml);
                         } catch (JSONException e) {
                             // The result was not in the expected format. Just log, and return
