@@ -32,10 +32,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b74fcda3-e969-48d5-82c5-8be07ebed69f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/SaveToDiskTask.java" afterPath="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/SaveToDiskTask.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="android-client.iws" />
@@ -64,25 +61,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="StringWidget.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/widgets/StringWidget.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-5.8076925" vertical-offset="1949" max-vertical-offset="3030">
-              <caret line="140" column="29" selection-start-line="140" selection-start-column="29" selection-end-line="140" selection-end-column="29" />
-              <folding>
-                <element signature="e#0#6348#0" expanded="true" />
-                <element signature="imports" expanded="true" />
-                <element signature="e#4335#4336#0" expanded="true" />
-                <element signature="e#4368#4369#0" expanded="true" />
-                <element signature="e#4535#4536#0" expanded="true" />
-                <element signature="e#4572#4573#0" expanded="true" />
-                <element signature="e#6168#6169#0" expanded="true" />
-                <element signature="e#6217#6218#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="ODKView.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/views/ODKView.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -96,8 +74,8 @@
       <file leaf-file-name="FormEntryActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.461538" vertical-offset="11837" max-vertical-offset="42450">
-              <caret line="809" column="0" selection-start-line="809" selection-start-column="0" selection-end-line="809" selection-end-column="0" />
+            <state vertical-scroll-proportion="-0.5" vertical-offset="39797" max-vertical-offset="42450">
+              <caret line="2654" column="17" selection-start-line="2654" selection-start-column="17" selection-end-line="2654" selection-end-column="17" />
               <folding>
                 <element signature="e#0#98558#0" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -173,15 +151,47 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SaveToDiskTask.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SaveToDiskTask.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/SaveToDiskTask.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.4777563" vertical-offset="638" max-vertical-offset="6240">
-              <caret line="83" column="0" selection-start-line="83" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="638" max-vertical-offset="6240">
+              <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
               <folding>
                 <element signature="e#0#18102#0" expanded="true" />
                 <element signature="e#3051#3142#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PatientListActivity.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.44874275" vertical-offset="4433" max-vertical-offset="5100">
+              <caret line="337" column="37" selection-start-line="337" selection-start-column="37" selection-end-line="337" selection-end-column="37" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Intent.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/content/Intent.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="4062" max-vertical-offset="8535">
+              <caret line="283" column="11" selection-start-line="283" selection-start-column="11" selection-end-line="283" selection-end-column="11" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FragmentActivity.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.0/classes.jar!/android/support/v4/app/FragmentActivity.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-6.72" vertical-offset="1347" max-vertical-offset="1890">
+              <caret line="102" column="16" selection-start-line="102" selection-start-column="16" selection-end-line="102" selection-end-column="16" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -193,29 +203,6 @@
               <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
               <folding />
             </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FormTraverser.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormTraverser.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="780">
-              <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="form_entry.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/odkcollect/src/main/res/layout/form_entry.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.518518" vertical-offset="253" max-vertical-offset="825">
-              <caret line="34" column="49" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="49" />
-              <folding />
-            </state>
-          </provider>
-          <provider editor-type-id="android-designer">
-            <state />
           </provider>
         </entry>
       </file>
@@ -2495,6 +2482,7 @@
         <option value="$PROJECT_DIR$/odkcollect/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java" />
         <option value="$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java" />
       </list>
     </option>
   </component>
@@ -2763,7 +2751,11 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="records" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -2789,11 +2781,15 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
+              <option name="myItemId" value="java" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="layout" />
+              <option name="myItemId" value="records" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ui" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -3024,11 +3020,11 @@
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34251103" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24969475" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24969475" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24786325" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24786325" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2863436" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Memory Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -3064,56 +3060,28 @@
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/SaveToDiskTask.java</url>
-          <line>78</line>
-          <properties />
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java</url>
           <line>2522</line>
           <properties />
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java</url>
-          <line>769</line>
+          <url>file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java</url>
+          <line>341</line>
           <properties />
-          <option name="timeStamp" value="10" />
+          <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java</url>
-          <line>791</line>
+          <url>file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java</url>
+          <line>333</line>
           <properties />
-          <option name="timeStamp" value="11" />
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="12" />
+      <option name="time" value="15" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/EditTextDialogFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="735" max-vertical-offset="930">
-          <caret line="49" column="35" selection-start-line="49" selection-start-column="35" selection-end-line="49" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/GridDialogFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="495" max-vertical-offset="1740">
-          <caret line="40" column="23" selection-start-line="40" selection-start-column="23" selection-end-line="40" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="5205" max-vertical-offset="5760">
-          <caret line="347" column="13" selection-start-line="347" selection-start-column="13" selection-end-line="347" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/model/Patient.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="585">
@@ -3224,6 +3192,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1590">
           <caret line="83" column="80" selection-start-line="83" selection-start-column="80" selection-end-line="83" selection-end-column="80" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -3498,8 +3467,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/activities/FormEntryActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.461538" vertical-offset="11837" max-vertical-offset="42450">
-          <caret line="809" column="0" selection-start-line="809" selection-start-column="0" selection-end-line="809" selection-end-column="0" />
+        <state vertical-scroll-proportion="-0.5" vertical-offset="39797" max-vertical-offset="42450">
+          <caret line="2654" column="17" selection-start-line="2654" selection-start-column="17" selection-end-line="2654" selection-end-column="17" />
           <folding>
             <element signature="e#0#98558#0" expanded="true" />
             <element signature="imports" expanded="true" />
@@ -3554,6 +3523,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.0/classes.jar!/android/support/v4/app/FragmentActivity.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.72" vertical-offset="1347" max-vertical-offset="1890">
+          <caret line="102" column="16" selection-start-line="102" selection-start-column="16" selection-end-line="102" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Applications/android-sdk-macosx/platforms/android-21/android.jar!/android/content/Intent.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="4062" max-vertical-offset="8535">
+          <caret line="283" column="11" selection-start-line="283" selection-start-column="11" selection-end-line="283" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/logic/FormController.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="10613" max-vertical-offset="18030">
@@ -3564,11 +3549,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/odkcollect/src/main/java/org/odk/collect/android/tasks/SaveToDiskTask.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4777563" vertical-offset="638" max-vertical-offset="6240">
-          <caret line="83" column="0" selection-start-line="83" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="638" max-vertical-offset="6240">
+          <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
           <folding>
             <element signature="e#0#18102#0" expanded="true" />
             <element signature="e#3051#3142#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/msf/records/ui/PatientListActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.44874275" vertical-offset="4433" max-vertical-offset="5100">
+          <caret line="337" column="37" selection-start-line="337" selection-start-column="37" selection-end-line="337" selection-end-column="37" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
