@@ -6,8 +6,11 @@ import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.gson.JsonObject;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +27,6 @@ import java.util.List;
  */
 public class OpenMrsXformsConnection {
     private static final String TAG = "OpenMrsXformsConnection";
-    private static final String KNOWN_UUID = "d5bbf64a-69ba-11e4-8a42-47ebc7225440";
 
     private final VolleySingleton mVolley;
     private final String mRootUrl;
@@ -125,14 +127,12 @@ public class OpenMrsXformsConnection {
 
     /**
      * Get a single (full) Xform from the OpenMRS server
-     * @param uuid the uuid of the form to fetch
      * @param resultListener the listener to be informed of the form asynchronously
      * @param errorListener a listener to be informed of any errors
      */
     public void postXformInstance(
-            String uuid,
             String xform,
-            final Response.Listener<String> resultListener,
+            final Response.Listener<JSONObject> resultListener,
             Response.ErrorListener errorListener) {
 
         // The JsonObject members in the API as written at the moment.
@@ -141,23 +141,28 @@ public class OpenMrsXformsConnection {
         // String "date_entered"
         // String "xml" the form.
         JsonObject post = new JsonObject();
+        post.addProperty("xml", xform);
+        // Don't add patient property for create new patient
+//        post.addProperty("patient_id", );
+        // TODO(nfortescue): get the enterer from the user login
+        post.addProperty("enterer_id", 1);
 
-
+        post.addProperty("date_entered", ISODateTimeFormat.basicDateTime().print(new DateTime()));
+        JSONObject postBody = null;
+        try {
+            postBody = new JSONObject(post.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, "This should never happen converting one JSON object to another. " + post, e);
+            errorListener.onErrorResponse(new VolleyError("failed to convert to JSON", e));
+        }
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
-                mRootUrl + "/xform/" + uuid + "?v=full",
-                null, // null implies GET
+                mRootUrl + "/xforminstance",
+                postBody, // non-null implies POST
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        try {
-                            String xml = response.getString("xml");
-                            resultListener.onResponse(xml);
-                        } catch (JSONException e) {
-                            // The result was not in the expected format. Just log, and return
-                            // results so far.
-                            Log.e(TAG, "response was in bad format: " + response, e);
-                        }
+                        resultListener.onResponse(response);
                     }
                 }, errorListener
         );
