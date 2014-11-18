@@ -39,6 +39,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -111,7 +112,7 @@ public class FormEntryActivity
 	public static final int AUDIO_CAPTURE = 3;
 	public static final int VIDEO_CAPTURE = 4;
 	public static final int LOCATION_CAPTURE = 5;
-	public static final int HIERARCHY_ACTIVITY = 6;
+//	public static final int HIERARCHY_ACTIVITY = 6;
 	public static final int IMAGE_CHOOSER = 7;
 	public static final int AUDIO_CHOOSER = 8;
 	public static final int VIDEO_CHOOSER = 9;
@@ -149,10 +150,10 @@ public class FormEntryActivity
 	// Tracks whether we are autosaving
 	public static final String KEY_AUTO_SAVED = "autosaved";
 	
-	private static final int MENU_LANGUAGES = Menu.FIRST;
-	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
-	private static final int MENU_SAVE = Menu.FIRST + 2;
-	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
+//	private static final int MENU_LANGUAGES = Menu.FIRST;
+//	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
+//	private static final int MENU_SAVE = Menu.FIRST + 2;
+//	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
 
 	private static final int PROGRESS_DIALOG = 1;
 	private static final int SAVING_DIALOG = 2;
@@ -169,7 +170,7 @@ public class FormEntryActivity
 //	private Animation mOutAnimation;
 //	private View mStaleView = null;
 
-	private ScrollView mScrollView;
+	private LinearLayout mQuestionHolder;
 	private View mCurrentView;
 
 	private AlertDialog mAlertDialog;
@@ -219,7 +220,7 @@ public class FormEntryActivity
 //		mInAnimation = null;
 //		mOutAnimation = null;
 //		mGestureDetector = new GestureDetector(this, this);
-		mScrollView = (ScrollView) findViewById(R.id.questionholder);
+		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
 		// get admin preference settings
 //		mAdminPreferences = getSharedPreferences(
@@ -480,19 +481,22 @@ public class FormEntryActivity
         ArrayAdapter<?> sidebarAdapter = new ArrayAdapter<Object>(this, 0, sidebarItems);
 
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new ScrollViewFormVisitor())
+                .addVisitor(new QuestionHolderFormVisitor())
                 .addVisitor(new SidebarFormVisitor(sidebarItems))
                 .build();
+        traverser.traverse(Collect.getInstance().getFormController());
 
         // TODO(giljulio): Hook up sidebar list view to sidebarAdapter.
     }
 
-    private class ScrollViewFormVisitor implements FormVisitor {
+    private class QuestionHolderFormVisitor implements FormVisitor {
 
         @Override
         public void visit(int event, FormController formController) {
             View view = createView(event, false /*advancingPage*/);
-            mScrollView.addView(view);
+            if (view != null) {
+                mQuestionHolder.addView(view);
+            }
         }
     }
 
@@ -574,145 +578,146 @@ public class FormEntryActivity
 
 		if (resultCode == RESULT_CANCELED) {
 			// request was canceled...
-			if (requestCode != HIERARCHY_ACTIVITY) {
+//			if (requestCode != HIERARCHY_ACTIVITY) {
 				((ODKView) mCurrentView).cancelWaitingForBinaryData();
-			}
+//			}
 			return;
 		}
 
 		switch (requestCode) {
-		case BARCODE_CAPTURE:
-			String sb = intent.getStringExtra("SCAN_RESULT");
-			((ODKView) mCurrentView).setBinaryData(sb);
-			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			break;
-		case EX_STRING_CAPTURE:
-		case EX_INT_CAPTURE:
-		case EX_DECIMAL_CAPTURE:
-            String key = "value";
-            boolean exists = intent.getExtras().containsKey(key);
-            if (exists) {
-                Object externalValue = intent.getExtras().get(key);
-                ((ODKView) mCurrentView).setBinaryData(externalValue);
+            case BARCODE_CAPTURE:
+                String sb = intent.getStringExtra("SCAN_RESULT");
+                ((ODKView) mCurrentView).setBinaryData(sb);
                 saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-            }
-            break;
-        case EX_GROUP_CAPTURE:
-            try {
-                Bundle extras = intent.getExtras();
-                ((ODKView) mCurrentView).setDataForFields(extras);
-            } catch (JavaRosaException e) {
-                Log.e(TAG, e.getMessage(), e);
-                createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
-            }
-            break;
-		case DRAW_IMAGE:
-		case ANNOTATE_IMAGE:
-		case SIGNATURE_CAPTURE:
-		case IMAGE_CAPTURE:
-			/*
-			 * We saved the image to the tempfile_path, but we really want it to
-			 * be in: /sdcard/odk/instances/[current instnace]/something.jpg so
-			 * we move it there before inserting it into the content provider.
-			 * Once the android image capture bug gets fixed, (read, we move on
-			 * from Android 1.6) we want to handle images the audio and video
-			 */
-			// The intent is empty, but we know we saved the image to the temp
-			// file
-			File fi = new File(Collect.TMPFILE_PATH);
-			String mInstanceFolder = formController.getInstancePath()
-					.getParent();
-			String s = mInstanceFolder + File.separator
-					+ System.currentTimeMillis() + ".jpg";
+                break;
+            case EX_STRING_CAPTURE:
+            case EX_INT_CAPTURE:
+            case EX_DECIMAL_CAPTURE:
+                String key = "value";
+                boolean exists = intent.getExtras().containsKey(key);
+                if (exists) {
+                    Object externalValue = intent.getExtras().get(key);
+                    ((ODKView) mCurrentView).setBinaryData(externalValue);
+                    saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+                }
+                break;
+            case EX_GROUP_CAPTURE:
+                try {
+                    Bundle extras = intent.getExtras();
+                    ((ODKView) mCurrentView).setDataForFields(extras);
+                } catch (JavaRosaException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
+                }
+                break;
+            case DRAW_IMAGE:
+            case ANNOTATE_IMAGE:
+            case SIGNATURE_CAPTURE:
+            case IMAGE_CAPTURE:
+                /*
+                 * We saved the image to the tempfile_path, but we really want it to
+                 * be in: /sdcard/odk/instances/[current instnace]/something.jpg so
+                 * we move it there before inserting it into the content provider.
+                 * Once the android image capture bug gets fixed, (read, we move on
+                 * from Android 1.6) we want to handle images the audio and video
+                 */
+                // The intent is empty, but we know we saved the image to the temp
+                // file
+                File fi = new File(Collect.TMPFILE_PATH);
+                String mInstanceFolder = formController.getInstancePath()
+                        .getParent();
+                String s = mInstanceFolder + File.separator
+                        + System.currentTimeMillis() + ".jpg";
 
-			File nf = new File(s);
-			if (!fi.renameTo(nf)) {
-				Log.e(TAG, "Failed to rename " + fi.getAbsolutePath());
-			} else {
-				Log.i(TAG,
-						"renamed " + fi.getAbsolutePath() + " to "
-								+ nf.getAbsolutePath());
-			}
+                File nf = new File(s);
+                if (!fi.renameTo(nf)) {
+                    Log.e(TAG, "Failed to rename " + fi.getAbsolutePath());
+                } else {
+                    Log.i(TAG,
+                            "renamed " + fi.getAbsolutePath() + " to "
+                                    + nf.getAbsolutePath());
+                }
 
-			((ODKView) mCurrentView).setBinaryData(nf);
-			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			break;
-		case ALIGNED_IMAGE:
-			/*
-			 * We saved the image to the tempfile_path; the app returns the full
-			 * path to the saved file in the EXTRA_OUTPUT extra. Take that file
-			 * and move it into the instance folder.
-			 */
-			String path = intent
-					.getStringExtra(android.provider.MediaStore.EXTRA_OUTPUT);
-			fi = new File(path);
-			mInstanceFolder = formController.getInstancePath().getParent();
-			s = mInstanceFolder + File.separator + System.currentTimeMillis()
-					+ ".jpg";
+                ((ODKView) mCurrentView).setBinaryData(nf);
+                saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+                break;
+            case ALIGNED_IMAGE:
+                /*
+                 * We saved the image to the tempfile_path; the app returns the full
+                 * path to the saved file in the EXTRA_OUTPUT extra. Take that file
+                 * and move it into the instance folder.
+                 */
+                String path = intent
+                        .getStringExtra(android.provider.MediaStore.EXTRA_OUTPUT);
+                fi = new File(path);
+                mInstanceFolder = formController.getInstancePath().getParent();
+                s = mInstanceFolder + File.separator + System.currentTimeMillis()
+                        + ".jpg";
 
-			nf = new File(s);
-			if (!fi.renameTo(nf)) {
-				Log.e(TAG, "Failed to rename " + fi.getAbsolutePath());
-			} else {
-				Log.i(TAG,
-						"renamed " + fi.getAbsolutePath() + " to "
-								+ nf.getAbsolutePath());
-			}
+                nf = new File(s);
+                if (!fi.renameTo(nf)) {
+                    Log.e(TAG, "Failed to rename " + fi.getAbsolutePath());
+                } else {
+                    Log.i(TAG,
+                            "renamed " + fi.getAbsolutePath() + " to "
+                                    + nf.getAbsolutePath());
+                }
 
-			((ODKView) mCurrentView).setBinaryData(nf);
-			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			break;
-		case IMAGE_CHOOSER:
-			/*
-			 * We have a saved image somewhere, but we really want it to be in:
-			 * /sdcard/odk/instances/[current instnace]/something.jpg so we move
-			 * it there before inserting it into the content provider. Once the
-			 * android image capture bug gets fixed, (read, we move on from
-			 * Android 1.6) we want to handle images the audio and video
-			 */
+                ((ODKView) mCurrentView).setBinaryData(nf);
+                saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+                break;
+            case IMAGE_CHOOSER:
+                /*
+                 * We have a saved image somewhere, but we really want it to be in:
+                 * /sdcard/odk/instances/[current instnace]/something.jpg so we move
+                 * it there before inserting it into the content provider. Once the
+                 * android image capture bug gets fixed, (read, we move on from
+                 * Android 1.6) we want to handle images the audio and video
+                 */
 
-			// get gp of chosen file
-			Uri selectedImage = intent.getData();
-			String sourceImagePath = MediaUtils.getPathFromUri(this, selectedImage, Images.Media.DATA);
+                // get gp of chosen file
+                Uri selectedImage = intent.getData();
+                String sourceImagePath =
+                        MediaUtils.getPathFromUri(this, selectedImage, Images.Media.DATA);
 
-			// Copy file to sdcard
-			String mInstanceFolder1 = formController.getInstancePath()
-					.getParent();
-			String destImagePath = mInstanceFolder1 + File.separator
-					+ System.currentTimeMillis() + ".jpg";
+                // Copy file to sdcard
+                String mInstanceFolder1 = formController.getInstancePath()
+                        .getParent();
+                String destImagePath = mInstanceFolder1 + File.separator
+                        + System.currentTimeMillis() + ".jpg";
 
-			File source = new File(sourceImagePath);
-			File newImage = new File(destImagePath);
-			FileUtils.copyFile(source, newImage);
+                File source = new File(sourceImagePath);
+                File newImage = new File(destImagePath);
+                FileUtils.copyFile(source, newImage);
 
-			((ODKView) mCurrentView).setBinaryData(newImage);
-			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			break;
-		case AUDIO_CAPTURE:
-		case VIDEO_CAPTURE:
-		case AUDIO_CHOOSER:
-		case VIDEO_CHOOSER:
-			// For audio/video capture/chooser, we get the URI from the content
-			// provider
-			// then the widget copies the file and makes a new entry in the
-			// content provider.
-			Uri media = intent.getData();
-			((ODKView) mCurrentView).setBinaryData(media);
-			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			break;
-		case LOCATION_CAPTURE:
-			String sl = intent.getStringExtra(LOCATION_RESULT);
-			((ODKView) mCurrentView).setBinaryData(sl);
-			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			break;
-		case BEARING_CAPTURE:
-            String bearing = intent.getStringExtra(BEARING_RESULT);
-            ((ODKView) mCurrentView).setBinaryData(bearing);
-            saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-		case HIERARCHY_ACTIVITY:
-			// We may have jumped to a new index in hierarchy activity, so
-			// refresh
-			break;
+                ((ODKView) mCurrentView).setBinaryData(newImage);
+                saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+                break;
+            case AUDIO_CAPTURE:
+            case VIDEO_CAPTURE:
+            case AUDIO_CHOOSER:
+            case VIDEO_CHOOSER:
+                // For audio/video capture/chooser, we get the URI from the content
+                // provider
+                // then the widget copies the file and makes a new entry in the
+                // content provider.
+                Uri media = intent.getData();
+                ((ODKView) mCurrentView).setBinaryData(media);
+                saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+                break;
+            case LOCATION_CAPTURE:
+                String sl = intent.getStringExtra(LOCATION_RESULT);
+                ((ODKView) mCurrentView).setBinaryData(sl);
+                saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+                break;
+            case BEARING_CAPTURE:
+                String bearing = intent.getStringExtra(BEARING_RESULT);
+                ((ODKView) mCurrentView).setBinaryData(bearing);
+                saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+//		case HIERARCHY_ACTIVITY:
+//			// We may have jumped to a new index in hierarchy activity, so
+//			// refresh
+//			break;
 
 		}
 //		refreshCurrentView();
@@ -751,11 +756,11 @@ public class FormEntryActivity
 		Collect.getInstance().getActivityLogger()
 				.logInstanceAction(this, "onCreateOptionsMenu", "show");
 		super.onCreateOptionsMenu(menu);
-
-		CompatibilityUtils.setShowAsAction(
-				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers).setIcon(
-						android.R.drawable.ic_menu_save),
-				MenuItem.SHOW_AS_ACTION_IF_ROOM);
+//
+//		CompatibilityUtils.setShowAsAction(
+//				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers).setIcon(
+//						android.R.drawable.ic_menu_save),
+//				MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
 //		CompatibilityUtils.setShowAsAction(
 //				menu.add(0, MENU_HIERARCHY_VIEW, 0, R.string.view_hierarchy)
@@ -809,49 +814,49 @@ public class FormEntryActivity
 //				.setEnabled(useability);
 		return true;
 	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		FormController formController = Collect.getInstance()
-				.getFormController();
-		switch (item.getItemId()) {
-		case MENU_LANGUAGES:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_LANGUAGES");
-//			createLanguageDialog();
-			return true;
-		case MENU_SAVE:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_SAVE");
-			// don'TAG exit
-			saveDataToDisk(DO_NOT_EXIT, isInstanceComplete(false), null);
-			return true;
-		case MENU_HIERARCHY_VIEW:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_HIERARCHY_VIEW");
-			if (formController.currentPromptIsQuestion()) {
-				saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
-			}
-			Intent i = new Intent(this, FormHierarchyActivity.class);
-			startActivityForResult(i, HIERARCHY_ACTIVITY);
-			return true;
-		case MENU_PREFERENCES:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_PREFERENCES");
-			Intent pref = new Intent(this, PreferencesActivity.class);
-			startActivity(pref);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+//
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		FormController formController = Collect.getInstance()
+//				.getFormController();
+//		switch (item.getItemId()) {
+////		case MENU_LANGUAGES:
+////			Collect.getInstance()
+////					.getActivityLogger()
+////					.logInstanceAction(this, "onOptionsItemSelected",
+////							"MENU_LANGUAGES");
+////			createLanguageDialog();
+////			return true;
+//		case MENU_SAVE:
+//			Collect.getInstance()
+//					.getActivityLogger()
+//					.logInstanceAction(this, "onOptionsItemSelected",
+//							"MENU_SAVE");
+//			// don'TAG exit
+//			saveDataToDisk(DO_NOT_EXIT, isInstanceComplete(false), null);
+//			return true;
+//		case MENU_HIERARCHY_VIEW:
+//			Collect.getInstance()
+//					.getActivityLogger()
+//					.logInstanceAction(this, "onOptionsItemSelected",
+//							"MENU_HIERARCHY_VIEW");
+//			if (formController.currentPromptIsQuestion()) {
+//				saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
+//			}
+//			Intent i = new Intent(this, FormHierarchyActivity.class);
+//			startActivityForResult(i, HIERARCHY_ACTIVITY);
+//			return true;
+//		case MENU_PREFERENCES:
+//			Collect.getInstance()
+//					.getActivityLogger()
+//					.logInstanceAction(this, "onOptionsItemSelected",
+//							"MENU_PREFERENCES");
+//			Intent pref = new Intent(this, PreferencesActivity.class);
+//			startActivity(pref);
+//			return true;
+//		}
+//		return super.onOptionsItemSelected(item);
+//	}
 
 	/**
 	 * Attempt to save the answer(s) in the current screen to into the data
@@ -971,8 +976,8 @@ public class FormEntryActivity
 	private View createView(int event, boolean advancingPage) {
 		FormController formController = Collect.getInstance()
 				.getFormController();
-		setTitle(getString(R.string.app_name) + " > "
-				+ formController.getFormTitle());
+//		setTitle(getString(R.string.app_name) + " > "
+//				+ formController.getFormTitle());
 
 		switch (event) {
 //		case FormEntryController.EVENT_BEGINNING_OF_FORM:
@@ -1389,14 +1394,14 @@ public class FormEntryActivity
 //		// adjust which view is in the layout container...
 //		mStaleView = mCurrentView;
 //		mCurrentView = next;
-//		mScrollView.addView(mCurrentView, lp);
+//		mQuestionHolder.addView(mCurrentView, lp);
 //		mAnimationCompletionSet = 0;
 //
 //		if (mStaleView != null) {
 //			// start OutAnimation for transition...
 //			mStaleView.startAnimation(mOutAnimation);
 //			// and remove the old view (MUST occur after start of animation!!!)
-//			mScrollView.removeView(mStaleView);
+//			mQuestionHolder.removeView(mStaleView);
 //		} else {
 //			mAnimationCompletionSet = 2;
 //		}

@@ -28,6 +28,8 @@ public class FormTraverser {
                 for (FormVisitor visitor : mVisitors) {
                     visitor.visit(event, controller);
                 }
+                controller.stepToNextEvent(false /*stepIntoGroup*/);
+                event = controller.getEvent();
             }
         } finally {
             controller.jumpToIndex(originalFormIndex);
