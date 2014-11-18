@@ -58,6 +58,8 @@ public class StringWidget extends QuestionWidget {
         mAnswer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mAnswerFontsize);
 
         TableLayout.LayoutParams params = new TableLayout.LayoutParams();
+        params.width = LayoutParams.MATCH_PARENT;
+        params.height = LayoutParams.WRAP_CONTENT;
 
         /**
          * If a 'rows' attribute is on the input tag, set the minimum number of lines

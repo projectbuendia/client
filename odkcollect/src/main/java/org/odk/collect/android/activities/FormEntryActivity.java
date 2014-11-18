@@ -29,8 +29,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
@@ -38,8 +36,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -152,7 +152,7 @@ public class FormEntryActivity
 	
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
-//	private static final int MENU_SAVE = Menu.FIRST + 2;
+	private static final int MENU_SAVE = Menu.FIRST;
 //	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
 
 	private static final int PROGRESS_DIALOG = 1;
@@ -170,6 +170,7 @@ public class FormEntryActivity
 //	private Animation mOutAnimation;
 //	private View mStaleView = null;
 
+    private ScrollView mScrollView;
 	private LinearLayout mQuestionHolder;
 	private View mCurrentView;
 
@@ -209,8 +210,12 @@ public class FormEntryActivity
 		}
 
 		setContentView(R.layout.form_entry);
-		setTitle(getString(R.string.app_name) + " > "
-				+ getString(R.string.loading_form));
+
+        // TODO(dxchen): Load this from the form itself.
+        setTitle(getString(R.string.title_add_patient));
+//
+//		setTitle(getString(R.string.app_name) + " > "
+//				+ getString(R.string.loading_form));
 
         mErrorMessage = null;
 
@@ -220,6 +225,7 @@ public class FormEntryActivity
 //		mInAnimation = null;
 //		mOutAnimation = null;
 //		mGestureDetector = new GestureDetector(this, this);
+        mScrollView = (ScrollView) findViewById(R.id.question_holder_scroller);
 		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
 		// get admin preference settings
@@ -474,22 +480,35 @@ public class FormEntryActivity
 	}
 
     private void populateViews() {
-        // TODO(giljulio): Choose right type.
-        List<Object> sidebarItems = new ArrayList<Object>();
-
-        // TODO(giljulio): Create a list item view resource.
-        ArrayAdapter<?> sidebarAdapter = new ArrayAdapter<Object>(this, 0, sidebarItems);
+        List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
+        final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
+                this, android.R.layout.simple_list_item_1, sidebarItems);
 
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new QuestionHolderFormVisitor())
-                .addVisitor(new SidebarFormVisitor(sidebarItems))
+                .addVisitor(new QuestionHolderFormVisitor(sidebarItems))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
-        // TODO(giljulio): Hook up sidebar list view to sidebarAdapter.
+        ListView sidebar = (ListView) findViewById(R.id.sidebar);
+        sidebar.setAdapter(sidebarAdapter);
+        sidebar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SidebarItem item = sidebarAdapter.getItem(position);
+                mScrollView.smoothScrollTo(0 /*x*/, item.mView.getTop());
+            }
+        });
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
+
+        private final List<SidebarItem> mSidebarItems;
+
+        public QuestionHolderFormVisitor(List<SidebarItem> sidebarItems) {
+            // TODO(giljulio): Pick right type for list.
+            mSidebarItems = sidebarItems;
+        }
 
         @Override
         public void visit(int event, FormController formController) {
@@ -497,6 +516,27 @@ public class FormEntryActivity
             if (view != null) {
                 mQuestionHolder.addView(view);
             }
+
+            if (event == FormEntryController.EVENT_GROUP) {
+                mSidebarItems.add(new SidebarItem(
+                        Collect.getInstance().getFormController().getLastGroupText(), view));
+            }
+        }
+    }
+
+    private static class SidebarItem {
+
+        public final String mName;
+        public final View mView;
+
+        public SidebarItem(String name, View view) {
+            mName = name;
+            mView = view;
+        }
+
+        @Override
+        public String toString() {
+            return mName;
         }
     }
 
@@ -733,7 +773,7 @@ public class FormEntryActivity
 //				.getFormController();
 //		int event = formController.getEvent();
 //
-//		// When we refresh, repeat dialog state isn'TAG maintained, so step back
+//		// When we refresh, repeat dialog state isn't maintained, so step back
 //		// to the previous
 //		// question.
 //		// Also, if we're within a group labeled 'field list', step back to the
@@ -756,11 +796,12 @@ public class FormEntryActivity
 		Collect.getInstance().getActivityLogger()
 				.logInstanceAction(this, "onCreateOptionsMenu", "show");
 		super.onCreateOptionsMenu(menu);
-//
-//		CompatibilityUtils.setShowAsAction(
-//				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers).setIcon(
-//						android.R.drawable.ic_menu_save),
-//				MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+		CompatibilityUtils.setShowAsAction(
+				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
+				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+
+        // TODO(dxchen): Add cancel? Or should we just count on the user to press back?
 
 //		CompatibilityUtils.setShowAsAction(
 //				menu.add(0, MENU_HIERARCHY_VIEW, 0, R.string.view_hierarchy)
@@ -782,6 +823,8 @@ public class FormEntryActivity
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
+
+        menu.findItem(MENU_SAVE).setVisible(true).setEnabled(true);
 //
 //		FormController formController = Collect.getInstance()
 //				.getFormController();
@@ -814,12 +857,12 @@ public class FormEntryActivity
 //				.setEnabled(useability);
 		return true;
 	}
-//
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		FormController formController = Collect.getInstance()
-//				.getFormController();
-//		switch (item.getItemId()) {
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		FormController formController = Collect.getInstance()
+				.getFormController();
+		switch (item.getItemId()) {
 ////		case MENU_LANGUAGES:
 ////			Collect.getInstance()
 ////					.getActivityLogger()
@@ -827,14 +870,14 @@ public class FormEntryActivity
 ////							"MENU_LANGUAGES");
 ////			createLanguageDialog();
 ////			return true;
-//		case MENU_SAVE:
-//			Collect.getInstance()
-//					.getActivityLogger()
-//					.logInstanceAction(this, "onOptionsItemSelected",
-//							"MENU_SAVE");
-//			// don'TAG exit
-//			saveDataToDisk(DO_NOT_EXIT, isInstanceComplete(false), null);
-//			return true;
+		case MENU_SAVE:
+			Collect.getInstance()
+					.getActivityLogger()
+					.logInstanceAction(this, "onOptionsItemSelected",
+							"MENU_SAVE");
+			// don't exit
+			saveDataToDisk(EXIT, true /*complete*/, null);
+			return true;
 //		case MENU_HIERARCHY_VIEW:
 //			Collect.getInstance()
 //					.getActivityLogger()
@@ -854,9 +897,9 @@ public class FormEntryActivity
 //			Intent pref = new Intent(this, PreferencesActivity.class);
 //			startActivity(pref);
 //			return true;
-//		}
-//		return super.onOptionsItemSelected(item);
-//	}
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
 	/**
 	 * Attempt to save the answer(s) in the current screen to into the data
@@ -875,7 +918,7 @@ public class FormEntryActivity
 			LinkedHashMap<FormIndex, IAnswerData> answers = ((ODKView) mCurrentView)
 					.getAnswers();
             try {
-                FailedConstraint constraint = formController.saveAllScreenAnswers(answers, evaluateConstraints);
+                FailedConstraint constraint = formController.saveAnswers(answers, evaluateConstraints);
                 if (constraint != null) {
                     createConstraintToast(constraint.index, constraint.status);
                     return false;
@@ -889,6 +932,40 @@ public class FormEntryActivity
 		return true;
 	}
 
+    /**
+     * Saves all answers in the form.
+     *
+     * @return false if any error occurs while saving (constraint violated,
+     *         etc...), true otherwise
+     */
+    private boolean saveAnswers(boolean evaluateConstraints) {
+        FormController formController = Collect.getInstance().getFormController();
+        int childCount = mQuestionHolder.getChildCount();
+        LinkedHashMap<FormIndex, IAnswerData> answers =
+                new LinkedHashMap<FormIndex, IAnswerData>();
+        for (int i = 0; i < childCount; i++) {
+            View view = mQuestionHolder.getChildAt(i);
+            if (!(view instanceof ODKView)) {
+                continue;
+            }
+            answers.putAll(((ODKView) view).getAnswers());
+        }
+
+        try {
+            FailedConstraint constraint = formController.saveAnswers(answers, evaluateConstraints);
+            if (constraint != null) {
+                createConstraintToast(constraint.index, constraint.status);
+                return false;
+            }
+        } catch (JavaRosaException e) {
+            Log.e(TAG, e.getMessage(), e);
+            createErrorDialog(e.getCause().getMessage(), DO_NOT_EXIT);
+            return false;
+        }
+
+        return true;
+    }
+
 	/**
 	 * Clears the answer on the screen.
 	 */
@@ -898,48 +975,48 @@ public class FormEntryActivity
 		}
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		Collect.getInstance().getActivityLogger()
-				.logInstanceAction(this, "onCreateContextMenu", "show");
-		FormController formController = Collect.getInstance()
-				.getFormController();
+//	@Override
+//	public void onCreateContextMenu(ContextMenu menu, View v,
+//			ContextMenuInfo menuInfo) {
+//		super.onCreateContextMenu(menu, v, menuInfo);
+//		Collect.getInstance().getActivityLogger()
+//				.logInstanceAction(this, "onCreateContextMenu", "show");
+//		FormController formController = Collect.getInstance()
+//				.getFormController();
+//
+//		menu.add(0, v.getId(), 0, getString(R.string.clear_answer));
+////		if (formController.indexContainsRepeatableGroup()) {
+////			menu.add(0, DELETE_REPEAT, 0, getString(R.string.delete_repeat));
+////		}
+//		menu.setHeaderTitle(getString(R.string.edit_prompt));
+//	}
 
-		menu.add(0, v.getId(), 0, getString(R.string.clear_answer));
-//		if (formController.indexContainsRepeatableGroup()) {
-//			menu.add(0, DELETE_REPEAT, 0, getString(R.string.delete_repeat));
+//	@Override
+//	public boolean onContextItemSelected(MenuItem item) {
+//		/*
+//		 * We don't have the right view here, so we store the View's ID as the
+//		 * item ID and loop through the possible views to find the one the user
+//		 * clicked on.
+//		 */
+//		for (QuestionWidget qw : ((ODKView) mCurrentView).getWidgets()) {
+//			if (item.getItemId() == qw.getId()) {
+//				Collect.getInstance()
+//						.getActivityLogger()
+//						.logInstanceAction(this, "onContextItemSelected",
+//								"createClearDialog", qw.getPrompt().getIndex());
+//				createClearDialog(qw);
+//			}
 //		}
-		menu.setHeaderTitle(getString(R.string.edit_prompt));
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		/*
-		 * We don'TAG have the right view here, so we store the View's ID as the
-		 * item ID and loop through the possible views to find the one the user
-		 * clicked on.
-		 */
-		for (QuestionWidget qw : ((ODKView) mCurrentView).getWidgets()) {
-			if (item.getItemId() == qw.getId()) {
-				Collect.getInstance()
-						.getActivityLogger()
-						.logInstanceAction(this, "onContextItemSelected",
-								"createClearDialog", qw.getPrompt().getIndex());
-				createClearDialog(qw);
-			}
-		}
-//		if (item.getItemId() == DELETE_REPEAT) {
-//			Collect.getInstance()
-//					.getActivityLogger()
-//					.logInstanceAction(this, "onContextItemSelected",
-//							"createDeleteRepeatConfirmDialog");
-//			createDeleteRepeatConfirmDialog();
-//		}
-
-		return super.onContextItemSelected(item);
-	}
+////		if (item.getItemId() == DELETE_REPEAT) {
+////			Collect.getInstance()
+////					.getActivityLogger()
+////					.logInstanceAction(this, "onContextItemSelected",
+////							"createDeleteRepeatConfirmDialog");
+////			createDeleteRepeatConfirmDialog();
+////		}
+//
+//		return super.onContextItemSelected(item);
+//	}
 
 	/**
 	 * If we're loading, then we pass the loading thread to our next instance.
@@ -958,7 +1035,7 @@ public class FormEntryActivity
 				&& mSaveToDiskTask.getStatus() != AsyncTask.Status.FINISHED)
 			return mSaveToDiskTask;
 
-		// mFormEntryController is static so we don'TAG need to pass it.
+		// mFormEntryController is static so we don't need to pass it.
 		if (formController != null && formController.currentPromptIsQuestion()) {
 			saveAnswersForCurrentScreen(DO_NOT_EVALUATE_CONSTRAINTS);
 		}
@@ -1292,7 +1369,7 @@ public class FormEntryActivity
 //                    break;
 //                default:
 //                    Log.w(TAG,
-//                            "JavaRosa added a new EVENT type and didn'TAG tell us... shame on them.");
+//                            "JavaRosa added a new EVENT type and didn't tell us... shame on them.");
 //                    break;
 //            }
 //        } catch (JavaRosaException e) {
@@ -1722,16 +1799,14 @@ public class FormEntryActivity
         return saveDataToDisk(exit, complete, updatedSaveName, true);
     }
 
-    // but if you want save in the background, can'TAG be current screen
+    // but if you want save in the background, can't be current screen
     private boolean saveDataToDisk(boolean exit, boolean complete, String updatedSaveName,
             boolean current) {
         // save current answer
-        if (current) {
-            if (!saveAnswersForCurrentScreen(complete)) {
-                Toast.makeText(this, getString(R.string.data_saved_error), Toast.LENGTH_SHORT)
-                        .show();
-                return false;
-            }
+        if (!saveAnswers(EVALUATE_CONSTRAINTS)) {
+            Toast.makeText(this, getString(R.string.data_saved_error), Toast.LENGTH_SHORT)
+                    .show();
+            return false;
         }
 
         synchronized (saveDialogLock) {
@@ -1746,97 +1821,97 @@ public class FormEntryActivity
 
         return true;
     }
-
-	/**
-	 * Create a dialog with options to save and exit, save, or quit without
-	 * saving
-	 */
-	private void createQuitDialog() {
-		FormController formController = Collect.getInstance()
-				.getFormController();
-		String[] items;
-        String[] two = { getString(R.string.keep_changes),
-                getString(R.string.do_not_save) };
-        items = two;
-
-		Collect.getInstance().getActivityLogger()
-				.logInstanceAction(this, "createQuitDialog", "show");
-		mAlertDialog = new AlertDialog.Builder(this)
-				.setIcon(android.R.drawable.ic_dialog_info)
-				.setTitle(
-						getString(R.string.quit_application,
-								formController.getFormTitle()))
-				.setNeutralButton(getString(R.string.do_not_exit),
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-
-								Collect.getInstance()
-										.getActivityLogger()
-										.logInstanceAction(this,
-												"createQuitDialog", "cancel");
-								dialog.cancel();
-
-							}
-						})
-				.setItems(items, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						switch (which) {
-
-						case 0: // save and exit
-//							// this is slightly complicated because if the
-//							// option is disabled in
-//							// the admin menu, then case 0 actually becomes
-//							// 'discard and exit'
-//							// whereas if it's enabled it's 'save and exit'
-//							if (mAdminPreferences
-//									.getBoolean(
-//											AdminPreferencesActivity.KEY_SAVE_MID,
-//											true)) {
-                            Collect.getInstance()
-                                    .getActivityLogger()
-                                    .logInstanceAction(this,
-                                            "createQuitDialog",
-                                            "saveAndExit");
-                            saveDataToDisk(EXIT, isInstanceComplete(false),
-                                    null);
-//							} else {
+//
+//	/**
+//	 * Create a dialog with options to save and exit, save, or quit without
+//	 * saving
+//	 */
+//	private void createQuitDialog() {
+//		FormController formController = Collect.getInstance()
+//				.getFormController();
+//		String[] items;
+//        String[] two = { getString(R.string.keep_changes),
+//                getString(R.string.do_not_save) };
+//        items = two;
+//
+//		Collect.getInstance().getActivityLogger()
+//				.logInstanceAction(this, "createQuitDialog", "show");
+//		mAlertDialog = new AlertDialog.Builder(this)
+//				.setIcon(android.R.drawable.ic_dialog_info)
+//				.setTitle(
+//						getString(R.string.quit_application,
+//								formController.getFormTitle()))
+//				.setNeutralButton(getString(R.string.do_not_exit),
+//						new DialogInterface.OnClickListener() {
+//							@Override
+//							public void onClick(DialogInterface dialog, int id) {
+//
 //								Collect.getInstance()
 //										.getActivityLogger()
 //										.logInstanceAction(this,
-//												"createQuitDialog",
-//												"discardAndExit");
-//								removeTempInstance();
-//								finishReturnInstance();
+//												"createQuitDialog", "cancel");
+//								dialog.cancel();
+//
 //							}
-							break;
-
-						case 1: // discard changes and exit
-							Collect.getInstance()
-									.getActivityLogger()
-									.logInstanceAction(this,
-											"createQuitDialog",
-											"discardAndExit");
-
-                            // close all open databases of external data.
-                            Collect.getInstance().getExternalDataManager().close();
-
-							removeTempInstance();
-							finishReturnInstance();
-							break;
-
-						case 2:// do nothing
-							Collect.getInstance()
-									.getActivityLogger()
-									.logInstanceAction(this,
-											"createQuitDialog", "cancel");
-							break;
-						}
-					}
-				}).create();
-		mAlertDialog.show();
-	}
+//						})
+//				.setItems(items, new DialogInterface.OnClickListener() {
+//					@Override
+//					public void onClick(DialogInterface dialog, int which) {
+//						switch (which) {
+//
+//						case 0: // save and exit
+////							// this is slightly complicated because if the
+////							// option is disabled in
+////							// the admin menu, then case 0 actually becomes
+////							// 'discard and exit'
+////							// whereas if it's enabled it's 'save and exit'
+////							if (mAdminPreferences
+////									.getBoolean(
+////											AdminPreferencesActivity.KEY_SAVE_MID,
+////											true)) {
+//                            Collect.getInstance()
+//                                    .getActivityLogger()
+//                                    .logInstanceAction(this,
+//                                            "createQuitDialog",
+//                                            "saveAndExit");
+//                            saveDataToDisk(EXIT, isInstanceComplete(false),
+//                                    null);
+////							} else {
+////								Collect.getInstance()
+////										.getActivityLogger()
+////										.logInstanceAction(this,
+////												"createQuitDialog",
+////												"discardAndExit");
+////								removeTempInstance();
+////								finishReturnInstance();
+////							}
+//							break;
+//
+//						case 1: // discard changes and exit
+//							Collect.getInstance()
+//									.getActivityLogger()
+//									.logInstanceAction(this,
+//											"createQuitDialog",
+//											"discardAndExit");
+//
+//                            // close all open databases of external data.
+//                            Collect.getInstance().getExternalDataManager().close();
+//
+//							removeTempInstance();
+//							finishReturnInstance();
+//							break;
+//
+//						case 2:// do nothing
+//							Collect.getInstance()
+//									.getActivityLogger()
+//									.logInstanceAction(this,
+//											"createQuitDialog", "cancel");
+//							break;
+//						}
+//					}
+//				}).create();
+//		mAlertDialog.show();
+//	}
 
 	/**
 	 * this method cleans up unneeded files when the user selects 'discard and
@@ -2258,7 +2333,6 @@ public class FormEntryActivity
 		}
 
 		super.onDestroy();
-
 	}
 //
 //	private int mAnimationCompletionSet = 0;
@@ -2421,7 +2495,7 @@ public class FormEntryActivity
 				// view
 				Intent i = new Intent(this, FormHierarchyActivity.class);
 				startActivity(i);
-				return; // so we don'TAG show the intro screen before jumping to
+				return; // so we don't show the intro screen before jumping to
 						// the hierarchy
 			}
 		}
@@ -2487,7 +2561,7 @@ public class FormEntryActivity
 //				next();
 //			// otherwise, we can get the proper toast(s) by saving with constraint check
 //			else
-				saveAnswersForCurrentScreen(EVALUATE_CONSTRAINTS);
+//				saveAnswersForCurrentScreen(EVALUATE_CONSTRAINTS);
 
 			break;
 		}
@@ -2521,51 +2595,51 @@ public class FormEntryActivity
 		}
 	}
 
-	/**
-	 * Checks the database to determine if the current instance being edited has
-	 * already been 'marked completed'. A form can be 'unmarked' complete and
-	 * then resaved.
-	 *
-	 * @return true if form has been marked completed, false otherwise.
-	 */
-	private boolean isInstanceComplete(boolean end) {
-		FormController formController = Collect.getInstance()
-				.getFormController();
-		// default to false if we're mid form
-		boolean complete = false;
-
-		// if we're at the end of the form, then check the preferences
-		if (end) {
-			// First get the value from the preferences
-			SharedPreferences sharedPreferences = PreferenceManager
-					.getDefaultSharedPreferences(this);
-			complete = sharedPreferences.getBoolean(
-					PreferencesActivity.KEY_COMPLETED_DEFAULT, true);
-		}
-
-		// Then see if we've already marked this form as complete before
-		String selection = InstanceColumns.INSTANCE_FILE_PATH + "=?";
-		String[] selectionArgs = { formController.getInstancePath()
-				.getAbsolutePath() };
-		Cursor c = null;
-		try {
-			c = getContentResolver().query(InstanceColumns.CONTENT_URI, null,
-					selection, selectionArgs, null);
-			if (c != null && c.getCount() > 0) {
-				c.moveToFirst();
-				String status = c.getString(c
-						.getColumnIndex(InstanceColumns.STATUS));
-				if (InstanceProviderAPI.STATUS_COMPLETE.compareTo(status) == 0) {
-					complete = true;
-				}
-			}
-		} finally {
-			if (c != null) {
-				c.close();
-			}
-		}
-		return complete;
-	}
+//	/**
+//	 * Checks the database to determine if the current instance being edited has
+//	 * already been 'marked completed'. A form can be 'unmarked' complete and
+//	 * then resaved.
+//	 *
+//	 * @return true if form has been marked completed, false otherwise.
+//	 */
+//	private boolean isInstanceComplete(boolean end) {
+//		FormController formController = Collect.getInstance()
+//				.getFormController();
+//		// default to false if we're mid form
+//		boolean complete = false;
+//
+//		// if we're at the end of the form, then check the preferences
+//		if (end) {
+//			// First get the value from the preferences
+//			SharedPreferences sharedPreferences = PreferenceManager
+//					.getDefaultSharedPreferences(this);
+//			complete = sharedPreferences.getBoolean(
+//					PreferencesActivity.KEY_COMPLETED_DEFAULT, true);
+//		}
+//
+//		// Then see if we've already marked this form as complete before
+//		String selection = InstanceColumns.INSTANCE_FILE_PATH + "=?";
+//		String[] selectionArgs = { formController.getInstancePath()
+//				.getAbsolutePath() };
+//		Cursor c = null;
+//		try {
+//			c = getContentResolver().query(InstanceColumns.CONTENT_URI, null,
+//					selection, selectionArgs, null);
+//			if (c != null && c.getCount() > 0) {
+//				c.moveToFirst();
+//				String status = c.getString(c
+//						.getColumnIndex(InstanceColumns.STATUS));
+//				if (InstanceProviderAPI.STATUS_COMPLETE.compareTo(status) == 0) {
+//					complete = true;
+//				}
+//			}
+//		} finally {
+//			if (c != null) {
+//				c.close();
+//			}
+//		}
+//		return complete;
+//	}
 //
 //	public void next() {
 //		if (!mBeenSwiped) {
@@ -2702,7 +2776,7 @@ public class FormEntryActivity
 //			float distanceY) {
 //		// The onFling() captures the 'up' event so our view thinks it gets long
 //		// pressed.
-//		// We don'TAG wnat that, so cancel it.
+//		// We don't wnat that, so cancel it.
 //        if (mCurrentView != null) {
 //            mCurrentView.cancelLongPress();
 //        }

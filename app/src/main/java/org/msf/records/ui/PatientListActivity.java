@@ -319,11 +319,23 @@ public class PatientListActivity extends FragmentActivity
         showOdkCollect(1L);
     }
 
+    private static final int ODK_COLLECT_REQUEST_CODE = 1;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != ODK_COLLECT_REQUEST_CODE) {
+            return;
+        }
+
+        // TODO(nfortescue): FILL IN!
+    }
+
     private void showOdkCollect(long formId) {
         Intent intent = new Intent(this, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
-        startActivity(intent);
+        intent.setAction(Intent.ACTION_PICK);
+        startActivityForResult(intent, ODK_COLLECT_REQUEST_CODE);
     }
 
     private void showFakeScanProgress() {
