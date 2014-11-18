@@ -53,7 +53,7 @@ public abstract class QuestionWidget extends LinearLayout {
 		return ++idGenerator;
 	}
 
-    private LinearLayout.LayoutParams mLayout;
+    private LinearLayout.LayoutParams mLayoutParams;
     protected FormEntryPrompt mPrompt;
 
     protected final int mQuestionFontsize;
@@ -76,10 +76,10 @@ public abstract class QuestionWidget extends LinearLayout {
         setGravity(Gravity.TOP);
         setPadding(0, 7, 0, 0);
 
-        mLayout =
-            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
+        mLayoutParams =
+            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-        mLayout.setMargins(10, 0, 10, 0);
+        mLayoutParams.setMargins(10, 0, 10, 0);
 
         addQuestionText(p);
         addHelpText(p);
@@ -180,6 +180,7 @@ public abstract class QuestionWidget extends LinearLayout {
 
         // Wrap to the size of the parent view
         mQuestionText.setHorizontallyScrolling(false);
+        mQuestionText.setLayoutParams(mLayoutParams);
 
         if (promptText == null || promptText.length() == 0) {
             mQuestionText.setVisibility(GONE);
@@ -189,7 +190,7 @@ public abstract class QuestionWidget extends LinearLayout {
         mediaLayout = new MediaLayout(getContext());
         mediaLayout.setAVT(p.getIndex(), "", mQuestionText, audioURI, imageURI, videoURI, bigImageURI);
 
-        addView(mediaLayout, mLayout);
+        addView(mediaLayout, mLayoutParams);
     }
 
 
@@ -209,7 +210,7 @@ public abstract class QuestionWidget extends LinearLayout {
             mHelpText.setText(s);
             mHelpText.setTypeface(null, Typeface.ITALIC);
 
-            addView(mHelpText, mLayout);
+            addView(mHelpText, mLayoutParams);
         }
     }
 

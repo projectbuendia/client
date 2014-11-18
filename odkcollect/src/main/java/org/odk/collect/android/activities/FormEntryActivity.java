@@ -209,8 +209,12 @@ public class FormEntryActivity
 		}
 
 		setContentView(R.layout.form_entry);
-		setTitle(getString(R.string.app_name) + " > "
-				+ getString(R.string.loading_form));
+
+        // TODO(dxchen): Load this from the form itself.
+        setTitle(getString(R.string.title_add_patient));
+//
+//		setTitle(getString(R.string.app_name) + " > "
+//				+ getString(R.string.loading_form));
 
         mErrorMessage = null;
 
@@ -898,48 +902,48 @@ public class FormEntryActivity
 		}
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		Collect.getInstance().getActivityLogger()
-				.logInstanceAction(this, "onCreateContextMenu", "show");
-		FormController formController = Collect.getInstance()
-				.getFormController();
+//	@Override
+//	public void onCreateContextMenu(ContextMenu menu, View v,
+//			ContextMenuInfo menuInfo) {
+//		super.onCreateContextMenu(menu, v, menuInfo);
+//		Collect.getInstance().getActivityLogger()
+//				.logInstanceAction(this, "onCreateContextMenu", "show");
+//		FormController formController = Collect.getInstance()
+//				.getFormController();
+//
+//		menu.add(0, v.getId(), 0, getString(R.string.clear_answer));
+////		if (formController.indexContainsRepeatableGroup()) {
+////			menu.add(0, DELETE_REPEAT, 0, getString(R.string.delete_repeat));
+////		}
+//		menu.setHeaderTitle(getString(R.string.edit_prompt));
+//	}
 
-		menu.add(0, v.getId(), 0, getString(R.string.clear_answer));
-//		if (formController.indexContainsRepeatableGroup()) {
-//			menu.add(0, DELETE_REPEAT, 0, getString(R.string.delete_repeat));
+//	@Override
+//	public boolean onContextItemSelected(MenuItem item) {
+//		/*
+//		 * We don'TAG have the right view here, so we store the View's ID as the
+//		 * item ID and loop through the possible views to find the one the user
+//		 * clicked on.
+//		 */
+//		for (QuestionWidget qw : ((ODKView) mCurrentView).getWidgets()) {
+//			if (item.getItemId() == qw.getId()) {
+//				Collect.getInstance()
+//						.getActivityLogger()
+//						.logInstanceAction(this, "onContextItemSelected",
+//								"createClearDialog", qw.getPrompt().getIndex());
+//				createClearDialog(qw);
+//			}
 //		}
-		menu.setHeaderTitle(getString(R.string.edit_prompt));
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		/*
-		 * We don'TAG have the right view here, so we store the View's ID as the
-		 * item ID and loop through the possible views to find the one the user
-		 * clicked on.
-		 */
-		for (QuestionWidget qw : ((ODKView) mCurrentView).getWidgets()) {
-			if (item.getItemId() == qw.getId()) {
-				Collect.getInstance()
-						.getActivityLogger()
-						.logInstanceAction(this, "onContextItemSelected",
-								"createClearDialog", qw.getPrompt().getIndex());
-				createClearDialog(qw);
-			}
-		}
-//		if (item.getItemId() == DELETE_REPEAT) {
-//			Collect.getInstance()
-//					.getActivityLogger()
-//					.logInstanceAction(this, "onContextItemSelected",
-//							"createDeleteRepeatConfirmDialog");
-//			createDeleteRepeatConfirmDialog();
-//		}
-
-		return super.onContextItemSelected(item);
-	}
+////		if (item.getItemId() == DELETE_REPEAT) {
+////			Collect.getInstance()
+////					.getActivityLogger()
+////					.logInstanceAction(this, "onContextItemSelected",
+////							"createDeleteRepeatConfirmDialog");
+////			createDeleteRepeatConfirmDialog();
+////		}
+//
+//		return super.onContextItemSelected(item);
+//	}
 
 	/**
 	 * If we're loading, then we pass the loading thread to our next instance.
@@ -2258,7 +2262,6 @@ public class FormEntryActivity
 		}
 
 		super.onDestroy();
-
 	}
 //
 //	private int mAnimationCompletionSet = 0;
