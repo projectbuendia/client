@@ -44,8 +44,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.debug.hv.ViewServer;
-
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.form.api.FormEntryCaption;
@@ -211,8 +209,6 @@ public class FormEntryActivity
 		}
 
 		setContentView(R.layout.form_entry);
-
-        ViewServer.get(this).addWindow(this);
 
         // TODO(dxchen): Load this from the form itself.
         setTitle(getString(R.string.title_add_patient));
@@ -2151,7 +2147,6 @@ public class FormEntryActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-        ViewServer.get(this).setFocusedWindow(this);
 
         if (mErrorMessage != null) {
             if (mAlertDialog != null && !mAlertDialog.isShowing()) {
@@ -2267,7 +2262,6 @@ public class FormEntryActivity
 		}
 
 		super.onDestroy();
-        ViewServer.get(this).removeWindow(this);
 	}
 //
 //	private int mAnimationCompletionSet = 0;
