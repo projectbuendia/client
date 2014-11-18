@@ -31,13 +31,13 @@ the License.
         tools:layout="@android:layout/list_content" >
     </ScrollView>
 
-    <LinearLayout
+    <ScrollView
         android:id="@+id/questionholder"
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="3"
         android:layout_alignParentTop="true">
-    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
