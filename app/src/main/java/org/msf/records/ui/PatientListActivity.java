@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -33,11 +34,15 @@ import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
+import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
 import java.io.File;
 import java.util.List;
+
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 
 /**
@@ -266,7 +271,7 @@ public class PatientListActivity extends FragmentActivity
                 showFakeScanProgress();
                 break;
             case SEND_FORM_TO_SERVER:
-                sendFormToServer();
+                sendFormToServer(Constants.makeNewPatientFormInstance("KH.31", "Fred", "West"));
                 break;
         }
     }
@@ -330,7 +335,41 @@ public class PatientListActivity extends FragmentActivity
             return;
         }
 
-        // TODO(nfortescue): FILL IN!
+        Uri uri = data.getData();
+
+        if (!getContentResolver().getType(uri).equals(
+                InstanceProviderAPI.InstanceColumns.CONTENT_TYPE)) {
+            Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
+            return;
+        }
+
+        Cursor instanceCursor = null;
+        try {
+            instanceCursor = getContentResolver().query(uri,
+                    null, null, null, null);
+            if (instanceCursor.getCount() != 1) {
+                Log.e(TAG, "The form that we tried to load did not exist: " + uri);
+                return;
+            }
+            instanceCursor.moveToFirst();
+            String instancePath = instanceCursor.getString(
+                    instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
+            if (instancePath == null) {
+                Log.e(TAG, "No file path for form instance: " + uri);
+                return;
+
+            }
+            sendFormToServer(readFromPath(instancePath));
+        } finally {
+            if (instanceCursor != null) {
+                instanceCursor.close();
+            }
+        }
+    }
+
+    private String readFromPath(String path) {
+        StringBuilder xml = new StringBuilder();
+        return xml.toString();
     }
 
     private void showOdkCollect(long formId) {
@@ -348,9 +387,9 @@ public class PatientListActivity extends FragmentActivity
         progressDialog.show();
     }
 
-    private void sendFormToServer() {
+    private void sendFormToServer(String xml) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
-        connection.postXformInstance(Constants.makeNewPatientFormInstance("KH.31", "Fred", "West"),
+        connection.postXformInstance(xml,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
