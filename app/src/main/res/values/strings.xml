@@ -19,7 +19,7 @@
     <string name="detail_pager_blood">Lab tests</string>
     <string name="detail_pager_notes">Notes</string>
     <string name="detail_pager_logs">Logs</string>
-    <string name="title_activity_patient_add">New Patient</string>
+    <string name="title_activity_patient_add">+ Create New Patient</string>
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
 

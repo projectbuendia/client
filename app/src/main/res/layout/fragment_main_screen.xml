@@ -11,7 +11,7 @@
         android:text="@string/action_new_patient"
         android:id="@+id/new_patient_button"
         android:onClick="onButtonClicked"
-        style="@style/button_large" />
+        style="@style/button_large"/>
 
     <Button
         android:layout_width="fill_parent"
