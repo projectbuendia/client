@@ -5,6 +5,8 @@ import android.text.format.DateFormat;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -62,7 +64,7 @@ public class Utils {
      * @param  timestamp  the long to convert
      * @return String the converted date
      */
-    public static String timestampToDate (Long timestamp) {
+    public static String timestampToDate(Long timestamp) {
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(timestamp * 1000);
         return DateFormat.format("dd-MM-yyyy", cal).toString();
@@ -78,5 +80,17 @@ public class Utils {
         DateTime start = new DateTime(timestamp * 1000);
         DateTime currentDate = new DateTime();
         return new Period(start, currentDate);
+    }
+
+    /**
+     * Encode a URL parameter, catching the useless exception that never happens.
+     */
+    public static String urlEncode(String s) {
+        try {
+            // Oh Java, how you make the simplest operation a waste of millions of programmer-hours.
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("UTF-8 should be supported in every JVM");
+        }
     }
 }

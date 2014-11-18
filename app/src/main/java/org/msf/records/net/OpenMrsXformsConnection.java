@@ -14,8 +14,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.msf.records.net.Constants.API_BASE;
-
 /**
  * A connection to the Xform handling module we are adding to OpenMRS to provide xforms.
  * This is not part of OpenMrsServer as it has entirely it's own interface, but may be merged in
@@ -43,7 +41,7 @@ public class OpenMrsXformsConnection {
                           Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                "http://"+ Constants.LOCALHOST_EMULATOR +":8080"+ API_BASE +"/xform/"+uuid+"?v=full",
+                Constants.API_URL + "/xform/" + uuid + "?v=full",
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -71,7 +69,7 @@ public class OpenMrsXformsConnection {
                            final Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                "http://"+ Constants.LOCALHOST_EMULATOR +":8080"+ API_BASE +"/xform", // list all forms
+                Constants.API_URL + "/xform", // list all forms
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -127,7 +125,7 @@ public class OpenMrsXformsConnection {
 
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                "http://"+ Constants.LOCALHOST_EMULATOR +":8080"+ API_BASE +"/xform/"+uuid+"?v=full",
+                Constants.API_URL + "/xform/" + uuid + "?v=full",
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override

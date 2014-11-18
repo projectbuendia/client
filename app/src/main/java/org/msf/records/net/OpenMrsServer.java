@@ -2,7 +2,6 @@ package org.msf.records.net;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -15,6 +14,7 @@ import org.json.JSONObject;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
 import org.msf.records.model.PatientLocation;
+import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,17 +25,15 @@ import java.util.Map;
  * Created by nfortescue on 11/3/14.
  */
 public class OpenMrsServer implements Server {
-    private static final String USERNAME = "buendiatest1";
-    private static final String PASSWORD = "Buendia123";
-    private static final String DEFAULT_ROOT_URL = "http://104.155.15.141:8080/openmrs/ws/rest/v1/";
+    // private static final String USERNAME = "buendiatest1";
+    // private static final String PASSWORD = "Buendia123";
+    // private static final String DEFAULT_ROOT_URL = "http://104.155.15.141:8080/openmrs/ws/rest/v1/";
 
     private final Gson gson = new Gson();
-    private final String ROOT_URL;
     private final VolleySingleton mVolley;
 
     public OpenMrsServer(Context context, @Nullable String rootUrl) {
         this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
-        ROOT_URL = TextUtils.isEmpty(rootUrl) ? DEFAULT_ROOT_URL : rootUrl;
     }
 
     @Override
@@ -60,11 +58,9 @@ public class OpenMrsServer implements Server {
             throw new RuntimeException(e);
         }
 
-
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
-                        "/patient",
+                Constants.API_URL + "/patient",
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -96,8 +92,7 @@ public class OpenMrsServer implements Server {
                            final String logTag) {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
-                        "/patient/" + patientId,
+                Constants.API_URL + "/patient/" + patientId,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -128,14 +123,15 @@ public class OpenMrsServer implements Server {
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, final String logTag) {
+        String query = filterQueryTerm != null ? filterQueryTerm : "";
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                "http://" + Constants.LOCALHOST_EMULATOR + ":8080" + Constants.API_BASE +
-                        "/patient?q=" + ((filterQueryTerm == null) ? "" : filterQueryTerm),
+                Constants.API_URL + "/patient?q=" + Utils.urlEncode(query),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+
 
                         ArrayList<Patient> result = new ArrayList<>();
                         try {
