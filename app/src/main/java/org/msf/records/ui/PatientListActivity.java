@@ -6,10 +6,8 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,14 +23,15 @@ import android.widget.SearchView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.crashlytics.android.Crashlytics;
-import com.google.common.base.Preconditions;
 
+import org.json.JSONObject;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
+import org.msf.records.net.OpenMrsXformsConnection;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.tasks.DiskSyncTask;
@@ -254,6 +253,7 @@ public class PatientListActivity extends FragmentActivity
         PLAY_WITH_ODK,
         FETCH_XFORMS,
         FAKE_SCAN,
+        SEND_FORM_TO_SERVER,
     }
 
     private void startScanBracelet() {
@@ -264,6 +264,9 @@ public class PatientListActivity extends FragmentActivity
                 break;
             case FAKE_SCAN:
                 showFakeScanProgress();
+                break;
+            case SEND_FORM_TO_SERVER:
+                sendFormToServer();
                 break;
         }
     }
@@ -343,6 +346,23 @@ public class PatientListActivity extends FragmentActivity
                 .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
         progressDialog.setCancelable(true);
         progressDialog.show();
+    }
+
+    private void sendFormToServer() {
+        OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
+        connection.postXformInstance(Constants.makeNewPatientFormInstance("KH.31", "Fred", "West"),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i(TAG, "Created new patient successfully" + response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Did not submit  form to server successfully", error);
+                    }
+                });
     }
 
     private void startActivity(Class<?> activityClass) {

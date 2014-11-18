@@ -390,23 +390,25 @@ public class FormController {
     private boolean groupIsFieldList(FormIndex index) {
         // if this isn't a group, return right away
     	IFormElement element = mFormEntryController.getModel().getForm().getChild(index);
-        if (!(element instanceof GroupDef)) {
-            return false;
-        }
-
-        GroupDef gd = (GroupDef) element; // exceptions?
-        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
+        return element instanceof GroupDef;
+//        if (!(element instanceof GroupDef)) {
+//            return false;
+//        }
+//
+//        GroupDef gd = (GroupDef) element; // exceptions?
+//        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
     }
 
     private boolean repeatIsFieldList(FormIndex index) {
         // if this isn't a group, return right away
     	IFormElement element = mFormEntryController.getModel().getForm().getChild(index);
-        if (!(element instanceof GroupDef)) {
-            return false;
-        }
-
-        GroupDef gd = (GroupDef) element; // exceptions?
-        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
+        return element instanceof GroupDef;
+//        if (!(element instanceof GroupDef)) {
+//            return false;
+//        }
+//
+//        GroupDef gd = (GroupDef) element; // exceptions?
+//        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
     }
 
     /**
@@ -453,7 +455,8 @@ public class FormController {
      * @return true if index is in a "field-list". False otherwise.
      */
     public boolean indexIsInFieldList() {
-        return indexIsInFieldList(getFormIndex());
+        return true;
+        //return indexIsInFieldList(getFormIndex());
     }
 
 

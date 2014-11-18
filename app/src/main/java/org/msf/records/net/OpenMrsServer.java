@@ -27,7 +27,6 @@ import java.util.Map;
 public class OpenMrsServer implements Server {
     // private static final String USERNAME = "buendiatest1";
     // private static final String PASSWORD = "Buendia123";
-    // private static final String DEFAULT_ROOT_URL = "http://104.155.15.141:8080/openmrs/ws/rest/v1/";
 
     private final Gson gson = new Gson();
     private final VolleySingleton mVolley;
