@@ -1,7 +1,6 @@
 package org.msf.records.net;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -17,6 +16,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * A connection to the Xform handling module we are adding to OpenMRS to provide xforms.
