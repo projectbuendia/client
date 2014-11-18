@@ -21,6 +21,8 @@
 <string name="add_repeat_no">Do Not Add</string>
 <string name="advance">forward to\nnext\nprompt</string>
 <string name="altitude">Altitude</string>
+<string name="title_confirm_cancel">Confirm cancel</string>
+<string name="are_you_sure">This will discard all changes. Are you sure?</string>
 <string name="audio_file_error">No audio file was specified.</string>
 <string name="audio_file_invalid">File: %s is not a valid audio file.</string>
 <string name="backup">backward to\nprevious\nprompt</string>
@@ -141,6 +143,8 @@
 <string name="url_error">Sorry, invalid URL!</string>
 <string name="username">Username</string>
 <string name="view_hierarchy">Go To Prompt</string>
+<string name="yes">Yes</string>
+<string name="no">Cancel</string>
 <string name="general_preferences">General Settings</string>
 <string name="click_to_web">Tap to visit http://opendatakit.org</string>
 <string name="client">User Interface</string>

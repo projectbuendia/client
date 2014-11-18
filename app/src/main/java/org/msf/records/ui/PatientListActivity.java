@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -33,11 +34,19 @@ import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
+import org.odk.collect.android.provider.InstanceProviderAPI;
+import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
+
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 
 /**
@@ -116,8 +125,6 @@ public class PatientListActivity extends FragmentActivity
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
-
-
     private void setupCustomActionBar(){
         final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -136,7 +143,6 @@ public class PatientListActivity extends FragmentActivity
         mSearchView.setIconifiedByDefault(false);
         actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
     }
 
     /**
@@ -253,7 +259,6 @@ public class PatientListActivity extends FragmentActivity
         PLAY_WITH_ODK,
         FETCH_XFORMS,
         FAKE_SCAN,
-        SEND_FORM_TO_SERVER,
     }
 
     private void startScanBracelet() {
@@ -264,9 +269,6 @@ public class PatientListActivity extends FragmentActivity
                 break;
             case FAKE_SCAN:
                 showFakeScanProgress();
-                break;
-            case SEND_FORM_TO_SERVER:
-                sendFormToServer();
                 break;
         }
     }
@@ -335,7 +337,48 @@ public class PatientListActivity extends FragmentActivity
             return;
         }
 
-        // TODO(nfortescue): FILL IN!
+        Uri uri = data.getData();
+
+        if (!getContentResolver().getType(uri).equals(
+                InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
+            Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
+            return;
+        }
+
+        Cursor instanceCursor = null;
+        try {
+            instanceCursor = getContentResolver().query(uri,
+                    null, null, null, null);
+            if (instanceCursor.getCount() != 1) {
+                Log.e(TAG, "The form that we tried to load did not exist: " + uri);
+                return;
+            }
+            instanceCursor.moveToFirst();
+            String instancePath = instanceCursor.getString(
+                    instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
+            if (instancePath == null) {
+                Log.e(TAG, "No file path for form instance: " + uri);
+                return;
+
+            }
+            sendFormToServer(null /* create new patient */, readFromPath(instancePath));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read xml form into a String " + uri, e);
+        } finally {
+            if (instanceCursor != null) {
+                instanceCursor.close();
+            }
+        }
+    }
+
+    private String readFromPath(String path) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        String line;
+        while((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
     }
 
     private void showOdkCollect(long formId) {
@@ -353,13 +396,18 @@ public class PatientListActivity extends FragmentActivity
         progressDialog.show();
     }
 
-    private void sendFormToServer() {
+    private void sendFormToServer(String patientId, String xml) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
-        connection.postXformInstance(Constants.makeNewPatientFormInstance("KH.31", "Fred", "West"),
+        connection.postXformInstance(patientId, xml,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i(TAG, "Created new patient successfully" + response.toString());
+                        Log.i(TAG, "Created new patient successfully on server"
+                                + response.toString());
+// TODO(nfortescue): get delete after upload working
+//                        DeleteInstancesTask dit = new DeleteInstancesTask();
+//                        dit.setContentResolver(Collect.getInstance().getApplication().getContentResolver());
+//                        dit.execute(toDelete);
                     }
                 },
                 new Response.ErrorListener() {
