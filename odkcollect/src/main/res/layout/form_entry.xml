@@ -23,15 +23,16 @@ the License.
     android:divider="?android:attr/dividerHorizontal"
     android:id="@+id/rl" >
 
-    <ScrollView
+    <ListView
         android:id="@+id/sidebar"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         tools:layout="@android:layout/list_content" >
-    </ScrollView>
+    </ListView>
 
     <ScrollView
+        android:id="@+id/question_holder_scroller"
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="match_parent"
