@@ -361,7 +361,28 @@ public class PatientListActivity extends FragmentActivity
                 return;
 
             }
-            sendFormToServer(null /* create new patient */, readFromPath(instancePath));
+            int columnIndex = instanceCursor
+                    .getColumnIndex(InstanceProviderAPI.InstanceColumns._ID);
+            if (columnIndex == -1) {
+                Log.e(TAG, "No id to delete for after upload: " + uri);
+                return;
+            }
+            final long idToDelete = instanceCursor.getLong(columnIndex);
+
+            sendFormToServer(null /* create new patient */, readFromPath(instancePath),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.i(TAG, "Created new patient successfully on server"
+                                    + response.toString());
+
+                            // Code largely copied from InstanceUploaderTask to delete on upload
+                            DeleteInstancesTask dit = new DeleteInstancesTask();
+                            dit.setContentResolver(
+                                    Collect.getInstance().getApplication().getContentResolver());
+                            dit.execute(idToDelete);
+                        }
+                    });
         } catch (IOException e) {
             Log.e(TAG, "Failed to read xml form into a String " + uri, e);
         } finally {
@@ -396,20 +417,11 @@ public class PatientListActivity extends FragmentActivity
         progressDialog.show();
     }
 
-    private void sendFormToServer(String patientId, String xml) {
+    private void sendFormToServer(String patientId, String xml,
+                                  Response.Listener<JSONObject> successListener) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
         connection.postXformInstance(patientId, xml,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.i(TAG, "Created new patient successfully on server"
-                                + response.toString());
-// TODO(nfortescue): get delete after upload working
-//                        DeleteInstancesTask dit = new DeleteInstancesTask();
-//                        dit.setContentResolver(Collect.getInstance().getApplication().getContentResolver());
-//                        dit.execute(toDelete);
-                    }
-                },
+                successListener,
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
