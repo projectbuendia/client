@@ -540,25 +540,6 @@ public class FormEntryActivity
         }
     }
 
-    private class SidebarFormVisitor implements FormVisitor {
-
-        private final List<?> mItems;
-
-        public SidebarFormVisitor(List<?> items) {
-            // TODO(giljulio): Pick right type for list.
-            this.mItems = items;
-        }
-
-        @Override
-        public void visit(int event, FormController formController) {
-            if (event != FormEntryController.EVENT_GROUP) {
-                return;
-            }
-
-            // TODO(giljulio): Add the appropriate element to the list.
-        }
-    }
-
     /**
      * Create save-points asynchronously in order to not affect swiping performance
      * on larger forms.
@@ -1549,7 +1530,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("constraintMsg");
 				if (constraintText == null) {
-					constraintText = getString(R.string.invalid_answer_error);
+					constraintText = formController.getQuestionPrompt(index).getQuestionText() + " "
+                            + "is invalid.";
 				}
 			}
 			break;
@@ -1565,7 +1547,8 @@ public class FormEntryActivity
 				constraintText = formController.getQuestionPrompt(index)
 						.getSpecialFormQuestionText("requiredMsg");
 				if (constraintText == null) {
-					constraintText = getString(R.string.required_answer_error);
+                    constraintText = formController.getQuestionPrompt(index).getQuestionText() + " "
+                            + " is required.";
 				}
 			}
 			break;
