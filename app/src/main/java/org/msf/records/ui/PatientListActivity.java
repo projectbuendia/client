@@ -29,6 +29,8 @@ import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.net.Constants;
+import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.odk.collect.android.activities.FormEntryActivity;
@@ -95,6 +97,14 @@ public class PatientListActivity extends FragmentActivity
             // activity should be in two-pane mode.
             mTwoPane = true;
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+            // Create a main screen shown when no patient is selected.
+            MainScreenFragment mainScreenFragment = new MainScreenFragment();
+
+            // Add the fragment to the container.
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.patient_detail_container, mainScreenFragment).commit();
+
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
             ((PatientListFragment) getSupportFragmentManager()
@@ -255,20 +265,28 @@ public class PatientListActivity extends FragmentActivity
             case FAKE_SCAN:
                 showFakeScanProgress();
                 break;
-            case FETCH_XFORMS:
-                fetchXforms();
+        }
+    }
+
+    public void onButtonClicked(View view) {
+        switch (view.getId()) {
+            case R.id.new_patient_button:
+                fetchXforms(Constants.ADD_PATIENT_UUID);
                 break;
         }
     }
 
-    private void fetchXforms() {
-        final String tag = "fetchXforms";
-        final Response.ErrorListener errorListener = new Response.ErrorListener() {
+    private Response.ErrorListener getErrorListenerForTag(final String tag) {
+        return new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(tag, error.toString());
             }
         };
+    }
+
+    private void fetchXforms(final String uuidToShow) {
+        final String tag = "fetchXforms";
         Log.i(tag, "Fetching all forms");
         App.getmOpenMrsXformsConnection().listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
@@ -280,45 +298,19 @@ public class PatientListActivity extends FragmentActivity
                         }
                         // Cache all the forms into the ODK form cache
                         new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-                            boolean displayed;
-
                             @Override
-                            public void formWritten(File path) {
+                            public void formWritten(File path, String uuid) {
                                 Log.i(tag, "wrote form " + path);
 
-                                // Just display one form.
-                                synchronized (this) {
-                                    if (displayed) {
-                                        return;
-                                    } else {
-                                        displayed = true;
-                                    }
+                                // Only show the requested form.
+                                if (uuid.equals(uuidToShow)) {
+                                    Log.i(tag, "showing form " + uuid);
+                                    showOdkCollect(OdkDatabase.getFormIdForPath(path));
                                 }
-
-                                // TODO(nfortescue): factor out this ODK database stuff to somewhere
-                                // common
-                                // Fetch it from the ODK database
-                                long formId;
-                                Cursor cursor = null;
-                                try {
-                                    cursor = OdkXformSyncTask.getCursorForFormFile(
-                                            path, new String[]{
-                                                    BaseColumns._ID
-                                            });
-                                    Preconditions.checkArgument(cursor.getCount() == 1);
-                                    Preconditions.checkArgument(cursor.getColumnCount() == 1);
-                                    cursor.moveToNext();
-                                    formId = cursor.getLong(0);
-                                } finally {
-                                   if (cursor != null) {
-                                       cursor.close();
-                                   }
-                                }
-                                showOdkCollect(formId);
                             }
                         }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
                     }
-                }, errorListener);
+                }, getErrorListenerForTag(tag));
     }
 
     private void showFirstFormFromSdcard() {

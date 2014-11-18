@@ -31,8 +31,17 @@ public class OpenMrsServer implements Server {
 
     private final Gson gson = new Gson();
     private final VolleySingleton mVolley;
+    private final String mRootUrl;
+    private final String mUserName;
+    private final String mPassword;
 
-    public OpenMrsServer(Context context, @Nullable String rootUrl) {
+    public OpenMrsServer(Context context,
+                         @Nullable String rootUrl,
+                         @Nullable String userName,
+                         @Nullable String password) {
+        mRootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
+        mUserName = (userName == null) ? Constants.LOCAL_ADMIN_USERNAME : userName;
+        mPassword = (password == null) ? Constants.LOCAL_ADMIN_PASSWORD : password;
         this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
     }
 
@@ -59,8 +68,8 @@ public class OpenMrsServer implements Server {
         }
 
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                Constants.API_URL + "/patient",
+                mUserName, mPassword,
+                mRootUrl + "/patient",
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -91,8 +100,8 @@ public class OpenMrsServer implements Server {
                            final Response.ErrorListener errorListener,
                            final String logTag) {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                Constants.API_URL + "/patient/" + patientId,
+                mUserName, mPassword,
+                mRootUrl + "/patient/" + patientId,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -125,8 +134,8 @@ public class OpenMrsServer implements Server {
                              Response.ErrorListener errorListener, final String logTag) {
         String query = filterQueryTerm != null ? filterQueryTerm : "";
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                Constants.API_URL + "/patient?q=" + Utils.urlEncode(query),
+                mUserName, mPassword,
+                mRootUrl + "/patient?q=" + Utils.urlEncode(query),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
