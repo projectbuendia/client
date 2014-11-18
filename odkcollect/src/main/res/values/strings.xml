@@ -124,7 +124,7 @@
 <string name="review_data">Edit Saved Form</string>
 <string name="review_data_button">Edit Saved Form (%s)</string>
 <string name="saved_data">Incomplete (%s)</string>
-<string name="save_all_answers">Save Form</string>
+<string name="save_all_answers">Done</string>
 <string name="save_enter_data_description">You are at the end of %s.</string>
 <string name="saving_form">Saving Form</string>
 <string name="sending_items">Sending %1$s of %2$s form(s)</string>
