@@ -15,6 +15,7 @@
 package org.odk.collect.android.widgets;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.util.TypedValue;
@@ -35,11 +36,12 @@ public class StringNumberWidget extends StringWidget {
 
         mAnswer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mAnswerFontsize);
         mAnswer.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
+//
+//        // needed to make long readonly text scroll
+//        mAnswer.setHorizontallyScrolling(false);
+//        mAnswer.setSingleLine(false);
 
-        // needed to make long readonly text scroll
-        mAnswer.setHorizontallyScrolling(false);
-        mAnswer.setSingleLine(false);
-
+        mAnswer.setRawInputType(Configuration.KEYBOARD_12KEY);
         mAnswer.setKeyListener(new DigitsKeyListener() {
             @Override
             protected char[] getAcceptedChars() {
