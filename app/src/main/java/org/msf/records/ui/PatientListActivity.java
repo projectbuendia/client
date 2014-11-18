@@ -37,9 +37,13 @@ import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI;
+import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
@@ -121,8 +125,6 @@ public class PatientListActivity extends FragmentActivity
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
-
-
     private void setupCustomActionBar(){
         final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -141,7 +143,6 @@ public class PatientListActivity extends FragmentActivity
         mSearchView.setIconifiedByDefault(false);
         actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
     }
 
     /**
@@ -258,7 +259,6 @@ public class PatientListActivity extends FragmentActivity
         PLAY_WITH_ODK,
         FETCH_XFORMS,
         FAKE_SCAN,
-        SEND_FORM_TO_SERVER,
     }
 
     private void startScanBracelet() {
@@ -269,9 +269,6 @@ public class PatientListActivity extends FragmentActivity
                 break;
             case FAKE_SCAN:
                 showFakeScanProgress();
-                break;
-            case SEND_FORM_TO_SERVER:
-                sendFormToServer(Constants.makeNewPatientFormInstance("KH.31", "Fred", "West"));
                 break;
         }
     }
@@ -338,7 +335,7 @@ public class PatientListActivity extends FragmentActivity
         Uri uri = data.getData();
 
         if (!getContentResolver().getType(uri).equals(
-                InstanceProviderAPI.InstanceColumns.CONTENT_TYPE)) {
+                InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
             Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
             return;
         }
@@ -359,7 +356,9 @@ public class PatientListActivity extends FragmentActivity
                 return;
 
             }
-            sendFormToServer(readFromPath(instancePath));
+            sendFormToServer(null /* create new patient */, readFromPath(instancePath));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read xml form into a String " + uri, e);
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -367,9 +366,14 @@ public class PatientListActivity extends FragmentActivity
         }
     }
 
-    private String readFromPath(String path) {
-        StringBuilder xml = new StringBuilder();
-        return xml.toString();
+    private String readFromPath(String path) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        String line;
+        while((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
     }
 
     private void showOdkCollect(long formId) {
@@ -387,13 +391,18 @@ public class PatientListActivity extends FragmentActivity
         progressDialog.show();
     }
 
-    private void sendFormToServer(String xml) {
+    private void sendFormToServer(String patientId, String xml) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
-        connection.postXformInstance(xml,
+        connection.postXformInstance(patientId, xml,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i(TAG, "Created new patient successfully" + response.toString());
+                        Log.i(TAG, "Created new patient successfully on server"
+                                + response.toString());
+// TODO(nfortescue): get delete after upload working
+//                        DeleteInstancesTask dit = new DeleteInstancesTask();
+//                        dit.setContentResolver(Collect.getInstance().getApplication().getContentResolver());
+//                        dit.execute(toDelete);
                     }
                 },
                 new Response.ErrorListener() {
