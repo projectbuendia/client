@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
+import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -53,8 +54,26 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             Cursor cursor = null;
             boolean isNew;
             try {
-                cursor = getCursorForFormFile(proposedPath, null);
-                isNew = cursor.getCount() <= 0;
+                cursor = getCursorForFormFile(proposedPath, new String[]{
+                        FormsProviderAPI.FormsColumns.DATE
+                });
+                boolean isInDatabase = cursor.getCount() > 0;
+                if (isInDatabase) {
+                    Preconditions.checkArgument(cursor.getCount() == 1);
+                    Preconditions.checkArgument(cursor.getColumnCount() == 1);
+                    cursor.moveToNext();
+                    long existingTimestamp = cursor.getLong(0);
+                    isNew = (existingTimestamp < formInfo.dateChanged);
+
+                    if (isNew) {
+                        Log.i(TAG, "Form " + formInfo.uuid + " requires an update." +
+                                " (Local creation date: " + existingTimestamp +
+                                ", (Latest version: " + formInfo.dateChanged + ")");
+                    }
+                } else {
+                    Log.i(TAG, "Form " + formInfo.uuid + " not found in database.");
+                    isNew = true;
+                }
             } finally {
                 if (cursor != null) {
                     cursor.close();
@@ -62,8 +81,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }
 
             if (!isNew) {
-                // TODO(nfortescue): add some logic based on version code to see if we should
-                // refetch. For now return existing form.
+                Log.i(TAG, "Using form " + formInfo.uuid + " from local cache.");
                 formWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 continue;
             }

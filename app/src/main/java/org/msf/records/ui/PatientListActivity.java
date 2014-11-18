@@ -292,7 +292,6 @@ public class PatientListActivity extends FragmentActivity
 
     private void fetchXforms(final String uuidToShow) {
         final String tag = "fetchXforms";
-        Log.i(tag, "Fetching all forms");
         App.getmOpenMrsXformsConnection().listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
@@ -306,16 +305,22 @@ public class PatientListActivity extends FragmentActivity
                             @Override
                             public void formWritten(File path, String uuid) {
                                 Log.i(tag, "wrote form " + path);
-
-                                // Only show the requested form.
-                                if (uuid.equals(uuidToShow)) {
-                                    Log.i(tag, "showing form " + uuid);
-                                    showOdkCollect(OdkDatabase.getFormIdForPath(path));
-                                }
+                                showOdkCollect(OdkDatabase.getFormIdForPath(path));
                             }
-                        }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
+                        }).execute(findUuid(response, uuidToShow));
                     }
                 }, getErrorListenerForTag(tag));
+    }
+
+    // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
+    // return null if no xform is found.
+    private OpenMrsXformIndexEntry findUuid(List<OpenMrsXformIndexEntry> allEntries, String uuid) {
+        for (OpenMrsXformIndexEntry entry : allEntries) {
+            if (entry.uuid.equals(uuid)) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     private void showFirstFormFromSdcard() {
