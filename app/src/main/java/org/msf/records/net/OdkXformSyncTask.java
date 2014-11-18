@@ -64,7 +64,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             if (!isNew) {
                 // TODO(nfortescue): add some logic based on version code to see if we should
                 // refetch. For now return existing form.
-                formWrittenListener.formWritten(proposedPath);
+                formWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 continue;
             }
 
@@ -75,7 +75,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onResponse(String response) {
                     Log.i(TAG, "adding form to db " + response);
-                    new AddFormToDbAsyncTask(formWrittenListener).execute(new FormToWrite(response, proposedPath));
+                    new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid)
+                            .execute(new FormToWrite(response, proposedPath));
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -134,9 +135,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
         private final FormWrittenListener formWrittenListener;
         private String mPath;
+        private String mUuid;
 
-        private AddFormToDbAsyncTask(@Nullable FormWrittenListener formWrittenListener) {
+        private AddFormToDbAsyncTask(
+                @Nullable FormWrittenListener formWrittenListener, String uuid) {
             this.formWrittenListener = formWrittenListener;
+            mUuid = uuid;
         }
 
         @Override
@@ -180,12 +184,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         protected void onPostExecute(File path) {
             super.onPostExecute(path);
             if (formWrittenListener != null && path != null) {
-                formWrittenListener.formWritten(path);
+                formWrittenListener.formWritten(path, mUuid);
             }
         }
     }
 
     public static interface FormWrittenListener {
-        public void formWritten(File path);
+        public void formWritten(File path, String uuid);
     }
 }

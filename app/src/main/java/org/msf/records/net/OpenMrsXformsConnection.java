@@ -1,6 +1,7 @@
 package org.msf.records.net;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -26,9 +27,18 @@ public class OpenMrsXformsConnection {
     private static final String KNOWN_UUID = "d5bbf64a-69ba-11e4-8a42-47ebc7225440";
 
     private final VolleySingleton mVolley;
+    private final String mRootUrl;
+    private final String mUserName;
+    private final String mPassword;
 
-    public OpenMrsXformsConnection(Context context) {
+    public OpenMrsXformsConnection(Context context,
+                                   @Nullable String rootUrl,
+                                   @Nullable String userName,
+                                   @Nullable String password) {
         this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
+        mRootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
+        mUserName = (userName == null) ? Constants.LOCAL_ADMIN_USERNAME : userName;
+        mPassword = (password == null) ? Constants.LOCAL_ADMIN_PASSWORD : password;
     }
 
     /**
@@ -40,8 +50,8 @@ public class OpenMrsXformsConnection {
     public void getXform(String uuid, final Response.Listener<String> resultListener,
                           Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(
-                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                Constants.API_URL + "/xform/" + uuid + "?v=full",
+                mUserName, mPassword,
+                mRootUrl + "/xform/" + uuid + "?v=full",
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -68,8 +78,8 @@ public class OpenMrsXformsConnection {
     public void listXforms(final Response.Listener<List<OpenMrsXformIndexEntry>> listener,
                            final Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(
-                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                Constants.API_URL + "/xform", // list all forms
+                mUserName, mPassword,
+                mRootUrl + "/xform", // list all forms
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -83,10 +93,20 @@ public class OpenMrsXformsConnection {
                             JSONArray results = response.getJSONArray("results");
                             for (int i = 0; i < results.length(); i++) {
                                 JSONObject entry = results.getJSONObject(i);
+
+                                // Sometimes date_changed is not set; in this case, date_changed is
+                                // simply date_created.
+                                long date_changed;
+                                if (entry.get("date_changed") == JSONObject.NULL) {
+                                    date_changed = entry.getLong("date_created");
+                                } else {
+                                    date_changed = entry.getLong("date_changed");
+                                }
+
                                 OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
                                         entry.getString("uuid"),
                                         entry.getString("name"),
-                                        entry.getLong("date_changed"));
+                                        date_changed);
                                 result.add(indexEntry);
                             }
                         } catch (JSONException e) {
@@ -124,8 +144,8 @@ public class OpenMrsXformsConnection {
 
 
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                Constants.LOCAL_ADMIN_USERNAME, Constants.LOCAL_ADMIN_PASSWORD,
-                Constants.API_URL + "/xform/" + uuid + "?v=full",
+                mUserName, mPassword,
+                mRootUrl + "/xform/" + uuid + "?v=full",
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
