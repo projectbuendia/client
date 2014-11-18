@@ -332,6 +332,12 @@ public class PatientListActivity extends FragmentActivity
             return;
         }
 
+        if (data == null || data.getData() == null) {
+            // Cancelled.
+            Log.i(TAG, "No data for form result, probably cancelled.");
+            return;
+        }
+
         Uri uri = data.getData();
 
         if (!getContentResolver().getType(uri).equals(
