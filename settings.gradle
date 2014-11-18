@@ -1,2 +1,2 @@
-include ':app', ':odkcollect'
+include ':app', ':odkcollect', ':viewserver'
 include ':ViewPagerIndicator'
