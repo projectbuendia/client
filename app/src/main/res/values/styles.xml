@@ -87,4 +87,12 @@
     <style name="stacked_small">
         <item name="android:layout_width">wrap_content</item>
     </style>
+
+    <style name="button_large">
+        <item name="android:layout_gravity">center_horizontal|top</item>
+        <item name="android:background">@color/button_material_dark</item>
+        <item name="android:textColor">@drawable/white</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:padding">30dp</item>
+    </style>
 </resources>

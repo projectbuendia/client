@@ -40,5 +40,8 @@
     <string name="location_confirmed_zone">Confirmed zone</string>
     <string name="location_mortuary">Mortuary</string>
     <string name="location_outside">Outside</string>
+    <string name="action_new_patient">New Patient</string>
+    <string name="action_new_round">New Round</string>
+    <string name="action_view_round_archive">Round Archive</string>
 
 </resources>
