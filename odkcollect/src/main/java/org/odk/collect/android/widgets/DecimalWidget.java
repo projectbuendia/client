@@ -15,6 +15,7 @@
 package org.odk.collect.android.widgets;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
@@ -55,12 +56,13 @@ public class DecimalWidget extends StringWidget {
         // formatting
         mAnswer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mAnswerFontsize);
         mAnswer.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
-
-        // needed to make long readonly text scroll
-        mAnswer.setHorizontallyScrolling(false);
-        mAnswer.setSingleLine(false);
+//
+//        // needed to make long readonly text scroll
+//        mAnswer.setHorizontallyScrolling(false);
+//        mAnswer.setSingleLine(false);
 
         // only numbers are allowed
+        mAnswer.setRawInputType(Configuration.KEYBOARD_12KEY);
         mAnswer.setKeyListener(new DigitsKeyListener(true, true));
 
         // only 15 characters allowed

@@ -73,6 +73,13 @@ public class StringWidget extends QuestionWidget {
          * will set the height of the EditText box to 5 rows high.
          */
         String height = prompt.getQuestion().getAdditionalAttribute(null, ROWS);
+        if (height == null || height.equals("1")) {
+            mAnswer.setSingleLine();
+        } else {
+            mAnswer.setSingleLine(false);
+            mAnswer.setHorizontallyScrolling(false);
+        }
+
         if ( height != null && height.length() != 0 ) {
         	try {
 	        	int rows = Integer.valueOf(height);
@@ -90,8 +97,8 @@ public class StringWidget extends QuestionWidget {
         mAnswer.setKeyListener(new TextKeyListener(Capitalize.SENTENCES, false));
 
         // needed to make long read only text scroll
-        mAnswer.setHorizontallyScrolling(false);
-        mAnswer.setSingleLine(false);
+//        mAnswer.setHorizontallyScrolling(false);
+//        mAnswer.setSingleLine(false);
 
         String s = prompt.getAnswerText();
         if (s != null) {
