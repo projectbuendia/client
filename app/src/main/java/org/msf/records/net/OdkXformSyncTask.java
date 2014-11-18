@@ -177,7 +177,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             } catch (SQLException e) {
                 Log.i(TAG, "failed to insert fetched file", e);
             }
-            return null;
+            return proposedPath;
         }
 
         @Override
