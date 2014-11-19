@@ -6,13 +6,27 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.android.volley.Response;
 import com.viewpagerindicator.TabPageIndicator;
 
+import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.model.Patient;
+import org.msf.records.model.Status;
+import org.msf.records.utils.Utils;
+
+import java.util.HashMap;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 
 /**
  * A fragment representing a single Patient detail screen.
@@ -20,35 +34,29 @@ import org.msf.records.R;
  * in two-pane mode (on tablets) or a {@link PatientDetailActivity}
  * on handsets.
  */
-public class PatientDetailFragment extends Fragment {
+public class PatientDetailFragment extends ProgressFragment implements Response.Listener<Patient>, Response.ErrorListener {
 
     private static final String TAG = PatientDetailFragment.class.getSimpleName();
 
     public static final String PATIENT_ID_KEY = "PATIENT_ID_KEY";
-
-    private static final int COUNT = 2;
-    private static final int OVERVIEW = 0, NOTES = 1;//FLAGS = 1, BLOOD = 2, LOGS = 3;
+    private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
 
     public String mPatientId;
 
-    ViewPager mPager;
+    @InjectView(R.id.patient_overview_name)
+    TextView mPatientNameTV;
+    @InjectView(R.id.patient_overview_id) TextView mPatientIdTV;
+    @InjectView(R.id.patient_overview_location) TextView mPatientLocationTV;
+    @InjectView(R.id.patient_overview_important_description) TextView mPatientImportantTV;
+    @InjectView(R.id.patient_overview_days_since_admission_tv) TextView mPatientDaysSinceAdmissionTV;
+    @InjectView(R.id.patient_overview_status_icon)
+    ImageView mPatientStatusIcon;
+    @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
+    @InjectView(R.id.patient_overview_gender_tv) TextView mPatientGenderTV;
+    @InjectView(R.id.patient_overview_age_tv) TextView mPatientAgeTV;
+    @InjectView(R.id.patient_overview_status) View mPatientStatusContainer;
+    @InjectView(R.id.patient_overview_assigned_location_tv) TextView mPatientAssignedLocationTV;
 
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_patient_detail, container, false);
-
-        FragmentPagerAdapter adapter = new PatientDetailsAdapter(getChildFragmentManager());
-
-        mPager = (ViewPager) view.findViewById(R.id.pager);
-        mPager.setAdapter(adapter);
-
-        TabPageIndicator indicator = (TabPageIndicator) view.findViewById(R.id.indicator);
-        indicator.setViewPager(mPager);
-
-
-        return view;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,28 @@ public class PatientDetailFragment extends Fragment {
         if(mPatientId == null)
             throw new IllegalArgumentException("Please pass the user id to the PatientDetailFragment");
 
+        // savedInstanceState is non-null when there is fragment state
+        // saved from previous configurations of this activity
+        // (e.g. when rotating the screen from portrait to landscape).
+        // In this case, the fragment will automatically be re-added
+        // to its container so we don't need to manually add it.
+        // For more information, see the Fragments API guide at:
+        //
+        // http://developer.android.com/guide/components/fragments.html
+        //
+        if (savedInstanceState == null) {
+            // Create the detail pager fragment and add it to the activity
+            // using a fragment transaction.
+            Bundle arguments = new Bundle();
+            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY, mPatientId);
+            PatientDetailPagerFragment fragment = new PatientDetailPagerFragment();
+            fragment.setArguments(arguments);
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.patient_detail_pager_container, fragment)
+                    .commit();
+        }
+
+        setContentView(R.layout.fragment_patient_detail);
     }
 
     @Override
@@ -66,50 +96,180 @@ public class PatientDetailFragment extends Fragment {
         outState.putString(PATIENT_ID_KEY, mPatientId);
     }
 
-    class PatientDetailsAdapter extends FragmentPagerAdapter {
-        public PatientDetailsAdapter(FragmentManager fm) {
-            super(fm);
-        }
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case OVERVIEW:
-                    return PatientDetailOverviewFragment.newInstance(mPatientId);
-                /*case BLOOD:
-                    return PatientDetailBloodFragment.newInstance(mPatientId);*/
-                case NOTES:
-                    return PatientDetailLogsFragment.newInstance();
-                /*case FLAGS:
-                    return PatientDetailFlagsFragment.newInstance(mPatientId);*/
-                default:
-                    return null;
+        ButterKnife.inject(this, view);
+        App.getServer().getPatient(mPatientId, this, this, TAG);
+    }
 
+    @OnClick(R.id.patient_overview_name)
+    public void patientOverviewNameClick(){
+        FragmentManager fm = getChildFragmentManager();
+        EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
+        Bundle b = new Bundle();
+        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_name));
+        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER, new EditTextDialogFragment.OnItemClickListener() {
+
+            @Override
+            public void onPositiveButtonClick(String[] data) {
+
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("given_name", data[0]);
+                map.put("family_name", data[1]);
+                updatePatient(map);
             }
-        }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
+    @OnClick(R.id.patient_overview_status)
+    public void patientOverviewStatusClick(){
+        Log.d(TAG, "patientOverviewStatusClick");
+        FragmentManager fm = getChildFragmentManager();
+        GridDialogFragment gridDialogFragment = new GridDialogFragment();
+        Bundle bundle = new Bundle();
 
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case OVERVIEW:
-                    return getString(R.string.detail_pager_overview);
-                case NOTES:
-                    return "Notes";
-                /*case BLOOD:
-                    return getString(R.string.detail_pager_blood);
-                case LOGS:
-                    return getString(R.string.detail_pager_logs);
-                case FLAGS:
-                    return getString(R.string.detail_pager_flags);*/
-                default:
-                    return null;
+        bundle.putParcelableArray(GridDialogFragment.ITEM_LIST_KEY, Status.getStatus());
+        bundle.putSerializable(GridDialogFragment.GRID_ITEM_DONE_LISTENER, new GridDialogFragment.OnItemClickListener(){
+            @Override
+            public void onGridItemClick(int position) {
 
+                String statusName = Status.getStatus()[position].key;
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("status", statusName);
+                updatePatient(map);
+                Log.d(TAG, statusName);
             }
+        });
+        gridDialogFragment.setArguments(bundle);
+        gridDialogFragment.show(fm, null);
+    }
+
+    @OnClick({R.id.patient_overview_assigned_location})
+    public void patientOverviewLocationClick() {
+        FragmentManager fm = getChildFragmentManager();
+        EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
+        Bundle b = new Bundle();
+        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_location));
+        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER, new EditTextDialogFragment.OnItemClickListener() {
+
+            @Override
+            public void onPositiveButtonClick(String[] data) {
+
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("assigned_location_zone_id", data[0]);
+                map.put("assigned_location_tent_id", data[1]);
+                map.put("assigned_location_bed", data[2]);
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
+    @OnClick(R.id.patient_overview_gender)
+    public void patientOverviewGenderClick() {
+        FragmentManager fm = getChildFragmentManager();
+        ListDialogFragment dialogListFragment = new ListDialogFragment();
+        Bundle b = new Bundle();
+        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.add_patient_gender));
+        b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
+            @Override
+            public void onListItemClick(int position) {
+                String gender = getResources().getStringArray(R.array.add_patient_gender)[position];
+                String g;
+                if (gender.equals("Male")) {
+                    g = "M";
+                } else {
+                    g = "F";
+                }
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("gender", g);
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
+    @OnClick(R.id.patient_overview_age)
+    public void patientOverviewAgeClick() {
+        FragmentManager fm = getChildFragmentManager();
+        ListDialogFragment dialogListFragment = new ListDialogFragment();
+        Bundle b = new Bundle();
+        String[] ageArray = new String[100];
+        ageArray[0] = "Less than 1";
+        for (int i = 1; i < ageArray.length; i++) {
+            ageArray[i] = String.valueOf(i);
+        }
+        b.putStringArray(ITEM_LIST_KEY, ageArray);
+        b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
+            @Override
+            public void onListItemClick(int position) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("age_years", String.valueOf(position));
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
+
+    private void updatePatient(HashMap<String, String> map){
+        App.getServer().updatePatient(mPatientId, map,
+                PatientDetailFragment.this, PatientDetailFragment.this, TAG);
+    }
+
+    @Override
+    public void onResponse(Patient response) {
+        Log.d(TAG, "onResponse");
+
+        String mGender;
+        int mAge;
+
+        mPatientNameTV.setText(response.given_name + " " + response.family_name);
+        mPatientIdTV.setText("" + response.id);
+        mPatientAssignedLocationTV.setText(response.assigned_location.zone + "\n" +
+                response.assigned_location.tent + " " + response.assigned_location.bed);
+        mPatientDaysSinceAdmissionTV.setText(String.format(
+                getResources().getString(R.string.day_n),
+                Utils.timeDifference(response.created_timestamp).getDays()));
+        if(response.status == null)
+            response.status = "confirmed";
+        mPatientStatusContainer.setBackgroundColor(getResources().getColor(Status.getStatus(response.status).colorId));
+        mPatientStatusIcon.setImageResource(Status.getStatus(response.status).roundIconId);
+        mPatientStatusTV.setText(Status.getStatus(response.status).nameId);
+
+        if (response.gender.equals("M")) {
+            mGender = "Male";
+        } else {
+            mGender = "Female";
         }
 
-        @Override
-        public int getCount() {
-            return COUNT;
+        if (response.age.years == 0) {
+            mAge = response.age.months;
+        } else {
+            mAge = response.age.years;
         }
+
+        mPatientGenderTV.setText(mGender);
+        mPatientAgeTV.setText(String.format(getResources().getString(R.string.age_years), mAge));
+
+
+        //important information
+        if(response.important_information == null || response.important_information.equals("null")){
+            mPatientImportantTV.setVisibility(View.GONE);
+        } else {
+            mPatientImportantTV.setVisibility(View.VISIBLE);
+            mPatientImportantTV.setText(response.important_information);
+        }
+
+        /*if(response.important_information == null || response.important_information.equals("null")){
+            mPatientContactTV.setText("");
+        } else {
+            mPatientContactTV.setText(response.important_information);
+        }*/
+
+        changeState(ProgressFragment.State.LOADED);
     }
 }
