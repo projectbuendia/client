@@ -122,8 +122,8 @@ public class PatientListActivity extends FragmentActivity
         final View customActionBarView = inflater.inflate(
                 R.layout.actionbar_custom_main, null);
 
-        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
-        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
+//        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
+//        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
         mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
         mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
         mSearchView.setIconifiedByDefault(false);
@@ -179,12 +179,12 @@ public class PatientListActivity extends FragmentActivity
 
             searchMenuItem.expandActionView();
         } else {
-          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              startActivity(PatientAddActivity.class);
-            }
-          });
+//          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//              startActivity(PatientAddActivity.class);
+//            }
+//          });
 
           mSettingsBtn.setOnClickListener(new View.OnClickListener() {
               @Override
@@ -193,12 +193,12 @@ public class PatientListActivity extends FragmentActivity
               }
           });
 
-          mScanBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              startScanBracelet();
-            }
-          });
+//          mScanBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//              startScanBracelet();
+//            }
+//          });
         }
 
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
