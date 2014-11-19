@@ -1,10 +1,19 @@
 package org.msf.records.ui;
 
+import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.SearchView;
 
 import org.msf.records.R;
 
@@ -20,7 +29,6 @@ import org.msf.records.R;
  */
 
 public class PatientDetailActivity extends FragmentActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +58,31 @@ public class PatientDetailActivity extends FragmentActivity {
                     .add(R.id.patient_detail_container, fragment)
                     .commit();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.overview, menu);
+
+        menu.findItem(R.id.action_update_chart).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                // TODO(dxchen): Implement.
+                return true;
+            }
+        });
+
+        menu.findItem(R.id.action_edit_details).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                // Intentionally blank for demo.
+                return true;
+            }
+        });
+
+        return true;
     }
 
     @Override
