@@ -16,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
 import org.msf.records.R;
+import org.msf.records.net.Constants;
 
 
 /**
@@ -69,7 +70,8 @@ public class PatientDetailActivity extends FragmentActivity {
         menu.findItem(R.id.action_update_chart).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                // TODO(dxchen): Implement.
+                OdkActivityLauncher.fetchXforms(
+                        PatientDetailActivity.this, Constants.ADD_OBSERVATION_UUID);
                 return true;
             }
         });
@@ -100,5 +102,11 @@ public class PatientDetailActivity extends FragmentActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        OdkActivityLauncher.sendOdkResultToServer(this, requestCode, resultCode, data);
     }
 }
