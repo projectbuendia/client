@@ -303,9 +303,6 @@ public class PatientListFragment extends ProgressFragment implements
 
             holder.mPatientName.setText(patient.given_name + " " + patient.family_name);
             holder.mPatientId.setText(patient.id);
-            holder.mPatientLocation.setText("" + getString(Location.getLocationWithoutAll()[patient.assigned_location.zone].getTitleId()) +
-                    ", Tent " + patient.assigned_location.tent +
-                    ", Bed " + patient.assigned_location.bed);
 
             if (patient.age.type != null && patient.age.type.equals("months")) {
                 holder.mPatientAge.setText("<1");
@@ -324,11 +321,11 @@ public class PatientListFragment extends ProgressFragment implements
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_man));
             }
 
-            if (patient.gender != null && patient.gender.equals("F") && patient.pregnancy_start_date == null) {
+            if (patient.gender != null && patient.gender.equals("F") && patient.pregnant) {
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_woman));
             }
 
-            if (patient.pregnancy_start_date != null) {
+            if (patient.pregnant) {
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_pregnant));
             }
 
@@ -352,7 +349,6 @@ public class PatientListFragment extends ProgressFragment implements
         @InjectView(R.id.listview_cell_search_results_color_indicator) ImageView mPatientListStatusColorIndicator;
         @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
         @InjectView(R.id.listview_cell_search_results_id) TextView mPatientId;
-        @InjectView(R.id.listview_cell_search_results_location) TextView mPatientLocation;
         @InjectView(R.id.listview_cell_search_results_gender) ImageView mPatientGender;
         @InjectView(R.id.listview_cell_search_results_age) TextView mPatientAge;
 

@@ -65,6 +65,9 @@ public class Utils {
      * @return String the converted date
      */
     public static String timestampToDate(Long timestamp) {
+        if (timestamp == null) {
+            timestamp = 0L;
+        }
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(timestamp * 1000);
         return DateFormat.format("dd-MM-yyyy", cal).toString();

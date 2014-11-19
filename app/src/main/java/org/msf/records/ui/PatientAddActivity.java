@@ -164,7 +164,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
 
         /*{
             "id":"MSF.TS.1",
-                "created_timestamp_utc":1413234941,
+                "created_timestamp":1413234941,
                 "created_local_date":"2014-10-13",
                 "status":null,
                 "given_name":null,
@@ -183,7 +183,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
             "gender":null,
                 "important_information":null,
                 "pregnancy_start_date":null,
-                "first_showed_symptoms_timestamp_utc":0,
+                "first_showed_symptoms_timestamp":0,
                 "first_showed_symptoms_local_date":"1970-01-01",
                 "movement":null,
                 "eating":null,
