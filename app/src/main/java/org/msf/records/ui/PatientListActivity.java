@@ -259,79 +259,7 @@ public class PatientListActivity extends FragmentActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != OdkActivityLauncher.ODK_COLLECT_REQUEST_CODE) {
-            return;
-        }
-
-        if (data == null || data.getData() == null) {
-            // Cancelled.
-            Log.i(TAG, "No data for form result, probably cancelled.");
-            return;
-        }
-
-        Uri uri = data.getData();
-
-        if (!getContentResolver().getType(uri).equals(
-                InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
-            Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
-            return;
-        }
-
-        Cursor instanceCursor = null;
-        try {
-            instanceCursor = getContentResolver().query(uri,
-                    null, null, null, null);
-            if (instanceCursor.getCount() != 1) {
-                Log.e(TAG, "The form that we tried to load did not exist: " + uri);
-                return;
-            }
-            instanceCursor.moveToFirst();
-            String instancePath = instanceCursor.getString(
-                    instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
-            if (instancePath == null) {
-                Log.e(TAG, "No file path for form instance: " + uri);
-                return;
-
-            }
-            int columnIndex = instanceCursor
-                    .getColumnIndex(InstanceProviderAPI.InstanceColumns._ID);
-            if (columnIndex == -1) {
-                Log.e(TAG, "No id to delete for after upload: " + uri);
-                return;
-            }
-            final long idToDelete = instanceCursor.getLong(columnIndex);
-
-            sendFormToServer(null /* create new patient */, readFromPath(instancePath),
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            Log.i(TAG, "Created new patient successfully on server"
-                                    + response.toString());
-
-                            // Code largely copied from InstanceUploaderTask to delete on upload
-                            DeleteInstancesTask dit = new DeleteInstancesTask();
-                            dit.setContentResolver(
-                                    Collect.getInstance().getApplication().getContentResolver());
-                            dit.execute(idToDelete);
-                        }
-                    });
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read xml form into a String " + uri, e);
-        } finally {
-            if (instanceCursor != null) {
-                instanceCursor.close();
-            }
-        }
-    }
-
-    private String readFromPath(String path) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(path));
-        String line;
-        while((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
-        }
-        return sb.toString();
+        OdkActivityLauncher.sendOdkResultToServer(this, requestCode, resultCode, data);
     }
 
     private void showFakeScanProgress() {
@@ -339,19 +267,6 @@ public class PatientListActivity extends FragmentActivity
                 .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
         progressDialog.setCancelable(true);
         progressDialog.show();
-    }
-
-    private void sendFormToServer(String patientId, String xml,
-                                  Response.Listener<JSONObject> successListener) {
-        OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
-        connection.postXformInstance(patientId, xml,
-                successListener,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Did not submit  form to server successfully", error);
-                    }
-                });
     }
 
     private void startActivity(Class<?> activityClass) {
