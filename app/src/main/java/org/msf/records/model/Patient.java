@@ -6,7 +6,9 @@ import java.io.Serializable;
  * Created by Gil on 03/10/2014.
  */
 public class Patient implements Serializable {
-
+    // Internal identifier.
+    public String uuid;
+    // User-specified identifier.
     public String id;
     public String given_name;
     public String family_name;
@@ -40,5 +42,4 @@ public class Patient implements Serializable {
 
     public PatientLocation assigned_location;
     public PatientAge age;
-
 }
