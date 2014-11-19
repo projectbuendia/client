@@ -60,7 +60,7 @@ public class Status implements Parcelable, ListItem {
     public static Status getStatus(String statusKey){
         Status status = STATUSES.get(statusKey);
         if (status == null) {
-            Log.e("Status", "Tried to get status for unknown: " + statusKey);
+            Log.e("Status", "Tried to get status for unknown: '" + statusKey + '\'');
             return STATUSES.get("suspected");
         }
         return status;
