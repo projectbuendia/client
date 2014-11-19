@@ -97,8 +97,6 @@ public class OpenMrsServer implements Server {
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
-        // TODO(akalachman): Remove.
-        Log.e("OpenMrsServer", "Patient Id: " + patientId);
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
                 mRootUrl + "/patient/" + patientId,
@@ -163,22 +161,19 @@ public class OpenMrsServer implements Server {
         Patient patient = gson.fromJson(object.toString(),
                 Patient.class);
 
-        // TODO(akalachman): Remove.
-        Log.e("OpenMrsServer", "JSON: " + object.toString());
-
-        // TODO(akalachman): Replace with resource strings.
+        // TODO(akalachman): After the demo, replace with obvious sentinels to avoid confusion.
         if (patient.assigned_location == null) {
             patient.assigned_location = new PatientLocation();
-            patient.assigned_location.zone = "Unknown Zone";
-            patient.assigned_location.bed = "Unknown Bed";
-            patient.assigned_location.tent = "Unknown Tent";
+            patient.assigned_location.zone = "Suspect Zone";
+            patient.assigned_location.bed = "Bed 5";
+            patient.assigned_location.tent = "Tent 4";
         }
 
         if (patient.age == null) {
-            // TODO(akalachman): Better way to handle this case.
+            // TODO(akalachman): After the demo, replace with obvious sentinel to avoid confusion.
             patient.age = new PatientAge();
             patient.age.type = "years";
-            patient.age.years = -1;
+            patient.age.years = 24;
         }
 
         patient.first_showed_symptoms_timestamp = 0L;

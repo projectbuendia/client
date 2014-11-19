@@ -103,7 +103,9 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mFrame.removeAllViewsInLayout();
+        if (mFrame != null) {
+            mFrame.removeAllViewsInLayout();
+        }
     }
 
     protected void setContentView(int layout){
