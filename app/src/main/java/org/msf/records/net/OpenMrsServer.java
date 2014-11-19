@@ -168,9 +168,11 @@ public class OpenMrsServer implements Server {
         patient.assigned_location.bed = 2;
         patient.assigned_location.tent = 3;
 
-        patient.age = new PatientAge();
-        patient.age.type = "years";
-        patient.age.years = 24;
+        if (patient.age == null) {
+            patient.age = new PatientAge();
+            patient.age.type = "years";
+            patient.age.years = 24;
+        }
 
         patient.first_showed_symptoms_timestamp_utc = 0L;
         if (patient.created_timestamp_utc != null) {
