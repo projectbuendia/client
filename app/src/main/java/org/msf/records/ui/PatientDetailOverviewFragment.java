@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -44,18 +43,13 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
     @InjectView(R.id.patient_overview_movement) TextView mPatientMovementTV;
     @InjectView(R.id.patient_overview_eating_status) TextView mPatientEatingTV;
     @InjectView(R.id.patient_overview_admission_date) TextView mPatientAdmissionDateTV;
-    @InjectView(R.id.patient_overview_estimated_days_infected) TextView mPatientDaysInfectedTV;
+    @InjectView(R.id.patient_overview_days_since_admission_tv) TextView mPatientDaysSinceAdmissionTV;
     @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
     @InjectView(R.id.patient_overview_gender_tv) TextView mPatientGenderTV;
     @InjectView(R.id.patient_overview_age_tv) TextView mPatientAgeTV;
     @InjectView(R.id.patient_overview_status) View mPatientStatusContainer;
-    @InjectView(R.id.patient_overview_location_zone_tv) TextView mPatientLocationZoneTv;
-    @InjectView(R.id.patient_overview_location_tent_tv) TextView mPatientLocationTentTv;
-    @InjectView(R.id.patient_overview_location_bed_tv) TextView mPatientLocationBedTv;
-    @InjectView(R.id.patient_overview_location_zone) LinearLayout mPatientLocationZone;
-    @InjectView(R.id.patient_overview_location_tent) LinearLayout mPatientLocationTent;
-    @InjectView(R.id.patient_overview_location_bed) LinearLayout mPatientLocationBed;
+    @InjectView(R.id.patient_overview_assigned_location_tv) TextView mPatientAssignedLocationTV;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -138,7 +132,8 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         gridDialogFragment.setArguments(bundle);
         gridDialogFragment.show(fm, null);
     }
-    @OnClick({R.id.patient_overview_location_zone, R.id.patient_overview_location_tent, R.id.patient_overview_location_bed})
+
+    @OnClick({R.id.patient_overview_assigned_location})
     public void patientOverviewLocationClick() {
         FragmentManager fm = getChildFragmentManager();
         EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
@@ -215,18 +210,21 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
 
         mPatientNameTV.setText(response.given_name + " " + response.family_name);
         mPatientIdTV.setText("" + response.id);
-        mPatientLocationZoneTv.setText(getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()));
-        mPatientLocationTentTv.setText("#" + response.assigned_location.tent);
-        mPatientLocationBedTv.setText("#" + response.assigned_location.bed);
 
-        //mPatientLocationTV.setText("" + getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()) + ", Tent " +
-        //        response.assigned_location.tent + ", Bed " + response.assigned_location.bed);
+        //mPatientLocationZoneTv.setText(getString(Location.getLocationWithoutAll()[response.assigned_location.zone].getTitleId()));
+        //mPatientLocationTentTv.setText("#" + response.assigned_location.tent);
+        //mPatientLocationBedTv.setText("#" + response.assigned_location.bed);
+
+        mPatientAssignedLocationTV.setText(response.assigned_location.zone + "\n" +
+                response.assigned_location.tent + " " + response.assigned_location.bed);
         mPatientMovementTV.setText("" + response.movement);
         mPatientEatingTV.setText("" + response.eating);
-        mPatientAdmissionDateTV.setText(Utils.timestampToDate(response.created_timestamp_utc));
+        mPatientAdmissionDateTV.setText(Utils.timestampToDate(response.created_timestamp));
         mPatientOriginTV.setText(response.origin_location);
         mPatientContactTV.setText(response.next_of_kin);
-        mPatientDaysInfectedTV.setText("" + Utils.timeDifference(response.first_showed_symptoms_timestamp_utc).getDays());
+        mPatientDaysSinceAdmissionTV.setText(String.format(
+                getResources().getString(R.string.day_n),
+                Utils.timeDifference(response.created_timestamp).getDays()));
         if(response.status == null)
             response.status = "confirmed";
         mPatientStatusContainer.setBackgroundColor(getResources().getColor(Status.getStatus(response.status).colorId));
@@ -246,7 +244,7 @@ public class PatientDetailOverviewFragment extends ProgressFragment implements R
         }
 
         mPatientGenderTV.setText(mGender);
-        mPatientAgeTV.setText(mAge + " years old");
+        mPatientAgeTV.setText(String.format(getResources().getString(R.string.age_years), mAge));
 
 
         //important information

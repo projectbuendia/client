@@ -162,19 +162,24 @@ public class OpenMrsServer implements Server {
         Patient patient = gson.fromJson(object.toString(),
                 Patient.class);
 
-        // TODO(nfortescue): fill these in properly
-        patient.assigned_location = new PatientLocation();
-        patient.assigned_location.zone = 1;
-        patient.assigned_location.bed = 2;
-        patient.assigned_location.tent = 3;
+        // TODO(akalachman): Replace with resource strings.
+        if (patient.assigned_location == null) {
+            patient.assigned_location = new PatientLocation();
+            patient.assigned_location.zone = "Unknown Zone";
+            patient.assigned_location.bed = "Unknown Bed";
+            patient.assigned_location.tent = "Unknown Tent";
+        }
 
-        patient.age = new PatientAge();
-        patient.age.type = "years";
-        patient.age.years = 24;
+        if (patient.age == null) {
+            // TODO(akalachman): Better way to handle this case.
+            patient.age = new PatientAge();
+            patient.age.type = "years";
+            patient.age.years = -1;
+        }
 
-        patient.first_showed_symptoms_timestamp_utc = 0L;
-        if (patient.created_timestamp_utc != null) {
-            patient.created_timestamp_utc /= 1000; // UI wants it in seconds, not millis
+        patient.first_showed_symptoms_timestamp = 0L;
+        if (patient.created_timestamp != null) {
+            patient.created_timestamp /= 1000; // UI wants it in seconds, not millis
         }
         return patient;
     }

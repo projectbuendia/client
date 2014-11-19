@@ -12,17 +12,30 @@ public class Patient implements Serializable {
     public String family_name;
 
     public String important_information;
-    public String status;
-    public String pregnancy_start_date;
 
+    /**
+     * Accepted values:
+     * suspected, probable, confirmed, non-case, convalescent,
+     * can_be_discharged, dischraged, suspected_dead, confirmed_dead
+     */
+    public String status;
+
+    public boolean pregnant;
+
+    // Must be "M" or "F".
     public String gender;
+
+    @Deprecated
     public String movement;
+    @Deprecated
     public String eating;
 
-    public Long created_timestamp_utc;
-    public Long first_showed_symptoms_timestamp_utc;
+    public Long admission_timestamp;
+    public Long created_timestamp;
+    public Long first_showed_symptoms_timestamp;
 
     public String origin_location;
+    // Not yet ready.
     public String next_of_kin;
 
     public PatientLocation assigned_location;
