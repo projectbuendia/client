@@ -74,14 +74,14 @@ public class PatientListActivity extends FragmentActivity
 
     private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
-    private OnSearchListener mSearchListerner;
+    private OnSearchListener mSearchListener;
 
     interface OnSearchListener {
-        void setQuerySubmited(String q);
+        void setQuerySubmitted(String q);
     }
 
     public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListerner = onSearchListener;
+        this.mSearchListener = onSearchListener;
     }
 
     /**
@@ -112,12 +112,6 @@ public class PatientListActivity extends FragmentActivity
             // Add the fragment to the container.
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.patient_detail_container, mainScreenFragment).commit();
-
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            ((PatientListFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.patient_list))
-                    .setActivateOnItemClick(true);
 
             setupCustomActionBar();
         }
@@ -151,25 +145,9 @@ public class PatientListActivity extends FragmentActivity
      */
     @Override
     public void onItemSelected(String id) {
-        if (mTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-            Bundle arguments = new Bundle();
-            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY, id);
-            PatientDetailFragment fragment = new PatientDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.patient_detail_container, fragment)
-                    .commit();
-
-        } else {
-            // In single-pane mode, simply start the detail activity
-            // for the selected item ID.
-            Intent detailIntent = new Intent(this, PatientDetailActivity.class);
-            detailIntent.putExtra(PatientDetailFragment.PATIENT_ID_KEY, id);
-            startActivity(detailIntent);
-        }
+        Intent detailIntent = new Intent(this, PatientDetailActivity.class);
+        detailIntent.putExtra(PatientDetailFragment.PATIENT_ID_KEY, id);
+        startActivity(detailIntent);
     }
 
     @Override
@@ -180,11 +158,11 @@ public class PatientListActivity extends FragmentActivity
             inflater.inflate(R.menu.main, menu);
 
             menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startActivity(PatientAddActivity.class);
-                return false;
-              }
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    startActivity(PatientAddActivity.class);
+                    return false;
+                }
             });
 
             menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
@@ -217,10 +195,10 @@ public class PatientListActivity extends FragmentActivity
           });
 
           mSettingsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              startActivity(SettingsActivity.class);
-            }
+              @Override
+              public void onClick(View v) {
+                  startActivity(SettingsActivity.class);
+              }
           });
 
           mScanBtn.setOnClickListener(new View.OnClickListener() {
@@ -246,8 +224,8 @@ public class PatientListActivity extends FragmentActivity
 
           @Override
           public boolean onQueryTextChange(String newText) {
-            if (mSearchListerner != null)
-              mSearchListerner.setQuerySubmited(newText);
+            if (mSearchListener != null)
+              mSearchListener.setQuerySubmitted(newText);
             return true;
           }
         });
