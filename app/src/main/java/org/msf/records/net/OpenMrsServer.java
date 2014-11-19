@@ -97,6 +97,8 @@ public class OpenMrsServer implements Server {
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
+        // TODO(akalachman): Remove.
+        Log.e("OpenMrsServer", "Patient Id: " + patientId);
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
                 mRootUrl + "/patient/" + patientId,
@@ -160,6 +162,9 @@ public class OpenMrsServer implements Server {
     private Patient parsePatientJson(JSONObject object) throws JSONException {
         Patient patient = gson.fromJson(object.toString(),
                 Patient.class);
+
+        // TODO(akalachman): Remove.
+        Log.e("OpenMrsServer", "JSON: " + object.toString());
 
         // TODO(akalachman): Replace with resource strings.
         if (patient.assigned_location == null) {

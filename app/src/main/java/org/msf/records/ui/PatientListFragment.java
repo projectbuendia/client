@@ -232,7 +232,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mCallbacks.onItemSelected(mPatientAdapter.getItem(position).id);
+        mCallbacks.onItemSelected(mPatientAdapter.getItem(position).uuid);
 
     }
     /**
