@@ -61,10 +61,6 @@ public class DateWidget extends QuestionWidget {
         mDatePicker.setFocusable(!prompt.isReadOnly());
         mDatePicker.setEnabled(!prompt.isReadOnly());
 
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(context, null);
-        layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT;
-        layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT;
-
         hideDayFieldIfNotInFormat(prompt);
 
         mDateListener = new DatePicker.OnDateChangedListener() {
