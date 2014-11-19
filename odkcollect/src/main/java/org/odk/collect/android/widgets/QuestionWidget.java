@@ -21,6 +21,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.form.api.FormEntryPrompt;
+import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.views.MediaLayout;
 
@@ -171,16 +173,18 @@ public abstract class QuestionWidget extends LinearLayout {
 
         String promptText = p.getLongText();
         // Add the text view. Textview always exists, regardless of whether there's text.
-        mQuestionText = new TextView(getContext());
+        mQuestionText = (TextView) LayoutInflater.from(getContext())
+                .inflate(R.layout.template_text_view_question, null);
+//        mQuestionText = new TextView(getContext());
         mQuestionText.setText(promptText == null ? "" : promptText);
-        mQuestionText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize);
-        mQuestionText.setTypeface(null, Typeface.BOLD);
-        mQuestionText.setPadding(0, 0, 0, 7);
+//        mQuestionText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize);
+//        mQuestionText.setTypeface(null, Typeface.BOLD);
+//        mQuestionText.setPadding(0, 0, 0, 7);
         mQuestionText.setId(QuestionWidget.newUniqueId()); // assign random id
 
         // Wrap to the size of the parent view
-        mQuestionText.setHorizontallyScrolling(false);
-        mQuestionText.setLayoutParams(mLayoutParams);
+//        mQuestionText.setHorizontallyScrolling(false);
+//        mQuestionText.setLayoutParams(mLayoutParams);
 
         if (promptText == null || promptText.length() == 0) {
             mQuestionText.setVisibility(GONE);

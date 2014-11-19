@@ -23,12 +23,12 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,7 +90,7 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
         mView.setPadding(0, 7, 0, 0);
 
         mLayout =
-            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
+            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
         mLayout.setMargins(10, 0, 10, 0);
 
@@ -171,9 +171,13 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
                 });
 
                 View divider = new View(getContext());
-                divider.setBackgroundResource(android.R.drawable.divider_horizontal_bright);
-                divider.setMinimumHeight(3);
+                divider.setBackgroundResource(R.drawable.divider);
+                divider.setMinimumHeight((int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 9, getResources().getDisplayMetrics()));
                 mView.addView(divider);
+
+//                mView.addView(
+//                        LayoutInflater.from(getContext()).inflate(R.layout.template_divider, null));
 
                 mView.addView(mLaunchIntentButton, mLayout);
             }
@@ -183,9 +187,14 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
         int id = 0;
         for (FormEntryPrompt p : questionPrompts) {
             if (!first) {
+
                 View divider = new View(getContext());
-                divider.setBackgroundResource(android.R.drawable.divider_horizontal_bright);
-                divider.setMinimumHeight(3);
+                divider.setBackgroundResource(R.drawable.divider);
+                divider.setMinimumHeight((int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 9, getResources().getDisplayMetrics()));
+//                divider.setLay
+//                mView.addView(
+//                        LayoutInflater.from(getContext()).inflate(R.layout.template_divider, null));
                 mView.addView(divider);
             } else {
                 first = false;
@@ -283,11 +292,12 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
 
         // build view
         if (s.length() > 0) {
-            TextView tv = new TextView(getContext());
+            TextView tv = (TextView) LayoutInflater.from(getContext())
+                    .inflate(R.layout.template_text_view_group, null);
             tv.setText(s.substring(0, s.length() - 3));
-            int questionFontsize = Collect.getQuestionFontsize();
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, questionFontsize - 4);
-            tv.setPadding(0, 0, 0, 5);
+//            int questionFontsize = Collect.getQuestionFontsize();
+//            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, questionFontsize - 4);
+//            tv.setPadding(0, 0, 0, 5);
             mView.addView(tv, mLayout);
         }
     }
