@@ -52,4 +52,6 @@
     <string name="overview_days_since_admission">Days Since Admission</string>
     <string name="overview_gender">Gender</string>
     <string name="overview_assigned_location">Assigned Location</string>
+    <string name="overview_instructions">Instructions</string>
+    <string name="detail_page_view_chart">View Chart</string>
 </resources>

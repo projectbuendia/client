@@ -29,13 +29,6 @@
             android:layout_marginTop="6dp"
             android:textColor="@android:color/darker_gray" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/listview_cell_search_results_location"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginTop="20dp" />
-
     </LinearLayout>
 
     <LinearLayout

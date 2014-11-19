@@ -35,6 +35,14 @@
         <item name="android:gravity">center</item>
         <item name="android:padding">16dp</item>
     </style>
+    <style name="cell_left_align">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">left</item>
+        <item name="android:padding">16dp</item>
+    </style>
     <style name="cell_heading">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -95,5 +103,10 @@
         <item name="android:textColor">@drawable/white</item>
         <item name="android:layout_marginBottom">10dp</item>
         <item name="android:padding">30dp</item>
+    </style>
+
+    <style name="overview_details_row">
+        <item name="android:background">@color/yellow</item>
+        <item name="android:layout_margin">30dp</item>
     </style>
 </resources>
