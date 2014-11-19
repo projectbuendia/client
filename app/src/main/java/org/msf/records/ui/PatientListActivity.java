@@ -2,7 +2,6 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -29,22 +28,15 @@ import org.json.JSONObject;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.Constants;
-import org.msf.records.net.OdkDatabase;
-import org.msf.records.net.OdkXformSyncTask;
-import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
-import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.application.Collect;
-import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
@@ -254,64 +246,20 @@ public class PatientListActivity extends FragmentActivity
     public void onButtonClicked(View view) {
         switch (view.getId()) {
             case R.id.new_patient_button:
-                fetchXforms(Constants.ADD_PATIENT_UUID);
+                OdkActivityLauncher.fetchXforms(this, Constants.ADD_PATIENT_UUID);
                 break;
         }
-    }
-
-    private Response.ErrorListener getErrorListenerForTag(final String tag) {
-        return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(tag, error.toString());
-            }
-        };
-    }
-
-    private void fetchXforms(final String uuidToShow) {
-        final String tag = "fetchXforms";
-        App.getmOpenMrsXformsConnection().listXforms(
-                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                    @Override
-                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                        if (response.isEmpty()) {
-                            Log.i(tag, "No forms found");
-                            return;
-                        }
-                        // Cache all the forms into the ODK form cache
-                        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-                            @Override
-                            public void formWritten(File path, String uuid) {
-                                Log.i(tag, "wrote form " + path);
-                                showOdkCollect(OdkDatabase.getFormIdForPath(path));
-                            }
-                        }).execute(findUuid(response, uuidToShow));
-                    }
-                }, getErrorListenerForTag(tag));
-    }
-
-    // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
-    // return null if no xform is found.
-    private OpenMrsXformIndexEntry findUuid(List<OpenMrsXformIndexEntry> allEntries, String uuid) {
-        for (OpenMrsXformIndexEntry entry : allEntries) {
-            if (entry.uuid.equals(uuid)) {
-                return entry;
-            }
-        }
-        return null;
     }
 
     private void showFirstFormFromSdcard() {
         // Sync the local sdcard forms into the database
         new DiskSyncTask().execute((Void[]) null);
-        showOdkCollect(1L);
+        OdkActivityLauncher.showOdkCollect(this, 1L);
     }
-
-    private static final int ODK_COLLECT_REQUEST_CODE = 1;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != ODK_COLLECT_REQUEST_CODE) {
+        if (requestCode != OdkActivityLauncher.ODK_COLLECT_REQUEST_CODE) {
             return;
         }
 
@@ -384,14 +332,6 @@ public class PatientListActivity extends FragmentActivity
             sb.append(line).append("\n");
         }
         return sb.toString();
-    }
-
-    private void showOdkCollect(long formId) {
-        Intent intent = new Intent(this, FormEntryActivity.class);
-        Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
-        intent.setData(formUri);
-        intent.setAction(Intent.ACTION_PICK);
-        startActivityForResult(intent, ODK_COLLECT_REQUEST_CODE);
     }
 
     private void showFakeScanProgress() {
