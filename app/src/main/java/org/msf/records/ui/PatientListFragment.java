@@ -337,7 +337,7 @@ public class PatientListFragment extends ProgressFragment implements
                 holder.mPatientListStatusColorIndicator.setBackgroundColor(getResources().getColor(R.color.transparent));
             }
 
-            if (patient.status != null){
+            if (patient.status != null && Status.getStatus(patient.status) != null) {
                 holder.mPatientListStatusColorIndicator.setBackgroundColor(getResources().getColor(Status.getStatus(patient.status).colorId));
             }
 

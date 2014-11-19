@@ -234,11 +234,14 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         mPatientDaysSinceAdmissionTV.setText(String.format(
                 getResources().getString(R.string.day_n),
                 Utils.timeDifference(response.created_timestamp).getDays()));
-        if(response.status == null)
-            response.status = "confirmed";
-        mPatientStatusContainer.setBackgroundColor(getResources().getColor(Status.getStatus(response.status).colorId));
-        mPatientStatusIcon.setImageResource(Status.getStatus(response.status).roundIconId);
-        mPatientStatusTV.setText(Status.getStatus(response.status).nameId);
+        if (response.status == null) {
+            response.status = "CONFIRMED_CASE";
+        }
+        if (Status.getStatus(response.status) != null) {
+            mPatientStatusContainer.setBackgroundColor(getResources().getColor(Status.getStatus(response.status).colorId));
+            mPatientStatusIcon.setImageResource(Status.getStatus(response.status).roundIconId);
+            mPatientStatusTV.setText(Status.getStatus(response.status).nameId);
+        }
 
         if (response.gender.equals("M")) {
             mGender = "Male";
