@@ -80,6 +80,9 @@ public class Utils {
      * @return Period between the 2 dates
      */
     public static Period timeDifference(Long timestamp) {
+        if (timestamp == null) {
+            return Period.millis(0);
+        }
         DateTime start = new DateTime(timestamp * 1000);
         DateTime currentDate = new DateTime();
         return new Period(start, currentDate);
