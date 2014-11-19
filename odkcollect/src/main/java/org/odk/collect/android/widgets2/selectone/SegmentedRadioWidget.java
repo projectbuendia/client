@@ -20,8 +20,6 @@ import org.odk.collect.android.widgets2.TypedWidget;
 
 import java.util.List;
 
-import info.hoang8f.android.segmented.SegmentedGroup;
-
 /**
  * A {@link TypedWidget} of {@link SelectOneData} that displays choices as horizontal segmented
  * buttons.
