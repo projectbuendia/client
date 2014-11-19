@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="None" />
+
+    <!-- The style for Buendia text. -->
+    <style name="TextAppearance.Buendia" parent="TextAppearance.AppCompat">
+
+    </style>
+
+    <!-- The style for title text. -->
+    <style name="TextAppearance.Buendia.Title">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
+    <!-- The style for heading text. -->
+    <style name="TextAppearance.Buendia.Heading">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- The style for EditText widgets. -->
+    <style name="Widget.Buendia.EditText" parent="None">
+        <item name="android:textSize">24sp</item>
+        <item name="android:padding">12dp</item>
+        <!--<item name="android:paddingLeft">12dp</item>-->
+        <!--<item name="android:paddingRight">12dp</item>-->
+        <!--<item name="android:paddingBottom">12dp</item>-->
+        <!--<item name="android:layout_marginBottom">20dp</item>-->
+        <!--<item name="android:layout_margin">12dp</item>-->
+    </style>
+</resources>
