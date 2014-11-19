@@ -95,7 +95,6 @@
     <orderEntry type="library" exported="" name="apache-mime4j-storage-0.7.2" level="project" />
     <orderEntry type="library" exported="" name="apache-mime4j-examples-0.7.2" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
-    <orderEntry type="library" exported="" name="android-segmented-1.0.2" level="project" />
     <orderEntry type="library" exported="" name="apache-mime4j-core-0.7.2" level="project" />
     <orderEntry type="library" exported="" name="apache-mime4j-benchmark-0.7.2" level="project" />
     <orderEntry type="library" exported="" name="joda-time-2.3" level="project" />
