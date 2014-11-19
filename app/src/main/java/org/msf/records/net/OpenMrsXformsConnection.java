@@ -63,7 +63,8 @@ public class OpenMrsXformsConnection {
                             String xml = response.getString("xml");
 
                             // TODO(akalachman): This is hacky and bad but handles a server bug.
-                            xml = xml.replaceFirst("xmlns:openmrs=\".*\"", "");
+                            // The regex below is greedy, so loses everything after the attribute.
+//                            xml = xml.replaceFirst("xmlns:openmrs=\".*\"", "");
 
                             resultListener.onResponse(xml);
                         } catch (JSONException e) {
