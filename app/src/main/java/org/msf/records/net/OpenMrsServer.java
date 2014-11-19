@@ -25,9 +25,8 @@ import java.util.Map;
  * Created by nfortescue on 11/3/14.
  */
 public class OpenMrsServer implements Server {
-    // private static final String USERNAME = "buendiatest1";
-    // private static final String PASSWORD = "Buendia123";
 
+    private static final String TAG = "OpenMrsServer";
     private final Gson gson = new Gson();
     private final VolleySingleton mVolley;
     private final String mRootUrl;
@@ -180,6 +179,12 @@ public class OpenMrsServer implements Server {
         patient.first_showed_symptoms_timestamp = 0L;
         if (patient.created_timestamp != null) {
             patient.created_timestamp /= 1000; // UI wants it in seconds, not millis
+        }
+
+        if (patient.gender == null) {
+            // If not sent by server (should never happen)
+            Log.e(TAG, "gender was not sent from server");
+            patient.gender = "F";
         }
         return patient;
     }
