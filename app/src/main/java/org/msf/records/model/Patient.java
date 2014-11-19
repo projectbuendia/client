@@ -10,7 +10,6 @@ public class Patient implements Serializable {
     public String uuid;
     // User-specified identifier.
     public String id;
-    public String uuid;
     public String given_name;
     public String family_name;
 
