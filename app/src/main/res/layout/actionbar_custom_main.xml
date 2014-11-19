@@ -40,42 +40,42 @@
         </FrameLayout>
 
 
-        <FrameLayout
-            android:id="@+id/actionbar_add_patient"
-            style="?android:actionButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@+id/actionbar_settings">
+        <!--<FrameLayout-->
+            <!--android:id="@+id/actionbar_add_patient"-->
+            <!--style="?android:actionButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_toLeftOf="@+id/actionbar_settings">-->
 
-            <TextView style="?android:actionBarTabTextStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:gravity="center_vertical"
-                android:textSize="20sp"
-                android:text="Add Patient" />
-        </FrameLayout>
+            <!--<TextView style="?android:actionBarTabTextStyle"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:paddingLeft="8dp"-->
+                <!--android:paddingRight="8dp"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:textSize="20sp"-->
+                <!--android:text="Add Patient" />-->
+        <!--</FrameLayout>-->
 
-        <FrameLayout
-            android:id="@+id/actionbar_scan"
-            style="?android:actionButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@id/actionbar_add_patient">
-            <TextView
-                style="?android:actionBarTabTextStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:gravity="center"
-                android:textSize="20sp"
-                android:text="Scan"/>
-        </FrameLayout>
+        <!--<FrameLayout-->
+            <!--android:id="@+id/actionbar_scan"-->
+            <!--style="?android:actionButtonStyle"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_alignParentLeft="true"-->
+            <!--android:layout_toLeftOf="@id/actionbar_add_patient">-->
+            <!--<TextView-->
+                <!--style="?android:actionBarTabTextStyle"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:paddingLeft="8dp"-->
+                <!--android:paddingRight="8dp"-->
+                <!--android:gravity="center"-->
+                <!--android:textSize="20sp"-->
+                <!--android:text="Scan"/>-->
+        <!--</FrameLayout>-->
 
 
     </RelativeLayout>
