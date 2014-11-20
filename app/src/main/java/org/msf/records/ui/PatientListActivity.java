@@ -17,6 +17,22 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.crashlytics.android.Crashlytics;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
+import com.squareup.otto.Subscribe;
+import com.google.common.base.Preconditions;
+
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.events.UpdateAvailableEvent;
+import org.msf.records.events.UpdateDownloadedEvent;
+import org.msf.records.net.OdkXformSyncTask;
+import org.msf.records.net.OpenMrsXformIndexEntry;
+import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.provider.FormsProviderAPI;
 import com.squareup.otto.Subscribe;
 
 import org.msf.records.App;
@@ -53,6 +69,8 @@ public class PatientListActivity extends FragmentActivity
     private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
     private OnSearchListener mSearchListener;
+
+    private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
 
     interface OnSearchListener {
         void setQuerySubmitted(String q);
@@ -95,6 +113,19 @@ public class PatientListActivity extends FragmentActivity
             setupCustomActionBar();
         }
 
+        updateAvailableSnackbar = Snackbar.with(this)
+                .text(getString(R.string.snackbar_update_available))
+                .actionLabel(getString(R.string.snackbar_action_download))
+                .swipeToDismiss(true)
+                .animation(false)
+                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
+        updateDownloadedSnackbar = Snackbar.with(this)
+                .text(getString(R.string.snackbar_update_downloaded))
+                .actionLabel(getString(R.string.snackbar_action_install))
+                .swipeToDismiss(true)
+                .animation(false)
+                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
+
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
@@ -103,13 +134,58 @@ public class PatientListActivity extends FragmentActivity
         super.onResume();
 
         App.getMainThreadBus().register(this);
+
+        App.getUpdateManager().checkForUpdate(App.getMainThreadBus());
     }
 
     @Override
     protected void onPause() {
         App.getMainThreadBus().unregister(this);
 
+        updateAvailableSnackbar.dismiss();
+        updateDownloadedSnackbar.dismiss();
+
         super.onPause();
+    }
+
+    /**
+     * Displays a {@link Snackbar} indicating that an update is available upon receiving an
+     * {@link UpdateAvailableEvent}.
+     */
+    @Subscribe
+    public void onUpdateAvailableEvent(final UpdateAvailableEvent event) {
+        updateAvailableSnackbar
+                .actionListener(new ActionClickListener() {
+
+                    @Override
+                    public void onActionClicked() {
+                        App.getUpdateManager()
+                                .downloadUpdate(App.getMainThreadBus(), event.mUpdateInfo);
+                    }
+                });
+        if (updateAvailableSnackbar.isDismissed()) {
+            updateAvailableSnackbar.show(this);
+        }
+    }
+
+    /**
+     * Displays a {@link Snackbar} indicating that an update has been downloaded upon receiving an
+     * {@link UpdateDownloadedEvent}.
+     */
+    @Subscribe
+    public void onUpdateDownloadedEvent(final UpdateDownloadedEvent event) {
+        updateAvailableSnackbar.dismiss();
+        updateDownloadedSnackbar
+                .actionListener(new ActionClickListener() {
+
+                    @Override
+                    public void onActionClicked() {
+                        App.getUpdateManager().installUpdate(event.mUpdateInfo);
+                    }
+                });
+        if (updateDownloadedSnackbar.isDismissed()) {
+            updateDownloadedSnackbar.show(this);
+        }
     }
 
     private void setupCustomActionBar(){

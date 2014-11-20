@@ -29,7 +29,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 20
         versionCode 1
-        versionName "1.0"
+        versionName "0.1.0"
     }
     buildTypes {
         release {
@@ -58,12 +58,14 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.6'
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.jakewharton:butterknife:5.1.2'
+    compile 'com.squareup:otto:1.3.5' // Otto, the event bus.
     compile 'joda-time:joda-time:2.5'
     compile 'com.crashlytics.android:crashlytics:1.+'
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.android.support:recyclerview-v7:+'
-    compile 'com.squareup:otto:1.3.5' // The event bus.
+    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning.
+    compile project(':snackbar')
     androidTestCompile files('libs/espresso-1.1-bundled.jar')
     compile project(':odkcollect')
     compile project(':viewserver')

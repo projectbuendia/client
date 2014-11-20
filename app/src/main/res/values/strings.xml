@@ -46,6 +46,11 @@
     <string name="action_update_chart">Update Chart</string>
     <string name="action_view_round_archive">Round Archive</string>
 
+    <string name="snackbar_update_available">Application update available</string>
+    <string name="snackbar_update_downloaded">Application update downloaded</string>
+    <string name="snackbar_action_download">Download</string>
+    <string name="snackbar_action_install">Install</string>
+
     <string name="age_years">%d years</string>
     <string name="day_n">%d</string>
     <string name="overview_age">Age</string>
