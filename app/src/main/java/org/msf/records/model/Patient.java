@@ -22,7 +22,7 @@ public class Patient implements Serializable {
      */
     public String status;
 
-    public boolean pregnant;
+    public Boolean pregnant;
 
     // Must be "M" or "F".
     public String gender;
