@@ -21,10 +21,12 @@ import com.android.volley.VolleyError;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.cache.PatientOpenHelper;
 import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
 
+import java.util.Collection;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -65,6 +67,8 @@ public class PatientListFragment extends ProgressFragment implements
 
     private PatientAdapter mPatientAdapter;
 
+    private PatientOpenHelper patientDb;
+
     private ListView mListView;
 
     private SwipeRefreshLayout mSwipeToRefresh;
@@ -89,7 +93,7 @@ public class PatientListFragment extends ProgressFragment implements
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(String id);
+        public void onItemSelected(String uuid, String givenName, String familyName, String id);
     }
 
     /**
@@ -98,7 +102,7 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
-        public void onItemSelected(String id) {
+        public void onItemSelected(String uuid, String givenName, String familyName, String id) {
         }
     };
 
@@ -160,6 +164,8 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        patientDb = new PatientOpenHelper(getActivity());
 
         mListView = (ListView) view.findViewById(R.id.fragment_patient_list);
         mListView.setOnItemClickListener(this);
@@ -232,8 +238,11 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mCallbacks.onItemSelected(mPatientAdapter.getItem(position).uuid);
-
+        mCallbacks.onItemSelected(
+                mPatientAdapter.getItem(position).uuid,
+                mPatientAdapter.getItem(position).given_name,
+                mPatientAdapter.getItem(position).family_name,
+                mPatientAdapter.getItem(position).id);
     }
     /**
      @Override
@@ -321,12 +330,12 @@ public class PatientListFragment extends ProgressFragment implements
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_man));
             }
 
-            if (patient.gender != null && patient.gender.equals("F") && patient.pregnant != null && patient.pregnant) {
-                holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_woman));
-            }
-
-            if (patient.pregnant != null && patient.pregnant) {
-                holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_pregnant));
+            if (patient.gender != null && patient.gender.equals("F")) {
+                if (patient.pregnant != null && patient.pregnant) {
+                    holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_pregnant));
+                } else {
+                    holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_woman));
+                }
             }
 
             if (patient.gender == null) {
@@ -342,6 +351,26 @@ public class PatientListFragment extends ProgressFragment implements
             }
 
             return convertView;
+        }
+
+        @Override
+        public void addAll(Collection<? extends Patient> patients) {
+            // Inject entries from local cache.
+            for (Patient patient : patients) {
+                add(patient);
+            }
+        }
+
+        @Override
+        public void add(Patient patient) {
+            // If the patient exists in local cache, inject it.
+            // TODO(akalachman): Remove after demo?
+            Patient cachedPatient = patientDb.getPatient(patient.uuid);
+            if (cachedPatient == null) {
+                super.add(patient);
+            } else {
+                super.add(cachedPatient);
+            }
         }
     }
 

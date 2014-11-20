@@ -24,7 +24,7 @@ public class PatientDetailOverviewFragment extends Fragment {
     public static PatientDetailOverviewFragment newInstance(String patientId){
         PatientDetailOverviewFragment patientDetailOverviewFragment = new PatientDetailOverviewFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(PatientDetailFragment.PATIENT_ID_KEY, patientId);
+        bundle.putString(PatientDetailFragment.PATIENT_UUID_KEY, patientId);
         patientDetailOverviewFragment.setArguments(bundle);
         return patientDetailOverviewFragment;
     }
