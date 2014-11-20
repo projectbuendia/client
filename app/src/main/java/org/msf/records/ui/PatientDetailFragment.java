@@ -117,7 +117,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         }
     }
 
-    @OnClick(R.id.patient_overview_name)
+//    @OnClick(R.id.patient_overview_name)
     public void patientOverviewNameClick(){
         FragmentManager fm = getChildFragmentManager();
         EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
