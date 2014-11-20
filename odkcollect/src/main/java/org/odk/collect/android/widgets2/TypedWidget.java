@@ -11,8 +11,12 @@ import org.odk.collect.android.widgets.QuestionWidget;
  */
 public abstract class TypedWidget<T extends IAnswerData> extends QuestionWidget {
 
-    public TypedWidget(Context context, FormEntryPrompt prompt) {
+    protected final Appearance mAppearance;
+
+    public TypedWidget(Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
         super(context, prompt);
+
+        mAppearance = appearance;
     }
 
     @Override
