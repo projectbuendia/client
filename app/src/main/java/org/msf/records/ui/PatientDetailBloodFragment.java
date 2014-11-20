@@ -48,7 +48,7 @@ public class PatientDetailBloodFragment extends ProgressFragment {
     public static PatientDetailBloodFragment newInstance(String patientId) {
         PatientDetailBloodFragment fragment = new PatientDetailBloodFragment();
         Bundle args = new Bundle();
-        args.putString(PatientDetailFragment.PATIENT_ID_KEY, patientId);
+        args.putString(PatientDetailFragment.PATIENT_UUID_KEY, patientId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,7 +60,7 @@ public class PatientDetailBloodFragment extends ProgressFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mPatientId = getArguments().getString(PatientDetailFragment.PATIENT_ID_KEY);
+            mPatientId = getArguments().getString(PatientDetailFragment.PATIENT_UUID_KEY);
         }
         setContentView(R.layout.fragment_patient_detail_blood);
     }

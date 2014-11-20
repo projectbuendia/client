@@ -49,7 +49,7 @@ public class PatientDetailFlagsFragment extends ProgressFragment {
     public static PatientDetailFlagsFragment newInstance(String patientId) {
         PatientDetailFlagsFragment fragment = new PatientDetailFlagsFragment();
         Bundle args = new Bundle();
-        args.putString(PatientDetailFragment.PATIENT_ID_KEY, patientId);
+        args.putString(PatientDetailFragment.PATIENT_UUID_KEY, patientId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,7 +60,7 @@ public class PatientDetailFlagsFragment extends ProgressFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mPatientId = getArguments().getString(PatientDetailFragment.PATIENT_ID_KEY);
+            mPatientId = getArguments().getString(PatientDetailFragment.PATIENT_UUID_KEY);
         }
         setContentView(R.layout.fragment_patient_detail_flags);
     }
