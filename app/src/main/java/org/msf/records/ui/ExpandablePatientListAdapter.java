@@ -200,7 +200,6 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
 
     public void add(final Patient patient) {
         // If the patient exists in local cache, inject it.
-        // TODO(akalachman): Remove after demo?
         Patient patientToAdd = patientDb.getPatient(patient.uuid);
         if (patientToAdd == null) {
             patientToAdd = patient;
