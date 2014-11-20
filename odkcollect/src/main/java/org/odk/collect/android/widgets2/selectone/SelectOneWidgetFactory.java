@@ -15,14 +15,14 @@ public class SelectOneWidgetFactory extends TypedWidgetFactory<SelectOneData> {
 
     public TypedWidget<SelectOneData> create(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
-        // TODO(dxchen):
+        // TODO(dxchen): Uncomment this when ready!
 
 //        if (appearance == null) {
 //            return null;
 //        }
 
 //        if (appearance.mPrimaryAppearance.equals("minimal")
-//                && appearance.hasQualifier("segmented")) {
+//                && appearance.hasQualifier("buttons")) {
             return new ButtonsSelectOneWidget(context, prompt, appearance, forceReadOnly);
 //        }
 

@@ -10,6 +10,7 @@ import org.javarosa.core.model.data.SelectOneData;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.widgets2.date.DateWidgetFactory;
 import org.odk.collect.android.widgets2.selectone.SelectOneWidgetFactory;
+import org.odk.collect.android.widgets2.string.StringWidgetFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class Widget2Factory {
         sFactoryRegistry = new SparseArray<SparseArray<TypedWidgetFactory<?>>>();
         register(Constants.CONTROL_SELECT_ONE, new SelectOneWidgetFactory());
         register(Constants.CONTROL_INPUT, Constants.DATATYPE_DATE, new DateWidgetFactory());
+        register(Constants.CONTROL_INPUT, Constants.DATATYPE_TEXT, new StringWidgetFactory());
     }
 
     public static final Widget2Factory INSTANCE = new Widget2Factory();
