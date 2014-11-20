@@ -44,7 +44,7 @@ public class TimeElapsedDateWidget extends TypedWidget<DateData> {
     public TimeElapsedDateWidget(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
         // TODO(dxchen): Handle initial values.
-        
+
         super(context, prompt, appearance, forceReadOnly);
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
@@ -76,12 +76,19 @@ public class TimeElapsedDateWidget extends TypedWidget<DateData> {
 
         mVisibleUnits.get(0).setChecked(true);
 
+        addView(mLayout);
+
         mStartDateTime = DateTime.now();
     }
 
     @Override
     public DateData getAnswer() {
-        int value = Integer.valueOf(mValue.getText().toString());
+        String valueString = mValue.getText().toString();
+        if ("".equals(valueString)) {
+            return null;
+        }
+        int value = Integer.valueOf(valueString);
+
         RadioButton checkedButton =
                 (RadioButton) mUnits.findViewById(mUnits.getCheckedRadioButtonId());
 

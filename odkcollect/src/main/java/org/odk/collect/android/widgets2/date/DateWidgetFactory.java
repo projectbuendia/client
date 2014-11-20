@@ -17,10 +17,14 @@ public class DateWidgetFactory extends TypedWidgetFactory<DateData> {
     public TypedWidget<DateData> create(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
         // TODO(dxchen): Actual logic plz!
-        return new TimeElapsedDateWidget(
-                context,
-                prompt,
-                Appearance.fromString("minimal|show_years|show_months"),
-                forceReadOnly);
+        if (prompt.getQuestionText().toLowerCase().contains("birth")) {
+            return new TimeElapsedDateWidget(
+                    context,
+                    prompt,
+                    Appearance.fromString("minimal|show_years|show_months"),
+                    forceReadOnly);
+        }
+
+        return null;
     }
 }
