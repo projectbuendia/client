@@ -390,23 +390,25 @@ public class FormController {
     private boolean groupIsFieldList(FormIndex index) {
         // if this isn't a group, return right away
     	IFormElement element = mFormEntryController.getModel().getForm().getChild(index);
-        if (!(element instanceof GroupDef)) {
-            return false;
-        }
-
-        GroupDef gd = (GroupDef) element; // exceptions?
-        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
+        return element instanceof GroupDef;
+//        if (!(element instanceof GroupDef)) {
+//            return false;
+//        }
+//
+//        GroupDef gd = (GroupDef) element; // exceptions?
+//        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
     }
 
     private boolean repeatIsFieldList(FormIndex index) {
         // if this isn't a group, return right away
     	IFormElement element = mFormEntryController.getModel().getForm().getChild(index);
-        if (!(element instanceof GroupDef)) {
-            return false;
-        }
-
-        GroupDef gd = (GroupDef) element; // exceptions?
-        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
+        return element instanceof GroupDef;
+//        if (!(element instanceof GroupDef)) {
+//            return false;
+//        }
+//
+//        GroupDef gd = (GroupDef) element; // exceptions?
+//        return (ODKView.FIELD_LIST.equalsIgnoreCase(gd.getAppearanceAttr()));
     }
 
     /**
@@ -453,7 +455,8 @@ public class FormController {
      * @return true if index is in a "field-list". False otherwise.
      */
     public boolean indexIsInFieldList() {
-        return indexIsInFieldList(getFormIndex());
+        return true;
+        //return indexIsInFieldList(getFormIndex());
     }
 
 
@@ -766,31 +769,30 @@ public class FormController {
      * @param evaluateConstraints
      * @return FailedConstraint of first failed constraint or null if all questions were saved.
      */
-    public FailedConstraint saveAllScreenAnswers(LinkedHashMap<FormIndex,IAnswerData> answers, boolean evaluateConstraints) throws JavaRosaException {
-    	if (currentPromptIsQuestion()) {
-            Iterator<FormIndex> it = answers.keySet().iterator();
-            while (it.hasNext()) {
-                FormIndex index = it.next();
-                // Within a group, you can only save for question events
-                if (getEvent(index) == FormEntryController.EVENT_QUESTION) {
-                	int saveStatus;
-                	IAnswerData answer = answers.get(index);
-                	if (evaluateConstraints) {
-                		saveStatus = answerQuestion(index, answer);
-                        if (saveStatus != FormEntryController.ANSWER_OK) {
-                            return new FailedConstraint(index, saveStatus);
-                        }
-                    } else {
-                        saveAnswer(index, answer);
+    public FailedConstraint saveAnswers(LinkedHashMap<FormIndex, IAnswerData> answers, boolean evaluateConstraints) throws JavaRosaException {
+        Iterator<FormIndex> it = answers.keySet().iterator();
+        while (it.hasNext()) {
+            FormIndex index = it.next();
+            // Within a group, you can only save for question events
+            if (getEvent(index) == FormEntryController.EVENT_QUESTION) {
+                int saveStatus;
+                IAnswerData answer = answers.get(index);
+                if (evaluateConstraints) {
+                    saveStatus = answerQuestion(index, answer);
+                    if (saveStatus != FormEntryController.ANSWER_OK) {
+                        return new FailedConstraint(index, saveStatus);
                     }
                 } else {
-                    Log.w(t,
-                        "Attempted to save an index referencing something other than a question: "
-                                + index.getReference());
+                    saveAnswer(index, answer);
                 }
+            } else {
+                Log.w(t,
+                    "Attempted to save an index referencing something other than a question: "
+                            + index.getReference());
             }
         }
-    	return null;
+
+        return null;
     }
 
 

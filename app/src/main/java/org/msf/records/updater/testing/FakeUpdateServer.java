@@ -32,7 +32,7 @@ public class FakeUpdateServer extends UpdateServer {
         mHandler = new Handler(Looper.getMainLooper());
         mUpdateInfo = new UpdateInfo();
         mUpdateInfo.androidClient = new UpdateInfo.ComponentUpdateInfo();
-        mUpdateInfo.androidClient.latestVersionString = "0.1.1";
+        mUpdateInfo.androidClient.latestVersionString = "0.1.0";
         mUpdateInfo.androidClient.installWindowHoursMin = 200;
         mUpdateInfo.androidClient.installWindowHoursMax = 400;
         mUpdateInfo.androidClient.run = Arrays.asList("foo/bar/baz.apk");

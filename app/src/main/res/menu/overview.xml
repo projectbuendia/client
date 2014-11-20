@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:showAsAction="always"
+        android:id="@+id/action_update_chart"
+        android:title="@string/action_update_chart"/>
+    <item android:showAsAction="always|withText"
+        android:id="@+id/action_edit_details"
+        android:icon="@drawable/ic_content_edit"
+        android:title="@string/action_edit_details"/>
+</menu>

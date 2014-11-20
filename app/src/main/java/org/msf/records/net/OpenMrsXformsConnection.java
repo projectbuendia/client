@@ -5,13 +5,19 @@ import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.google.gson.JsonObject;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * A connection to the Xform handling module we are adding to OpenMRS to provide xforms.
@@ -22,18 +28,21 @@ import java.util.List;
  */
 public class OpenMrsXformsConnection {
     private static final String TAG = "OpenMrsXformsConnection";
-    private static final String LOCALHOST_EMULATOR = "10.0.2.2";
-    private static final String API_BASE = "/openmrs/ws/rest/v1/projectbuendia";
-    private static final String USERNAME = "admin";
-    private static final String PASSWORD = "Admin123";
-    private static final String KNOWN_UUID = "d5bbf64a-69ba-11e4-8a42-47ebc7225440";
 
     private final VolleySingleton mVolley;
+    private final String mRootUrl;
+    private final String mUserName;
+    private final String mPassword;
 
-    public OpenMrsXformsConnection(Context context) {
+    public OpenMrsXformsConnection(Context context,
+                                   @Nullable String rootUrl,
+                                   @Nullable String userName,
+                                   @Nullable String password) {
         this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
+        mRootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
+        mUserName = (userName == null) ? Constants.LOCAL_ADMIN_USERNAME : userName;
+        mPassword = (password == null) ? Constants.LOCAL_ADMIN_PASSWORD : password;
     }
-
 
     /**
      * Get a single (full) Xform from the OpenMRS server
@@ -44,8 +53,8 @@ public class OpenMrsXformsConnection {
     public void getXform(String uuid, final Response.Listener<String> resultListener,
                           Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(
-                USERNAME, PASSWORD,
-                "http://"+ LOCALHOST_EMULATOR +":8080"+ API_BASE +"/xform/"+uuid+"?v=full",
+                mUserName, mPassword,
+                mRootUrl + "/xform/" + uuid + "?v=full",
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -72,8 +81,8 @@ public class OpenMrsXformsConnection {
     public void listXforms(final Response.Listener<List<OpenMrsXformIndexEntry>> listener,
                            final Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(
-                USERNAME, PASSWORD,
-                "http://"+ LOCALHOST_EMULATOR +":8080"+ API_BASE +"/xform", // list all forms
+                mUserName, mPassword,
+                mRootUrl + "/xform", // list all forms
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -87,10 +96,20 @@ public class OpenMrsXformsConnection {
                             JSONArray results = response.getJSONArray("results");
                             for (int i = 0; i < results.length(); i++) {
                                 JSONObject entry = results.getJSONObject(i);
+
+                                // Sometimes date_changed is not set; in this case, date_changed is
+                                // simply date_created.
+                                long date_changed;
+                                if (entry.get("date_changed") == JSONObject.NULL) {
+                                    date_changed = entry.getLong("date_created");
+                                } else {
+                                    date_changed = entry.getLong("date_changed");
+                                }
+
                                 OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
                                         entry.getString("uuid"),
                                         entry.getString("name"),
-                                        entry.getLong("date_changed"));
+                                        date_changed);
                                 result.add(indexEntry);
                             }
                         } catch (JSONException e) {
@@ -106,4 +125,55 @@ public class OpenMrsXformsConnection {
         );
         mVolley.addToRequestQueue(request, TAG);
     }
+
+    /**
+     * Get a single (full) Xform from the OpenMRS server
+     *
+     * @param patientUuid null if this is to add a new patient, non-null for observation on existing
+     *                  patient
+     * @param resultListener the listener to be informed of the form asynchronously
+     * @param errorListener a listener to be informed of any errors
+     */
+    public void postXformInstance(
+            @Nullable String patientUuid,
+            String xform,
+            final Response.Listener<JSONObject> resultListener,
+            Response.ErrorListener errorListener) {
+
+        // The JsonObject members in the API as written at the moment.
+        // int "patient_id"
+        // int "enterer_id"
+        // String "date_entered" in ISO8601 format (1977-01-10T
+        // String "xml" the form.
+        JsonObject post = new JsonObject();
+        post.addProperty("xml", xform);
+        // Don't add patient property for create new patient
+        if (patientUuid != null) {
+            post.addProperty("patient_uuid", patientUuid);
+        }
+        // TODO(nfortescue): get the enterer from the user login
+        post.addProperty("enterer_id", 1);
+
+        post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
+        JSONObject postBody = null;
+        try {
+            postBody = new JSONObject(post.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, "This should never happen converting one JSON object to another. " + post, e);
+            errorListener.onErrorResponse(new VolleyError("failed to convert to JSON", e));
+        }
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                mUserName, mPassword,
+                mRootUrl + "/xforminstance",
+                postBody, // non-null implies POST
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        resultListener.onResponse(response);
+                    }
+                }, errorListener
+        );
+        mVolley.addToRequestQueue(request, TAG);
+    }
+
 }

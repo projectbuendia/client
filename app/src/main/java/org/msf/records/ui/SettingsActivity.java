@@ -126,6 +126,8 @@ public class SettingsActivity extends PreferenceActivity {
         // to reflect the new value, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference("api_root_url"));
         bindPreferenceSummaryToValue(findPreference("openmrs_root_url"));
+        bindPreferenceSummaryToValue(findPreference("openmrs_user"));
+        bindPreferenceSummaryToValue(findPreference("openmrs_password"));
         bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
         bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }

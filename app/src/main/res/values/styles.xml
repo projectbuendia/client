@@ -35,12 +35,19 @@
         <item name="android:gravity">center</item>
         <item name="android:padding">16dp</item>
     </style>
+    <style name="cell_left_align">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">left</item>
+        <item name="android:padding">16dp</item>
+    </style>
     <style name="cell_heading">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:textSize">22sp</item>
-        <item name="android:lines">1</item>
         <item name="android:ellipsize">end</item>
         <item name="android:layout_marginBottom">8dp</item>
     </style>
@@ -86,5 +93,20 @@
     </style>
     <style name="stacked_small">
         <item name="android:layout_width">wrap_content</item>
+    </style>
+
+    <style name="button_large">
+        <item name="android:minWidth">400dp</item>
+        <item name="android:textSize">30dp</item>
+        <item name="android:layout_gravity">center_horizontal|top</item>
+        <item name="android:background">@drawable/button_selector</item>
+        <item name="android:textColor">@drawable/white</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:padding">30dp</item>
+    </style>
+
+    <style name="overview_details_row">
+        <item name="android:background">@color/yellow</item>
+        <item name="android:layout_margin">30dp</item>
     </style>
 </resources>

@@ -40,10 +40,23 @@
     <string name="location_confirmed_zone">Confirmed zone</string>
     <string name="location_mortuary">Mortuary</string>
     <string name="location_outside">Outside</string>
+    <string name="action_edit_details">Edit Details</string>
+    <string name="action_new_patient">+ Create New Patient</string>
+    <string name="action_new_round">New Round</string>
+    <string name="action_update_chart">Update Chart</string>
+    <string name="action_view_round_archive">Round Archive</string>
 
     <string name="snackbar_update_available">Application update available</string>
     <string name="snackbar_update_downloaded">Application update downloaded</string>
     <string name="snackbar_action_download">Download</string>
     <string name="snackbar_action_install">Install</string>
 
+    <string name="age_years">%d years</string>
+    <string name="day_n">%d</string>
+    <string name="overview_age">Age</string>
+    <string name="overview_days_since_admission">Days Since Admission</string>
+    <string name="overview_gender">Gender</string>
+    <string name="overview_assigned_location">Assigned Location</string>
+    <string name="overview_instructions">Instructions</string>
+    <string name="detail_page_view_chart">View Chart</string>
 </resources>
