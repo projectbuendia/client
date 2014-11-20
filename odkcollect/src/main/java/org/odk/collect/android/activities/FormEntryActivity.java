@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
@@ -37,9 +38,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -500,16 +503,16 @@ public class FormEntryActivity
 	}
 
     private void populateViews() {
-        List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
+        final List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
         final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
-                this, R.layout.large_list_item_1, R.id.text, sidebarItems);
+                this, R.layout.large_list_item_1, sidebarItems);
 
         FormTraverser traverser = new FormTraverser.Builder()
                 .addVisitor(new QuestionHolderFormVisitor(sidebarItems))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
-        ListView sidebar = (ListView) findViewById(R.id.sidebar);
+        final ListView sidebar = (ListView) findViewById(R.id.sidebar);
         sidebar.setAdapter(sidebarAdapter);
         sidebar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -519,6 +522,48 @@ public class FormEntryActivity
                 mScrollView.smoothScrollTo(0 /*x*/, item.mView.getTop());
             }
         });
+
+        // For each item in the sidebar, determine the position of it in the scroll view. Then
+        // register a ViewTreeObserver so that we can highlight it when the user gets there.
+        Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                final int[] positions = new int[sidebarItems.size()];
+                for (int i = 0; i < sidebarItems.size(); i++) {
+                    positions[i] = sidebarItems.get(i).mView.getTop();
+                }
+
+                ((CheckedTextView) sidebar.getChildAt(0)).setChecked(true);
+
+                mScrollView.getViewTreeObserver().addOnScrollChangedListener(
+                        new ViewTreeObserver.OnScrollChangedListener() {
+                            @Override
+                            public void onScrollChanged() {
+                                for (int i = positions.length - 1; i >= 0; i--) {
+                                    if (mScrollView.getScrollY() >= positions[i]) {
+                                        CheckedTextView listItemView =
+                                                (CheckedTextView) sidebar.getChildAt(i);
+                                        if (listItemView.isChecked()) {
+                                            return;
+                                        }
+
+                                        for (int j = 0; j < positions.length; j++) {
+                                            ((CheckedTextView) sidebar.getChildAt(j))
+                                                    .setChecked(false);
+                                        }
+
+                                        listItemView.setChecked(true);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                );
+            }
+        };
+
+        new Handler(getMainLooper()).post(runnable);
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
@@ -539,7 +584,8 @@ public class FormEntryActivity
 
             if (event == FormEntryController.EVENT_GROUP) {
                 mSidebarItems.add(new SidebarItem(
-                        Collect.getInstance().getFormController().getLastGroupText(), view));
+                        Collect.getInstance().getFormController().getLastGroupText(),
+                        view));
             }
         }
     }
@@ -548,6 +594,7 @@ public class FormEntryActivity
 
         public final String mName;
         public final View mView;
+        public boolean isActive;
 
         public SidebarItem(String name, View view) {
             mName = name;
