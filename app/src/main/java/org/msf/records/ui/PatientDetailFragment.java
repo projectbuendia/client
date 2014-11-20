@@ -260,7 +260,12 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         onResponse(mPatient);
 
         App.getServer().updatePatient(mPatientId, patient,
-                PatientDetailFragment.this, PatientDetailFragment.this, TAG);
+                new Response.Listener<Patient>() {
+                    @Override
+                    public void onResponse(Patient response) {
+                        // Ignore the response for now until the server has it implemented correctly
+                    }
+                }, PatientDetailFragment.this, TAG);
     }
 
     @Override
