@@ -140,6 +140,12 @@ public class PatientListFragment extends ProgressFragment implements
             mPatientAdapter.notifyDataSetChanged();
         }
         mPatientAdapter.addAll(patients);
+
+        // Expand all by default.
+        for (int i = 0; i < mPatientAdapter.getGroupCount(); i++) {
+            mListView.expandGroup(i);
+        }
+
         mPatientAdapter.notifyDataSetChanged();
         changeState(State.LOADED);
         stopRefreshing();
@@ -260,11 +266,16 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        Patient patient = mPatientAdapter.getPatient(groupPosition, childPosition);
+        if (patient == null) {
+            return false;
+        }
+
         mCallbacks.onItemSelected(
-                mPatientAdapter.getPatient(groupPosition, childPosition).uuid,
-                mPatientAdapter.getPatient(groupPosition, childPosition).given_name,
-                mPatientAdapter.getPatient(groupPosition, childPosition).family_name,
-                mPatientAdapter.getPatient(groupPosition, childPosition).id);
+                patient.uuid,
+                patient.given_name,
+                patient.family_name,
+                patient.id);
 
         return true;
     }
