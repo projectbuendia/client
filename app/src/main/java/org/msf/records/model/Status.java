@@ -40,17 +40,20 @@ public class Status implements Parcelable, ListItem {
 
     static {
         STATUSES = new HashMap<String, Status>();
-        STATUSES.put("suspected", new Status("suspected", R.string.status_suspect, R.drawable.square_suspect, R.drawable.round_suspect, R.color.status_suspect));
-        STATUSES.put("probable", new Status("probable", R.string.status_probable, R.drawable.square_probable, R.drawable.round_probable, R.color.status_probable));
-        STATUSES.put("confirmed", new Status("confirmed", R.string.status_confirmed, R.drawable.square_confirmed, R.drawable.round_confirmed, R.color.status_confirmed));
-        STATUSES.put("non-case", new Status("non-case", R.string.status_non_case, R.drawable.square_non_case, R.drawable.round_non_case, R.color.status_non_case));
-        STATUSES.put("convalescent", new Status("convalescent", R.string.status_convalescence, R.drawable.square_convalescence, R.drawable.round_convalescent, R.color.status_convalescent));
-        STATUSES.put("can be discharged", new Status("can be discharged", R.string.status_can_be_discharged, R.drawable.square_can_be_discharged, R.drawable.round_can_be_discharged, R.color.status_can_be_discharged));
-        STATUSES.put("discharged", new Status("discharged", R.string.status_discharged, R.drawable.square_discharged, R.drawable.round_discharged, R.color.status_discharged));
-        STATUSES.put("unconfirmed-death", new Status("unconfirmed-death", R.string.status_unconfirmed_death, R.drawable.square_unconfirmed_death, R.drawable.round_deceased_unconfirmed, R.color.status_unconfirmed_death));
-        STATUSES.put("confirmed-death", new Status("confirmed-death", R.string.status_confirmed_death, R.drawable.square_confirmed_death, R.drawable.round_deceased_confirmed, R.color.status_confirmed_death));
+        for (Status status : new Status[]{
+                new Status("SUSPECTED_CASE", R.string.status_suspect, R.drawable.square_suspect, R.drawable.round_suspect, R.color.status_suspect),
+                new Status("PROBABLE_CASE", R.string.status_probable, R.drawable.square_probable, R.drawable.round_probable, R.color.status_probable),
+                new Status("CONFIRMED_CASE", R.string.status_confirmed, R.drawable.square_confirmed, R.drawable.round_confirmed, R.color.status_confirmed),
+                new Status("NON_CASE", R.string.status_non_case, R.drawable.square_non_case, R.drawable.round_non_case, R.color.status_non_case),
+                new Status("CONVALESCENT", R.string.status_convalescence, R.drawable.square_convalescence, R.drawable.round_convalescent, R.color.status_convalescent),
+                new Status("READY_FOR_DISCHARGE", R.string.status_can_be_discharged, R.drawable.square_can_be_discharged, R.drawable.round_can_be_discharged, R.color.status_can_be_discharged),
+                new Status("DISCHARGED", R.string.status_discharged, R.drawable.square_discharged, R.drawable.round_discharged, R.color.status_discharged),
+                new Status("SUSPECTED_DEATH", R.string.status_unconfirmed_death, R.drawable.square_unconfirmed_death, R.drawable.round_deceased_unconfirmed, R.color.status_unconfirmed_death),
+                new Status("CONFIRMED_DEATH", R.string.status_confirmed_death, R.drawable.square_confirmed_death, R.drawable.round_deceased_confirmed, R.color.status_confirmed_death)
+        }) {
+            STATUSES.put(status.key, status);
+        }
     }
-
 
     public static Status[] getStatus() {
         Object[] objects = STATUSES.values().toArray();
@@ -61,7 +64,7 @@ public class Status implements Parcelable, ListItem {
         Status status = STATUSES.get(statusKey);
         if (status == null) {
             Log.e("Status", "Tried to get status for unknown: '" + statusKey + '\'');
-            return STATUSES.get("suspected");
+            return STATUSES.get("SUSPECTED_CASE");
         }
         return status;
     }
