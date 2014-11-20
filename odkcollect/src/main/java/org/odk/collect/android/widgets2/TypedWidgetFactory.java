@@ -11,5 +11,5 @@ import org.javarosa.form.api.FormEntryPrompt;
 public abstract class TypedWidgetFactory<T extends IAnswerData> {
 
     public abstract TypedWidget<T> create(
-            Context context, FormEntryPrompt prompt, boolean forceReadOnly);
+            Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly);
 }
