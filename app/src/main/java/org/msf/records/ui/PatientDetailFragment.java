@@ -19,6 +19,7 @@ import org.msf.records.model.PatientLocation;
 import org.msf.records.model.Status;
 import org.msf.records.utils.Utils;
 
+import java.text.NumberFormat;
 import java.util.Calendar;
 
 import butterknife.ButterKnife;
@@ -286,8 +287,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         mPatientIdTV.setText("" + response.id);
         mPatientAssignedLocationTV.setText(response.assigned_location.zone + "\n" +
                 response.assigned_location.tent + " " + response.assigned_location.bed);
-        mPatientDaysSinceAdmissionTV.setText(String.format(
-                getResources().getString(R.string.day_n),
+        mPatientDaysSinceAdmissionTV.setText(NumberFormat.getInstance().format(
                 Utils.timeDifference(response.admission_timestamp).toStandardDays().getDays()));
         if (response.status == null) {
             response.status = "CONFIRMED_CASE";
