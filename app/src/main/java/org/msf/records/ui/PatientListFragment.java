@@ -325,7 +325,7 @@ public class PatientListFragment extends ProgressFragment implements
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_woman));
             }
 
-            if (patient.pregnant) {
+            if (patient.pregnant != null && patient.pregnant) {
                 holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_pregnant));
             }
 
