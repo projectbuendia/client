@@ -16,22 +16,24 @@ import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.widgets.QuestionWidget;
+import org.odk.collect.android.widgets2.Appearance;
 import org.odk.collect.android.widgets2.TypedWidget;
 
 import java.util.List;
 
 /**
- * A {@link TypedWidget} of {@link SelectOneData} that displays choices as horizontal segmented
- * buttons.
+ * A {@link SelectOneData} {@link TypedWidget} that displays choices as a row of buttons.
  */
-public class SegmentedRadioWidget extends TypedWidget<SelectOneData> {
+public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
     private final List<SelectChoice> mChoices;
     private final RadioGroup mGroup;
 
-    public SegmentedRadioWidget(Context context, FormEntryPrompt prompt, boolean forceReadOnly) {
-        super(context, prompt);
+    public ButtonsSelectOneWidget(
+            Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
+        // TODO(dxchen): Handle initial values.
 
+        super(context, prompt, appearance, forceReadOnly);
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         HorizontalScrollView scrollView =

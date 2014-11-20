@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- A template for the group text displayed in an ODK form edit view. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:inputType="number"
+        android:imeOptions="actionNext"
+        android:minEms="3"
+        android:maxEms="3"
+        style="@style/Widget.Buendia.EditText" />
+
+    <RadioGroup
+        android:id="@+id/units"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/years"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:button="@null"
+            android:background="@drawable/bg_radio_button"
+            android:visibility="gone"
+            android:textSize="24sp"
+            android:tag="years"
+            android:text="Years" />
+
+        <RadioButton
+            android:id="@+id/months"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:button="@null"
+            android:background="@drawable/bg_radio_button"
+            android:visibility="gone"
+            android:textSize="24sp"
+            android:tag="months"
+            android:text="Months" />
+
+        <RadioButton
+            android:id="@+id/days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:button="@null"
+            android:background="@drawable/bg_radio_button"
+            android:visibility="gone"
+            android:textSize="24sp"
+            android:tag="days"
+            android:text="Days" />
+
+    </RadioGroup>
+
+</LinearLayout>
