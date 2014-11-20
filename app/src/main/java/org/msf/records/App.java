@@ -4,6 +4,9 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.squareup.otto.Bus;
+
+import org.msf.records.events.MainThreadBus;
 import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
@@ -18,6 +21,16 @@ public class App extends Application {
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
 
+    /**
+     * An event bus that posts events to any available thread.
+     */
+    private static Bus sBus;
+
+    /**
+     * An event bus that posts events specifically to the main thread.
+     */
+    private static MainThreadBus sMainThreadBus;
+
     @Override
     public void onCreate() {
         Collect.onCreate(this);
@@ -27,6 +40,9 @@ public class App extends Application {
                 PreferenceManager.getDefaultSharedPreferences(this);
 
         synchronized (App.class) {
+            sBus = new Bus();
+            sMainThreadBus = new MainThreadBus(sBus);
+
             String rootUrl;
             if (preferences.getBoolean("use_openmrs", false)) {
                 rootUrl = preferences.getString("openmrs_root_url", null);
@@ -43,6 +59,10 @@ public class App extends Application {
                     preferences.getString("openmrs_user", null),
                     preferences.getString("openmrs_password", null));
         }
+    }
+
+    public static synchronized MainThreadBus getMainThreadBus() {
+        return sMainThreadBus;
     }
 
     public static synchronized Server getServer() {
