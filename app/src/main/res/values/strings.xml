@@ -47,7 +47,7 @@
     <string name="action_view_round_archive">Round Archive</string>
 
     <string name="age_years">%d years</string>
-    <string name="day_n">Day %d</string>
+    <string name="day_n">%d</string>
     <string name="overview_age">Age</string>
     <string name="overview_days_since_admission">Days Since Admission</string>
     <string name="overview_gender">Gender</string>
