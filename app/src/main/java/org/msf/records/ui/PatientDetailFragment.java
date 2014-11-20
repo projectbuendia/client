@@ -13,11 +13,12 @@ import com.android.volley.Response;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.model.Patient;
+import org.msf.records.model.PatientAge;
+import org.msf.records.model.PatientLocation;
 import org.msf.records.model.Status;
 import org.msf.records.utils.Utils;
 
 import java.util.Calendar;
-import java.util.HashMap;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -111,10 +112,10 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
             @Override
             public void onPositiveButtonClick(String[] data) {
 
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("given_name", data[0]);
-                map.put("family_name", data[1]);
-                updatePatient(map);
+                Patient patient = new Patient();
+                patient.given_name = data[0];
+                patient.family_name = data[1];
+                updatePatient(patient);
             }
         });
         dialogListFragment.setArguments(b);
@@ -133,9 +134,9 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
             public void onGridItemClick(int position) {
 
                 String statusName = Status.getStatus()[position].key;
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("status", statusName);
-                updatePatient(map);
+                Patient patient = new Patient();
+                patient.status = statusName;
+                updatePatient(patient);
                 Log.d(TAG, statusName);
             }
         });
@@ -154,11 +155,13 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
             @Override
             public void onPositiveButtonClick(String[] data) {
 
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("assigned_location_zone_id", data[0]);
-                map.put("assigned_location_tent_id", data[1]);
-                map.put("assigned_location_bed", data[2]);
-                updatePatient(map);
+                Patient patient = new Patient();
+                PatientLocation location = new PatientLocation();
+                location.zone = data[0];
+                location.tent = data[1];
+                location.bed = data[2];
+                patient.assigned_location = location;
+                updatePatient(patient);
             }
         });
         dialogListFragment.setArguments(b);
@@ -174,15 +177,13 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
             @Override
             public void onListItemClick(int position) {
                 String gender = getResources().getStringArray(R.array.add_patient_gender)[position];
-                String g;
+                Patient patient = new Patient();
                 if (gender.equals("Male")) {
-                    g = "M";
+                    patient.gender = "M";
                 } else {
-                    g = "F";
+                    patient.gender = "F";
                 }
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("gender", g);
-                updatePatient(map);
+                updatePatient(patient);
             }
         });
         dialogListFragment.setArguments(b);
@@ -202,9 +203,11 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
             @Override
             public void onListItemClick(int position) {
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("age_years", String.valueOf(position));
-                updatePatient(map);
+                Patient patient = new Patient();
+                patient.age = new PatientAge();
+                patient.age.years = position;
+                patient.age.type = "years";
+                updatePatient(patient);
             }
         });
         dialogListFragment.setArguments(b);
@@ -225,57 +228,23 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
             @Override
             public void onListItemClick(int position) {
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("days_since_admission", String.valueOf(position));
-                updatePatient(map);
+                Patient patient = new Patient();
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DATE, -position);
+                patient.admission_timestamp = calendar.getTimeInMillis() / 1000;
+                updatePatient(patient);
             }
         });
         dialogListFragment.setArguments(b);
         dialogListFragment.show(fm, null);
     }
 
-    private void updatePatient(HashMap<String, String> map){
+    private void updatePatient(Patient patient) {
         // Update local fields.
-        for (String field : map.keySet()) {
-            String value = map.get(field);
-            switch (field) {
-                case "age_years":
-                    mPatient.age.years = Integer.parseInt(value);
-                    break;
-                case "age_months":
-                    mPatient.age.months = Integer.parseInt(value);
-                    break;
-                case "gender":
-                    mPatient.gender = value;
-                    break;
-                case "status":
-                    mPatient.status = value;
-                    break;
-                case "assigned_location_zone_id":
-                    mPatient.assigned_location.zone = value;
-                    break;
-                case "assigned_location_tent_id":
-                    mPatient.assigned_location.tent = value;
-                    break;
-                case "assigned_location_bed":
-                    mPatient.assigned_location.bed = value;
-                    break;
-                case "given_name":
-                    mPatient.given_name = value;
-                    break;
-                case "family_name":
-                    mPatient.family_name = value;
-                    break;
-                case "days_since_admission":
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.DATE, -Integer.parseInt(value));
-                    mPatient.admission_timestamp = calendar.getTimeInMillis() / 1000;
-                    break;
-            }
-        }
+        mPatient.writeFrom(patient);
         onResponse(mPatient);
 
-        App.getServer().updatePatient(mPatientId, map,
+        App.getServer().updatePatient(mPatientId, patient,
                 PatientDetailFragment.this, PatientDetailFragment.this, TAG);
     }
 
