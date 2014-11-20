@@ -129,13 +129,13 @@ public class OpenMrsXformsConnection {
     /**
      * Get a single (full) Xform from the OpenMRS server
      *
-     * @param patientId null if this is to add a new patient, non-null for observation on existing
+     * @param patientUuid null if this is to add a new patient, non-null for observation on existing
      *                  patient
      * @param resultListener the listener to be informed of the form asynchronously
      * @param errorListener a listener to be informed of any errors
      */
     public void postXformInstance(
-            @Nullable String patientId,
+            @Nullable String patientUuid,
             String xform,
             final Response.Listener<JSONObject> resultListener,
             Response.ErrorListener errorListener) {
@@ -148,8 +148,8 @@ public class OpenMrsXformsConnection {
         JsonObject post = new JsonObject();
         post.addProperty("xml", xform);
         // Don't add patient property for create new patient
-        if (patientId != null) {
-            post.addProperty("patient_id", patientId);
+        if (patientUuid != null) {
+            post.addProperty("patient_uuid", patientUuid);
         }
         // TODO(nfortescue): get the enterer from the user login
         post.addProperty("enterer_id", 1);
