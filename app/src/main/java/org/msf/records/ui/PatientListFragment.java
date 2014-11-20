@@ -1,34 +1,26 @@
 package org.msf.records.ui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.squareup.otto.Subscribe;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
-import org.msf.records.model.Status;
 
 import java.util.List;
-
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 /**
  * A list fragment representing a list of Patients. This fragment
@@ -40,7 +32,7 @@ import butterknife.InjectView;
  * interface.
  */
 public class PatientListFragment extends ProgressFragment implements
-        AdapterView.OnItemClickListener, Response.Listener<List<Patient>>,
+        ExpandableListView.OnChildClickListener, Response.Listener<List<Patient>>,
         SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
@@ -63,9 +55,9 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
-    private PatientAdapter mPatientAdapter;
+    private ExpandablePatientListAdapter mPatientAdapter;
 
-    private ListView mListView;
+    private ExpandableListView mListView;
 
     private SwipeRefreshLayout mSwipeToRefresh;
 
@@ -79,7 +71,6 @@ public class PatientListFragment extends ProgressFragment implements
     String mFilterState;
 
 
-
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -89,7 +80,7 @@ public class PatientListFragment extends ProgressFragment implements
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(String id);
+        public void onItemSelected(String uuid, String givenName, String familyName, String id);
     }
 
     /**
@@ -98,7 +89,7 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
-        public void onItemSelected(String id) {
+        public void onItemSelected(String uuid, String givenName, String familyName, String id) {
         }
     };
 
@@ -115,6 +106,20 @@ public class PatientListFragment extends ProgressFragment implements
 
         setContentView(R.layout.fragment_patient_list);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        App.getMainThreadBus().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        App.getMainThreadBus().unregister(this);
+
+        super.onPause();
     }
 
     @Override
@@ -161,8 +166,8 @@ public class PatientListFragment extends ProgressFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mListView = (ListView) view.findViewById(R.id.fragment_patient_list);
-        mListView.setOnItemClickListener(this);
+        mListView = (ExpandableListView) view.findViewById(R.id.fragment_patient_list);
+        mListView.setOnChildClickListener(this);
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(this);
@@ -170,7 +175,7 @@ public class PatientListFragment extends ProgressFragment implements
         Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
         allLocationsButton.setOnClickListener(onClickListener);
 
-        mPatientAdapter = new PatientAdapter(getActivity(), 0);
+        mPatientAdapter = new ExpandablePatientListAdapter(getActivity());
         mListView.setAdapter(mPatientAdapter);
 
         loadSearchResults();
@@ -183,7 +188,7 @@ public class PatientListFragment extends ProgressFragment implements
 
         ((PatientListActivity)getActivity()).setOnSearchListener(new PatientListActivity.OnSearchListener() {
             @Override
-            public void setQuerySubmited(String q) {
+            public void setQuerySubmitted(String q) {
                 App.getServer().cancelPendingRequests(TAG);
                 isRefreshing = false;
                 mFilterQueryTerm = q;
@@ -229,12 +234,6 @@ public class PatientListFragment extends ProgressFragment implements
         mCallbacks = sDummyCallbacks;
     }
 
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mCallbacks.onItemSelected(mPatientAdapter.getItem(position).id);
-
-    }
     /**
      @Override
      public void onListItemClick(int position, int type) {
@@ -259,6 +258,25 @@ public class PatientListFragment extends ProgressFragment implements
         }
     }
 
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        mCallbacks.onItemSelected(
+                mPatientAdapter.getPatient(groupPosition, childPosition).uuid,
+                mPatientAdapter.getPatient(groupPosition, childPosition).given_name,
+                mPatientAdapter.getPatient(groupPosition, childPosition).family_name,
+                mPatientAdapter.getPatient(groupPosition, childPosition).id);
+
+        return true;
+    }
+
+    @Subscribe
+    public void onCreatePatientSucceeded(CreatePatientSucceededEvent event) {
+        if(!isRefreshing){
+            isRefreshing = true;
+            loadSearchResults();
+        }
+    }
+
     /**
      * Turns on activate-on-click mode. When this mode is on, list items will be
      * given the 'activated' state when touched.
@@ -279,85 +297,5 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
-    }
-
-    class PatientAdapter extends ArrayAdapter<Patient> {
-
-        public PatientAdapter(Context context, int resource) {
-            super(context, resource);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView != null) {
-                holder = (ViewHolder) convertView.getTag();
-            } else {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.listview_cell_search_results, parent, false);
-                holder = new ViewHolder(convertView);
-                convertView.setTag(holder);
-            }
-
-
-            Patient patient = getItem(position);
-
-            holder.mPatientName.setText(patient.given_name + " " + patient.family_name);
-            holder.mPatientId.setText(patient.id);
-            holder.mPatientLocation.setText("" + getString(Location.getLocationWithoutAll()[patient.assigned_location.zone].getTitleId()) +
-                    ", Tent " + patient.assigned_location.tent +
-                    ", Bed " + patient.assigned_location.bed);
-
-            if (patient.age.type != null && patient.age.type.equals("months")) {
-                holder.mPatientAge.setText("<1");
-            }
-
-            if (patient.age.type != null && patient.age.type.equals("years")) {
-                holder.mPatientAge.setText("" + patient.age.years);
-            }
-
-            if (patient.age.type == null) {
-                holder.mPatientAge.setText("99");
-                holder.mPatientAge.setTextColor(getResources().getColor(R.color.transparent));
-            }
-
-            if (patient.gender != null && patient.gender.equals("M")) {
-                holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_man));
-            }
-
-            if (patient.gender != null && patient.gender.equals("F") && patient.pregnancy_start_date == null) {
-                holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_woman));
-            }
-
-            if (patient.pregnancy_start_date != null) {
-                holder.mPatientGender.setImageDrawable(getResources().getDrawable(R.drawable.gender_pregnant));
-            }
-
-            if (patient.gender == null) {
-                holder.mPatientGender.setVisibility(View.GONE);
-            }
-
-            if (patient.status == null) {
-                holder.mPatientListStatusColorIndicator.setBackgroundColor(getResources().getColor(R.color.transparent));
-            }
-
-            if (patient.status != null){
-                holder.mPatientListStatusColorIndicator.setBackgroundColor(getResources().getColor(Status.getStatus(patient.status).colorId));
-            }
-
-            return convertView;
-        }
-    }
-
-    static class ViewHolder {
-        @InjectView(R.id.listview_cell_search_results_color_indicator) ImageView mPatientListStatusColorIndicator;
-        @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
-        @InjectView(R.id.listview_cell_search_results_id) TextView mPatientId;
-        @InjectView(R.id.listview_cell_search_results_location) TextView mPatientLocation;
-        @InjectView(R.id.listview_cell_search_results_gender) ImageView mPatientGender;
-        @InjectView(R.id.listview_cell_search_results_age) TextView mPatientAge;
-
-        public ViewHolder(View view) {
-            ButterKnife.inject(this, view);
-        }
     }
 }

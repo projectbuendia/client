@@ -316,8 +316,6 @@ public class MediaLayout extends RelativeLayout {
                 imageParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
                 imageParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
                 imageParams.addRule(RelativeLayout.BELOW, mView_Text.getId());
-            } else {
-                textParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             }
         }
 

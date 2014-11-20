@@ -57,11 +57,6 @@ public class FileUtils {
     public static final String SUBMISSIONURI = "submission";
     public static final String BASE64_RSA_PUBLIC_KEY = "base64RsaPublicKey";
 
-    // A flag to show all the changes we make to the parsing code to become compatible with OpenMRS
-    // forms. The alternative is to do these changes server side, which is probably better, but
-    // let's get it working for now.
-    public static boolean openMrsLenientParsing = true;
-
     public static boolean createFolder(String path) {
         boolean made = true;
         File dir = new File(path);
@@ -303,23 +298,12 @@ public class FileUtils {
             String xforms = "http://www.w3.org/2002/xforms";
             String html = doc.getRootElement().getNamespace();
 
-            Element model;
-            if (openMrsLenientParsing) {
-                model = getChildElement(doc.getRootElement(), "model");
-                Element instance = getChildElement(model, "instance");
-                Element form = getChildElement(instance, "form");
-                String title = form.getAttributeValue(form.getNamespace(), "name");
-                if (title != null) {
-                    fields.put(TITLE, title);
-                }
-            } else {
-                Element head = doc.getRootElement().getElement(html, "head");
-                Element title = head.getElement(html, "title");
-                if (title != null) {
-                    fields.put(TITLE, XFormParser.getXMLText(title, true));
-                }
-                model = getChildElement(head, "model");
+            Element head = doc.getRootElement().getElement(html, "head");
+            Element title = head.getElement(html, "title");
+            if (title != null) {
+                fields.put(TITLE, XFormParser.getXMLText(title, true));
             }
+            Element model = getChildElement(head, "model");
 
             Element cur = getChildElement(model,"instance");
 

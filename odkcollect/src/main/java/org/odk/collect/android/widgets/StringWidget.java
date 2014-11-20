@@ -23,6 +23,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TableLayout;
@@ -30,6 +31,7 @@ import android.widget.TableLayout;
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.core.model.data.StringData;
 import org.javarosa.form.api.FormEntryPrompt;
+import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 
 /**
@@ -51,13 +53,16 @@ public class StringWidget extends QuestionWidget {
 
     protected StringWidget(Context context, FormEntryPrompt prompt, boolean readOnlyOverride, boolean derived) {
         super(context, prompt);
-        mAnswer = new EditText(context);
+        mAnswer =
+                (EditText) LayoutInflater.from(context).inflate(R.layout.template_edit_text, null);
         mAnswer.setId(QuestionWidget.newUniqueId());
         mReadOnly = prompt.isReadOnly() || readOnlyOverride;
 
-        mAnswer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mAnswerFontsize);
+//        mAnswer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mAnswerFontsize);
 
-        TableLayout.LayoutParams params = new TableLayout.LayoutParams();
+//        TableLayout.LayoutParams params = new TableLayout.LayoutParams();
+//        params.width = LayoutParams.MATCH_PARENT;
+//        params.height = LayoutParams.WRAP_CONTENT;
 
         /**
          * If a 'rows' attribute is on the input tag, set the minimum number of lines
@@ -71,6 +76,13 @@ public class StringWidget extends QuestionWidget {
          * will set the height of the EditText box to 5 rows high.
          */
         String height = prompt.getQuestion().getAdditionalAttribute(null, ROWS);
+        if (height == null || height.equals("1")) {
+            mAnswer.setSingleLine();
+        } else {
+            mAnswer.setSingleLine(false);
+            mAnswer.setHorizontallyScrolling(false);
+        }
+
         if ( height != null && height.length() != 0 ) {
         	try {
 	        	int rows = Integer.valueOf(height);
@@ -81,15 +93,15 @@ public class StringWidget extends QuestionWidget {
         	}
         }
 
-        params.setMargins(7, 5, 7, 5);
-        mAnswer.setLayoutParams(params);
+//        params.setMargins(7, 5, 7, 5);
+//        mAnswer.setLayoutParams(params);
 
         // capitalize the first letter of the sentence
         mAnswer.setKeyListener(new TextKeyListener(Capitalize.SENTENCES, false));
 
         // needed to make long read only text scroll
-        mAnswer.setHorizontallyScrolling(false);
-        mAnswer.setSingleLine(false);
+//        mAnswer.setHorizontallyScrolling(false);
+//        mAnswer.setSingleLine(false);
 
         String s = prompt.getAnswerText();
         if (s != null) {

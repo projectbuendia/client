@@ -23,12 +23,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +50,7 @@ import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
+import org.odk.collect.android.widgets2.Widget2Factory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ import java.util.Set;
  * 
  * @author carlhartung
  */
-public class ODKView extends ScrollView implements OnLongClickListener {
+public class ODKView extends LinearLayout {
 
 	// starter random number for view IDs
     private final static int VIEW_ID = 12345;  
@@ -90,7 +90,7 @@ public class ODKView extends ScrollView implements OnLongClickListener {
         mView.setPadding(0, 7, 0, 0);
 
         mLayout =
-            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT,
+            new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
         mLayout.setMargins(10, 0, 10, 0);
 
@@ -171,9 +171,13 @@ public class ODKView extends ScrollView implements OnLongClickListener {
                 });
 
                 View divider = new View(getContext());
-                divider.setBackgroundResource(android.R.drawable.divider_horizontal_bright);
-                divider.setMinimumHeight(3);
+                divider.setBackgroundResource(R.drawable.divider);
+                divider.setMinimumHeight((int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 9, getResources().getDisplayMetrics()));
                 mView.addView(divider);
+
+//                mView.addView(
+//                        LayoutInflater.from(getContext()).inflate(R.layout.template_divider, null));
 
                 mView.addView(mLaunchIntentButton, mLayout);
             }
@@ -183,9 +187,14 @@ public class ODKView extends ScrollView implements OnLongClickListener {
         int id = 0;
         for (FormEntryPrompt p : questionPrompts) {
             if (!first) {
+
                 View divider = new View(getContext());
-                divider.setBackgroundResource(android.R.drawable.divider_horizontal_bright);
-                divider.setMinimumHeight(3);
+                divider.setBackgroundResource(R.drawable.divider);
+                divider.setMinimumHeight((int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 9, getResources().getDisplayMetrics()));
+//                divider.setLay
+//                mView.addView(
+//                        LayoutInflater.from(getContext()).inflate(R.layout.template_divider, null));
                 mView.addView(divider);
             } else {
                 first = false;
@@ -193,9 +202,11 @@ public class ODKView extends ScrollView implements OnLongClickListener {
 
             // if question or answer type is not supported, use text widget
             QuestionWidget qw =
-                WidgetFactory.createWidgetFromPrompt(p, getContext(), readOnlyOverride);
-            qw.setLongClickable(true);
-            qw.setOnLongClickListener(this);
+                    Widget2Factory.INSTANCE.create(getContext(), p, readOnlyOverride);
+            if (qw == null) {
+                qw = WidgetFactory.createWidgetFromPrompt(p, getContext(), readOnlyOverride);
+            }
+
             qw.setId(VIEW_ID + id++);
 
             widgets.add(qw);
@@ -283,11 +294,12 @@ public class ODKView extends ScrollView implements OnLongClickListener {
 
         // build view
         if (s.length() > 0) {
-            TextView tv = new TextView(getContext());
+            TextView tv = (TextView) LayoutInflater.from(getContext())
+                    .inflate(R.layout.template_text_view_group, null);
             tv.setText(s.substring(0, s.length() - 3));
-            int questionFontsize = Collect.getQuestionFontsize();
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, questionFontsize - 4);
-            tv.setPadding(0, 0, 0, 5);
+//            int questionFontsize = Collect.getQuestionFontsize();
+//            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, questionFontsize - 4);
+//            tv.setPadding(0, 0, 0, 5);
             mView.addView(tv, mLayout);
         }
     }
@@ -412,13 +424,6 @@ public class ODKView extends ScrollView implements OnLongClickListener {
         }
     }
 
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
-    }
-    
-
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();
@@ -426,5 +431,4 @@ public class ODKView extends ScrollView implements OnLongClickListener {
             qw.cancelLongPress();
         }
     }
-
 }

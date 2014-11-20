@@ -5,8 +5,8 @@ package org.msf.records.model;
  */
 public class PatientLocation {
 
-    public int zone;
-    public int tent;
-    public int bed;
+    public String zone;
+    public String tent;
+    public String bed;
 
 }

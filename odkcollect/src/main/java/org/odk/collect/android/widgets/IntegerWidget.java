@@ -15,6 +15,7 @@
 package org.odk.collect.android.widgets;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
@@ -52,12 +53,13 @@ public class IntegerWidget extends StringWidget {
 
         mAnswer.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mAnswerFontsize);
         mAnswer.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
-
-        // needed to make long readonly text scroll
-        mAnswer.setHorizontallyScrolling(false);
-        mAnswer.setSingleLine(false);
+//
+//        // needed to make long readonly text scroll
+//        mAnswer.setHorizontallyScrolling(false);
+//        mAnswer.setSingleLine(false);
 
         // only allows numbers and no periods
+        mAnswer.setRawInputType(Configuration.KEYBOARD_12KEY);
         mAnswer.setKeyListener(new DigitsKeyListener(true, false));
 
         // ints can only hold 2,147,483,648. we allow 999,999,999

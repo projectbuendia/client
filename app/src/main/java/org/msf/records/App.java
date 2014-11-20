@@ -54,14 +54,21 @@ public class App extends Application {
 
             sUpdateManager = new UpdateManager();
 
+            String rootUrl;
             if (preferences.getBoolean("use_openmrs", false)) {
-                String openmrsRootUrl = preferences.getString("openmrs_root_url", null);
-                mServer = new OpenMrsServer(getApplicationContext(), openmrsRootUrl);
+                rootUrl = preferences.getString("openmrs_root_url", null);
+                mServer = new OpenMrsServer(
+                        getApplicationContext(), rootUrl,
+                        preferences.getString("openmrs_user", null),
+                        preferences.getString("openmrs_password", null));
             } else {
-                String apiRootUrl = preferences.getString("api_root_url", null);
-                mServer = new BuendiaServer(getApplicationContext(), apiRootUrl);
+                rootUrl = preferences.getString("api_root_url", null);
+                mServer = new BuendiaServer(getApplicationContext(), rootUrl);
             }
-            mOpenMrsXformsConnection = new OpenMrsXformsConnection(getApplicationContext());
+            mOpenMrsXformsConnection = new OpenMrsXformsConnection(
+                    getApplicationContext(), rootUrl,
+                    preferences.getString("openmrs_user", null),
+                    preferences.getString("openmrs_password", null));
         }
     }
 

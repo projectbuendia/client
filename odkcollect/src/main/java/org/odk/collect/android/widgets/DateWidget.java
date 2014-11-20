@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -121,19 +122,23 @@ public class DateWidget extends QuestionWidget {
 	private void hideDayFieldIfNotInFormat(FormEntryPrompt prompt) {
         String appearance = prompt.getQuestion().getAppearanceAttr();
         if ( appearance == null ) {
-        	if ( Build.VERSION.SDK_INT >= 11 ) {
-        		showCalendar = true;
-	        	this.mDatePicker.setCalendarViewShown(true);
-	        	if ( Build.VERSION.SDK_INT >= 12 ) {
-	        		CalendarView cv = this.mDatePicker.getCalendarView();
-		        	cv.setShowWeekNumber(false);
-	        	}
-	        	this.mDatePicker.setSpinnersShown(true);
-	        	hideDay = true;
-	        	hideMonth = false;
-        	} else {
-        		return;
-        	}
+//        	if ( Build.VERSION.SDK_INT >= 11 ) {
+//        		showCalendar = true;
+//	        	this.mDatePicker.setCalendarViewShown(true);
+//	        	if ( Build.VERSION.SDK_INT >= 12 ) {
+//	        		CalendarView cv = this.mDatePicker.getCalendarView();
+//		        	cv.setShowWeekNumber(false);
+//	        	}
+//	        	this.mDatePicker.setSpinnersShown(true);
+//	        	hideDay = true;
+//	        	hideMonth = false;
+//        	} else {
+//        		return;
+//        	}
+            if ( Build.VERSION.SDK_INT >= 11 ) {
+                this.mDatePicker.setCalendarViewShown(false);
+                this.mDatePicker.setSpinnersShown(true);
+            }
         } else if ( "month-year".equals(appearance) ) {
         	hideDay = true;
         	if ( Build.VERSION.SDK_INT >= 11 ) {

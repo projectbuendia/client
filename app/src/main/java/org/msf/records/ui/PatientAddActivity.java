@@ -26,7 +26,6 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
-import org.msf.records.net.VolleySingleton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +39,7 @@ import static org.msf.records.net.Server.PATIENT_DOB_YEARS_KEY;
 import static org.msf.records.net.Server.PATIENT_FAMILY_NAME_KEY;
 import static org.msf.records.net.Server.PATIENT_GENDER_KEY;
 import static org.msf.records.net.Server.PATIENT_GIVEN_NAME_KEY;
+import static org.msf.records.net.Server.PATIENT_ID_KEY;
 import static org.msf.records.net.Server.PATIENT_IMPORTANT_INFORMATION_KEY;
 import static org.msf.records.net.Server.PATIENT_LOCATION_BED_KEY;
 import static org.msf.records.net.Server.PATIENT_LOCATION_TENT_KEY;
@@ -53,6 +53,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
     private static final String TAG = PatientAddActivity.class.getSimpleName();
 
     //basic details
+    @InjectView(R.id.add_patient_id) TextView mPatientIdTV;
     @InjectView(R.id.add_patient_given_name) TextView mPatientGivenNameTV;
     @InjectView(R.id.add_patient_family_name) TextView mPatientFamilyNameTV;
     @InjectView(R.id.add_patient_dob_estimated) CheckBox mPatientDoBEstimatedCB;
@@ -163,7 +164,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
 
         /*{
             "id":"MSF.TS.1",
-                "created_timestamp_utc":1413234941,
+                "created_timestamp":1413234941,
                 "created_local_date":"2014-10-13",
                 "status":null,
                 "given_name":null,
@@ -182,7 +183,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
             "gender":null,
                 "important_information":null,
                 "pregnancy_start_date":null,
-                "first_showed_symptoms_timestamp_utc":0,
+                "first_showed_symptoms_timestamp":0,
                 "first_showed_symptoms_local_date":"1970-01-01",
                 "movement":null,
                 "eating":null,
@@ -190,6 +191,7 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
                 "next_of_kin":null
         }*/
         HashMap<String, String> map = new HashMap<String, String>();
+        map.put(PATIENT_ID_KEY, mPatientIdTV.getText().toString());
         map.put(PATIENT_GENDER_KEY, mPatientGenderSpinner.getSelectedItem().toString().toLowerCase().equals("male") ? "m" : "f");
         map.put(PATIENT_GIVEN_NAME_KEY, mPatientGivenNameTV.getText().toString());
         map.put(PATIENT_FAMILY_NAME_KEY, mPatientFamilyNameTV.getText().toString());

@@ -2,16 +2,11 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,10 +33,13 @@ import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.provider.FormsProviderAPI;
-import org.odk.collect.android.tasks.DiskSyncTask;
+import com.squareup.otto.Subscribe;
 
-import java.io.File;
-import java.util.List;
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.net.Constants;
+import org.odk.collect.android.tasks.DiskSyncTask;
 
 
 /**
@@ -64,21 +62,22 @@ public class PatientListActivity extends FragmentActivity
         implements PatientListFragment.Callbacks {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
+    private static final int ODK_ACTIVITY_REQUEST = 1;
 
     private SearchView mSearchView;
 
     private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
-    private OnSearchListener mSearchListerner;
+    private OnSearchListener mSearchListener;
 
     private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
 
     interface OnSearchListener {
-        void setQuerySubmited(String q);
+        void setQuerySubmitted(String q);
     }
 
     public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListerner = onSearchListener;
+        this.mSearchListener = onSearchListener;
     }
 
     /**
@@ -90,7 +89,8 @@ public class PatientListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Crashlytics.start(this);
+        // Crashlytics is really painful on the emulator.
+//        Crashlytics.start(this);
         setContentView(R.layout.activity_patient_list);
 
         getActionBar().setDisplayShowHomeEnabled(false);
@@ -102,11 +102,13 @@ public class PatientListActivity extends FragmentActivity
             // activity should be in two-pane mode.
             mTwoPane = true;
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            ((PatientListFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.patient_list))
-                    .setActivateOnItemClick(true);
+
+            // Create a main screen shown when no patient is selected.
+            MainScreenFragment mainScreenFragment = new MainScreenFragment();
+
+            // Add the fragment to the container.
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.patient_detail_container, mainScreenFragment).commit();
 
             setupCustomActionBar();
         }
@@ -197,41 +199,27 @@ public class PatientListActivity extends FragmentActivity
         final View customActionBarView = inflater.inflate(
                 R.layout.actionbar_custom_main, null);
 
-        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
-        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
+//        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
+//        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
         mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
         mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
         mSearchView.setIconifiedByDefault(false);
         actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
     }
 
     /**
      * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given ID was selected.
+     * indicating that the item with the given uuid/name/id was selected.
      */
     @Override
-    public void onItemSelected(String id) {
-        if (mTwoPane) {
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
-            Bundle arguments = new Bundle();
-            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY, id);
-            PatientDetailFragment fragment = new PatientDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.patient_detail_container, fragment)
-                    .commit();
-
-        } else {
-            // In single-pane mode, simply start the detail activity
-            // for the selected item ID.
-            Intent detailIntent = new Intent(this, PatientDetailActivity.class);
-            detailIntent.putExtra(PatientDetailFragment.PATIENT_ID_KEY, id);
-            startActivity(detailIntent);
-        }
+    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
+        Intent detailIntent = new Intent(this, PatientDetailActivity.class);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_ID_KEY, id);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_UUID_KEY, uuid);
+        detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
+        startActivity(detailIntent);
     }
 
     @Override
@@ -242,11 +230,11 @@ public class PatientListActivity extends FragmentActivity
             inflater.inflate(R.menu.main, menu);
 
             menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startActivity(PatientAddActivity.class);
-                return false;
-              }
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    startActivity(PatientAddActivity.class);
+                    return false;
+                }
             });
 
             menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
@@ -271,26 +259,26 @@ public class PatientListActivity extends FragmentActivity
 
             searchMenuItem.expandActionView();
         } else {
-          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              startActivity(PatientAddActivity.class);
-            }
-          });
+//          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//              startActivity(PatientAddActivity.class);
+//            }
+//          });
 
           mSettingsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              startActivity(SettingsActivity.class);
-            }
+              @Override
+              public void onClick(View v) {
+                  startActivity(SettingsActivity.class);
+              }
           });
 
-          mScanBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              startScanBracelet();
-            }
-          });
+//          mScanBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//              startScanBracelet();
+//            }
+//          });
         }
 
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -308,8 +296,8 @@ public class PatientListActivity extends FragmentActivity
 
           @Override
           public boolean onQueryTextChange(String newText) {
-            if (mSearchListerner != null)
-              mSearchListerner.setQuerySubmited(newText);
+            if (mSearchListener != null)
+              mSearchListener.setQuerySubmitted(newText);
             return true;
           }
         });
@@ -324,7 +312,7 @@ public class PatientListActivity extends FragmentActivity
     }
 
     private void startScanBracelet() {
-        ScanAction scanAction = ScanAction.FETCH_XFORMS;
+        ScanAction scanAction = ScanAction.PLAY_WITH_ODK;
         switch (scanAction) {
             case PLAY_WITH_ODK:
                 showFirstFormFromSdcard();
@@ -332,83 +320,31 @@ public class PatientListActivity extends FragmentActivity
             case FAKE_SCAN:
                 showFakeScanProgress();
                 break;
-            case FETCH_XFORMS:
-                fetchXforms();
-                break;
         }
     }
 
-    private void fetchXforms() {
-        final String tag = "fetchXforms";
-        final Response.ErrorListener errorListener = new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(tag, error.toString());
-            }
-        };
-        Log.i(tag, "Fetching all forms");
-        App.getmOpenMrsXformsConnection().listXforms(
-                new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                    @Override
-                    public void onResponse(final List<OpenMrsXformIndexEntry> response) {
-                        if (response.isEmpty()) {
-                            Log.i(tag, "No forms found");
-                            return;
-                        }
-                        // Cache all the forms into the ODK form cache
-                        new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-                            boolean displayed;
-
-                            @Override
-                            public void formWritten(File path) {
-                                Log.i(tag, "wrote form " + path);
-
-                                // Just display one form.
-                                synchronized (this) {
-                                    if (displayed) {
-                                        return;
-                                    } else {
-                                        displayed = true;
-                                    }
-                                }
-
-                                // TODO(nfortescue): factor out this ODK database stuff to somewhere
-                                // common
-                                // Fetch it from the ODK database
-                                long formId;
-                                Cursor cursor = null;
-                                try {
-                                    cursor = OdkXformSyncTask.getCursorForFormFile(
-                                            path, new String[]{
-                                                    BaseColumns._ID
-                                            });
-                                    Preconditions.checkArgument(cursor.getCount() == 1);
-                                    Preconditions.checkArgument(cursor.getColumnCount() == 1);
-                                    cursor.moveToNext();
-                                    formId = cursor.getLong(0);
-                                } finally {
-                                   if (cursor != null) {
-                                       cursor.close();
-                                   }
-                                }
-                                showOdkCollect(formId);
-                            }
-                        }).execute(response.toArray(new OpenMrsXformIndexEntry[response.size()]));
-                    }
-                }, errorListener);
+    public void onButtonClicked(View view) {
+        switch (view.getId()) {
+            case R.id.new_patient_button:
+                OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
+                        ODK_ACTIVITY_REQUEST);
+                break;
+        }
     }
 
     private void showFirstFormFromSdcard() {
         // Sync the local sdcard forms into the database
         new DiskSyncTask().execute((Void[]) null);
-        showOdkCollect(1L);
+        OdkActivityLauncher.showOdkCollect(this, ODK_ACTIVITY_REQUEST, 1L);
     }
 
-    private void showOdkCollect(long formId) {
-        Intent intent = new Intent(this, FormEntryActivity.class);
-        Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
-        intent.setData(formUri);
-        startActivity(intent);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != ODK_ACTIVITY_REQUEST) {
+            return;
+        }
+        OdkActivityLauncher.sendOdkResultToServer(this, null /* create a new patient */, resultCode,
+                data);
     }
 
     private void showFakeScanProgress() {

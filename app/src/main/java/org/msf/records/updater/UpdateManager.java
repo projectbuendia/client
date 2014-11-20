@@ -158,7 +158,9 @@ public class UpdateManager {
                                     App.getInstance(),
                                     null /*dirType*/,
                                     "androidclient_"
-                                            + availableUpdateInfo.mAvailableVersion.toString());
+                                            + availableUpdateInfo.mAvailableVersion.toString())
+                            .setNotificationVisibility(
+                                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             mDownloadId = mDownloadManager.enqueue(request);
 
             return true;

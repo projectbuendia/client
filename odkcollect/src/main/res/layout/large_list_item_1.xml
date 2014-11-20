@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A single-line list item layout that's larger than usual. -->
+<!--<LinearLayout-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:tools="http://schemas.android.com/tools"-->
+    <!--android:orientation="vertical"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:minHeight="@dimen/touch_target"-->
+    <!--android:gravity="center_vertical">-->
+
+<!--</LinearLayout>-->
+
+<CheckedTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/touch_target"
+    android:gravity="center_vertical"
+    android:padding="@dimen/padding_standard"
+    android:textStyle="bold"
+    android:textSize="@dimen/text_size_title"
+    android:singleLine="true"
+    android:ellipsize="end"
+    android:background="@drawable/bg_selectable_list_item"/>
