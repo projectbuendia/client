@@ -21,6 +21,7 @@ import com.android.volley.VolleyError;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.cache.PatientOpenHelper;
 import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
@@ -64,6 +65,8 @@ public class PatientListFragment extends ProgressFragment implements
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
     private PatientAdapter mPatientAdapter;
+
+    private PatientOpenHelper patientDb;
 
     private ListView mListView;
 
@@ -160,6 +163,8 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        patientDb = new PatientOpenHelper(getActivity());
 
         mListView = (ListView) view.findViewById(R.id.fragment_patient_list);
         mListView.setOnItemClickListener(this);
@@ -300,6 +305,13 @@ public class PatientListFragment extends ProgressFragment implements
 
 
             Patient patient = getItem(position);
+
+            // If the patient exists in local cache, inject it.
+            // TODO(akalachman): Remove after demo?
+            Patient cachedPatient = patientDb.getPatient(patient.uuid);
+            if (cachedPatient != null) {
+                patient = cachedPatient;
+            }
 
             holder.mPatientName.setText(patient.given_name + " " + patient.family_name);
             holder.mPatientId.setText(patient.id);
