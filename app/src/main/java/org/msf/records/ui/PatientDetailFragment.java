@@ -12,6 +12,7 @@ import com.android.volley.Response;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.cache.PatientOpenHelper;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
 import org.msf.records.model.PatientLocation;
@@ -40,6 +41,8 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     public String mPatientId;
     private Patient mPatient = null;
 
+    private PatientOpenHelper patientDb;
+
     @InjectView(R.id.patient_overview_name)
     TextView mPatientNameTV;
     @InjectView(R.id.patient_overview_id) TextView mPatientIdTV;
@@ -62,6 +65,8 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         mPatientId = bundle.getString(PATIENT_ID_KEY);
         if(mPatientId == null)
             throw new IllegalArgumentException("Please pass the user id to the PatientDetailFragment");
+
+        patientDb = new PatientOpenHelper(getActivity());
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -98,7 +103,17 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         super.onViewCreated(view, savedInstanceState);
 
         ButterKnife.inject(this, view);
-        App.getServer().getPatient(mPatientId, this, this, TAG);
+
+        // Check local cache for patient before retrieving from server.
+        mPatient = patientDb.getPatient(mPatientId);
+
+        // Retrieve from server if not found in local cache.
+        if (mPatient == null) {
+            App.getServer().getPatient(mPatientId, this, this, TAG);
+        } else {
+            // If we already have all of the patient data available, immediately set all fields.
+            populatePatientFields(mPatient);
+        }
     }
 
     @OnClick(R.id.patient_overview_name)
@@ -249,8 +264,18 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     }
 
     @Override
+    // On response, populate all fields and update the cache.
     public void onResponse(Patient response) {
         Log.d(TAG, "onResponse");
+
+        populatePatientFields(response);
+
+        // Cache after every update.
+        patientDb.setPatient(mPatientId, mPatient);
+    }
+
+    // Populate fields but do not change cache.
+    private void populatePatientFields(Patient response) {
         mPatient = response;
 
         String mGender;
@@ -301,7 +326,6 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         } else {
             mPatientContactTV.setText(response.important_information);
         }*/
-
         changeState(ProgressFragment.State.LOADED);
     }
 }

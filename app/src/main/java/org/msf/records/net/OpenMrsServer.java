@@ -93,13 +93,13 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void getPatient(String patientUuid,
+    public void getPatient(String patientId,
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
-                mRootUrl + "/patient/" + patientUuid,
+                mRootUrl + "/patient/" + patientId,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
