@@ -177,6 +177,12 @@ public abstract class QuestionWidget extends LinearLayout {
                 .inflate(R.layout.template_text_view_question, null);
 //        mQuestionText = new TextView(getContext());
         mQuestionText.setText(promptText == null ? "" : promptText);
+
+        // TODO(dxchen): Remove this hack!
+        if (promptText != null && promptText.toLowerCase().equals("date of birth")) {
+            mQuestionText.setText("Age");
+        }
+
 //        mQuestionText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize);
 //        mQuestionText.setTypeface(null, Typeface.BOLD);
 //        mQuestionText.setPadding(0, 0, 0, 7);

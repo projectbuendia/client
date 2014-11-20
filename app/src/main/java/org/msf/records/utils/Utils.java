@@ -4,6 +4,7 @@ import android.text.format.DateFormat;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -85,7 +86,7 @@ public class Utils {
         }
         DateTime start = new DateTime(timestamp * 1000);
         DateTime currentDate = new DateTime();
-        return new Period(start, currentDate);
+        return new Period(start, currentDate, PeriodType.days());
     }
 
     /**
