@@ -58,11 +58,12 @@ public class BuendiaServer implements Server {
     @Override
     public void updatePatient(
             String patientId,
-            Map<String, String> patientArguments,
+            Patient patientArguments,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener, String logTag) {
+        // TODO(akalachman): Fix compatibility with old server by making map from patientArguments.
         mVolley.addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT,
-                        patientArguments, ROOT_URL + "patients/" + patientId, Patient.class, false,
+                        null, ROOT_URL + "patients/" + patientId, Patient.class, false,
                         null,
                         patientListener, errorListener),
                 logTag);

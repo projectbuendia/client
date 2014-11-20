@@ -119,10 +119,39 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void updatePatient(String patientId, Map<String, String> patientArguments,
-                              Response.Listener<Patient> patientListener,
-                              Response.ErrorListener errorListener, String logTag) {
-        // errorListener.onErrorResponse(new VolleyError("Not yet implemented"));
+    public void updatePatient(String patientId, Patient patientArguments,
+                              final Response.Listener<Patient> patientListener,
+                              final Response.ErrorListener errorListener, final String logTag) {
+        // TODO(akalachman): Re-enable server updates below.
+        /*Gson gson = new Gson();
+        JSONObject patientJson;
+        try {
+            String patientJsonString = gson.toJson(patientArguments);
+            Log.i(logTag, "Sending patient update: " + patientJsonString);
+            patientJson = new JSONObject(patientJsonString);
+        } catch (JSONException e) {
+            // TODO(akalachman): Prefer using a toast here.
+            errorListener.onErrorResponse(new VolleyError("Error updating patient."));
+            return;
+        }
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                mUserName, mPassword,
+                mRootUrl + "/patient/" + patientId,
+                patientJson,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            patientListener.onResponse(parsePatientJson(response));
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                errorListener);
+        mVolley.addToRequestQueue(request, logTag);*/
     }
 
     @Override
