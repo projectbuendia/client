@@ -39,6 +39,18 @@ public class PatientDetailPagerFragment extends ProgressFragment {
 
         TabPageIndicator indicator = (TabPageIndicator) view.findViewById(R.id.indicator);
         indicator.setViewPager(mPager);
+        indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) {}
+
+            @Override
+            public void onPageSelected(int i) {
+                mPager.requestLayout();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {}
+        });
 
         return view;
     }
