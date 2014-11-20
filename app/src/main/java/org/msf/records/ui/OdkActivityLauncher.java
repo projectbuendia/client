@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Charsets;
 
 import org.json.JSONObject;
 import org.msf.records.App;
@@ -26,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
@@ -78,9 +80,16 @@ public class OdkActivityLauncher {
      * @param resultCode
      * @param data
      */
-    public static void sendOdkResultToServer(Activity callingActivity, int requestCode,
-                                         int resultCode,
-                                         Intent data) {
+    public static void sendOdkResultToServer(
+            Activity callingActivity,
+            int requestCode,
+            int resultCode,
+            Intent data) {
+
+        if (resultCode == Activity.RESULT_CANCELED) {
+            return;
+        }
+
         if (requestCode != OdkActivityLauncher.ODK_COLLECT_REQUEST_CODE) {
             return;
         }
@@ -154,7 +163,11 @@ public class OdkActivityLauncher {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Did not submit  form to server successfully", error);
+                        Log.e(TAG, "Did not submit form to server successfully", error);
+                        if (error.networkResponse.statusCode == 500) {
+                            Log.e(TAG, "Internal error stack trace:\n");
+                            Log.e(TAG, new String(error.networkResponse.data, Charsets.UTF_8));
+                        }
                     }
                 });
     }
