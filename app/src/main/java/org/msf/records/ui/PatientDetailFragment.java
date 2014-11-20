@@ -35,7 +35,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 
     private static final String TAG = PatientDetailFragment.class.getSimpleName();
 
-    public static final String PATIENT_ID_KEY = "PATIENT_ID_KEY";
+    public static final String PATIENT_UUID_KEY = "PATIENT_UUID_KEY";
     private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
 
     public String mPatientId;
@@ -62,7 +62,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = savedInstanceState != null ? savedInstanceState : getArguments();
-        mPatientId = bundle.getString(PATIENT_ID_KEY);
+        mPatientId = bundle.getString(PATIENT_UUID_KEY);
         if(mPatientId == null)
             throw new IllegalArgumentException("Please pass the user id to the PatientDetailFragment");
 
@@ -81,7 +81,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
             // Create the detail pager fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY, mPatientId);
+            arguments.putString(PatientDetailFragment.PATIENT_UUID_KEY, mPatientId);
             PatientDetailPagerFragment fragment = new PatientDetailPagerFragment();
             fragment.setArguments(arguments);
             getChildFragmentManager().beginTransaction()
@@ -95,7 +95,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(PATIENT_ID_KEY, mPatientId);
+        outState.putString(PATIENT_UUID_KEY, mPatientId);
     }
 
     @Override
@@ -280,6 +280,8 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         String mGender;
         int mAge;
 
+        getActivity().setTitle(
+                response.given_name + " " + response.family_name + " (" + response.id + ")");
         mPatientNameTV.setText(response.given_name + " " + response.family_name);
         mPatientIdTV.setText("" + response.id);
         mPatientAssignedLocationTV.setText(response.assigned_location.zone + "\n" +
