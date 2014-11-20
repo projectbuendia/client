@@ -542,18 +542,19 @@ public class FormEntryActivity
                             public void onScrollChanged() {
                                 for (int i = positions.length - 1; i >= 0; i--) {
                                     if (mScrollView.getScrollY() >= positions[i]) {
+                                        for (int j = 0; j < positions.length; j++) {
+                                            CheckedTextView child =
+                                                    ((CheckedTextView) sidebar.getChildAt(j));
+                                            if (child != null) {
+                                                child.setChecked(false);
+                                            }
+                                        }
+
                                         CheckedTextView listItemView =
                                                 (CheckedTextView) sidebar.getChildAt(i);
-                                        if (listItemView.isChecked()) {
-                                            return;
+                                        if (listItemView != null) {
+                                            listItemView.setChecked(true);
                                         }
-
-                                        for (int j = 0; j < positions.length; j++) {
-                                            ((CheckedTextView) sidebar.getChildAt(j))
-                                                    .setChecked(false);
-                                        }
-
-                                        listItemView.setChecked(true);
                                         return;
                                     }
                                 }

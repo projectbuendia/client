@@ -8,17 +8,19 @@ import java.util.Set;
  */
 public class Appearance {
 
+    private static final Appearance EMPTY = new Appearance("", new HashSet<String>());
+
     public final String mPrimaryAppearance;
     private final Set<String> mQualifiers;
 
     public static Appearance fromString(String appearanceString) {
         if (appearanceString == null) {
-            return null;
+            return EMPTY;
         }
 
         String[] appearanceParts = appearanceString.split("\\|");
         if (appearanceParts.length == 0) {
-            return null;
+            return EMPTY;
         }
 
         String primaryAppearance = appearanceParts[0];
@@ -34,6 +36,10 @@ public class Appearance {
     public Appearance(String primaryAppearance, Set<String> qualifiers) {
         mPrimaryAppearance = primaryAppearance;
         mQualifiers = qualifiers;
+    }
+
+    public boolean isEmpty() {
+        return this == EMPTY;
     }
 
     public boolean hasQualifier(String qualifier) {

@@ -5,11 +5,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,25 +17,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.crashlytics.android.Crashlytics;
-
-import org.json.JSONObject;
-import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.Constants;
-import org.msf.records.net.OpenMrsXformsConnection;
-import org.odk.collect.android.application.Collect;
-import org.odk.collect.android.provider.InstanceProviderAPI;
-import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.tasks.DiskSyncTask;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
-import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
 
 /**
@@ -61,6 +42,7 @@ public class PatientListActivity extends FragmentActivity
         implements PatientListFragment.Callbacks {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
+    private static final int ODK_ACTIVITY_REQUEST = 1;
 
     private SearchView mSearchView;
 
@@ -85,7 +67,8 @@ public class PatientListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Crashlytics.start(this);
+        // Crashlytics is really painful on the emulator.
+//        Crashlytics.start(this);
         setContentView(R.layout.activity_patient_list);
 
         getActionBar().setDisplayShowHomeEnabled(false);
@@ -139,6 +122,7 @@ public class PatientListActivity extends FragmentActivity
     public void onItemSelected(String id) {
         Intent detailIntent = new Intent(this, PatientDetailActivity.class);
         detailIntent.putExtra(PatientDetailFragment.PATIENT_ID_KEY, id);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_UUID_KEY, id);
         startActivity(detailIntent);
     }
 
@@ -246,7 +230,8 @@ public class PatientListActivity extends FragmentActivity
     public void onButtonClicked(View view) {
         switch (view.getId()) {
             case R.id.new_patient_button:
-                OdkActivityLauncher.fetchXforms(this, Constants.ADD_PATIENT_UUID);
+                OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
+                        ODK_ACTIVITY_REQUEST);
                 break;
         }
     }
@@ -254,12 +239,16 @@ public class PatientListActivity extends FragmentActivity
     private void showFirstFormFromSdcard() {
         // Sync the local sdcard forms into the database
         new DiskSyncTask().execute((Void[]) null);
-        OdkActivityLauncher.showOdkCollect(this, 1L);
+        OdkActivityLauncher.showOdkCollect(this, ODK_ACTIVITY_REQUEST, 1L);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        OdkActivityLauncher.sendOdkResultToServer(this, requestCode, resultCode, data);
+        if (requestCode != ODK_ACTIVITY_REQUEST) {
+            return;
+        }
+        OdkActivityLauncher.sendOdkResultToServer(this, null /* create a new patient */, resultCode,
+                data);
     }
 
     private void showFakeScanProgress() {

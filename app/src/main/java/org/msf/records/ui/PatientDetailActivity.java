@@ -1,22 +1,18 @@
 package org.msf.records.ui;
 
-import android.app.ActionBar;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.SearchView;
 
 import org.msf.records.R;
 import org.msf.records.net.Constants;
+
+import javax.annotation.Nullable;
 
 
 /**
@@ -28,8 +24,28 @@ import org.msf.records.net.Constants;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link PatientDetailFragment}.
  */
-
 public class PatientDetailActivity extends FragmentActivity {
+
+    private static final String TAG = "PatientDetailActivity";
+
+    /*
+     * The ODK code for filling in a form has no way of attaching metadata to it This means we can't
+     * pass which patient is currently being edited. Instead, we keep an array of up to
+     * MAX_ODK_REQUESTS patientUuids. We then send request code BASE_ODK_REQUEST + index, and roll
+     * through the array. The array is persisted through activity restart in the savedInstanceState.
+     */
+    private static final int BASE_ODK_REQUEST = 100;
+    // In reality we probably never need more than one request, but be safe.
+    private static final int MAX_ODK_REQUESTS = 10;
+    private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
+    public static final String PATIENT_UUID_KEY = "PATIENT_UUID";
+    private int nextIndex = 0;
+    private final String[] patientUuids = new String[MAX_ODK_REQUESTS];
+
+
+    // This is the patient id of the current patient being displayed.
+    private String mPatientUuid;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,13 +67,41 @@ public class PatientDetailActivity extends FragmentActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY,
-                    getIntent().getStringExtra(PatientDetailFragment.PATIENT_ID_KEY));
+            mPatientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
+            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY, getIntent().getStringExtra(PatientDetailFragment.PATIENT_ID_KEY));
             PatientDetailFragment fragment = new PatientDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.patient_detail_container, fragment)
                     .commit();
+        } else {
+            mPatientUuid = savedInstanceState.getString(PATIENT_UUID_KEY);
+            String[] storedIds = savedInstanceState.getStringArray(PATIENT_UUIDS_BUNDLE_KEY);
+            if (storedIds != null) {
+                synchronized (patientUuids) {
+                    System.arraycopy(storedIds, 0, patientUuids, 0,
+                            Math.max(storedIds.length, patientUuids.length));
+                }
+            }
+        }
+    }
+
+    private int savePatientUuidForRequestCode(String patientUuid) {
+      synchronized (patientUuids) {
+          patientUuids[nextIndex] = patientUuid;
+          int requestCode = BASE_ODK_REQUEST + nextIndex;
+          nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
+          return requestCode;
+      }
+    }
+
+    @Nullable
+    private String getAndClearPatientUuidForRequestCode(int requestCode) {
+        synchronized (patientUuids) {
+            int index = requestCode - BASE_ODK_REQUEST;
+            String patientUuid = patientUuids[index];
+            patientUuids[index] = null;
+            return patientUuid;
         }
     }
 
@@ -70,8 +114,9 @@ public class PatientDetailActivity extends FragmentActivity {
         menu.findItem(R.id.action_update_chart).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                OdkActivityLauncher.fetchXforms(
-                        PatientDetailActivity.this, Constants.ADD_OBSERVATION_UUID);
+                OdkActivityLauncher.fetchAndShowXform(
+                        PatientDetailActivity.this, Constants.ADD_OBSERVATION_UUID,
+                        savePatientUuidForRequestCode(mPatientUuid));
                 return true;
             }
         });
@@ -104,9 +149,19 @@ public class PatientDetailActivity extends FragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(PATIENT_UUID_KEY, mPatientUuid);
+        outState.putStringArray(PATIENT_UUIDS_BUNDLE_KEY, patientUuids);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        OdkActivityLauncher.sendOdkResultToServer(this, requestCode, resultCode, data);
+        String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
+        if (patientUuid == null) {
+            Log.e(TAG, "Received unknown request code: " + requestCode);
+        }
+        OdkActivityLauncher.sendOdkResultToServer(this, patientUuid, resultCode, data);
     }
 }

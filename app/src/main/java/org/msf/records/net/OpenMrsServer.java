@@ -119,7 +119,7 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void updatePatient(String patientId, Patient patientArguments,
+    public void updatePatient(String patientId, Patient patientChanges,
                               final Response.Listener<Patient> patientListener,
                               final Response.ErrorListener errorListener, final String logTag) {
         // TODO(akalachman): Re-enable server updates below.

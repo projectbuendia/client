@@ -27,8 +27,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 
@@ -39,58 +40,52 @@ public class OdkActivityLauncher {
 
     private static final String TAG = "OdkActivityLauncher";
 
-    public static final int ODK_COLLECT_REQUEST_CODE = 1;
-
-    public static void fetchXforms(final Activity callingActivity, final String uuidToShow) {
-        final String tag = "fetchXforms";
+    public static void fetchAndShowXform(final Activity callingActivity, final String uuidToShow,
+                                         final int requestCode) {
         App.getmOpenMrsXformsConnection().listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
-                            Log.i(tag, "No forms found");
+                            Log.i(TAG, "No forms found");
                             return;
                         }
                         // Cache all the forms into the ODK form cache
                         new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
                             @Override
                             public void formWritten(File path, String uuid) {
-                                Log.i(tag, "wrote form " + path);
-                                showOdkCollect(callingActivity, OdkDatabase.getFormIdForPath(path));
+                                Log.i(TAG, "wrote form " + path);
+                                showOdkCollect(callingActivity, requestCode,
+                                        OdkDatabase.getFormIdForPath(path));
                             }
                         }).execute(findUuid(response, uuidToShow));
                     }
-                }, getErrorListenerForTag(tag));
+                }, getErrorListenerForTag(TAG));
     }
 
-    public static void showOdkCollect(Activity callingActivity, long formId) {
+    public static void showOdkCollect(Activity callingActivity, int requestCode, long formId) {
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
         intent.setAction(Intent.ACTION_PICK);
-        callingActivity.startActivityForResult(intent, ODK_COLLECT_REQUEST_CODE);
+        callingActivity.startActivityForResult(intent, requestCode);
     }
-
 
     /**
      * Convenient shared code for handling an ODK activity result.
      *
-     * @param callingActivity
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * @param callingActivity the calling activity, used for getting content resolvers
+     * @param patientUuid the patient to add an observation to, or null to create a new patient
+     * @param resultCode the result code sent from Android activity transition
+     * @param data the incoming intent
      */
     public static void sendOdkResultToServer(
             Activity callingActivity,
-            int requestCode,
+            @Nullable String patientUuid,
             int resultCode,
             Intent data) {
 
         if (resultCode == Activity.RESULT_CANCELED) {
-            return;
-        }
-
-        if (requestCode != OdkActivityLauncher.ODK_COLLECT_REQUEST_CODE) {
             return;
         }
 
@@ -132,7 +127,7 @@ public class OdkActivityLauncher {
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
 
-            sendFormToServer(null /* create new patient */, readFromPath(instancePath),
+            sendFormToServer(patientUuid, readFromPath(instancePath),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -155,10 +150,10 @@ public class OdkActivityLauncher {
         }
     }
 
-    private static void sendFormToServer(String patientId, String xml,
+    private static void sendFormToServer(String patientUuid, String xml,
                                   Response.Listener<JSONObject> successListener) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
-        connection.postXformInstance(patientId, xml,
+        connection.postXformInstance(patientUuid, xml,
                 successListener,
                 new Response.ErrorListener() {
                     @Override

@@ -9,6 +9,7 @@ import com.android.volley.Response;
 
 import org.msf.records.model.Patient;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,12 +59,22 @@ public class BuendiaServer implements Server {
     @Override
     public void updatePatient(
             String patientId,
-            Patient patientArguments,
+            Patient patientChanges,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener, String logTag) {
-        // TODO(akalachman): Fix compatibility with old server by making map from patientArguments.
+        Map<String, String> map = new HashMap<>();
+        if (patientChanges.given_name != null) {
+            map.put(Server.PATIENT_GIVEN_NAME_KEY, patientChanges.given_name);
+        }
+        if (patientChanges.family_name != null) {
+            map.put(Server.PATIENT_FAMILY_NAME_KEY, patientChanges.family_name);
+        }
+        if (patientChanges.gender != null) {
+            map.put(Server.PATIENT_GENDER_KEY, patientChanges.gender);
+        }
+
         mVolley.addToRequestQueue(new GsonRequest<Patient>(Request.Method.PUT,
-                        null, ROOT_URL + "patients/" + patientId, Patient.class, false,
+                        map, ROOT_URL + "patients/" + patientId, Patient.class, false,
                         null,
                         patientListener, errorListener),
                 logTag);
