@@ -196,6 +196,12 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
         patientsByZone.get(zone).add(patientToAdd);
     }
 
+    // TODO(akalachman): Use this for grouping.
+    private class Tent {
+        public String name;
+        public List<Patient> patients = new ArrayList<Patient>();
+    }
+
     static class ViewHolder {
         @InjectView(R.id.listview_cell_search_results_color_indicator) ImageView mPatientListStatusColorIndicator;
         @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
