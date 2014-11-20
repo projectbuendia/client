@@ -93,13 +93,13 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void getPatient(String patientId,
+    public void getPatient(String patientUuid,
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
-                mRootUrl + "/patient/" + patientId,
+                mRootUrl + "/patient/" + patientUuid,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -119,10 +119,38 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void updatePatient(String patientId, Patient patientChanges,
-                              Response.Listener<Patient> patientListener,
-                              Response.ErrorListener errorListener, String logTag) {
-        // errorListener.onErrorResponse(new VolleyError("Not yet implemented"));
+    public void updatePatient(String patientUuid, Patient patientChanges,
+                              final Response.Listener<Patient> patientListener,
+                              final Response.ErrorListener errorListener,
+                              final String logTag) {
+        JSONObject requestBody;
+        try {
+            requestBody = new JSONObject(gson.toJson(patientChanges));
+        } catch (JSONException e) {
+            String msg = "Failed to write patient changes to Gson: " + patientChanges;
+            Log.e(logTag, msg);
+            errorListener.onErrorResponse(new VolleyError(msg));
+            return;
+        }
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                mUserName, mPassword,
+                mRootUrl + "/patient/"+patientUuid,
+                requestBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            patientListener.onResponse(parsePatientJson(response));
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                errorListener);
+        mVolley.addToRequestQueue(request, logTag);
     }
 
     @Override
