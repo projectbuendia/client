@@ -2,19 +2,13 @@ package org.msf.records.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
-import com.viewpagerindicator.TabPageIndicator;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -22,6 +16,7 @@ import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
 import org.msf.records.utils.Utils;
 
+import java.util.Calendar;
 import java.util.HashMap;
 
 import butterknife.ButterKnife;
@@ -42,6 +37,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
 
     public String mPatientId;
+    private Patient mPatient = null;
 
     @InjectView(R.id.patient_overview_name)
     TextView mPatientNameTV;
@@ -215,7 +211,70 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         dialogListFragment.show(fm, null);
     }
 
+    @OnClick(R.id.patient_overview_days_since_admission)
+    public void patientOverviewDaysSinceAdmissionClick() {
+        FragmentManager fm = getChildFragmentManager();
+        ListDialogFragment dialogListFragment = new ListDialogFragment();
+        Bundle b = new Bundle();
+        String[] daysArray = new String[30];
+        daysArray[0] = "Less than 1";
+        for (int i = 1; i < daysArray.length; i++) {
+            daysArray[i] = String.valueOf(i);
+        }
+        b.putStringArray(ITEM_LIST_KEY, daysArray);
+        b.putSerializable(ListDialogFragment.GRID_ITEM_DONE_LISTENER, new ListDialogFragment.OnItemClickListener() {
+            @Override
+            public void onListItemClick(int position) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("days_since_admission", String.valueOf(position));
+                updatePatient(map);
+            }
+        });
+        dialogListFragment.setArguments(b);
+        dialogListFragment.show(fm, null);
+    }
+
     private void updatePatient(HashMap<String, String> map){
+        // Update local fields.
+        for (String field : map.keySet()) {
+            String value = map.get(field);
+            switch (field) {
+                case "age_years":
+                    mPatient.age.years = Integer.parseInt(value);
+                    break;
+                case "age_months":
+                    mPatient.age.months = Integer.parseInt(value);
+                    break;
+                case "gender":
+                    mPatient.gender = value;
+                    break;
+                case "status":
+                    mPatient.status = value;
+                    break;
+                case "assigned_location_zone_id":
+                    mPatient.assigned_location.zone = value;
+                    break;
+                case "assigned_location_tent_id":
+                    mPatient.assigned_location.tent = value;
+                    break;
+                case "assigned_location_bed":
+                    mPatient.assigned_location.bed = value;
+                    break;
+                case "given_name":
+                    mPatient.given_name = value;
+                    break;
+                case "family_name":
+                    mPatient.family_name = value;
+                    break;
+                case "days_since_admission":
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.DATE, -Integer.parseInt(value));
+                    mPatient.admission_timestamp = calendar.getTimeInMillis() / 1000;
+                    break;
+            }
+        }
+        onResponse(mPatient);
+
         App.getServer().updatePatient(mPatientId, map,
                 PatientDetailFragment.this, PatientDetailFragment.this, TAG);
     }
@@ -223,6 +282,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     @Override
     public void onResponse(Patient response) {
         Log.d(TAG, "onResponse");
+        mPatient = response;
 
         String mGender;
         int mAge;
@@ -233,7 +293,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
                 response.assigned_location.tent + " " + response.assigned_location.bed);
         mPatientDaysSinceAdmissionTV.setText(String.format(
                 getResources().getString(R.string.day_n),
-                Utils.timeDifference(response.created_timestamp).getDays()));
+                Utils.timeDifference(response.admission_timestamp).toStandardDays().getDays()));
         if (response.status == null) {
             response.status = "CONFIRMED_CASE";
         }
