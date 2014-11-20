@@ -39,6 +39,8 @@ public class PatientDetailActivity extends FragmentActivity {
     private static final int MAX_ODK_REQUESTS = 10;
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
     public static final String PATIENT_UUID_KEY = "PATIENT_UUID";
+    public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
+    public static final String PATIENT_ID_KEY = "PATIENT_ID";
     private int nextIndex = 0;
     private final String[] patientUuids = new String[MAX_ODK_REQUESTS];
 
@@ -63,12 +65,18 @@ public class PatientDetailActivity extends FragmentActivity {
         //
         // http://developer.android.com/guide/components/fragments.html
         //
+        String patientName;
+        String patientId;
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
             mPatientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
-            arguments.putString(PatientDetailFragment.PATIENT_ID_KEY, getIntent().getStringExtra(PatientDetailFragment.PATIENT_ID_KEY));
+
+            patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
+            patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
+
+            arguments.putString(PatientDetailFragment.PATIENT_UUID_KEY, getIntent().getStringExtra(PatientDetailFragment.PATIENT_UUID_KEY));
             PatientDetailFragment fragment = new PatientDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -76,6 +84,10 @@ public class PatientDetailActivity extends FragmentActivity {
                     .commit();
         } else {
             mPatientUuid = savedInstanceState.getString(PATIENT_UUID_KEY);
+
+            patientName = savedInstanceState.getString(PATIENT_NAME_KEY);
+            patientId = savedInstanceState.getString(PATIENT_ID_KEY);
+
             String[] storedIds = savedInstanceState.getStringArray(PATIENT_UUIDS_BUNDLE_KEY);
             if (storedIds != null) {
                 synchronized (patientUuids) {
@@ -83,6 +95,10 @@ public class PatientDetailActivity extends FragmentActivity {
                             Math.max(storedIds.length, patientUuids.length));
                 }
             }
+        }
+
+        if (patientName != null && patientId != null) {
+            setTitle(patientName + " (" + patientId + ")");
         }
     }
 
