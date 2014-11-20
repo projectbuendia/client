@@ -17,7 +17,11 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.squareup.otto.Subscribe;
+
+import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -92,6 +96,20 @@ public class PatientListActivity extends FragmentActivity
         }
 
         // TODO: If exposing deep links into your app, handle intents here.
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        App.getMainThreadBus().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        App.getMainThreadBus().unregister(this);
+
+        super.onPause();
     }
 
     private void setupCustomActionBar(){
