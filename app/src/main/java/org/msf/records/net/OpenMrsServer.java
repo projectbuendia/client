@@ -138,8 +138,6 @@ public class OpenMrsServer implements Server {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
-
                         ArrayList<Patient> result = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");

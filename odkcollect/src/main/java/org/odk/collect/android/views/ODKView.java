@@ -26,7 +26,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -51,6 +50,7 @@ import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
+import org.odk.collect.android.widgets2.Widget2Factory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ import java.util.Set;
  * 
  * @author carlhartung
  */
-public class ODKView extends LinearLayout implements OnLongClickListener {
+public class ODKView extends LinearLayout {
 
 	// starter random number for view IDs
     private final static int VIEW_ID = 12345;  
@@ -202,9 +202,11 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
 
             // if question or answer type is not supported, use text widget
             QuestionWidget qw =
-                WidgetFactory.createWidgetFromPrompt(p, getContext(), readOnlyOverride);
-            qw.setLongClickable(true);
-            qw.setOnLongClickListener(this);
+                    Widget2Factory.INSTANCE.create(getContext(), p, readOnlyOverride);
+            if (qw == null) {
+                qw = WidgetFactory.createWidgetFromPrompt(p, getContext(), readOnlyOverride);
+            }
+
             qw.setId(VIEW_ID + id++);
 
             widgets.add(qw);
@@ -422,13 +424,6 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
         }
     }
 
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
-    }
-    
-
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();
@@ -436,5 +431,4 @@ public class ODKView extends LinearLayout implements OnLongClickListener {
             qw.cancelLongPress();
         }
     }
-
 }
