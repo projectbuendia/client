@@ -116,13 +116,15 @@ public class PatientListActivity extends FragmentActivity
 
     /**
      * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given ID was selected.
+     * indicating that the item with the given uuid/name/id was selected.
      */
     @Override
-    public void onItemSelected(String id) {
+    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
         Intent detailIntent = new Intent(this, PatientDetailActivity.class);
-        detailIntent.putExtra(PatientDetailFragment.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_UUID_KEY, id);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_ID_KEY, id);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
+        detailIntent.putExtra(PatientDetailActivity.PATIENT_UUID_KEY, uuid);
+        detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
         startActivity(detailIntent);
     }
 

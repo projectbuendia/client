@@ -21,7 +21,7 @@ public class PatientDetailPagerFragment extends ProgressFragment {
     private static final int COUNT = 2;
     private static final int OVERVIEW = 0, VIEW_CHART = 1;//FLAGS = 1, BLOOD = 2, LOGS = 3;
 
-    public static final String PATIENT_ID_KEY = "PATIENT_ID_KEY";
+    public static final String PATIENT_ID_KEY = "PATIENT_UUID_KEY";
 
     public String mPatientId;
 
