@@ -65,7 +65,7 @@
             android:name=".ui.PatientAddActivity"
             android:label="@string/title_activity_patient_add" >
         </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="0a31f10a42050e1a7c9ce97ace4fda4c5235f280"/>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="0a31f10a42050e1a7c9ce97ace4fda4c5235f280" />
     </application>
 
 </manifest>
