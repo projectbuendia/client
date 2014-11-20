@@ -143,7 +143,7 @@ public class OpenMrsXformsConnection {
         // The JsonObject members in the API as written at the moment.
         // int "patient_id"
         // int "enterer_id"
-        // String "date_entered"
+        // String "date_entered" in ISO8601 format (1977-01-10T
         // String "xml" the form.
         JsonObject post = new JsonObject();
         post.addProperty("xml", xform);
@@ -154,7 +154,7 @@ public class OpenMrsXformsConnection {
         // TODO(nfortescue): get the enterer from the user login
         post.addProperty("enterer_id", 1);
 
-        post.addProperty("date_entered", ISODateTimeFormat.basicDateTime().print(new DateTime()));
+        post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
         JSONObject postBody = null;
         try {
             postBody = new JSONObject(post.toString());
