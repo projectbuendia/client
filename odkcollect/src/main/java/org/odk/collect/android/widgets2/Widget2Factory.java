@@ -35,23 +35,22 @@ public class Widget2Factory {
         SparseArray<TypedWidgetFactory<?>> dataTypeArray =
                 sFactoryRegistry.get(prompt.getControlType());
         if (dataTypeArray == null) {
-            Log.e(
-                    TAG,
-                    "No TypedWidgetFactory registered for control type "
-                            + prompt.getControlType() + "."
-            );
+//            Log.e(
+//                    TAG,
+//                    "No TypedWidgetFactory registered for control type "
+//                            + prompt.getControlType() + ".");
             return null;
         }
         TypedWidgetFactory<?> factory = dataTypeArray.get(prompt.getDataType());
         if (factory == null) {
             factory = dataTypeArray.get(-1);
             if (factory == null) {
-                Log.e(
-                        TAG,
-                        "No TypedWidgetFactory registered for control type "
-                                + prompt.getControlType() + " and data type "
-                                + prompt.getDataType() + " (and no default TypedWidgetFactory for "
-                                + "that control type is registered).");
+//                Log.e(
+//                        TAG,
+//                        "No TypedWidgetFactory registered for control type "
+//                                + prompt.getControlType() + " and data type "
+//                                + prompt.getDataType() + " (and no default TypedWidgetFactory for "
+//                                + "that control type is registered).");
                 return null;
             }
         }

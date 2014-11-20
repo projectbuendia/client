@@ -12,6 +12,8 @@
         android:layout_height="match_parent"
         android:inputType="number"
         android:imeOptions="actionNext"
+        android:minEms="3"
+        android:maxEms="3"
         style="@style/Widget.Buendia.EditText" />
 
     <RadioGroup
@@ -22,9 +24,8 @@
 
         <RadioButton
             android:id="@+id/years"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:padding="16dp"
             android:button="@null"
             android:background="@drawable/bg_radio_button"
@@ -35,9 +36,8 @@
 
         <RadioButton
             android:id="@+id/months"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:padding="16dp"
             android:button="@null"
             android:background="@drawable/bg_radio_button"
@@ -48,9 +48,8 @@
 
         <RadioButton
             android:id="@+id/days"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:padding="16dp"
             android:button="@null"
             android:background="@drawable/bg_radio_button"
