@@ -293,9 +293,6 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         mPatientIdTV.setText("" + response.id);
         mPatientAssignedLocationTV.setText(response.assigned_location.zone + "\n" +
                 response.assigned_location.tent + " " + response.assigned_location.bed);
-//        mPatientDaysSinceAdmissionTV.setText(String.format(
-//                getResources().getString(R.string.day_n),
-//                Utils.timeDifference(response.admission_timestamp).toStandardDays().getDays()));
         mPatientDaysSinceAdmissionTV.setText(NumberFormat.getInstance().format(
                 Utils.timeDifference(response.admission_timestamp).toStandardDays().getDays()));
         if (response.status == null) {
