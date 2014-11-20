@@ -122,7 +122,7 @@ public class OpenMrsServer implements Server {
     public void updatePatient(String patientId, Map<String, String> patientArguments,
                               Response.Listener<Patient> patientListener,
                               Response.ErrorListener errorListener, String logTag) {
-        errorListener.onErrorResponse(new VolleyError("Not yet implemented"));
+        // errorListener.onErrorResponse(new VolleyError("Not yet implemented"));
     }
 
     @Override
