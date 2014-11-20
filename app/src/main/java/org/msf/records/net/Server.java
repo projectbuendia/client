@@ -66,12 +66,13 @@ public interface Server {
      * map for parameters, but this is a bit close in implementation details to the old Buendia UI
      * so it will probably need to be generalized in future.
      *
-     * @param patientArguments a String-String map for the patient arguments, key constants
+     * @param patientChanges a Patient map for the patient arguments. If a field is null then
+     *                         the value is not touched. There is no way to delete values.
      * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void updatePatient(
             String patientId,
-            Map<String, String> patientArguments,
+            Patient patientChanges,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);
