@@ -8,8 +8,16 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- Required for fetching data. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Required to check if there is a connection to the internet -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
+    <!-- Required to enable our SyncAdapter after it's created. -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <!-- Required because we're manually creating a new account. -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
     <application
         android:name="org.msf.records.App"
@@ -50,7 +58,7 @@
             android:parentActivityName=".ui.PatientListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.PatientListActivity" />
+                android:value="org.msf.records.ui.PatientListActivity" />
         </activity>
         <activity
             android:name=".ui.SettingsActivity"
@@ -58,14 +66,23 @@
             android:parentActivityName=".ui.PatientListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.PatientListActivity" />
+                android:value="org.msf.records.ui.PatientListActivity" />
         </activity>
 
         <activity
             android:name=".ui.PatientAddActivity"
             android:label="@string/title_activity_patient_add" >
         </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="0a31f10a42050e1a7c9ce97ace4fda4c5235f280" />
+
+        <service android:name=".accounts.GenericAccountService">
+            <!-- Required filter used by the system to launch our account service. -->
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <!-- This points to an XMLf ile which describes our account service. -->
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
     </application>
 
 </manifest>
