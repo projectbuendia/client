@@ -12,15 +12,23 @@ import auto.parcel.AutoParcel;
 public abstract class Location2 implements Parcelable {
 
     public abstract String getZone();
-    public abstract int getTent();
-    public abstract int getBed();
+    public abstract String getTent();
+    public abstract String getBed();
 
-    public static Location2 create(String zone, int tent, int bed) {
+    public static Location2 create(String zone, String tent, String bed) {
         return new AutoParcel_Location2(zone, tent, bed);
     }
 
     public static Location2 create(PatientLocation patientLocation) {
         return new AutoParcel_Location2(
                 patientLocation.zone, patientLocation.tent, patientLocation.bed);
+    }
+
+    public PatientLocation toPatientLocation() {
+        PatientLocation location = new PatientLocation();
+        location.zone = getZone();
+        location.tent = getTent();
+        location.bed = getBed();
+        return location;
     }
 }

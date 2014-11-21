@@ -50,7 +50,7 @@
             android:parentActivityName=".ui.PatientListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.PatientListActivity" />
+                android:value="org.msf.records.ui.PatientDetailActivity" />
         </activity>
         <activity
             android:name=".ui.SettingsActivity"
@@ -58,7 +58,7 @@
             android:parentActivityName=".ui.PatientListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.PatientListActivity" />
+                android:value="org.msf.records.ui.SettingsActivity" />
         </activity>
 
         <activity
