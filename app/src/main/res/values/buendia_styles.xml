@@ -31,8 +31,10 @@
     </style>
 
     <!-- AutoCompleteTextView -->
-    <style name="Widget.Buendia.AutoCompleteTextView" parent="Widget.AppCompat.AutoCompleteTextView">
+    <!--<style-->
+        <!--name="Widget.Buendia.AutoCompleteTextView"-->
+        <!--parent="Widget.AppCompat.AutoCompleteTextView">-->
 
-    </style>
+    <!--</style>-->
 
 </resources>

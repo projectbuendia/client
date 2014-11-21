@@ -9,13 +9,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
+import com.squareup.otto.Subscribe;
 
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.cache.PatientOpenHelper;
+import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
+import org.msf.records.model.PatientLocation;
 import org.msf.records.model.Status;
 import org.msf.records.ui.dialogs.EditAssignedLocationDialogFragment;
 import org.msf.records.utils.Utils;
@@ -118,6 +121,20 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        App.getMainThreadBus().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        App.getMainThreadBus().unregister(this);
+
+        super.onPause();
+    }
+
     @OnClick(R.id.patient_overview_name)
     public void patientOverviewNameClick(){
         FragmentManager fm = getChildFragmentManager();
@@ -138,6 +155,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         dialogListFragment.setArguments(b);
         dialogListFragment.show(fm, null);
     }
+
     @OnClick(R.id.patient_overview_status)
     public void patientOverviewStatusClick(){
         Log.d(TAG, "patientOverviewStatusClick");
@@ -172,8 +190,9 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         // EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
         EditAssignedLocationDialogFragment dialogFragment =
                 EditAssignedLocationDialogFragment.newInstance(currentLocation);
-        Bundle b = new Bundle();
-        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_location));
+        dialogFragment.show(fm, null);
+//        Bundle b = new Bundle();
+//        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_location));
 //        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER,
 //                new EditTextDialogFragment.OnItemClickListener() {
 //
@@ -189,8 +208,15 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 //                updatePatient(patient);
 //            }
 //        });
-        dialogListFragment.setArguments(b);
-        dialogListFragment.show(fm, null);
+//        dialogListFragment.setArguments(b);
+//        dialogListFragment.show(fm, null);
+    }
+
+    @Subscribe
+    public void onPatientLocationEdited(PatientLocationEditedEvent event) {
+        Patient patient = new Patient();
+        patient.assigned_location = event.mLocation.toPatientLocation();
+        updatePatient(patient);
     }
 
     @OnClick(R.id.patient_overview_gender)
@@ -295,8 +321,8 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
                 response.given_name + " " + response.family_name + " (" + response.id + ")");
         mPatientNameTV.setText(response.given_name + " " + response.family_name);
         mPatientIdTV.setText("" + response.id);
-        mPatientAssignedLocationTV.setText(response.assigned_location.getZone() + "\n" +
-                response.assigned_location.getTent() + " " + response.assigned_location.getBed());
+        mPatientAssignedLocationTV.setText(response.assigned_location.zone + "\n" +
+                response.assigned_location.tent + " " + response.assigned_location.bed);
         mPatientDaysSinceAdmissionTV.setText(NumberFormat.getInstance().format(
                 Utils.timeDifference(response.admission_timestamp).toStandardDays().getDays()));
         if (response.status == null) {

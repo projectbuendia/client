@@ -204,8 +204,8 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
 
         String zone = UNKNOWN_ZONE;
         if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.getZone() != null) {
-            zone = patientToAdd.assigned_location.getZone();
+                patientToAdd.assigned_location.zone != null) {
+            zone = patientToAdd.assigned_location.zone;
         }
         if (!tentsByZone.containsKey(zone)) {
             tentsByZone.put(zone, new HashMap<String, Tent>());
@@ -215,8 +215,8 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
         Map<String, Tent> tents = tentsByZone.get(zone);
         String tentName = UNKNOWN_TENT;
         if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.getTent() != null) {
-            tentName = patientToAdd.assigned_location.getTent();
+                patientToAdd.assigned_location.tent != null) {
+            tentName = patientToAdd.assigned_location.tent;
         }
         if (!tents.containsKey(tentName)) {
             Tent tent = new Tent();
