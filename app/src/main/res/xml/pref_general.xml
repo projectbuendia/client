@@ -53,4 +53,13 @@
         android:capitalize="none"
         android:singleLine="true"
         android:maxLines="1" />
+
+    <!-- Whether to save filled in forms locally. Normally we won't want to (the file system will fill up
+     but it is useful when developing or debugging -->
+    <CheckBoxPreference
+        android:key="keep_form_instances_locally"
+        android:title="@string/pref_title_store_form_instances"
+        android:summary="@string/pref_desc_store_form_instances"
+        android:defaultValue="false" />
+
 </PreferenceScreen>

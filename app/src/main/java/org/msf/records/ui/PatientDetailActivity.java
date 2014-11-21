@@ -177,6 +177,7 @@ public class PatientDetailActivity extends FragmentActivity {
         String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
         if (patientUuid == null) {
             Log.e(TAG, "Received unknown request code: " + requestCode);
+            return;
         }
         OdkActivityLauncher.sendOdkResultToServer(this, patientUuid, resultCode, data);
     }
