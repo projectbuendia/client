@@ -1,10 +1,7 @@
 package org.msf.records.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -207,8 +204,8 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
 
         String zone = UNKNOWN_ZONE;
         if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.zone != null) {
-            zone = patientToAdd.assigned_location.zone;
+                patientToAdd.assigned_location.getZone() != null) {
+            zone = patientToAdd.assigned_location.getZone();
         }
         if (!tentsByZone.containsKey(zone)) {
             tentsByZone.put(zone, new HashMap<String, Tent>());
@@ -218,8 +215,8 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
         Map<String, Tent> tents = tentsByZone.get(zone);
         String tentName = UNKNOWN_TENT;
         if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.tent != null) {
-            tentName = patientToAdd.assigned_location.tent;
+                patientToAdd.assigned_location.getTent() != null) {
+            tentName = patientToAdd.assigned_location.getTent();
         }
         if (!tents.containsKey(tentName)) {
             Tent tent = new Tent();
