@@ -60,4 +60,5 @@
     <string name="overview_assigned_location">Assigned Location</string>
     <string name="overview_instructions">Instructions</string>
     <string name="detail_page_view_chart">View Chart</string>
+    <string name="title_edit_patient_location">Edit Patient Location</string>
 </resources>
