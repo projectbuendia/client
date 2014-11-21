@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TableRow>
+
+        <TextView
+            android:gravity="center"
+            android:text="Zone" />
+
+        <TextView
+            android:gravity="center"
+            android:text="Tent" />
+
+        <TextView
+            android:gravity="center"
+            android:text="Bed" />
+
+    </TableRow>
+
+    <TableRow>
+
+        <EditText
+            android:id="@+id/zone"
+            android:minEms="13"
+            android:maxEms="13" />
+
+        <EditText
+            android:id="@+id/bed"
+            android:minEms="3"
+            android:maxEms="3" />
+
+    </TableRow>
+
+</TableLayout>
