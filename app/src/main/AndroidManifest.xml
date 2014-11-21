@@ -74,6 +74,25 @@
             android:label="@string/title_activity_patient_add" >
         </activity>
 
+
+
+        <provider
+            android:name=".provider.PatientProvider"
+            android:authorities="org.msf.records"
+            android:exported="false" />
+
+        <service android:name=".provider.SyncService"
+            android:exported="true">
+            <!-- This intent filter is required. It allows the system to launch our sync service
+            as needed. -->
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <!-- This points to a required XML file which describes our SyncAdapter. -->
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
         <service android:name=".accounts.GenericAccountService">
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>
@@ -83,6 +102,7 @@
             <meta-data android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="0a31f10a42050e1a7c9ce97ace4fda4c5235f280" />
     </application>
 
 </manifest>
