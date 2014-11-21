@@ -17,27 +17,14 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.crashlytics.android.Crashlytics;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 import com.squareup.otto.Subscribe;
-import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
-import org.msf.records.net.OdkXformSyncTask;
-import org.msf.records.net.OpenMrsXformIndexEntry;
-import org.odk.collect.android.activities.FormEntryActivity;
-import org.odk.collect.android.provider.FormsProviderAPI;
-import com.squareup.otto.Subscribe;
-
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
