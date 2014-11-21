@@ -81,7 +81,7 @@
             android:authorities="org.msf.records"
             android:exported="false" />
 
-        <service android:name=".provider.SyncService"
+        <service android:name=".net.SyncService"
             android:exported="true">
             <!-- This intent filter is required. It allows the system to launch our sync service
             as needed. -->

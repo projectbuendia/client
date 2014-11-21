@@ -58,8 +58,25 @@ public class PatientContract {
          */
         public static final String COLUMN_NAME_PATIENT_ID = "patient_id";
         /**
-         * Article title
+         * Patient admission timestamp
          */
-        public static final String COLUMN_NAME_TITLE = "given_name";
+        public static final String COLUMN_NAME_ADMISSION_TIMESTAMP = "admission_timestamp";
+        /**
+         * Patient family name
+         */
+        public static final String COLUMN_NAME_FAMILY_NAME = "family_name";
+        /**
+         * Patient admission timestamp
+         */
+        public static final String COLUMN_NAME_GIVEN_NAME = "given_name";
+        /**
+         * Patient Status
+         */
+        public static final String COLUMN_NAME_STATUS = "status";
+        /**
+         * Patient uuid
+         */
+        public static final String COLUMN_NAME_UUID = "uuid";
+
     }
 }
