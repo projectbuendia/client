@@ -18,6 +18,9 @@ import org.msf.records.model.Patient;
  * Created by akalachman on 11/20/14.
  */
 public class PatientOpenHelper extends SQLiteOpenHelper {
+    // If true, enable client-side caching.
+    private static final boolean CACHING_ENABLED = false;
+
     private static final String TAG = "PatientOpenHelper";
     private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "cache.db";
@@ -44,6 +47,10 @@ public class PatientOpenHelper extends SQLiteOpenHelper {
     }
 
     public Patient getPatient(String patientId) {
+        if (!CACHING_ENABLED) {
+            return null;
+        }
+
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cur = db.rawQuery(
                 "SELECT " + KEY_PATIENT_JSON + " FROM " + PATIENT_TABLE_NAME + " WHERE " + KEY_PATIENT_ID + "=?",
@@ -59,6 +66,10 @@ public class PatientOpenHelper extends SQLiteOpenHelper {
     }
 
     public boolean setPatient(String patientId, Patient patient) {
+        if (!CACHING_ENABLED) {
+            return false;
+        }
+
         String patientJson = new Gson().toJson(patient);
 
         ContentValues values = new ContentValues();
