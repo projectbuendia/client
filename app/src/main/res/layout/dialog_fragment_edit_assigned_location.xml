@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- A dummy view to prevent auto-focusing on the first EditText. -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+    <TableLayout
+        android:padding="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+
+        <TableRow>
+
+            <TextView
+                android:gravity="center_vertical"
+                android:text="Zone" />
+
+            <TextView
+                android:gravity="center_vertical"
+                android:text="Tent" />
+
+            <TextView
+                android:gravity="center_vertical"
+                android:text="Bed" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <org.msf.records.view.InstantAutoCompleteTextView
+                android:id="@+id/zone"
+                android:minEms="13"
+                android:maxEms="13" />
+                <!--style="@style/Widget.Buendia.AutoCompleteTextView"/>-->
+
+            <org.msf.records.view.InstantAutoCompleteTextView
+                android:id="@+id/tent"
+                android:minEms="3" />
+                <!--style="@style/Widget.Buendia.AutoCompleteTextView"/>-->
+
+            <org.msf.records.view.InstantAutoCompleteTextView
+                android:id="@+id/bed"
+                android:minEms="3" />
+                <!--style="@style/Widget.Buendia.AutoCompleteTextView"/>-->
+
+        </TableRow>
+
+    </TableLayout>
+</FrameLayout>
