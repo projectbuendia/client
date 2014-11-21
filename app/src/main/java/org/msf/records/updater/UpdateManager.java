@@ -9,7 +9,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -27,8 +26,6 @@ import org.msf.records.model.UpdateInfo;
 import org.msf.records.updater.testing.FakeUpdateServer;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An object that manages auto-updating of the application from a configurable update server.
