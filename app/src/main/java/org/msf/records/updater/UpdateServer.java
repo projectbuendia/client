@@ -2,7 +2,6 @@ package org.msf.records.updater;
 
 import android.support.annotation.Nullable;
 
-import com.android.volley.Request;
 import com.android.volley.Response;
 
 import org.msf.records.App;
