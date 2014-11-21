@@ -127,7 +127,7 @@ public class OpenMrsXformsConnection {
     }
 
     /**
-     * Get a single (full) Xform from the OpenMRS server
+     * Send a single Xform to the OpenMRS server.
      *
      * @param patientUuid null if this is to add a new patient, non-null for observation on existing
      *                  patient
