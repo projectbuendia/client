@@ -329,6 +329,9 @@ public class PatientListActivity extends FragmentActivity
                 OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
                         ODK_ACTIVITY_REQUEST);
                 break;
+            case R.id.view_xform_button:
+                OdkActivityLauncher.showSavedXform(this);
+                break;
         }
     }
 

@@ -1,8 +1,8 @@
 package org.msf.records.ui;
 
-import android.app.Activity;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +23,17 @@ public class MainScreenFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main_screen, container, false);
+        View view = inflater.inflate(R.layout.fragment_main_screen, container, false);
+        SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+        final boolean keepFormInstancesLocally =
+                preferences.getBoolean("keep_form_instances_locally", false);
+        if (keepFormInstancesLocally) {
+            view.findViewById(R.id.view_xform_button).setVisibility(View.VISIBLE);
+        }
+
+        return view;
+
+
     }
 }
