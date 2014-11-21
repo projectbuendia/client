@@ -17,12 +17,8 @@ public class StringWidgetFactory extends TypedWidgetFactory<StringData> {
 
     public TypedWidget<StringData> create(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
-        // TODO(dxchen): HACK! This exists only to special-case the gender widget, which is a string
-        // widget on the server.
 
-        if (prompt.getQuestionText().toLowerCase().contains("gender")) {
-            return new HackGenderStringWidget(context, prompt, appearance, forceReadOnly);
-        }
+        // Currently, there are no typed string widgets.
 
         return null;
     }

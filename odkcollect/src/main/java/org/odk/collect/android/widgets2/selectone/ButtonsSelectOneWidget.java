@@ -52,7 +52,10 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
             RadioButton radioButton =
                     (RadioButton) inflater.inflate(R.layout.template_radio_button_segmented, null);
-            radioButton.setText(prompt.getSelectChoiceText(choice));
+
+            // TODO(dxchen): Un-unscreamify once server work is done.
+
+            radioButton.setText(unscreamify(prompt.getSelectChoiceText(choice)));
             radioButton.setTag(i);
             radioButton.setId(QuestionWidget.newUniqueId());
             radioButton.setEnabled(!isReadOnly);
@@ -98,4 +101,30 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
     @Override
     public void setOnLongClickListener(OnLongClickListener l) {}
+
+    /**
+     * Returns the less screamy version of a string.
+     */
+    public static String unscreamify(String s) {
+        if (!s.equals(s.toUpperCase())) {
+            return s;
+        }
+
+        s = s.toLowerCase();
+        StringBuilder titleCase = new StringBuilder();
+        boolean nextTitleCase = true;
+
+        for (char c : s.toCharArray()) {
+            if (Character.isSpaceChar(c)) {
+                nextTitleCase = true;
+            } else if (nextTitleCase) {
+                c = Character.toTitleCase(c);
+                nextTitleCase = false;
+            }
+
+            titleCase.append(c);
+        }
+
+        return titleCase.toString();
+    }
 }

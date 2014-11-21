@@ -32,26 +32,31 @@ import butterknife.InjectView;
 public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
 
     private Activity context;
-    private Map<String, List<Patient>> patientsByZone;
+    private Map<String, Map<String, Tent>> tentsByZone;
     private List<String> zones;
     private final String UNKNOWN_ZONE = "Unknown Zone";
+    private final String UNKNOWN_TENT = "Unknown Tent";
 
     private PatientOpenHelper patientDb;
 
     public ExpandablePatientListAdapter(Activity context) {
         this.context = context;
-        patientsByZone = new HashMap<String, List<Patient>>();
+        tentsByZone = new HashMap<String, Map<String, Tent>>();
         zones = new ArrayList<String>();
         patientDb = new PatientOpenHelper(context);
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return patientsByZone.get(zones.get(groupPosition)).get(childPosition);
+        return allListItemsForZone(zones.get(groupPosition)).get(childPosition);
     }
 
     public Patient getPatient(int groupPosition, int childPosition) {
-        return (Patient)getChild(groupPosition, childPosition);
+        try {
+            return (Patient) getChild(groupPosition, childPosition);
+        } catch (ClassCastException e) {
+            return null;
+        }
     }
 
     @Override
@@ -62,12 +67,18 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(final int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
-        final Patient patient = (Patient) getChild(groupPosition, childPosition);
+        Object listItem = getChild(groupPosition, childPosition);
+        if (listItem instanceof String) {
+            return getTentNameView((String)listItem, convertView);
+        }
+        final Patient patient = (Patient)listItem;
 
-        ViewHolder holder;
+        ViewHolder holder = null;
         if (convertView != null) {
             holder = (ViewHolder) convertView.getTag();
-        } else {
+        }
+
+        if (convertView == null || holder == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.listview_cell_search_results, parent, false);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
@@ -116,13 +127,24 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    private View getTentNameView(String tentName, View convertView) {
+        if (convertView == null || convertView.findViewById(R.id.patient_list_tent_tv) == null) {
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.listview_tent_header, null);
+        }
+        TextView item = (TextView) convertView.findViewById(R.id.patient_list_tent_tv);
+        item.setText(tentName);
+        return convertView;
+    }
+
     @Override
     public int getChildrenCount(int groupPosition) {
         if (groupPosition >= zones.size()) {
             return 0;
         }
 
-        return patientsByZone.get(zones.get(groupPosition)).size();
+        return allListItemsForZone(zones.get(groupPosition)).size();
     }
 
     @Override
@@ -165,7 +187,7 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
     }
 
     public void clear() {
-        patientsByZone.clear();
+        tentsByZone.clear();
         zones.clear();
     }
 
@@ -178,7 +200,6 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
 
     public void add(final Patient patient) {
         // If the patient exists in local cache, inject it.
-        // TODO(akalachman): Remove after demo?
         Patient patientToAdd = patientDb.getPatient(patient.uuid);
         if (patientToAdd == null) {
             patientToAdd = patient;
@@ -189,17 +210,40 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
                 patientToAdd.assigned_location.zone != null) {
             zone = patientToAdd.assigned_location.zone;
         }
-        if (!patientsByZone.containsKey(zone)) {
-            patientsByZone.put(zone, new ArrayList<Patient>());
+        if (!tentsByZone.containsKey(zone)) {
+            tentsByZone.put(zone, new HashMap<String, Tent>());
             zones.add(zone);
         }
-        patientsByZone.get(zone).add(patientToAdd);
+
+        Map<String, Tent> tents = tentsByZone.get(zone);
+        String tentName = UNKNOWN_TENT;
+        if (patientToAdd.assigned_location != null &&
+                patientToAdd.assigned_location.tent != null) {
+            tentName = patientToAdd.assigned_location.tent;
+        }
+        if (!tents.containsKey(tentName)) {
+            Tent tent = new Tent();
+            tent.name = tentName;
+            tents.put(tentName, tent);
+        }
+
+        tents.get(tentName).patients.add(patientToAdd);
     }
 
     // TODO(akalachman): Use this for grouping.
     private class Tent {
         public String name;
         public List<Patient> patients = new ArrayList<Patient>();
+    }
+
+    private List<Object> allListItemsForZone(String zone) {
+        List<Object> listItems = new ArrayList<Object>();
+        for (Tent tent : tentsByZone.get(zone).values()) {
+            listItems.add(tent.name);
+            listItems.addAll(tent.patients);
+        }
+
+        return listItems;
     }
 
     static class ViewHolder {

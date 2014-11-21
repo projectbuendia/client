@@ -11,6 +11,7 @@ import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
+import org.msf.records.updater.UpdateManager;
 import org.odk.collect.android.application.Collect;
 
 /**
@@ -18,8 +19,10 @@ import org.odk.collect.android.application.Collect;
  */
 public class App extends Application {
 
-    private static Server mServer;
-    private static OpenMrsXformsConnection mOpenMrsXformsConnection;
+    /**
+     * The current instance of the application.
+     */
+    private static App sInstance;
 
     /**
      * An event bus that posts events to any available thread.
@@ -31,6 +34,11 @@ public class App extends Application {
      */
     private static MainThreadBus sMainThreadBus;
 
+    private static UpdateManager sUpdateManager;
+
+    private static Server mServer;
+    private static OpenMrsXformsConnection mOpenMrsXformsConnection;
+
     @Override
     public void onCreate() {
         Collect.onCreate(this);
@@ -40,8 +48,11 @@ public class App extends Application {
                 PreferenceManager.getDefaultSharedPreferences(this);
 
         synchronized (App.class) {
+            sInstance = this;
             sBus = new Bus();
             sMainThreadBus = new MainThreadBus(sBus);
+
+            sUpdateManager = new UpdateManager();
 
             String rootUrl;
             if (preferences.getBoolean("use_openmrs", false)) {
@@ -61,8 +72,20 @@ public class App extends Application {
         }
     }
 
+    public static synchronized App getInstance() {
+        return sInstance;
+    }
+
+    public static synchronized Bus getBus() {
+        return sBus;
+    }
+
     public static synchronized MainThreadBus getMainThreadBus() {
         return sMainThreadBus;
+    }
+
+    public static synchronized UpdateManager getUpdateManager() {
+        return sUpdateManager;
     }
 
     public static synchronized Server getServer() {
