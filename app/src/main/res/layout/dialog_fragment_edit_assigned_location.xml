@@ -1,36 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="32dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
 
     <TableRow>
 
         <TextView
-            android:gravity="center"
+            android:gravity="center_vertical"
             android:text="Zone" />
 
         <TextView
-            android:gravity="center"
+            android:gravity="center_vertical"
             android:text="Tent" />
 
         <TextView
-            android:gravity="center"
+            android:gravity="center_vertical"
             android:text="Bed" />
 
     </TableRow>
 
     <TableRow>
 
-        <EditText
+        <org.msf.records.view.InstantAutoCompleteTextView
             android:id="@+id/zone"
             android:minEms="13"
-            android:maxEms="13" />
+            android:maxEms="13"
+            style="@style/Widget.Buendia.AutoCompleteTextView"/>
 
-        <EditText
+        <org.msf.records.view.InstantAutoCompleteTextView
+            android:id="@+id/tent"
+            android:minEms="3"
+            style="@style/Widget.Buendia.AutoCompleteTextView"/>
+
+        <org.msf.records.view.InstantAutoCompleteTextView
             android:id="@+id/bed"
             android:minEms="3"
-            android:maxEms="3" />
+            style="@style/Widget.Buendia.AutoCompleteTextView"/>
 
     </TableRow>
 
