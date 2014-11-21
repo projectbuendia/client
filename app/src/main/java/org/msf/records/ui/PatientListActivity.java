@@ -17,11 +17,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.squareup.otto.Subscribe;
-
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -252,6 +249,9 @@ public class PatientListActivity extends FragmentActivity
             case R.id.new_patient_button:
                 OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
                         ODK_ACTIVITY_REQUEST);
+                break;
+            case R.id.view_xform_button:
+                OdkActivityLauncher.showSavedXform(this);
                 break;
         }
     }
