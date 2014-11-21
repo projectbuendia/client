@@ -181,15 +181,21 @@ public class PatientProvider extends ContentProvider {
         /** Filename for SQLite file. */
         public static final String DATABASE_NAME = "records.db";
 
+        private static final String PRIMARY_KEY = " PRIMARY KEY";
         private static final String TYPE_TEXT = " TEXT";
         private static final String TYPE_INTEGER = " INTEGER";
         private static final String COMMA_SEP = ",";
+
         /** SQL statement to create "entry" table. */
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + PatientContract.Patient.TABLE_NAME + " (" +
-                        PatientContract.Patient._ID + TYPE_TEXT + " PRIMARY KEY" + COMMA_SEP +
+                        PatientContract.Patient._ID + TYPE_TEXT + PRIMARY_KEY + COMMA_SEP +
                         PatientContract.Patient.COLUMN_NAME_PATIENT_ID + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_TITLE + TYPE_TEXT + ")";
+                        PatientContract.Patient.COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.Patient.COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.Patient.COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.Patient.COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.Patient.COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
 
         /** SQL statement to drop "patient" table. */
         private static final String SQL_DELETE_ENTRIES =

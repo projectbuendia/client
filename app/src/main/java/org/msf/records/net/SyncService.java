@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.msf.records.provider;
+package org.msf.records.net;
 
 import android.app.Service;
 import android.content.Intent;
