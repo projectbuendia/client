@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Buendia" parent="Theme.AppCompat">
+        <!--<item name="android:textViewStyle">@style/Widget.Buendia.TextView</item>-->
+        <item name="android:editTextStyle">@style/Widget.Buendia.EditText</item>
+
+    </style>
+</resources>
