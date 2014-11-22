@@ -102,7 +102,8 @@ public class UserManager {
      * the sync to be forced.
      *
      * <p>This method will post a {@link KnownUsersSyncedEvent} if the sync succeeded and a
-     * {@link KnownUsersSyncFailedEvent} otherwise.
+     * {@link KnownUsersSyncFailedEvent} otherwise. If the sync succeeded and the current active
+     * user was deleted on the server, this method will post a {@link ActiveUserUnsetEvent}.
      */
     public void syncKnownUsers() {
         new SyncKnownUsersTask().execute();
@@ -245,21 +246,15 @@ public class UserManager {
             }
 
             synchronized (mKnownUsersLock) {
-                //ImmutableSets.difference()
-                Set<User> addedUsers = new HashSet<User>(syncedKnownUsers);
-                addedUsers.removeAll(mKnownUsers);
-
-                Set<User> deletedUsers = new HashSet<User>(mKnownUsers);
-                deletedUsers.removeAll(syncedKnownUsers);
+                ImmutableSet<User> addedUsers =
+                        ImmutableSet.copyOf(Sets.difference(syncedKnownUsers, mKnownUsers));
+                ImmutableSet<User> deletedUsers =
+                        ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedKnownUsers));
 
                 mKnownUsers = syncedKnownUsers;
 
                 EventBus.getDefault()
-                        .post(new KnownUsersSyncedEvent(
-                                ImmutableSet.copyOf(
-                                        Sets.difference(syncedKnownUsers, mKnownUsers)),
-                                ImmutableSet.copyOf(
-                                        Sets.difference(mKnownUsers, syncedKnownUsers))));
+                        .post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
 
                 synchronized (mActiveUserLock) {
                     if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
