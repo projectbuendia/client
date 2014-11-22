@@ -27,7 +27,7 @@ public class ActiveUserUnsetEvent {
     /**
      * The previous active user. If the reason why the active user was unset is because the user was
      * deleted from the server, this object will no longer be known to
-     * {@link org.msf.records.login.UserManager}.
+     * {@link org.msf.records.user.UserManager}.
      */
     public final User mPreviousActiveUser;
 

@@ -6,4 +6,10 @@ package org.msf.records.events.user;
 public class KnownUsersSyncFailedEvent {
 
     public static final int REASON_UNKNOWN = 0;
+
+    private final int mReason;
+
+    public KnownUsersSyncFailedEvent(int reason) {
+        mReason = reason;
+    }
 }

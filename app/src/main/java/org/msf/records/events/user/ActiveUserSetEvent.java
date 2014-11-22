@@ -8,6 +8,11 @@ import org.msf.records.model.User;
 public class ActiveUserSetEvent {
 
     /**
+     * The previous active user.
+     */
+    public final User mPreviousActiveUser;
+
+    /**
      * The current active user.
      */
     public final User mActiveUser;
@@ -15,7 +20,8 @@ public class ActiveUserSetEvent {
     /**
      * Creates a new {@link ActiveUserSetEvent}.
      */
-    public ActiveUserSetEvent(User activeUser) {
+    public ActiveUserSetEvent(User previousActiveUser, User activeUser) {
+        mPreviousActiveUser = previousActiveUser;
         mActiveUser = activeUser;
     }
 }
