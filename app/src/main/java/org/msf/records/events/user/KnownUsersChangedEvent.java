@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableSet;
 
 import org.msf.records.model.User;
 
-import java.util.Set;
-
 /**
  * An event bus event indicating that the set of known users has changed.
  */

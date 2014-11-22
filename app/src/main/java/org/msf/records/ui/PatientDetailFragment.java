@@ -17,7 +17,6 @@ import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
-import org.msf.records.model.PatientLocation;
 import org.msf.records.model.Status;
 import org.msf.records.ui.dialogs.EditAssignedLocationDialogFragment;
 import org.msf.records.utils.Utils;

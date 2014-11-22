@@ -1,6 +1,5 @@
 package org.msf.records.model;
 
-import android.os.Parcel;
 import android.os.Parcelable;
 
 import auto.parcel.AutoParcel;

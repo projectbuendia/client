@@ -1,7 +1,5 @@
 package org.msf.records.user;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.msf.records.model.User;
 
 import java.util.Set;
