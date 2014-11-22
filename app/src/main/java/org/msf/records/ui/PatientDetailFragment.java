@@ -48,14 +48,12 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 
     private PatientOpenHelper patientDb;
 
-    @InjectView(R.id.patient_overview_name)
-    TextView mPatientNameTV;
+    @InjectView(R.id.patient_overview_name) TextView mPatientNameTV;
     @InjectView(R.id.patient_overview_id) TextView mPatientIdTV;
     @InjectView(R.id.patient_overview_location) TextView mPatientLocationTV;
     @InjectView(R.id.patient_overview_important_description) TextView mPatientImportantTV;
     @InjectView(R.id.patient_overview_days_since_admission_tv) TextView mPatientDaysSinceAdmissionTV;
-    @InjectView(R.id.patient_overview_status_icon)
-    ImageView mPatientStatusIcon;
+    @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
     @InjectView(R.id.patient_overview_gender_tv) TextView mPatientGenderTV;
     @InjectView(R.id.patient_overview_age_tv) TextView mPatientAgeTV;

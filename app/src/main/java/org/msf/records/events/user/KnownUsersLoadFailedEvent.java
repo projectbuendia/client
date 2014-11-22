@@ -6,4 +6,10 @@ package org.msf.records.events.user;
 public class KnownUsersLoadFailedEvent {
 
     public static final int REASON_UNKNOWN = 0;
+
+    private final int mReason;
+
+    public KnownUsersLoadFailedEvent(int reason) {
+        mReason = reason;
+    }
 }
