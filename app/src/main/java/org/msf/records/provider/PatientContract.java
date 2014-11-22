@@ -31,7 +31,7 @@ public class PatientContract {
     /**
      * Columns supported by "patients" records.
      */
-    public static class Patient implements BaseColumns {
+    public static class PatientMeta implements BaseColumns {
         /**
          * MIME type for lists of patients.
          */

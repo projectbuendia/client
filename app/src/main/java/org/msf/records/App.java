@@ -8,6 +8,7 @@ import com.squareup.otto.Bus;
 
 import org.msf.records.events.MainThreadBus;
 import org.msf.records.net.BuendiaServer;
+import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
@@ -55,7 +56,7 @@ public class App extends Application {
             sUpdateManager = new UpdateManager();
 
             String rootUrl;
-            if (preferences.getBoolean("use_openmrs", false)) {
+            if (preferences.getBoolean("use_openmrs", true)) {
                 rootUrl = preferences.getString("openmrs_root_url", null);
                 mServer = new OpenMrsServer(
                         getApplicationContext(), rootUrl,
