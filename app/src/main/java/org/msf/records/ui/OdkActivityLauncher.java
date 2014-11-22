@@ -38,6 +38,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import de.greenrobot.event.EventBus;
+
 import static android.provider.BaseColumns._ID;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
@@ -155,7 +157,7 @@ public class OdkActivityLauncher {
                                 dit.setContentResolver(
                                         Collect.getInstance().getApplication().getContentResolver());
                                 dit.execute(idToDelete);
-                                App.getMainThreadBus().post(new CreatePatientSucceededEvent());
+                                EventBus.getDefault().post(new CreatePatientSucceededEvent());
                             }
                         }
                     });

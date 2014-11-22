@@ -19,7 +19,6 @@ import android.widget.SearchView;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
-import com.squareup.otto.Subscribe;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -27,6 +26,8 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
+
+import de.greenrobot.event.EventBus;
 
 
 /**
@@ -120,14 +121,14 @@ public class PatientListActivity extends FragmentActivity
     protected void onResume() {
         super.onResume();
 
-        App.getMainThreadBus().register(this);
+        EventBus.getDefault().register(this);
 
-        App.getUpdateManager().checkForUpdate(App.getMainThreadBus());
+        App.getUpdateManager().checkForUpdate();
     }
 
     @Override
     protected void onPause() {
-        App.getMainThreadBus().unregister(this);
+        EventBus.getDefault().unregister(this);
 
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar.dismiss();
@@ -139,15 +140,13 @@ public class PatientListActivity extends FragmentActivity
      * Displays a {@link Snackbar} indicating that an update is available upon receiving an
      * {@link UpdateAvailableEvent}.
      */
-    @Subscribe
-    public void onUpdateAvailableEvent(final UpdateAvailableEvent event) {
+    public void onEventMainThread(final UpdateAvailableEvent event) {
         updateAvailableSnackbar
                 .actionListener(new ActionClickListener() {
 
                     @Override
                     public void onActionClicked() {
-                        App.getUpdateManager()
-                                .downloadUpdate(App.getMainThreadBus(), event.mUpdateInfo);
+                        App.getUpdateManager().downloadUpdate(event.mUpdateInfo);
                     }
                 });
         if (updateAvailableSnackbar.isDismissed()) {
@@ -159,8 +158,7 @@ public class PatientListActivity extends FragmentActivity
      * Displays a {@link Snackbar} indicating that an update has been downloaded upon receiving an
      * {@link UpdateDownloadedEvent}.
      */
-    @Subscribe
-    public void onUpdateDownloadedEvent(final UpdateDownloadedEvent event) {
+    public void onEventMainThread(final UpdateDownloadedEvent event) {
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar
                 .actionListener(new ActionClickListener() {

@@ -4,9 +4,6 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.squareup.otto.Bus;
-
-import org.msf.records.events.MainThreadBus;
 import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
@@ -24,16 +21,6 @@ public class App extends Application {
      */
     private static App sInstance;
 
-    /**
-     * An event bus that posts events to any available thread.
-     */
-    private static Bus sBus;
-
-    /**
-     * An event bus that posts events specifically to the main thread.
-     */
-    private static MainThreadBus sMainThreadBus;
-
     private static UpdateManager sUpdateManager;
 
     private static Server mServer;
@@ -49,8 +36,6 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-            sBus = new Bus();
-            sMainThreadBus = new MainThreadBus(sBus);
 
             sUpdateManager = new UpdateManager();
 
@@ -74,14 +59,6 @@ public class App extends Application {
 
     public static synchronized App getInstance() {
         return sInstance;
-    }
-
-    public static synchronized Bus getBus() {
-        return sBus;
-    }
-
-    public static synchronized MainThreadBus getMainThreadBus() {
-        return sMainThreadBus;
     }
 
     public static synchronized UpdateManager getUpdateManager() {
