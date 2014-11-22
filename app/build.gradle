@@ -60,7 +60,8 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.6'
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.jakewharton:butterknife:5.1.2'
-    compile 'com.squareup:otto:1.3.5' // Otto, the event bus.
+//    compile 'com.squareup:otto:1.3.5' // Otto, the event bus.
+    compile 'de.greenrobot:eventbus:2.4.0' // The event bus.
     compile 'joda-time:joda-time:2.5'
     compile 'com.crashlytics.android:crashlytics:1.+'
     compile 'com.android.support:appcompat-v7:+'

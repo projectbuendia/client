@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
-import com.squareup.otto.Subscribe;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -29,6 +28,7 @@ import java.util.Calendar;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 /**
  * A fragment representing a single Patient detail screen.
@@ -125,12 +125,12 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     public void onResume() {
         super.onResume();
 
-        App.getMainThreadBus().register(this);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
-        App.getMainThreadBus().unregister(this);
+        EventBus.getDefault().unregister(this);
 
         super.onPause();
     }
@@ -212,8 +212,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 //        dialogListFragment.show(fm, null);
     }
 
-    @Subscribe
-    public void onPatientLocationEdited(PatientLocationEditedEvent event) {
+    public void onEventMainThread(PatientLocationEditedEvent event) {
         Patient patient = new Patient();
         patient.assigned_location = event.mLocation.toPatientLocation();
         updatePatient(patient);

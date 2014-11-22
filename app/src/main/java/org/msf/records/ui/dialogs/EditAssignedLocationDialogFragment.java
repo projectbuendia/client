@@ -2,18 +2,13 @@ package org.msf.records.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 
-import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
@@ -21,6 +16,7 @@ import org.msf.records.view.InstantAutoCompleteTextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 
 /**
  * A {@link DialogFragment} for editing a user's assigned location.
@@ -91,8 +87,7 @@ public class EditAssignedLocationDialogFragment extends DialogFragment {
 
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-
-                                App.getMainThreadBus().post(
+                                EventBus.getDefault().post(
                                         new PatientLocationEditedEvent(Location2.create(
                                                 mZone.getText().toString(),
                                                 mTent.getText().toString(),

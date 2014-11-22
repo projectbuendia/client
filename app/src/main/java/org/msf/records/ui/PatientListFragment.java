@@ -12,7 +12,6 @@ import android.widget.ListView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.squareup.otto.Subscribe;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -21,6 +20,8 @@ import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
 
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A list fragment representing a list of Patients. This fragment
@@ -112,12 +113,12 @@ public class PatientListFragment extends ProgressFragment implements
     public void onResume() {
         super.onResume();
 
-        App.getMainThreadBus().register(this);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
-        App.getMainThreadBus().unregister(this);
+        EventBus.getDefault().unregister(this);
 
         super.onPause();
     }
@@ -280,8 +281,7 @@ public class PatientListFragment extends ProgressFragment implements
         return true;
     }
 
-    @Subscribe
-    public void onCreatePatientSucceeded(CreatePatientSucceededEvent event) {
+    public void onEvent(CreatePatientSucceededEvent event) {
         if(!isRefreshing){
             isRefreshing = true;
             loadSearchResults();
