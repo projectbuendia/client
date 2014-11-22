@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import org.msf.records.model.User;
 import org.msf.records.user.UserStore;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
