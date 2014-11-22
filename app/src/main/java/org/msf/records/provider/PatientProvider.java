@@ -54,9 +54,9 @@ public class PatientProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case ROUTE_PATIENTS:
-                return PatientContract.Patient.CONTENT_TYPE;
+                return PatientContract.PatientMeta.CONTENT_TYPE;
             case ROUTE_PATIENTS_ID:
-                return PatientContract.Patient.CONTENT_ITEM_TYPE;
+                return PatientContract.PatientMeta.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -77,10 +77,10 @@ public class PatientProvider extends ContentProvider {
             case ROUTE_PATIENTS_ID:
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
-                builder.where(PatientContract.Patient._ID + "=?", id);
+                builder.where(PatientContract.PatientMeta._ID + "=?", id);
             case ROUTE_PATIENTS:
                 // Return all known entries.
-                builder.table(PatientContract.Patient.TABLE_NAME)
+                builder.table(PatientContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor c = builder.query(db, projection, sortOrder);
                 // Note: Notification URI must be manually set here for loaders to correctly
@@ -102,8 +102,8 @@ public class PatientProvider extends ContentProvider {
         Uri result;
         switch (match) {
             case ROUTE_PATIENTS:
-                long id = db.insertOrThrow(PatientContract.Patient.TABLE_NAME, null, values);
-                result = Uri.parse(PatientContract.Patient.CONTENT_URI + "/" + id);
+                long id = db.insertOrThrow(PatientContract.PatientMeta.TABLE_NAME, null, values);
+                result = Uri.parse(PatientContract.PatientMeta.CONTENT_URI + "/" + id);
                 break;
             case ROUTE_PATIENTS_ID:
                 throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
@@ -125,14 +125,14 @@ public class PatientProvider extends ContentProvider {
         int count;
         switch (match) {
             case ROUTE_PATIENTS:
-                count = builder.table(PatientContract.Patient.TABLE_NAME)
+                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
             case ROUTE_PATIENTS_ID:
                 String id = uri.getLastPathSegment();
-                count = builder.table(PatientContract.Patient.TABLE_NAME)
-                        .where(PatientContract.Patient._ID + "=?", id)
+                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                        .where(PatientContract.PatientMeta._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
@@ -154,14 +154,14 @@ public class PatientProvider extends ContentProvider {
         int count;
         switch (match) {
             case ROUTE_PATIENTS:
-                count = builder.table(PatientContract.Patient.TABLE_NAME)
+                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
             case ROUTE_PATIENTS_ID:
                 String id = uri.getLastPathSegment();
-                count = builder.table(PatientContract.Patient.TABLE_NAME)
-                        .where(PatientContract.Patient._ID + "=?", id)
+                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                        .where(PatientContract.PatientMeta._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
@@ -177,29 +177,31 @@ public class PatientProvider extends ContentProvider {
     static class PatientDatabase extends SQLiteOpenHelper {
 
         /** Schema version. */
-        public static final int DATABASE_VERSION = 1;
+        public static final int DATABASE_VERSION = 2;
         /** Filename for SQLite file. */
         public static final String DATABASE_NAME = "records.db";
 
         private static final String PRIMARY_KEY = " PRIMARY KEY";
         private static final String TYPE_TEXT = " TEXT";
         private static final String TYPE_INTEGER = " INTEGER";
+        private static final String AUTOINCREMENT = " AUTOINCREMENT";
+        private static final String NOTNULL = "  NOT NULL";
         private static final String COMMA_SEP = ",";
 
-        /** SQL statement to create "entry" table. */
+        /** SQL statement to create "patient" table. */
         private static final String SQL_CREATE_ENTRIES =
-                "CREATE TABLE " + PatientContract.Patient.TABLE_NAME + " (" +
-                        PatientContract.Patient._ID + TYPE_TEXT + PRIMARY_KEY + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_PATIENT_ID + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.Patient.COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
+                "CREATE TABLE " + PatientContract.PatientMeta.TABLE_NAME + " (" +
+                        PatientContract.PatientMeta._ID + TYPE_INTEGER + PRIMARY_KEY + AUTOINCREMENT + NOTNULL + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_PATIENT_ID + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
 
         /** SQL statement to drop "patient" table. */
         private static final String SQL_DELETE_ENTRIES =
-                "DROP TABLE IF EXISTS " + PatientContract.Patient.TABLE_NAME;
+                "DROP TABLE IF EXISTS " + PatientContract.PatientMeta.TABLE_NAME;
 
 
         public PatientDatabase(Context context) {

@@ -38,8 +38,8 @@ public class OpenMrsServer implements Server {
                          @Nullable String userName,
                          @Nullable String password) {
         mRootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
-        mUserName = (userName == null) ? Constants.LOCAL_ADMIN_USERNAME : userName;
-        mPassword = (password == null) ? Constants.LOCAL_ADMIN_PASSWORD : password;
+        mUserName = (userName == null) ? Constants.API_ADMIN_USERNAME : userName;
+        mPassword = (password == null) ? Constants.API_ADMIN_PASSWORD : password;
         this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
     }
 

@@ -30,7 +30,7 @@ import org.msf.records.provider.PatientContract;
  * Static helper methods for working with the sync framework.
  */
 public class SyncUtils {
-    private static final long SYNC_FREQUENCY = 60 * 60;  // 1 hour (in seconds)
+    private static final long SYNC_FREQUENCY = 1 * 60;  // 1 minute (in seconds)
     private static final String CONTENT_AUTHORITY = PatientContract.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
 
