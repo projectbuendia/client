@@ -17,18 +17,26 @@ public class FakeUserStore extends UserStore {
     private int mNextId;
 
     public FakeUserStore() {
-        User adam = User.create("0", "Adam Kalachman");
-        User david = User.create("1", "David Chen");
-        User kaping = User.create("2", "Ka-Ping Yee");
-        User nick = User.create("3", "Nick Fortescue");
+        User user1 = User.create("1", "Adam Kalachman");
+        User user2 = User.create("2", "David Chen");
+        User user3 = User.create("3", "Ganesh Shankar");
+        User user4 = User.create("4", "Isabella Pighi");
+        User user5 = User.create("5", "Jon Skeet");
+        User user6 = User.create("6", "Ka-Ping Yee");
+        User user7 = User.create("7", "Ken Krieger");
+        User user8 = User.create("8", "Nick Fortescue");
+        User user9 = User.create("9", "Pete Gillin");
+        User user10 = User.create("10", "Steve Crossan");
 
         // Server doesn't have Nick.
-        mServerKnownUsers = Sets.newHashSet(adam, david, kaping);
+        mServerKnownUsers =
+                Sets.newHashSet(user2, user3, user4, user5, user6, user7, user8, user9, user10);
 
         // Local doesn't have Ping.
-        mLocalKnownUsers = Sets.newHashSet(adam, david, nick);
+        mLocalKnownUsers =
+                Sets.newHashSet(user1, user2, user3, user4, user5, user6, user7, user8, user9);
 
-        mNextId = 4;
+        mNextId = 11;
     }
 
     @Override
