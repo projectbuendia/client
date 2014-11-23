@@ -9,6 +9,7 @@ import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.updater.UpdateManager;
+import org.msf.records.user.UserManager;
 import org.odk.collect.android.application.Collect;
 
 /**
@@ -21,6 +22,7 @@ public class App extends Application {
      */
     private static App sInstance;
 
+    private static UserManager sUserManager;
     private static UpdateManager sUpdateManager;
 
     private static Server mServer;
@@ -37,6 +39,7 @@ public class App extends Application {
         synchronized (App.class) {
             sInstance = this;
 
+            sUserManager = new UserManager();
             sUpdateManager = new UpdateManager();
 
             String rootUrl;
@@ -59,6 +62,10 @@ public class App extends Application {
 
     public static synchronized App getInstance() {
         return sInstance;
+    }
+
+    public static synchronized UserManager getUserManager() {
+        return sUserManager;
     }
 
     public static synchronized UpdateManager getUpdateManager() {

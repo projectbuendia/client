@@ -9,7 +9,7 @@ import org.msf.records.model.User;
  */
 public class KnownUsersLoadedEvent {
 
-    private final ImmutableSet<User> mKnownUsers;
+    public final ImmutableSet<User> mKnownUsers;
 
     public KnownUsersLoadedEvent(ImmutableSet<User> knownUsers) {
         mKnownUsers = knownUsers;
