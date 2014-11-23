@@ -108,7 +108,7 @@ public class UserLoginFragment extends Fragment {
             }
 
             User user = getItem(position);
-            holder.mInitials.setBackgroundColor(USER_COLORIZER.getColorArgb(user));
+            holder.mInitials.setBackgroundColor(USER_COLORIZER.getColorArgb(user.getId()));
             holder.mInitials.setText(user.getInitials());
             holder.mName.setText(user.getFullName());
 
