@@ -132,7 +132,7 @@ public class Colorizer {
      * Gets an ARGB value for the specified object.
      */
     public int getColorArgb(Object o) {
-        return getColorArgb(o == null ? 0 : o.hashCode());
+        return getColorArgb(mix(o == null ? 0 : o.hashCode()));
     }
 
     private static int[][] getColorWheelBytes() {
@@ -146,5 +146,21 @@ public class Colorizer {
         }
 
         return colorWheelBytes;
+    }
+
+    /**
+     * Mixes the specified value so that it is closer to being evenly distributed across all
+     * possible integers.
+     *
+     * <p>This method implements the finalizer step of MurmurHash.
+     */
+    private static int mix(int value) {
+        value ^= value >>> 16;
+        value *= 0x85ebca6b;
+        value ^= value >>> 13;
+        value *= 0xc2b2ae35;
+        value ^= value >>> 16;
+
+        return value;
     }
 }
