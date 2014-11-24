@@ -9,11 +9,11 @@ import java.util.Arrays;
  */
 public class Colorizer {
 
-    private static final int[] sColorWheel = new int[] {
+    private static final int[] sDefaultPalette = new int[] {
             0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00,
             0xFFFF7000, 0xFF7FFF00, 0xFF00FF7F, 0xFF007FFF, 0xFF7F00FF, 0xFFFF007F };
 
-    private static final int[][] sColorWheelBytes = getColorWheelBytes();
+    private static final int[][] sDefaultPaletteBytes = getPaletteBytes(sDefaultPalette);
 
     /**
      * A {@link Colorizer} that has 12 colors.
@@ -35,30 +35,47 @@ public class Colorizer {
      */
     public static final Colorizer _96 = new Colorizer(3);
 
+    public static Colorizer withPalette(int... palette) {
+        return new Colorizer(Arrays.copyOf(palette, palette.length));
+    }
+
     private final LruCache<Integer, Integer> mCache = new LruCache<Integer, Integer>(128);
 
+    private final int[][] mPaletteBytes;
     private final int mInterpolations;
     private final int mInterpolationMultiplier;
     private final int mColorCount;
     private final double mShift;
 
-    private Colorizer(int interpolations) {
-        if (interpolations < 0 || interpolations > 5) {
-            throw new IllegalArgumentException(
-                    "The number of interpolations must be between 0 and 5.");
-        }
+    private Colorizer(int[] palette) {
+        this(getPaletteBytes(palette), 0, 0.);
+    }
 
-        mInterpolations = interpolations;
-        mInterpolationMultiplier = 1 << interpolations;
-        mColorCount = sColorWheel.length * (mInterpolationMultiplier);
-        mShift = 0.;
+    private Colorizer(int interpolations) {
+        this(sDefaultPaletteBytes, interpolations, 0.);
+    }
+
+    private Colorizer(Colorizer colorizer, int interpolations) {
+        this(colorizer.mPaletteBytes, colorizer.mInterpolations + interpolations, colorizer.mShift);
     }
 
     private Colorizer(Colorizer colorizer, double shiftOffset) {
-        mInterpolations = colorizer.mInterpolations;
-        mInterpolationMultiplier = colorizer.mInterpolationMultiplier;
-        mColorCount = colorizer.mColorCount;
-        mShift = Math.max(Math.min(colorizer.mShift + shiftOffset, 1.), -1.);
+        this(
+                colorizer.mPaletteBytes,
+                colorizer.mInterpolations,
+                Math.max(Math.min(colorizer.mShift + shiftOffset, 1.), -1.));
+    }
+
+    private Colorizer(int[][] paletteBytes, int interpolations, double shift) {
+        mPaletteBytes = paletteBytes;
+        mInterpolations = interpolations;
+        mInterpolationMultiplier = 1 << interpolations;
+        mColorCount = paletteBytes.length * mInterpolationMultiplier;
+        mShift = shift;
+    }
+
+    public Colorizer interpolate(int interpolation) {
+        return new Colorizer(this, interpolation);
     }
 
     /**
@@ -101,14 +118,14 @@ public class Colorizer {
 
         int[] rgb;
         if (mInterpolations == 0) {
-            rgb = Arrays.copyOf(sColorWheelBytes[colorIndex], 3);
+            rgb = Arrays.copyOf(mPaletteBytes[colorIndex], 3);
         } else {
-            int baseWheelIndex = colorIndex / mInterpolationMultiplier;
-            int baseWheelOffset = colorIndex - baseWheelIndex * mInterpolationMultiplier;
-            double offsetFraction = (double) baseWheelOffset / mInterpolationMultiplier;
+            int basePaletteIndex = colorIndex / mInterpolationMultiplier;
+            int basePaletteOffset = colorIndex - basePaletteIndex * mInterpolationMultiplier;
+            double offsetFraction = (double) basePaletteOffset / mInterpolationMultiplier;
 
-            int[] startRgb = sColorWheelBytes[baseWheelIndex];
-            int[] endRgb = sColorWheelBytes[(baseWheelIndex + 1) % 12];
+            int[] startRgb = mPaletteBytes[basePaletteIndex];
+            int[] endRgb = mPaletteBytes[(basePaletteIndex + 1) % mPaletteBytes.length];
 
             // TODO(dxchen): Consider doing interpolations in another color space.
             rgb = new int[] {
@@ -135,17 +152,17 @@ public class Colorizer {
         return getColorArgb(mix(o == null ? 0 : o.hashCode()));
     }
 
-    private static int[][] getColorWheelBytes() {
-        int[][] colorWheelBytes = new int[sColorWheel.length][];
-        for (int i = 0; i < sColorWheel.length; i++) {
-            colorWheelBytes[i] = new int[] {
-                    ((sColorWheel[i] >>> 16) & 0xff),
-                    ((sColorWheel[i] >>> 8) & 0xff),
-                    ((sColorWheel[i]) & 0xff)
+    private static int[][] getPaletteBytes(int[] palette) {
+        int[][] paletteBytes = new int[palette.length][];
+        for (int i = 0; i < palette.length; i++) {
+            paletteBytes[i] = new int[] {
+                    ((palette[i] >>> 16) & 0xff),
+                    ((palette[i] >>> 8) & 0xff),
+                    ((palette[i]) & 0xff)
             };
         }
 
-        return colorWheelBytes;
+        return paletteBytes;
     }
 
     /**

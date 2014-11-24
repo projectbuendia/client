@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The base action bar for the entire application. -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+</RelativeLayout>
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--android:orientation="horizontal"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:divider="?android:attr/dividerVertical"-->
+    <!--android:showDividers="middle"-->
+    <!--android:dividerPadding="12dp"-->
+    <!--android:weightSum="4"-->
+    <!--android:focusable="true"-->
+    <!--android:focusableInTouchMode="true">-->
+    <!--<SearchView-->
+        <!--android:id="@+id/actionbar_custom_main_search"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="1"/>-->
+    <!--<RelativeLayout-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="3"-->
+        <!--android:gravity="right"-->
+        <!--android:weightSum="3">-->
+
+        <!--<FrameLayout-->
+            <!--android:id="@+id/actionbar_settings"-->
+            <!--style="?android:actionButtonStyle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_alignParentRight="true">-->
+            <!--<TextView style="?android:actionBarTabTextStyle"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:paddingLeft="8dp"-->
+                <!--android:paddingRight="8dp"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:textSize="20sp"-->
+                <!--android:text="Settings" />-->
+        <!--</FrameLayout>-->
+
+
+        <!--&lt;!&ndash;<FrameLayout&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/actionbar_add_patient"&ndash;&gt;-->
+            <!--&lt;!&ndash;style="?android:actionButtonStyle"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_toLeftOf="@+id/actionbar_settings">&ndash;&gt;-->
+
+            <!--&lt;!&ndash;<TextView style="?android:actionBarTabTextStyle"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_gravity="center"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:paddingLeft="8dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:paddingRight="8dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:gravity="center_vertical"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:textSize="20sp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:text="Add Patient" />&ndash;&gt;-->
+        <!--&lt;!&ndash;</FrameLayout>&ndash;&gt;-->
+
+        <!--&lt;!&ndash;<FrameLayout&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/actionbar_scan"&ndash;&gt;-->
+            <!--&lt;!&ndash;style="?android:actionButtonStyle"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_alignParentLeft="true"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_toLeftOf="@id/actionbar_add_patient">&ndash;&gt;-->
+            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
+                <!--&lt;!&ndash;style="?android:actionBarTabTextStyle"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:layout_gravity="center"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:paddingLeft="8dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:paddingRight="8dp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:gravity="center"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:textSize="20sp"&ndash;&gt;-->
+                <!--&lt;!&ndash;android:text="Scan"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;</FrameLayout>&ndash;&gt;-->
+
+
+    <!--</RelativeLayout>-->
+<!--</LinearLayout>-->
