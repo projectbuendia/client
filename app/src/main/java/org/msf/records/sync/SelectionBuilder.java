@@ -20,7 +20,7 @@
  * -Changed package name
  */
 
-package org.msf.records.utils;
+package org.msf.records.sync;
 
 import android.content.ContentValues;
 import android.database.Cursor;

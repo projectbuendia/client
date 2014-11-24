@@ -1,4 +1,4 @@
-package org.msf.records.provider;
+package org.msf.records.sync;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -29,6 +29,11 @@ public class PatientContract {
     private static final String PATH_PATIENTS = "patients";
 
     /**
+     * Path component for "patient"-type resources..
+     */
+    private static final String PATH_PATIENTS_ZONES = "zones";
+
+    /**
      * Columns supported by "patients" records.
      */
     public static class PatientMeta implements BaseColumns {
@@ -49,14 +54,13 @@ public class PatientContract {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS).build();
 
+        public static final Uri CONTENT_URI_PATIENT_ZONES =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_ZONES).build();
+
         /**
          * Table name where records are stored for "patient" resources.
          */
         public static final String TABLE_NAME = "patients";
-        /**
-         * Patient ID. (Note: Not to be confused with the database primary key, which is _ID.
-         */
-        public static final String COLUMN_NAME_PATIENT_ID = "patient_id";
         /**
          * Patient admission timestamp
          */
@@ -77,6 +81,10 @@ public class PatientContract {
          * Patient uuid
          */
         public static final String COLUMN_NAME_UUID = "uuid";
+        /**
+         * Patient zone
+         */
+        public static final String COLUMN_NAME_LOCATION_ZONE = "location_zone";
 
     }
 }
