@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="4dp"
-        android:textSize="20sp"
+        android:textSize="14sp"
         android:ellipsize="end"
         android:lines="2"
         tools:text="Christian Clinician" />

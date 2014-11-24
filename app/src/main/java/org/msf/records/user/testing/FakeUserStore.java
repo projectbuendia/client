@@ -17,26 +17,40 @@ public class FakeUserStore extends UserStore {
     private int mNextId;
 
     public FakeUserStore() {
-        User user1 = User.create("1", "Adam Kalachman");
-        User user2 = User.create("2", "David Chen");
-        User user3 = User.create("3", "Ganesh Shankar");
-        User user4 = User.create("4", "Isabella Pighi");
-        User user5 = User.create("5", "Jon Skeet");
-        User user6 = User.create("6", "Ka-Ping Yee");
-        User user7 = User.create("7", "Ken Krieger");
-        User user8 = User.create("8", "Nick Fortescue");
-        User user9 = User.create("9", "Pete Gillin");
-        User user10 = User.create("10", "Steve Crossan");
+        User akalachman = User.create("akalachman", "Adam Kalachman");
+        User cpritchard = User.create("cpritchard", "Corinne Pritchard");
+        User dan = User.create("dan", "Dan Cunningham");
+        User danielsjulio = User.create("danielsjulio", "Daniel Julio");
+        User dxchen = User.create("dxchen", "David Chen");
+        User gilsjulio = User.create("gilsjulio", "Gil Julio");
+        User gansha = User.create("gansha", "Ganesh Shankar");
+        User isabella = User.create("isabella", "Isabella Pighi");
+        User ivangayton = User.create("ivangayton", "Ivan Gayton");
+        User jonskeet = User.create("jonskeet", "Jon Skeet");
+        User kenk = User.create("kenk", "Ken Krieger");
+        User koen = User.create("koen", "Koen Vendrik");
+        User kpy = User.create("kpy", "Ka-Ping Yee");
+        User madhul = User.create("madhul", "Madhuwati Lagu");
+        User nfortescue = User.create("nfortescue", "Nick Fortescue");
+        User peteg = User.create("peteg", "Pete Gillin");
+        User pim = User.create("pim", "Pim de Witte");
+        User sanderlatour = User.create("sanderlatour", "Sander Latour");
+        User scrossan = User.create("scrossan", "Steve Crossan");
+
+        Set<User> allKnownUsers =
+            Sets.newHashSet(akalachman, cpritchard, dan, danielsjulio, dxchen, gilsjulio,
+                gansha, isabella, ivangayton, jonskeet, kenk, koen, kpy, madhul,
+                nfortescue, peteg, pim, sanderlatour, scrossan);
 
         // Server doesn't have Nick.
-        mServerKnownUsers =
-                Sets.newHashSet(user2, user3, user4, user5, user6, user7, user8, user9, user10);
+        mServerKnownUsers = Sets.newHashSet(allKnownUsers);
+        mServerKnownUsers.remove(nfortescue);
 
         // Local doesn't have Ping.
-        mLocalKnownUsers =
-                Sets.newHashSet(user1, user2, user3, user4, user5, user6, user7, user8, user9);
+        mLocalKnownUsers = Sets.newHashSet(allKnownUsers);
+        mLocalKnownUsers.remove(kpy);
 
-        mNextId = 11;
+        mNextId = 1;
     }
 
     @Override
@@ -62,7 +76,8 @@ public class FakeUserStore extends UserStore {
             throw new RuntimeException("Server user already exists.");
         }
 
-        String id = Integer.toString(mNextId++);
+        // Fake out an RPC to the server asking it to create a new user.
+        String id = "user" + (mNextId++);
         User userWithId = User.create(id, user.getFullName());
 
         mServerKnownUsers.add(userWithId);
