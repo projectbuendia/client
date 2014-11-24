@@ -35,7 +35,13 @@ import de.greenrobot.event.EventBus;
  */
 public class UserLoginFragment extends Fragment {
 
-    private static final Colorizer USER_COLORIZER = Colorizer._96.withShade(.3);
+    private static final Colorizer USER_COLORIZER = Colorizer
+            .withPalette(
+                    0xffb0120a, 0xff880e4f, 0xff4a148c, 0xff311b92, 0xff1a237e, 0xff2a36b1,
+                    0xff01579b, 0xff006064, 0xff004d40, 0xff0d5302, 0xff33691e, 0xff827717,
+                    0xfff57f17, 0xffff6f00, 0xffe65100, 0xffbf360c, 0xff3e2723, 0xff212121,
+                    0xff263238)
+            .withTint(.2);
 
     @InjectView(R.id.users) GridView mUsersGrid;
     private UserListAdapter mUserListAdapter;
