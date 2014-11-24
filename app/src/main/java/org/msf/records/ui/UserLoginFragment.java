@@ -21,6 +21,7 @@ import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.model.User;
 import org.msf.records.utils.Colorizer;
+import org.msf.records.utils.Constants;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,14 +35,6 @@ import de.greenrobot.event.EventBus;
  * A {@link Fragment} that allows a user to login.
  */
 public class UserLoginFragment extends Fragment {
-
-    private static final Colorizer USER_COLORIZER = Colorizer
-            .withPalette(
-                    0xffb0120a, 0xff880e4f, 0xff4a148c, 0xff311b92, 0xff1a237e, 0xff2a36b1,
-                    0xff01579b, 0xff006064, 0xff004d40, 0xff0d5302, 0xff33691e, 0xff827717,
-                    0xfff57f17, 0xffff6f00, 0xffe65100, 0xffbf360c, 0xff3e2723, 0xff212121,
-                    0xff263238)
-            .withTint(.2);
 
     @InjectView(R.id.users) GridView mUsersGrid;
     private UserListAdapter mUserListAdapter;
@@ -114,7 +107,8 @@ public class UserLoginFragment extends Fragment {
             }
 
             User user = getItem(position);
-            holder.mInitials.setBackgroundColor(USER_COLORIZER.getColorArgb(user.getId()));
+            holder.mInitials
+                    .setBackgroundColor(Constants.USER_COLORIZER.getColorArgb(user.getId()));
             holder.mInitials.setText(user.getInitials());
             holder.mName.setText(user.getFullName());
 

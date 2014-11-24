@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link PatientDetailFragment}.
  */
-public class PatientDetailActivity extends FragmentActivity {
+public class PatientDetailActivity extends BaseActivity {
 
     private static final String TAG = "PatientDetailActivity";
 
@@ -122,7 +122,7 @@ public class PatientDetailActivity extends FragmentActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public void onExtendOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.overview, menu);
@@ -144,8 +144,6 @@ public class PatientDetailActivity extends FragmentActivity {
                 return true;
             }
         });
-
-        return true;
     }
 
     @Override
