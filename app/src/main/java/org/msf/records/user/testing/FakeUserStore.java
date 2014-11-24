@@ -38,9 +38,9 @@ public class FakeUserStore extends UserStore {
         User scrossan = User.create("scrossan", "Steve Crossan");
 
         Set<User> allKnownUsers =
-                Sets.newHashSet(akalachman, cpritchard, dan, danielsjulio, dxchen, gilsjulio,
-                        gansha, isabella, ivangayton, jonskeet, kenk, koen, kpy, madhul,
-                        nfortescue, peteg, pim, sanderlatour, scrossan);
+            Sets.newHashSet(akalachman, cpritchard, dan, danielsjulio, dxchen, gilsjulio,
+                gansha, isabella, ivangayton, jonskeet, kenk, koen, kpy, madhul,
+                nfortescue, peteg, pim, sanderlatour, scrossan);
 
         // Server doesn't have Nick.
         mServerKnownUsers = Sets.newHashSet(allKnownUsers);
@@ -49,6 +49,8 @@ public class FakeUserStore extends UserStore {
         // Local doesn't have Ping.
         mLocalKnownUsers = Sets.newHashSet(allKnownUsers);
         mLocalKnownUsers.remove(kpy);
+
+        mNextId = 1;
     }
 
     @Override
@@ -74,10 +76,14 @@ public class FakeUserStore extends UserStore {
             throw new RuntimeException("Server user already exists.");
         }
 
-        mServerKnownUsers.add(user);
-        mLocalKnownUsers.add(user);
+        // Fake out an RPC to the server asking it to create a new user.
+        String id = "user" + (mNextId++);
+        User userWithId = User.create(id, user.getFullName());
 
-        return user;
+        mServerKnownUsers.add(userWithId);
+        mLocalKnownUsers.add(userWithId);
+
+        return userWithId;
     }
 
     @Override
