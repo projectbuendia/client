@@ -46,7 +46,7 @@ import de.greenrobot.event.EventBus;
  * {@link PatientListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class PatientListActivity extends FragmentActivity
+public class PatientListActivity extends BaseActivity
         implements PatientListFragment.Callbacks {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
@@ -98,7 +98,7 @@ public class PatientListActivity extends FragmentActivity
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.patient_detail_container, mainScreenFragment).commit();
 
-            setupCustomActionBar();
+//            setupCustomActionBar();
         }
 
         updateAvailableSnackbar = Snackbar.with(this)
@@ -121,14 +121,14 @@ public class PatientListActivity extends FragmentActivity
     protected void onResume() {
         super.onResume();
 
-        EventBus.getDefault().register(this);
+//        EventBus.getDefault().register(this);
 
         App.getUpdateManager().checkForUpdate();
     }
 
     @Override
     protected void onPause() {
-        EventBus.getDefault().unregister(this);
+//        EventBus.getDefault().unregister(this);
 
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar.dismiss();
@@ -173,25 +173,25 @@ public class PatientListActivity extends FragmentActivity
         }
     }
 
-    private void setupCustomActionBar(){
-        final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
-        final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions(
-                ActionBar.DISPLAY_SHOW_CUSTOM,
-                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
-                        | ActionBar.DISPLAY_SHOW_TITLE);
-        final View customActionBarView = inflater.inflate(
-                R.layout.actionbar_custom_main, null);
-
-//        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
-//        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
-        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
-        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
-        mSearchView.setIconifiedByDefault(false);
-        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-    }
+//    private void setupCustomActionBar(){
+//        final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
+//                .getSystemService(LAYOUT_INFLATER_SERVICE);
+//        final ActionBar actionBar = getActionBar();
+//        actionBar.setDisplayOptions(
+//                ActionBar.DISPLAY_SHOW_CUSTOM,
+//                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
+//                        | ActionBar.DISPLAY_SHOW_TITLE);
+//        final View customActionBarView = inflater.inflate(
+//                R.layout.actionbar_custom_main, null);
+//
+////        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
+////        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
+//        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
+//        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
+//        mSearchView.setIconifiedByDefault(false);
+////        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
+////                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//    }
 
     /**
      * Callback method from {@link PatientListFragment.Callbacks}
@@ -207,88 +207,94 @@ public class PatientListActivity extends FragmentActivity
         startActivity(detailIntent);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        if(!mTwoPane) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.main, menu);
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        return super.onCreateOptionsMenu(menu);
+//    }
 
-            menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    startActivity(PatientAddActivity.class);
-                    return false;
-                }
-            });
-
-            menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startActivity(SettingsActivity.class);
-                return false;
-              }
-            });
-
-            menu.findItem(R.id.action_scan).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startScanBracelet();
-                return false;
-              }
-            });
-
-            MenuItem searchMenuItem = menu.findItem(R.id.action_search);
-            mSearchView = (SearchView) searchMenuItem.getActionView();
-            mSearchView.setIconifiedByDefault(false);
-
-            searchMenuItem.expandActionView();
-        } else {
-//          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              startActivity(PatientAddActivity.class);
-//            }
+    //
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu items for use in the action bar
+//        if(!mTwoPane) {
+//            MenuInflater inflater = getMenuInflater();
+//            inflater.inflate(R.menu.main, menu);
+//
+//            menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+//                @Override
+//                public boolean onMenuItemClick(MenuItem item) {
+//                    startActivity(PatientAddActivity.class);
+//                    return false;
+//                }
+//            });
+//
+//            menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+//              @Override
+//              public boolean onMenuItemClick(MenuItem item) {
+//                startActivity(SettingsActivity.class);
+//                return false;
+//              }
+//            });
+//
+//            menu.findItem(R.id.action_scan).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+//              @Override
+//              public boolean onMenuItemClick(MenuItem item) {
+//                startScanBracelet();
+//                return false;
+//              }
+//            });
+//
+//            MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+//            mSearchView = (SearchView) searchMenuItem.getActionView();
+//            mSearchView.setIconifiedByDefault(false);
+//
+//            searchMenuItem.expandActionView();
+//        } else {
+////          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
+////            @Override
+////            public void onClick(View v) {
+////              startActivity(PatientAddActivity.class);
+////            }
+////          });
+//
+//          mSettingsBtn.setOnClickListener(new View.OnClickListener() {
+//              @Override
+//              public void onClick(View v) {
+//                  startActivity(SettingsActivity.class);
+//              }
 //          });
-
-          mSettingsBtn.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                  startActivity(SettingsActivity.class);
-              }
-          });
-
-//          mScanBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              startScanBracelet();
-//            }
-//          });
-        }
-
-        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-          @Override
-          public boolean onQueryTextSubmit(String query) {
-
-            InputMethodManager mgr = (InputMethodManager) getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-            mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-            return true;
-          }
-
-          @Override
-          public boolean onQueryTextChange(String newText) {
-            if (mSearchListener != null)
-              mSearchListener.setQuerySubmitted(newText);
-            return true;
-          }
-        });
-
-        return true;
-    }
+//
+////          mScanBtn.setOnClickListener(new View.OnClickListener() {
+////            @Override
+////            public void onClick(View v) {
+////              startScanBracelet();
+////            }
+////          });
+//        }
+//
+//        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//        mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+//
+//        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//          @Override
+//          public boolean onQueryTextSubmit(String query) {
+//
+//            InputMethodManager mgr = (InputMethodManager) getSystemService(
+//                Context.INPUT_METHOD_SERVICE);
+//            mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+//            return true;
+//          }
+//
+//          @Override
+//          public boolean onQueryTextChange(String newText) {
+//            if (mSearchListener != null)
+//              mSearchListener.setQuerySubmitted(newText);
+//            return true;
+//          }
+//        });
+//
+//        return true;
+//    }
 
     private enum ScanAction {
         PLAY_WITH_ODK,

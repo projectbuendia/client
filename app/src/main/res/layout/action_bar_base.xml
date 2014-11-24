@@ -3,8 +3,34 @@
 <!-- The base action bar for the entire application. -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="fill_horizontal">
+
+    <FrameLayout
+        android:id="@+id/user_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="@android:drawable/list_selector_background">
+
+        <TextView
+            android:id="@+id/user_initials"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:background="#000000"
+            android:textSize="24sp"
+            android:textColor="#FFFFFF"
+            tools:text="CC" />
+
+    </FrameLayout>
 
 </RelativeLayout>
 <!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
