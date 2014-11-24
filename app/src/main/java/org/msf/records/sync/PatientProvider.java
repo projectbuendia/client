@@ -1,4 +1,4 @@
-package org.msf.records.provider;
+package org.msf.records.sync;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
-import org.msf.records.utils.SelectionBuilder;
+import static org.msf.records.sync.PatientContract.CONTENT_AUTHORITY;
 
 /**
  * Created by Gil on 21/11/14.
@@ -17,11 +17,6 @@ import org.msf.records.utils.SelectionBuilder;
 public class PatientProvider extends ContentProvider {
 
     PatientDatabase mDatabaseHelper;
-
-    /**
-     * Content authority for this provider.
-     */
-    private static final String AUTHORITY = PatientContract.CONTENT_AUTHORITY;
 
     /**
      * URI ID for route: /patients
@@ -34,13 +29,19 @@ public class PatientProvider extends ContentProvider {
     public static final int ROUTE_PATIENTS_ID = 2;
 
     /**
+     * URI ID for route: /zones
+     */
+    public static final int ROUTE_ZONES = 3;
+
+    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sUriMatcher.addURI(AUTHORITY, "patients", ROUTE_PATIENTS);
-        sUriMatcher.addURI(AUTHORITY, "patients/*", ROUTE_PATIENTS_ID);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, "patients", ROUTE_PATIENTS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, "patients/*", ROUTE_PATIENTS_ID);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, "zones", ROUTE_ZONES);
     }
 
     @Override
@@ -54,6 +55,7 @@ public class PatientProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case ROUTE_PATIENTS:
+            case ROUTE_ZONES:
                 return PatientContract.PatientMeta.CONTENT_TYPE;
             case ROUTE_PATIENTS_ID:
                 return PatientContract.PatientMeta.CONTENT_ITEM_TYPE;
@@ -73,6 +75,7 @@ public class PatientProvider extends ContentProvider {
         SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
         int uriMatch = sUriMatcher.match(uri);
+        Context ctx = getContext();
         switch (uriMatch) {
             case ROUTE_PATIENTS_ID:
                 // Return a single entry, by ID.
@@ -85,10 +88,17 @@ public class PatientProvider extends ContentProvider {
                 Cursor c = builder.query(db, projection, sortOrder);
                 // Note: Notification URI must be manually set here for loaders to correctly
                 // register ContentObservers.
-                Context ctx = getContext();
                 assert ctx != null;
                 c.setNotificationUri(ctx.getContentResolver(), uri);
                 return c;
+            case ROUTE_ZONES://ContentProviders dont support group by, this is a way around it
+                builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                        .where(selection, selectionArgs);
+                Cursor zonesCursor = builder.query(db, projection,
+                        PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
+                assert ctx != null;
+                zonesCursor.setNotificationUri(ctx.getContentResolver(), uri);
+                return zonesCursor;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -106,6 +116,7 @@ public class PatientProvider extends ContentProvider {
                 result = Uri.parse(PatientContract.PatientMeta.CONTENT_URI + "/" + id);
                 break;
             case ROUTE_PATIENTS_ID:
+            case ROUTE_ZONES:
                 throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -136,6 +147,8 @@ public class PatientProvider extends ContentProvider {
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
+            case ROUTE_ZONES:
+                throw new UnsupportedOperationException("Delete not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -165,6 +178,8 @@ public class PatientProvider extends ContentProvider {
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
+            case ROUTE_ZONES:
+                throw new UnsupportedOperationException("Update not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -177,9 +192,9 @@ public class PatientProvider extends ContentProvider {
     static class PatientDatabase extends SQLiteOpenHelper {
 
         /** Schema version. */
-        public static final int DATABASE_VERSION = 2;
+        public static final int DATABASE_VERSION = 3;
         /** Filename for SQLite file. */
-        public static final String DATABASE_NAME = "records.db";
+        public static final String DATABASE_NAME = "patients.db";
 
         private static final String PRIMARY_KEY = " PRIMARY KEY";
         private static final String TYPE_TEXT = " TEXT";
@@ -191,12 +206,12 @@ public class PatientProvider extends ContentProvider {
         /** SQL statement to create "patient" table. */
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + PatientContract.PatientMeta.TABLE_NAME + " (" +
-                        PatientContract.PatientMeta._ID + TYPE_INTEGER + PRIMARY_KEY + AUTOINCREMENT + NOTNULL + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_PATIENT_ID + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta._ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                         PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
                         PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
                         PatientContract.PatientMeta.COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
                         PatientContract.PatientMeta.COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
+                        PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
                         PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
 
         /** SQL statement to drop "patient" table. */

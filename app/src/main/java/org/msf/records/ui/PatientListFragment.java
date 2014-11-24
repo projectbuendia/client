@@ -23,13 +23,10 @@ import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.model.Location;
 import org.msf.records.model.Patient;
-import org.msf.records.model.PatientAge;
-import org.msf.records.model.PatientLocation;
 import org.msf.records.net.Constants;
-import org.msf.records.provider.PatientContract;
-import org.msf.records.utils.SyncUtils;
+import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.PatientContract;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -91,7 +88,7 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private static final String[] PROJECTION = new String[] {
             PatientContract.PatientMeta._ID,
-            PatientContract.PatientMeta.COLUMN_NAME_PATIENT_ID,
+            PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
             PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
             PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
             PatientContract.PatientMeta.COLUMN_NAME_UUID,
@@ -101,7 +98,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
-    public static final int COLUMN_PATIENT_ID = 1;
+    public static final int COLUMN_LOCATION_ZONE = 1;
     public static final int COLUMN_GIVEN_NAME = 2;
     public static final int COLUMN_FAMILY_NAME = 3;
     public static final int COLUMN_UUID = 4;
@@ -174,10 +171,10 @@ public class PatientListFragment extends ProgressFragment implements
         if(isRefreshing){
             Log.d(TAG, "onResponse refresh");
 
-            mPatientAdapter.clear();
+        //    mPatientAdapter.clear();
             mPatientAdapter.notifyDataSetChanged();
         }
-        mPatientAdapter.addAll(patients);
+        //mPatientAdapter.addAll(patients);
 
         // Expand all by default.
         for (int i = 0; i < mPatientAdapter.getGroupCount(); i++) {
@@ -222,7 +219,7 @@ public class PatientListFragment extends ProgressFragment implements
         Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
         allLocationsButton.setOnClickListener(onClickListener);
 
-        mPatientAdapter = new ExpandablePatientListAdapter(getActivity());
+        mPatientAdapter = new ExpandablePatientListAdapter(null, getActivity());
         mListView.setAdapter(mPatientAdapter);
 
         loadSearchResults();
@@ -274,7 +271,7 @@ public class PatientListFragment extends ProgressFragment implements
 
         if(Constants.OFFLINE_SUPPORT){
             // Create account, if needed
-            SyncUtils.CreateSyncAccount(activity);
+            GenericAccountService.registerSyncAccount(activity);
         }
     }
 
@@ -312,7 +309,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-        Patient patient = mPatientAdapter.getPatient(groupPosition, childPosition);
+        /*Patient patient = mPatientAdapter.getPatient(groupPosition, childPosition);
         if (patient == null) {
             return false;
         }
@@ -322,7 +319,7 @@ public class PatientListFragment extends ProgressFragment implements
                 patient.given_name,
                 patient.family_name,
                 patient.id);
-
+*/
         return true;
     }
 
@@ -359,7 +356,7 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(),  // Context
-                PatientContract.PatientMeta.CONTENT_URI, // URI
+                PatientContract.PatientMeta.CONTENT_URI_PATIENT_ZONES, // URI
                 PROJECTION,                // Projection
                 null,                           // Selection
                 null,                           // Selection args
@@ -369,59 +366,30 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
 
-        PatientLocation location = new PatientLocation();
-        location.zone = "Z11";
-        location.tent = "2";
-        location.bed = "1";
 
-        PatientAge age = new PatientAge();
-        age.type = "years";
-        age.years = 29;
+        // Swap the new cursor in.
+        int id = cursorLoader.getId();
 
-        //TODO(giljulio) redo the adapter to use cursors - then redo this
-        List<Patient> patients = new ArrayList<>();
-        while (cursor.moveToNext()){
-            patients.add(new Patient(
-                    cursor.getString(COLUMN_UUID),
-                    cursor.getString(COLUMN_PATIENT_ID),
-                    cursor.getString(COLUMN_GIVEN_NAME),
-                    cursor.getString(COLUMN_FAMILY_NAME),
-                    "",//important info
-                    cursor.getString(COLUMN_STATUS),
-                    false,//pregnant
-                    "m",//gender
-                    cursor.getLong(COLUMN_ADMISSION_TIMESTAMP),
-                    1416655160L,//created timestamp
-                    1416655160L, //first showed sumtoms timestamp
-                    "",
-                    "",
-                    location,
-                    age
-            ));
+        if (id == LOADER_LIST_ID) {
+            mPatientAdapter.setGroupCursor(cursor);
+            changeState(State.LOADED);
         }
-        isRefreshing = true;
-        onResponse(patients);
-        /**
-         String uuid,
-         String id,
-         String given_name,
-         String family_name,
-         String important_information,
-         String status,
-         Boolean pregnant,
-         String gender,
-         Long admission_timestamp,
-         Long created_timestamp,
-         Long first_showed_symptoms_timestamp,
-         String origin_location,
-         String next_of_kin,
-         PatientLocation assigned_location,
-         PatientAge age
-         */
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> objectLoader) {
-
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // is about to be closed.
+        int id = cursorLoader.getId();
+        if (id != LOADER_LIST_ID) {
+            // child cursor
+            try {
+                mPatientAdapter.setChildrenCursor(id, null);
+            } catch (NullPointerException e) {
+                Log.w(TAG, "Adapter expired, try again on the next query: " + e.getMessage());
+            }
+        } else {
+            mPatientAdapter.setGroupCursor(null);
+        }
     }
 }

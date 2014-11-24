@@ -1,4 +1,4 @@
-package org.msf.records.net;
+package org.msf.records.sync;
 
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
@@ -20,7 +20,6 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.App;
 import org.msf.records.model.Patient;
-import org.msf.records.provider.PatientContract;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,22 +38,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     private static final String[] PROJECTION = new String[] {
             PatientContract.PatientMeta._ID,
-            PatientContract.PatientMeta.COLUMN_NAME_PATIENT_ID,
             PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
             PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
             PatientContract.PatientMeta.COLUMN_NAME_UUID,
             PatientContract.PatientMeta.COLUMN_NAME_STATUS,
-            PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+            PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP,
+            PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE
     };
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
-    public static final int COLUMN_PATIENT_ID = 1;
-    public static final int COLUMN_GIVEN_NAME = 2;
-    public static final int COLUMN_FAMILY_NAME = 3;
-    public static final int COLUMN_UUID = 4;
-    public static final int COLUMN_STATUS = 5;
-    public static final int COLUMN_ADMISSION_TIMESTAMP = 6;
+    public static final int COLUMN_GIVEN_NAME = 1;
+    public static final int COLUMN_FAMILY_NAME = 2;
+    public static final int COLUMN_UUID = 3;
+    public static final int COLUMN_STATUS = 4;
+    public static final int COLUMN_ADMISSION_TIMESTAMP = 5;
+    public static final int COLUMN_LOCATION_ZONE = 6;
 
 
     /**
@@ -131,28 +130,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor c = contentResolver.query(uri, PROJECTION, null, null, null);
         assert c != null;
         Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
+        Log.i(TAG, "Found " + patients.size() + " external entries. Computing merge solution...");
 
 
-        int id;
-        String patientId, givenName, familyName, uuid, status;
+        String id;
+        String givenName, familyName, uuid, status, locationZone;
         long admissionTimestamp;
 
         //iterate through the list of patients
         while(c.moveToNext()){
             syncResult.stats.numEntries++;
 
-            id = c.getInt(COLUMN_ID);
-            patientId = c.getString(COLUMN_PATIENT_ID);
+            id = c.getString(COLUMN_ID);
             givenName = c.getString(COLUMN_GIVEN_NAME);
             familyName = c.getString(COLUMN_FAMILY_NAME);
             uuid = c.getString(COLUMN_UUID);
             status = c.getString(COLUMN_STATUS);
             admissionTimestamp = c.getLong(COLUMN_ADMISSION_TIMESTAMP);
+            locationZone = c.getString(COLUMN_LOCATION_ZONE);
 
-            Patient patient = patientsMap.get(patientId);
+            Patient patient = patientsMap.get(id);
             if (patient != null) {
                 // Entry exists. Remove from entry map to prevent insert later.
-                patientsMap.remove(patientId);
+                patientsMap.remove(id);
                 // Check to see if the entry needs to be updated
                 Uri existingUri = PatientContract.PatientMeta.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
 
@@ -162,7 +162,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         (patient.uuid != null && !patient.uuid.equals(uuid)) ||
                         (patient.status != null && !patient.status.equals(status)) ||
                         (patient.admission_timestamp != null &&
-                                !patient.admission_timestamp.equals(admissionTimestamp))) {
+                                !patient.admission_timestamp.equals(admissionTimestamp)) ||
+                        (patient.assigned_location.zone != null &&
+                            !patient.assigned_location.zone.equals(locationZone))) {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
@@ -170,7 +172,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME, familyName)
                             .withValue(PatientContract.PatientMeta.COLUMN_NAME_UUID, uuid)
                             .withValue(PatientContract.PatientMeta.COLUMN_NAME_STATUS, status)
+                            .withValue(PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, status)
                             .withValue(PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
+                            .withValue(PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, locationZone)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
@@ -179,7 +183,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             } else {
                 // Entry doesn't exist. Remove it from the database.
                 Uri deleteUri = PatientContract.PatientMeta.CONTENT_URI.buildUpon()
-                        .appendPath(Integer.toString(id)).build();
+                        .appendPath(id).build();
                 Log.i(TAG, "Scheduling delete: " + deleteUri);
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
@@ -191,12 +195,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         for (Patient e : patientsMap.values()) {
             Log.i(TAG, "Scheduling insert: entry_id=" + e.id);
             batch.add(ContentProviderOperation.newInsert(PatientContract.PatientMeta.CONTENT_URI)
-                    .withValue(PatientContract.PatientMeta.COLUMN_NAME_PATIENT_ID, e.id)
+                    .withValue(PatientContract.PatientMeta._ID, e.id)
                     .withValue(PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME, e.given_name)
                     .withValue(PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME, e.family_name)
                     .withValue(PatientContract.PatientMeta.COLUMN_NAME_UUID, e.uuid)
                     .withValue(PatientContract.PatientMeta.COLUMN_NAME_STATUS, e.status)
                     .withValue(PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
+                    .withValue(PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
                     .build());
             syncResult.stats.numInserts++;
         }

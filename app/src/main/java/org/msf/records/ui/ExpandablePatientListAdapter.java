@@ -1,93 +1,121 @@
 package org.msf.records.ui;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Typeface;
+import android.content.CursorLoader;
+import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
+import android.widget.CursorTreeAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.msf.records.R;
-import org.msf.records.cache.PatientOpenHelper;
-import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.msf.records.sync.PatientContract;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Created by akalachman on 11/20/14.
+ * Created by Gil on 24/11/14.
  */
-public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
+public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
-    private Activity context;
-    private Map<String, Map<String, Tent>> tentsByZone;
-    private List<String> zones;
-    private final String UNKNOWN_ZONE = "Unknown Zone";
-    private final String UNKNOWN_TENT = "Unknown Tent";
+    private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
 
-    private PatientOpenHelper patientDb;
+    /**
+     * Projection for querying the content provider.
+     */
+    private static final String[] PROJECTION = new String[] {
+            PatientContract.PatientMeta._ID,
+            PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
+            PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
+            PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
+            PatientContract.PatientMeta.COLUMN_NAME_UUID,
+            PatientContract.PatientMeta.COLUMN_NAME_STATUS,
+            PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+    };
 
-    public ExpandablePatientListAdapter(Activity context) {
-        this.context = context;
-        tentsByZone = new HashMap<String, Map<String, Tent>>();
-        zones = new ArrayList<String>();
-        patientDb = new PatientOpenHelper(context);
+    // Constants representing column positions from PROJECTION.
+    public static final int COLUMN_ID = 0;
+    public static final int COLUMN_LOCATION_ZONE = 1;
+    public static final int COLUMN_GIVEN_NAME = 2;
+    public static final int COLUMN_FAMILY_NAME = 3;
+    public static final int COLUMN_UUID = 4;
+    public static final int COLUMN_STATUS = 5;
+    public static final int COLUMN_ADMISSION_TIMESTAMP = 6;
+
+    private Context mContext;
+
+    public ExpandablePatientListAdapter(Cursor cursor, Context context) {
+        super(cursor, context);
+        mContext = context;
     }
 
     @Override
-    public Object getChild(int groupPosition, int childPosition) {
-        return allListItemsForZone(zones.get(groupPosition)).get(childPosition);
-    }
+    protected Cursor getChildrenCursor(Cursor groupCursor) {
+        Cursor itemCursor = getGroup(groupCursor.getPosition());
 
-    public Patient getPatient(int groupPosition, int childPosition) {
+        String zone = itemCursor.getString(PatientListFragment.COLUMN_LOCATION_ZONE);
+        Log.d(TAG, "Getting child cursor for zone: " + zone);
+
+        CursorLoader cursorLoader = new CursorLoader(mContext,
+                PatientContract.PatientMeta.CONTENT_URI, PROJECTION, PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + "=?",
+                new String[] { zone },
+                null);
+
+        Cursor childCursor = null;
+
         try {
-            return (Patient) getChild(groupPosition, childPosition);
-        } catch (ClassCastException e) {
-            return null;
+            childCursor = cursorLoader.loadInBackground();
+            Log.d(TAG, "childCursor " + childCursor.getCount());
+            childCursor.moveToFirst();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
+
+        return childCursor;
     }
 
     @Override
-    public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
+    protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
+        return LayoutInflater.from(context).inflate(R.layout.listview_zone_header, null);
     }
 
     @Override
-    public View getChildView(final int groupPosition, final int childPosition,
-                             boolean isLastChild, View convertView, ViewGroup parent) {
-        Object listItem = getChild(groupPosition, childPosition);
-        if (listItem instanceof String) {
-            return getTentNameView((String)listItem, convertView);
-        }
-        final Patient patient = (Patient)listItem;
+    protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+        TextView item = (TextView) view.findViewById(R.id.patient_list_zone_tv);
+        item.setText(cursor.getString(PatientListFragment.COLUMN_LOCATION_ZONE));
+    }
+
+    @Override
+    protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
+        View view = LayoutInflater.from(context).inflate(R.layout.listview_cell_search_results, parent, false);
+        ViewHolder holder = new ViewHolder(view);
+        view.setTag(holder);
+        return view;
+    }
+
+    @Override
+    protected void bindChildView(View convertView, Context context, Cursor cursor, boolean isLastChild) {
 
         ViewHolder holder = null;
         if (convertView != null) {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        if (convertView == null || holder == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.listview_cell_search_results, parent, false);
-            holder = new ViewHolder(convertView);
-            convertView.setTag(holder);
-        }
+        String givenName = cursor.getString(COLUMN_GIVEN_NAME);
+        String familyName = cursor.getString(COLUMN_FAMILY_NAME);
+        String id = cursor.getString(COLUMN_ID);
+        String status = cursor.getString(COLUMN_STATUS);
 
-        holder.mPatientName.setText(patient.given_name + " " + patient.family_name);
-        holder.mPatientId.setText(patient.id);
+        holder.mPatientName.setText(givenName + " " + familyName);
+        holder.mPatientId.setText(id);
 
-        if (patient.age.type != null && patient.age.type.equals("months")) {
+        //Age currently not being stored in content provider
+        /*if (patient.age.type != null && patient.age.type.equals("months")) {
             holder.mPatientAge.setText("<1");
         }
 
@@ -98,9 +126,10 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
         if (patient.age.type == null) {
             holder.mPatientAge.setText("99");
             holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
-        }
+        }*/
 
-        if (patient.gender != null && patient.gender.equals("M")) {
+        //Gender currently not being stored in content provider
+        /*if (patient.gender != null && patient.gender.equals("M")) {
             holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_man));
         }
 
@@ -114,140 +143,20 @@ public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
 
         if (patient.gender == null) {
             holder.mPatientGender.setVisibility(View.GONE);
-        }
+        }*/
 
-        if (patient.status == null) {
+        if (status == null) {
             holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(R.color.transparent));
         }
 
-        if (patient.status != null && Status.getStatus(patient.status) != null) {
-            holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(Status.getStatus(patient.status).colorId));
+        if (status != null && Status.getStatus(status) != null) {
+            holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(Status.getStatus(status).colorId));
         }
-
-        return convertView;
-    }
-
-    private View getTentNameView(String tentName, View convertView) {
-        if (convertView == null || convertView.findViewById(R.id.patient_list_tent_tv) == null) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.listview_tent_header, null);
-        }
-        TextView item = (TextView) convertView.findViewById(R.id.patient_list_tent_tv);
-        item.setText(tentName);
-        return convertView;
-    }
-
-    @Override
-    public int getChildrenCount(int groupPosition) {
-        if (groupPosition >= zones.size()) {
-            return 0;
-        }
-
-        return allListItemsForZone(zones.get(groupPosition)).size();
-    }
-
-    @Override
-    public Object getGroup(int groupPosition) {
-        return zones.get(groupPosition);
-    }
-
-    @Override
-    public int getGroupCount() {
-        return zones.size();
-    }
-
-    @Override
-    public long getGroupId(int groupPosition) {
-        return groupPosition;
-    }
-
-    @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
-        String zone = (String) getGroup(groupPosition);
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.listview_zone_header, null);
-        }
-        TextView item = (TextView) convertView.findViewById(R.id.patient_list_zone_tv);
-        item.setText(zone);
-        return convertView;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
-    }
-
-    public void clear() {
-        tentsByZone.clear();
-        zones.clear();
-    }
-
-    public void addAll(Collection<? extends Patient> patients) {
-        // Inject entries from local cache.
-        for (Patient patient : patients) {
-            add(patient);
-        }
-    }
-
-    public void add(final Patient patient) {
-        // If the patient exists in local cache, inject it.
-        Patient patientToAdd = patientDb.getPatient(patient.uuid);
-        if (patientToAdd == null) {
-            patientToAdd = patient;
-        }
-
-        String zone = UNKNOWN_ZONE;
-        if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.zone != null) {
-            zone = patientToAdd.assigned_location.zone;
-        }
-        if (!tentsByZone.containsKey(zone)) {
-            tentsByZone.put(zone, new HashMap<String, Tent>());
-            zones.add(zone);
-        }
-
-        Map<String, Tent> tents = tentsByZone.get(zone);
-        String tentName = UNKNOWN_TENT;
-        if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.tent != null) {
-            tentName = patientToAdd.assigned_location.tent;
-        }
-        if (!tents.containsKey(tentName)) {
-            Tent tent = new Tent();
-            tent.name = tentName;
-            tents.put(tentName, tent);
-        }
-
-        tents.get(tentName).patients.add(patientToAdd);
-    }
-
-    // TODO(akalachman): Use this for grouping.
-    private class Tent {
-        public String name;
-        public List<Patient> patients = new ArrayList<Patient>();
-    }
-
-    private List<Object> allListItemsForZone(String zone) {
-        List<Object> listItems = new ArrayList<Object>();
-        for (Tent tent : tentsByZone.get(zone).values()) {
-            listItems.add(tent.name);
-            listItems.addAll(tent.patients);
-        }
-
-        return listItems;
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listview_cell_search_results_color_indicator) ImageView mPatientListStatusColorIndicator;
+        @InjectView(R.id.listview_cell_search_results_color_indicator)
+        ImageView mPatientListStatusColorIndicator;
         @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
         @InjectView(R.id.listview_cell_search_results_id) TextView mPatientId;
         @InjectView(R.id.listview_cell_search_results_gender) ImageView mPatientGender;

@@ -57,7 +57,7 @@ public class App extends Application {
 
             String rootUrl;
             if (preferences.getBoolean("use_openmrs", true)) {
-                rootUrl = preferences.getString("openmrs_root_url", null);
+                rootUrl = Constants.API_URL;//preferences.getString("openmrs_root_url", null);
                 mServer = new OpenMrsServer(
                         getApplicationContext(), rootUrl,
                         preferences.getString("openmrs_user", null),

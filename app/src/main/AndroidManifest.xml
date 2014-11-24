@@ -77,11 +77,11 @@
 
 
         <provider
-            android:name=".provider.PatientProvider"
+            android:name=".sync.PatientProvider"
             android:authorities="org.msf.records"
             android:exported="false" />
 
-        <service android:name=".net.SyncService"
+        <service android:name=".sync.SyncService"
             android:exported="true">
             <!-- This intent filter is required. It allows the system to launch our sync service
             as needed. -->
@@ -93,7 +93,7 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <service android:name=".accounts.GenericAccountService">
+        <service android:name=".sync.GenericAccountService">
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
