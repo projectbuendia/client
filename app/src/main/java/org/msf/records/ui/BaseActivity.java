@@ -1,25 +1,26 @@
 package org.msf.records.ui;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.TypedValue;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.drawable.TextDrawable;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.model.User;
 import org.msf.records.utils.Constants;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -49,17 +50,15 @@ public abstract class BaseActivity extends FragmentActivity {
 
         getMenuInflater().inflate(R.menu.base, menu);
 
-        mMenu
-                .getItem(mMenu.size() -1)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
+        final MenuPopupWindow menuPopupWindow = new MenuPopupWindow();
+        final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
+        userView.setOnClickListener(new View.OnClickListener() {
 
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(BaseActivity.this, SettingsActivity.class);
-                        startActivity(intent);
-                    }
-                });
+            @Override
+            public void onClick(View view) {
+                menuPopupWindow.showAsDropDown(userView);
+            }
+        });
 
         updateActiveUser();
 
@@ -94,4 +93,53 @@ public abstract class BaseActivity extends FragmentActivity {
     public void onEvent(ActiveUserUnsetEvent event) {
         // TODO(dxchen): Implement this in one way or another!
     }
+
+    class MenuPopupWindow extends PopupWindow {
+
+        private final LinearLayout mLayout;
+
+        @InjectView(R.id.user_name) TextView mUserName;
+        @InjectView(R.id.button_settings) ImageButton mSettings;
+        @InjectView(R.id.button_log_out) ImageButton mLogOut;
+
+        public MenuPopupWindow() {
+            super();
+
+            mLayout = (LinearLayout) getLayoutInflater()
+                    .inflate(R.layout.popup_window_user, null);
+            setContentView(mLayout);
+
+            ButterKnife.inject(this, mLayout);
+
+            setWindowLayoutMode(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            setFocusable(true);
+            setOutsideTouchable(true);
+            setBackgroundDrawable(new BitmapDrawable());
+        }
+
+        @Override
+        public void showAsDropDown(View anchor) {
+            super.showAsDropDown(anchor);
+
+            mUserName.setText(App.getUserManager().getActiveUser().getFullName());
+        }
+
+        @OnClick(R.id.button_settings)
+        public void onSettingsClick() {
+            Intent settingsIntent = new Intent(BaseActivity.this, SettingsActivity.class);
+            startActivity(settingsIntent);
+        }
+
+        @OnClick(R.id.button_log_out)
+        public void onLogOutClick() {
+            App.getUserManager().setActiveUser(null);
+
+            Intent settingsIntent = new Intent(BaseActivity.this, UserLoginActivity.class);
+            settingsIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(settingsIntent);
+        }
+    }
 }
+
