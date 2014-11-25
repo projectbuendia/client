@@ -11,6 +11,7 @@ import auto.parcel.AutoParcel;
  */
 @AutoParcel
 public abstract class User implements Parcelable, Comparable<User> {
+    private static final String GUEST_ACCOUNT_NAME = "Guest";
 
     public static final Comparator<User> COMPARATOR_BY_ID = new Comparator<User>() {
 
@@ -24,6 +25,16 @@ public abstract class User implements Parcelable, Comparable<User> {
 
         @Override
         public int compare(User a, User b) {
+            // Special case: the guest account should always appear first if present.
+            if (a.getFullName().equals(GUEST_ACCOUNT_NAME)) {
+                if (b.getFullName().equals(GUEST_ACCOUNT_NAME)) {
+                    return 0;
+                }
+                return -1;
+            } else if (b.getFullName().equals(GUEST_ACCOUNT_NAME)) {
+                return 1;
+            }
+
             return a.getFullName().compareTo(b.getFullName());
         }
     };
