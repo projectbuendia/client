@@ -15,6 +15,7 @@ import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.events.user.UserDeleteFailedEvent;
 import org.msf.records.events.user.UserDeletedEvent;
+import org.msf.records.model.NewUser;
 import org.msf.records.model.User;
 
 import java.util.HashSet;
@@ -178,7 +179,7 @@ public class UserManager {
      * <p>This method will post a {@link UserAddedEvent} if the user was added successfully and a
      * {@link UserAddFailedEvent} otherwise.
      */
-    public void addUser(User user) {
+    public void addUser(NewUser user) {
         if (user == null) {
             throw new NullPointerException("User cannot be null.");
         }
@@ -269,9 +270,9 @@ public class UserManager {
 
     private class AddUserTask extends AsyncTask<Void, Void, Void> {
 
-        private final User mUser;
+        private final NewUser mUser;
 
-        public AddUserTask(User user) {
+        public AddUserTask(NewUser user) {
             mUser = user;
         }
 
