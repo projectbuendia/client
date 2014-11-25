@@ -54,7 +54,7 @@ public class OdkActivityLauncher {
 
     public static void fetchAndShowXform(final Activity callingActivity, final String uuidToShow,
                                          final int requestCode) {
-        App.getmOpenMrsXformsConnection().listXforms(
+        new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
@@ -172,7 +172,8 @@ public class OdkActivityLauncher {
 
     private static void sendFormToServer(String patientUuid, String xml,
                                          Response.Listener<JSONObject> successListener) {
-        OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
+        OpenMrsXformsConnection connection =
+                new OpenMrsXformsConnection(App.getConnectionDetails());
         connection.postXformInstance(patientUuid, xml,
                 successListener,
                 new Response.ErrorListener() {

@@ -44,7 +44,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     @Override
     protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
 
-        OpenMrsXformsConnection openMrsXformsConnection = App.getmOpenMrsXformsConnection();
+        OpenMrsXformsConnection openMrsXformsConnection =
+                new OpenMrsXformsConnection(App.getConnectionDetails());
 
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
             final File proposedPath = formInfo.makeFileForForm();

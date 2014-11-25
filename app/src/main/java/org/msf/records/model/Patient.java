@@ -43,9 +43,7 @@ public class Patient implements Serializable {
     public PatientLocation assigned_location;
     public PatientAge age;
 
-    public Patient(){
-
-    }
+    public Patient() {}
 
     public Patient(String uuid, String id, String given_name, String family_name, String important_information,
                    String status, Boolean pregnant, String gender, Long admission_timestamp, Long created_timestamp,
