@@ -2,7 +2,6 @@ package org.msf.records.net;
 
 import com.android.volley.Response;
 
-import org.msf.records.model.Concept;
 import org.msf.records.model.ConceptList;
 import org.msf.records.model.CustomSerialization;
 import org.msf.records.model.PatientChart;
@@ -45,7 +44,7 @@ public class OpenMrsChartServer {
                             Response.ErrorListener errorListener) {
         GsonRequest<ConceptList> request = new GsonRequest<ConceptList>(
                 mConnectionDetails.rootUrl + "/concept",
-                Concept.class, false,
+                ConceptList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
