@@ -71,8 +71,6 @@ public class PatientListActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Crashlytics is really painful on the emulator.
-//        Crashlytics.start(this);
         setContentView(R.layout.activity_patient_list);
 
         getActionBar().setDisplayShowHomeEnabled(false);
