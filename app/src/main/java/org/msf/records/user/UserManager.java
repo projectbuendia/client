@@ -73,7 +73,7 @@ public class UserManager {
     private User mActiveUser;
 
     public UserManager() {
-        mUserStore = new FakeUserStore();
+        mUserStore = new UserStore();
     }
 
     /**
