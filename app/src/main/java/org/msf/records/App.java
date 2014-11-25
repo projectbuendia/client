@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.msf.records.net.BuendiaServer;
-import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
@@ -43,18 +42,21 @@ public class App extends Application {
             sUserManager = new UserManager();
             sUpdateManager = new UpdateManager();
 
-            //Turned off preferences as it is impossible to access them from login screen
-            mServer = new OpenMrsServer(
-                    getApplicationContext(),
-                    Constants.API_URL,
-                    Constants.API_ADMIN_USERNAME,
-                    Constants.API_ADMIN_PASSWORD);
-
+            String rootUrl;
+            if (preferences.getBoolean("use_openmrs", false)) {
+                rootUrl = preferences.getString("openmrs_root_url", null);
+                mServer = new OpenMrsServer(
+                        getApplicationContext(), rootUrl,
+                        preferences.getString("openmrs_user", null),
+                        preferences.getString("openmrs_password", null));
+            } else {
+                rootUrl = preferences.getString("api_root_url", null);
+                mServer = new BuendiaServer(getApplicationContext(), rootUrl);
+            }
             mOpenMrsXformsConnection = new OpenMrsXformsConnection(
-                    getApplicationContext(),
-                    Constants.API_URL,
-                    Constants.API_ADMIN_USERNAME,
-                    Constants.API_ADMIN_PASSWORD);
+                    getApplicationContext(), rootUrl,
+                    preferences.getString("openmrs_user", null),
+                    preferences.getString("openmrs_password", null));
         }
     }
 
