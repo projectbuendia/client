@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.msf.records.net.BuendiaServer;
+import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
@@ -28,6 +29,9 @@ public class App extends Application {
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
 
+    private static OpenMrsConnectionDetails mConnectionDetails;
+
+
     @Override
     public void onCreate() {
         Collect.onCreate(this);
@@ -42,21 +46,18 @@ public class App extends Application {
             sUserManager = new UserManager();
             sUpdateManager = new UpdateManager();
 
-            String rootUrl;
-            if (preferences.getBoolean("use_openmrs", false)) {
-                rootUrl = preferences.getString("openmrs_root_url", null);
-                mServer = new OpenMrsServer(
-                        getApplicationContext(), rootUrl,
-                        preferences.getString("openmrs_user", null),
-                        preferences.getString("openmrs_password", null));
+            mConnectionDetails =
+                    new OpenMrsConnectionDetails(
+                            preferences.getString("openmrs_root_url", null),
+                            preferences.getString("openmrs_user", null),
+                            preferences.getString("openmrs_password", null),
+                            getApplicationContext());
+            if (preferences.getBoolean("use_openmrs", true)) {
+                mServer = new OpenMrsServer(mConnectionDetails);
             } else {
-                rootUrl = preferences.getString("api_root_url", null);
+                String rootUrl = preferences.getString("api_root_url", null);
                 mServer = new BuendiaServer(getApplicationContext(), rootUrl);
             }
-            mOpenMrsXformsConnection = new OpenMrsXformsConnection(
-                    getApplicationContext(), rootUrl,
-                    preferences.getString("openmrs_user", null),
-                    preferences.getString("openmrs_password", null));
         }
     }
 
@@ -76,7 +77,7 @@ public class App extends Application {
         return mServer;
     }
 
-    public static synchronized OpenMrsXformsConnection getmOpenMrsXformsConnection() {
-        return mOpenMrsXformsConnection;
+    public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
+        return mConnectionDetails;
     }
 }
