@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -20,7 +19,6 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.model.User;
-import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.Constants;
 
 import java.util.Collections;

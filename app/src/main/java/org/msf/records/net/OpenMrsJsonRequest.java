@@ -1,7 +1,5 @@
 package org.msf.records.net;
 
-import android.util.Base64;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -27,13 +25,21 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         this.mPassword = password;
     }
 
+    public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
+                              String urlSuffix,
+                              JSONObject jsonRequest,
+                              Response.Listener<JSONObject> listener,
+                              Response.ErrorListener errorListener) {
+        this(connectionDetails.userName, connectionDetails.password,
+                connectionDetails.rootUrl + urlSuffix,
+                jsonRequest, listener, errorListener);
+    }
+
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         // TODO(nfortescue): work out how to do Auth properly
-        HashMap<String, String> params = new HashMap<String, String>();
-        String creds = String.format("%s:%s", mUsername, mPassword);
-        String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
-        params.put("Authorization", auth);
+        HashMap<String, String> params = new HashMap<>();
+        OpenMrsConnectionDetails.addAuthHeader(mUsername, mPassword, params);
         return params;
     }
 }
