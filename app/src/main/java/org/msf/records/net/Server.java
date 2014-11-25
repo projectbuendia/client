@@ -1,11 +1,11 @@
 package org.msf.records.net;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
 import org.msf.records.model.Patient;
+import org.msf.records.model.User;
 
 import java.util.List;
 import java.util.Map;
@@ -87,6 +87,15 @@ public interface Server {
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, String logTag);
+
+    /**
+     * List all existing users.
+     *
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void listUsers(@Nullable String filterQueryTerm,
+                          Response.Listener<List<User>> userListener,
+                          Response.ErrorListener errorListener, String logTag);
 
     /**
      * Cancel all requests associated with the given tag.

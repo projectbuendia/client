@@ -14,7 +14,7 @@
         android:imeOptions="actionNext"
         android:minEms="3"
         android:maxEms="3"
-        style="@style/Widget.Buendia.EditText" />
+        style="@style/Widget.Odk.EditText" />
 
     <RadioGroup
         android:id="@+id/units"

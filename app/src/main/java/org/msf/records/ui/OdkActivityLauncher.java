@@ -3,8 +3,10 @@ package org.msf.records.ui;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -19,10 +21,14 @@ import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.activities.FormHierarchyActivity;
 import org.odk.collect.android.application.Collect;
+import org.odk.collect.android.listeners.FormLoaderListener;
+import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.DeleteInstancesTask;
+import org.odk.collect.android.tasks.FormLoaderTask;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,7 +38,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import de.greenrobot.event.EventBus;
+
+import static android.provider.BaseColumns._ID;
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.JR_FORM_ID;
 
 /**
  * Convenience class for launching ODK to display an Xform.
@@ -121,12 +132,17 @@ public class OdkActivityLauncher {
 
             }
             int columnIndex = instanceCursor
-                    .getColumnIndex(InstanceProviderAPI.InstanceColumns._ID);
+                    .getColumnIndex(_ID);
             if (columnIndex == -1) {
                 Log.e(TAG, "No id to delete for after upload: " + uri);
                 return;
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
+
+            SharedPreferences preferences =
+                    PreferenceManager.getDefaultSharedPreferences(callingActivity.getApplicationContext());
+            final boolean keepFormInstancesLocally =
+                    preferences.getBoolean("keep_form_instances_locally", false);
 
             sendFormToServer(patientUuid, readFromPath(instancePath),
                     new Response.Listener<JSONObject>() {
@@ -135,12 +151,14 @@ public class OdkActivityLauncher {
                             Log.i(TAG, "Created new patient successfully on server"
                                     + response.toString());
 
-                            // Code largely copied from InstanceUploaderTask to delete on upload
-                            DeleteInstancesTask dit = new DeleteInstancesTask();
-                            dit.setContentResolver(
-                                    Collect.getInstance().getApplication().getContentResolver());
-                            dit.execute(idToDelete);
-                            App.getMainThreadBus().post(new CreatePatientSucceededEvent());
+                            if (!keepFormInstancesLocally) {
+                                //Code largely copied from InstanceUploaderTask to delete on upload
+                                DeleteInstancesTask dit = new DeleteInstancesTask();
+                                dit.setContentResolver(
+                                        Collect.getInstance().getApplication().getContentResolver());
+                                dit.execute(idToDelete);
+                                EventBus.getDefault().post(new CreatePatientSucceededEvent());
+                            }
                         }
                     });
         } catch (IOException e) {
@@ -153,7 +171,7 @@ public class OdkActivityLauncher {
     }
 
     private static void sendFormToServer(String patientUuid, String xml,
-                                  Response.Listener<JSONObject> successListener) {
+                                         Response.Listener<JSONObject> successListener) {
         OpenMrsXformsConnection connection = App.getmOpenMrsXformsConnection();
         connection.postXformInstance(patientUuid, xml,
                 successListener,
@@ -173,7 +191,7 @@ public class OdkActivityLauncher {
         StringBuilder sb = new StringBuilder();
         BufferedReader reader = new BufferedReader(new FileReader(path));
         String line;
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             sb.append(line).append("\n");
         }
         return sb.toString();
@@ -197,5 +215,98 @@ public class OdkActivityLauncher {
                 Log.e(tag, error.toString());
             }
         };
+    }
+
+    /**
+     * Show the ODK activity for viewing a saved form.
+     *
+     * @param caller the calling activity.
+     */
+    public static void showSavedXform(final Activity caller) {
+
+        // This has to be at the start of anything that uses the ODK file system.
+        Collect.createODKDirs();
+
+        final String selection = InstanceProviderAPI.InstanceColumns.STATUS + " != ?";
+        final String[] selectionArgs = {InstanceProviderAPI.STATUS_SUBMITTED};
+        final String sortOrder = InstanceProviderAPI.InstanceColumns.STATUS + " DESC, "
+                + InstanceProviderAPI.InstanceColumns.DISPLAY_NAME + " ASC";
+
+        final Uri instanceUri;
+        final String instancePath;
+        final String jrFormId;
+        Cursor instanceCursor = null;
+        try {
+            instanceCursor = caller.getContentResolver().query(
+                    CONTENT_URI, new String[]{_ID, INSTANCE_FILE_PATH, JR_FORM_ID}, selection,
+                    selectionArgs, sortOrder);
+            if (instanceCursor.getCount() == 0) {
+                return;
+            }
+            instanceCursor.moveToFirst();
+
+            // The URI code mostly copied from InstanceChooserList.onListItemClicked()
+            instanceUri =
+                    ContentUris.withAppendedId(CONTENT_URI,
+                            instanceCursor.getLong(instanceCursor.getColumnIndex(_ID)));
+            instancePath = instanceCursor.getString(instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
+            jrFormId = instanceCursor.getString(instanceCursor.getColumnIndex(JR_FORM_ID));
+        } finally {
+            if (instanceCursor != null) {
+                instanceCursor.close();
+            }
+        }
+
+        // It looks like we need to load the form as well. Which is odd, because
+        // the main menu doesn't seem to do this, but without the FormLoaderTask run
+        // there is no form manager for the HierarchyActivity.
+        FormLoaderTask loaderTask = new FormLoaderTask(instancePath, null, null);
+
+        final String formPath;
+        Cursor formCursor = null;
+        try {
+            formCursor = caller.getContentResolver().query(
+                    FormsProviderAPI.FormsColumns.CONTENT_URI,
+                    new String[]{FormsProviderAPI.FormsColumns.FORM_FILE_PATH},
+                    FormsProviderAPI.FormsColumns.JR_FORM_ID + " = ?",
+                    new String[]{jrFormId}, null);
+            if (formCursor.getCount() == 0) {
+                Log.e(TAG, "Loading forms for displaying " + jrFormId + " and got no forms,");
+                return;
+            }
+            if (formCursor.getCount() != 1) {
+                Log.e(TAG, "Loading forms for displaying instance, expected only 1. Got multiple so using first.");
+            }
+            formCursor.moveToFirst();
+            formPath = formCursor.getString(
+                    formCursor.getColumnIndex(FormsProviderAPI.FormsColumns.FORM_FILE_PATH));
+        } finally {
+            if (formCursor != null) {
+                formCursor.close();
+            }
+        }
+
+        loaderTask.setFormLoaderListener(new FormLoaderListener() {
+            @Override
+            public void loadingComplete(FormLoaderTask task) {
+                // This was extracted from FormEntryActivity.loadingComplete()
+                FormController formController = task.getFormController();
+                Collect.getInstance().setFormController(formController);
+
+                Intent intent = new Intent(caller, FormHierarchyActivity.class);
+                intent.setData(instanceUri);
+                intent.setAction(Intent.ACTION_PICK);
+                caller.startActivity(intent);
+            }
+
+            @Override
+            public void loadingError(String errorMsg) {
+            }
+
+            @Override
+            public void onProgressStep(String stepMessage) {
+            }
+        });
+        loaderTask.execute(formPath);
     }
 }

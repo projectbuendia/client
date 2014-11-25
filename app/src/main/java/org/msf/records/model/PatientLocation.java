@@ -8,5 +8,4 @@ public class PatientLocation {
     public String zone;
     public String tent;
     public String bed;
-
 }

@@ -4,15 +4,13 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.squareup.otto.Bus;
-
-import org.msf.records.events.MainThreadBus;
 import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.updater.UpdateManager;
+import org.msf.records.user.UserManager;
 import org.odk.collect.android.application.Collect;
 
 /**
@@ -25,16 +23,7 @@ public class App extends Application {
      */
     private static App sInstance;
 
-    /**
-     * An event bus that posts events to any available thread.
-     */
-    private static Bus sBus;
-
-    /**
-     * An event bus that posts events specifically to the main thread.
-     */
-    private static MainThreadBus sMainThreadBus;
-
+    private static UserManager sUserManager;
     private static UpdateManager sUpdateManager;
 
     private static Server mServer;
@@ -50,9 +39,8 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-            sBus = new Bus();
-            sMainThreadBus = new MainThreadBus(sBus);
 
+            sUserManager = new UserManager();
             sUpdateManager = new UpdateManager();
 
             String rootUrl;
@@ -77,12 +65,8 @@ public class App extends Application {
         return sInstance;
     }
 
-    public static synchronized Bus getBus() {
-        return sBus;
-    }
-
-    public static synchronized MainThreadBus getMainThreadBus() {
-        return sMainThreadBus;
+    public static synchronized UserManager getUserManager() {
+        return sUserManager;
     }
 
     public static synchronized UpdateManager getUpdateManager() {

@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
 import org.msf.records.model.PatientLocation;
+import org.msf.records.model.User;
 import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
@@ -213,6 +214,40 @@ public class OpenMrsServer implements Server {
             patient.gender = "F";
         }
         return patient;
+    }
+
+    private User parseUserJson(JSONObject object) throws JSONException {
+        return User.create(object.getString("user_id"), object.getString("full_name"));
+    }
+
+    @Override
+    public void listUsers(@Nullable String filterQueryTerm,
+                          final Response.Listener<List<User>> userListener,
+                          Response.ErrorListener errorListener,
+                          final String logTag) {
+        String query = filterQueryTerm != null ? filterQueryTerm : "";
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                mUserName, mPassword,
+                mRootUrl + "/user?q=" + Utils.urlEncode(query),
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        ArrayList<User> result = new ArrayList<>();
+                        try {
+                            JSONArray results = response.getJSONArray("results");
+                            for (int i=0; i<results.length(); i++) {
+                                User user = parseUserJson(results.getJSONObject(i));
+                                result.add(user);
+                            }
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                        }
+                        userListener.onResponse(result);
+                    }
+                },
+                errorListener);
+        mVolley.addToRequestQueue(request, logTag);
     }
 
     @Override

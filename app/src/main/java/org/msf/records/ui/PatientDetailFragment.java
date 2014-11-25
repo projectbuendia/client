@@ -13,10 +13,12 @@ import com.android.volley.Response;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.cache.PatientOpenHelper;
+import org.msf.records.events.PatientLocationEditedEvent;
+import org.msf.records.model.Location2;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
-import org.msf.records.model.PatientLocation;
 import org.msf.records.model.Status;
+import org.msf.records.ui.dialogs.EditAssignedLocationDialogFragment;
 import org.msf.records.utils.Utils;
 
 import java.text.NumberFormat;
@@ -25,6 +27,7 @@ import java.util.Calendar;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 /**
  * A fragment representing a single Patient detail screen.
@@ -44,14 +47,12 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 
     private PatientOpenHelper patientDb;
 
-    @InjectView(R.id.patient_overview_name)
-    TextView mPatientNameTV;
+    @InjectView(R.id.patient_overview_name) TextView mPatientNameTV;
     @InjectView(R.id.patient_overview_id) TextView mPatientIdTV;
     @InjectView(R.id.patient_overview_location) TextView mPatientLocationTV;
     @InjectView(R.id.patient_overview_important_description) TextView mPatientImportantTV;
     @InjectView(R.id.patient_overview_days_since_admission_tv) TextView mPatientDaysSinceAdmissionTV;
-    @InjectView(R.id.patient_overview_status_icon)
-    ImageView mPatientStatusIcon;
+    @InjectView(R.id.patient_overview_status_icon) ImageView mPatientStatusIcon;
     @InjectView(R.id.patient_overview_status_description) TextView mPatientStatusTV;
     @InjectView(R.id.patient_overview_gender_tv) TextView mPatientGenderTV;
     @InjectView(R.id.patient_overview_age_tv) TextView mPatientAgeTV;
@@ -117,6 +118,20 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        EventBus.getDefault().unregister(this);
+
+        super.onPause();
+    }
+
     @OnClick(R.id.patient_overview_name)
     public void patientOverviewNameClick(){
         FragmentManager fm = getChildFragmentManager();
@@ -137,6 +152,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         dialogListFragment.setArguments(b);
         dialogListFragment.show(fm, null);
     }
+
     @OnClick(R.id.patient_overview_status)
     public void patientOverviewStatusClick(){
         Log.d(TAG, "patientOverviewStatusClick");
@@ -162,27 +178,43 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 
     @OnClick({R.id.patient_overview_assigned_location})
     public void patientOverviewLocationClick() {
+        if (mPatient == null || mPatient.assigned_location == null) {
+            return;
+        }
+
+        Location2 currentLocation = Location2.create(mPatient.assigned_location);
         FragmentManager fm = getChildFragmentManager();
-        EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
-        Bundle b = new Bundle();
-        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_location));
-        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER, new EditTextDialogFragment.OnItemClickListener() {
-
-            @Override
-            public void onPositiveButtonClick(String[] data) {
-
-                Patient patient = new Patient();
-                PatientLocation location = new PatientLocation();
-                location.zone = data[0];
-                location.tent = data[1];
-                location.bed = data[2];
-                patient.assigned_location = location;
-                updatePatient(patient);
-            }
-        });
-        dialogListFragment.setArguments(b);
-        dialogListFragment.show(fm, null);
+        // EditTextDialogFragment dialogListFragment = new EditTextDialogFragment();
+        EditAssignedLocationDialogFragment dialogFragment =
+                EditAssignedLocationDialogFragment.newInstance(currentLocation);
+        dialogFragment.show(fm, null);
+//        Bundle b = new Bundle();
+//        b.putStringArray(ITEM_LIST_KEY, getResources().getStringArray(R.array.patient_location));
+//        b.putSerializable(EditTextDialogFragment.GRID_ITEM_DONE_LISTENER,
+//                new EditTextDialogFragment.OnItemClickListener() {
+//
+//            @Override
+//            public void onPositiveButtonClick(String[] data) {
+//
+//                Patient patient = new Patient();
+//                PatientLocation location = new PatientLocation();
+//                location.zone = data[0];
+//                location.tent = data[1];
+//                location.bed = data[2];
+//                patient.assigned_location = location;
+//                updatePatient(patient);
+//            }
+//        });
+//        dialogListFragment.setArguments(b);
+//        dialogListFragment.show(fm, null);
     }
+
+    public void onEventMainThread(PatientLocationEditedEvent event) {
+        Patient patient = new Patient();
+        patient.assigned_location = event.mLocation.toPatientLocation();
+        updatePatient(patient);
+    }
+
     @OnClick(R.id.patient_overview_gender)
     public void patientOverviewGenderClick() {
         FragmentManager fm = getChildFragmentManager();

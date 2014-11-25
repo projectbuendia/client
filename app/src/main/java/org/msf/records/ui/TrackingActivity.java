@@ -1,7 +1,5 @@
 package org.msf.records.ui;
 
-import com.estimote.sdk.Region;
-
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,6 +14,7 @@ import android.widget.Toast;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
+import com.estimote.sdk.Region;
 import com.estimote.sdk.Utils;
 
 import java.util.List;

@@ -12,6 +12,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_user_login">Login</string>
     <string name="title_patient_list">Patients</string>
     <string name="title_patient_detail">Patient Detail</string>
     <string name="detail_pager_overview">Overview</string>
@@ -42,6 +43,7 @@
     <string name="location_outside">Outside</string>
     <string name="action_edit_details">Edit Details</string>
     <string name="action_new_patient">+ Create New Patient</string>
+    <string name="action_view_xform">+ View first saved xform</string>
     <string name="action_new_round">New Round</string>
     <string name="action_update_chart">Update Chart</string>
     <string name="action_view_round_archive">Round Archive</string>
@@ -59,4 +61,5 @@
     <string name="overview_assigned_location">Assigned Location</string>
     <string name="overview_instructions">Instructions</string>
     <string name="detail_page_view_chart">View Chart</string>
+    <string name="title_edit_patient_location">Edit Patient Location</string>
 </resources>
