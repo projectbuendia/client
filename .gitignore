@@ -3,6 +3,7 @@
 # Built application files
 *.apk
 *.ap_
+!app/build/outputs/apk/app_debug.apk
 
 # Files for the Dalvik VM
 *.dex
@@ -32,6 +33,3 @@ proguard/
 .idea/libraries/
 .idea/workspace.xml
 .idea/tasks.xml
-7
-# Crashlytics
-app/src/main/res/values/com_crashlytics_export_strings.xml

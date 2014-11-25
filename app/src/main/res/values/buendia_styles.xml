@@ -20,7 +20,7 @@
 
     <!-- Widgets -->
 
-    <style name="Widget.Buendia">
+    <style name="Widget.Buendia" parent="None">
     </style>
 
     <!-- EditText -->
