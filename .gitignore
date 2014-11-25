@@ -1,10 +1,5 @@
 # Created by .gitignore support plugin (hsz.mobi)
 ### Android template
-# Built application files
-*.apk
-*.ap_
-!app/build/outputs/apk/app_debug.apk
-
 # Files for the Dalvik VM
 *.dex
 
