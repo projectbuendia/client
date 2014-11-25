@@ -43,21 +43,18 @@ public class App extends Application {
             sUserManager = new UserManager();
             sUpdateManager = new UpdateManager();
 
-            String rootUrl;
-            if (preferences.getBoolean("use_openmrs", true)) {
-                rootUrl = Constants.API_URL;//preferences.getString("openmrs_root_url", null);
-                mServer = new OpenMrsServer(
-                        getApplicationContext(), rootUrl,
-                        preferences.getString("openmrs_user", null),
-                        preferences.getString("openmrs_password", null));
-            } else {
-                rootUrl = preferences.getString("api_root_url", null);
-                mServer = new BuendiaServer(getApplicationContext(), rootUrl);
-            }
+            //Turned off preferences as it is impossible to access them from login screen
+            mServer = new OpenMrsServer(
+                    getApplicationContext(),
+                    Constants.API_URL,
+                    Constants.API_ADMIN_USERNAME,
+                    Constants.API_ADMIN_PASSWORD);
+
             mOpenMrsXformsConnection = new OpenMrsXformsConnection(
-                    getApplicationContext(), rootUrl,
-                    preferences.getString("openmrs_user", null),
-                    preferences.getString("openmrs_password", null));
+                    getApplicationContext(),
+                    Constants.API_URL,
+                    Constants.API_ADMIN_USERNAME,
+                    Constants.API_ADMIN_PASSWORD);
         }
     }
 

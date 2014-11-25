@@ -74,4 +74,5 @@ dependencies {
     androidTestCompile files('libs/espresso-1.1-bundled.jar')
     compile project(':odkcollect')
     compile project(':viewserver')
+
 }

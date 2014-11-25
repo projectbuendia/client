@@ -14,20 +14,13 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.squareup.otto.Subscribe;
-
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.model.Location;
-import org.msf.records.model.Patient;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientContract;
-
-import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
