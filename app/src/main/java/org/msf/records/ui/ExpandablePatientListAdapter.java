@@ -62,7 +62,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         Log.d(TAG, "Getting child cursor for zone: " + zone);
 
         CursorLoader cursorLoader = new CursorLoader(mContext,
-                PatientContract.PatientMeta.CONTENT_URI, PROJECTION, PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + "=?",
+                PatientContract.PatientMeta.CONTENT_URI,
+                PROJECTION,
+                PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + "=?",
                 new String[] { zone },
                 null);
 

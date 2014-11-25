@@ -208,6 +208,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(PatientContract.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(PatientContract.PatientMeta.CONTENT_URI, null, false);
+        mContentResolver.notifyChange(PatientContract.PatientMeta.CONTENT_URI_PATIENT_ZONES, null, false);
 
 
 

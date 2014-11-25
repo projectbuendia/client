@@ -96,8 +96,9 @@ public class PatientProvider extends ContentProvider {
                         .where(selection, selectionArgs);
                 Cursor zonesCursor = builder.query(db, projection,
                         PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
-                assert ctx != null;
-                zonesCursor.setNotificationUri(ctx.getContentResolver(), uri);
+                Context ctx1 = getContext();
+                assert ctx1 != null;
+                zonesCursor.setNotificationUri(ctx1.getContentResolver(), uri);
                 return zonesCursor;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

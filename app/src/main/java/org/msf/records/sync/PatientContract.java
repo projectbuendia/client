@@ -29,7 +29,7 @@ public class PatientContract {
     private static final String PATH_PATIENTS = "patients";
 
     /**
-     * Path component for "patient"-type resources..
+     * Path component for "zones"-type resources..
      */
     private static final String PATH_PATIENTS_ZONES = "zones";
 
