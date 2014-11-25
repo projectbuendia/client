@@ -1,8 +1,12 @@
 package org.msf.records.ui;
 
 import android.app.Activity;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
@@ -10,16 +14,13 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.model.Location;
-import org.msf.records.model.Patient;
-
-import java.util.List;
+import org.msf.records.net.Constants;
+import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.PatientContract;
 
 import de.greenrobot.event.EventBus;
 
@@ -33,8 +34,8 @@ import de.greenrobot.event.EventBus;
  * interface.
  */
 public class PatientListFragment extends ProgressFragment implements
-        ExpandableListView.OnChildClickListener, Response.Listener<List<Patient>>,
-        SwipeRefreshLayout.OnRefreshListener {
+        ExpandableListView.OnChildClickListener,
+        SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
     private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
@@ -44,6 +45,11 @@ public class PatientListFragment extends ProgressFragment implements
      * activated item position. Only used on tablets.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
+
+    /**
+     * The id to identify which Cursor is returned
+     */
+    private static final int LOADER_LIST_ID = 0;
 
     /**
      * The fragment's current callback object, which is notified of list item
@@ -70,6 +76,29 @@ public class PatientListFragment extends ProgressFragment implements
     String mFilterQueryTerm;
 
     String mFilterState;
+
+
+    /**
+     * Projection for querying the content provider.
+     */
+    private static final String[] PROJECTION = new String[] {
+            PatientContract.PatientMeta._ID,
+            PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
+            PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
+            PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
+            PatientContract.PatientMeta.COLUMN_NAME_UUID,
+            PatientContract.PatientMeta.COLUMN_NAME_STATUS,
+            PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+    };
+
+    // Constants representing column positions from PROJECTION.
+    public static final int COLUMN_ID = 0;
+    public static final int COLUMN_LOCATION_ZONE = 1;
+    public static final int COLUMN_GIVEN_NAME = 2;
+    public static final int COLUMN_FAMILY_NAME = 3;
+    public static final int COLUMN_UUID = 4;
+    public static final int COLUMN_STATUS = 5;
+    public static final int COLUMN_ADMISSION_TIMESTAMP = 6;
 
 
     /**
@@ -126,35 +155,11 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onRefresh() {
         if(!isRefreshing){
+            Log.d(TAG, "onRefresh");
+            //triggers app wide data refresh
+            GenericAccountService.triggerRefresh();
             isRefreshing = true;
-            loadSearchResults();
         }
-    }
-
-    @Override
-    public void onResponse(List<Patient> patients) {
-        Log.d(TAG, "onResponse ");
-        if(isRefreshing){
-            Log.d(TAG, "onResponse refresh");
-
-            mPatientAdapter.clear();
-            mPatientAdapter.notifyDataSetChanged();
-        }
-        mPatientAdapter.addAll(patients);
-
-        // Expand all by default.
-        for (int i = 0; i < mPatientAdapter.getGroupCount(); i++) {
-            mListView.expandGroup(i);
-        }
-
-        mPatientAdapter.notifyDataSetChanged();
-        changeState(State.LOADED);
-        stopRefreshing();
-    }
-
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        stopRefreshing();
     }
 
     private void stopRefreshing(){
@@ -165,8 +170,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
-        App.getServer().listPatients(mFilterState, mFilterLocation, mFilterQueryTerm,
-                this, this, TAG);
+        getLoaderManager().initLoader(LOADER_LIST_ID, null, this);
     }
 
     @Override
@@ -182,7 +186,7 @@ public class PatientListFragment extends ProgressFragment implements
         Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
         allLocationsButton.setOnClickListener(onClickListener);
 
-        mPatientAdapter = new ExpandablePatientListAdapter(getActivity());
+        mPatientAdapter = new ExpandablePatientListAdapter(null, getActivity());
         mListView.setAdapter(mPatientAdapter);
 
         loadSearchResults();
@@ -231,6 +235,11 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mCallbacks = (Callbacks) activity;
+
+        if(Constants.OFFLINE_SUPPORT){
+            // Create account, if needed
+            GenericAccountService.registerSyncAccount(activity);
+        }
     }
 
     @Override
@@ -241,20 +250,6 @@ public class PatientListFragment extends ProgressFragment implements
         mCallbacks = sDummyCallbacks;
     }
 
-    /**
-     @Override
-     public void onListItemClick(int position, int type) {
-     Log.d(TAG, "position: " + position + " type: " + type);
-     if(position == 0)
-     mFilterLocation = null;
-     else
-     mFilterLocation = "" + (position - 1);
-     App.getInstance().cancelPendingRequests(TAG);
-     isRefreshing = false;
-     changeState(State.LOADING);
-     onRefresh();
-     }
-     **/
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -267,17 +262,13 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-        Patient patient = mPatientAdapter.getPatient(groupPosition, childPosition);
-        if (patient == null) {
-            return false;
-        }
+        Cursor childCursor = mPatientAdapter.getChild(groupPosition, childPosition);
 
         mCallbacks.onItemSelected(
-                patient.uuid,
-                patient.given_name,
-                patient.family_name,
-                patient.id);
-
+                childCursor.getString(ExpandablePatientListAdapter.COLUMN_UUID),
+                childCursor.getString(ExpandablePatientListAdapter.COLUMN_GIVEN_NAME),
+                childCursor.getString(ExpandablePatientListAdapter.COLUMN_FAMILY_NAME),
+                childCursor.getString(ExpandablePatientListAdapter.COLUMN_ID));
         return true;
     }
 
@@ -308,5 +299,45 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(getActivity(),  // Context
+                PatientContract.PatientMeta.CONTENT_URI_PATIENT_ZONES, // URI
+                PROJECTION,                // Projection
+                null,                           // Selection
+                null,                           // Selection args
+                PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        // Swap the new cursor in.
+        int id = cursorLoader.getId();
+
+        Log.d(TAG, "onLoadFinsihed id: " + id);
+        if (id == LOADER_LIST_ID) {
+            mPatientAdapter.setGroupCursor(cursor);
+            changeState(State.LOADED);
+            stopRefreshing();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // is about to be closed.
+        int id = cursorLoader.getId();
+        if (id != LOADER_LIST_ID) {
+            // child cursor
+            try {
+                mPatientAdapter.setChildrenCursor(id, null);
+            } catch (NullPointerException e) {
+                Log.w(TAG, "Adapter expired, try again on the next query: " + e.getMessage());
+            }
+        } else {
+            mPatientAdapter.setGroupCursor(null);
+        }
     }
 }
