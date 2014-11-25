@@ -1,6 +1,5 @@
 package org.msf.records.net;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -29,19 +28,10 @@ import javax.annotation.Nullable;
 public class OpenMrsXformsConnection {
     private static final String TAG = "OpenMrsXformsConnection";
 
-    private final VolleySingleton mVolley;
-    private final String mRootUrl;
-    private final String mUserName;
-    private final String mPassword;
+    private final OpenMrsConnectionDetails mConnectionDetails;
 
-    public OpenMrsXformsConnection(Context context,
-                                   @Nullable String rootUrl,
-                                   @Nullable String userName,
-                                   @Nullable String password) {
-        this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
-        mRootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
-        mUserName = (userName == null) ? Constants.LOCAL_ADMIN_USERNAME : userName;
-        mPassword = (password == null) ? Constants.LOCAL_ADMIN_PASSWORD : password;
+    public OpenMrsXformsConnection(OpenMrsConnectionDetails connection) {
+        this.mConnectionDetails = connection;
     }
 
     /**
@@ -52,9 +42,8 @@ public class OpenMrsXformsConnection {
      */
     public void getXform(String uuid, final Response.Listener<String> resultListener,
                           Response.ErrorListener errorListener) {
-        Request request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/xform/" + uuid + "?v=full",
+        Request request = new OpenMrsJsonRequest(mConnectionDetails,
+                "/xform/" + uuid + "?v=full",
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -70,7 +59,7 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
-        mVolley.addToRequestQueue(request, TAG);
+        mConnectionDetails.volley.addToRequestQueue(request, TAG);
     }
 
     /**
@@ -80,9 +69,7 @@ public class OpenMrsXformsConnection {
      */
     public void listXforms(final Response.Listener<List<OpenMrsXformIndexEntry>> listener,
                            final Response.ErrorListener errorListener) {
-        Request request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/xform", // list all forms
+        Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xform", // list all forms
                 null, // null implies GET
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -123,7 +110,7 @@ public class OpenMrsXformsConnection {
                 },
                 errorListener
         );
-        mVolley.addToRequestQueue(request, TAG);
+        mConnectionDetails.volley.addToRequestQueue(request, TAG);
     }
 
     /**
@@ -163,8 +150,7 @@ public class OpenMrsXformsConnection {
             errorListener.onErrorResponse(new VolleyError("failed to convert to JSON", e));
         }
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/xforminstance",
+                mConnectionDetails, "/xforminstance",
                 postBody, // non-null implies POST
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -173,7 +159,7 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
-        mVolley.addToRequestQueue(request, TAG);
+        mConnectionDetails.volley.addToRequestQueue(request, TAG);
     }
 
 }
