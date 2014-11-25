@@ -159,6 +159,7 @@ public class OpenMrsServer implements Server {
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, final String logTag) {
+
         String query = filterQueryTerm != null ? filterQueryTerm : "";
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
@@ -226,6 +227,7 @@ public class OpenMrsServer implements Server {
                           Response.ErrorListener errorListener,
                           final String logTag) {
         String query = filterQueryTerm != null ? filterQueryTerm : "";
+        Log.d(TAG, "username: " + mUserName + "  password: " + mPassword);
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
                 mUserName, mPassword,
                 mRootUrl + "/user?q=" + Utils.urlEncode(query),
