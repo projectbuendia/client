@@ -1,21 +1,18 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'http://download.crashlytics.com/maven' }
     }
 
     dependencies {
-        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
     }
 }
 apply plugin: 'com.android.application'
-apply plugin: 'crashlytics'
 apply plugin: 'android-apt'
 
-repositories {
-    maven { url 'http://download.crashlytics.com/maven' }
-}
+def versionMajor = 0
+def versionMinor = 1
+def versionPatch = 1
 
 android {
     compileSdkVersion 21
@@ -30,18 +27,21 @@ android {
         applicationId "org.msf.records"
         minSdkVersion 15
         targetSdkVersion 20
-        versionCode 1
-        versionName "0.1.0"
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
     }
+
     buildTypes {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     defaultConfig {
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES' // otherwise we get duplicates
         exclude 'META-INF/services/javax.annotation.processing.Processor'
@@ -50,29 +50,38 @@ android {
         exclude 'META-INF/LICENSE' // otherwise we get duplicates
         exclude 'META-INF/LICENSE.txt' // otherwise we get duplicates
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
+    // Build plugins
+    apt 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables
+
+    // Local .jar dependencies
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    //compile 'com.android.support:appcompat-v7:20.0.0'
-    compile 'com.android.support:support-v4:20.0.0'
+
+    // Local project dependencies
+    compile project(':odkcollect')
+    compile project(':snackbar')
     compile project(':ViewPagerIndicator')
-    compile 'com.mcxiaoke.volley:library:1.0.6'
-    compile 'com.google.code.gson:gson:2.3'
-    compile 'com.jakewharton:butterknife:5.1.2'
-//    compile 'com.squareup:otto:1.3.5' // Otto, the event bus.
-    compile 'de.greenrobot:eventbus:2.4.0' // The event bus.
-    compile 'joda-time:joda-time:2.5'
-    compile 'com.crashlytics.android:crashlytics:1.+'
+    compile project(':viewserver')
+
+    // External dependencies
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.android.support:recyclerview-v7:+'
-    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning.
+    compile 'com.android.support:support-v4:20.0.0'
     compile 'com.github.frankiesardo:auto-parcel:+' // Easier Parcelables.
-    apt 'com.github.frankiesardo:auto-parcel-processor:+' // Easier Parcelables.
-    compile project(':snackbar')
-    androidTestCompile files('libs/espresso-1.1-bundled.jar')
-    compile project(':odkcollect')
-    compile project(':viewserver')
+    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
+    compile 'com.google.code.gson:gson:2.3' // JSON parser
+    compile 'com.jakewharton:butterknife:5.1.2' // View injection
+    compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
+    compile 'de.greenrobot:eventbus:2.4.0' // The event bus
+    compile 'joda-time:joda-time:2.5' // Better dates and times
 
+    // Testing
+    androidTestCompile files('libs/espresso-1.1-bundled.jar')
 }

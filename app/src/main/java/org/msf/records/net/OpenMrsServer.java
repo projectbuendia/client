@@ -1,6 +1,5 @@
 package org.msf.records.net;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -29,19 +28,10 @@ public class OpenMrsServer implements Server {
 
     private static final String TAG = "OpenMrsServer";
     private final Gson gson = new Gson();
-    private final VolleySingleton mVolley;
-    private final String mRootUrl;
-    private final String mUserName;
-    private final String mPassword;
+    private final OpenMrsConnectionDetails mConnectionDetails;
 
-    public OpenMrsServer(Context context,
-                         @Nullable String rootUrl,
-                         @Nullable String userName,
-                         @Nullable String password) {
-        mRootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
-        mUserName = (userName == null) ? Constants.API_ADMIN_USERNAME : userName;
-        mPassword = (password == null) ? Constants.API_ADMIN_PASSWORD : password;
-        this.mVolley = VolleySingleton.getInstance(context.getApplicationContext());
+    public OpenMrsServer(OpenMrsConnectionDetails connectionDetails) {
+        this.mConnectionDetails = connectionDetails;
     }
 
     @Override
@@ -66,9 +56,7 @@ public class OpenMrsServer implements Server {
             throw new RuntimeException(e);
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/patient",
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/patient",
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -83,7 +71,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mVolley.addToRequestQueue(request, logTag);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
     }
 
     private void putIfSet(Map<String, String> patientArguments, String key, JSONObject name, String param) throws JSONException {
@@ -98,9 +86,8 @@ public class OpenMrsServer implements Server {
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/patient/" + patientId,
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+                "/patient/" + patientId,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -116,7 +103,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mVolley.addToRequestQueue(request, logTag);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -134,9 +121,8 @@ public class OpenMrsServer implements Server {
             return;
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/patient/"+patientUuid,
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+                "/patient/"+patientUuid,
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -151,7 +137,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mVolley.addToRequestQueue(request, logTag);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -159,11 +145,9 @@ public class OpenMrsServer implements Server {
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, final String logTag) {
-
         String query = filterQueryTerm != null ? filterQueryTerm : "";
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/patient?q=" + Utils.urlEncode(query),
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+                "/patient?q=" + Utils.urlEncode(query),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -182,7 +166,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mVolley.addToRequestQueue(request, logTag);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
     }
 
     private Patient parsePatientJson(JSONObject object) throws JSONException {
@@ -227,10 +211,8 @@ public class OpenMrsServer implements Server {
                           Response.ErrorListener errorListener,
                           final String logTag) {
         String query = filterQueryTerm != null ? filterQueryTerm : "";
-        Log.d(TAG, "username: " + mUserName + "  password: " + mPassword);
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mUserName, mPassword,
-                mRootUrl + "/user?q=" + Utils.urlEncode(query),
+                mConnectionDetails, "/user?q=" + Utils.urlEncode(query),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -249,11 +231,11 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mVolley.addToRequestQueue(request, logTag);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
     }
 
     @Override
     public void cancelPendingRequests(String logTag) {
-        mVolley.cancelPendingRequests(logTag);
+        mConnectionDetails.volley.cancelPendingRequests(logTag);
     }
 }
