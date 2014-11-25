@@ -43,6 +43,8 @@ public class Patient implements Serializable {
     public PatientLocation assigned_location;
     public PatientAge age;
 
+    public Patient() {}
+
     /**
      * Overwrite the fields in this GSON object with everything non-null in the source.
      * PatientAge and PatientLocation are overwritten completely (not merged)

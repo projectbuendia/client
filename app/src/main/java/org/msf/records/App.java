@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.OpenMrsServer;
+import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
@@ -26,7 +27,10 @@ public class App extends Application {
     private static UpdateManager sUpdateManager;
 
     private static Server mServer;
+    private static OpenMrsXformsConnection mOpenMrsXformsConnection;
+
     private static OpenMrsConnectionDetails mConnectionDetails;
+
 
     @Override
     public void onCreate() {
@@ -43,7 +47,8 @@ public class App extends Application {
             sUpdateManager = new UpdateManager();
 
             mConnectionDetails =
-                    new OpenMrsConnectionDetails(preferences.getString("openmrs_root_url", null),
+                    new OpenMrsConnectionDetails(
+                            preferences.getString("openmrs_root_url", null),
                             preferences.getString("openmrs_user", null),
                             preferences.getString("openmrs_password", null),
                             getApplicationContext());
