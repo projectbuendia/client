@@ -45,27 +45,6 @@ public class Patient implements Serializable {
 
     public Patient() {}
 
-    public Patient(String uuid, String id, String given_name, String family_name, String important_information,
-                   String status, Boolean pregnant, String gender, Long admission_timestamp, Long created_timestamp,
-                   Long first_showed_symptoms_timestamp, String origin_location, String next_of_kin,
-                   PatientLocation assigned_location, PatientAge age) {
-        this.uuid = uuid;
-        this.id = id;
-        this.given_name = given_name;
-        this.family_name = family_name;
-        this.important_information = important_information;
-        this.status = status;
-        this.pregnant = pregnant;
-        this.gender = gender;
-        this.admission_timestamp = admission_timestamp;
-        this.created_timestamp = created_timestamp;
-        this.first_showed_symptoms_timestamp = first_showed_symptoms_timestamp;
-        this.origin_location = origin_location;
-        this.next_of_kin = next_of_kin;
-        this.assigned_location = assigned_location;
-        this.age = age;
-    }
-
     /**
      * Overwrite the fields in this GSON object with everything non-null in the source.
      * PatientAge and PatientLocation are overwritten completely (not merged)

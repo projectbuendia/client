@@ -23,8 +23,8 @@ public class OpenMrsConnectionDetails {
                                     @Nullable String password,
                                     VolleySingleton volley) {
         this.rootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
-        this.userName = (userName == null) ? Constants.LOCAL_ADMIN_USERNAME : userName;
-        this.password = (password == null) ? Constants.LOCAL_ADMIN_PASSWORD : password;
+        this.userName = (userName == null) ? Constants.API_ADMIN_USERNAME : userName;
+        this.password = (password == null) ? Constants.API_ADMIN_PASSWORD : password;
         this.volley = volley;
     }
 
