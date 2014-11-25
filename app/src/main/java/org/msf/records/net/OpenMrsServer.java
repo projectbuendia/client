@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.model.NewUser;
 import org.msf.records.model.Patient;
 import org.msf.records.model.PatientAge;
 import org.msf.records.model.PatientLocation;
@@ -63,6 +64,46 @@ public class OpenMrsServer implements Server {
                     public void onResponse(JSONObject response) {
                         try {
                             patientListener.onResponse(parsePatientJson(response));
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                errorListener);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+    }
+
+    @Override
+    public void addUser(
+            final NewUser user,
+            final Response.Listener<User> userListener,
+            final Response.ErrorListener errorListener,
+            final String logTag) {
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("user_name", user.getUsername());
+            requestBody.put("given_name", user.getGivenName());
+            requestBody.put("family_name", user.getFamilyName());
+            requestBody.put("password", user.getPassword());
+
+        } catch (JSONException e) {
+            // This is almost never recoverable, and should not happen in correctly functioning code
+            // So treat like NPE and rethrow.
+            throw new RuntimeException(e);
+        }
+
+        // TODO(akalachman): Remove.
+        Log.e(TAG, requestBody.toString());
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/user",
+                requestBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            userListener.onResponse(parseUserJson(response));
                         } catch (JSONException e) {
                             Log.e(logTag, "Failed to parse response", e);
                             errorListener.onErrorResponse(

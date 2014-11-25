@@ -1,6 +1,7 @@
 package org.msf.records.model;
 
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.util.Comparator;
 
@@ -39,16 +40,19 @@ public abstract class User implements Parcelable, Comparable<User> {
         }
     };
 
-    /**
-     * The guest user.
-     */
-    public static User GUEST = User.create(Integer.toString(Integer.MAX_VALUE), "Guest");
-
     public abstract String getId();
     public abstract String getFullName();
 
     public static User create(String id, String fullName) {
         return new AutoParcel_User(id, fullName);
+    }
+
+    public static User fromNewUser(NewUser newUser) {
+        String fullName = new String(newUser.getGivenName());
+        if (newUser.getFamilyName() != null) {
+            fullName += " " + newUser.getFamilyName();
+        }
+        return new AutoParcel_User(newUser.getUsername(), fullName);
     }
 
     public String getInitials() {
