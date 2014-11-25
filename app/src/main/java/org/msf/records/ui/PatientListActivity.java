@@ -6,38 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.crashlytics.android.Crashlytics;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
-import com.squareup.otto.Subscribe;
-import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
-import org.msf.records.net.OdkXformSyncTask;
-import org.msf.records.net.OpenMrsXformIndexEntry;
-import org.odk.collect.android.activities.FormEntryActivity;
-import org.odk.collect.android.provider.FormsProviderAPI;
-import com.squareup.otto.Subscribe;
-
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -58,7 +40,7 @@ import org.odk.collect.android.tasks.DiskSyncTask;
  * {@link PatientListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class PatientListActivity extends FragmentActivity
+public class PatientListActivity extends BaseActivity
         implements PatientListFragment.Callbacks {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
@@ -66,7 +48,7 @@ public class PatientListActivity extends FragmentActivity
 
     private SearchView mSearchView;
 
-    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
+//    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
     private OnSearchListener mSearchListener;
 
@@ -133,15 +115,11 @@ public class PatientListActivity extends FragmentActivity
     protected void onResume() {
         super.onResume();
 
-        App.getMainThreadBus().register(this);
-
-        App.getUpdateManager().checkForUpdate(App.getMainThreadBus());
+        App.getUpdateManager().checkForUpdate();
     }
 
     @Override
     protected void onPause() {
-        App.getMainThreadBus().unregister(this);
-
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar.dismiss();
 
@@ -152,15 +130,13 @@ public class PatientListActivity extends FragmentActivity
      * Displays a {@link Snackbar} indicating that an update is available upon receiving an
      * {@link UpdateAvailableEvent}.
      */
-    @Subscribe
-    public void onUpdateAvailableEvent(final UpdateAvailableEvent event) {
+    public void onEventMainThread(final UpdateAvailableEvent event) {
         updateAvailableSnackbar
                 .actionListener(new ActionClickListener() {
 
                     @Override
                     public void onActionClicked() {
-                        App.getUpdateManager()
-                                .downloadUpdate(App.getMainThreadBus(), event.mUpdateInfo);
+                        App.getUpdateManager().downloadUpdate(event.mUpdateInfo);
                     }
                 });
         if (updateAvailableSnackbar.isDismissed()) {
@@ -172,8 +148,7 @@ public class PatientListActivity extends FragmentActivity
      * Displays a {@link Snackbar} indicating that an update has been downloaded upon receiving an
      * {@link UpdateDownloadedEvent}.
      */
-    @Subscribe
-    public void onUpdateDownloadedEvent(final UpdateDownloadedEvent event) {
+    public void onEventMainThread(final UpdateDownloadedEvent event) {
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar
                 .actionListener(new ActionClickListener() {
@@ -201,7 +176,7 @@ public class PatientListActivity extends FragmentActivity
 
 //        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
 //        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
-        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
+//        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
         mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
         mSearchView.setIconifiedByDefault(false);
         actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
@@ -223,64 +198,7 @@ public class PatientListActivity extends FragmentActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        if(!mTwoPane) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.main, menu);
-
-            menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    startActivity(PatientAddActivity.class);
-                    return false;
-                }
-            });
-
-            menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startActivity(SettingsActivity.class);
-                return false;
-              }
-            });
-
-            menu.findItem(R.id.action_scan).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startScanBracelet();
-                return false;
-              }
-            });
-
-            MenuItem searchMenuItem = menu.findItem(R.id.action_search);
-            mSearchView = (SearchView) searchMenuItem.getActionView();
-            mSearchView.setIconifiedByDefault(false);
-
-            searchMenuItem.expandActionView();
-        } else {
-//          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              startActivity(PatientAddActivity.class);
-//            }
-//          });
-
-          mSettingsBtn.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                  startActivity(SettingsActivity.class);
-              }
-          });
-
-//          mScanBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              startScanBracelet();
-//            }
-//          });
-        }
-
+    public void onExtendOptionsMenu(Menu menu) {
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
@@ -301,8 +219,6 @@ public class PatientListActivity extends FragmentActivity
             return true;
           }
         });
-
-        return true;
     }
 
     private enum ScanAction {
@@ -328,6 +244,9 @@ public class PatientListActivity extends FragmentActivity
             case R.id.new_patient_button:
                 OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
                         ODK_ACTIVITY_REQUEST);
+                break;
+            case R.id.view_xform_button:
+                OdkActivityLauncher.showSavedXform(this);
                 break;
         }
     }

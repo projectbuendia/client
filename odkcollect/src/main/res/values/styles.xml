@@ -3,13 +3,13 @@
 
     <style name="None" />
 
-    <!-- The style for Buendia text. -->
-    <style name="TextAppearance.Buendia" parent="TextAppearance.AppCompat">
+    <!-- The style for ODK text. -->
+    <style name="TextAppearance.Odk" parent="TextAppearance.AppCompat">
 
     </style>
 
     <!-- The style for title text. -->
-    <style name="TextAppearance.Buendia.Title">
+    <style name="TextAppearance.Odk.Title">
         <item name="android:textSize">32sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:paddingLeft">4dp</item>
@@ -17,13 +17,13 @@
     </style>
 
     <!-- The style for heading text. -->
-    <style name="TextAppearance.Buendia.Heading">
+    <style name="TextAppearance.Odk.Heading">
         <item name="android:textSize">24sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <!-- The style for EditText widgets. -->
-    <style name="Widget.Buendia.EditText" parent="None">
+    <style name="Widget.Odk.EditText" parent="None">
         <item name="android:textSize">24sp</item>
         <item name="android:padding">12dp</item>
         <!--<item name="android:paddingLeft">12dp</item>-->

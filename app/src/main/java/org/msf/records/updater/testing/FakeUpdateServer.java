@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.updater.UpdateServer;

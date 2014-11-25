@@ -9,14 +9,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.github.zafarkhaja.semver.ParseException;
 import com.github.zafarkhaja.semver.Version;
-import com.squareup.otto.Bus;
 
 import org.joda.time.DateTime;
 import org.msf.records.App;
@@ -27,8 +25,8 @@ import org.msf.records.model.UpdateInfo;
 import org.msf.records.updater.testing.FakeUpdateServer;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * An object that manages auto-updating of the application from a configurable update server.
@@ -109,16 +107,12 @@ public class UpdateManager {
      * </ul>
      *
      * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_FREQUENCY_HOURS}.
-     *
-     * @param bus the event bus to which to post update available events. If called from an activity
-     *            or a service, this should be an instance of
-     *            {@link org.msf.records.events.MainThreadBus}.
      */
-    public void checkForUpdate(Bus bus) {
+    public void checkForUpdate() {
         DateTime now = DateTime.now();
         if (now.isBefore(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
             if (!mIsDownloadInProgress && mLastAvailableUpdateInfo.shouldUpdate()) {
-                bus.post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+                EventBus.getDefault().post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
             }
 
             return;
@@ -126,7 +120,7 @@ public class UpdateManager {
 
         mLastCheckForUpdateTime = now;
 
-        CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener(bus);
+        CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener();
         mServer.getAndroidUpdateInfo(listener, listener, null /*tag*/);
     }
 
@@ -134,12 +128,9 @@ public class UpdateManager {
      * Asynchronously downloads an available update and posts an event indicating that the update is
      * available.
      *
-     * @param bus the event bus to which to post update downloaded events. If called from an
-     *            activity or a service, this should be an instance of
-     *            {@link org.msf.records.events.MainThreadBus}.
      * @return whether a download was started. {@code false} if a download is already in progress.
      */
-    public boolean downloadUpdate(Bus bus, AvailableUpdateInfo availableUpdateInfo) {
+    public boolean downloadUpdate(AvailableUpdateInfo availableUpdateInfo) {
         synchronized (mDownloadLock) {
             if (mIsDownloadInProgress) {
                 return false;
@@ -147,7 +138,7 @@ public class UpdateManager {
             mIsDownloadInProgress = true;
 
             App.getInstance().registerReceiver(
-                    new DownloadUpdateReceiver(bus), sDownloadCompleteIntentFilter);
+                    new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
             DownloadManager.Request request =
                     new DownloadManager.Request(availableUpdateInfo.mUpdateUri)
@@ -220,12 +211,6 @@ public class UpdateManager {
     private class CheckForUpdateResponseListener
             implements Response.Listener<UpdateInfo>, Response.ErrorListener {
 
-        private final Bus mBus;
-
-        public CheckForUpdateResponseListener(Bus bus) {
-            mBus = bus;
-        }
-
         @Override
         public void onResponse(UpdateInfo response) {
             synchronized (mLock) {
@@ -237,13 +222,14 @@ public class UpdateManager {
                                 .greaterThanOrEqualTo(mLastAvailableUpdateInfo.mAvailableVersion)) {
                     // If there's already a downloaded update that is as recent as the available
                     // update, post an UpdateDownloadedEvent.
-                    mBus.post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
+                    EventBus.getDefault()
+                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
                 } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
                     // Else, if the latest available update is good, post an UpdateAvailableEvent.
-                    mBus.post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+                    EventBus.getDefault().post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
                 } else {
                     // Else, post an UpdateNotAvailableEvent.
-                    mBus.post(new UpdateNotAvailableEvent());
+                    EventBus.getDefault().post(new UpdateNotAvailableEvent());
                 }
             }
         }
@@ -263,12 +249,6 @@ public class UpdateManager {
      * {@code DownloadManager.ACTION_DOWNLOAD_COMPLETED} intents.
      */
     private class DownloadUpdateReceiver extends BroadcastReceiver {
-
-        private final Bus mBus;
-
-        private DownloadUpdateReceiver(Bus bus) {
-            mBus = bus;
-        }
 
         @Override
         public void onReceive(Context context, Intent intent) {

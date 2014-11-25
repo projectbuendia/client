@@ -8,6 +8,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 
 import org.msf.records.model.Patient;
+import org.msf.records.model.User;
 
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +97,14 @@ public class BuendiaServer implements Server {
                         Patient.class, true, null, patientListener, errorListener),
                 logTag);
 
+    }
+
+    @Override
+    public void listUsers(@Nullable String filterQueryTerm,
+                          Response.Listener<List<User>> userListener,
+                          Response.ErrorListener errorListener,
+                          String logTag) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

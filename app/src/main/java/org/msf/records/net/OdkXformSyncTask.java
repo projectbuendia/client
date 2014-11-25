@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
-import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
 import android.util.Log;
 

@@ -1,19 +1,21 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven { url 'http://download.crashlytics.com/maven' }
     }
 
     dependencies {
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'crashlytics'
+apply plugin: 'android-apt'
 
 repositories {
     maven { url 'http://download.crashlytics.com/maven' }
 }
-
 
 android {
     compileSdkVersion 21
@@ -58,13 +60,16 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.6'
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.jakewharton:butterknife:5.1.2'
-    compile 'com.squareup:otto:1.3.5' // Otto, the event bus.
+//    compile 'com.squareup:otto:1.3.5' // Otto, the event bus.
+    compile 'de.greenrobot:eventbus:2.4.0' // The event bus.
     compile 'joda-time:joda-time:2.5'
     compile 'com.crashlytics.android:crashlytics:1.+'
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.android.support:recyclerview-v7:+'
     compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning.
+    compile 'com.github.frankiesardo:auto-parcel:+' // Easier Parcelables.
+    apt 'com.github.frankiesardo:auto-parcel-processor:+' // Easier Parcelables.
     compile project(':snackbar')
     androidTestCompile files('libs/espresso-1.1-bundled.jar')
     compile project(':odkcollect')
