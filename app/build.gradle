@@ -30,15 +30,18 @@ android {
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
     }
+
     buildTypes {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     defaultConfig {
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES' // otherwise we get duplicates
         exclude 'META-INF/services/javax.annotation.processing.Processor'
@@ -46,6 +49,10 @@ android {
         exclude 'META-INF/NOTICE.txt' // otherwise we get duplicates
         exclude 'META-INF/LICENSE' // otherwise we get duplicates
         exclude 'META-INF/LICENSE.txt' // otherwise we get duplicates
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
