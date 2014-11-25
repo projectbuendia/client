@@ -30,6 +30,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
     private User lastActiveUser;
     private Menu mMenu;
+    private MenuPopupWindow mPopupWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +51,13 @@ public abstract class BaseActivity extends FragmentActivity {
 
         getMenuInflater().inflate(R.menu.base, menu);
 
-        final MenuPopupWindow menuPopupWindow = new MenuPopupWindow();
+        mPopupWindow = new MenuPopupWindow();
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                menuPopupWindow.showAsDropDown(userView);
+                mPopupWindow.showAsDropDown(userView);
             }
         });
 
@@ -71,11 +72,20 @@ public abstract class BaseActivity extends FragmentActivity {
     protected void onPause() {
         EventBus.getDefault().unregister(this);
 
+        if (mPopupWindow != null) {
+            mPopupWindow.dismiss();
+        }
+
         super.onPause();
     }
 
     private void updateActiveUser() {
         User user = App.getUserManager().getActiveUser();
+        if (user == null) {
+            // TODO(dxchen): Handle no user.
+            return;
+        }
+
         if (!user.equals(lastActiveUser)) {
             // TODO(dxchen): Handle a user switch.
         }
@@ -122,6 +132,12 @@ public abstract class BaseActivity extends FragmentActivity {
         @Override
         public void showAsDropDown(View anchor) {
             super.showAsDropDown(anchor);
+
+            User user = App.getUserManager().getActiveUser();
+            if (user == null) {
+                // TODO(dxchen): Handle no user.
+                return;
+            }
 
             mUserName.setText(App.getUserManager().getActiveUser().getFullName());
         }
