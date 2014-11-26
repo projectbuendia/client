@@ -16,6 +16,17 @@ public class PatientProviderContract {
     }
 
     /**
+     * MIME type for lists of patients.
+     */
+    public static final String CONTENT_TYPE =
+            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.patients";
+    /**
+     * MIME type for individual patients.
+     */
+    public static final String CONTENT_ITEM_TYPE =
+            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.records.patient";
+
+    /**
      * Content provider authority.
      */
     public static final String CONTENT_AUTHORITY = "org.msf.records";
@@ -26,43 +37,29 @@ public class PatientProviderContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     /**
-     * Path component for "patient"-type resources..
+     * Path component for "patient"-type resources. Visible for re-use in PatientProvider.
      */
-    private static final String PATH_PATIENTS = "patients";
+    static final String PATH_PATIENTS = "patients";
 
     /**
-     * Path component for "zones"-type resources..
+     * Path component for "zones"-type resources.  Visible for re-use in PatientProvider.
      */
-    private static final String PATH_PATIENTS_ZONES = "zones";
+    static final String PATH_PATIENTS_ZONES = "zones";
+
+    /**
+     * Fully qualified URI for "patient" resources.
+     */
+    public static final Uri CONTENT_URI =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS).build();
+
+    public static final Uri CONTENT_URI_PATIENT_ZONES =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_ZONES).build();
 
     /**
      * Columns supported by "patients" records.
      */
-    public static class PatientMeta implements BaseColumns {
-        /**
-         * MIME type for lists of patients.
-         */
-        public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.patients";
-        /**
-         * MIME type for individual patients.
-         */
-        public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.records.patient";
+    public static class PatientColumns implements BaseColumns {
 
-        /**
-         * Fully qualified URI for "patient" resources.
-         */
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS).build();
-
-        public static final Uri CONTENT_URI_PATIENT_ZONES =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_ZONES).build();
-
-        /**
-         * Table name where records are stored for "patient" resources.
-         */
-        public static final String TABLE_NAME = "patients";
         /**
          * Patient admission timestamp
          */

@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
+import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS;
+import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_ZONES;
 
 /**
  * A ContentProvider for accessing active patients and their attributes.
@@ -38,9 +40,9 @@ public class PatientProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, "patients", ROUTE_PATIENTS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, "patients/*", ROUTE_PATIENTS_ID);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, "zones", ROUTE_ZONES);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, ROUTE_PATIENTS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", ROUTE_PATIENTS_ID);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS_ZONES, ROUTE_ZONES);
     }
 
     @Override
@@ -55,9 +57,9 @@ public class PatientProvider extends ContentProvider {
         switch (match) {
             case ROUTE_PATIENTS:
             case ROUTE_ZONES:
-                return PatientProviderContract.PatientMeta.CONTENT_TYPE;
+                return PatientProviderContract.CONTENT_TYPE;
             case ROUTE_PATIENTS_ID:
-                return PatientProviderContract.PatientMeta.CONTENT_ITEM_TYPE;
+                return PatientProviderContract.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -79,10 +81,10 @@ public class PatientProvider extends ContentProvider {
             case ROUTE_PATIENTS_ID:
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
-                builder.where(PatientProviderContract.PatientMeta._ID + "=?", id);
+                builder.where(PatientProviderContract.PatientColumns._ID + "=?", id);
             case ROUTE_PATIENTS:
                 // Return all known entries.
-                builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
+                builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor c = builder.query(db, projection, sortOrder);
                 // Note: Notification URI must be manually set here for loaders to correctly
@@ -91,10 +93,10 @@ public class PatientProvider extends ContentProvider {
                 c.setNotificationUri(ctx.getContentResolver(), uri);
                 return c;
             case ROUTE_ZONES://ContentProviders dont support group by, this is a way around it
-                builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
+                builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor zonesCursor = builder.query(db, projection,
-                        PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
                 Context ctx1 = getContext();
                 assert ctx1 != null;
                 zonesCursor.setNotificationUri(ctx1.getContentResolver(), uri);
@@ -112,8 +114,8 @@ public class PatientProvider extends ContentProvider {
         Uri result;
         switch (match) {
             case ROUTE_PATIENTS:
-                long id = db.insertOrThrow(PatientProviderContract.PatientMeta.TABLE_NAME, null, values);
-                result = Uri.parse(PatientProviderContract.PatientMeta.CONTENT_URI + "/" + id);
+                long id = db.insertOrThrow(PatientDatabase.PATIENTS_TABLE_NAME, null, values);
+                result = Uri.parse(PatientProviderContract.CONTENT_URI + "/" + id);
                 break;
             case ROUTE_PATIENTS_ID:
             case ROUTE_ZONES:
@@ -136,14 +138,14 @@ public class PatientProvider extends ContentProvider {
         int count;
         switch (match) {
             case ROUTE_PATIENTS:
-                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
+                count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
             case ROUTE_PATIENTS_ID:
                 String id = uri.getLastPathSegment();
-                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
-                        .where(PatientProviderContract.PatientMeta._ID + "=?", id)
+                count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
+                        .where(PatientProviderContract.PatientColumns._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
@@ -167,14 +169,14 @@ public class PatientProvider extends ContentProvider {
         int count;
         switch (match) {
             case ROUTE_PATIENTS:
-                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
+                count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
             case ROUTE_PATIENTS_ID:
                 String id = uri.getLastPathSegment();
-                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
-                        .where(PatientProviderContract.PatientMeta._ID + "=?", id)
+                count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
+                        .where(PatientProviderContract.PatientColumns._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;

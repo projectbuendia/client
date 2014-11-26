@@ -29,13 +29,13 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
      * Projection for querying the content provider.
      */
     private static final String[] PROJECTION = new String[] {
-            PatientProviderContract.PatientMeta._ID,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_UUID,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_STATUS,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+            PatientProviderContract.PatientColumns._ID,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP
     };
 
     // Constants representing column positions from PROJECTION.
@@ -62,9 +62,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         Log.d(TAG, "Getting child cursor for zone: " + zone);
 
         CursorLoader cursorLoader = new CursorLoader(mContext,
-                PatientProviderContract.PatientMeta.CONTENT_URI,
+                PatientProviderContract.CONTENT_URI,
                 PROJECTION,
-                PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + "=?",
+                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + "=?",
                 new String[] { zone },
                 null);
 
