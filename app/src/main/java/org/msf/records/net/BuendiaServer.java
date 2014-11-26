@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.android.volley.Request;
 import com.android.volley.Response;
 
+import org.msf.records.model.NewUser;
 import org.msf.records.model.Patient;
 import org.msf.records.model.User;
 
@@ -43,6 +44,15 @@ public class BuendiaServer implements Server {
         mVolley.addToRequestQueue(new GsonRequest<Patient>(Request.Method.POST,
                 patientArguments, mRootUrl + "patients/", Patient.class, false, null,
                 patientListener, errorListener), logTag);
+    }
+
+    @Override
+    public void addUser(
+            NewUser user,
+            Response.Listener<User> userListener,
+            Response.ErrorListener errorListener,
+            String logTag) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

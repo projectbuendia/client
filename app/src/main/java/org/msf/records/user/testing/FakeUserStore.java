@@ -2,6 +2,7 @@ package org.msf.records.user.testing;
 
 import com.google.common.collect.Sets;
 
+import org.msf.records.model.NewUser;
 import org.msf.records.model.User;
 import org.msf.records.user.UserStore;
 
@@ -64,26 +65,21 @@ public class FakeUserStore extends UserStore {
         return Sets.newHashSet(mLocalKnownUsers);
     }
 
-    // TODO(dxchen): Users presumably will have a server-side user ID. Should we have a data type
-    // for a new user that excludes the user ID?
     @Override
-    public User addUser(User user) {
-        if (mLocalKnownUsers.contains(user)) {
+    public User addUser(NewUser user) {
+        User asUser = User.fromNewUser(user);
+        if (mLocalKnownUsers.contains(asUser)) {
             throw new RuntimeException("Local user already exists.");
         }
 
-        if (mServerKnownUsers.contains(user)) {
+        if (mServerKnownUsers.contains(asUser)) {
             throw new RuntimeException("Server user already exists.");
         }
 
-        // Fake out an RPC to the server asking it to create a new user.
-        String id = "user" + (mNextId++);
-        User userWithId = User.create(id, user.getFullName());
+        mServerKnownUsers.add(asUser);
+        mLocalKnownUsers.add(asUser);
 
-        mServerKnownUsers.add(userWithId);
-        mLocalKnownUsers.add(userWithId);
-
-        return userWithId;
+        return asUser;
     }
 
     @Override
