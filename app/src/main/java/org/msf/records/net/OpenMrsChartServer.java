@@ -2,6 +2,7 @@ package org.msf.records.net;
 
 import com.android.volley.Response;
 
+import org.msf.records.model.ChartStructure;
 import org.msf.records.model.ConceptList;
 import org.msf.records.model.CustomSerialization;
 import org.msf.records.model.PatientChart;
@@ -47,6 +48,18 @@ public class OpenMrsChartServer {
                 ConceptList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
+        };
+        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+    }
+
+    public void getChartStructure(
+            String uuid, Response.Listener<ChartStructure> chartListener,
+            Response.ErrorListener errorListener) {
+        GsonRequest<ChartStructure> request = new GsonRequest<ChartStructure>(
+                mConnectionDetails.rootUrl + "/chart/" + uuid + "?v=full",
+                ChartStructure.class, false,
+                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+                chartListener, errorListener) {
         };
         mConnectionDetails.volley.addToRequestQueue(request, TAG);
     }

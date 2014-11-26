@@ -12,6 +12,7 @@ import com.android.volley.VolleyError;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.model.ChartStructure;
 import org.msf.records.model.ConceptList;
 import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
@@ -51,7 +52,20 @@ public class PatientDetailViewChartFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                      Log.e(TAG, "Unexpected error fetching concepts", error);
+                        Log.e(TAG, "Unexpected error fetching concepts", error);
+                    }
+                });
+        server.getChartStructure("ea43f213-66fb-4af6-8a49-70fd6b9ce5d4",
+                new Response.Listener<ChartStructure>() {
+                    @Override
+                    public void onResponse(ChartStructure response) {
+                        Log.i(TAG, Arrays.asList(response.groups).toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Unexpected error fetching concepts", error);
                     }
                 });
         return fragment;
