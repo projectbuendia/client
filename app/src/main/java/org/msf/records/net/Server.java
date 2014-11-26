@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
+import org.msf.records.model.NewUser;
 import org.msf.records.model.Patient;
 import org.msf.records.model.User;
 
@@ -44,6 +45,18 @@ public interface Server {
     public void addPatient(
             Map<String, String> patientArguments,
             Response.Listener<Patient> patientListener,
+            Response.ErrorListener errorListener,
+            String logTag);
+
+    /**
+     * Creates a new user.
+     *
+     * @param user the NewUser to add
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void addUser(
+            NewUser user,
+            Response.Listener<User> userListener,
             Response.ErrorListener errorListener,
             String logTag);
 
