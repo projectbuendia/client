@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -81,7 +82,6 @@ public class PatientListActivity extends BaseActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
             // Create a main screen shown when no patient is selected.
             MainScreenFragment mainScreenFragment = new MainScreenFragment();
@@ -89,9 +89,9 @@ public class PatientListActivity extends BaseActivity
             // Add the fragment to the container.
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.patient_detail_container, mainScreenFragment).commit();
-
-            setupCustomActionBar();
         }
+
+        setupCustomActionBar();
 
         updateAvailableSnackbar = Snackbar.with(this)
                 .text(getString(R.string.snackbar_update_available))
@@ -197,6 +197,21 @@ public class PatientListActivity extends BaseActivity
 
     @Override
     public void onExtendOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        OdkActivityLauncher.fetchAndShowXform(
+                                PatientListActivity.this,
+                                Constants.ADD_PATIENT_UUID,
+                                ODK_ACTIVITY_REQUEST);
+
+                        return true;
+                    }
+                });
+
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
@@ -233,18 +248,6 @@ public class PatientListActivity extends BaseActivity
                 break;
             case FAKE_SCAN:
                 showFakeScanProgress();
-                break;
-        }
-    }
-
-    public void onButtonClicked(View view) {
-        switch (view.getId()) {
-            case R.id.new_patient_button:
-                OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
-                        ODK_ACTIVITY_REQUEST);
-                break;
-            case R.id.view_xform_button:
-                OdkActivityLauncher.showSavedXform(this);
                 break;
         }
     }
