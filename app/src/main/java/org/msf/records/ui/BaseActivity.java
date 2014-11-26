@@ -86,7 +86,7 @@ public abstract class BaseActivity extends FragmentActivity {
             return;
         }
 
-        if (!user.equals(lastActiveUser)) {
+        if (user.compareTo(lastActiveUser) != 0) {
             // TODO(dxchen): Handle a user switch.
         }
         lastActiveUser = user;
