@@ -12,7 +12,7 @@ import auto.parcel.AutoParcel;
  */
 @AutoParcel
 public abstract class User implements Parcelable, Comparable<User> {
-    private static final String GUEST_ACCOUNT_NAME = "Guest";
+    private static final String GUEST_ACCOUNT_NAME = "Guest User";
 
     public static final Comparator<User> COMPARATOR_BY_ID = new Comparator<User>() {
 
@@ -48,10 +48,7 @@ public abstract class User implements Parcelable, Comparable<User> {
     }
 
     public static User fromNewUser(NewUser newUser) {
-        String fullName = new String(newUser.getGivenName());
-        if (newUser.getFamilyName() != null) {
-            fullName += " " + newUser.getFamilyName();
-        }
+        String fullName = newUser.getGivenName() + " " + newUser.getFamilyName();
         return new AutoParcel_User(newUser.getUsername(), fullName);
     }
 
