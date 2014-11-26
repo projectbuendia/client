@@ -20,7 +20,7 @@ import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.model.Location;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
-import org.msf.records.sync.PatientContract;
+import org.msf.records.sync.PatientProviderContract;
 
 import de.greenrobot.event.EventBus;
 
@@ -82,13 +82,13 @@ public class PatientListFragment extends ProgressFragment implements
      * Projection for querying the content provider.
      */
     private static final String[] PROJECTION = new String[] {
-            PatientContract.PatientMeta._ID,
-            PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
-            PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
-            PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
-            PatientContract.PatientMeta.COLUMN_NAME_UUID,
-            PatientContract.PatientMeta.COLUMN_NAME_STATUS,
-            PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+            PatientProviderContract.PatientMeta._ID,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_UUID,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_STATUS,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
     };
 
     // Constants representing column positions from PROJECTION.
@@ -304,11 +304,11 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(),  // Context
-                PatientContract.PatientMeta.CONTENT_URI_PATIENT_ZONES, // URI
+                PatientProviderContract.PatientMeta.CONTENT_URI_PATIENT_ZONES, // URI
                 PROJECTION,                // Projection
                 null,                           // Selection
                 null,                           // Selection args
-                PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
+                PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
     }
 
     @Override

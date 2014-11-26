@@ -19,7 +19,7 @@ public class GenericAccountService extends Service {
     private static final String ACCOUNT_TYPE = "org.msf.records";
     public static final String ACCOUNT_NAME = "sync";
     private static final long SYNC_FREQUENCY = 1 * 60;  // 1 minute (in seconds)
-    private static final String CONTENT_AUTHORITY = PatientContract.CONTENT_AUTHORITY;
+    private static final String CONTENT_AUTHORITY = PatientProviderContract.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
     private Authenticator mAuthenticator;
 
@@ -58,7 +58,7 @@ public class GenericAccountService extends Service {
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
-                PatientContract.CONTENT_AUTHORITY, // Content authority
+                PatientProviderContract.CONTENT_AUTHORITY, // Content authority
                 b);                                      // Extras
     }
 
