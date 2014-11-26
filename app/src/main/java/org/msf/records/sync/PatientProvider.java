@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
-import static org.msf.records.sync.PatientContract.CONTENT_AUTHORITY;
+import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 
 /**
  * Created by Gil on 21/11/14.
@@ -56,9 +56,9 @@ public class PatientProvider extends ContentProvider {
         switch (match) {
             case ROUTE_PATIENTS:
             case ROUTE_ZONES:
-                return PatientContract.PatientMeta.CONTENT_TYPE;
+                return PatientProviderContract.PatientMeta.CONTENT_TYPE;
             case ROUTE_PATIENTS_ID:
-                return PatientContract.PatientMeta.CONTENT_ITEM_TYPE;
+                return PatientProviderContract.PatientMeta.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -80,10 +80,10 @@ public class PatientProvider extends ContentProvider {
             case ROUTE_PATIENTS_ID:
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
-                builder.where(PatientContract.PatientMeta._ID + "=?", id);
+                builder.where(PatientProviderContract.PatientMeta._ID + "=?", id);
             case ROUTE_PATIENTS:
                 // Return all known entries.
-                builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor c = builder.query(db, projection, sortOrder);
                 // Note: Notification URI must be manually set here for loaders to correctly
@@ -92,10 +92,10 @@ public class PatientProvider extends ContentProvider {
                 c.setNotificationUri(ctx.getContentResolver(), uri);
                 return c;
             case ROUTE_ZONES://ContentProviders dont support group by, this is a way around it
-                builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor zonesCursor = builder.query(db, projection,
-                        PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
                 Context ctx1 = getContext();
                 assert ctx1 != null;
                 zonesCursor.setNotificationUri(ctx1.getContentResolver(), uri);
@@ -113,8 +113,8 @@ public class PatientProvider extends ContentProvider {
         Uri result;
         switch (match) {
             case ROUTE_PATIENTS:
-                long id = db.insertOrThrow(PatientContract.PatientMeta.TABLE_NAME, null, values);
-                result = Uri.parse(PatientContract.PatientMeta.CONTENT_URI + "/" + id);
+                long id = db.insertOrThrow(PatientProviderContract.PatientMeta.TABLE_NAME, null, values);
+                result = Uri.parse(PatientProviderContract.PatientMeta.CONTENT_URI + "/" + id);
                 break;
             case ROUTE_PATIENTS_ID:
             case ROUTE_ZONES:
@@ -137,14 +137,14 @@ public class PatientProvider extends ContentProvider {
         int count;
         switch (match) {
             case ROUTE_PATIENTS:
-                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
             case ROUTE_PATIENTS_ID:
                 String id = uri.getLastPathSegment();
-                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
-                        .where(PatientContract.PatientMeta._ID + "=?", id)
+                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
+                        .where(PatientProviderContract.PatientMeta._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
@@ -168,14 +168,14 @@ public class PatientProvider extends ContentProvider {
         int count;
         switch (match) {
             case ROUTE_PATIENTS:
-                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
+                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
             case ROUTE_PATIENTS_ID:
                 String id = uri.getLastPathSegment();
-                count = builder.table(PatientContract.PatientMeta.TABLE_NAME)
-                        .where(PatientContract.PatientMeta._ID + "=?", id)
+                count = builder.table(PatientProviderContract.PatientMeta.TABLE_NAME)
+                        .where(PatientProviderContract.PatientMeta._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
@@ -206,18 +206,18 @@ public class PatientProvider extends ContentProvider {
 
         /** SQL statement to create "patient" table. */
         private static final String SQL_CREATE_ENTRIES =
-                "CREATE TABLE " + PatientContract.PatientMeta.TABLE_NAME + " (" +
-                        PatientContract.PatientMeta._ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
-                        PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
+                "CREATE TABLE " + PatientProviderContract.PatientMeta.TABLE_NAME + " (" +
+                        PatientProviderContract.PatientMeta._ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
+                        PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
 
         /** SQL statement to drop "patient" table. */
         private static final String SQL_DELETE_ENTRIES =
-                "DROP TABLE IF EXISTS " + PatientContract.PatientMeta.TABLE_NAME;
+                "DROP TABLE IF EXISTS " + PatientProviderContract.PatientMeta.TABLE_NAME;
 
 
         public PatientDatabase(Context context) {

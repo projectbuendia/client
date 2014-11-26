@@ -5,12 +5,14 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Created by Gil on 21/11/14.
+ * A collection of static variables used in the ContentProvider interface for Patients.
  */
-public class PatientContract {
+public class PatientProviderContract {
 
-    public PatientContract(){
-
+    /**
+     * Collection of static Strings so should not be instantiated.
+     */
+    private PatientProviderContract(){
     }
 
     /**
@@ -85,6 +87,5 @@ public class PatientContract {
          * Patient zone
          */
         public static final String COLUMN_NAME_LOCATION_ZONE = "location_zone";
-
     }
 }

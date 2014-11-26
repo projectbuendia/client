@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import org.msf.records.R;
 import org.msf.records.model.Status;
-import org.msf.records.sync.PatientContract;
+import org.msf.records.sync.PatientProviderContract;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -29,13 +29,13 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
      * Projection for querying the content provider.
      */
     private static final String[] PROJECTION = new String[] {
-            PatientContract.PatientMeta._ID,
-            PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
-            PatientContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
-            PatientContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
-            PatientContract.PatientMeta.COLUMN_NAME_UUID,
-            PatientContract.PatientMeta.COLUMN_NAME_STATUS,
-            PatientContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+            PatientProviderContract.PatientMeta._ID,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_UUID,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_STATUS,
+            PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
     };
 
     // Constants representing column positions from PROJECTION.
@@ -62,9 +62,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         Log.d(TAG, "Getting child cursor for zone: " + zone);
 
         CursorLoader cursorLoader = new CursorLoader(mContext,
-                PatientContract.PatientMeta.CONTENT_URI,
+                PatientProviderContract.PatientMeta.CONTENT_URI,
                 PROJECTION,
-                PatientContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + "=?",
+                PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE + "=?",
                 new String[] { zone },
                 null);
 
