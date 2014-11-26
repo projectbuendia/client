@@ -18,9 +18,11 @@ import com.google.common.collect.Lists;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
+import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.model.User;
 import org.msf.records.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -76,6 +78,30 @@ public class UserLoginFragment extends Fragment {
         mUserListAdapter.addAll(users);
 
         // TODO(dxchen): Center the damn GridView, because it won't center itself.
+    }
+
+    public synchronized void onUserAdded(UserAddedEvent event) {
+        List<User> users = new ArrayList<User>();
+
+        // Create a list of users from the list of current users with the new user inserted in
+        // the right place.
+        User current;
+        int i;
+        for (i = 0; i < mUserListAdapter.getCount(); i++) {
+            current = mUserListAdapter.getItem(i);
+
+            if (current.compareTo(event.mAddedUser) == 1) {
+                users.add(event.mAddedUser);
+            }
+            users.add(mUserListAdapter.getItem(i));
+        }
+        for (int j = i+1; j < mUserListAdapter.getCount(); j++) {
+            users.add(mUserListAdapter.getItem(j));
+        }
+
+        // Update the UI.
+        mUserListAdapter.clear();
+        mUserListAdapter.addAll(users);
     }
 
     @OnItemClick(R.id.users)

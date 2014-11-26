@@ -62,4 +62,10 @@
     <string name="overview_instructions">Instructions</string>
     <string name="detail_page_view_chart">View Chart</string>
     <string name="title_edit_patient_location">Edit Patient Location</string>
+    <string name="add_user_example_username">jsmith</string>
+    <string name="given_name">Given Name</string>
+    <string name="add_user_example_given_name">Jane</string>
+    <string name="family_name">Family Name</string>
+    <string name="add_user_example_family_name">Smith</string>
+    <string name="title_add_new_user">Add New User</string>
 </resources>
