@@ -7,19 +7,10 @@
     android:divider="?android:attr/dividerVertical"
     android:showDividers="middle"
     android:dividerPadding="12dp"
-    android:weightSum="4"
     android:focusable="true"
     android:focusableInTouchMode="true">
     <SearchView
         android:id="@+id/actionbar_custom_main_search"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
-    <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:gravity="right">
-
-    </RelativeLayout>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>
