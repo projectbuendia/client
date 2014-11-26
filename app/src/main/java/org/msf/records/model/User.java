@@ -1,7 +1,8 @@
 package org.msf.records.model;
 
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
+
+import com.google.common.base.Preconditions;
 
 import java.util.Comparator;
 
@@ -44,6 +45,8 @@ public abstract class User implements Parcelable, Comparable<User> {
     public abstract String getFullName();
 
     public static User create(String id, String fullName) {
+        Preconditions.checkNotNull(id);
+        Preconditions.checkNotNull(fullName);
         return new AutoParcel_User(id, fullName);
     }
 
