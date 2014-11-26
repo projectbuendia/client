@@ -9,7 +9,6 @@ import org.msf.records.App;
 import org.msf.records.model.NewUser;
 import org.msf.records.model.User;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

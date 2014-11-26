@@ -12,16 +12,10 @@ import android.widget.EditText;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.PatientLocationEditedEvent;
-import org.msf.records.events.user.UserAddedEvent;
-import org.msf.records.model.Location2;
 import org.msf.records.model.NewUser;
-import org.msf.records.model.User;
-import org.msf.records.view.InstantAutoCompleteTextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import de.greenrobot.event.EventBus;
 
 /**
  * A {@link android.support.v4.app.DialogFragment} for adding a new user.

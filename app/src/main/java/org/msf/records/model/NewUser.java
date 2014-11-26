@@ -1,6 +1,6 @@
 package org.msf.records.model;
 
-import android.support.annotation.Nullable;
+import com.google.common.base.Preconditions;
 
 import auto.parcel.AutoParcel;
 
@@ -19,6 +19,7 @@ public abstract class NewUser {
 
     public static NewUser create(
             String username, String givenName, String familyName) {
+        Preconditions.checkNotNull(username);
         return new AutoParcel_NewUser(
                 username, givenName, familyName, DEFAULT_PASSWORD);
     }

@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
-import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.model.User;
 import org.msf.records.utils.Constants;
