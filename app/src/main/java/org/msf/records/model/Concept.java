@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * A single medical concept, usually a question on answer in an observation on a patient. A simple
  * Java bean for GSON converting to and from a JSON encoding. Stores localization and type
- * information
+ * information.
  */
 public class Concept {
 
