@@ -82,13 +82,13 @@ public class PatientListFragment extends ProgressFragment implements
      * Projection for querying the content provider.
      */
     private static final String[] PROJECTION = new String[] {
-            PatientProviderContract.PatientMeta._ID,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_LOCATION_ZONE,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_GIVEN_NAME,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_FAMILY_NAME,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_UUID,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_STATUS,
-            PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP
+            PatientProviderContract.PatientColumns._ID,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP
     };
 
     // Constants representing column positions from PROJECTION.
@@ -304,11 +304,11 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(),  // Context
-                PatientProviderContract.PatientMeta.CONTENT_URI_PATIENT_ZONES, // URI
+                PatientProviderContract.CONTENT_URI_PATIENT_ZONES, // URI
                 PROJECTION,                // Projection
                 null,                           // Selection
                 null,                           // Selection args
-                PatientProviderContract.PatientMeta.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
+                PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
     }
 
     @Override
