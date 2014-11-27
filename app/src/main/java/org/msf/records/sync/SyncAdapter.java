@@ -22,12 +22,16 @@ import org.msf.records.App;
 import org.msf.records.model.ChartStructure;
 import org.msf.records.model.ConceptList;
 import org.msf.records.model.Patient;
+import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import static org.msf.records.sync.ChartProviderContract.ChartColumns;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns;
 
 /**
  * Global sync adapter for syncing all client side database caches.
@@ -40,14 +44,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Project used when querying content provider. Returns all known fields.
      */
     private static final String[] PROJECTION = new String[] {
-            PatientProviderContract.PatientColumns._ID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT
+            PatientColumns._ID,
+            PatientColumns.COLUMN_NAME_GIVEN_NAME,
+            PatientColumns.COLUMN_NAME_FAMILY_NAME,
+            PatientColumns.COLUMN_NAME_UUID,
+            PatientColumns.COLUMN_NAME_STATUS,
+            PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
+            PatientColumns.COLUMN_NAME_LOCATION_ZONE,
+            PatientColumns.COLUMN_NAME_LOCATION_TENT
     };
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
@@ -65,6 +69,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * If this key is present with boolean value true then sync the chart structure.
      */
     public static String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
+
+    /**
+     * If this key is present with boolean value true then sync the observations.
+     */
+    public static String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
@@ -109,12 +118,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 specific = true;
                 updateChartStructure(provider, syncResult);
             }
+            if (extras.getBoolean(SYNC_OBSERVATIONS)) {
+                specific = true;
+                updateObservations(provider, syncResult);
+            }
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
                 updatePatientData(syncResult);
                 updateConcepts(provider, syncResult);
                 updateChartStructure(provider, syncResult);
+                updateObservations(provider, syncResult);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error in RPC: " + e.toString());
@@ -211,14 +225,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME, givenName)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_UUID, uuid)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS, status)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, status)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, locationZone)
-                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT, locationTent)
+                            .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, givenName)
+                            .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
+                            .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
+                            .withValue(PatientColumns.COLUMN_NAME_STATUS, status)
+                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, status)
+                            .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
+                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, locationZone)
+                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, locationTent)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
@@ -239,14 +253,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         for (Patient e : patientsMap.values()) {
             Log.i(TAG, "Scheduling insert: entry_id=" + e.id);
             batch.add(ContentProviderOperation.newInsert(PatientProviderContract.CONTENT_URI)
-                    .withValue(PatientProviderContract.PatientColumns._ID, e.id)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME, e.given_name)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_UUID, e.uuid)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS, e.status)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
-                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT, e.assigned_location.tent)
+                    .withValue(PatientColumns._ID, e.id)
+                    .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, e.given_name)
+                    .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
+                    .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
+                    .withValue(PatientColumns.COLUMN_NAME_STATUS, e.status)
+                    .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
+                    .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
+                    .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, e.assigned_location.tent)
                     .build());
             syncResult.stats.numInserts++;
         }
@@ -280,6 +294,58 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ChartStructure conceptList = future.get();
         // When we do a chart update, delete everything first.
         provider.delete(ChartProviderContract.CHART_CONTENT_URI, null, null);
+        syncResult.stats.numDeletes++;
         provider.applyBatch(ChartRpcToDb.chartStructureRpcToDb(conceptList, syncResult));
+    }
+
+    private void updateObservations(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
+
+        // Get call patients from the cache.
+        Uri uri = PatientProviderContract.CONTENT_URI; // Get all entries
+        Cursor c = provider.query(
+                uri, new String[]{PatientColumns.COLUMN_NAME_UUID}, null, null, null);
+        if (c.getCount() < 1) {
+            return;
+        }
+
+        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
+        // Get the charts asynchronously using volley.
+        ArrayList<RequestFuture<PatientChart>> futures = new ArrayList<>();
+        while (c.moveToNext()) {
+            RequestFuture<PatientChart> future = RequestFuture.newFuture();
+            chartServer.getChart(c.getString(c.getColumnIndex(PatientColumns.COLUMN_NAME_UUID)),
+                    future, future);
+            futures.add(future);
+        }
+        for (RequestFuture<PatientChart> future : futures) {
+            // As we are doing multiple request in parallel, deal with exceptions in the loop.
+            try {
+                PatientChart patientChart = future.get();
+                if (patientChart.uuid == null) {
+                    Log.e(TAG, "null patient id in observation response");
+                    continue;
+                }
+                // Delete all existing observations for the patient.
+                provider.delete(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
+                        ChartColumns.PATIENT_UUID + "=?",
+                        new String[]{patientChart.uuid});
+                // Add the new observations
+                provider.applyBatch(ChartRpcToDb.observationsRpcToDb(patientChart, syncResult));
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Error interruption: " + e.toString());
+                syncResult.stats.numIoExceptions++;
+                return;
+            } catch (ExecutionException e){
+                Log.e(TAG, "Error failed to execute: " + e.toString());
+                syncResult.stats.numIoExceptions++;
+                return;
+            } catch (Exception e){
+                Log.e(TAG, "Error reading from network: " + e.toString());
+                syncResult.stats.numIoExceptions++;
+                return;
+            }
+        }
     }
 }

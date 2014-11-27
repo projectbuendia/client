@@ -4,10 +4,13 @@ import android.content.ContentProviderOperation;
 import android.content.SyncResult;
 import android.util.Log;
 
+import org.joda.time.DateTime;
 import org.msf.records.model.ChartGroup;
 import org.msf.records.model.ChartStructure;
 import org.msf.records.model.Concept;
 import org.msf.records.model.ConceptList;
+import org.msf.records.model.Encounter;
+import org.msf.records.model.PatientChart;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -87,6 +90,41 @@ public class ChartRpcToDb {
                         .withValue(ChartColumns.CHART_ROW, chartRow++)
                         .withValue(ChartColumns.GROUP_UUID, groupUuid)
                         .withValue(ChartColumns.CONCEPT_UUID, conceptUuid)
+                        .build());
+                syncResult.stats.numInserts++;
+            }
+        }
+        return operations;
+    }
+
+    /**
+     * Convert a ChartStructure response into appropriate inserts in the chart table.
+     */
+    public static ArrayList<ContentProviderOperation> observationsRpcToDb(
+            PatientChart response, SyncResult syncResult) {
+        final String patientUuid = response.uuid;
+        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+        for (Encounter encounter : response.encounters) {
+            if (encounter.uuid == null) {
+                Log.e(TAG, "Encounter uuid was null for " + patientUuid);
+                continue;
+            }
+            final String encounterUuid = encounter.uuid;
+            DateTime timestamp = encounter.timestamp;
+            if (timestamp == null) {
+                Log.e(TAG, "Encounter timestamp was null for " + encounterUuid);
+                continue;
+            }
+            final int encounterTime = (int) (timestamp.getMillis() / 1000); // seconds since epoch
+            for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
+                final String conceptUuid = (String) entry.getKey();
+                operations.add(ContentProviderOperation
+                        .newInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI)
+                        .withValue(ChartColumns.PATIENT_UUID, patientUuid)
+                        .withValue(ChartColumns.ENCOUNTER_UUID, encounterUuid)
+                        .withValue(ChartColumns.ENCOUNTER_TIME, encounterTime)
+                        .withValue(ChartColumns.CONCEPT_UUID, conceptUuid)
+                        .withValue(ChartColumns.VALUE, entry.getValue().toString())
                         .build());
                 syncResult.stats.numInserts++;
             }
