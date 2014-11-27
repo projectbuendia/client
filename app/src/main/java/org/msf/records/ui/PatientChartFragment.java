@@ -166,7 +166,7 @@ public class PatientChartFragment extends Fragment {
             float temperatureFloat;
             try {
                 temperatureFloat = Float.parseFloat(temperature.localizedValue);
-                temperatureValue = String.format("%.1f", temperatureFloat);
+                temperatureValue = String.format("%.1f°", temperatureFloat);
             } catch (NumberFormatException e) {}
         }
         mTemperature.setValue(temperatureValue);
