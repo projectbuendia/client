@@ -21,7 +21,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 5;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -56,7 +56,6 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CONCEPTS =
             CREATE_TABLE + CONCEPTS_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    ChartColumns.CONCEPT_UUID + TYPE_TEXT + UNIQUE + COMMA_SEP +
                     ChartColumns.CONCEPT_TYPE + TYPE_TEXT +
                     ")";
 
@@ -64,7 +63,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_CONCEPT_NAMES =
             CREATE_TABLE + CONCEPT_NAMES_TABLE_NAME + " (" +
-                    _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     ChartColumns.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartColumns.LOCALE + TYPE_TEXT + COMMA_SEP +
                     ChartColumns.NAME + TYPE_TEXT + COMMA_SEP +
@@ -76,7 +75,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_OBSERVATIONS =
             CREATE_TABLE + OBSERVATIONS_TABLE_NAME + " (" +
-                    _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     ChartColumns.PATIENT_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartColumns.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartColumns.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
@@ -90,7 +89,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_CHARTS =
             CREATE_TABLE + CHARTS_TABLE_NAME + " (" +
-                    _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     ChartColumns.CHART_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartColumns.CHART_ROW + TYPE_INTEGER + COMMA_SEP +
                     ChartColumns.GROUP_UUID + TYPE_TEXT + COMMA_SEP +

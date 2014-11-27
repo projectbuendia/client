@@ -4,13 +4,17 @@ import android.content.ContentProviderOperation;
 import android.content.SyncResult;
 import android.util.Log;
 
+import org.msf.records.model.ChartGroup;
+import org.msf.records.model.ChartStructure;
 import org.msf.records.model.Concept;
 import org.msf.records.model.ConceptList;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import static org.msf.records.sync.ChartProviderContract.CHART_CONTENT_URI;
 import static org.msf.records.sync.ChartProviderContract.CONCEPT_NAMES_CONTENT_URI;
+import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 
 /**
  * A helper class for turning the Java beans that are the result of chart RPC calls into
@@ -30,9 +34,9 @@ public class ChartRpcToDb {
             // This is safe because we have implemented insert on the content provider
             // with replace.
             operations.add(ContentProviderOperation
-                    .newUpdate(ChartProviderContract.CONCEPTS_CONTENT_URI)
-                    .withValue(ChartProviderContract.ChartColumns.CONCEPT_UUID, concept.uuid)
-                    .withValue(ChartProviderContract.ChartColumns.CONCEPT_TYPE, concept.type.name())
+                    .newInsert(ChartProviderContract.CONCEPTS_CONTENT_URI)
+                    .withValue(ChartColumns._ID, concept.uuid)
+                    .withValue(ChartColumns.CONCEPT_TYPE, concept.type.name())
                     .build());
             syncResult.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
@@ -48,9 +52,41 @@ public class ChartRpcToDb {
                 }
                 operations.add(ContentProviderOperation
                         .newInsert(CONCEPT_NAMES_CONTENT_URI)
-                        .withValue(ChartProviderContract.ChartColumns.CONCEPT_UUID, concept.uuid)
-                        .withValue(ChartProviderContract.ChartColumns.LOCALE, locale)
-                        .withValue(ChartProviderContract.ChartColumns.NAME, name)
+                        .withValue(ChartColumns.CONCEPT_UUID, concept.uuid)
+                        .withValue(ChartColumns.LOCALE, locale)
+                        .withValue(ChartColumns.NAME, name)
+                        .build());
+                syncResult.stats.numInserts++;
+            }
+        }
+        return operations;
+    }
+
+    /**
+     * Convert a ChartStructure response into appropriate inserts in the chart table.
+     */
+    public static ArrayList<ContentProviderOperation> chartStructureRpcToDb(
+            ChartStructure response, SyncResult syncResult) {
+        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+        String chartUuid = response.uuid;
+        if (chartUuid == null) {
+            Log.e(TAG, "null chart uuid when fetching chart structure");
+        }
+        int chartRow = 0;
+        String groupUuid;
+        for (ChartGroup group : response.groups) {
+            groupUuid = group.uuid;
+            if (groupUuid == null) {
+                Log.e(TAG, "null group uuid for chart " + chartUuid);
+                continue;
+            }
+            for (String conceptUuid : group.concepts) {
+                operations.add(ContentProviderOperation
+                        .newInsert(CHART_CONTENT_URI)
+                        .withValue(ChartColumns.CHART_UUID, chartUuid)
+                        .withValue(ChartColumns.CHART_ROW, chartRow++)
+                        .withValue(ChartColumns.GROUP_UUID, groupUuid)
+                        .withValue(ChartColumns.CONCEPT_UUID, conceptUuid)
                         .build());
                 syncResult.stats.numInserts++;
             }
