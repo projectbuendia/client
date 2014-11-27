@@ -19,7 +19,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.App;
+import org.msf.records.model.ConceptList;
 import org.msf.records.model.Patient;
+import org.msf.records.net.OpenMrsChartServer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +48,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
             PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT
     };
+
+    /**
+     * If this key is present with boolean value true then sync patients.
+     */
+    public static String SYNC_PATIENTS = "SYNC_PATIENTS";
+
+    /**
+     * If this key is present with boolean value true then sync concepts.
+     */
+    public static String SYNC_CONCEPTS = "SYNC_CONCEPTS";
+
+
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
@@ -77,6 +91,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Beginning network synchronization");
         try {
+            if (extras.getBoolean(SYNC_PATIENTS)) {
+                // default behaviour
+                updatePatientData(syncResult);
+            }
+            if (extras.getBoolean(SYNC_CONCEPTS)) {
+                updateConcepts(provider, syncResult);
+            }
             updatePatientData(syncResult);
         } catch (RemoteException e) {
             Log.e(TAG, "Error updating database: " + e.toString());
@@ -223,4 +244,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         //TODO(giljulio) update the server as well as the client
     }
 
+    private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
+        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
+        RequestFuture<ConceptList> future = RequestFuture.newFuture();
+        chartServer.getConcepts(future, future); // errors handled by caller
+        ConceptList conceptList = future.get();
+        provider.applyBatch(ChartRpcToDb.conceptRpcToDb(conceptList, syncResult));
+    }
 }

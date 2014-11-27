@@ -37,17 +37,17 @@ public class PatientProviderContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     /**
-     * Path component for "patient"-type resources. Visible for re-use in PatientProvider.
+     * Path component for "patient"-type resources. Visible for re-use in MsfRecordsProvider.
      */
     static final String PATH_PATIENTS = "patients";
 
     /**
-     * Path component for "zones"-type resources.  Visible for re-use in PatientProvider.
+     * Path component for "zones"-type resources.  Visible for re-use in MsfRecordsProvider.
      */
     static final String PATH_PATIENTS_ZONES = "zones";
 
     /**
-     * Path component for "tents"-type resources. Visible for re-use in PatientProvider.
+     * Path component for "tents"-type resources. Visible for re-use in MsfRecordsProvider.
      */
     static final String PATH_PATIENTS_TENTS = "tents";
 

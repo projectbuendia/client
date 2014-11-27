@@ -90,7 +90,7 @@
 
 
         <provider
-            android:name=".sync.PatientProvider"
+            android:name=".sync.MsfRecordsProvider"
             android:authorities="org.msf.records"
             android:exported="false" />
 
@@ -105,7 +105,6 @@
             <meta-data android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-
         <service android:name=".sync.GenericAccountService">
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>

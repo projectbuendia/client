@@ -1,11 +1,11 @@
 package org.msf.records.sync;
 
-import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
@@ -14,11 +14,10 @@ import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_TENTS;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_ZONES;
 
 /**
- * A ContentProvider for accessing active patients and their attributes.
+ * ContentProvider code for handling patient related URIs.
  */
-public class PatientProvider extends ContentProvider {
+public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
 
-    PatientDatabase mDatabaseHelper;
 
     /**
      * URI ID for route: /patients
@@ -53,9 +52,13 @@ public class PatientProvider extends ContentProvider {
     }
 
     @Override
-    public boolean onCreate() {
-        mDatabaseHelper = new PatientDatabase(getContext());
-        return true;
+    public String[] getPaths() {
+        return new String[] {
+                PATH_PATIENTS,
+                PATH_PATIENTS + "/*",
+                PATH_PATIENTS_ZONES,
+                PATH_PATIENTS_TENTS,
+        };
     }
 
     @Override
@@ -73,18 +76,13 @@ public class PatientProvider extends ContentProvider {
         }
     }
 
-    /**
-     * Performs database query
-     * @param uri supporting /patients where it returns all the patients
-     *        or /patient/{ID} where selects a particular patient
-     * @return results
-     */
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
+    public Cursor query(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                        String[] projection, String selection, String[] selectionArgs,
+                        String sortOrder) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
         int uriMatch = sUriMatcher.match(uri);
-        Context ctx = getContext();
         switch (uriMatch) {
             case ROUTE_PATIENTS_ID:
                 // Return a single entry, by ID.
@@ -97,26 +95,21 @@ public class PatientProvider extends ContentProvider {
                 Cursor c = builder.query(db, projection, sortOrder);
                 // Note: Notification URI must be manually set here for loaders to correctly
                 // register ContentObservers.
-                assert ctx != null;
-                c.setNotificationUri(ctx.getContentResolver(), uri);
+                c.setNotificationUri(contentResolver, uri);
                 return c;
             case ROUTE_TENTS:  //ContentProviders don't support group by, this is a way around it
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor tentsCursor = builder.query(db, projection,
                         PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT, "", sortOrder, "");
-                Context ctx1 = getContext();
-                assert ctx1 != null;
-                tentsCursor.setNotificationUri(ctx1.getContentResolver(), uri);
+                tentsCursor.setNotificationUri(contentResolver, uri);
                 return tentsCursor;
             case ROUTE_ZONES:  //ContentProviders don't support group by, this is a way around it
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor zonesCursor = builder.query(db, projection,
                         PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
-                Context ctx2 = getContext();
-                assert ctx2 != null;
-                zonesCursor.setNotificationUri(ctx2.getContentResolver(), uri);
+                zonesCursor.setNotificationUri(contentResolver, uri);
                 return zonesCursor;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -124,8 +117,9 @@ public class PatientProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+    public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                      ContentValues values) {
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
         assert db != null;
         final int match = sUriMatcher.match(uri);
         Uri result;
@@ -142,16 +136,15 @@ public class PatientProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         // Send broadcast to registered ContentObservers, to refresh UI.
-        Context ctx = getContext();
-        assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        contentResolver.notifyChange(uri, null, false);
         return result;
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                      String selection, String[] selectionArgs) {
         SelectionBuilder builder = new SelectionBuilder();
-        final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int count;
         switch (match) {
@@ -174,16 +167,15 @@ public class PatientProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         // Send broadcast to registered ContentObservers, to refresh UI.
-        Context ctx = getContext();
-        assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                      ContentValues values, String selection, String[] selectionArgs) {
         SelectionBuilder builder = new SelectionBuilder();
-        final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int count;
         switch (match) {
@@ -205,9 +197,7 @@ public class PatientProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        Context ctx = getContext();
-        assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        contentResolver.notifyChange(uri, null, false);
         return count;
     }
 }

@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import static android.provider.BaseColumns._ID;
+import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
@@ -26,6 +27,8 @@ public class PatientDatabase extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE = "CREATE TABLE ";
     private static final String PRIMARY_KEY = " PRIMARY KEY";
+    private static final String UNIQUE = " UNIQUE";
+    private static final String UNIQUE_INDEX = "UNIQUE(";
     private static final String TYPE_TEXT = " TEXT";
     private static final String TYPE_INTEGER = " INTEGER";
     private static final String NOTNULL = "  NOT NULL";
@@ -53,8 +56,8 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CONCEPTS =
             CREATE_TABLE + CONCEPTS_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_TYPE + TYPE_TEXT +
+                    ChartColumns.CONCEPT_UUID + TYPE_TEXT + UNIQUE + COMMA_SEP +
+                    ChartColumns.CONCEPT_TYPE + TYPE_TEXT +
                     ")";
 
     static final String CONCEPT_NAMES_TABLE_NAME = "concept_names";
@@ -62,9 +65,11 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CONCEPT_NAMES =
             CREATE_TABLE + CONCEPT_NAMES_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.LOCALE + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.NAME + TYPE_TEXT +
+                    ChartColumns.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
+                    ChartColumns.LOCALE + TYPE_TEXT + COMMA_SEP +
+                    ChartColumns.NAME + TYPE_TEXT + COMMA_SEP +
+                    UNIQUE_INDEX + ChartColumns.CONCEPT_UUID + COMMA_SEP + ChartColumns.LOCALE +
+                    ")" +
                     ")";
 
     static final String OBSERVATIONS_TABLE_NAME = "observations";
@@ -72,11 +77,13 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_OBSERVATIONS =
             CREATE_TABLE + OBSERVATIONS_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.PATIENT_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.VALUE + TYPE_INTEGER +
+                    ChartColumns.PATIENT_UUID + TYPE_TEXT + COMMA_SEP +
+                    ChartColumns.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP +
+                    ChartColumns.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
+                    ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
+                    ChartColumns.VALUE + TYPE_INTEGER + COMMA_SEP +
+                    UNIQUE_INDEX + ChartColumns.PATIENT_UUID + COMMA_SEP +
+                    ChartColumns.ENCOUNTER_UUID + COMMA_SEP + ChartColumns.CONCEPT_UUID + ")" +
                     ")";
 
     static final String CHARTS_TABLE_NAME = "charts";
@@ -84,10 +91,12 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CHARTS =
             CREATE_TABLE + CHARTS_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CHART_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CHART_ROW + TYPE_INTEGER + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.GROUP_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_INTEGER +
+                    ChartColumns.CHART_UUID + TYPE_TEXT + COMMA_SEP +
+                    ChartColumns.CHART_ROW + TYPE_INTEGER + COMMA_SEP +
+                    ChartColumns.GROUP_UUID + TYPE_TEXT + COMMA_SEP +
+                    ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
+                    UNIQUE_INDEX + ChartColumns.CHART_UUID + COMMA_SEP + ChartColumns.CONCEPT_UUID +
+                    ")" +
                     ")";
 
     private static String makeDropTable(String tableName) {
