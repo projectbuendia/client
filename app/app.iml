@@ -100,6 +100,7 @@
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="auto-parcel-0.2" level="project" />
+    <orderEntry type="library" exported="" name="autofittextview-0.2.0" level="project" />
     <orderEntry type="library" exported="" name="apache-mime4j-dom-0.7.2" level="project" />
     <orderEntry type="library" exported="" name="espresso-1.1-bundled" level="project" />
     <orderEntry type="library" exported="" name="opencsv-2.3" level="project" />
