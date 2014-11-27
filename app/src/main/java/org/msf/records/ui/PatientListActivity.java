@@ -203,10 +203,10 @@ public class PatientListActivity extends BaseActivity
      */
     @Override
     public void onItemSelected(String uuid, String givenName, String familyName, String id) {
-        Intent detailIntent = new Intent(this, PatientDetailActivity.class);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_UUID_KEY, uuid);
+        Intent detailIntent = new Intent(this, PatientChartActivity.class);
+        detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
+        detailIntent.putExtra(PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
+        detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
         detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
         startActivity(detailIntent);
     }
