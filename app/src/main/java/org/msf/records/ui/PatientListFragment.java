@@ -70,7 +70,6 @@ public class PatientListFragment extends ProgressFragment implements
 
     private boolean isRefreshing;
 
-
     String mFilterLocation;
 
     String mFilterQueryTerm;
@@ -83,7 +82,7 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private static final String[] PROJECTION = new String[] {
             PatientProviderContract.PatientColumns._ID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT,
             PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
             PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
             PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
@@ -93,7 +92,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
-    public static final int COLUMN_LOCATION_ZONE = 1;
+    public static final int COLUMN_LOCATION_TENT = 1;
     public static final int COLUMN_GIVEN_NAME = 2;
     public static final int COLUMN_FAMILY_NAME = 3;
     public static final int COLUMN_UUID = 4;
@@ -304,7 +303,7 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(),  // Context
-                PatientProviderContract.CONTENT_URI_PATIENT_ZONES, // URI
+                PatientProviderContract.CONTENT_URI_PATIENT_TENTS, // URI
                 PROJECTION,                // Projection
                 null,                           // Selection
                 null,                           // Selection args

@@ -3,15 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="5dp"
-    android:background="#666666">
+    android:padding="20dp">
 
     <TextView
         android:id="@+id/patient_list_tent_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="40dp"
-        android:text="Unknown Zone"
-        android:textStyle="bold"
-        android:textColor="@color/white"/>
+        android:text="Unknown Tent"
+        android:textStyle="bold"/>
 </LinearLayout>

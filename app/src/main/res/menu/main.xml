@@ -4,4 +4,10 @@
         android:showAsAction="ifRoom"
         android:id="@+id/action_add"
         android:title="Add Patient"/>
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_action_search"
+        android:title="@string/action_search"
+        android:showAsAction="ifRoom" />
 </menu>

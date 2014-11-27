@@ -8,6 +8,7 @@ import static android.provider.BaseColumns._ID;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_UUID;
@@ -44,6 +45,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
+                    COLUMN_NAME_LOCATION_TENT + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
 
     static final String CONCEPTS_TABLE_NAME = "concepts";
@@ -52,7 +54,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
             CREATE_TABLE + CONCEPTS_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_TYPE + TYPE_TEXT + COMMA_SEP +
+                    ChartProviderContract.ChartColumns.CONCEPT_TYPE + TYPE_TEXT +
                     ")";
 
     static final String CONCEPT_NAMES_TABLE_NAME = "concept_names";
@@ -62,7 +64,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartProviderContract.ChartColumns.LOCALE + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.NAME + TYPE_TEXT + COMMA_SEP +
+                    ChartProviderContract.ChartColumns.NAME + TYPE_TEXT +
                     ")";
 
     static final String OBSERVATIONS_TABLE_NAME = "observations";
@@ -74,7 +76,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ChartProviderContract.ChartColumns.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartProviderContract.ChartColumns.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
                     ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.VALUE + TYPE_INTEGER + COMMA_SEP +
+                    ChartProviderContract.ChartColumns.VALUE + TYPE_INTEGER +
                     ")";
 
     static final String CHARTS_TABLE_NAME = "charts";
@@ -85,7 +87,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ChartProviderContract.ChartColumns.CHART_UUID + TYPE_TEXT + COMMA_SEP +
                     ChartProviderContract.ChartColumns.CHART_ROW + TYPE_INTEGER + COMMA_SEP +
                     ChartProviderContract.ChartColumns.GROUP_UUID + TYPE_TEXT + COMMA_SEP +
-                    ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
+                    ChartProviderContract.ChartColumns.CONCEPT_UUID + TYPE_INTEGER +
                     ")";
 
     private static String makeDropTable(String tableName) {

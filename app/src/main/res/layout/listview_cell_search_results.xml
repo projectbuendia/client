@@ -7,9 +7,28 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="20dp"
+        android:orientation="horizontal"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
         android:layout_weight="1">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/listview_cell_search_results_id"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:width="120dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="@android:color/darker_gray"/>
 
         <TextView
             android:id="@+id/listview_cell_search_results_name"
@@ -20,14 +39,6 @@
             android:ellipsize="end"
             android:scrollHorizontally="true"
             android:singleLine="true"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/listview_cell_search_results_id"
-            android:layout_marginTop="6dp"
-            android:textColor="@android:color/darker_gray" />
 
     </LinearLayout>
 
@@ -53,14 +64,5 @@
             android:textAlignment="gravity"/>
 
         </LinearLayout>
-
-
-
-    <ImageView
-        android:layout_weight="0"
-        android:id="@+id/listview_cell_search_results_color_indicator"
-        android:layout_width="10dp"
-        android:layout_height="match_parent"
-        android:background="@android:color/holo_red_dark"/>
 
 </LinearLayout>

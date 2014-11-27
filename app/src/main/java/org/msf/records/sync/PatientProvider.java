@@ -10,6 +10,7 @@ import android.net.Uri;
 
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS;
+import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_TENTS;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_ZONES;
 
 /**
@@ -35,6 +36,11 @@ public class PatientProvider extends ContentProvider {
     public static final int ROUTE_ZONES = 3;
 
     /**
+     * URI ID for route: /tents
+     */
+    public static final int ROUTE_TENTS = 4;
+
+    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -43,6 +49,7 @@ public class PatientProvider extends ContentProvider {
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, ROUTE_PATIENTS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", ROUTE_PATIENTS_ID);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS_ZONES, ROUTE_ZONES);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS_TENTS, ROUTE_TENTS);
     }
 
     @Override
@@ -56,6 +63,7 @@ public class PatientProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case ROUTE_PATIENTS:
+            case ROUTE_TENTS:
             case ROUTE_ZONES:
                 return PatientProviderContract.CONTENT_TYPE;
             case ROUTE_PATIENTS_ID:
@@ -92,14 +100,23 @@ public class PatientProvider extends ContentProvider {
                 assert ctx != null;
                 c.setNotificationUri(ctx.getContentResolver(), uri);
                 return c;
-            case ROUTE_ZONES://ContentProviders dont support group by, this is a way around it
+            case ROUTE_TENTS:  //ContentProviders don't support group by, this is a way around it
+                builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
+                        .where(selection, selectionArgs);
+                Cursor tentsCursor = builder.query(db, projection,
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT, "", sortOrder, "");
+                Context ctx1 = getContext();
+                assert ctx1 != null;
+                tentsCursor.setNotificationUri(ctx1.getContentResolver(), uri);
+                return tentsCursor;
+            case ROUTE_ZONES:  //ContentProviders don't support group by, this is a way around it
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
                 Cursor zonesCursor = builder.query(db, projection,
                         PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
-                Context ctx1 = getContext();
-                assert ctx1 != null;
-                zonesCursor.setNotificationUri(ctx1.getContentResolver(), uri);
+                Context ctx2 = getContext();
+                assert ctx2 != null;
+                zonesCursor.setNotificationUri(ctx2.getContentResolver(), uri);
                 return zonesCursor;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -118,6 +135,7 @@ public class PatientProvider extends ContentProvider {
                 result = Uri.parse(PatientProviderContract.CONTENT_URI + "/" + id);
                 break;
             case ROUTE_PATIENTS_ID:
+            case ROUTE_TENTS:
             case ROUTE_ZONES:
                 throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
             default:
@@ -149,6 +167,7 @@ public class PatientProvider extends ContentProvider {
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
+            case ROUTE_TENTS:
             case ROUTE_ZONES:
                 throw new UnsupportedOperationException("Delete not supported on URI: " + uri);
             default:
@@ -180,6 +199,7 @@ public class PatientProvider extends ContentProvider {
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
+            case ROUTE_TENTS:
             case ROUTE_ZONES:
                 throw new UnsupportedOperationException("Update not supported on URI: " + uri);
             default:

@@ -30,7 +30,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
      */
     private static final String[] PROJECTION = new String[] {
             PatientProviderContract.PatientColumns._ID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT,
             PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
             PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
             PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
@@ -40,7 +40,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
-    public static final int COLUMN_LOCATION_ZONE = 1;
+    public static final int COLUMN_LOCATION_TENT = 1;
     public static final int COLUMN_GIVEN_NAME = 2;
     public static final int COLUMN_FAMILY_NAME = 3;
     public static final int COLUMN_UUID = 4;
@@ -58,14 +58,14 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     protected Cursor getChildrenCursor(Cursor groupCursor) {
         Cursor itemCursor = getGroup(groupCursor.getPosition());
 
-        String zone = itemCursor.getString(PatientListFragment.COLUMN_LOCATION_ZONE);
-        Log.d(TAG, "Getting child cursor for zone: " + zone);
+        String tent = itemCursor.getString(PatientListFragment.COLUMN_LOCATION_TENT);
+        Log.d(TAG, "Getting child cursor for tent: " + tent);
 
         CursorLoader cursorLoader = new CursorLoader(mContext,
                 PatientProviderContract.CONTENT_URI,
                 PROJECTION,
-                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + "=?",
-                new String[] { zone },
+                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT + "=?",
+                new String[] { tent },
                 null);
 
         Cursor childCursor = null;
@@ -83,13 +83,23 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
-        return LayoutInflater.from(context).inflate(R.layout.listview_zone_header, null);
+        return LayoutInflater.from(context).inflate(R.layout.listview_tent_header, null);
     }
 
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
-        TextView item = (TextView) view.findViewById(R.id.patient_list_zone_tv);
-        item.setText(cursor.getString(PatientListFragment.COLUMN_LOCATION_ZONE));
+        int patientCount = getChildrenCursor(cursor).getCount();
+
+        TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
+        if (patientCount == 1) {
+            item.setText(
+                cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT) + " " +
+                context.getResources().getString(R.string.one_patient));
+        } else {
+            item.setText(
+                cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT) + " " +
+                context.getResources().getString(R.string.n_patients, patientCount));
+        }
     }
 
     @Override
@@ -148,17 +158,30 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         }*/
 
         if (status == null) {
-            holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+            holder.mPatientId.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+            holder.mPatientId.setTextColor(context.getResources().getColor(android.R.color.black));
         }
 
         if (status != null && Status.getStatus(status) != null) {
-            holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(Status.getStatus(status).colorId));
+            holder.mPatientId.setBackgroundColor(context.getResources().getColor(Status.getStatus(status).colorId));
+            holder.mPatientId.setTextColor(context.getResources().getColor(R.color.white));
+        }
+
+        // Add a bottom border and extra padding to the last item in each group.
+        if (isLastChild) {
+            convertView.setBackgroundResource(R.drawable.bottom_border_1dp);
+            convertView.setPadding(
+                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                    convertView.getPaddingRight(), 40);
+        } else {
+            convertView.setBackgroundResource(0);
+            convertView.setPadding(
+                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                    convertView.getPaddingRight(), 20);
         }
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listview_cell_search_results_color_indicator)
-        ImageView mPatientListStatusColorIndicator;
         @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
         @InjectView(R.id.listview_cell_search_results_id) TextView mPatientId;
         @InjectView(R.id.listview_cell_search_results_gender) ImageView mPatientGender;
