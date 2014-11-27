@@ -16,14 +16,9 @@
         android:padding="8dp"
         android:gravity="center"
         android:singleLine="true"
-        android:textSize="120sp"
+        android:textSize="96sp"
         app:minTextSize="24sp"
         tools:text="39.5" />
-
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0dp"-->
-        <!--android:layout_weight="1" />-->
 
     <TextView
         android:id="@+id/view_vital_name"

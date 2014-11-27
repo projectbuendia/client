@@ -64,6 +64,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.PatientChartActivity"
+            android:label="@string/title_patient_chart"
+            android:parentActivityName=".ui.PatientListActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.msf.records.ui.PatientListActivity" />
+        </activity>
+        <activity
             android:name=".ui.PatientDetailActivity"
             android:label="@string/title_patient_detail"
             android:parentActivityName=".ui.PatientListActivity"

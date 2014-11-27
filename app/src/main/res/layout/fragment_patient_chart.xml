@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="org.msf.records.ui.PatientDetailViewChartFragment">
+    tools:context="org.msf.records.ui.PatientChartFragment">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -18,12 +18,12 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="120dp">
+                android:layout_height="200dp">
 
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_heart"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:background="#880e4f"
                     app:vitalName="Heart"
@@ -32,7 +32,7 @@
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_blood_pressure"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:background="#01579b"
                     android:layout_span="2"
@@ -43,12 +43,12 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="120dp">
+                android:layout_height="200dp">
 
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_temperature"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:background="#006064"
                     app:vitalName="Temperature"
@@ -57,7 +57,7 @@
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_respirations"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:background="#ff6f00"
                     app:vitalName="Respirations"
@@ -66,7 +66,7 @@
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_pcr"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_margin="4dp"
                     android:background="#33691e"
                     app:vitalName="PCR"
@@ -74,18 +74,8 @@
 
             </TableRow>
 
-
         </TableLayout>
 
-
-        <!--<ImageView-->
-            <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-            <!--android:adjustViewBounds="true"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:src="@drawable/view_chart_demo_image"-->
-            <!--android:id="@+id/view_chart_demo_image"-->
-            <!--android:padding="16dp"/>-->
     </ScrollView>
 
 </FrameLayout>
