@@ -1,21 +1,86 @@
-<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context="org.msf.records.ui.PatientDetailViewChartFragment">
- -->
-<!--     <ScrollView
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"> -->
-        <ImageView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:adjustViewBounds="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/view_chart_demo_image"
-            android:id="@+id/view_chart_demo_image"
-            android:padding="16dp"/>
-    <!-- </ScrollView> -->
+        android:padding="16dp">
 
-<!-- </FrameLayout>
- -->
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+
+                <org.msf.records.view.VitalView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="#880e4f"
+                    app:vitalName="Heart"
+                    app:vitalValue="80"/>
+
+                <org.msf.records.view.VitalView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="#01579b"
+                    android:layout_span="2"
+                    app:vitalName="Blood Pressure"
+                    app:vitalValue="90 / 40"/>
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+
+                <org.msf.records.view.VitalView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="#006064"
+                    app:vitalName="Temperature"
+                    app:vitalValue="36.5°"/>
+
+                <org.msf.records.view.VitalView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="#ff6f00"
+                    app:vitalName="Respirations"
+                    app:vitalValue="8"/>
+
+                <org.msf.records.view.VitalView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="#33691e"
+                    app:vitalName="PCR"
+                    app:vitalValue="40"/>
+
+            </TableRow>
+
+
+        </TableLayout>
+
+
+        <!--<ImageView-->
+            <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+            <!--android:adjustViewBounds="true"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@drawable/view_chart_demo_image"-->
+            <!--android:id="@+id/view_chart_demo_image"-->
+            <!--android:padding="16dp"/>-->
+    </ScrollView>
+
+</FrameLayout>
