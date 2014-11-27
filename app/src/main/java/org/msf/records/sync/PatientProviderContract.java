@@ -47,6 +47,11 @@ public class PatientProviderContract {
     static final String PATH_PATIENTS_ZONES = "zones";
 
     /**
+     * Path component for "tents"-type resources. Visible for re-use in PatientProvider.
+     */
+    static final String PATH_PATIENTS_TENTS = "tents";
+
+    /**
      * Fully qualified URI for "patient" resources.
      */
     public static final Uri CONTENT_URI =
@@ -54,6 +59,9 @@ public class PatientProviderContract {
 
     public static final Uri CONTENT_URI_PATIENT_ZONES =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_ZONES).build();
+
+    public static final Uri CONTENT_URI_PATIENT_TENTS =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_TENTS).build();
 
     /**
      * Columns supported by "patients" records.
@@ -84,5 +92,9 @@ public class PatientProviderContract {
          * Patient zone
          */
         public static final String COLUMN_NAME_LOCATION_ZONE = "location_zone";
+        /**
+         * Patient tent
+         */
+        public static final String COLUMN_NAME_LOCATION_TENT = "location_tent";
     }
 }

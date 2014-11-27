@@ -8,6 +8,7 @@ import static android.provider.BaseColumns._ID;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_UUID;
@@ -44,6 +45,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
+                    COLUMN_NAME_LOCATION_TENT + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
 
     static final String CONCEPTS_TABLE_NAME = "concepts";
