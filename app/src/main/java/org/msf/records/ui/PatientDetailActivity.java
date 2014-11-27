@@ -135,14 +135,6 @@ public class PatientDetailActivity extends BaseActivity {
                 return true;
             }
         });
-
-        menu.findItem(R.id.action_edit_details).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                // Intentionally blank for demo.
-                return true;
-            }
-        });
     }
 
     @Override
