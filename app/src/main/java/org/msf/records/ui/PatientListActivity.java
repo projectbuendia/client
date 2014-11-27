@@ -2,20 +2,14 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.SearchView;
-import android.widget.SpinnerAdapter;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
@@ -25,6 +19,7 @@ import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.net.Constants;
+import org.msf.records.sync.ChartProviderContract;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
 
@@ -110,6 +105,20 @@ public class PatientListActivity extends BaseActivity
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
 
         // TODO: If exposing deep links into your app, handle intents here.
+        String chartUuid = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+        String patientUuid = "1802f573-6437-11e4-badf-42010af0dc15";
+        String locale = "en";
+        Cursor cursor = getContentResolver().query(ChartProviderContract.makeLocalizedChartUri(
+                chartUuid, patientUuid, locale), null, null, null, null);
+        while (cursor.moveToNext()) {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i<cursor.getColumnCount(); i++) {
+                result.append(cursor.getString(i));
+                result.append(",");
+            }
+            Log.i(TAG, result.toString());
+        }
+        cursor.close();
     }
 
     @Override
