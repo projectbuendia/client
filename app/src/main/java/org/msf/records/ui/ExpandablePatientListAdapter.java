@@ -166,6 +166,19 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder.mPatientId.setBackgroundColor(context.getResources().getColor(Status.getStatus(status).colorId));
             holder.mPatientId.setTextColor(context.getResources().getColor(R.color.white));
         }
+
+        // Add a bottom border and extra padding to the last item in each group.
+        if (isLastChild) {
+            convertView.setBackgroundResource(R.drawable.bottom_border_1dp);
+            convertView.setPadding(
+                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                    convertView.getPaddingRight(), 40);
+        } else {
+            convertView.setBackgroundResource(0);
+            convertView.setPadding(
+                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                    convertView.getPaddingRight(), 20);
+        }
     }
 
     static class ViewHolder {
