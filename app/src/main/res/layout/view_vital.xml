@@ -20,11 +20,6 @@
         app:minTextSize="24sp"
         tools:text="39.5" />
 
-    <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0dp"-->
-        <!--android:layout_weight="1" />-->
-
     <TextView
         android:id="@+id/view_vital_name"
         android:layout_width="match_parent"
