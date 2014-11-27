@@ -168,8 +168,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 !patient.admission_timestamp.equals(admissionTimestamp)) ||
                         (patient.assigned_location.zone != null &&
                             !patient.assigned_location.zone.equals(locationZone)) ||
-                        (patient.assigned_location != null &&
-                                !patient.assigned_location.tent.equals(locationTent))) {
+                        (patient.assigned_location.tent != null &&
+                            !patient.assigned_location.tent.equals(locationTent))) {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
@@ -216,7 +216,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.applyBatch(PatientProviderContract.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI, null, false);
         mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI_PATIENT_ZONES, null, false);
-
+        mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI_PATIENT_TENTS, null, false);
 
 
 
