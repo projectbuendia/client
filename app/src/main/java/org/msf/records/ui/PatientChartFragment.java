@@ -16,15 +16,19 @@ import org.msf.records.model.ChartStructure;
 import org.msf.records.model.ConceptList;
 import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.view.VitalView;
 
 import java.util.Arrays;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 /**
- * Displays a chart for a given patient. For now, this is actually
- * just a demo image.
+ * A {@link Fragment} that displays a patient's vitals and charts.
  */
 public class PatientChartFragment extends Fragment {
-    private static final String TAG = "PatientDetailViewChartFragment";
+
+    private static final String TAG = PatientChartFragment.class.getName();
 
     public static PatientChartFragment newInstance(String patientUuid) {
         PatientChartFragment fragment = new PatientChartFragment();
@@ -71,14 +75,28 @@ public class PatientChartFragment extends Fragment {
         return fragment;
     }
 
-    public PatientChartFragment() {
-        // Required empty public constructor
+    @InjectView(R.id.vital_heart) VitalView mHeart;
+    @InjectView(R.id.vital_blood_pressure) VitalView mBloodPressure;
+    @InjectView(R.id.vital_temperature) VitalView mTemperature;
+    @InjectView(R.id.vital_respirations) VitalView mRespirations;
+    @InjectView(R.id.vital_pcr) VitalView mPcr;
+
+    public PatientChartFragment() {}
+
+    @Override
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_patient_chart, container, false);
+        ButterKnife.inject(this, view);
+
+        return view;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_patient_chart, container, false);
+    public void onResume() {
+        super.onResume();
+
+        // TODO(dxchen,nfortescue): This is where the code to hook up the views to data should go.
     }
 }

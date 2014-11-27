@@ -16,7 +16,7 @@
         android:padding="8dp"
         android:gravity="center"
         android:singleLine="true"
-        android:textSize="120sp"
+        android:textSize="96sp"
         app:minTextSize="24sp"
         tools:text="39.5" />
 

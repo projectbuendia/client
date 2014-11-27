@@ -20,7 +20,7 @@ import me.grantland.widget.AutofitTextView;
 public class VitalView extends LinearLayout {
 
     @InjectView(R.id.view_vital_name) TextView mNameView;
-    @InjectView(R.id.view_vital_value) TextView mValueView;
+    @InjectView(R.id.view_vital_value) AutofitTextView mValueView;
 
     private int mTextColor;
     private String mName;
@@ -44,14 +44,15 @@ public class VitalView extends LinearLayout {
 
         Resources resources = getResources();
         int defaultTextColor = resources.getColor(R.color.view_vital_text_color);
-        float defaultName = resources.getDimension(R.dimen.view_vital_name_text_size);
+        float defaultNameTextSize = resources.getDimension(R.dimen.view_vital_name_text_size);
 
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.VitalView, defStyleAttr, 0 /*defStyleRes*/);
         try {
             mTextColor = a.getColor(R.styleable.VitalView_textColor, defaultTextColor);
             mName = a.getString(R.styleable.VitalView_vitalName);
-            mNameTextSize = a.getDimension(R.styleable.VitalView_vitalNameTextSize, defaultName);
+            mNameTextSize =
+                    a.getDimension(R.styleable.VitalView_vitalNameTextSize, defaultNameTextSize);
             mValue = a.getString(R.styleable.VitalView_vitalValue);
             mValueFormat = a.getString(R.styleable.VitalView_vitalValueFormat);
         } finally {
@@ -66,6 +67,4 @@ public class VitalView extends LinearLayout {
 
         mNameView.setText(mName);
     }
-
-
 }
