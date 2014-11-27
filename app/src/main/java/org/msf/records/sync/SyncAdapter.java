@@ -43,7 +43,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
             PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS,
             PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE
+            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT
     };
 
     // Constants representing column positions from PROJECTION.
@@ -54,6 +55,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int COLUMN_STATUS = 4;
     public static final int COLUMN_ADMISSION_TIMESTAMP = 5;
     public static final int COLUMN_LOCATION_ZONE = 6;
+    public static final int COLUMN_LOCATION_TENT = 7;
 
 
     /**
@@ -134,7 +136,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, status, locationZone;
+        String givenName, familyName, uuid, status, locationZone, locationTent;
         long admissionTimestamp;
 
         //iterate through the list of patients
@@ -148,6 +150,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             status = c.getString(COLUMN_STATUS);
             admissionTimestamp = c.getLong(COLUMN_ADMISSION_TIMESTAMP);
             locationZone = c.getString(COLUMN_LOCATION_ZONE);
+            locationTent = c.getString(COLUMN_LOCATION_TENT);
 
             Patient patient = patientsMap.get(id);
             if (patient != null) {
@@ -164,7 +167,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         (patient.admission_timestamp != null &&
                                 !patient.admission_timestamp.equals(admissionTimestamp)) ||
                         (patient.assigned_location.zone != null &&
-                            !patient.assigned_location.zone.equals(locationZone))) {
+                            !patient.assigned_location.zone.equals(locationZone)) ||
+                        (patient.assigned_location != null &&
+                                !patient.assigned_location.tent.equals(locationTent))) {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
@@ -175,6 +180,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, status)
                             .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
                             .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, locationZone)
+                            .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT, locationTent)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
@@ -202,6 +208,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS, e.status)
                     .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
                     .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
+                    .withValue(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT, e.assigned_location.tent)
                     .build());
             syncResult.stats.numInserts++;
         }
