@@ -88,8 +88,18 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+        int patientCount = getChildrenCursor(cursor).getCount();
+
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
-        item.setText(cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT));
+        if (patientCount == 1) {
+            item.setText(
+                cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT) + " " +
+                context.getResources().getString(R.string.one_patient));
+        } else {
+            item.setText(
+                cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT) + " " +
+                context.getResources().getString(R.string.n_patients, patientCount));
+        }
     }
 
     @Override
