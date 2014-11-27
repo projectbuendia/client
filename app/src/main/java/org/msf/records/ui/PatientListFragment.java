@@ -169,13 +169,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
-        Loader loader = getLoaderManager().getLoader(LOADER_LIST_ID);
-
-        if ( loader != null && loader.isReset() ) {
-            getLoaderManager().restartLoader(LOADER_LIST_ID, null, this);
-        } else {
-            getLoaderManager().initLoader(LOADER_LIST_ID, null, this);
-        }
+        getLoaderManager().initLoader(LOADER_LIST_ID, null, this);
     }
 
     @Override
