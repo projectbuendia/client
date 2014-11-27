@@ -41,6 +41,12 @@ public class ChartProviderContract {
             ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.chart";
 
     /**
+     * MIME type for lists of localized observations.
+     */
+    public static final String LOCALIZED_OBSERVATION_CONTENT_TYPE =
+            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.observation.localized";
+
+    /**
      * Base URI. (content://org.msf.records)
      */
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" +
@@ -71,6 +77,29 @@ public class ChartProviderContract {
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_CONCEPTS).build();
     public static final Uri CHART_CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHARTS).build();
+
+    private static final String LOCALIZED_CHART_PREFIX = "localizedchart";
+    /**
+     * A path segment for a special URI that will be used most often in the user interface.
+     * Get data for a given patient in a given language for a given chart.
+     *
+     * content://org.msf.records/localizedchart/{chart_uuid}/{patient_uuid}/{locale}
+     */
+    static final String PATH_LOCALIZED_CHART = LOCALIZED_CHART_PREFIX + "/*/*/*";
+
+    /**
+     * Make a special URI that will be used most often in the user interface.
+     * Get data for a given patient in a given language for a given chart.
+     *
+     * content://org.msf.records/localizedchart/{chart_uuid}/{patient_uuid}/{locale}
+     */
+    public static Uri makeLocalizedChartUri(String chartUuid, String patientUuid, String locale) {
+        return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHART_PREFIX)
+                .appendPath(chartUuid)
+                .appendPath(patientUuid)
+                .appendPath(locale)
+                .build();
+    }
 
     /**
      * Columns supported by "patients" records.
