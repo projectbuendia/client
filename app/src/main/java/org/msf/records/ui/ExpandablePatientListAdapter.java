@@ -159,10 +159,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
         if (status == null) {
             holder.mPatientId.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+            holder.mPatientId.setTextColor(context.getResources().getColor(android.R.color.black));
         }
 
         if (status != null && Status.getStatus(status) != null) {
             holder.mPatientId.setBackgroundColor(context.getResources().getColor(Status.getStatus(status).colorId));
+            holder.mPatientId.setTextColor(context.getResources().getColor(R.color.white));
         }
     }
 
