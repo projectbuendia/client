@@ -18,9 +18,22 @@ public class LocalizedChartHelper {
      * A simple bean class representing an observation. All names and values have been localized.
      */
     public static class LocalizedObservation {
+        /**
+         * The time of the encounter (hence the observation) in milliseconds since epoch.
+         */
         public final long encounterTimeMillis;
+        /**
+         * The localized name to the group/section the observation should be displayed in.
+         */
         public final String groupName;
+        /**
+         * The localized name of the concept that was observed.
+         */
         public final String conceptName;
+        /**
+         * The value that was observed, converted to a String, and localized in the case of
+         * Coded (concept) observations.
+         */
         public final String localizedValue;
 
         public LocalizedObservation(long encounterTimeMillis, String groupName, String conceptName,
