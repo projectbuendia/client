@@ -18,7 +18,7 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="200dp">
+                android:layout_height="120dp">
 
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_heart"
@@ -43,7 +43,7 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="200dp">
+                android:layout_height="120dp">
 
                 <org.msf.records.view.VitalView
                     android:id="@+id/vital_temperature"
