@@ -156,7 +156,7 @@ public class ChartProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        long id = db.insertOrThrow(tableName, null, values);
+        long id = db.replaceOrThrow(tableName, null, values);
         result = Uri.parse(preIdUri + "/" + id);
         // Send broadcast to registered ContentObservers, to refresh UI.
         Context ctx = getContext();
