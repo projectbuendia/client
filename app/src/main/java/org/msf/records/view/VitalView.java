@@ -67,4 +67,10 @@ public class VitalView extends LinearLayout {
 
         mNameView.setText(mName);
     }
+
+    public VitalView setValue(CharSequence value) {
+        mValueView.setText(value);
+
+        return this;
+    }
 }
