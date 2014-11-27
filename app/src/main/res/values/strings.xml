@@ -68,4 +68,7 @@
     <string name="family_name">Family Name</string>
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add New User</string>
+    <string name="one_patient">(1 patient)</string>
+    <string name="n_patients">(%d patients)</string>
+    <string name="action_search">Search</string>
 </resources>

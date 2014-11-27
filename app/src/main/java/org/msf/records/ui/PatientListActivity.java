@@ -6,13 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.SearchView;
+import android.widget.SpinnerAdapter;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
@@ -47,7 +50,7 @@ public class PatientListActivity extends BaseActivity
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
-    private SearchView mSearchView;
+//    private SearchView mSearchView;
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
@@ -162,23 +165,43 @@ public class PatientListActivity extends BaseActivity
     }
 
     private void setupCustomActionBar(){
+        // TODO(akalachman): Replace with real zones.
+        final String[] zones = new String[] {
+                "All Patients", "Triage", "Suspect", "Probable", "Confirmed"
+        };
+        ArrayAdapter adapter = new ArrayAdapter<String>(
+                this, R.layout.patient_list_spinner_dropdown_item, zones);
+        adapter.setDropDownViewResource(R.layout.patient_list_spinner_expanded_dropdown_item);
+
+        ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int position, long id) {
+                // TODO(akalachman): Filter by the selected zone.
+                Log.d("NavigationItemSelected", zones[position]); // Debug
+                return true;
+            }
+        };
+
         final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
         final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions(
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionBar.setListNavigationCallbacks(adapter, callback);
+        actionBar.setDisplayShowTitleEnabled(false);
+        /*actionBar.setDisplayOptions(
                 ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
                         | ActionBar.DISPLAY_SHOW_TITLE);
         final View customActionBarView = inflater.inflate(
-                R.layout.actionbar_custom_main, null);
+                R.layout.actionbar_custom_main, null);*/
 
 //        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
 //        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
 //        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
-        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
-        mSearchView.setIconifiedByDefault(false);
-        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
+//        mSearchView.setIconifiedByDefault(false);
+//        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
+//            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     /**
@@ -212,7 +235,17 @@ public class PatientListActivity extends BaseActivity
                     }
                 });
 
-        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        menu.findItem(R.id.action_search).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        // TODO(akalachman): Open a search activity or change state of this one.
+                        return true;
+                    }
+                });
+
+/*      InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -231,7 +264,7 @@ public class PatientListActivity extends BaseActivity
               mSearchListener.setQuerySubmitted(newText);
             return true;
           }
-        });
+        });*/
     }
 
     private enum ScanAction {
