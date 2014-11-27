@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.util.Log;
 
 import static org.msf.records.sync.ChartProviderContract.PATH_CHARTS;
 import static org.msf.records.sync.ChartProviderContract.PATH_CONCEPTS;
@@ -143,7 +142,6 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     @Override
     public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
                       ContentValues values) {
-        Log.i(TAG, "Inserting " + uri + ", " + values);
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         assert db != null;
         final int match = sUriMatcher.match(uri);

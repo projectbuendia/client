@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.App;
+import org.msf.records.model.ChartStructure;
 import org.msf.records.model.ConceptList;
 import org.msf.records.model.Patient;
 import org.msf.records.net.OpenMrsChartServer;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Created by Gil on 21/11/14.
+ * Global sync adapter for syncing all client side database caches.
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -48,6 +49,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE,
             PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT
     };
+    public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
     /**
      * If this key is present with boolean value true then sync patients.
@@ -59,7 +61,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     public static String SYNC_CONCEPTS = "SYNC_CONCEPTS";
 
-
+    /**
+     * If this key is present with boolean value true then sync the chart structure.
+     */
+    public static String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
 
     // Constants representing column positions from PROJECTION.
     public static final int COLUMN_ID = 0;
@@ -70,7 +75,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int COLUMN_ADMISSION_TIMESTAMP = 5;
     public static final int COLUMN_LOCATION_ZONE = 6;
     public static final int COLUMN_LOCATION_TENT = 7;
-
 
     /**
      * Content resolver, for performing database operations.
@@ -91,17 +95,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Beginning network synchronization");
         try {
+            boolean specific = false;
             if (extras.getBoolean(SYNC_PATIENTS)) {
+                specific = true;
                 // default behaviour
                 updatePatientData(syncResult);
             }
             if (extras.getBoolean(SYNC_CONCEPTS)) {
+                specific = true;
                 updateConcepts(provider, syncResult);
             }
-            updatePatientData(syncResult);
+            if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
+                specific = true;
+                updateChartStructure(provider, syncResult);
+            }
+            if (!specific) {
+                // If nothing is specified explicitly (such as from the android system menu),
+                // do everything.
+                updatePatientData(syncResult);
+                updateConcepts(provider, syncResult);
+                updateChartStructure(provider, syncResult);
+            }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error updating database: " + e.toString());
-            syncResult.databaseError = true;
+            Log.e(TAG, "Error in RPC: " + e.toString());
+            syncResult.stats.numIoExceptions++;
             return;
         } catch (OperationApplicationException e) {
             Log.e(TAG, "Error updating database: " + e.toString());
@@ -252,5 +269,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         chartServer.getConcepts(future, future); // errors handled by caller
         ConceptList conceptList = future.get();
         provider.applyBatch(ChartRpcToDb.conceptRpcToDb(conceptList, syncResult));
+    }
+
+    private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
+        OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
+        RequestFuture<ChartStructure> future = RequestFuture.newFuture();
+        chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
+        ChartStructure conceptList = future.get();
+        // When we do a chart update, delete everything first.
+        provider.delete(ChartProviderContract.CHART_CONTENT_URI, null, null);
+        provider.applyBatch(ChartRpcToDb.chartStructureRpcToDb(conceptList, syncResult));
     }
 }
