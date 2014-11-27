@@ -178,7 +178,7 @@ public class PatientChartFragment extends Fragment {
             int pulseInt;
             try {
                 pulseInt = Integer.parseInt(pulse.localizedValue);
-                pulseValue = String.format("%1", pulseInt);
+                pulseValue = String.format("%d", pulseInt);
             } catch (NumberFormatException e) {}
         }
         mHeart.setValue(pulseValue);
@@ -190,10 +190,10 @@ public class PatientChartFragment extends Fragment {
             int respirationsInt;
             try {
                 respirationsInt = Integer.parseInt(respirations.localizedValue);
-                respirationsValue = String.format("%1", respirationsInt);
+                respirationsValue = String.format("%d", respirationsInt);
             } catch (NumberFormatException e) {}
         }
-        mHeart.setValue(respirationsValue);
+        mRespirations.setValue(respirationsValue);
 
         LocalizedChartHelper.LocalizedObservation systolic =
                 conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
@@ -202,7 +202,7 @@ public class PatientChartFragment extends Fragment {
             int systolicInt;
             try {
                 systolicInt = Integer.parseInt(systolic.localizedValue);
-                systolicValue = String.format("%1", systolicInt);
+                systolicValue = String.format("%d", systolicInt);
             } catch (NumberFormatException e) {}
         }
 
@@ -213,10 +213,10 @@ public class PatientChartFragment extends Fragment {
             int diastolicInt;
             try {
                 diastolicInt = Integer.parseInt(systolic.localizedValue);
-                diastolicValue = String.format("%1", diastolicInt);
+                diastolicValue = String.format("%d", diastolicInt);
             } catch (NumberFormatException e) {}
         }
 
-        mBloodPressure.setValue(String.format("%1/%2", systolicValue, diastolicValue));
+        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
     }
 }
