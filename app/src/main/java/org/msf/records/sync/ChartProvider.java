@@ -149,8 +149,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
         String query = "SELECT obs.encounter_time," +
-                "group_names." + ChartColumns.NAME +
-                ",names." + ChartColumns.NAME +
+                "group_names." + ChartColumns.NAME + " AS group_name" +
+                ",names." + ChartColumns.NAME + " AS concept_name" +
                 // Localized value for concept values
                 ",coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
                 "AS localized_value" +
@@ -186,9 +186,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 " ORDER BY obs." + ChartColumns.ENCOUNTER_TIME + ", chart." + ChartColumns.CHART_ROW
                 ;
 
-        Cursor cursor = db.rawQuery(query, new String[]{chartUuid, patientUuid, locale});
-
-        return cursor;
+        return db.rawQuery(query, new String[]{chartUuid, patientUuid, locale});
     }
 
     @Override
