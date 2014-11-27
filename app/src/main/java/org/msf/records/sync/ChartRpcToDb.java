@@ -1,6 +1,7 @@
 package org.msf.records.sync;
 
 import android.content.ContentProviderOperation;
+import android.content.SyncResult;
 import android.util.Log;
 
 import org.msf.records.model.Concept;
@@ -22,7 +23,8 @@ public class ChartRpcToDb {
     /**
      * Convert a concept response into appropriate inserts in the concept and concept_name tables.
      */
-    public static ArrayList<ContentProviderOperation> conceptRpcToDb(ConceptList response) {
+    public static ArrayList<ContentProviderOperation> conceptRpcToDb(ConceptList response,
+                                                                     SyncResult syncResult) {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();
         for (Concept concept : response.results) {
             // This is safe because we have implemented insert on the content provider
@@ -32,6 +34,7 @@ public class ChartRpcToDb {
                     .withValue(ChartProviderContract.ChartColumns.CONCEPT_UUID, concept.uuid)
                     .withValue(ChartProviderContract.ChartColumns.CONCEPT_TYPE, concept.type.name())
                     .build());
+            syncResult.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
                 String locale = entry.getKey();
                 if (locale == null) {
@@ -49,6 +52,7 @@ public class ChartRpcToDb {
                         .withValue(ChartProviderContract.ChartColumns.LOCALE, locale)
                         .withValue(ChartProviderContract.ChartColumns.NAME, name)
                         .build());
+                syncResult.stats.numInserts++;
             }
         }
         return operations;

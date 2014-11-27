@@ -1,12 +1,13 @@
 package org.msf.records.sync;
 
-import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.util.Log;
 
 import static org.msf.records.sync.ChartProviderContract.PATH_CHARTS;
 import static org.msf.records.sync.ChartProviderContract.PATH_CONCEPTS;
@@ -17,9 +18,9 @@ import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 /**
  * ContentProvider for the cache database for chart observations, concepts and layout.
  */
-public class ChartProvider extends ContentProvider {
+public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 
-    private PatientDatabase mDatabaseHelper;
+    private static final String TAG = "ChartProvider";
 
     /**
      * URI ID for route: /observations
@@ -67,27 +68,38 @@ public class ChartProvider extends ContentProvider {
 
     static {
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_OBSERVATIONS, OBSERVATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_OBSERVATIONS + "/*", OBSERVATION_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_OBSERVATIONS), OBSERVATION_ITEMS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPTS, CONCEPTS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPTS + "/*", CONCEPT_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPTS), CONCEPT_ITEMS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPT_NAMES, CONCEPT_NAMES);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPT_NAMES + "/*", CONCEPT_NAME_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPT_NAMES), CONCEPT_NAME_ITEMS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHARTS, CHART_STRUCTURE);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHARTS + "/*", CHART_STRUCTURE_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CHARTS), CHART_STRUCTURE_ITEMS);
+    }
+
+    private static final String[] PATHS = new String[]{
+            PATH_OBSERVATIONS, subDirs(PATH_OBSERVATIONS),
+            PATH_CONCEPTS, subDirs(PATH_CONCEPTS),
+            PATH_CONCEPT_NAMES, subDirs(PATH_CONCEPT_NAMES),
+            PATH_CHARTS, subDirs(PATH_CHARTS),
+    };
+
+    @Override
+    public String[] getPaths() {
+        return PATHS;
+    }
+
+    private static String subDirs(String base) {
+        return base + "/*";
     }
 
     @Override
-    public boolean onCreate() {
-        mDatabaseHelper = new PatientDatabase(getContext());
-        return true;
-    }
-
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
+    public Cursor query(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                        String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
         int uriMatch = sUriMatcher.match(uri);
-        Context ctx = getContext();
         Cursor c;
         switch (uriMatch) {
             case OBSERVATIONS:
@@ -107,7 +119,7 @@ public class ChartProvider extends ContentProvider {
         }
         builder.where(selection, selectionArgs);
         c = builder.query(db, projection, sortOrder);
-        c.setNotificationUri(ctx.getContentResolver(), uri);
+        c.setNotificationUri(contentResolver, uri);
         return c;
     }
 
@@ -129,8 +141,10 @@ public class ChartProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+    public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                      ContentValues values) {
+        Log.i(TAG, "Inserting " + uri + ", " + values);
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
         assert db != null;
         final int match = sUriMatcher.match(uri);
         Uri result;
@@ -159,16 +173,15 @@ public class ChartProvider extends ContentProvider {
         long id = db.replaceOrThrow(tableName, null, values);
         result = Uri.parse(preIdUri + "/" + id);
         // Send broadcast to registered ContentObservers, to refresh UI.
-        Context ctx = getContext();
-        assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        contentResolver.notifyChange(uri, null, false);
         return result;
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                      String selection, String[] selectionArgs) {
         SelectionBuilder builder = new SelectionBuilder();
-        final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
@@ -191,16 +204,15 @@ public class ChartProvider extends ContentProvider {
                 .where(selection, selectionArgs)
                 .delete(db);
         // Send broadcast to registered ContentObservers, to refresh UI.
-        Context ctx = getContext();
-        assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                      ContentValues values, String selection, String[] selectionArgs) {
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
-        final SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
@@ -222,9 +234,7 @@ public class ChartProvider extends ContentProvider {
         int count = builder.table(tableName)
                 .where(selection, selectionArgs)
                 .update(db, values);
-        Context ctx = getContext();
-        assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        contentResolver.notifyChange(uri, null, false);
         return count;
     }
 }

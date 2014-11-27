@@ -56,6 +56,8 @@ public class GenericAccountService extends Service {
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
+        b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
                 PatientProviderContract.CONTENT_AUTHORITY, // Content authority
@@ -82,8 +84,10 @@ public class GenericAccountService extends Service {
             ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
             // Recommend a schedule for automatic synchronization. The system may modify this based
             // on other scheduled syncs and network utilization.
+            Bundle extras = new Bundle();
+            extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
             ContentResolver.addPeriodicSync(
-                    account, CONTENT_AUTHORITY, new Bundle(),SYNC_FREQUENCY);
+                    account, CONTENT_AUTHORITY, extras,SYNC_FREQUENCY);
             newAccount = true;
         }
 
