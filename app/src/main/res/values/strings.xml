@@ -70,4 +70,5 @@
     <string name="title_add_new_user">Add New User</string>
     <string name="one_patient">(1 patient)</string>
     <string name="n_patients">(%d patients)</string>
+    <string name="action_search">Search</string>
 </resources>
