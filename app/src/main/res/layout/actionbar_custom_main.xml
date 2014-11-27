@@ -9,8 +9,8 @@
     android:dividerPadding="12dp"
     android:focusable="true"
     android:focusableInTouchMode="true">
-    <SearchView
+    <!-- <SearchView
         android:id="@+id/actionbar_custom_main_search"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"/> -->
 </LinearLayout>
