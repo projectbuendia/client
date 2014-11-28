@@ -27,6 +27,10 @@ public class LocalizedChartHelper {
          */
         public final String groupName;
         /**
+         * The UUID of the concept, unique and guaranteed to be stable, so suitable as a map key.
+         */
+        public final String conceptUuid;
+        /**
          * The localized name of the concept that was observed.
          */
         public final String conceptName;
@@ -36,10 +40,12 @@ public class LocalizedChartHelper {
          */
         public final String localizedValue;
 
-        public LocalizedObservation(long encounterTimeMillis, String groupName, String conceptName,
+        public LocalizedObservation(long encounterTimeMillis, String groupName, String conceptUuid,
+                                    String conceptName,
                                     String localizedValue) {
             this.encounterTimeMillis = encounterTimeMillis;
             this.groupName = groupName;
+            this.conceptUuid = conceptUuid;
             this.conceptName = conceptName;
             this.localizedValue = localizedValue;
         }
@@ -69,6 +75,7 @@ public class LocalizedChartHelper {
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
+                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
