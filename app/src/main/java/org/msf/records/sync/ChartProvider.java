@@ -149,10 +149,10 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
         String query = "SELECT obs.encounter_time," +
-                "group_names." + ChartColumns.NAME + " AS group_name" +
-                ",names." + ChartColumns.NAME + " AS concept_name" +
+                "group_names." + ChartColumns.NAME + " AS group_name," +
+                "obs.concept_uuid,names." + ChartColumns.NAME + " AS concept_name," +
                 // Localized value for concept values
-                ",coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
+                "coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
                 "AS localized_value" +
 
                 " FROM " +
