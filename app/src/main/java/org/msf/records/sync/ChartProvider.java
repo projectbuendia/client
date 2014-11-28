@@ -15,6 +15,7 @@ import static org.msf.records.sync.ChartProviderContract.PATH_CHARTS;
 import static org.msf.records.sync.ChartProviderContract.PATH_CONCEPTS;
 import static org.msf.records.sync.ChartProviderContract.PATH_CONCEPT_NAMES;
 import static org.msf.records.sync.ChartProviderContract.PATH_LOCALIZED_CHART;
+import static org.msf.records.sync.ChartProviderContract.PATH_MOST_RECENT_CHART;
 import static org.msf.records.sync.ChartProviderContract.PATH_OBSERVATIONS;
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 
@@ -70,6 +71,11 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     public static final int LOCALIZED_CHART = 12;
 
     /**
+     * URI ID for route: /localizedchart/...
+     */
+    public static final int MOST_RECENT_CHART = 13;
+
+    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -84,6 +90,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHARTS, CHART_STRUCTURE);
         sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CHARTS), CHART_STRUCTURE_ITEMS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCALIZED_CHART, LOCALIZED_CHART);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOST_RECENT_CHART, MOST_RECENT_CHART);
     }
 
     private static final String[] PATHS = new String[]{
@@ -91,7 +98,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
             PATH_CONCEPTS, subDirs(PATH_CONCEPTS),
             PATH_CONCEPT_NAMES, subDirs(PATH_CONCEPT_NAMES),
             PATH_CHARTS, subDirs(PATH_CHARTS),
-            PATH_LOCALIZED_CHART, /* query only, subdris included */
+            PATH_LOCALIZED_CHART, /* query only, subdirs included */
+            PATH_MOST_RECENT_CHART, /* query only, subdirs included */
     };
 
     @Override
@@ -126,6 +134,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case LOCALIZED_CHART:
                 return queryLocalizedChart(uri, db);
+            case MOST_RECENT_CHART:
+                return queryMostRecentChart(uri, db);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -181,12 +191,68 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 
                 " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 1st selection arg
                 "obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 2nd selection arg
-                "names." + ChartColumns.LOCALE + "=?" + // 3rd selection arg
+                "names." + ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
+                "group_names." + ChartColumns.LOCALE + "=? AND " + // 4th selection arg
+                "value_names." + ChartColumns.LOCALE + "=?" + // 5th selection arg
 
                 " ORDER BY obs." + ChartColumns.ENCOUNTER_TIME + ", chart." + ChartColumns.CHART_ROW
                 ;
 
-        return db.rawQuery(query, new String[]{chartUuid, patientUuid, locale});
+        return db.rawQuery(query, new String[]{chartUuid, patientUuid, locale, locale, locale});
+    }
+
+    private Cursor queryMostRecentChart(Uri uri, SQLiteDatabase db) {
+        // Decode the uri, expected:
+        // content://org.msf.records/mostrecent/{patient_uuid}/{locale}
+        List<String> pathSegments = uri.getPathSegments();
+        if (pathSegments.size() != 3) {
+            throw new UnsupportedOperationException("Unknown URI " + uri);
+        }
+        String locale = pathSegments.get(pathSegments.size() - 1);
+        String patientUuid = pathSegments.get(pathSegments.size() - 2);
+
+        // This scary SQL statement joins the observations with appropriate concept names to give
+        // localized output in the correct order specified by a chart.
+        String query = "SELECT obs.encounter_time," +
+                "obs.concept_uuid,names." + ChartColumns.NAME + " AS concept_name," +
+                // Localized value for concept values
+                "coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
+                "AS localized_value" +
+
+                " FROM " +
+                PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs " +
+
+                " INNER JOIN " +
+
+                "(SELECT " + ChartColumns.CONCEPT_UUID +
+                ", MAX(" + ChartColumns.ENCOUNTER_TIME + ") AS maxtime " +
+                "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME +
+                " WHERE " + ChartColumns.PATIENT_UUID + "=? " + // 1st selection arg
+                "GROUP BY concept_uuid) maxs " +
+
+                "ON obs." + ChartColumns.ENCOUNTER_TIME + " = maxs.maxtime AND " +
+                "obs." + ChartColumns.CONCEPT_UUID + "=maxs." + ChartColumns.CONCEPT_UUID +
+
+                " INNER JOIN " +
+                PatientDatabase.CONCEPT_NAMES_TABLE_NAME +" names " +
+                "ON obs." + ChartColumns.CONCEPT_UUID + "=" +
+                "names." + ChartColumns.CONCEPT_UUID +
+
+                // Some of the results are CODED so value is a concept UUID
+                // Some are numeric so the value is fine.
+                // To cope we will do a left join on the value and the name
+                " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names " +
+                "ON obs." + ChartColumns.VALUE + "=" +
+                "value_names." + ChartColumns.CONCEPT_UUID +
+
+                " WHERE obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 2nd selection arg
+                "names." + ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
+                "value_names." + ChartColumns.LOCALE + "=?" + // 4th selection arg
+
+                " ORDER BY obs." + ChartColumns.CONCEPT_UUID
+                ;
+
+        return db.rawQuery(query, new String[]{patientUuid, patientUuid, locale, locale});
     }
 
     @Override
@@ -202,6 +268,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
             case CHART_STRUCTURE:
                 return ChartProviderContract.CHART_CONTENT_TYPE;
             case LOCALIZED_CHART:
+                return ChartProviderContract.LOCALIZED_OBSERVATION_CONTENT_TYPE;
+            case MOST_RECENT_CHART:
                 return ChartProviderContract.LOCALIZED_OBSERVATION_CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -236,6 +304,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
+            case MOST_RECENT_CHART:
+                throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -268,6 +338,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
+            case MOST_RECENT_CHART:
+                throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -301,6 +373,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
+            case MOST_RECENT_CHART:
+                throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

@@ -88,4 +88,45 @@ public class LocalizedChartHelper {
             }
         }
     }
+
+    /**
+     * Get the most recent observations for each concept for a given patient from the local cache,
+     * localized to English. Ordering will be by concept uuid, and there are not groups or other
+     * chart based configurations.
+     */
+    public static ArrayList<LocalizedObservation> getMostRecentObservations(
+            ContentResolver contentResolver, String patientUuid) {
+        return getMostRecentObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
+    }
+
+    /**
+     * Get the most recent observations for each concept for a given patient from the local cache,
+     * Ordering will be by concept uuid, and there are not groups or other chart based configurations.
+     * @param locale the locale to return the results in, to match the server String
+     */
+    public static ArrayList<LocalizedObservation> getMostRecentObservations(
+            ContentResolver contentResolver, String patientUuid, String locale) {
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(ChartProviderContract.makeMostRecentChartUri(
+                    patientUuid, locale), null, null, null, null);
+
+            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                LocalizedObservation obs = new LocalizedObservation(
+                        cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
+                        "", /* no group */
+                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
+                        cursor.getString(cursor.getColumnIndex("concept_name")),
+                        cursor.getString(cursor.getColumnIndex("localized_value"))
+                );
+                result.add(obs);
+            }
+            return result;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 }
