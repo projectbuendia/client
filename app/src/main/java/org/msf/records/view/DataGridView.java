@@ -181,8 +181,8 @@ public class DataGridView extends RelativeLayout {
         }
 
         // Add the data cells.
-        LayoutParams params2 =
-                new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+//        LayoutParams params2 =
+//                new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
 //        params2.setMargins(2, 2, 0, 0);
 
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
