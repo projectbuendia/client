@@ -6,10 +6,10 @@
     android:layout_height="wrap_content"
     tools:context="org.msf.records.ui.PatientChartFragment">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:padding="16dp">-->
 
         <TableLayout
             android:layout_width="match_parent"
@@ -76,6 +76,10 @@
 
         </TableLayout>
 
-    </ScrollView>
+    <!--</ScrollView>-->
+
+    <org.msf.records.view.DataGridView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </FrameLayout>
