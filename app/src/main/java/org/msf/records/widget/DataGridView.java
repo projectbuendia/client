@@ -271,6 +271,12 @@ public class DataGridView extends RelativeLayout {
         cornerParams.width = maxRowHeaderWidth;
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        mDataHorizontalScrollView.fullScroll(View.FOCUS_RIGHT);
+    }
+
     private TableRow createColumnHeadersView() {
         TableRow columnHeadersTableRow = new TableRow(mContext);
 

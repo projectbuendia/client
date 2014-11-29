@@ -21,9 +21,9 @@ import org.msf.records.model.ConceptList;
 import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.view.VitalView;
 import org.msf.records.widget.DataGridAdapter;
 import org.msf.records.widget.DataGridView;
-import org.msf.records.view.VitalView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -92,6 +92,7 @@ public class PatientChartFragment extends Fragment {
     }
 
     private String mPatientUuid;
+    private LayoutInflater mLayoutInflater;
 
     @InjectView(R.id.vital_heart) VitalView mHeart;
     @InjectView(R.id.vital_blood_pressure) VitalView mBloodPressure;
@@ -118,6 +119,8 @@ public class PatientChartFragment extends Fragment {
 
             return;
         }
+
+        mLayoutInflater = LayoutInflater.from(getActivity());
     }
 
     @Override
@@ -127,50 +130,6 @@ public class PatientChartFragment extends Fragment {
         ViewGroup view =
                 (ViewGroup) inflater.inflate(R.layout.fragment_patient_chart, container, false);
         ButterKnife.inject(this, view);
-
-        ViewGroup.LayoutParams params =
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        DataGridView grid = new DataGridView.Builder()
-                .setDataGridAdapter(new DataGridAdapter() {
-
-                    @Override
-                    public int getColumnCount() {
-                        return 30;
-                    }
-
-                    @Override
-                    public int getRowCount() {
-                        return 30;
-                    }
-
-                    @Override
-                    public View getRowHeader(int row, View convertView, ViewGroup parent) {
-                        TextView textView = new TextView(getActivity());
-                        textView.setText("Row Header " + row);
-
-                        return textView;
-                    }
-
-                    @Override
-                    public View getColumnHeader(int column, View convertView, ViewGroup parent) {
-                        TextView textView = new TextView(getActivity());
-                        textView.setText("Column Header " + column);
-
-                        return textView;
-                    }
-
-                    @Override
-                    public View getCell(int row, int column, View convertView, ViewGroup parent) {
-                        TextView textView = new TextView(getActivity());
-                        textView.setText("Cell " + row + ", " + column);
-
-                        return textView;
-                    }
-                })
-                .build(getActivity());
-        grid.setLayoutParams(params);
-
-        view.addView(grid);
 
         return view;
     }
@@ -266,5 +225,60 @@ public class PatientChartFragment extends Fragment {
         }
 
         mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
+
+        ViewGroup.LayoutParams params =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        DataGridView grid = new DataGridView.Builder()
+                .setDataGridAdapter(new DataGridAdapter() {
+
+                    @Override
+                    public int getColumnCount() {
+                        return 15;
+                    }
+
+                    @Override
+                    public int getRowCount() {
+                        return 30;
+                    }
+
+                    @Override
+                    public View getRowHeader(int row, View convertView, ViewGroup parent) {
+                        TextView textView = new TextView(getActivity());
+                        textView.setText("Row Header " + row);
+
+                        return textView;
+                    }
+
+                    @Override
+                    public View getColumnHeader(int column, View convertView, ViewGroup parent) {
+                        View view = mLayoutInflater.inflate(
+                                R.layout.data_grid_column_header_chart, null /*root*/);
+                        TextView textView =
+                                (TextView) view.findViewById(R.id.data_grid_column_header_text);
+                        if (column % 2 == 0) {
+                            textView.setText("AM");
+                        } else {
+                            textView.setText("PM");
+                        }
+
+                        return view;
+                    }
+
+                    @Override
+                    public View getCell(int row, int column, View convertView, ViewGroup parent) {
+                        View view = mLayoutInflater.inflate(
+                                R.layout.data_grid_cell_chart, null /*root*/);
+                        if ((row + column) % 3 == 0) {
+                            view.findViewById(R.id.data_grid_cell_chart_image)
+                                    .setVisibility(View.VISIBLE);
+                        }
+
+                        return view;
+                    }
+                })
+                .build(getActivity());
+        grid.setLayoutParams(params);
+
+        ((ViewGroup) ((ViewGroup) getView()).getChildAt(0)).addView(grid);
     }
 }
