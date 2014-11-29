@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.android.debug.hv.ViewServer;
+
 import org.msf.records.R;
 import org.msf.records.model.PatientChart;
 import org.msf.records.net.Constants;
@@ -47,6 +49,8 @@ public class PatientChartActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_chart);
+
+        ViewServer.get(this).addWindow(this);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -95,6 +99,20 @@ public class PatientChartActivity extends BaseActivity {
         if (patientName != null && patientId != null) {
             setTitle(patientName + " (" + patientId + ")");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        ViewServer.get(this).setFocusedWindow(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        ViewServer.get(this).removeWindow(this);
     }
 
     private int savePatientUuidForRequestCode(String patientUuid) {

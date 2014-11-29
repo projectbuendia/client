@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -19,6 +21,8 @@ import org.msf.records.model.ConceptList;
 import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.widget.DataGridAdapter;
+import org.msf.records.widget.DataGridView;
 import org.msf.records.view.VitalView;
 
 import java.util.Arrays;
@@ -120,8 +124,53 @@ public class PatientChartFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_patient_chart, container, false);
+        ViewGroup view =
+                (ViewGroup) inflater.inflate(R.layout.fragment_patient_chart, container, false);
         ButterKnife.inject(this, view);
+
+        ViewGroup.LayoutParams params =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        DataGridView grid = new DataGridView.Builder()
+                .setDataGridAdapter(new DataGridAdapter() {
+
+                    @Override
+                    public int getColumnCount() {
+                        return 30;
+                    }
+
+                    @Override
+                    public int getRowCount() {
+                        return 30;
+                    }
+
+                    @Override
+                    public View getRowHeader(int row, View convertView, ViewGroup parent) {
+                        TextView textView = new TextView(getActivity());
+                        textView.setText("Row Header " + row);
+
+                        return textView;
+                    }
+
+                    @Override
+                    public View getColumnHeader(int column, View convertView, ViewGroup parent) {
+                        TextView textView = new TextView(getActivity());
+                        textView.setText("Column Header " + column);
+
+                        return textView;
+                    }
+
+                    @Override
+                    public View getCell(int row, int column, View convertView, ViewGroup parent) {
+                        TextView textView = new TextView(getActivity());
+                        textView.setText("Cell " + row + ", " + column);
+
+                        return textView;
+                    }
+                })
+                .build(getActivity());
+        grid.setLayoutParams(params);
+
+        view.addView(grid);
 
         return view;
     }
