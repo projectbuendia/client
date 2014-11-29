@@ -101,8 +101,30 @@ public class ChartProviderContract {
                 .build();
     }
 
+    private static final String MOST_RECENT_CHART_PREFIX = "mostrecent";
     /**
-     * Columns supported by "patients" records.
+     * A path segment for a special URI that will be used most often in the user interface.
+     * Get all the most recent data for a given patient in a given language.
+     *
+     * content://org.msf.records/mostrecent/{patient_uuid}/{locale}
+     */
+    static final String PATH_MOST_RECENT_CHART = MOST_RECENT_CHART_PREFIX + "/*/*";
+
+    /**
+     * Make a special URI that will be used most often in the user interface.
+     * Get data for a given patient in a given language for a given chart.
+     *
+     * content://org.msf.records/localizedchart/{chart_uuid}/{patient_uuid}/{locale}
+     */
+    public static Uri makeMostRecentChartUri(String patientUuid, String locale) {
+        return BASE_CONTENT_URI.buildUpon().appendPath(MOST_RECENT_CHART_PREFIX)
+                .appendPath(patientUuid)
+                .appendPath(locale)
+                .build();
+    }
+
+    /**
+     * Columns supported by the various patient chart URIs.
      */
     public static class ChartColumns implements BaseColumns {
 
