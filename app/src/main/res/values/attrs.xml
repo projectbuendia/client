@@ -8,6 +8,7 @@
         <attr name="vitalValueFormat" format="string" />
     </declare-styleable>
     <declare-styleable name="SubtitledButtonView">
+        <attr name="subtitledButtonIsSquare" format="boolean" />
         <attr name="subtitledButtonTextColor" format="color" />
         <attr name="subtitledButtonSubtitleTextColor" format="color" />
         <attr name="subtitledButtonTitle" format="string" localization="suggested" />
