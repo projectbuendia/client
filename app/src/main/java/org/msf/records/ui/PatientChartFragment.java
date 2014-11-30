@@ -243,18 +243,47 @@ public class PatientChartFragment extends Fragment {
 
                     @Override
                     public View getRowHeader(int row, View convertView, ViewGroup parent) {
-                        TextView textView = new TextView(getActivity());
-                        textView.setText("Row Header " + row);
+                        View view = mLayoutInflater.inflate(
+                                R.layout.data_grid_header_chart, null /*root*/);
+                        TextView textView =
+                                (TextView) view.findViewById(R.id.data_grid_header_text);
 
-                        return textView;
+                        switch (row % 8) {
+                            case 0:
+                                textView.setText("Diarrhea");
+                                break;
+                            case 1:
+                                textView.setText("Nausea");
+                                break;
+                            case 2:
+                                textView.setText("Vomiting");
+                                break;
+                            case 3:
+                                textView.setText("Bleeding - Nose");
+                                break;
+                            case 4:
+                                textView.setText("Bleeding - Mouth");
+                                break;
+                            case 5:
+                                textView.setText("Sore Throat");
+                                break;
+                            case 6:
+                                textView.setText("Abdominal Pain");
+                                break;
+                            case 7:
+                                textView.setText("Conjunctival Infection");
+                                break;
+                        }
+
+                        return view;
                     }
 
                     @Override
                     public View getColumnHeader(int column, View convertView, ViewGroup parent) {
                         View view = mLayoutInflater.inflate(
-                                R.layout.data_grid_column_header_chart, null /*root*/);
+                                R.layout.data_grid_header_chart, null /*root*/);
                         TextView textView =
-                                (TextView) view.findViewById(R.id.data_grid_column_header_text);
+                                (TextView) view.findViewById(R.id.data_grid_header_text);
                         if (column % 2 == 0) {
                             textView.setText("AM");
                         } else {
