@@ -229,11 +229,12 @@ public class PatientChartFragment extends Fragment {
         ViewGroup.LayoutParams params =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         DataGridView grid = new DataGridView.Builder()
+                .setDoubleWidthColumnHeaders(true)
                 .setDataGridAdapter(new DataGridAdapter() {
 
                     @Override
                     public int getColumnCount() {
-                        return 15;
+                        return 16;
                     }
 
                     @Override
@@ -284,10 +285,12 @@ public class PatientChartFragment extends Fragment {
                                 R.layout.data_grid_header_chart, null /*root*/);
                         TextView textView =
                                 (TextView) view.findViewById(R.id.data_grid_header_text);
-                        if (column % 2 == 0) {
-                            textView.setText("AM");
+
+                        // 8 days.
+                        if (column == 14) {
+                            textView.setText("Today");
                         } else {
-                            textView.setText("PM");
+                            textView.setText(String.format("-%d Day", 7 - column / 2));
                         }
 
                         return view;

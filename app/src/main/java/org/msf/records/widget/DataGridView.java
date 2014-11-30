@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import java.util.Set;
@@ -18,6 +19,11 @@ import java.util.Set;
  *
  * <p>This layout can only be instantiated programmatically; it is not intended to be used in XML.
  *
+ * <p>In order to instantiate this layout, you must use a {@link DataGridView.Builder}, to which you
+ * must provide a {@link DataGridAdapter}. The adapter's methods will be invoked synchronously on
+ * construction and never again; therefore, the adapter must have ALL the data you wish to display
+ * before you call {@link DataGridView.Builder#build}.
+ *
  * <p>Based on https://www.codeofaninja.com/2013/08/android-scroll-table-fixed-header-column.html.
  */
 public class DataGridView extends RelativeLayout {
@@ -26,9 +32,13 @@ public class DataGridView extends RelativeLayout {
 
         private View mCornerView;
         private DataGridAdapter mDataGridAdapter;
+        private boolean mHasDoubleWidthColumnHeaders = false;
 
         public Builder() {}
 
+        /**
+         * Sets the view in the top left corner of the grid.
+         */
         public Builder setCornerView(View cornerView) {
             mCornerView = cornerView;
             return this;
@@ -39,21 +49,43 @@ public class DataGridView extends RelativeLayout {
             return this;
         }
 
+        /**
+         * Sets whether the column headers should be double width.
+         *
+         * <p>Double-width column headers span two columns each. When using double-width column
+         * headers, {@link DataGridAdapter#getColumnHeader} will be called only for every other
+         * column; for example, when called with column {@code 2}, the adapter should return the
+         * column header for columns {@code 2} and {@code 3}.
+         *
+         * <p>If you use double-width column headers, the number of columns returned by
+         * {@link DataGridAdapter#getColumnCount} must be a multiple of {@code 2}.
+         */
+        public Builder setDoubleWidthColumnHeaders(boolean hasDoubleWidthColumnHeaders) {
+            mHasDoubleWidthColumnHeaders = hasDoubleWidthColumnHeaders;
+            return this;
+        }
+
         public DataGridView build(Context context) {
             if (mDataGridAdapter == null) {
                 throw new IllegalStateException("Data grid adapter must be set.");
             }
 
             View cornerView = mCornerView != null ? mCornerView : new View(context);
-            return new DataGridView(context, mDataGridAdapter, cornerView);
+            return new DataGridView(
+                    context,
+                    mDataGridAdapter,
+                    cornerView,
+                    mHasDoubleWidthColumnHeaders);
         }
     }
 
     private static final String TAG = DataGridView.class.getName();
 
+    private Context mContext;
     private final DataGridAdapter mDataGridAdapter;
-
     private View mCornerView;
+    private final boolean mHasDoubleWidthColumnHeaders;
+
     private TableLayout mColumnHeadersLayout;
     private TableLayout mRowHeadersLayout;
     private TableLayout mDataLayout;
@@ -66,18 +98,24 @@ public class DataGridView extends RelativeLayout {
     private ScrollView mRowHeadersScrollView;
     private ScrollView mDataScrollView;
 
-    private Context mContext;
-
     @SuppressWarnings("ResourceType")
     private DataGridView(
             Context context,
             DataGridAdapter dataGridAdapter,
-            View cornerView) {
+            View cornerView,
+            boolean hasDoubleWidthColumnHeaders) {
         super(context);
 
         mContext = context;
         mDataGridAdapter = dataGridAdapter;
         mCornerView = cornerView;
+        mHasDoubleWidthColumnHeaders = hasDoubleWidthColumnHeaders;
+
+        if (mHasDoubleWidthColumnHeaders) {
+            Preconditions.checkArgument(
+                    mDataGridAdapter.getColumnCount() % 2 == 0,
+                    "If using double-width column headers, the number of columns must be even.");
+        }
 
         // Create all the main layout components.
         mColumnHeadersLayout = new TableLayout(mContext);
@@ -162,11 +200,24 @@ public class DataGridView extends RelativeLayout {
 
         // Find the widest column header...
         int maxWidth = 0;
-        for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-            int width = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
-                    .getMeasuredWidth();
-            if (width > maxWidth) {
-                maxWidth = width;
+        if (!mHasDoubleWidthColumnHeaders) {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
+                int width = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                        .getMeasuredWidth();
+                if (width > maxWidth) {
+                    maxWidth = width;
+                }
+            }
+        } else {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
+                int width =
+                        divideRoundUp(
+                                ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                                        .getMeasuredWidth(),
+                                2);
+                if (width > maxWidth) {
+                    maxWidth = width;
+                }
             }
         }
 
@@ -182,13 +233,22 @@ public class DataGridView extends RelativeLayout {
         }
 
         // ... then set all of the column headers to that width...
-        LayoutParams maxWidthLayoutParams = new LayoutParams(maxWidth, LayoutParams.MATCH_PARENT);
-        for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-            ViewGroup.LayoutParams newParams =
-                    ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
-                            .getLayoutParams();
+        if (!mHasDoubleWidthColumnHeaders) {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
+                ViewGroup.LayoutParams newParams =
+                        ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                                .getLayoutParams();
 
-            newParams.width = maxWidth;
+                newParams.width = maxWidth;
+            }
+        } else {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
+                ViewGroup.LayoutParams newParams =
+                        ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                                .getLayoutParams();
+
+                newParams.width = maxWidth * 2;
+            }
         }
 
         // ... then all of the data cells too.
@@ -247,11 +307,21 @@ public class DataGridView extends RelativeLayout {
 
         // Find the tallest column header.
         int maxColumnHeaderHeight = 0;
-        for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-            int height = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
-                    .getMeasuredHeight();
-            if (height > maxColumnHeaderHeight) {
-                maxColumnHeaderHeight = height;
+        if (!mHasDoubleWidthColumnHeaders) {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
+                int height = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                        .getMeasuredHeight();
+                if (height > maxColumnHeaderHeight) {
+                    maxColumnHeaderHeight = height;
+                }
+            }
+        } else {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
+                int height = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                        .getMeasuredHeight();
+                if (height > maxColumnHeaderHeight) {
+                    maxColumnHeaderHeight = height;
+                }
             }
         }
 
@@ -271,6 +341,10 @@ public class DataGridView extends RelativeLayout {
         cornerParams.width = maxRowHeaderWidth;
     }
 
+    private int divideRoundUp(int dividend, int divisor) {
+        return (dividend + divisor - 1) / divisor;
+    }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -280,11 +354,20 @@ public class DataGridView extends RelativeLayout {
     private TableRow createColumnHeadersView() {
         TableRow columnHeadersTableRow = new TableRow(mContext);
 
-        for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-            View view = mDataGridAdapter
-                    .getColumnHeader(i, null /*convertView*/, columnHeadersTableRow);
+        if (!mHasDoubleWidthColumnHeaders) {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
+                View view = mDataGridAdapter
+                        .getColumnHeader(i, null /*convertView*/, columnHeadersTableRow);
 
-            columnHeadersTableRow.addView(view);
+                columnHeadersTableRow.addView(view);
+            }
+        } else {
+            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i += 2) {
+                View view = mDataGridAdapter
+                        .getColumnHeader(i, null /*convertView*/, columnHeadersTableRow);
+
+                columnHeadersTableRow.addView(view);
+            }
         }
 
         return columnHeadersTableRow;
