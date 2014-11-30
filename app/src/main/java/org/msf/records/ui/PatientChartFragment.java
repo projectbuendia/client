@@ -94,11 +94,15 @@ public class PatientChartFragment extends Fragment {
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 
-    @InjectView(R.id.vital_heart) VitalView mHeart;
-    @InjectView(R.id.vital_blood_pressure) VitalView mBloodPressure;
+//    @InjectView(R.id.vital_heart) VitalView mHeart;
+//    @InjectView(R.id.vital_blood_pressure) VitalView mBloodPressure;
     @InjectView(R.id.vital_temperature) VitalView mTemperature;
-    @InjectView(R.id.vital_respirations) VitalView mRespirations;
+//    @InjectView(R.id.vital_respirations) VitalView mRespirations;
+    @InjectView(R.id.vital_days_admitted) VitalView mDaysAdmitted;
     @InjectView(R.id.vital_pcr) VitalView mPcr;
+    @InjectView(R.id.vital_food_drink) VitalView mFoodDrink;
+    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
+    @InjectView(R.id.vital_mobility) VitalView mMobility;
 
     public PatientChartFragment() {}
 
@@ -178,53 +182,53 @@ public class PatientChartFragment extends Fragment {
         }
         mTemperature.setValue(temperatureValue);
 
-        LocalizedChartHelper.LocalizedObservation pulse =
-                conceptsToLatestObservations.get("Pulse");
-        String pulseValue = "--";
-        if (pulse != null) {
-            int pulseInt;
-            try {
-                pulseInt = Integer.parseInt(pulse.localizedValue);
-                pulseValue = String.format("%d", pulseInt);
-            } catch (NumberFormatException e) {}
-        }
-        mHeart.setValue(pulseValue);
-
-        LocalizedChartHelper.LocalizedObservation respirations =
-                conceptsToLatestObservations.get("Respiratory rate");
-        String respirationsValue = "--";
-        if (respirations != null) {
-            int respirationsInt;
-            try {
-                respirationsInt = Integer.parseInt(respirations.localizedValue);
-                respirationsValue = String.format("%d", respirationsInt);
-            } catch (NumberFormatException e) {}
-        }
-        mRespirations.setValue(respirationsValue);
-
-        LocalizedChartHelper.LocalizedObservation systolic =
-                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
-        String systolicValue = "--";
-        if (systolic != null) {
-            int systolicInt;
-            try {
-                systolicInt = Integer.parseInt(systolic.localizedValue);
-                systolicValue = String.format("%d", systolicInt);
-            } catch (NumberFormatException e) {}
-        }
-
-        LocalizedChartHelper.LocalizedObservation diastolic =
-                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
-        String diastolicValue = "--";
-        if (systolic != null) {
-            int diastolicInt;
-            try {
-                diastolicInt = Integer.parseInt(systolic.localizedValue);
-                diastolicValue = String.format("%d", diastolicInt);
-            } catch (NumberFormatException e) {}
-        }
-
-        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
+//
+//        LocalizedChartHelper.LocalizedObservation pulse =
+//                conceptsToLatestObservations.get("Pulse");
+//        String pulseValue = "--";
+//        if (pulse != null) {
+//            int pulseInt;
+//            try {
+//                pulseInt = Integer.parseInt(pulse.localizedValue);
+//                pulseValue = String.format("%d", pulseInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mHeart.setValue(pulseValue);
+//
+//        LocalizedChartHelper.LocalizedObservation respirations =
+//                conceptsToLatestObservations.get("Respiratory rate");
+//        String respirationsValue = "--";
+//        if (respirations != null) {
+//            int respirationsInt;
+//            try {
+//                respirationsInt = Integer.parseInt(respirations.localizedValue);
+//                respirationsValue = String.format("%d", respirationsInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mRespirations.setValue(respirationsValue);
+//
+//        LocalizedChartHelper.LocalizedObservation systolic =
+//                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
+//        String systolicValue = "--";
+//        if (systolic != null) {
+//            int systolicInt;
+//            try {
+//                systolicInt = Integer.parseInt(systolic.localizedValue);
+//                systolicValue = String.format("%d", systolicInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//
+//        LocalizedChartHelper.LocalizedObservation diastolic =
+//                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
+//        String diastolicValue = "--";
+//        if (systolic != null) {
+//            int diastolicInt;
+//            try {
+//                diastolicInt = Integer.parseInt(systolic.localizedValue);
+//                diastolicValue = String.format("%d", diastolicInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
 
         ViewGroup.LayoutParams params =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);

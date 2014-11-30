@@ -67,7 +67,11 @@
             android:name=".ui.PatientChartActivity"
             android:label="@string/title_patient_chart"
             android:parentActivityName=".ui.PatientListActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:uiOptions="splitActionBarWhenNarrow">
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.msf.records.ui.PatientListActivity" />
