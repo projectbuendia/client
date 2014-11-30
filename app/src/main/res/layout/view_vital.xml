@@ -17,7 +17,7 @@
         android:gravity="center"
         android:singleLine="true"
         android:textSize="96sp"
-        app:minTextSize="24sp"
+        app:minTextSize="20sp"
         tools:text="39.5" />
 
     <TextView
