@@ -12,6 +12,29 @@
         <!--android:layout_height="wrap_content"-->
         <!--android:padding="16dp">-->
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:textSize="20sp"
+                android:textColor="#999999"
+                android:text="Last Updated"/>
+
+            <TextView
+                android:id="@+id/last_updated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:textSize="20sp"
+                android:text="Never" />
+
+        </LinearLayout>
+
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
