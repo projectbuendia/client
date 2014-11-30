@@ -109,7 +109,7 @@ public class UserLoginFragment extends Fragment {
         // TODO(dxchen): Error handling.
         App.getUserManager().setActiveUser(mUserListAdapter.getItem(position));
 
-        getActivity().startActivity(new Intent(getActivity(), PatientListActivity.class));
+        getActivity().startActivity(new Intent(getActivity(), TentSelectionActivity.class));
     }
 
     static class UserListAdapter extends ArrayAdapter<User> {

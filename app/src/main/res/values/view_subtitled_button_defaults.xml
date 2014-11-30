@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="view_subtitled_button_text_color">#000000</color>
+    <color name="view_subtitled_button_subtitle_text_color">#888888</color>
+    <dimen name="view_subtitled_button_title_text_size">16sp</dimen>
+</resources>
