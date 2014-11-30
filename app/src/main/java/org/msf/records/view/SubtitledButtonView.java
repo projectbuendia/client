@@ -29,6 +29,7 @@ public class SubtitledButtonView extends LinearLayout {
     private float mTitleTextSize;
     private String mSubtitle;
     private String mSubtitleFormat;
+    private boolean mIsSquare;
 
     public SubtitledButtonView(Context context) {
         this(context, null);
@@ -51,7 +52,8 @@ public class SubtitledButtonView extends LinearLayout {
                 R.color.view_subtitled_button_subtitle_text_color);
         float defaultTitleTextSize = resources.getDimension(
                 R.dimen.view_subtitled_button_title_text_size);
-
+        boolean defaultIsSquare = resources.getBoolean(
+                R.bool.view_subtitled_button_is_square);
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.SubtitledButtonView, defStyleAttr, 0 /*defStyleRes*/);
         try {
@@ -67,6 +69,8 @@ public class SubtitledButtonView extends LinearLayout {
             mSubtitle = a.getString(R.styleable.SubtitledButtonView_subtitledButtonSubtitle);
             mSubtitleFormat = a.getString(
                     R.styleable.SubtitledButtonView_subtitledButtonSubtitleFormat);
+            mIsSquare = a.getBoolean(R.styleable.SubtitledButtonView_subtitledButtonIsSquare,
+                    defaultIsSquare);
         } finally {
             a.recycle();
         }
@@ -76,13 +80,30 @@ public class SubtitledButtonView extends LinearLayout {
         mTitleView.setText(mTitle);
         mSubtitleView.setTextColor(mSubtitleTextColor);
         mSubtitleView.setText(mSubtitle);
-
-        mTitleView.setText(mTitle);
     }
 
-    public SubtitledButtonView setValue(CharSequence value) {
-        mSubtitleView.setText(value);
+    public SubtitledButtonView setTitle(CharSequence title) {
+        mTitleView.setText(title);
 
         return this;
+    }
+
+    public SubtitledButtonView setSubtitle(CharSequence subtitle) {
+        mSubtitleView.setText(subtitle);
+
+        return this;
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (!mIsSquare) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int size = width > height ? height : width;
+        setMeasuredDimension(size, size);
     }
 }
