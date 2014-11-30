@@ -94,10 +94,8 @@ public class PatientChartFragment extends Fragment {
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 
-//    @InjectView(R.id.vital_heart) VitalView mHeart;
-//    @InjectView(R.id.vital_blood_pressure) VitalView mBloodPressure;
+    @InjectView(R.id.last_updated) TextView mLastUpdated;
     @InjectView(R.id.vital_temperature) VitalView mTemperature;
-//    @InjectView(R.id.vital_respirations) VitalView mRespirations;
     @InjectView(R.id.vital_days_admitted) VitalView mDaysAdmitted;
     @InjectView(R.id.vital_pcr) VitalView mPcr;
     @InjectView(R.id.vital_food_drink) VitalView mFoodDrink;
