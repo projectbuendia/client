@@ -9,13 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.listeners.ActionClickListener;
-
-import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -45,8 +39,6 @@ public class PatientListActivity extends PatientSearchActivity {
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
-    private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
-
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -75,74 +67,9 @@ public class PatientListActivity extends PatientSearchActivity {
 
         setupCustomActionBar();
 
-        updateAvailableSnackbar = Snackbar.with(this)
-                .text(getString(R.string.snackbar_update_available))
-                .actionLabel(getString(R.string.snackbar_action_download))
-                .swipeToDismiss(true)
-                .animation(false)
-                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
-        updateDownloadedSnackbar = Snackbar.with(this)
-                .text(getString(R.string.snackbar_update_downloaded))
-                .actionLabel(getString(R.string.snackbar_action_install))
-                .swipeToDismiss(true)
-                .animation(false)
-                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
-
         mFragment = (PatientListFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.patient_list);
         // TODO: If exposing deep links into your app, handle intents here.
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        App.getUpdateManager().checkForUpdate();
-    }
-
-    @Override
-    protected void onPause() {
-        updateAvailableSnackbar.dismiss();
-        updateDownloadedSnackbar.dismiss();
-
-        super.onPause();
-    }
-
-    /**
-     * Displays a {@link Snackbar} indicating that an update is available upon receiving an
-     * {@link UpdateAvailableEvent}.
-     */
-    public void onEventMainThread(final UpdateAvailableEvent event) {
-        updateAvailableSnackbar
-                .actionListener(new ActionClickListener() {
-
-                    @Override
-                    public void onActionClicked() {
-                        App.getUpdateManager().downloadUpdate(event.mUpdateInfo);
-                    }
-                });
-        if (updateAvailableSnackbar.isDismissed()) {
-            updateAvailableSnackbar.show(this);
-        }
-    }
-
-    /**
-     * Displays a {@link Snackbar} indicating that an update has been downloaded upon receiving an
-     * {@link UpdateDownloadedEvent}.
-     */
-    public void onEventMainThread(final UpdateDownloadedEvent event) {
-        updateAvailableSnackbar.dismiss();
-        updateDownloadedSnackbar
-                .actionListener(new ActionClickListener() {
-
-                    @Override
-                    public void onActionClicked() {
-                        App.getUpdateManager().installUpdate(event.mUpdateInfo);
-                    }
-                });
-        if (updateDownloadedSnackbar.isDismissed()) {
-            updateDownloadedSnackbar.show(this);
-        }
     }
 
     private void setupCustomActionBar(){

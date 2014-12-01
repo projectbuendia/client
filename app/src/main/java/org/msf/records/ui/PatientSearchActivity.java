@@ -2,11 +2,18 @@ package org.msf.records.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.listeners.ActionClickListener;
+
+import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.events.UpdateAvailableEvent;
+import org.msf.records.events.UpdateDownloadedEvent;
 
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
@@ -16,9 +23,27 @@ public abstract class PatientSearchActivity extends BaseActivity
         implements PatientListFragment.Callbacks {
     private SearchView mSearchView;
     private OnSearchListener mSearchListener;
+    private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
 
     public SearchView getSearchView() {
         return mSearchView;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        updateAvailableSnackbar = Snackbar.with(this)
+                .text(getString(R.string.snackbar_update_available))
+                .actionLabel(getString(R.string.snackbar_action_download))
+                .swipeToDismiss(true)
+                .animation(false)
+                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
+        updateDownloadedSnackbar = Snackbar.with(this)
+                .text(getString(R.string.snackbar_update_downloaded))
+                .actionLabel(getString(R.string.snackbar_action_install))
+                .swipeToDismiss(true)
+                .animation(false)
+                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
     }
 
     /**
@@ -69,5 +94,57 @@ public abstract class PatientSearchActivity extends BaseActivity
                 return true;
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        App.getUpdateManager().checkForUpdate();
+    }
+
+    @Override
+    protected void onPause() {
+        updateAvailableSnackbar.dismiss();
+        updateDownloadedSnackbar.dismiss();
+
+        super.onPause();
+    }
+
+    /**
+     * Displays a {@link com.nispok.snackbar.Snackbar} indicating that an update is available upon receiving an
+     * {@link org.msf.records.events.UpdateAvailableEvent}.
+     */
+    public void onEventMainThread(final UpdateAvailableEvent event) {
+        updateAvailableSnackbar
+                .actionListener(new ActionClickListener() {
+
+                    @Override
+                    public void onActionClicked() {
+                        App.getUpdateManager().downloadUpdate(event.mUpdateInfo);
+                    }
+                });
+        if (updateAvailableSnackbar.isDismissed()) {
+            updateAvailableSnackbar.show(this);
+        }
+    }
+
+    /**
+     * Displays a {@link com.nispok.snackbar.Snackbar} indicating that an update has been downloaded upon receiving an
+     * {@link org.msf.records.events.UpdateDownloadedEvent}.
+     */
+    public void onEventMainThread(final UpdateDownloadedEvent event) {
+        updateAvailableSnackbar.dismiss();
+        updateDownloadedSnackbar
+                .actionListener(new ActionClickListener() {
+
+                    @Override
+                    public void onActionClicked() {
+                        App.getUpdateManager().installUpdate(event.mUpdateInfo);
+                    }
+                });
+        if (updateDownloadedSnackbar.isDismissed()) {
+            updateDownloadedSnackbar.show(this);
+        }
     }
 }
