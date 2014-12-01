@@ -4,10 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -21,6 +22,8 @@ import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.view.VitalView;
+import org.msf.records.widget.DataGridAdapter;
+import org.msf.records.widget.DataGridView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,12 +92,15 @@ public class PatientChartFragment extends Fragment {
     }
 
     private String mPatientUuid;
+    private LayoutInflater mLayoutInflater;
 
-    @InjectView(R.id.vital_heart) VitalView mHeart;
-    @InjectView(R.id.vital_blood_pressure) VitalView mBloodPressure;
+    @InjectView(R.id.last_updated) TextView mLastUpdated;
     @InjectView(R.id.vital_temperature) VitalView mTemperature;
-    @InjectView(R.id.vital_respirations) VitalView mRespirations;
+    @InjectView(R.id.vital_days_admitted) VitalView mDaysAdmitted;
     @InjectView(R.id.vital_pcr) VitalView mPcr;
+    @InjectView(R.id.vital_food_drink) VitalView mFoodDrink;
+    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
+    @InjectView(R.id.vital_mobility) VitalView mMobility;
 
     public PatientChartFragment() {}
 
@@ -115,13 +121,16 @@ public class PatientChartFragment extends Fragment {
 
             return;
         }
+
+        mLayoutInflater = LayoutInflater.from(getActivity());
     }
 
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_patient_chart, container, false);
+        ViewGroup view =
+                (ViewGroup) inflater.inflate(R.layout.fragment_patient_chart, container, false);
         ButterKnife.inject(this, view);
 
         return view;
@@ -171,52 +180,139 @@ public class PatientChartFragment extends Fragment {
         }
         mTemperature.setValue(temperatureValue);
 
-        LocalizedChartHelper.LocalizedObservation pulse =
-                conceptsToLatestObservations.get("Pulse");
-        String pulseValue = "--";
-        if (pulse != null) {
-            int pulseInt;
-            try {
-                pulseInt = Integer.parseInt(pulse.localizedValue);
-                pulseValue = String.format("%d", pulseInt);
-            } catch (NumberFormatException e) {}
-        }
-        mHeart.setValue(pulseValue);
+//
+//        LocalizedChartHelper.LocalizedObservation pulse =
+//                conceptsToLatestObservations.get("Pulse");
+//        String pulseValue = "--";
+//        if (pulse != null) {
+//            int pulseInt;
+//            try {
+//                pulseInt = Integer.parseInt(pulse.localizedValue);
+//                pulseValue = String.format("%d", pulseInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mHeart.setValue(pulseValue);
+//
+//        LocalizedChartHelper.LocalizedObservation respirations =
+//                conceptsToLatestObservations.get("Respiratory rate");
+//        String respirationsValue = "--";
+//        if (respirations != null) {
+//            int respirationsInt;
+//            try {
+//                respirationsInt = Integer.parseInt(respirations.localizedValue);
+//                respirationsValue = String.format("%d", respirationsInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mRespirations.setValue(respirationsValue);
+//
+//        LocalizedChartHelper.LocalizedObservation systolic =
+//                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
+//        String systolicValue = "--";
+//        if (systolic != null) {
+//            int systolicInt;
+//            try {
+//                systolicInt = Integer.parseInt(systolic.localizedValue);
+//                systolicValue = String.format("%d", systolicInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//
+//        LocalizedChartHelper.LocalizedObservation diastolic =
+//                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
+//        String diastolicValue = "--";
+//        if (systolic != null) {
+//            int diastolicInt;
+//            try {
+//                diastolicInt = Integer.parseInt(systolic.localizedValue);
+//                diastolicValue = String.format("%d", diastolicInt);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
 
-        LocalizedChartHelper.LocalizedObservation respirations =
-                conceptsToLatestObservations.get("Respiratory rate");
-        String respirationsValue = "--";
-        if (respirations != null) {
-            int respirationsInt;
-            try {
-                respirationsInt = Integer.parseInt(respirations.localizedValue);
-                respirationsValue = String.format("%d", respirationsInt);
-            } catch (NumberFormatException e) {}
-        }
-        mRespirations.setValue(respirationsValue);
+        ViewGroup.LayoutParams params =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        DataGridView grid = new DataGridView.Builder()
+                .setDoubleWidthColumnHeaders(true)
+                .setDataGridAdapter(new DataGridAdapter() {
 
-        LocalizedChartHelper.LocalizedObservation systolic =
-                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
-        String systolicValue = "--";
-        if (systolic != null) {
-            int systolicInt;
-            try {
-                systolicInt = Integer.parseInt(systolic.localizedValue);
-                systolicValue = String.format("%d", systolicInt);
-            } catch (NumberFormatException e) {}
-        }
+                    @Override
+                    public int getColumnCount() {
+                        return 16;
+                    }
 
-        LocalizedChartHelper.LocalizedObservation diastolic =
-                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
-        String diastolicValue = "--";
-        if (systolic != null) {
-            int diastolicInt;
-            try {
-                diastolicInt = Integer.parseInt(systolic.localizedValue);
-                diastolicValue = String.format("%d", diastolicInt);
-            } catch (NumberFormatException e) {}
-        }
+                    @Override
+                    public int getRowCount() {
+                        return 30;
+                    }
 
-        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
+                    @Override
+                    public View getRowHeader(int row, View convertView, ViewGroup parent) {
+                        View view = mLayoutInflater.inflate(
+                                R.layout.data_grid_header_chart, null /*root*/);
+                        TextView textView =
+                                (TextView) view.findViewById(R.id.data_grid_header_text);
+
+                        switch (row % 8) {
+                            case 0:
+                                textView.setText("Diarrhea");
+                                break;
+                            case 1:
+                                textView.setText("Nausea");
+                                break;
+                            case 2:
+                                textView.setText("Vomiting");
+                                break;
+                            case 3:
+                                textView.setText("Bleeding - Nose");
+                                break;
+                            case 4:
+                                textView.setText("Bleeding - Mouth");
+                                break;
+                            case 5:
+                                textView.setText("Sore Throat");
+                                break;
+                            case 6:
+                                textView.setText("Abdominal Pain");
+                                break;
+                            case 7:
+                                textView.setText("Conjunctival Infection");
+                                break;
+                        }
+
+                        return view;
+                    }
+
+                    @Override
+                    public View getColumnHeader(int column, View convertView, ViewGroup parent) {
+                        View view = mLayoutInflater.inflate(
+                                R.layout.data_grid_header_chart, null /*root*/);
+                        TextView textView =
+                                (TextView) view.findViewById(R.id.data_grid_header_text);
+
+                        // 8 days.
+                        if (column == 14) {
+                            textView.setText("Today");
+                        } else {
+                            textView.setText(String.format("-%d Day", 7 - column / 2));
+                        }
+
+                        return view;
+                    }
+
+                    @Override
+                    public View getCell(int row, int column, View convertView, ViewGroup parent) {
+                        View view = mLayoutInflater.inflate(
+                                R.layout.data_grid_cell_chart, null /*root*/);
+                        if ((row + column) % 3 == 0) {
+                            view.findViewById(R.id.data_grid_cell_chart_image)
+                                    .setVisibility(View.VISIBLE);
+                        }
+
+                        return view;
+                    }
+                })
+                .build(getActivity());
+        grid.setLayoutParams(params);
+
+        ((ViewGroup) ((ViewGroup) getView()).getChildAt(0)).addView(grid);
     }
 }

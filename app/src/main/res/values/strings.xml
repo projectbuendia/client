@@ -24,7 +24,6 @@
     <string name="title_activity_patient_add">New Patient</string>
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
-
     <string name="status_suspect">Suspect</string>
     <string name="status_probable">Probable</string>
     <string name="status_confirmed">Confirmed</string>
@@ -34,7 +33,6 @@
     <string name="status_discharged">Discharged</string>
     <string name="status_unconfirmed_death">Unconfirmed death</string>
     <string name="status_confirmed_death">Confirmed death</string>
-
     <string name="location_all_zones">All zones</string>
     <string name="location_triage">Triage</string>
     <string name="location_suspected_zone">Suspected zone</string>
@@ -48,12 +46,10 @@
     <string name="action_new_round">New Round</string>
     <string name="action_update_chart">Update Chart</string>
     <string name="action_view_round_archive">Round Archive</string>
-
     <string name="snackbar_update_available">Application update available</string>
     <string name="snackbar_update_downloaded">Application update downloaded</string>
     <string name="snackbar_action_download">Download</string>
     <string name="snackbar_action_install">Install</string>
-
     <string name="age_years">%d years</string>
     <string name="day_n">%d</string>
     <string name="overview_age">Age</string>
@@ -72,4 +68,6 @@
     <string name="one_patient">(1 patient)</string>
     <string name="n_patients">(%d patients)</string>
     <string name="action_search">Search</string>
+    <string name="title_activity_tent_selection">MSF Medical Records</string>
+
 </resources>
