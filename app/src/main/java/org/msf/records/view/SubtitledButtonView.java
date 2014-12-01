@@ -3,6 +3,7 @@ package org.msf.records.view;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
@@ -41,6 +42,7 @@ public class SubtitledButtonView extends LinearLayout {
 
     public SubtitledButtonView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setBackgroundResource(R.drawable.border_grey_1dp);
 
         LayoutInflater.from(context).inflate(
                 R.layout.view_subtitled_button, this, true /*attachToRoot*/);

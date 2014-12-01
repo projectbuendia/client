@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"
+            android:clickable="true"
             app:subtitledButtonTitle="ALL PATIENTS"
             app:subtitledButtonSubtitle="No patients"/>
         <org.msf.records.view.SubtitledButtonView
