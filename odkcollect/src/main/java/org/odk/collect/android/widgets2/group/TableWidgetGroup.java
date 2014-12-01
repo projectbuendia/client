@@ -13,21 +13,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link WidgetGroup} that contains a number of {@link BinarySelectOneWidget}s.
+ * A {@link WidgetGroup} that displays widgets in a table with a configurable number of columns.
  */
-public class BinarySelectOneWidgetGroup extends TableLayout implements WidgetGroup {
+public class TableWidgetGroup extends TableLayout implements WidgetGroup {
+
+    private int mNumColumns = 2;
 
     private TableRow mLastTableRow = null;
     private List<TypedWidget<?>> mWidgets = new ArrayList<TypedWidget<?>>();
 
-    public BinarySelectOneWidgetGroup(Context context, AttributeSet attrs) {
+    public TableWidgetGroup(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public TableWidgetGroup setNumColumns(int numColumns) {
+        mNumColumns = numColumns;
+
+        return this;
     }
 
     @Override
     public void addView(View child) {
-        if (mLastTableRow == null || mLastTableRow.getChildCount() == 2) {
+        if (mLastTableRow == null || mLastTableRow.getChildCount() == mNumColumns) {
             mLastTableRow = new TableRow(getContext());
+            mLastTableRow.setWeightSum(mNumColumns);
+
             super.addView(mLastTableRow);
         }
 
@@ -51,15 +61,6 @@ public class BinarySelectOneWidgetGroup extends TableLayout implements WidgetGro
         // https://code.google.com/p/android/issues/detail?id=19343.
         if (getChildCount() > 1 || (mLastTableRow != null && mLastTableRow.getChildCount() > 0)) {
             setStretchAllColumns(true);
-        }
-
-        // If the last table row only has one item, add another to have it take up the appropriate
-        // amount of space.
-        if (mLastTableRow != null && mLastTableRow.getChildCount() == 1) {
-            View view = new View(getContext());
-            view.setLayoutParams(new TableRow.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f));
-
-            mLastTableRow.addView(view);
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

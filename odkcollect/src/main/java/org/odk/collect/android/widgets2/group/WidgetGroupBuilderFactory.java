@@ -14,12 +14,12 @@ public class WidgetGroupBuilderFactory {
         Appearance appearance = Appearance.fromString(group.getAppearanceHint());
 
         if (appearance.hasQualifier("binary-select-one")) {
-            return new BinarySelectOneWidgetGroupBuilder(appearance);
+            return new BinarySelectOneTableWidgetGroupBuilder(appearance);
         }
 
         // TODO(dxchen): Remove this once the server sends back the right appearance.
         if (group.getQuestionText().startsWith("Symptoms")) {
-            return new BinarySelectOneWidgetGroupBuilder(appearance);
+            return new BinarySelectOneTableWidgetGroupBuilder(appearance);
         }
 
         return null;
