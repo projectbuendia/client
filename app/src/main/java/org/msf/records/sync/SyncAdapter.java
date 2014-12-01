@@ -54,7 +54,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             PatientColumns.COLUMN_NAME_LOCATION_TENT,
             PatientColumns.COLUMN_NAME_AGE_MONTHS,
             PatientColumns.COLUMN_NAME_AGE_YEARS,
-            PatientColumns.COLUMN_NAME_GENDER
+            PatientColumns.COLUMN_NAME_GENDER,
     };
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
@@ -238,7 +238,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             !patient.assigned_location.tent.equals(locationTent)) ||
                         (patient.age.months != ageMonths) ||
                         (patient.age.years != ageYears) ||
-                        (patient.gender != null && !patient.gender.equals(gender))) {
+                        (patient.gender != null && !patient.gender.equals(gender)) ||
+                        (patient.id != null && !patient.id.equals(id))) {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
@@ -253,6 +254,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
+                            .withValue(PatientColumns._ID, id)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
