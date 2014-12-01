@@ -68,7 +68,6 @@ import org.odk.collect.android.logic.FormTraverser;
 import org.odk.collect.android.logic.FormVisitor;
 import org.odk.collect.android.preferences.PreferencesActivity;
 import org.odk.collect.android.provider.FormsProviderAPI.FormsColumns;
-import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns;
 import org.odk.collect.android.tasks.FormLoaderTask;
 import org.odk.collect.android.tasks.SavePointTask;
@@ -79,6 +78,8 @@ import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.MediaUtils;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets.QuestionWidget;
+import org.odk.collect.android.widgets2.Widget2Factory;
+import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -1315,6 +1316,23 @@ public class FormEntryActivity
 //					});
 //
 //			return endView;
+//        case FormEntryController.EVENT_GROUP:
+//            FormEntryCaption[] groups = formController.getGroupsForCurrentIndex();
+//            if (groups.length == 0) {
+//                Log.e(
+//                        TAG,
+//                        "Attempted to handle a FormEntryController.EVENT_GROUP when the form was "
+//                                + "not on a group.");
+//                break;
+//            }
+//            WidgetGroupBuilder builder =
+//                    Widget2Factory.INSTANCE.createGroupBuilder(this, groups[groups.length - 1]);
+//            if (builder != null) {
+//                // TODO(dxchen): Use the builder.
+//                break;
+//            }
+//
+//            // Fall through to the next case if we didn't manage to create a builder.
 		case FormEntryController.EVENT_QUESTION:
 		case FormEntryController.EVENT_GROUP:
 		case FormEntryController.EVENT_REPEAT:

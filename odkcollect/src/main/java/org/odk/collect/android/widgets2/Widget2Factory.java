@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.SparseArray;
 
 import org.javarosa.core.model.Constants;
+import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -38,9 +39,8 @@ public class Widget2Factory {
      * Creates a {@link WidgetGroupBuilder} for a given group or returns {@code null} if unable to
      * create a builder.
      */
-    public WidgetGroupBuilder createGroup(
-            Context context, FormEntryPrompt prompt, boolean forceReadOnly) {
-        return sWidgetGroupFactory.create(context, prompt, forceReadOnly);
+    public WidgetGroupBuilder createGroupBuilder(Context context, FormEntryCaption group) {
+        return sWidgetGroupFactory.create(context, group);
     }
 
     /**

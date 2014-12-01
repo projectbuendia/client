@@ -2,7 +2,7 @@ package org.odk.collect.android.widgets2.group;
 
 import android.content.Context;
 
-import org.javarosa.form.api.FormEntryPrompt;
+import org.javarosa.form.api.FormEntryCaption;
 import org.odk.collect.android.widgets2.common.Appearance;
 
 /**
@@ -10,11 +10,15 @@ import org.odk.collect.android.widgets2.common.Appearance;
  */
 public class WidgetGroupBuilderFactory {
 
-    public static WidgetGroupBuilder create(
-            Context context, FormEntryPrompt prompt, boolean forceReadOnly) {
-        Appearance appearance = Appearance.fromString(prompt.getAppearanceHint());
+    public WidgetGroupBuilder create(Context context, FormEntryCaption group) {
+        Appearance appearance = Appearance.fromString(group.getAppearanceHint());
 
         if (appearance.hasQualifier("binary-select-one")) {
+            return new BinarySelectOneWidgetGroupBuilder(appearance);
+        }
+
+        // TODO(dxchen): Remove this once the server sends back the right appearance.
+        if (group.getQuestionText().startsWith("Symptoms")) {
             return new BinarySelectOneWidgetGroupBuilder(appearance);
         }
 
