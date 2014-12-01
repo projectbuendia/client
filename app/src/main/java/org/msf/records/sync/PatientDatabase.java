@@ -7,7 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import static android.provider.BaseColumns._ID;
 import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE;
@@ -21,7 +24,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -49,7 +52,10 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_TENT + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + ")";
+                    COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP +
+                    COLUMN_NAME_AGE_YEARS + TYPE_INTEGER + COMMA_SEP +
+                    COLUMN_NAME_AGE_MONTHS + TYPE_INTEGER + COMMA_SEP +
+                    COLUMN_NAME_GENDER + TYPE_TEXT + ")";
 
     static final String CONCEPTS_TABLE_NAME = "concepts";
 

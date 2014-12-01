@@ -35,7 +35,10 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
             PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
             PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP
+            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS,
+            PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER
     };
 
     // Constants representing column positions from PROJECTION.
@@ -46,6 +49,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     public static final int COLUMN_UUID = 4;
     public static final int COLUMN_STATUS = 5;
     public static final int COLUMN_ADMISSION_TIMESTAMP = 6;
+    public static final int COLUMN_AGE_MONTHS = 7;
+    public static final int COLUMN_AGE_YEARS = 8;
+    public static final int COLUMN_GENDER = 9;
 
     private Context mContext;
 
@@ -122,40 +128,39 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String familyName = cursor.getString(COLUMN_FAMILY_NAME);
         String id = cursor.getString(COLUMN_ID);
         String status = cursor.getString(COLUMN_STATUS);
+        String gender = cursor.getString(COLUMN_GENDER);
+        int ageMonths = cursor.getInt(COLUMN_AGE_MONTHS);
+        int ageYears = cursor.getInt(COLUMN_AGE_YEARS);
 
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
 
-        //Age currently not being stored in content provider
-        /*if (patient.age.type != null && patient.age.type.equals("months")) {
-            holder.mPatientAge.setText("<1");
-        }
-
-        if (patient.age.type != null && patient.age.type.equals("years")) {
-            holder.mPatientAge.setText("" + patient.age.years);
-        }
-
-        if (patient.age.type == null) {
-            holder.mPatientAge.setText("99");
+        // TODO(akalachman): Replace all strings below with resource strings.
+        if (ageMonths > 0) {
+            holder.mPatientAge.setText(ageMonths + "mo");
+        } else if (ageYears > 0) {
+            holder.mPatientAge.setText(ageYears + "Y");
+        } else {
+            holder.mPatientAge.setText("99Y");
             holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
-        }*/
+        }
 
-        //Gender currently not being stored in content provider
-        /*if (patient.gender != null && patient.gender.equals("M")) {
+        if (gender != null && gender.equals("M")) {
             holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_man));
         }
 
-        if (patient.gender != null && patient.gender.equals("F")) {
-            if (patient.pregnant != null && patient.pregnant) {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_pregnant));
-            } else {
+        // TODO(akalachman): Use pregnancy flag when available in server/patient provider.
+        if (gender != null && gender.equals("F")) {
+            // if (patient.pregnant != null && patient.pregnant) {
+            //     holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_pregnant));
+            // } else {
                 holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_woman));
-            }
+            // }
         }
 
-        if (patient.gender == null) {
+        if (gender == null) {
             holder.mPatientGender.setVisibility(View.GONE);
-        }*/
+        }
 
         if (status == null) {
             holder.mPatientId.setBackgroundColor(context.getResources().getColor(R.color.transparent));
