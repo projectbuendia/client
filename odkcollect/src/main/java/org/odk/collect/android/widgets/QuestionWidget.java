@@ -33,6 +33,7 @@ import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
+import org.odk.collect.android.utilities.StringUtils;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 
@@ -181,7 +182,7 @@ public abstract class QuestionWidget extends LinearLayout {
         // TODO(dxchen): Un-unscreamify once server work is done.
 
         mQuestionText
-                .setText(promptText == null ? "" : ButtonsSelectOneWidget.unscreamify(promptText));
+                .setText(promptText == null ? "" : StringUtils.unscreamify(promptText));
 
         // TODO(dxchen): Remove this hack!
         if (promptText != null && promptText.toLowerCase().equals("date of birth")) {

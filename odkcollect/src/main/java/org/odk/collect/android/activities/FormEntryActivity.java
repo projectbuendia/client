@@ -572,7 +572,6 @@ public class FormEntryActivity
         private final List<SidebarItem> mSidebarItems;
 
         public QuestionHolderFormVisitor(List<SidebarItem> sidebarItems) {
-            // TODO(giljulio): Pick right type for list.
             mSidebarItems = sidebarItems;
         }
 
@@ -595,7 +594,6 @@ public class FormEntryActivity
 
         public final String mName;
         public final View mView;
-        public boolean isActive;
 
         public SidebarItem(String name, View view) {
             mName = name;
