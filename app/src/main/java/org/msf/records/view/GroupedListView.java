@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.view;
 
 import android.content.Context;
 import android.database.DataSetObserver;
