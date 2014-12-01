@@ -329,9 +329,12 @@ public class PatientListFragment extends ProgressFragment implements
                 PatientProviderContract.CONTENT_URI_PATIENT_TENTS, // URI
                 PROJECTION,                // Projection
                 PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + " LIKE ? AND (" +
+                PatientProviderContract.PatientColumns._ID + "=? OR " +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ? OR " +
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ?)",
-                new String[] {zoneFilterString, nameFilterString, nameFilterString}, // args
+                PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ?)",
+                new String[] {
+                        zoneFilterString, mFilterQueryTerm, nameFilterString, nameFilterString
+                }, // Selection args
                 PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
     }
 

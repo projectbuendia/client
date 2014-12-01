@@ -97,9 +97,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
                 PROJECTION,
                 PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + " LIKE ? AND " +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT + "=? AND (" +
+                PatientProviderContract.PatientColumns._ID + "=? OR " +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ? OR " +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ?)",
-                new String[] { zoneFilterString, tent, likeQueryTerm, likeQueryTerm },
+                new String[] {
+                        zoneFilterString, tent, mQueryFilterTerm, likeQueryTerm, likeQueryTerm
+                },
                 null);
 
         Cursor childCursor = null;
