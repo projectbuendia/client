@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.google.gson.Gson;
 
-import org.msf.records.model.Patient;
+import org.msf.records.net.model.Patient;
 
 /**
  * Created by akalachman on 11/20/14.

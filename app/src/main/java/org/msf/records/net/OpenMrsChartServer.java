@@ -2,10 +2,10 @@ package org.msf.records.net;
 
 import com.android.volley.Response;
 
-import org.msf.records.model.ChartStructure;
-import org.msf.records.model.ConceptList;
-import org.msf.records.model.CustomSerialization;
-import org.msf.records.model.PatientChart;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.CustomSerialization;
+import org.msf.records.net.model.PatientChart;
 
 import java.util.HashMap;
 

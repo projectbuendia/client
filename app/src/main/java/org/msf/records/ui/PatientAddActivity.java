@@ -24,8 +24,8 @@ import com.android.volley.VolleyError;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.model.Patient;
 import org.msf.records.model.Status;
+import org.msf.records.net.model.Patient;
 
 import java.util.ArrayList;
 import java.util.HashMap;

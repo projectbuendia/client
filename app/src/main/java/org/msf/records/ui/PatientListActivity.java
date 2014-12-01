@@ -70,8 +70,6 @@ public class PatientListActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
 
-        getActionBar().setDisplayShowHomeEnabled(false);
-
         if (findViewById(R.id.patient_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-large and
@@ -178,9 +176,10 @@ public class PatientListActivity extends BaseActivity
         final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
                 .getSystemService(LAYOUT_INFLATER_SERVICE);
         final ActionBar actionBar = getActionBar();
+        actionBar.setLogo(R.drawable.ic_launcher);
+        actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionBar.setListNavigationCallbacks(adapter, callback);
-        actionBar.setDisplayShowTitleEnabled(false);
         /*actionBar.setDisplayOptions(
                 ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME

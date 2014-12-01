@@ -12,7 +12,7 @@ import android.widget.EditText;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.model.NewUser;
+import org.msf.records.net.model.NewUser;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

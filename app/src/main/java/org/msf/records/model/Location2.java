@@ -2,6 +2,8 @@ package org.msf.records.model;
 
 import android.os.Parcelable;
 
+import org.msf.records.net.model.PatientLocation;
+
 import auto.parcel.AutoParcel;
 
 /**
