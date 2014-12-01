@@ -4,19 +4,12 @@ import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.listeners.ActionClickListener;
-
-import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -37,27 +30,14 @@ import org.odk.collect.android.tasks.DiskSyncTask;
  * {@link PatientListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class PatientListActivity extends BaseActivity
-        implements PatientListFragment.Callbacks {
+public class PatientListActivity extends PatientSearchActivity {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
-//    private SearchView mSearchView;
+    private PatientListFragment mFragment;
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
-
-    private OnSearchListener mSearchListener;
-
-    private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
-
-    interface OnSearchListener {
-        void setQuerySubmitted(String q);
-    }
-
-    public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListener = onSearchListener;
-    }
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -87,72 +67,9 @@ public class PatientListActivity extends BaseActivity
 
         setupCustomActionBar();
 
-        updateAvailableSnackbar = Snackbar.with(this)
-                .text(getString(R.string.snackbar_update_available))
-                .actionLabel(getString(R.string.snackbar_action_download))
-                .swipeToDismiss(true)
-                .animation(false)
-                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
-        updateDownloadedSnackbar = Snackbar.with(this)
-                .text(getString(R.string.snackbar_update_downloaded))
-                .actionLabel(getString(R.string.snackbar_action_install))
-                .swipeToDismiss(true)
-                .animation(false)
-                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
-
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.patient_list);
         // TODO: If exposing deep links into your app, handle intents here.
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        App.getUpdateManager().checkForUpdate();
-    }
-
-    @Override
-    protected void onPause() {
-        updateAvailableSnackbar.dismiss();
-        updateDownloadedSnackbar.dismiss();
-
-        super.onPause();
-    }
-
-    /**
-     * Displays a {@link Snackbar} indicating that an update is available upon receiving an
-     * {@link UpdateAvailableEvent}.
-     */
-    public void onEventMainThread(final UpdateAvailableEvent event) {
-        updateAvailableSnackbar
-                .actionListener(new ActionClickListener() {
-
-                    @Override
-                    public void onActionClicked() {
-                        App.getUpdateManager().downloadUpdate(event.mUpdateInfo);
-                    }
-                });
-        if (updateAvailableSnackbar.isDismissed()) {
-            updateAvailableSnackbar.show(this);
-        }
-    }
-
-    /**
-     * Displays a {@link Snackbar} indicating that an update has been downloaded upon receiving an
-     * {@link UpdateDownloadedEvent}.
-     */
-    public void onEventMainThread(final UpdateDownloadedEvent event) {
-        updateAvailableSnackbar.dismiss();
-        updateDownloadedSnackbar
-                .actionListener(new ActionClickListener() {
-
-                    @Override
-                    public void onActionClicked() {
-                        App.getUpdateManager().installUpdate(event.mUpdateInfo);
-                    }
-                });
-        if (updateDownloadedSnackbar.isDismissed()) {
-            updateDownloadedSnackbar.show(this);
-        }
     }
 
     private void setupCustomActionBar(){
@@ -167,8 +84,11 @@ public class PatientListActivity extends BaseActivity
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long id) {
-                // TODO(akalachman): Filter by the selected zone.
-                Log.d("NavigationItemSelected", zones[position]); // Debug
+                if (position == 0) {
+                    mFragment.setZone(null); // All locations
+                } else {
+                    mFragment.setZone(zones[position]);
+                }
                 return true;
             }
         };
@@ -190,24 +110,8 @@ public class PatientListActivity extends BaseActivity
 //        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
 //        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
 //        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
-//        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
-//        mSearchView.setIconifiedByDefault(false);
 //        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
 //            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-    }
-
-    /**
-     * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given uuid/name/id was selected.
-     */
-    @Override
-    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
-        Intent detailIntent = new Intent(this, PatientChartActivity.class);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
-        detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
-        startActivity(detailIntent);
     }
 
     @Override
@@ -226,37 +130,7 @@ public class PatientListActivity extends BaseActivity
                         return true;
                     }
                 });
-
-        menu.findItem(R.id.action_search).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        // TODO(akalachman): Open a search activity or change state of this one.
-                        return true;
-                    }
-                });
-
-/*      InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-          @Override
-          public boolean onQueryTextSubmit(String query) {
-
-            InputMethodManager mgr = (InputMethodManager) getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-            mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-            return true;
-          }
-
-          @Override
-          public boolean onQueryTextChange(String newText) {
-            if (mSearchListener != null)
-              mSearchListener.setQuerySubmitted(newText);
-            return true;
-          }
-        });*/
+        super.onExtendOptionsMenu(menu);
     }
 
     private enum ScanAction {

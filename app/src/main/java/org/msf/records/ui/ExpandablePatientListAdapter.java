@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorTreeAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -54,10 +55,31 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     public static final int COLUMN_GENDER = 9;
 
     private Context mContext;
+    private String mQueryFilterTerm;
+    private String mZoneFilter;
 
-    public ExpandablePatientListAdapter(Cursor cursor, Context context) {
+    public ExpandablePatientListAdapter(
+            Cursor cursor, Context context, String queryFilterTerm, String zoneFilter) {
         super(cursor, context);
         mContext = context;
+        mQueryFilterTerm = queryFilterTerm;
+        mZoneFilter = zoneFilter;
+    }
+
+    public String getQueryFilterTerm() {
+        return mQueryFilterTerm;
+    }
+
+    public void setQueryFilterTerm(String queryFilterTerm) {
+        mQueryFilterTerm = queryFilterTerm;
+    }
+
+    public String getZoneFilter() {
+        return mZoneFilter;
+    }
+
+    public void setZoneFilter(String zoneFilter) {
+        mZoneFilter = zoneFilter;
     }
 
     @Override
@@ -67,11 +89,17 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String tent = itemCursor.getString(PatientListFragment.COLUMN_LOCATION_TENT);
         Log.d(TAG, "Getting child cursor for tent: " + tent);
 
+        String likeQueryTerm = mQueryFilterTerm + "%";
+        String zoneFilterString = (mZoneFilter == null) ? "%" : mZoneFilter;
+
         CursorLoader cursorLoader = new CursorLoader(mContext,
                 PatientProviderContract.CONTENT_URI,
                 PROJECTION,
-                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT + "=?",
-                new String[] { tent },
+                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + " LIKE ? AND " +
+                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT + "=? AND (" +
+                PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ? OR " +
+                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ?)",
+                new String[] { zoneFilterString, tent, likeQueryTerm, likeQueryTerm },
                 null);
 
         Cursor childCursor = null;
