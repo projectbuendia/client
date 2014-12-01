@@ -1,4 +1,4 @@
-package org.msf.records.model;
+package org.msf.records.net.model;
 
 /**
  * A datatype explaining how the patient chart should be displayed. Gives how fields should be

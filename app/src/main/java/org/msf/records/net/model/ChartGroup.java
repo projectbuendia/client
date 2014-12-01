@@ -1,4 +1,4 @@
-package org.msf.records.model;
+package org.msf.records.net.model;
 
 /**
  * Created by nfortescue on 11/25/14.

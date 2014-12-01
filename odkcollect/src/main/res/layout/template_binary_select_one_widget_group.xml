@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.odk.collect.android.widgets2.group.BinarySelectOneWidgetGroup
+<org.odk.collect.android.widgets2.group.TableWidgetGroup
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:columnCount="2" />
+    android:layout_height="wrap_content" />

@@ -86,7 +86,7 @@ public abstract class QuestionWidget extends LinearLayout {
         mLayoutParams.setMargins(10, 0, 10, 0);
 
         addQuestionText(p);
-        addHelpText(p);
+//        addHelpText(p);
     }
 
     public void playAudio() {
@@ -177,12 +177,10 @@ public abstract class QuestionWidget extends LinearLayout {
         // Add the text view. Textview always exists, regardless of whether there's text.
         mQuestionText = (TextView) LayoutInflater.from(getContext())
                 .inflate(R.layout.template_text_view_question, null);
-//        mQuestionText = new TextView(getContext());
 
         // TODO(dxchen): Un-unscreamify once server work is done.
 
-        mQuestionText
-                .setText(promptText == null ? "" : StringUtils.unscreamify(promptText));
+        mQuestionText.setText(promptText == null ? "" : StringUtils.unscreamify(promptText));
 
         // TODO(dxchen): Remove this hack!
         if (promptText != null && promptText.toLowerCase().equals("date of birth")) {
@@ -209,27 +207,27 @@ public abstract class QuestionWidget extends LinearLayout {
         addView(mediaLayout, mLayoutParams);
     }
 
-
-    /**
-     * Add a TextView containing the help text.
-     */
-    private void addHelpText(FormEntryPrompt p) {
-
-        String s = p.getHelpText();
-
-        if (s != null && !s.equals("")) {
-            mHelpText = new TextView(getContext());
-            mHelpText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize - 3);
-            mHelpText.setPadding(0, -5, 0, 7);
-            // wrap to the widget of view
-            mHelpText.setHorizontallyScrolling(false);
-            mHelpText.setText(s);
-            mHelpText.setTypeface(null, Typeface.ITALIC);
-
-            addView(mHelpText, mLayoutParams);
-        }
-    }
-
+//
+//    /**
+//     * Add a TextView containing the help text.
+//     */
+//    private void addHelpText(FormEntryPrompt p) {
+//
+//        String s = p.getHelpText();
+//
+//        if (s != null && !s.equals("")) {
+//            mHelpText = new TextView(getContext());
+//            mHelpText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize - 3);
+//            mHelpText.setPadding(0, -5, 0, 7);
+//            // wrap to the widget of view
+//            mHelpText.setHorizontallyScrolling(false);
+//            mHelpText.setText(s);
+//            mHelpText.setTypeface(null, Typeface.ITALIC);
+//
+//            addView(mHelpText, mLayoutParams);
+//        }
+//    }
+//
 
     /**
      * Every subclassed widget should override this, adding any views they may contain, and calling

@@ -4,9 +4,9 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
-import org.msf.records.model.NewUser;
-import org.msf.records.model.Patient;
-import org.msf.records.model.User;
+import org.msf.records.net.model.NewUser;
+import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.User;
 
 import java.util.List;
 import java.util.Map;
