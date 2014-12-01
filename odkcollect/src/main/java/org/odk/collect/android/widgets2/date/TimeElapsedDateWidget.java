@@ -106,10 +106,4 @@ public class TimeElapsedDateWidget extends TypedWidget<DateData> {
         mValue.setText("");
         mVisibleUnits.get(0).setChecked(true);
     }
-
-    @Override
-    public void setFocus(Context context) {}
-
-    @Override
-    public void setOnLongClickListener(OnLongClickListener l) {}
 }
