@@ -1,4 +1,4 @@
-package org.msf.records.model;
+package org.msf.records.net.model;
 
 import com.google.common.base.Preconditions;
 

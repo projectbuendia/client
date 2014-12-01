@@ -2,7 +2,7 @@ package org.msf.records.events.user;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.msf.records.model.User;
+import org.msf.records.net.model.User;
 
 /**
  * An event bus event indicating that the set of known users was synced from the server.

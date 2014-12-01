@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import com.android.debug.hv.ViewServer;
 
 import org.msf.records.R;
-import org.msf.records.model.PatientChart;
 import org.msf.records.net.Constants;
 
 import javax.annotation.Nullable;
