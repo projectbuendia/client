@@ -12,8 +12,8 @@ import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.utilities.StringUtils;
 import org.odk.collect.android.widgets.QuestionWidget;
-import org.odk.collect.android.widgets2.Appearance;
-import org.odk.collect.android.widgets2.TypedWidget;
+import org.odk.collect.android.widgets2.common.Appearance;
+import org.odk.collect.android.widgets2.common.TypedWidget;
 
 import java.util.List;
 

@@ -1,6 +1,7 @@
 package org.odk.collect.android.widgets2.group;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.widget.GridLayout;
 import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
 
@@ -9,7 +10,7 @@ import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
  */
 public class BinarySelectOneWidgetGroup extends GridLayout implements WidgetGroup {
 
-    public BinarySelectOneWidgetGroup(Context context) {
-        super(context);
+    public BinarySelectOneWidgetGroup(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
 }
