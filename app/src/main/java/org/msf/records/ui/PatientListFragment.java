@@ -72,7 +72,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     String mFilterLocation;
 
-    String mFilterQueryTerm;
+    String mFilterQueryTerm = "";
 
     String mFilterState;
 
@@ -155,6 +155,15 @@ public class PatientListFragment extends ProgressFragment implements
     public void onRefresh() {
         if(!isRefreshing){
             Log.d(TAG, "onRefresh");
+            // Ensure returned data is filtered by name.
+            if (!mFilterQueryTerm.equals(mPatientAdapter.getQueryFilterTerm())) {
+                mPatientAdapter.setQueryFilterTerm(mFilterQueryTerm);
+
+                // Reload the group cursor in addition to children cursor so we don't show any
+                // tents with 0 matching patients.
+                loadSearchResults();
+            }
+
             //triggers app wide data refresh
             GenericAccountService.triggerRefresh();
             isRefreshing = true;
@@ -169,7 +178,8 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
-        getLoaderManager().initLoader(LOADER_LIST_ID, null, this);
+        mPatientAdapter.setGroupCursor(null);
+        getLoaderManager().restartLoader(LOADER_LIST_ID, null, this);
     }
 
     @Override
@@ -185,7 +195,7 @@ public class PatientListFragment extends ProgressFragment implements
         Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
         allLocationsButton.setOnClickListener(onClickListener);
 
-        mPatientAdapter = new ExpandablePatientListAdapter(null, getActivity());
+        mPatientAdapter = new ExpandablePatientListAdapter(null, getActivity(), mFilterQueryTerm);
         mListView.setAdapter(mPatientAdapter);
 
         loadSearchResults();
@@ -302,11 +312,13 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String likeFilterString = mFilterQueryTerm + "%";
         return new CursorLoader(getActivity(),  // Context
                 PatientProviderContract.CONTENT_URI_PATIENT_TENTS, // URI
                 PROJECTION,                // Projection
-                null,                           // Selection
-                null,                           // Selection args
+                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ? OR " +
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ?",
+                new String[] {likeFilterString, likeFilterString}, // Selection args
                 PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
     }
 
