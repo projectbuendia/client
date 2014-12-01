@@ -10,11 +10,11 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.msf.records.model.NewUser;
-import org.msf.records.model.Patient;
-import org.msf.records.model.PatientAge;
-import org.msf.records.model.PatientLocation;
-import org.msf.records.model.User;
+import org.msf.records.net.model.NewUser;
+import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.PatientAge;
+import org.msf.records.net.model.PatientLocation;
+import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
@@ -220,6 +220,7 @@ public class OpenMrsServer implements Server {
             patient.assigned_location.zone = "Suspect Zone";
             patient.assigned_location.bed = "Bed 5";
             patient.assigned_location.tent = "Tent 4";
+            patient.assigned_location.uuid = "86976903-645a-4afc-9d4b-d24b05d5db7b";
         }
 
         if (patient.age == null) {

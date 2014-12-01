@@ -2,6 +2,7 @@ package org.odk.collect.android.widgets2.selectone;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 
@@ -54,6 +55,14 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
         if (mYesChoice.getValue().equals(defaultAnswer)) {
             mCheckBox.setChecked(true);
         }
+
+        // Remove the views added by the base class.
+        removeAllViews();
+
+        // Force a wide layout.
+//        ViewGroup.LayoutParams params =
+//                new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+//        setLayoutParams(params);
 
         addView(mCheckBox);
     }

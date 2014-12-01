@@ -2,8 +2,8 @@ package org.msf.records.user.testing;
 
 import com.google.common.collect.Sets;
 
-import org.msf.records.model.NewUser;
-import org.msf.records.model.User;
+import org.msf.records.net.model.NewUser;
+import org.msf.records.net.model.User;
 import org.msf.records.user.UserStore;
 
 import java.util.Set;

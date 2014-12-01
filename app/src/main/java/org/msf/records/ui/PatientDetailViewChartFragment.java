@@ -12,10 +12,10 @@ import com.android.volley.VolleyError;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.model.ChartStructure;
-import org.msf.records.model.ConceptList;
-import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.PatientChart;
 
 import java.util.Arrays;
 
