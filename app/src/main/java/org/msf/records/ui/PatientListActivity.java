@@ -73,8 +73,6 @@ public class PatientListActivity extends PatientSearchActivity {
         }
         setupCustomActionBar(selectedFilter);
 
-        mFragment = (PatientListFragment)getSupportFragmentManager()
-                .findFragmentById(R.id.patient_list);
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
@@ -114,7 +112,14 @@ public class PatientListActivity extends PatientSearchActivity {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionBar.setListNavigationCallbacks(adapter, callback);
         actionBar.setSelectedNavigationItem(selectedFilter);
-        mFragment.setZone(zones[selectedFilter]);
+
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.patient_list);
+        if (selectedFilter == 0) {
+            mFragment.setZone(null);
+        } else {
+            mFragment.setZone(zones[selectedFilter]);
+        }
         /*actionBar.setDisplayOptions(
                 ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
