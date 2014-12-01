@@ -96,5 +96,17 @@ public class PatientProviderContract {
          * Patient tent
          */
         public static final String COLUMN_NAME_LOCATION_TENT = "location_tent";
+        /**
+         * Patient age (years)
+         */
+        public static final String COLUMN_NAME_AGE_YEARS = "age_years";
+        /**
+         * Patient age (months)
+         */
+        public static final String COLUMN_NAME_AGE_MONTHS = "age_months";
+        /**
+         * Patient gender
+         */
+        public static final String COLUMN_NAME_GENDER = "gender";
     }
 }
