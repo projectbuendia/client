@@ -504,89 +504,19 @@ public class FormEntryActivity
 	}
 
     private void populateViews() {
-        final List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
-        final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
-                this, R.layout.large_list_item_1, sidebarItems);
-
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new QuestionHolderFormVisitor(sidebarItems))
+                .addVisitor(new QuestionHolderFormVisitor())
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
-
-        final ListView sidebar = (ListView) findViewById(R.id.sidebar);
-        sidebar.setAdapter(sidebarAdapter);
-        sidebar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SidebarItem item = sidebarAdapter.getItem(position);
-                mScrollView.smoothScrollTo(0 /*x*/, item.mView.getTop());
-            }
-        });
-
-        // For each item in the sidebar, determine the position of it in the scroll view. Then
-        // register a ViewTreeObserver so that we can highlight it when the user gets there.
-        Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                final int[] positions = new int[sidebarItems.size()];
-                for (int i = 0; i < sidebarItems.size(); i++) {
-                    positions[i] = sidebarItems.get(i).mView.getTop();
-                }
-
-                ((CheckedTextView) sidebar.getChildAt(0)).setChecked(true);
-
-                mScrollView.getViewTreeObserver().addOnScrollChangedListener(
-                        new ViewTreeObserver.OnScrollChangedListener() {
-                            @Override
-                            public void onScrollChanged() {
-                                for (int i = positions.length - 1; i >= 0; i--) {
-                                    if (mScrollView.getScrollY() >= positions[i]) {
-                                        for (int j = 0; j < positions.length; j++) {
-                                            CheckedTextView child =
-                                                    ((CheckedTextView) sidebar.getChildAt(j));
-                                            if (child != null) {
-                                                child.setChecked(false);
-                                            }
-                                        }
-
-                                        CheckedTextView listItemView =
-                                                (CheckedTextView) sidebar.getChildAt(i);
-                                        if (listItemView != null) {
-                                            listItemView.setChecked(true);
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                );
-            }
-        };
-
-        new Handler(getMainLooper()).post(runnable);
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
-
-        private final List<SidebarItem> mSidebarItems;
-
-        public QuestionHolderFormVisitor(List<SidebarItem> sidebarItems) {
-            mSidebarItems = sidebarItems;
-        }
 
         @Override
         public void visit(int event, FormController formController) {
             View view = createView(event, false /*advancingPage*/);
             if (view != null) {
                 mQuestionHolder.addView(view);
-            }
-
-            if (event == FormEntryController.EVENT_GROUP) {
-                mSidebarItems.add(new SidebarItem(
-                        Collect.getInstance().getFormController().getLastGroupText(),
-                        view));
             }
         }
     }
