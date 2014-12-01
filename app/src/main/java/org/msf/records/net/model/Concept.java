@@ -1,4 +1,4 @@
-package org.msf.records.model;
+package org.msf.records.net.model;
 
 import java.util.Map;
 

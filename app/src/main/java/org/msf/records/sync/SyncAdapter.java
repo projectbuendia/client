@@ -19,11 +19,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.App;
-import org.msf.records.model.ChartStructure;
-import org.msf.records.model.ConceptList;
-import org.msf.records.model.Patient;
-import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.PatientChart;
 
 import java.util.ArrayList;
 import java.util.HashMap;
