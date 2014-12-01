@@ -5,6 +5,7 @@ package org.msf.records.net.model;
  */
 public class PatientLocation {
 
+    public String uuid;
     public String zone;
     public String tent;
     public String bed;
