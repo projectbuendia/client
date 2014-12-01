@@ -3,8 +3,6 @@ package org.odk.collect.android.widgets2.group;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.GridLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
