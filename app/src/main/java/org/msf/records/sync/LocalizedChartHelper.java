@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A simple helper method to get all observations for a patient in a nice java bean format.
@@ -15,6 +17,24 @@ public class LocalizedChartHelper {
     public static final String ENGLISH_LOCALE = "en";
 
     public static final String PULSE_UUID = "";
+    /**
+     * A uuid representing when a clinician fills in "Unknown".
+     */
+    public static final String UNKNOWN_VALUE = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * A set of uuids for concepts that represent an answer indicating everything is normal, and
+     * there is no worrying symptom
+     */
+    public static final Set<String> NO_SYMPTOM_VALUES = new HashSet<>();
+    static {
+        NO_SYMPTOM_VALUES.add("1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // NO
+        NO_SYMPTOM_VALUES.add("159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // Solid food
+        NO_SYMPTOM_VALUES.add("95d50bc3-6281-4661-94ab-1a26455c40a2"); // Normal pulse
+        NO_SYMPTOM_VALUES.add("160282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // Awake
+        NO_SYMPTOM_VALUES.add("1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // NORMAL
+        NO_SYMPTOM_VALUES.add("db2ac5ad-cc64-4184-b4be-1324730e1882"); // Can talk
+        NO_SYMPTOM_VALUES.add("c2a547f7-6329-4273-80c2-eae804897efd"); // Can walk
+    }
 
     /**
      * A simple bean class representing an observation. All names and values have been localized.
@@ -37,6 +57,12 @@ public class LocalizedChartHelper {
          */
         public final String conceptName;
         /**
+         * The value that was observed non-localized. For a numeric value it will be a number,
+         * for a non-numeric value it will be a UUID of the response.
+         */
+        public final String value;
+
+        /**
          * The value that was observed, converted to a String, and localized in the case of
          * Coded (concept) observations.
          */
@@ -44,11 +70,13 @@ public class LocalizedChartHelper {
 
         public LocalizedObservation(long encounterTimeMillis, String groupName, String conceptUuid,
                                     String conceptName,
+                                    String value,
                                     String localizedValue) {
             this.encounterTimeMillis = encounterTimeMillis;
             this.groupName = groupName;
             this.conceptUuid = conceptUuid;
             this.conceptName = conceptName;
+            this.value = value;
             this.localizedValue = localizedValue;
         }
 
@@ -85,6 +113,7 @@ public class LocalizedChartHelper {
                         cursor.getString(cursor.getColumnIndex("group_name")),
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
+                        cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
                 result.add(obs);
@@ -126,7 +155,39 @@ public class LocalizedChartHelper {
                         "", /* no group */
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
+                        cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
+                );
+                result.add(obs);
+            }
+            return result;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    /**
+     * Get all observations for a given patient.
+     * @param locale the locale to return the results in, to match the server String
+     */
+    public static ArrayList<LocalizedObservation> getEmptyChart(
+            ContentResolver contentResolver, String locale) {
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(ChartProviderContract.makeEmptyLocalizedChartUri(
+                    KNOWN_CHART_UUID, locale), null, null, null, null);
+
+            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                LocalizedObservation obs = new LocalizedObservation(
+                        0L,
+                        cursor.getString(cursor.getColumnIndex("group_name")),
+                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
+                        cursor.getString(cursor.getColumnIndex("concept_name")),
+                        "", // no value
+                        "" // no value
                 );
                 result.add(obs);
             }

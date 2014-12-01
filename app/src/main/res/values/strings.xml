@@ -69,5 +69,6 @@
     <string name="n_patients">(%d patients)</string>
     <string name="action_search">Search</string>
     <string name="title_activity_tent_selection">MSF Medical Records</string>
+    <string name="today">Today</string>
 
 </resources>
