@@ -51,6 +51,8 @@ import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
 import org.odk.collect.android.widgets2.Widget2Factory;
+import org.odk.collect.android.widgets2.common.Appearance;
+import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -100,6 +102,25 @@ public class ODKView extends LinearLayout {
 
         // when the grouped fields are populated by an external app, this will get true.
         boolean readOnlyOverride = false;
+
+        if (groups != null && groups.length > 0) {
+            WidgetGroupBuilder<?, ?> builder =
+                    Widget2Factory.INSTANCE.createGroupBuilder(context, groups[groups.length - 1]);
+            if (builder != null) {
+                int id = 0;
+                for (FormEntryPrompt p : questionPrompts) {
+                    builder.createAndAddWidget(
+                            context,
+                            p,
+                            Appearance.fromString(p.getAppearanceHint()),
+                            readOnlyOverride,
+                            VIEW_ID + id++);
+                }
+                mView.addView(builder.build(context));
+                addView(mView);
+                return;
+            }
+        }
 
         // get the group we are showing -- it will be the last of the groups in the groups list
         if (groups != null && groups.length > 0) {
@@ -292,14 +313,11 @@ public class ODKView extends LinearLayout {
             }
         }
 
-        // build view
+        // If any groups exist, add a TextView that contains the group name.
         if (s.length() > 0) {
             TextView tv = (TextView) LayoutInflater.from(getContext())
                     .inflate(R.layout.template_text_view_group, null);
             tv.setText(s.substring(0, s.length() - 3));
-//            int questionFontsize = Collect.getQuestionFontsize();
-//            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, questionFontsize - 4);
-//            tv.setPadding(0, 0, 0, 5);
             mView.addView(tv, mLayout);
         }
     }

@@ -31,7 +31,11 @@ public class BinarySelectOneWidgetGroupBuilder implements
 
     @Override
     public BinarySelectOneWidgetGroupBuilder createAndAddWidget(
-            Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
+            Context context,
+            FormEntryPrompt prompt,
+            Appearance appearance,
+            boolean forceReadOnly,
+            int id) {
         if (prompt.getControlType() != Constants.CONTROL_SELECT_ONE) {
             Log.w(
                     TAG,
@@ -40,7 +44,20 @@ public class BinarySelectOneWidgetGroupBuilder implements
             return this;
         }
 
-        mWidgets.add(new BinarySelectOneWidget(context, prompt, appearance, forceReadOnly));
+        BinarySelectOneWidget widget;
+        try {
+            widget = new BinarySelectOneWidget(context, prompt, appearance, forceReadOnly);
+        } catch (IllegalArgumentException e) {
+            Log.w(
+                    TAG,
+                    "A select-one field that is not binary was found under a binary select-one "
+                            + "group. It has not been added.",
+                    e);
+            return this;
+        }
+
+        widget.setId(id);
+        mWidgets.add(widget);
 
         return this;
     }
