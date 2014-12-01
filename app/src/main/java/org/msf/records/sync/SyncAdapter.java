@@ -51,7 +51,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             PatientColumns.COLUMN_NAME_STATUS,
             PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
             PatientColumns.COLUMN_NAME_LOCATION_ZONE,
-            PatientColumns.COLUMN_NAME_LOCATION_TENT
+            PatientColumns.COLUMN_NAME_LOCATION_TENT,
+            PatientColumns.COLUMN_NAME_AGE_MONTHS,
+            PatientColumns.COLUMN_NAME_AGE_YEARS,
+            PatientColumns.COLUMN_NAME_GENDER
     };
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
@@ -84,6 +87,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int COLUMN_ADMISSION_TIMESTAMP = 5;
     public static final int COLUMN_LOCATION_ZONE = 6;
     public static final int COLUMN_LOCATION_TENT = 7;
+    public static final int COLUMN_AGE_MONTHS = 8;
+    public static final int COLUMN_AGE_YEARS = 9;
+    public static final int COLUMN_GENDER = 10;
 
     /**
      * Content resolver, for performing database operations.
@@ -188,7 +194,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, status, locationZone, locationTent;
+        String givenName, familyName, uuid, status, locationZone, locationTent, gender;
+        int ageMonths = -1, ageYears = -1;
         long admissionTimestamp;
 
         //iterate through the list of patients
@@ -203,6 +210,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             admissionTimestamp = c.getLong(COLUMN_ADMISSION_TIMESTAMP);
             locationZone = c.getString(COLUMN_LOCATION_ZONE);
             locationTent = c.getString(COLUMN_LOCATION_TENT);
+            if (!c.isNull(COLUMN_AGE_MONTHS)) {
+                ageMonths = c.getInt(COLUMN_AGE_MONTHS);
+            }
+            if (!c.isNull(COLUMN_AGE_YEARS)) {
+                ageYears = c.getInt(COLUMN_AGE_YEARS);
+            }
+            gender = c.getString(COLUMN_GENDER);
 
             Patient patient = patientsMap.get(id);
             if (patient != null) {
@@ -221,7 +235,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         (patient.assigned_location.zone != null &&
                             !patient.assigned_location.zone.equals(locationZone)) ||
                         (patient.assigned_location.tent != null &&
-                            !patient.assigned_location.tent.equals(locationTent))) {
+                            !patient.assigned_location.tent.equals(locationTent)) ||
+                        (patient.age.months != ageMonths) ||
+                        (patient.age.years != ageYears) ||
+                        (patient.gender != null && !patient.gender.equals(gender))) {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
@@ -233,6 +250,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, locationZone)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, locationTent)
+                            .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
+                            .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
+                            .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
@@ -261,6 +281,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
                     .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
                     .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, e.assigned_location.tent)
+                    .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
+                    .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
+                    .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender)
                     .build());
             syncResult.stats.numInserts++;
         }
