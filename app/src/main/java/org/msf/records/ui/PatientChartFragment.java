@@ -16,10 +16,10 @@ import com.google.common.collect.Maps;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.model.ChartStructure;
-import org.msf.records.model.ConceptList;
-import org.msf.records.model.PatientChart;
 import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.PatientChart;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.view.VitalView;
 import org.msf.records.widget.DataGridAdapter;

@@ -5,12 +5,12 @@ import android.content.SyncResult;
 import android.util.Log;
 
 import org.joda.time.DateTime;
-import org.msf.records.model.ChartGroup;
-import org.msf.records.model.ChartStructure;
-import org.msf.records.model.Concept;
-import org.msf.records.model.ConceptList;
-import org.msf.records.model.Encounter;
-import org.msf.records.model.PatientChart;
+import org.msf.records.net.model.ChartGroup;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.Concept;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.Encounter;
+import org.msf.records.net.model.PatientChart;
 
 import java.util.ArrayList;
 import java.util.Map;

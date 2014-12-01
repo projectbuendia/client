@@ -6,8 +6,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.msf.records.App;
-import org.msf.records.model.NewUser;
-import org.msf.records.model.User;
+import org.msf.records.net.model.NewUser;
+import org.msf.records.net.model.User;
 
 import java.util.HashSet;
 import java.util.List;

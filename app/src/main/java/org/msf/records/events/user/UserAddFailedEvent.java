@@ -1,6 +1,6 @@
 package org.msf.records.events.user;
 
-import org.msf.records.model.NewUser;
+import org.msf.records.net.model.NewUser;
 
 /**
  * An event bus event indicating that a user could not be successfully added.

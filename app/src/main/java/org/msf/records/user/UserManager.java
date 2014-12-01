@@ -15,8 +15,8 @@ import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.events.user.UserDeleteFailedEvent;
 import org.msf.records.events.user.UserDeletedEvent;
-import org.msf.records.model.NewUser;
-import org.msf.records.model.User;
+import org.msf.records.net.model.NewUser;
+import org.msf.records.net.model.User;
 
 import java.util.HashSet;
 import java.util.Set;

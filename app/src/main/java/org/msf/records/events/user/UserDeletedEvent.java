@@ -1,6 +1,6 @@
 package org.msf.records.events.user;
 
-import org.msf.records.model.User;
+import org.msf.records.net.model.User;
 
 /**
  * An event bus event indicating that a user was successfully deleted, both locally and on the

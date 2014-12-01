@@ -15,7 +15,7 @@ import android.widget.TextView;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
-import org.msf.records.model.User;
+import org.msf.records.net.model.User;
 import org.msf.records.utils.Constants;
 
 import butterknife.ButterKnife;
