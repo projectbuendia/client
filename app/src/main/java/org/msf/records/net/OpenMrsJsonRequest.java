@@ -35,6 +35,15 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                 jsonRequest, listener, errorListener);
     }
 
+    public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
+                              int method, String url, JSONObject jsonRequest,
+                              Response.Listener<JSONObject> listener,
+                              Response.ErrorListener errorListener) {
+        super(method, url, jsonRequest, listener, errorListener);
+        this.mUsername = connectionDetails.userName;
+        this.mPassword = connectionDetails.password;
+    }
+
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         // TODO(nfortescue): work out how to do Auth properly
