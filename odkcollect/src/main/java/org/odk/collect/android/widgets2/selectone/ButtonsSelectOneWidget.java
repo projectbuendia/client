@@ -14,6 +14,7 @@ import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.utilities.StringUtils;
+import org.odk.collect.android.views.FlowRadioGroup;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -21,12 +22,12 @@ import org.odk.collect.android.widgets2.common.TypedWidget;
 import java.util.List;
 
 /**
- * A {@link SelectOneData} {@link TypedWidget} that displays choices as a row of buttons.
+ * A {@link SelectOneData} {@link TypedWidget} that displays choices as a flow layout of buttons.
  */
 public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
     private final List<SelectChoice> mChoices;
-    private final RadioGroup mGroup;
+    private final FlowRadioGroup mGroup;
 
     public ButtonsSelectOneWidget(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
@@ -35,9 +36,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
         super(context, prompt, appearance, forceReadOnly);
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
-        HorizontalScrollView scrollView =
-                (HorizontalScrollView) inflater.inflate(R.layout.template_segmented_group, null);
-        mGroup = (RadioGroup) scrollView.findViewById(R.id.radio_group);
+        mGroup = (FlowRadioGroup) inflater.inflate(R.layout.template_segmented_group, null);
 
         mChoices = prompt.getSelectChoices();
         String defaultAnswer = prompt.getAnswerValue() == null
@@ -67,7 +66,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
             mGroup.addView(radioButton);
         }
 
-        addView(scrollView);
+        addView(mGroup);
     }
 
     @Override
