@@ -79,24 +79,45 @@ public class ChartProviderContract {
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHARTS).build();
 
     private static final String LOCALIZED_CHART_PREFIX = "localizedchart";
+
     /**
      * A path segment for a special URI that will be used most often in the user interface.
      * Get data for a given patient in a given language for a given chart.
      *
-     * content://org.msf.records/localizedchart/{chart_uuid}/{patient_uuid}/{locale}
+     * content://org.msf.records/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
      */
     static final String PATH_LOCALIZED_CHART = LOCALIZED_CHART_PREFIX + "/*/*/*";
+
+    /**
+     * A path segment for a special URI that will give an empty chart for a given local.
+     *
+     * content://org.msf.records/localizedchart/{chart_uuid}/{locale}
+     */
+    static final String PATH_EMPTY_LOCALIZED_CHART = LOCALIZED_CHART_PREFIX + "/*/*";
 
     /**
      * Make a special URI that will be used most often in the user interface.
      * Get data for a given patient in a given language for a given chart.
      *
-     * content://org.msf.records/localizedchart/{chart_uuid}/{patient_uuid}/{locale}
+     * content://org.msf.records/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
      */
     public static Uri makeLocalizedChartUri(String chartUuid, String patientUuid, String locale) {
         return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHART_PREFIX)
                 .appendPath(chartUuid)
+                .appendPath(locale)
                 .appendPath(patientUuid)
+                .build();
+    }
+
+    /**
+     * Make a special URI that will be used most often in the user interface.
+     * Get data for a given patient in a given language for a given chart.
+     *
+     * content://org.msf.records/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
+     */
+    public static Uri makeEmptyLocalizedChartUri(String chartUuid, String locale) {
+        return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHART_PREFIX)
+                .appendPath(chartUuid)
                 .appendPath(locale)
                 .build();
     }

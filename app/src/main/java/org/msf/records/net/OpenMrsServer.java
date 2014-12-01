@@ -3,6 +3,7 @@ package org.msf.records.net;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
@@ -10,6 +11,7 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientAge;
@@ -243,10 +245,6 @@ public class OpenMrsServer implements Server {
         return patient;
     }
 
-    private User parseUserJson(JSONObject object) throws JSONException {
-        return User.create(object.getString("user_id"), object.getString("full_name"));
-    }
-
     @Override
     public void listUsers(@Nullable String filterQueryTerm,
                           final Response.Listener<List<User>> userListener,
@@ -274,6 +272,125 @@ public class OpenMrsServer implements Server {
                 },
                 errorListener);
         mConnectionDetails.volley.addToRequestQueue(request, logTag);
+    }
+
+    private User parseUserJson(JSONObject object) throws JSONException {
+        return User.create(object.getString("user_id"), object.getString("full_name"));
+    }
+
+    public void addLocation(Location location,
+                            final Response.Listener<Location> locationListener,
+                            final Response.ErrorListener errorListener,
+                            final String logTag) {
+        JSONObject requestBody;
+        try {
+            if (location.uuid != null) {
+                throw new IllegalArgumentException("The server sets the uuids for new locations");
+            }
+            if (location.parent_uuid == null) {
+                throw new IllegalArgumentException("You must set a parent_uuid for a new location");
+            }
+            if (location.names == null || location.names.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "You must set a name in at least one locale for a new location");
+            }
+            requestBody = new JSONObject(gson.toJson(location));
+        } catch (JSONException e) {
+            // This is almost never recoverable, and should not happen in correctly functioning code
+            // So treat like NPE and rethrow.
+            throw new RuntimeException(e);
+        }
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/location",
+                requestBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        locationListener.onResponse(parseLocationJson(response));
+                    }
+                },
+                errorListener);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+    }
+
+    @Override
+    public void updateLocation(Location location,
+                               final Response.Listener<Location> locationListener,
+                               final Response.ErrorListener errorListener,
+                               final String logTag) {
+
+        if (location.uuid == null) {
+            throw new IllegalArgumentException("Location must be set for update " + location);
+        }
+        if (location.names == null || location.names.isEmpty()) {
+            throw new IllegalArgumentException("New names must be set for update " + location);
+        }
+        JSONObject requestBody;
+        try {
+            requestBody = new JSONObject(gson.toJson(location));
+        } catch (JSONException e) {
+            String msg = "Failed to write patient changes to Gson: " + location.toString();
+            Log.e(logTag, msg);
+            errorListener.onErrorResponse(new VolleyError(msg));
+            return;
+        }
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+                "/location/"+location.uuid,
+                requestBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        locationListener.onResponse(parseLocationJson(response));
+                    }
+                },
+                errorListener);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+    }
+
+    public void deleteLocation(String locationUuid,
+                               final Response.ErrorListener errorListener,
+                               final String logTag) {
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+                Request.Method.DELETE, "/location/" + locationUuid,
+                null,
+                null,
+                errorListener);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+    }
+
+    @Override
+    public void listLocations(final Response.Listener<List<Location>> locationListener,
+                              Response.ErrorListener errorListener,
+                              final String logTag) {
+
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+                mConnectionDetails, "/location",
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        ArrayList<Location> result = new ArrayList<>();
+                        try {
+                            JSONArray results = response.getJSONArray("results");
+                            for (int i=0; i<results.length(); i++) {
+                                Location location =
+                                        parseLocationJson(results.getJSONObject(i));
+                                result.add(location);
+                            }
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                        }
+                        locationListener.onResponse(result);
+                    }
+                },
+                errorListener);
+        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+    }
+
+    private Location parseLocationJson(JSONObject object) {
+        return gson.fromJson(object.toString(), Location.class);
     }
 
     @Override
