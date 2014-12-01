@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import org.msf.records.net.BuendiaServer;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
@@ -52,12 +51,7 @@ public class App extends Application {
                             preferences.getString("openmrs_user", null),
                             preferences.getString("openmrs_password", null),
                             getApplicationContext());
-            if (preferences.getBoolean("use_openmrs", true)) {
-                mServer = new OpenMrsServer(mConnectionDetails);
-            } else {
-                String rootUrl = preferences.getString("api_root_url", null);
-                mServer = new BuendiaServer(getApplicationContext(), rootUrl);
-            }
+            mServer = new OpenMrsServer(mConnectionDetails);
         }
     }
 
