@@ -220,6 +220,7 @@ public class OpenMrsServer implements Server {
             patient.assigned_location.zone = "Suspect Zone";
             patient.assigned_location.bed = "Bed 5";
             patient.assigned_location.tent = "Tent 4";
+            patient.assigned_location.uuid = "86976903-645a-4afc-9d4b-d24b05d5db7b";
         }
 
         if (patient.age == null) {
