@@ -22,11 +22,10 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.view.VitalView;
-import org.msf.records.widget.DataGridAdapter;
 import org.msf.records.widget.DataGridView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.ButterKnife;
@@ -141,7 +140,7 @@ public class PatientChartFragment extends Fragment {
         super.onResume();
 
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        List<LocalizedChartHelper.LocalizedObservation> observations =
+        ArrayList<LocalizedChartHelper.LocalizedObservation> observations =
                 LocalizedChartHelper.getObservations(
                         getActivity().getContentResolver(), mPatientUuid);
 
@@ -228,88 +227,13 @@ public class PatientChartFragment extends Fragment {
 //        }
 //        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
 
+
         ViewGroup.LayoutParams params =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         DataGridView grid = new DataGridView.Builder()
                 .setDoubleWidthColumnHeaders(true)
-                .setDataGridAdapter(new DataGridAdapter() {
-
-                    @Override
-                    public int getColumnCount() {
-                        return 16;
-                    }
-
-                    @Override
-                    public int getRowCount() {
-                        return 30;
-                    }
-
-                    @Override
-                    public View getRowHeader(int row, View convertView, ViewGroup parent) {
-                        View view = mLayoutInflater.inflate(
-                                R.layout.data_grid_header_chart, null /*root*/);
-                        TextView textView =
-                                (TextView) view.findViewById(R.id.data_grid_header_text);
-
-                        switch (row % 8) {
-                            case 0:
-                                textView.setText("Diarrhea");
-                                break;
-                            case 1:
-                                textView.setText("Nausea");
-                                break;
-                            case 2:
-                                textView.setText("Vomiting");
-                                break;
-                            case 3:
-                                textView.setText("Bleeding - Nose");
-                                break;
-                            case 4:
-                                textView.setText("Bleeding - Mouth");
-                                break;
-                            case 5:
-                                textView.setText("Sore Throat");
-                                break;
-                            case 6:
-                                textView.setText("Abdominal Pain");
-                                break;
-                            case 7:
-                                textView.setText("Conjunctival Infection");
-                                break;
-                        }
-
-                        return view;
-                    }
-
-                    @Override
-                    public View getColumnHeader(int column, View convertView, ViewGroup parent) {
-                        View view = mLayoutInflater.inflate(
-                                R.layout.data_grid_header_chart, null /*root*/);
-                        TextView textView =
-                                (TextView) view.findViewById(R.id.data_grid_header_text);
-
-                        // 8 days.
-                        if (column == 14) {
-                            textView.setText("Today");
-                        } else {
-                            textView.setText(String.format("-%d Day", 7 - column / 2));
-                        }
-
-                        return view;
-                    }
-
-                    @Override
-                    public View getCell(int row, int column, View convertView, ViewGroup parent) {
-                        View view = mLayoutInflater.inflate(
-                                R.layout.data_grid_cell_chart, null /*root*/);
-                        if ((row + column) % 3 == 0) {
-                            view.findViewById(R.id.data_grid_cell_chart_image)
-                                    .setVisibility(View.VISIBLE);
-                        }
-
-                        return view;
-                    }
-                })
+                .setDataGridAdapter(new LocalizedChartDataGridAdapter(getActivity(), observations,
+                        mLayoutInflater))
                 .build(getActivity());
         grid.setLayoutParams(params);
 

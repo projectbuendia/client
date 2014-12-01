@@ -15,8 +15,6 @@ import java.util.Map;
 /**
  * An interfacing abstracting the idea of an RPC to a server. Allows calls to be abstracted between
  * the existing custom project buendia server, and an OpenMSR server.
- *
- * Created by nfortescue on 11/3/14.
  */
 public interface Server {
 
