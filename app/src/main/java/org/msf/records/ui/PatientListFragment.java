@@ -76,6 +76,8 @@ public class PatientListFragment extends ProgressFragment implements
 
     String mFilterState;
 
+    String mZone = null;
+
 
     /**
      * Projection for querying the content provider.
@@ -99,6 +101,10 @@ public class PatientListFragment extends ProgressFragment implements
     public static final int COLUMN_STATUS = 5;
     public static final int COLUMN_ADMISSION_TIMESTAMP = 6;
 
+    public void setZone(String zone) {
+        mZone = zone;
+        loadSearchResults();
+    }
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -155,12 +161,16 @@ public class PatientListFragment extends ProgressFragment implements
     public void onRefresh() {
         if(!isRefreshing){
             Log.d(TAG, "onRefresh");
-            // Ensure returned data is filtered by name.
-            if (!mFilterQueryTerm.equals(mPatientAdapter.getQueryFilterTerm())) {
+            // Ensure filters are up to date.
+            if ((mFilterQueryTerm != null &&
+                    !mFilterQueryTerm.equals(mPatientAdapter.getQueryFilterTerm())) ||
+                    (mZone != null && !mZone.equals(mPatientAdapter.getZoneFilter()))) {
                 mPatientAdapter.setQueryFilterTerm(mFilterQueryTerm);
+                mPatientAdapter.setZoneFilter(mZone);
 
-                // Reload the group cursor in addition to children cursor so we don't show any
-                // tents with 0 matching patients.
+                // Reinitialize the cursor loader so that filters can be reapplied at the group
+                // level. We can skip this step and still get valid results, but the adapter would
+                // include tents with no patients.
                 loadSearchResults();
             }
 
@@ -195,7 +205,8 @@ public class PatientListFragment extends ProgressFragment implements
         Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
         allLocationsButton.setOnClickListener(onClickListener);
 
-        mPatientAdapter = new ExpandablePatientListAdapter(null, getActivity(), mFilterQueryTerm);
+        mPatientAdapter = new ExpandablePatientListAdapter(
+                null, getActivity(), mFilterQueryTerm, mZone);
         mListView.setAdapter(mPatientAdapter);
 
         loadSearchResults();
@@ -312,13 +323,15 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        String likeFilterString = mFilterQueryTerm + "%";
+        String nameFilterString = mFilterQueryTerm + "%";
+        String zoneFilterString = (mZone == null) ? "%" : mZone;
         return new CursorLoader(getActivity(),  // Context
                 PatientProviderContract.CONTENT_URI_PATIENT_TENTS, // URI
                 PROJECTION,                // Projection
+                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + " LIKE ? AND (" +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ? OR " +
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ?",
-                new String[] {likeFilterString, likeFilterString}, // Selection args
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ?)",
+                new String[] {zoneFilterString, nameFilterString, nameFilterString}, // args
                 PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc"); // Sort
     }
 

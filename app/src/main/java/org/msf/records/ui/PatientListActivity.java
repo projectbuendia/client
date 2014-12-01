@@ -47,6 +47,7 @@ public class PatientListActivity extends BaseActivity
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
     private SearchView mSearchView;
+    private PatientListFragment mFragment;
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
@@ -103,6 +104,8 @@ public class PatientListActivity extends BaseActivity
                 .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
 
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.patient_list);
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
@@ -170,8 +173,11 @@ public class PatientListActivity extends BaseActivity
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long id) {
-                // TODO(akalachman): Filter by the selected zone.
-                Log.d("NavigationItemSelected", zones[position]); // Debug
+                if (position == 0) {
+                    mFragment.setZone(null); // All locations
+                } else {
+                    mFragment.setZone(zones[position]);
+                }
                 return true;
             }
         };

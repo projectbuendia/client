@@ -56,11 +56,14 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     private Context mContext;
     private String mQueryFilterTerm;
+    private String mZoneFilter;
 
-    public ExpandablePatientListAdapter(Cursor cursor, Context context, String queryFilterTerm) {
+    public ExpandablePatientListAdapter(
+            Cursor cursor, Context context, String queryFilterTerm, String zoneFilter) {
         super(cursor, context);
         mContext = context;
         mQueryFilterTerm = queryFilterTerm;
+        mZoneFilter = zoneFilter;
     }
 
     public String getQueryFilterTerm() {
@@ -71,6 +74,14 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         mQueryFilterTerm = queryFilterTerm;
     }
 
+    public String getZoneFilter() {
+        return mZoneFilter;
+    }
+
+    public void setZoneFilter(String zoneFilter) {
+        mZoneFilter = zoneFilter;
+    }
+
     @Override
     protected Cursor getChildrenCursor(Cursor groupCursor) {
         Cursor itemCursor = getGroup(groupCursor.getPosition());
@@ -79,14 +90,16 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         Log.d(TAG, "Getting child cursor for tent: " + tent);
 
         String likeQueryTerm = mQueryFilterTerm + "%";
+        String zoneFilterString = (mZoneFilter == null) ? "%" : mZoneFilter;
 
         CursorLoader cursorLoader = new CursorLoader(mContext,
                 PatientProviderContract.CONTENT_URI,
                 PROJECTION,
+                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + " LIKE ? AND " +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT + "=? AND (" +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ? OR " +
                 PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ?)",
-                new String[] { tent, likeQueryTerm, likeQueryTerm },
+                new String[] { zoneFilterString, tent, likeQueryTerm, likeQueryTerm },
                 null);
 
         Cursor childCursor = null;
