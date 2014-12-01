@@ -14,23 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link WidgetGroupBuilder} that builds {@link BinarySelectOneWidgetGroup}s.
+ * A {@link WidgetGroupBuilder} that builds {@link TableWidgetGroup}s with a bunch of
+ * {@link BinarySelectOneWidget}s.
  */
-public class BinarySelectOneWidgetGroupBuilder implements
-        WidgetGroupBuilder<BinarySelectOneWidgetGroup, BinarySelectOneWidgetGroupBuilder> {
+public class BinarySelectOneTableWidgetGroupBuilder implements
+        WidgetGroupBuilder<TableWidgetGroup, BinarySelectOneTableWidgetGroupBuilder> {
 
-    private static final String TAG = BinarySelectOneWidgetGroupBuilder.class.getName();
+    private static final String TAG = BinarySelectOneTableWidgetGroupBuilder.class.getName();
 
     private final Appearance mAppearance;
     private final List<BinarySelectOneWidget> mWidgets;
 
-    public BinarySelectOneWidgetGroupBuilder(Appearance appearance) {
+    public BinarySelectOneTableWidgetGroupBuilder(Appearance appearance) {
         mAppearance = appearance;
         mWidgets = new ArrayList<BinarySelectOneWidget>();
     }
 
     @Override
-    public BinarySelectOneWidgetGroupBuilder createAndAddWidget(
+    public BinarySelectOneTableWidgetGroupBuilder createAndAddWidget(
             Context context,
             FormEntryPrompt prompt,
             Appearance appearance,
@@ -63,8 +64,8 @@ public class BinarySelectOneWidgetGroupBuilder implements
     }
 
     @Override
-    public BinarySelectOneWidgetGroup build(Context context) {
-        BinarySelectOneWidgetGroup group = (BinarySelectOneWidgetGroup) LayoutInflater.from(context)
+    public TableWidgetGroup build(Context context) {
+        TableWidgetGroup group = (TableWidgetGroup) LayoutInflater.from(context)
                 .inflate(R.layout.template_binary_select_one_widget_group, null /*parent*/);
 
         for (BinarySelectOneWidget widget : mWidgets) {
