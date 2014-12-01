@@ -13,17 +13,52 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/question_holder_scroller"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:showDividers="middle"
+    android:divider="?android:attr/dividerHorizontal"
+    android:id="@+id/rl" >
 
-    <LinearLayout
-        android:id="@+id/questionholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" />
+    <ScrollView
+        android:id="@+id/question_holder_scroller"
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_alignParentTop="true">
 
-</ScrollView>
+        <LinearLayout
+            android:id="@+id/questionholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="96dp"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/button_down"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_alignParentBottom="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_down" />
+
+        <ImageButton
+            android:id="@+id/button_up"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_above="@id/button_down"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_up" />
+
+    </RelativeLayout>
+
+</LinearLayout>

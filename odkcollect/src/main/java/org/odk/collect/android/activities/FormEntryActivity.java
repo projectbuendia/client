@@ -43,6 +43,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -182,6 +183,8 @@ public class FormEntryActivity
     private ScrollView mScrollView;
 	private LinearLayout mQuestionHolder;
 	private View mCurrentView;
+    private ImageButton mUpButton;
+    private ImageButton mDownButton;
 
 	private AlertDialog mAlertDialog;
 	private ProgressDialog mProgressDialog;
@@ -252,7 +255,27 @@ public class FormEntryActivity
         mScrollView = (ScrollView) findViewById(R.id.question_holder_scroller);
 		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
-		// get admin preference settings
+        mUpButton = (ImageButton) findViewById(R.id.button_up);
+        mUpButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                int height = mScrollView.getMeasuredHeight();
+                mScrollView.smoothScrollBy(0, -height / 2);
+            }
+        });
+
+        mDownButton = (ImageButton) findViewById(R.id.button_down);
+        mDownButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                int height = mScrollView.getMeasuredHeight();
+                mScrollView.smoothScrollBy(0, height / 2);
+            }
+        });
+
+        // get admin preference settings
 //		mAdminPreferences = getSharedPreferences(
 //				AdminPreferencesActivity.ADMIN_PREFERENCES, 0);
 
@@ -518,22 +541,6 @@ public class FormEntryActivity
             if (view != null) {
                 mQuestionHolder.addView(view);
             }
-        }
-    }
-
-    private static class SidebarItem {
-
-        public final String mName;
-        public final View mView;
-
-        public SidebarItem(String name, View view) {
-            mName = name;
-            mView = view;
-        }
-
-        @Override
-        public String toString() {
-            return mName;
         }
     }
 
