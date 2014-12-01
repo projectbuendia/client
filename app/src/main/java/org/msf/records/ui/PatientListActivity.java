@@ -2,16 +2,12 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.SearchView;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
@@ -40,27 +36,16 @@ import org.odk.collect.android.tasks.DiskSyncTask;
  * {@link PatientListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class PatientListActivity extends BaseActivity
-        implements PatientListFragment.Callbacks {
+public class PatientListActivity extends PatientSearchActivity {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
-    private SearchView mSearchView;
+    private PatientListFragment mFragment;
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
-    private OnSearchListener mSearchListener;
-
     private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
-
-    interface OnSearchListener {
-        void setQuerySubmitted(String q);
-    }
-
-    public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListener = onSearchListener;
-    }
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -103,6 +88,8 @@ public class PatientListActivity extends BaseActivity
                 .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
 
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.patient_list);
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
@@ -170,8 +157,11 @@ public class PatientListActivity extends BaseActivity
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long id) {
-                // TODO(akalachman): Filter by the selected zone.
-                Log.d("NavigationItemSelected", zones[position]); // Debug
+                if (position == 0) {
+                    mFragment.setZone(null); // All locations
+                } else {
+                    mFragment.setZone(zones[position]);
+                }
                 return true;
             }
         };
@@ -197,20 +187,6 @@ public class PatientListActivity extends BaseActivity
 //            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
-    /**
-     * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given uuid/name/id was selected.
-     */
-    @Override
-    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
-        Intent detailIntent = new Intent(this, PatientChartActivity.class);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
-        detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
-        startActivity(detailIntent);
-    }
-
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -227,30 +203,7 @@ public class PatientListActivity extends BaseActivity
                         return true;
                     }
                 });
-
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        mSearchView.setIconifiedByDefault(false);
-
-        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-          @Override
-          public boolean onQueryTextSubmit(String query) {
-
-            InputMethodManager mgr = (InputMethodManager) getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-            mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-            return true;
-          }
-
-          @Override
-          public boolean onQueryTextChange(String newText) {
-            if (mSearchListener != null)
-              mSearchListener.setQuerySubmitted(newText);
-            return true;
-          }
-        });
+        super.onExtendOptionsMenu(menu);
     }
 
     private enum ScanAction {
