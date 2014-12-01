@@ -2,13 +2,16 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.SearchView;
 
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
@@ -43,7 +46,7 @@ public class PatientListActivity extends BaseActivity
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
-//    private SearchView mSearchView;
+    private SearchView mSearchView;
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
@@ -190,8 +193,6 @@ public class PatientListActivity extends BaseActivity
 //        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
 //        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
 //        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
-//        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
-//        mSearchView.setIconifiedByDefault(false);
 //        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
 //            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
@@ -227,17 +228,10 @@ public class PatientListActivity extends BaseActivity
                     }
                 });
 
-        menu.findItem(R.id.action_search).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setIconifiedByDefault(false);
 
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        // TODO(akalachman): Open a search activity or change state of this one.
-                        return true;
-                    }
-                });
-
-/*      InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -256,7 +250,7 @@ public class PatientListActivity extends BaseActivity
               mSearchListener.setQuerySubmitted(newText);
             return true;
           }
-        });*/
+        });
     }
 
     private enum ScanAction {
