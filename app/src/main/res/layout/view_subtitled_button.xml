@@ -2,27 +2,24 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_vertical"
-    android:background="@drawable/border_grey_1dp"
-    android:clickable="true">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="?android:attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/view_subtitled_button_title"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:gravity="center_vertical"
         android:singleLine="true"
         android:textSize="24sp"
-        tools:text="Triage" />
+        tools:text="Triage"/>
 
     <TextView
         android:id="@+id/view_subtitled_button_subtitle"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
