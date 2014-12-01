@@ -13,39 +13,17 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:id="@+id/question_holder_scroller"
     android:orientation="horizontal"
-    android:showDividers="middle"
-    android:divider="?android:attr/dividerHorizontal"
-    android:id="@+id/rl" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <ListView
-        android:id="@+id/sidebar"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:choiceMode="singleChoice"
-        tools:layout="@android:layout/list_content" >
-    </ListView>
+    <LinearLayout
+        android:id="@+id/questionholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
 
-    <ScrollView
-        android:id="@+id/question_holder_scroller"
-        android:orientation="horizontal"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="5"
-        android:layout_alignParentTop="true">
-
-        <LinearLayout
-            android:id="@+id/questionholder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-    </ScrollView>
-
-</LinearLayout>
+</ScrollView>
