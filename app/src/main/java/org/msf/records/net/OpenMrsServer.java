@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of Server RPCs that will talk
- * Created by nfortescue on 11/3/14.
+ * Implementation of Server RPCs that will talk to OpenMRS.
+ * Currently no other implementations.
  */
 public class OpenMrsServer implements Server {
 
