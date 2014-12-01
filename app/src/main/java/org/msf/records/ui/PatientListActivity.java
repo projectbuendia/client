@@ -35,6 +35,8 @@ public class PatientListActivity extends PatientSearchActivity {
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
+    private static final String SELECTED_FILTER_KEY = "selected_filter";
+
     private PatientListFragment mFragment;
 
 //    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
@@ -65,14 +67,25 @@ public class PatientListActivity extends PatientSearchActivity {
                     .add(R.id.patient_detail_container, mainScreenFragment).commit();
         }
 
-        setupCustomActionBar();
+        int selectedFilter = 0;  // Default filter == all patients
+        if (savedInstanceState != null) {
+            selectedFilter = savedInstanceState.getInt(SELECTED_FILTER_KEY, 0);
+        }
+        setupCustomActionBar(selectedFilter);
 
         mFragment = (PatientListFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.patient_list);
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
-    private void setupCustomActionBar(){
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
+    }
+
+
+    private void setupCustomActionBar(int selectedFilter){
         // TODO(akalachman): Replace with real zones.
         final String[] zones = new String[] {
                 "All Patients", "Triage", "Suspect", "Probable", "Confirmed"
@@ -100,6 +113,8 @@ public class PatientListActivity extends PatientSearchActivity {
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionBar.setListNavigationCallbacks(adapter, callback);
+        actionBar.setSelectedNavigationItem(selectedFilter);
+        mFragment.setZone(zones[selectedFilter]);
         /*actionBar.setDisplayOptions(
                 ActionBar.DISPLAY_SHOW_CUSTOM,
                 ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
