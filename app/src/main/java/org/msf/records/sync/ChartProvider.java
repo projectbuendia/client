@@ -188,17 +188,17 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names " +
                 "ON obs." + ChartColumns.VALUE + "= " +
                 "value_names." + ChartColumns.CONCEPT_UUID +
+                " AND value_names." + ChartColumns.LOCALE + "=?" + // 1st selection arg
 
-                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 1st selection arg
-                "obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 2nd selection arg
-                "names." + ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
-                "group_names." + ChartColumns.LOCALE + "=? AND " + // 4th selection arg
-                "value_names." + ChartColumns.LOCALE + "=?" + // 5th selection arg
+                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 2nd selection arg
+                "obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 3rd selection arg
+                "names." + ChartColumns.LOCALE + "=? AND " + // 4th selection arg
+                "group_names." + ChartColumns.LOCALE + "=?" + // 5th selection arg
 
                 " ORDER BY obs." + ChartColumns.ENCOUNTER_TIME + ", chart." + ChartColumns.CHART_ROW
                 ;
 
-        return db.rawQuery(query, new String[]{chartUuid, patientUuid, locale, locale, locale});
+        return db.rawQuery(query, new String[]{locale, chartUuid, patientUuid, locale, locale});
     }
 
     private Cursor queryMostRecentChart(Uri uri, SQLiteDatabase db) {
@@ -211,11 +211,12 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         String locale = pathSegments.get(pathSegments.size() - 1);
         String patientUuid = pathSegments.get(pathSegments.size() - 2);
 
-        // This scary SQL statement joins the observations with appropriate concept names to give
-        // localized output in the correct order specified by a chart.
+        // This scary SQL statement joins the observations a subselect for the latest for each
+        // concept with appropriate concept names to give localized output.
         String query = "SELECT obs.encounter_time," +
                 "obs.concept_uuid,names." + ChartColumns.NAME + " AS concept_name," +
                 // Localized value for concept values
+                // "obs." + ChartColumns.VALUE + " " +
                 "coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
                 "AS localized_value" +
 
@@ -228,7 +229,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 ", MAX(" + ChartColumns.ENCOUNTER_TIME + ") AS maxtime " +
                 "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME +
                 " WHERE " + ChartColumns.PATIENT_UUID + "=? " + // 1st selection arg
-                "GROUP BY concept_uuid) maxs " +
+                "GROUP BY " + ChartColumns.CONCEPT_UUID + ") maxs " +
 
                 "ON obs." + ChartColumns.ENCOUNTER_TIME + " = maxs.maxtime AND " +
                 "obs." + ChartColumns.CONCEPT_UUID + "=maxs." + ChartColumns.CONCEPT_UUID +
@@ -244,15 +245,15 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names " +
                 "ON obs." + ChartColumns.VALUE + "=" +
                 "value_names." + ChartColumns.CONCEPT_UUID +
+                " AND value_names." + ChartColumns.LOCALE + "=?" + // 2nd selection arg
 
-                " WHERE obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 2nd selection arg
-                "names." + ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
-                "value_names." + ChartColumns.LOCALE + "=?" + // 4th selection arg
+                " WHERE obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 3rd selection arg
+                "names." + ChartColumns.LOCALE + "=? " + // 4th selection arg
 
                 " ORDER BY obs." + ChartColumns.CONCEPT_UUID
                 ;
 
-        return db.rawQuery(query, new String[]{patientUuid, patientUuid, locale, locale});
+        return db.rawQuery(query, new String[]{patientUuid, locale, patientUuid, locale});
     }
 
     @Override
