@@ -5,6 +5,9 @@ import android.util.SparseArray;
 
 import org.javarosa.core.model.Constants;
 import org.javarosa.form.api.FormEntryPrompt;
+import org.odk.collect.android.widgets2.common.Appearance;
+import org.odk.collect.android.widgets2.common.TypedWidget;
+import org.odk.collect.android.widgets2.common.TypedWidgetFactory;
 import org.odk.collect.android.widgets2.date.DateWidgetFactory;
 import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 import org.odk.collect.android.widgets2.group.WidgetGroupBuilderFactory;
@@ -55,6 +58,9 @@ public class Widget2Factory {
 //                            + prompt.getControlType() + ".");
             return null;
         }
+
+        // First, try to find the factory specifically for the current data type; if none exists,
+        // try to find the one for any data type.
         TypedWidgetFactory<?> factory = dataTypeArray.get(prompt.getDataType());
         if (factory == null) {
             factory = dataTypeArray.get(-1);
@@ -68,6 +74,7 @@ public class Widget2Factory {
                 return null;
             }
         }
+
         if (factory == null) {
             return null;
         }
@@ -77,7 +84,7 @@ public class Widget2Factory {
     }
 
     private static void register(int controlType, TypedWidgetFactory<?> factory) {
-        register(controlType, -1, factory);
+        register(controlType, -1 /*dataType*/, factory);
     }
 
     private static void register(int controlType, int dataType, TypedWidgetFactory<?> factory) {

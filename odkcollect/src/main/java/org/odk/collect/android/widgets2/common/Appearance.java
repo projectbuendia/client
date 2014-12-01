@@ -1,4 +1,4 @@
-package org.odk.collect.android.widgets2;
+package org.odk.collect.android.widgets2.common;
 
 import java.util.HashSet;
 import java.util.Set;

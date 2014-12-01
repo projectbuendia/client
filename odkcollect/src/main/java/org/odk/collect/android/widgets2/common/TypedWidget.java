@@ -1,4 +1,4 @@
-package org.odk.collect.android.widgets2;
+package org.odk.collect.android.widgets2.common;
 
 import android.content.Context;
 
