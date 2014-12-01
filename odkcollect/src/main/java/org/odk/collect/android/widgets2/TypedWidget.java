@@ -13,7 +13,8 @@ public abstract class TypedWidget<T extends IAnswerData> extends QuestionWidget 
 
     protected final Appearance mAppearance;
 
-    public TypedWidget(Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
+    protected TypedWidget(
+            Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
         super(context, prompt);
 
         mAppearance = appearance;
@@ -21,4 +22,10 @@ public abstract class TypedWidget<T extends IAnswerData> extends QuestionWidget 
 
     @Override
     public abstract T getAnswer();
+
+    @Override
+    public void setFocus(Context context) {}
+
+    @Override
+    public void setOnLongClickListener(OnLongClickListener l) {}
 }
