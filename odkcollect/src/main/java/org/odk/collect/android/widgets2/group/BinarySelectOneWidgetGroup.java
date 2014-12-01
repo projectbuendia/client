@@ -3,12 +3,14 @@ package org.odk.collect.android.widgets2.group;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.GridLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
+import org.odk.collect.android.widgets2.common.TypedWidget;
 import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link WidgetGroup} that contains a number of {@link BinarySelectOneWidget}s.
@@ -16,6 +18,7 @@ import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
 public class BinarySelectOneWidgetGroup extends TableLayout implements WidgetGroup {
 
     private TableRow mLastTableRow = null;
+    private List<TypedWidget<?>> mWidgets = new ArrayList<TypedWidget<?>>();
 
     public BinarySelectOneWidgetGroup(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,6 +34,15 @@ public class BinarySelectOneWidgetGroup extends TableLayout implements WidgetGro
         child.setLayoutParams(new TableRow.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f));
 
         mLastTableRow.addView(child);
+
+        if (child instanceof TypedWidget<?>) {
+            mWidgets.add((TypedWidget<?>) child);
+        }
+    }
+
+    @Override
+    public List<TypedWidget<?>> getWidgets() {
+        return mWidgets;
     }
 
     @Override
