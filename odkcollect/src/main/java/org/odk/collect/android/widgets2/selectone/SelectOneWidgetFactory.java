@@ -15,6 +15,12 @@ public class SelectOneWidgetFactory extends TypedWidgetFactory<SelectOneData> {
 
     public TypedWidget<SelectOneData> create(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
+
+        // TODO(dxchen): This is for testing!
+        if (prompt.getSelectChoices().size() == 3) {
+            return new BinarySelectOneWidget(context, prompt, appearance, forceReadOnly);
+        }
+
         // TODO(dxchen): Uncomment this when ready!
 //
 //        if (appearance == null) {

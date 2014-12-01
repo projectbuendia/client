@@ -13,6 +13,7 @@ import org.javarosa.core.model.data.SelectOneData;
 import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
+import org.odk.collect.android.utilities.StringUtils;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.Appearance;
 import org.odk.collect.android.widgets2.TypedWidget;
@@ -53,7 +54,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
             // TODO(dxchen): Un-unscreamify once server work is done.
 
-            radioButton.setText(unscreamify(prompt.getSelectChoiceText(choice)));
+            radioButton.setText(StringUtils.unscreamify(prompt.getSelectChoiceText(choice)));
             radioButton.setTag(i);
             radioButton.setId(QuestionWidget.newUniqueId());
             radioButton.setEnabled(!isReadOnly);
@@ -95,34 +96,5 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
         InputMethodManager inputManager = (InputMethodManager) context
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(this.getWindowToken(), 0);
-    }
-
-    @Override
-    public void setOnLongClickListener(OnLongClickListener l) {}
-
-    /**
-     * Returns the less screamy version of a string.
-     */
-    public static String unscreamify(String s) {
-        if (!s.equals(s.toUpperCase())) {
-            return s;
-        }
-
-        s = s.toLowerCase();
-        StringBuilder titleCase = new StringBuilder();
-        boolean nextTitleCase = true;
-
-        for (char c : s.toCharArray()) {
-            if (Character.isSpaceChar(c)) {
-                nextTitleCase = true;
-            } else if (nextTitleCase) {
-                c = Character.toTitleCase(c);
-                nextTitleCase = false;
-            }
-
-            titleCase.append(c);
-        }
-
-        return titleCase.toString();
     }
 }
