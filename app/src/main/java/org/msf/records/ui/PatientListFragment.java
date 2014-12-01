@@ -217,7 +217,7 @@ public class PatientListFragment extends ProgressFragment implements
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
 
-        ((PatientListActivity)getActivity()).setOnSearchListener(new PatientListActivity.OnSearchListener() {
+        ((PatientSearchActivity)getActivity()).setOnSearchListener(new PatientSearchActivity.OnSearchListener() {
             @Override
             public void setQuerySubmitted(String q) {
                 App.getServer().cancelPendingRequests(TAG);
