@@ -154,5 +154,4 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 .setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         return view;
     }
-
 }
