@@ -64,6 +64,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
+    compile project(':autofittextview')
     compile project(':odkcollect')
     compile project(':snackbar')
     compile project(':ViewPagerIndicator')
@@ -81,7 +82,7 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
     compile 'de.greenrobot:eventbus:2.4.0' // The event bus
     compile 'joda-time:joda-time:2.5' // Better dates and times
-    compile 'me.grantland:autofittextview:0.2.+' // Auto-scaling TextView
+//    compile 'me.grantland:autofittextview:0.2.+' // Auto-scaling TextView
 
     // Testing
     androidTestCompile files('libs/espresso-1.1-bundled.jar')

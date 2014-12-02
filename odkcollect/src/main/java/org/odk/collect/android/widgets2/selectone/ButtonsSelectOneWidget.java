@@ -4,9 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.HorizontalScrollView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.data.SelectOneData;
