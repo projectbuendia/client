@@ -40,22 +40,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final String TAG = SyncAdapter.class.getSimpleName();
 
-    /**
-     * Project used when querying content provider. Returns all known fields.
-     */
-    private static final String[] PROJECTION = new String[] {
-            PatientColumns._ID,
-            PatientColumns.COLUMN_NAME_GIVEN_NAME,
-            PatientColumns.COLUMN_NAME_FAMILY_NAME,
-            PatientColumns.COLUMN_NAME_UUID,
-            PatientColumns.COLUMN_NAME_STATUS,
-            PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
-            PatientColumns.COLUMN_NAME_LOCATION_ZONE,
-            PatientColumns.COLUMN_NAME_LOCATION_TENT,
-            PatientColumns.COLUMN_NAME_AGE_MONTHS,
-            PatientColumns.COLUMN_NAME_AGE_YEARS,
-            PatientColumns.COLUMN_NAME_GENDER,
-    };
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
     /**
@@ -77,19 +61,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * If this key is present with boolean value true then sync the observations.
      */
     public static String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
-
-    // Constants representing column positions from PROJECTION.
-    public static final int COLUMN_ID = 0;
-    public static final int COLUMN_GIVEN_NAME = 1;
-    public static final int COLUMN_FAMILY_NAME = 2;
-    public static final int COLUMN_UUID = 3;
-    public static final int COLUMN_STATUS = 4;
-    public static final int COLUMN_ADMISSION_TIMESTAMP = 5;
-    public static final int COLUMN_LOCATION_ZONE = 6;
-    public static final int COLUMN_LOCATION_TENT = 7;
-    public static final int COLUMN_AGE_MONTHS = 8;
-    public static final int COLUMN_AGE_YEARS = 9;
-    public static final int COLUMN_GENDER = 10;
 
     /**
      * Content resolver, for performing database operations.
@@ -163,6 +134,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void updatePatientData(SyncResult syncResult) throws InterruptedException, ExecutionException, RemoteException, OperationApplicationException {
         final ContentResolver contentResolver = getContext().getContentResolver();
 
+        final String[] projection = PatientProjection.getProjectionColumns();
 
         Log.d(TAG, "Before network call");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
@@ -187,7 +159,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Get list of all items
         Log.i(TAG, "Fetching local entries for merge");
         Uri uri = PatientProviderContract.CONTENT_URI; // Get all entries
-        Cursor c = contentResolver.query(uri, PROJECTION, null, null, null);
+        Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
         Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
         Log.i(TAG, "Found " + patients.size() + " external entries. Computing merge solution...");
@@ -202,21 +174,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         while(c.moveToNext()){
             syncResult.stats.numEntries++;
 
-            id = c.getString(COLUMN_ID);
-            givenName = c.getString(COLUMN_GIVEN_NAME);
-            familyName = c.getString(COLUMN_FAMILY_NAME);
-            uuid = c.getString(COLUMN_UUID);
-            status = c.getString(COLUMN_STATUS);
-            admissionTimestamp = c.getLong(COLUMN_ADMISSION_TIMESTAMP);
-            locationZone = c.getString(COLUMN_LOCATION_ZONE);
-            locationTent = c.getString(COLUMN_LOCATION_TENT);
-            if (!c.isNull(COLUMN_AGE_MONTHS)) {
-                ageMonths = c.getInt(COLUMN_AGE_MONTHS);
+            id = c.getString(PatientProjection.COLUMN_ID);
+            givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
+            familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
+            uuid = c.getString(PatientProjection.COLUMN_UUID);
+            status = c.getString(PatientProjection.COLUMN_STATUS);
+            admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+            locationZone = c.getString(PatientProjection.COLUMN_LOCATION_ZONE);
+            locationTent = c.getString(PatientProjection.COLUMN_LOCATION_TENT);
+            if (!c.isNull(PatientProjection.COLUMN_AGE_MONTHS)) {
+                ageMonths = c.getInt(PatientProjection.COLUMN_AGE_MONTHS);
             }
-            if (!c.isNull(COLUMN_AGE_YEARS)) {
-                ageYears = c.getInt(COLUMN_AGE_YEARS);
+            if (!c.isNull(PatientProjection.COLUMN_AGE_YEARS)) {
+                ageYears = c.getInt(PatientProjection.COLUMN_AGE_YEARS);
             }
-            gender = c.getString(COLUMN_GENDER);
+            gender = c.getString(PatientProjection.COLUMN_GENDER);
 
             Patient patient = patientsMap.get(id);
             if (patient != null) {
