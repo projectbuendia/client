@@ -26,7 +26,7 @@ public class VitalView extends LinearLayout {
     private String mName;
     private float mNameTextSize;
     private String mValue;
-    private String mValueFormat;
+    private final int mVitalValueMaxLines;
 
     public VitalView(Context context) {
         this(context, null);
@@ -54,18 +54,17 @@ public class VitalView extends LinearLayout {
             mNameTextSize =
                     a.getDimension(R.styleable.VitalView_vitalNameTextSize, defaultNameTextSize);
             mValue = a.getString(R.styleable.VitalView_vitalValue);
-            mValueFormat = a.getString(R.styleable.VitalView_vitalValueFormat);
+            mVitalValueMaxLines = a.getInteger(R.styleable.VitalView_vitalValueMaxLines, 1);
         } finally {
             a.recycle();
         }
 
         mNameView.setTextColor(mTextColor);
-        mNameView.setTextSize(mNameTextSize);
+//        mNameView.setTextSize(mNameTextSize);
         mNameView.setText(mName);
         mValueView.setTextColor(mTextColor);
         mValueView.setText(mValue);
-
-        mNameView.setText(mName);
+        mValueView.setMaxLines(mVitalValueMaxLines);
     }
 
     public VitalView setValue(CharSequence value) {
