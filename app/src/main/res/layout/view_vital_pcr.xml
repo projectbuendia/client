@@ -3,10 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_margin="4dp"
+    android:background="#FF0000">
 
     <TextView
-        android:id="@+id/view_vital_name"
+        android:id="@+id/vital_name_pcr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -16,18 +18,17 @@
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:textSize="16sp"
-        android:text="Consciousness" />
+        android:text="PCR" />
 
     <me.grantland.widget.AutofitTextView
-        android:id="@+id/view_vital_value"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/view_vital_name"
+        android:layout_above="@id/vital_name_pcr"
         android:padding="8dp"
         android:gravity="center"
         android:textColor="#FFFFFF"
         android:textSize="48sp"
-        android:maxLines="1"
-        tools:text="Pain"/>
+        android:maxLines="2"
+        tools:text="29.5\n28.1"/>
 
 </RelativeLayout>
