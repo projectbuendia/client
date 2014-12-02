@@ -84,13 +84,18 @@ public class PatientListActivity extends PatientSearchActivity {
 
 
     private void setupCustomActionBar(int selectedFilter){
-        // TODO(akalachman): Replace with real zones.
+        // TODO(akalachman): Replace with real zones, real filters.
         final String[] zones = new String[] {
-                "All Patients", "Triage", "Suspect", "Probable", "Confirmed"
+                "All Patients", "Triage", "Suspect", "Probable", "Confirmed",
+                null, // section border
+                "Pregnant", "Children Under 5", "Children Under 2"
         };
-        ArrayAdapter adapter = new ArrayAdapter<String>(
-                this, R.layout.patient_list_spinner_dropdown_item, zones);
-        adapter.setDropDownViewResource(R.layout.patient_list_spinner_expanded_dropdown_item);
+        SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<String>(
+                this,
+                R.layout.patient_list_spinner_dropdown_item,
+                R.layout.patient_list_spinner_expanded_dropdown_item,
+                R.layout.patient_list_spinner_expanded_section_divider,
+                zones);
 
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
