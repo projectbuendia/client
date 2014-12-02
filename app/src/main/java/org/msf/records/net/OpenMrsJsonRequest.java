@@ -49,6 +49,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         // TODO(nfortescue): work out how to do Auth properly
         HashMap<String, String> params = new HashMap<>();
         OpenMrsConnectionDetails.addAuthHeader(mUsername, mPassword, params);
+        params.put("Connection-Type", "application/json");
         return params;
     }
 }
