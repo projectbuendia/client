@@ -93,13 +93,13 @@ public class PatientChartFragment extends Fragment {
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 
-    @InjectView(R.id.last_updated) TextView mLastUpdated;
-    @InjectView(R.id.vital_temperature) VitalView mTemperature;
-    @InjectView(R.id.vital_days_admitted) VitalView mDaysAdmitted;
-    @InjectView(R.id.vital_pcr) VitalView mPcr;
-    @InjectView(R.id.vital_food_drink) VitalView mFoodDrink;
-    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
-    @InjectView(R.id.vital_mobility) VitalView mMobility;
+//    @InjectView(R.id.last_updated) TextView mLastUpdated;
+//    @InjectView(R.id.vital_temperature) VitalView mTemperature;
+//    @InjectView(R.id.vital_days_admitted) VitalView mDaysAdmitted;
+//    @InjectView(R.id.vital_pcr) VitalView mPcr;
+//    @InjectView(R.id.vital_food_drink) VitalView mFoodDrink;
+//    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
+//    @InjectView(R.id.vital_mobility) VitalView mMobility;
 
     public PatientChartFragment() {}
 
@@ -166,18 +166,18 @@ public class PatientChartFragment extends Fragment {
             }
         }
 
-        // Populate each of the views that we care about.
-        LocalizedChartHelper.LocalizedObservation temperature =
-                conceptsToLatestObservations.get("Temperature (C)");
-        String temperatureValue = "--.-°";
-        if (temperature != null) {
-            float temperatureFloat;
-            try {
-                temperatureFloat = Float.parseFloat(temperature.localizedValue);
-                temperatureValue = String.format("%.1f°", temperatureFloat);
-            } catch (NumberFormatException e) {}
-        }
-        mTemperature.setValue(temperatureValue);
+//        // Populate each of the views that we care about.
+//        LocalizedChartHelper.LocalizedObservation temperature =
+//                conceptsToLatestObservations.get("Temperature (C)");
+//        String temperatureValue = "--.-°";
+//        if (temperature != null) {
+//            float temperatureFloat;
+//            try {
+//                temperatureFloat = Float.parseFloat(temperature.localizedValue);
+//                temperatureValue = String.format("%.1f°", temperatureFloat);
+//            } catch (NumberFormatException e) {}
+//        }
+//        mTemperature.setValue(temperatureValue);
 
 //
 //        LocalizedChartHelper.LocalizedObservation pulse =
