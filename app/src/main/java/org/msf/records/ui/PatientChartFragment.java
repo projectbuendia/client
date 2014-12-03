@@ -166,67 +166,8 @@ public class PatientChartFragment extends Fragment {
             }
         }
 
-//        // Populate each of the views that we care about.
-//        LocalizedChartHelper.LocalizedObservation temperature =
-//                conceptsToLatestObservations.get("Temperature (C)");
-//        String temperatureValue = "--.-°";
-//        if (temperature != null) {
-//            float temperatureFloat;
-//            try {
-//                temperatureFloat = Float.parseFloat(temperature.localizedValue);
-//                temperatureValue = String.format("%.1f°", temperatureFloat);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mTemperature.setValue(temperatureValue);
-
-//
-//        LocalizedChartHelper.LocalizedObservation pulse =
-//                conceptsToLatestObservations.get("Pulse");
-//        String pulseValue = "--";
-//        if (pulse != null) {
-//            int pulseInt;
-//            try {
-//                pulseInt = Integer.parseInt(pulse.localizedValue);
-//                pulseValue = String.format("%d", pulseInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mHeart.setValue(pulseValue);
-//
-//        LocalizedChartHelper.LocalizedObservation respirations =
-//                conceptsToLatestObservations.get("Respiratory rate");
-//        String respirationsValue = "--";
-//        if (respirations != null) {
-//            int respirationsInt;
-//            try {
-//                respirationsInt = Integer.parseInt(respirations.localizedValue);
-//                respirationsValue = String.format("%d", respirationsInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mRespirations.setValue(respirationsValue);
-//
-//        LocalizedChartHelper.LocalizedObservation systolic =
-//                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
-//        String systolicValue = "--";
-//        if (systolic != null) {
-//            int systolicInt;
-//            try {
-//                systolicInt = Integer.parseInt(systolic.localizedValue);
-//                systolicValue = String.format("%d", systolicInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//
-//        LocalizedChartHelper.LocalizedObservation diastolic =
-//                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
-//        String diastolicValue = "--";
-//        if (systolic != null) {
-//            int diastolicInt;
-//            try {
-//                diastolicInt = Integer.parseInt(systolic.localizedValue);
-//                diastolicValue = String.format("%d", diastolicInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
-
+        // Remove grids that may have been inserted previously.
+        ((ViewGroup) ((ViewGroup) getView()).getChildAt(0)).removeAllViews();
 
         ViewGroup.LayoutParams params =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
