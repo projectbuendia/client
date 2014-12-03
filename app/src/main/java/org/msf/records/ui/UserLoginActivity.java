@@ -85,8 +85,32 @@ public class UserLoginActivity extends FragmentActivity {
 
         public void onEventMainThread(UserAddFailedEvent event) {
             Toast toast = Toast.makeText(
-                    UserLoginActivity.this, event.toString(), Toast.LENGTH_SHORT);
+                    UserLoginActivity.this, toErrorString(event), Toast.LENGTH_SHORT);
             toast.show();
+        }
+
+        private String toErrorString(UserAddFailedEvent event) {
+            int errorResource;
+            switch (event.mReason) {
+                case UserAddFailedEvent.REASON_UNKNOWN:
+                    errorResource = R.string.add_user_unknown_error;
+                    break;
+                case UserAddFailedEvent.REASON_INVALID_USER:
+                    errorResource = R.string.add_user_invalid_user;
+                    break;
+                case UserAddFailedEvent.REASON_USER_EXISTS_LOCALLY:
+                    errorResource = R.string.add_user_user_exists_locally;
+                    break;
+                case UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER:
+                    errorResource = R.string.add_user_user_exists_on_server;
+                    break;
+                case UserAddFailedEvent.REASON_SERVER_ERROR:
+                    errorResource = R.string.add_user_server_error;
+                    break;
+                default:
+                    errorResource = R.string.add_user_unknown_error;
+            }
+            return getResources().getString(errorResource);
         }
     }
 }
