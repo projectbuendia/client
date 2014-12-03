@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -29,7 +28,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
@@ -37,6 +35,7 @@ import butterknife.InjectView;
 public class PatientChartFragment extends Fragment {
 
     private static final String TAG = PatientChartFragment.class.getName();
+    private View mChartView;
 
     public static PatientChartFragment newInstance(String patientUuid) {
         PatientChartFragment fragment = new PatientChartFragment();
@@ -139,10 +138,48 @@ public class PatientChartFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        // Update our patient's vitals
+        updatePatientUI();
+    }
+
+    private void updatePatientUI()
+    {
+        // Retrieve the view
+        View view = getView();
+        ViewGroup viewGroup = ((ViewGroup) ((ViewGroup) view).getChildAt(0));
+
+        // Remove previous grid view if any
+        if ( mChartView != null ) {
+            viewGroup.removeView(mChartView);
+            mChartView = null;
+        }
+
+        // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        ArrayList<LocalizedChartHelper.LocalizedObservation> observations =
-                LocalizedChartHelper.getObservations(
-                        getActivity().getContentResolver(), mPatientUuid);
+        ArrayList<LocalizedChartHelper.LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
+        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations( observations );
+
+        // Update the observations
+        ViewGroup.LayoutParams params =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        DataGridView grid = new DataGridView.Builder()
+                .setDoubleWidthColumnHeaders(true)
+                .setDataGridAdapter(new LocalizedChartDataGridAdapter(getActivity(), observations,
+                        mLayoutInflater))
+                .build(getActivity());
+        grid.setLayoutParams(params);
+
+        // Add the grid view
+        mChartView = grid;
+        viewGroup.addView(grid);
+
+
+        // Update vitals
+        updatePatientVitalsUI( view, conceptsToLatestObservations );
+    }
+
+    private Map<String, LocalizedChartHelper.LocalizedObservation> sortObservations( final ArrayList<LocalizedChartHelper.LocalizedObservation> observations )
+    {
 
         // A map from a concept name to the latest observation for that concept.
         Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations =
@@ -153,12 +190,13 @@ public class PatientChartFragment extends Fragment {
 
         // Find the latest observation for each observation type.
         for (LocalizedChartHelper.LocalizedObservation observation : observations) {
+
             // If no other observations for this concept have been seen or if this is the
-            if (!conceptsToLatestObservations.containsKey(observation.conceptName)
+            if (!conceptsToLatestObservations.containsKey(observation.conceptUuid)
                     || observation.encounterTimeMillis >
-                            conceptsToLatestObservations.get(observation.conceptName)
-                                    .encounterTimeMillis) {
-                conceptsToLatestObservations.put(observation.conceptName, observation);
+                    conceptsToLatestObservations.get(observation.conceptUuid)
+                            .encounterTimeMillis) {
+                conceptsToLatestObservations.put(observation.conceptUuid, observation);
             }
 
             if (observation.encounterTimeMillis > latestEncounterTimeMillis) {
@@ -166,77 +204,26 @@ public class PatientChartFragment extends Fragment {
             }
         }
 
-//        // Populate each of the views that we care about.
-//        LocalizedChartHelper.LocalizedObservation temperature =
-//                conceptsToLatestObservations.get("Temperature (C)");
-//        String temperatureValue = "--.-°";
-//        if (temperature != null) {
-//            float temperatureFloat;
-//            try {
-//                temperatureFloat = Float.parseFloat(temperature.localizedValue);
-//                temperatureValue = String.format("%.1f°", temperatureFloat);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mTemperature.setValue(temperatureValue);
+        return conceptsToLatestObservations;
+    }
 
-//
-//        LocalizedChartHelper.LocalizedObservation pulse =
-//                conceptsToLatestObservations.get("Pulse");
-//        String pulseValue = "--";
-//        if (pulse != null) {
-//            int pulseInt;
-//            try {
-//                pulseInt = Integer.parseInt(pulse.localizedValue);
-//                pulseValue = String.format("%d", pulseInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mHeart.setValue(pulseValue);
-//
-//        LocalizedChartHelper.LocalizedObservation respirations =
-//                conceptsToLatestObservations.get("Respiratory rate");
-//        String respirationsValue = "--";
-//        if (respirations != null) {
-//            int respirationsInt;
-//            try {
-//                respirationsInt = Integer.parseInt(respirations.localizedValue);
-//                respirationsValue = String.format("%d", respirationsInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mRespirations.setValue(respirationsValue);
-//
-//        LocalizedChartHelper.LocalizedObservation systolic =
-//                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
-//        String systolicValue = "--";
-//        if (systolic != null) {
-//            int systolicInt;
-//            try {
-//                systolicInt = Integer.parseInt(systolic.localizedValue);
-//                systolicValue = String.format("%d", systolicInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//
-//        LocalizedChartHelper.LocalizedObservation diastolic =
-//                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
-//        String diastolicValue = "--";
-//        if (systolic != null) {
-//            int diastolicInt;
-//            try {
-//                diastolicInt = Integer.parseInt(systolic.localizedValue);
-//                diastolicValue = String.format("%d", diastolicInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
+    private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations )
+    {
+        // Data structures we are using
+        VitalView vital;
+        LocalizedChartHelper.LocalizedObservation observation;
 
+        // Update mobility
+        vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
+        observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
+        if ( observation == null )
+        {
+            vital.setValue( "N/A" );
+            Log.e( "PatientChart", "Missing observation" );
+        }
+        else {
+            vital.setValue( observation.localizedValue );
+        }
 
-        ViewGroup.LayoutParams params =
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        DataGridView grid = new DataGridView.Builder()
-                .setDoubleWidthColumnHeaders(true)
-                .setDataGridAdapter(new LocalizedChartDataGridAdapter(getActivity(), observations,
-                        mLayoutInflater))
-                .build(getActivity());
-        grid.setLayoutParams(params);
-
-        ((ViewGroup) ((ViewGroup) getView()).getChildAt(0)).addView(grid);
     }
 }

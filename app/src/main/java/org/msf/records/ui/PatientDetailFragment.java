@@ -12,7 +12,6 @@ import com.android.volley.Response;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.cache.PatientOpenHelper;
 import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
 import org.msf.records.model.Status;
@@ -45,8 +44,6 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
     public String mPatientId;
     private Patient mPatient = null;
 
-    private PatientOpenHelper patientDb;
-
     @InjectView(R.id.patient_overview_name) TextView mPatientNameTV;
     @InjectView(R.id.patient_overview_id) TextView mPatientIdTV;
     @InjectView(R.id.patient_overview_location) TextView mPatientLocationTV;
@@ -67,8 +64,6 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         mPatientId = bundle.getString(PATIENT_UUID_KEY);
         if(mPatientId == null)
             throw new IllegalArgumentException("Please pass the user id to the PatientDetailFragment");
-
-        patientDb = new PatientOpenHelper(getActivity());
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -106,16 +101,7 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
 
         ButterKnife.inject(this, view);
 
-        // Check local cache for patient before retrieving from server.
-        mPatient = patientDb.getPatient(mPatientId);
-
-        // Retrieve from server if not found in local cache.
-        if (mPatient == null) {
-            App.getServer().getPatient(mPatientId, this, this, TAG);
-        } else {
-            // If we already have all of the patient data available, immediately set all fields.
-            populatePatientFields(mPatient);
-        }
+        App.getServer().getPatient(mPatientId, this, this, TAG);
     }
 
     @Override
@@ -301,9 +287,6 @@ public class PatientDetailFragment extends ProgressFragment implements Response.
         Log.d(TAG, "onResponse");
 
         populatePatientFields(response);
-
-        // Cache after every update.
-        patientDb.setPatient(mPatientId, mPatient);
     }
 
     // Populate fields but do not change cache.
