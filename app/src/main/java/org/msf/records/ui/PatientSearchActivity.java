@@ -56,7 +56,6 @@ public abstract class PatientSearchActivity extends BaseActivity
         detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
         detailIntent.putExtra(PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
         detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
-        detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
         startActivity(detailIntent);
     }
 
