@@ -905,7 +905,7 @@ public class FormController {
      */
     public FormEntryPrompt[] getQuestionPrompts() throws RuntimeException {
 
-        ArrayList<FormIndex> indicies = new ArrayList<>();
+        ArrayList<FormIndex> indicies = new ArrayList<FormIndex>();
         FormIndex currentIndex = getFormIndex();
 
         // For questions, there is only one.
