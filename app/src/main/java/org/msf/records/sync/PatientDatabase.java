@@ -18,7 +18,8 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_UUID;
 
 /**
- * A helper for the database for storing patient attributes, active patients, and chart information.
+ * A helper for the database for storing patient attributes, active patients, locations,
+ * and chart information.
  * Stored in the same database as patients are the keys for charts too.
  */
 public class PatientDatabase extends SQLiteOpenHelper {
