@@ -22,19 +22,20 @@ public class FlowRadioGroup extends RadioGroup {
         super(context, attrs);
     }
 
-    private int mLineHeight;
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int width = MeasureSpec.getSize(widthMeasureSpec);
 
+        // Add some padding to the children
+        setPadding( 20, 20, 20, 20 );
+
         // The next line is WRONG!!! Doesn't take into account requested MeasureSpec mode!
-        int height = MeasureSpec.getSize(heightMeasureSpec) - getPaddingTop() - getPaddingBottom();
+        int height = getPaddingTop() + getPaddingBottom();
+
         final int count = getChildCount();
-        int lineHeight = 0;
 
         int xpos = getPaddingLeft();
-        int ypos = getPaddingTop();
+        int childrenSameHeightCount = 0;
 
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
@@ -45,27 +46,32 @@ public class FlowRadioGroup extends RadioGroup {
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.UNSPECIFIED));
 
                 final int childw = child.getMeasuredWidth();
-                lineHeight = Math.max(lineHeight, child.getMeasuredHeight() + lp.height);
 
                 if (xpos + childw > width) {
                     xpos = getPaddingLeft();
-                    ypos += lineHeight;
+
+                    View heightChild = getChildAt( i - ( i == 0 ? 0 : 1) );
+                    height += heightChild.getMeasuredHeight() + getPaddingBottom();
+                    childrenSameHeightCount = 0;
+                }
+
+                else
+                {
+                    ++childrenSameHeightCount;
                 }
 
                 xpos += childw + lp.width;
             }
         }
-        this.mLineHeight = lineHeight;
 
-        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED){
-            height = ypos + lineHeight;
+        if ( count > 0 )
+        {
+            View heightChild = getChildAt( count - 1 );
 
-        } else if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST){
-            if (ypos + lineHeight < height){
-                height = ypos + lineHeight;
-            }
+            height += heightChild.getMeasuredHeight() + getPaddingBottom() + heightChild.getLayoutParams().height;
         }
-        setMeasuredDimension(width, height);
+
+        setMeasuredDimension(width, height );
     }
 
     @Override
@@ -88,7 +94,7 @@ public class FlowRadioGroup extends RadioGroup {
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 if (xpos + childw > width) {
                     xpos = getPaddingLeft();
-                    ypos += mLineHeight;
+                    ypos += getChildAt(i-1).getMeasuredHeight()+getPaddingBottom();
                 }
                 child.layout(xpos, ypos, xpos + childw, ypos + childh);
                 xpos += childw + lp.width;

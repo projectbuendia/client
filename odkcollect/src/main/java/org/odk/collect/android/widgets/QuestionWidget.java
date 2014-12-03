@@ -16,10 +16,8 @@ package org.odk.collect.android.widgets;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -35,7 +33,6 @@ import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.utilities.StringUtils;
 import org.odk.collect.android.views.MediaLayout;
-import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +69,7 @@ public abstract class QuestionWidget extends LinearLayout {
         super(context);
 
         mQuestionFontsize = Collect.getQuestionFontsize();
-        mAnswerFontsize = mQuestionFontsize + 2;
+        mAnswerFontsize = mQuestionFontsize * 4;
 
         mPrompt = p;
 
@@ -83,7 +80,7 @@ public abstract class QuestionWidget extends LinearLayout {
         mLayoutParams =
             new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-        mLayoutParams.setMargins(10, 0, 10, 0);
+        mLayoutParams.setMargins(10, 10, 10, 0);
 
         addQuestionText(p);
 //        addHelpText(p);

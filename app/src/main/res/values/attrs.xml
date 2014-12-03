@@ -3,9 +3,8 @@
     <declare-styleable name="VitalView">
         <attr name="textColor" format="color" />
         <attr name="vitalName" format="string" localization="suggested" />
-        <attr name="vitalNameTextSize" format="dimension" />
         <attr name="vitalValue" format="string" />
-        <attr name="vitalValueFormat" format="string" />
+        <attr name="vitalValueMaxLines" format="integer" />
     </declare-styleable>
     <declare-styleable name="SubtitledButtonView">
         <attr name="subtitledButtonIsSquare" format="boolean" />

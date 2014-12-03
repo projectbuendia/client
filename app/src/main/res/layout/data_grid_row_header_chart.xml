@@ -7,20 +7,18 @@
     android:padding="1px">
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
         android:background="#FFFFFF">
 
-        <ImageView
-            android:id="@+id/data_grid_cell_chart_image"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <TextView
+            android:id="@+id/data_grid_header_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            android:visibility="invisible"
-            android:scaleType="fitXY"
-            android:src="@drawable/chart_cell_active" />
+            android:padding="16dp"
+            android:textSize="24sp"
+            tools:text="Heading" />
 
     </RelativeLayout>
 
