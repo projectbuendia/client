@@ -57,7 +57,6 @@ import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -312,6 +311,8 @@ public class ODKView extends LinearLayout {
         int i;
         // list all groups in one string
         for (FormEntryCaption g : groups) {
+
+
             i = g.getMultiplicity() + 1;
             t = g.getLongText();
             if (t != null) {
@@ -320,6 +321,12 @@ public class ODKView extends LinearLayout {
                     s.append(" (" + i + ")");
                 }
                 s.append(" > ");
+            }
+
+            // if any of the groups are invisible, ignore them (and all above)
+            Appearance appearance = Appearance.fromString(g.getAppearanceHint());
+            if (appearance.hasQualifier("invisible")) {
+                s.setLength(0);
             }
         }
 
