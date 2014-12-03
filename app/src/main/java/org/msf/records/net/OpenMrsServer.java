@@ -96,9 +96,6 @@ public class OpenMrsServer implements Server {
             throw new RuntimeException(e);
         }
 
-        // TODO(akalachman): Remove.
-        Log.e(TAG, requestBody.toString());
-
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/user",
                 requestBody,
                 new Response.Listener<JSONObject>() {
