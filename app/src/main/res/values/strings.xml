@@ -50,7 +50,7 @@
     <string name="snackbar_update_downloaded">Application update downloaded</string>
     <string name="snackbar_action_download">Download</string>
     <string name="snackbar_action_install">Install</string>
-    <string name="age_years">%d years</string>
+    <string name="age_years">%dY</string>
     <string name="day_n">%d</string>
     <string name="overview_age">Age</string>
     <string name="overview_days_since_admission">Days Since Admission</string>
@@ -75,5 +75,6 @@
     <string name="add_user_user_exists_locally">User already exists on tablet</string>
     <string name="add_user_user_exists_on_server">User already exists on server</string>
     <string name="add_user_server_error">Server error</string>
+    <string name="age_months">%dmo</string>
 
 </resources>
