@@ -157,7 +157,7 @@
   <string name="manifest_server_error">Răspunsul Manifest nu raportează o versiune OpenRosa — server greșit?</string>
   <string name="root_element_error">Root nu este &amp;lt;manifest\&gt; — era %s</string>
   <string name="root_namespace_error">Namespace pentru Root este incorect: %s</string>
-  <string name="manifest_tag_error">Înregistrării Manifest %s îi lipsește unul sau mai multe tag-uri: filename, hash, sau downloadUrl</string>
+  <string name="manifest_tag_error">Înregistrării Manifest %s îi lipsește unul sau mai multe tag-mUri: filename, hash, sau downloadUrl</string>
   <string name="form_download_progress">%1$s. Preluare fișiere media: %2$s din %3$s</string>
   <string name="file_fetch_failed">Eroare: %2$s (%3$s) la %1$s</string>
   <string name="fetching_manifest">%s. Preluare manifest </string>
@@ -318,5 +318,5 @@
   <string name="gme_search_browse">Căutați formulare. Sau selectați \'My Drive\' de mai jos pentru a naviga către ele.</string>
   <string name="no_blank_search">Câmpul căutare nu poate fi gol.</string>
   <string name="select_maps_account">Ați selectat Google Maps Engine ca server, vă rugăm să selectați un cont Google corespondent în Setări generale înainte de a continua</string>
-  <string name="get_project_IDs">Preluare ID-uri proiecte</string>
+  <string name="get_project_IDs">Preluare ID-mUri proiecte</string>
 </resources>

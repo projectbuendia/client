@@ -126,17 +126,22 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
     @Override
     public View getRowHeader(int row, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
-                R.layout.data_grid_header_chart, null /*root*/);
+                R.layout.data_grid_row_header_chart, null /*root*/);
         TextView textView =
                 (TextView) view.findViewById(R.id.data_grid_header_text);
         textView.setText(rows.get(row).name);
+
+        if (row % 2 == 0) {
+            textView.setBackgroundColor(0xFFCCCCCC);
+        }
+
         return view;
     }
 
     @Override
     public View getColumnHeader(int column, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
-                R.layout.data_grid_header_chart, null /*root*/);
+                R.layout.data_grid_column_header_chart, null /*root*/);
         TextView textView =
                 (TextView) view.findViewById(R.id.data_grid_header_text);
         textView.setText(columnHeaders.get(column));
@@ -152,6 +157,12 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
         boolean visible = rowData.dates.contains(dateKey);
         view.findViewById(R.id.data_grid_cell_chart_image)
                 .setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+
+        if (rowIndex % 2 == 0) {
+            ((ViewGroup) view).getChildAt(0).setBackgroundColor(0xFFCCCCCC);
+        }
+
         return view;
     }
 }
+

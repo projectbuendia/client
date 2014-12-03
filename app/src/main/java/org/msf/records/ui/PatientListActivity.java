@@ -4,12 +4,12 @@ import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 
 import org.msf.records.R;
+import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -38,8 +38,6 @@ public class PatientListActivity extends PatientSearchActivity {
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientListFragment mFragment;
-
-//    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -84,33 +82,22 @@ public class PatientListActivity extends PatientSearchActivity {
 
 
     private void setupCustomActionBar(int selectedFilter){
-        // TODO(akalachman): Replace with real zones, real filters.
-        final String[] zones = new String[] {
-                "All Patients", "Triage", "Suspect", "Probable", "Confirmed",
-                null, // section border
-                "Pregnant", "Children Under 5", "Children Under 2"
-        };
-        SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<String>(
+        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay();
+        SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<SimpleSelectionFilter>(
                 this,
                 R.layout.patient_list_spinner_dropdown_item,
                 R.layout.patient_list_spinner_expanded_dropdown_item,
                 R.layout.patient_list_spinner_expanded_section_divider,
-                zones);
+                filters);
 
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long id) {
-                if (position == 0) {
-                    mFragment.setZone(null); // All locations
-                } else {
-                    mFragment.setZone(zones[position]);
-                }
+                mFragment.filterBy(filters[position]);
                 return true;
             }
         };
 
-        final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
         final ActionBar actionBar = getActionBar();
         actionBar.setLogo(R.drawable.ic_launcher);
         actionBar.setDisplayShowTitleEnabled(false);
@@ -120,23 +107,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
         mFragment = (PatientListFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.patient_list);
-        if (selectedFilter == 0) {
-            mFragment.setZone(null);
-        } else {
-            mFragment.setZone(zones[selectedFilter]);
-        }
-        /*actionBar.setDisplayOptions(
-                ActionBar.DISPLAY_SHOW_CUSTOM,
-                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
-                        | ActionBar.DISPLAY_SHOW_TITLE);
-        final View customActionBarView = inflater.inflate(
-                R.layout.actionbar_custom_main, null);*/
-
-//        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
-//        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
-//        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
-//        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
-//            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mFragment.filterBy(filters[selectedFilter]);
     }
 
     @Override

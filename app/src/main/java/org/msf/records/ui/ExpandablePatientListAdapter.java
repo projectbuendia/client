@@ -1,19 +1,24 @@
 package org.msf.records.ui;
 
 import android.content.Context;
-import android.content.CursorLoader;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorTreeAdapter;
-import android.widget.FrameLayout;
+import android.widget.Filter;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.msf.records.R;
+import org.msf.records.filter.FilterGroup;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.TentFilter;
 import org.msf.records.model.Status;
+import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 
 import butterknife.ButterKnife;
@@ -29,86 +34,55 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     /**
      * Projection for querying the content provider.
      */
-    private static final String[] PROJECTION = new String[] {
-            PatientProviderContract.PatientColumns._ID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER
-    };
-
-    // Constants representing column positions from PROJECTION.
-    public static final int COLUMN_ID = 0;
-    public static final int COLUMN_LOCATION_TENT = 1;
-    public static final int COLUMN_GIVEN_NAME = 2;
-    public static final int COLUMN_FAMILY_NAME = 3;
-    public static final int COLUMN_UUID = 4;
-    public static final int COLUMN_STATUS = 5;
-    public static final int COLUMN_ADMISSION_TIMESTAMP = 6;
-    public static final int COLUMN_AGE_MONTHS = 7;
-    public static final int COLUMN_AGE_YEARS = 8;
-    public static final int COLUMN_GENDER = 9;
+    private static final String[] PROJECTION = PatientProjection.getProjectionColumns();
 
     private Context mContext;
     private String mQueryFilterTerm;
-    private String mZoneFilter;
+    private SimpleSelectionFilter mFilter;
 
     public ExpandablePatientListAdapter(
-            Cursor cursor, Context context, String queryFilterTerm, String zoneFilter) {
+            Cursor cursor, Context context, String queryFilterTerm,
+            SimpleSelectionFilter filter) {
         super(cursor, context);
         mContext = context;
         mQueryFilterTerm = queryFilterTerm;
-        mZoneFilter = zoneFilter;
+        mFilter = filter;
     }
 
-    public String getQueryFilterTerm() {
-        return mQueryFilterTerm;
+    public SimpleSelectionFilter getSelectionFilter() {
+        return mFilter;
     }
 
-    public void setQueryFilterTerm(String queryFilterTerm) {
-        mQueryFilterTerm = queryFilterTerm;
+    public void setSelectionFilter(SimpleSelectionFilter filter) {
+        mFilter = filter;
     }
 
-    public String getZoneFilter() {
-        return mZoneFilter;
-    }
+    public void filter(CharSequence constraint, Filter.FilterListener listener) {
+        setGroupCursor(null); // Reset the group cursor.
 
-    public void setZoneFilter(String zoneFilter) {
-        mZoneFilter = zoneFilter;
+        // Set the query filter term as a member variable so it can be retrieved when
+        // getting patients-per-tent.
+        mQueryFilterTerm = constraint.toString();
+
+        // Perform the actual filtering.
+        getFilter().filter(constraint, listener);
     }
 
     @Override
     protected Cursor getChildrenCursor(Cursor groupCursor) {
         Cursor itemCursor = getGroup(groupCursor.getPosition());
 
-        String tent = itemCursor.getString(PatientListFragment.COLUMN_LOCATION_TENT);
+        String tent = itemCursor.getString(PatientProjection.COLUMN_LOCATION_TENT);
         Log.d(TAG, "Getting child cursor for tent: " + tent);
 
-        String likeQueryTerm = mQueryFilterTerm + "%";
-        String zoneFilterString = (mZoneFilter == null) ? "%" : mZoneFilter;
-
-        CursorLoader cursorLoader = new CursorLoader(mContext,
-                PatientProviderContract.CONTENT_URI,
-                PROJECTION,
-                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE + " LIKE ? AND " +
-                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT + "=? AND (" +
-                PatientProviderContract.PatientColumns._ID + "=? OR " +
-                PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME + " LIKE ? OR " +
-                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + " LIKE ?)",
-                new String[] {
-                        zoneFilterString, tent, mQueryFilterTerm, likeQueryTerm, likeQueryTerm
-                },
-                null);
+        FilterQueryProvider queryProvider =
+                new FilterQueryProviderFactory().getFilterQueryProvider(
+                        mContext, new FilterGroup(getSelectionFilter(), new TentFilter(tent)));
 
         Cursor childCursor = null;
 
         try {
-            childCursor = cursorLoader.loadInBackground();
+            childCursor = queryProvider.runQuery(mQueryFilterTerm);
             Log.d(TAG, "childCursor " + childCursor.getCount());
             childCursor.moveToFirst();
         } catch (Exception e) {
@@ -130,11 +104,11 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
         if (patientCount == 1) {
             item.setText(
-                cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT) + " " +
+                cursor.getString(PatientProjection.COLUMN_LOCATION_TENT) + " " +
                 context.getResources().getString(R.string.one_patient));
         } else {
             item.setText(
-                cursor.getString(PatientListFragment.COLUMN_LOCATION_TENT) + " " +
+                cursor.getString(PatientProjection.COLUMN_LOCATION_TENT) + " " +
                 context.getResources().getString(R.string.n_patients, patientCount));
         }
     }
@@ -155,13 +129,13 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        String givenName = cursor.getString(COLUMN_GIVEN_NAME);
-        String familyName = cursor.getString(COLUMN_FAMILY_NAME);
-        String id = cursor.getString(COLUMN_ID);
-        String status = cursor.getString(COLUMN_STATUS);
-        String gender = cursor.getString(COLUMN_GENDER);
-        int ageMonths = cursor.getInt(COLUMN_AGE_MONTHS);
-        int ageYears = cursor.getInt(COLUMN_AGE_YEARS);
+        String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
+        String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
+        String id = cursor.getString(PatientProjection.COLUMN_ID);
+        String status = cursor.getString(PatientProjection.COLUMN_STATUS);
+        String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
+        int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
+        int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
 
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
