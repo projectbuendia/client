@@ -30,6 +30,10 @@ public class FilterManager {
         new FilterGroup(baseFilters, new AgeFilter(2)).setName("Children Under 2")
     };
 
+    public static SimpleSelectionFilter getDefaultFilter() {
+        return ZONE_FILTERS[0];
+    }
+
     public static SimpleSelectionFilter[] getZoneFilters() {
         return ZONE_FILTERS;
     }

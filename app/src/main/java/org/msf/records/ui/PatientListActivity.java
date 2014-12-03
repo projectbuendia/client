@@ -93,7 +93,7 @@ public class PatientListActivity extends PatientSearchActivity {
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long id) {
-                mFragment.setFilter(filters[position]);
+                mFragment.filterBy(filters[position]);
                 return true;
             }
         };
@@ -107,7 +107,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
         mFragment = (PatientListFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.patient_list);
-        mFragment.setFilter(filters[selectedFilter]);
+        mFragment.filterBy(filters[selectedFilter]);
     }
 
     @Override

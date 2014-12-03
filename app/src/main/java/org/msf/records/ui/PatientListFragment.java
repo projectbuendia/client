@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -18,7 +17,7 @@ import android.widget.ListView;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
-import org.msf.records.filter.AllFilter;
+import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.Location;
@@ -82,9 +81,9 @@ public class PatientListFragment extends ProgressFragment implements
 
     String mFilterQueryTerm = "";
 
-    SimpleSelectionFilter mFilter = new AllFilter();
+    SimpleSelectionFilter mFilter;
 
-    public void setFilter(SimpleSelectionFilter filter) {
+    public void filterBy(SimpleSelectionFilter filter) {
         mFilter = filter;
         mPatientAdapter.setSelectionFilter(mFilter);
         mPatientAdapter.setFilterQueryProvider(
@@ -147,6 +146,7 @@ public class PatientListFragment extends ProgressFragment implements
     public void onRefresh() {
         if(!isRefreshing){
             Log.d(TAG, "onRefresh");
+            getLoaderManager().restartLoader(LOADER_LIST_ID, null, this);
             //triggers app wide data refresh
             GenericAccountService.triggerRefresh();
             isRefreshing = true;
@@ -191,11 +191,11 @@ public class PatientListFragment extends ProgressFragment implements
         Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
         allLocationsButton.setOnClickListener(onClickListener);
 
+        mFilter = FilterManager.getDefaultFilter();
         mPatientAdapter = new ExpandablePatientListAdapter(
                 null, getActivity(), mFilterQueryTerm, mFilter);
         mListView.setAdapter(mPatientAdapter);
-
-        getLoaderManager().initLoader(LOADER_LIST_ID, null, this);
+        filterBy(mFilter);
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
@@ -279,10 +279,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     public void onEvent(CreatePatientSucceededEvent event) {
-        if(!isRefreshing){
-            isRefreshing = true;
-            loadSearchResults();
-        }
+        onRefresh();
     }
 
     /**
