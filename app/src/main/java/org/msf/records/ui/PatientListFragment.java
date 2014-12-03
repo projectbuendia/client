@@ -168,9 +168,6 @@ public class PatientListFragment extends ProgressFragment implements
                 changeState(State.LOADED);
                 stopRefreshing();
 
-                // TODO(akalachman): Necessary?
-                mPatientAdapter.notifyDataSetChanged();
-
                 if (oldCursor != null && !oldCursor.isClosed()) {
                     oldCursor.close();
                 }

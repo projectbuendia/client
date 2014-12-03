@@ -140,13 +140,15 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
 
-        // TODO(akalachman): Replace all strings below with resource strings.
         if (ageMonths > 0) {
-            holder.mPatientAge.setText(ageMonths + "mo");
+            holder.mPatientAge.setText(
+                    context.getResources().getString(R.string.age_months, ageMonths));
         } else if (ageYears > 0) {
-            holder.mPatientAge.setText(ageYears + "Y");
+            holder.mPatientAge.setText(
+                    context.getResources().getString(R.string.age_years, ageYears));
         } else {
-            holder.mPatientAge.setText("99Y");
+            holder.mPatientAge.setText(
+                    context.getResources().getString(R.string.age_years, 99));
             holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
         }
 

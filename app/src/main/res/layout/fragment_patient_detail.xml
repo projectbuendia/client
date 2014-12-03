@@ -6,15 +6,6 @@
     android:layout_height="wrap_content"
     android:textIsSelectable="true"
     android:background="#dddddd">
-
-    <!-- TODO(akalachman): Replace LinearLayout with ScrollView -->
-    <!--<ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        android:fillViewport="false">-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -300,5 +291,4 @@
                 tools:ignore="MergeRootFrame" />
         </LinearLayout>
     </LinearLayout>
-    <!--</ScrollView>-->
 </RelativeLayout>
