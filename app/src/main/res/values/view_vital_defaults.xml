@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="view_vital_text_color">#FFFFFF</color>
-    <dimen name="view_vital_name_text_size">16sp</dimen>
 </resources>
