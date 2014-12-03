@@ -27,11 +27,7 @@ public interface Server {
     public static final String PATIENT_AGE_TYPE_KEY = "age_type";
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
-    public static final String PATIENT_ORIGIN_LOCATION_KEY = "origin_location";
     public static final String PATIENT_MOVEMENT_KEY = "movement";
-    public static final String PATIENT_LOCATION_ZONE_KEY = "assigned_location_zone_id";
-    public static final String PATIENT_LOCATION_TENT_KEY = "assigned_location_tent_id";
-    public static final String PATIENT_LOCATION_BED_KEY = "assigned_location_bed";
 
     /**
      * Create a patient record for a new patient. Currently we are just using a String-String
