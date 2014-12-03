@@ -26,26 +26,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
-//import android.view.GestureDetector;
-//import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,17 +71,16 @@ import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.MediaUtils;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets.QuestionWidget;
-import org.odk.collect.android.widgets2.Widget2Factory;
-import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
+
+//import android.view.GestureDetector;
+//import android.view.GestureDetector.OnGestureListener;
 
 /**
  * FormEntryActivity is responsible for displaying questions, animating
@@ -880,7 +871,7 @@ public class FormEntryActivity
 
             InputMethodManager imm = (InputMethodManager)getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
 
 			saveDataToDisk(EXIT, true /*complete*/, null);
 			return true;

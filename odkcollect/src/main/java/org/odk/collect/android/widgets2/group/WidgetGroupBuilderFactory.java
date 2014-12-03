@@ -18,7 +18,8 @@ public class WidgetGroupBuilderFactory {
         }
 
         // TODO(dxchen): Remove this once the server sends back the right appearance.
-        if (group.getQuestionText().startsWith("Symptoms")) {
+        if (group.getQuestionText().startsWith("Symptoms")
+                || group.getQuestionText().startsWith("Pain")) {
             return new BinarySelectOneTableWidgetGroupBuilder(appearance);
         }
 
