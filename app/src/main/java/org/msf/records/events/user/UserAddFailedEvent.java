@@ -1,5 +1,6 @@
 package org.msf.records.events.user;
 
+import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
 
 /**
@@ -19,24 +20,5 @@ public class UserAddFailedEvent {
     public UserAddFailedEvent(NewUser user, int reason) {
         mUser = user;
         mReason = reason;
-    }
-
-    @Override
-    public String toString() {
-        // TODO(akalachman): Extract as string resources.
-        switch (mReason) {
-            case REASON_UNKNOWN:
-                return "Unknown error";
-            case REASON_INVALID_USER:
-                return "Invalid user";
-            case REASON_USER_EXISTS_LOCALLY:
-                return "User already exists on tablet";
-            case REASON_USER_EXISTS_ON_SERVER:
-                return "User already exists on server";
-            case REASON_SERVER_ERROR:
-                return "Unknown error on server";
-            default:
-                return "Unknown error";
-        }
     }
 }
