@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import static android.provider.BaseColumns._ID;
 import static org.msf.records.sync.ChartProviderContract.ChartColumns;
+import static org.msf.records.sync.LocationProviderContract.LocationColumns;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS;
@@ -25,7 +26,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 8;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -78,6 +79,27 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ")" +
                     ")";
 
+    static final String LOCATIONS_TABLE_NAME = "locations";
+
+    private static final String SQL_CREATE_LOCATIONS =
+            CREATE_TABLE + LOCATIONS_TABLE_NAME + " (" +
+                _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                LocationColumns.LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
+                LocationColumns.PARENT_UUID + TYPE_TEXT +
+                ")";
+
+    static final String LOCATION_NAMES_TABLE_NAME = "location_names";
+
+    private static final String SQL_CREATE_LOCATION_NAMES =
+            CREATE_TABLE + LOCATION_NAMES_TABLE_NAME + " (" +
+                _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                LocationColumns.LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
+                LocationColumns.LOCALE + TYPE_TEXT + COMMA_SEP +
+                LocationColumns.NAME + TYPE_TEXT + COMMA_SEP +
+                UNIQUE_INDEX + LocationColumns.LOCATION_UUID + COMMA_SEP + LocationColumns.LOCALE +
+                ")" +
+                ")";
+
     static final String OBSERVATIONS_TABLE_NAME = "observations";
 
     private static final String SQL_CREATE_OBSERVATIONS =
@@ -119,6 +141,8 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_CONCEPT_NAMES);
         db.execSQL(SQL_CREATE_CONCEPTS);
         db.execSQL(SQL_CREATE_CHARTS);
+        db.execSQL(SQL_CREATE_LOCATIONS);
+        db.execSQL(SQL_CREATE_LOCATION_NAMES);
         db.execSQL(SQL_CREATE_OBSERVATIONS);
     }
 
@@ -131,6 +155,8 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(makeDropTable(CONCEPTS_TABLE_NAME));
         db.execSQL(makeDropTable(CONCEPT_NAMES_TABLE_NAME));
         db.execSQL(makeDropTable(CHARTS_TABLE_NAME));
+        db.execSQL(makeDropTable(LOCATIONS_TABLE_NAME));
+        db.execSQL(makeDropTable(LOCATION_NAMES_TABLE_NAME));
         onCreate(db);
     }
 }
