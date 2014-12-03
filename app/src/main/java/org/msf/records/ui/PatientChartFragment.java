@@ -140,10 +140,6 @@ public class PatientChartFragment extends Fragment {
 
         // Update our patient's vitals
         updatePatientUI();
-
-        // Remove grids that may have been inserted previously.
-        ((ViewGroup) ((ViewGroup) getView()).getChildAt(0)).removeAllViews();
-
     }
 
     private void updatePatientUI()
