@@ -12,7 +12,6 @@ import com.android.volley.Response;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.cache.PatientOpenHelper;
 import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
 import org.msf.records.model.Status;
