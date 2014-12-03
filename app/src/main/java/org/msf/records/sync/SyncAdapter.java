@@ -6,6 +6,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
@@ -79,6 +80,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        // Fire a broadcast indicating that sync has completed.
+        Intent syncStartedIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncStartedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.STARTED);
+        getContext().sendBroadcast(syncStartedIntent);
+
+        Intent syncFailedIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
+
         Log.i(TAG, "Beginning network synchronization");
         try {
             boolean specific = false;
@@ -110,25 +121,36 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (RemoteException e) {
             Log.e(TAG, "Error in RPC: " + e.toString());
             syncResult.stats.numIoExceptions++;
+            getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (OperationApplicationException e) {
             Log.e(TAG, "Error updating database: " + e.toString());
             syncResult.databaseError = true;
+            getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (InterruptedException e){
             Log.e(TAG, "Error interruption: " + e.toString());
             syncResult.stats.numIoExceptions++;
+            getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (ExecutionException e){
             Log.e(TAG, "Error failed to execute: " + e.toString());
             syncResult.stats.numIoExceptions++;
+            getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (Exception e){
             Log.e(TAG, "Error reading from network: " + e.toString());
             syncResult.stats.numIoExceptions++;
+            getContext().sendBroadcast(syncFailedIntent);
             return;
         }
         Log.i(TAG, "Network synchronization complete");
+
+        // Fire a broadcast indicating that sync has completed.
+        Intent syncCompletedIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncCompletedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.COMPLETED);
+        getContext().sendBroadcast(syncCompletedIntent);
     }
 
     private void updatePatientData(SyncResult syncResult) throws InterruptedException, ExecutionException, RemoteException, OperationApplicationException {
