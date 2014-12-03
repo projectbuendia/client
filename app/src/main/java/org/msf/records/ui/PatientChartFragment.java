@@ -253,14 +253,11 @@ public class PatientChartFragment extends Fragment {
 
         // Find the latest observation for each observation type.
         for (LocalizedChartHelper.LocalizedObservation observation : observations) {
-            if ( observation.conceptUuid.equals( "30143d74-f654-4427-bb92-685f68f92c15" ) )
-            {
-                Log.e( "Test", "Found" );
-            }
+
             // If no other observations for this concept have been seen or if this is the
-            if (!conceptsToLatestObservations.containsKey(observation.conceptName)
+            if (!conceptsToLatestObservations.containsKey(observation.conceptUuid)
                     || observation.encounterTimeMillis >
-                    conceptsToLatestObservations.get(observation.conceptName)
+                    conceptsToLatestObservations.get(observation.conceptUuid)
                             .encounterTimeMillis) {
                 conceptsToLatestObservations.put(observation.conceptUuid, observation);
             }
@@ -280,15 +277,16 @@ public class PatientChartFragment extends Fragment {
         LocalizedChartHelper.LocalizedObservation observation;
 
         // Update mobility
-        /*vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
+        vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
         observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
         if ( observation == null )
         {
+            vital.setValue( "N/A" );
             Log.e( "PatientChart", "Missing observation" );
         }
         else {
             vital.setValue( observation.localizedValue );
         }
-        */
+
     }
 }
