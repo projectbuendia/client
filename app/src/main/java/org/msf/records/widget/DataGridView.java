@@ -122,8 +122,11 @@ public class DataGridView extends RelativeLayout {
 
         // Create all the main layout components.
         mColumnHeadersLayout = new TableLayout(mContext);
+        mColumnHeadersLayout.setBackgroundColor(0xFF999999);
         mRowHeadersLayout = new TableLayout(mContext);
+        mRowHeadersLayout.setBackgroundColor(0xFF999999);
         mDataLayout = new TableLayout(mContext);
+        mDataLayout.setBackgroundColor(0xFF999999);
 
         mHorizontalScrollViewLinkage = new Linkage<LinkableHorizontalScrollView>();
         mColumnHeadersHorizontalScrollView =

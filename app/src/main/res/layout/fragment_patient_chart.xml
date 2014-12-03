@@ -8,25 +8,89 @@
     tools:context="org.msf.records.ui.PatientChartFragment">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        >
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:textSize="20sp"
-            android:textColor="#999999"
-            android:text="Last Updated"/>
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="30sp"
+            android:gravity="left"
+            android:text="FirstName LastName"/>
 
         <TextView
-            android:id="@+id/last_updated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="30sp"
+            android:gravity="right"
+            android:text="PatientID#"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:gravity="left"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@android:color/darker_gray"
+            android:text="Age"/>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:textSize="20sp"
-            android:text="Never" />
+            android:textSize="25sp"
+            android:gravity="left"
+            android:fontFamily="sans-serif-condensed"
+            android:text="Sex"
+            android:textColor="@android:color/darker_gray"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:gravity="right"
+            android:fontFamily="sans-serif-condensed"
+            android:text="EMC Location/Tent#"
+            android:textColor="@android:color/darker_gray"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:gravity="left"
+            android:text="Day 4"
+            android:fontFamily="sans-serif-condensed"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:gravity="right"
+            android:fontFamily="sans-serif-condensed"
+            android:text="29 NOV 2014 07:18"/>
 
     </LinearLayout>
 
