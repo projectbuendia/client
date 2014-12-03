@@ -168,6 +168,7 @@ public class PatientListFragment extends ProgressFragment implements
                 changeState(State.LOADED);
                 stopRefreshing();
 
+                // TODO(akalachman): Investigate "Cursor finalized without prior close()"
                 if (oldCursor != null && !oldCursor.isClosed()) {
                     oldCursor.close();
                 }
