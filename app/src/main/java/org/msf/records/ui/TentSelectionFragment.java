@@ -1,30 +1,19 @@
 package org.msf.records.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.msf.records.R;
-import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.FilterManager;
-import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.filter.TentFilter;
 import org.msf.records.model.LocationTree;
-import org.msf.records.model.LocationTreeFactory;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -57,7 +46,7 @@ public class TentSelectionFragment extends Fragment {
 
         ButterKnife.inject(this, view);
 
-        LocationTree tree = new LocationTreeFactory(getActivity()).build();
+        LocationTree tree = LocationTree.getRootLocation(getActivity());
 
         TentListAdapter adapter = new TentListAdapter(
                 getActivity(), LocationTree.getTents(getActivity(), tree));

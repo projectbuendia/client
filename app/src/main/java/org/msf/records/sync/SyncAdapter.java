@@ -244,10 +244,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         (patient.status != null && !patient.status.equals(status)) ||
                         (patient.admission_timestamp != null &&
                                 !patient.admission_timestamp.equals(admissionTimestamp)) ||
-                        (patient.assigned_location.zone != null &&
-                            !patient.assigned_location.zone.equals(locationZone)) ||
-                        (patient.assigned_location.tent != null &&
-                            !patient.assigned_location.tent.equals(locationTent)) ||
                         (patient.assigned_location.uuid != null &&
                             !patient.assigned_location.uuid.equals(locationUuid)) ||
                         (patient.age.months != ageMonths) ||
@@ -261,10 +257,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
                             .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
                             .withValue(PatientColumns.COLUMN_NAME_STATUS, status)
-                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, status)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
-                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, locationZone)
-                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, locationTent)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
@@ -296,8 +289,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
                     .withValue(PatientColumns.COLUMN_NAME_STATUS, e.status)
                     .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
-                    .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
-                    .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, e.assigned_location.tent)
                     .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, e.assigned_location.uuid)
                     .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
                     .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)

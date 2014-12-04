@@ -1,31 +1,111 @@
 package org.msf.records.model;
 
 import android.content.Context;
+import android.util.Log;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.net.model.Location;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
  * locale.
+ *
+ * LocationTree should be used as a singleton.
  */
+// TODO(akalachman): Dagger this!
+// TODO(akalachman): Cleanup init/re-init.
 public class LocationTree implements Comparable<LocationTree> {
     private final String DEFAULT_LOCALE = "en";
 
     private LocationTree mParent;
 
+    // Keep an index of all children to make grabbing an arbitrary location straightforward.
+    private static HashMap<String, LocationTree> mAllChildren = new HashMap<String, LocationTree>();
     private TreeMap<String, LocationTree> mChildren;
     private Location mLocation;
     private String mSortLocale = DEFAULT_LOCALE;
     private int mPatientCount;
 
-    public LocationTree(LocationTree parent, Location location, int patientCount) {
+    private static LocationTree ROOT = null;
+    private static LocationTreeFactory FACTORY = null;
+
+    private static final String TAG = "LocationTree";
+
+    public static final int FACILITY_DEPTH = 0;
+    public static final int ZONE_DEPTH = 1;
+    public static final int TENT_DEPTH = 2;
+    public static final int BED_DEPTH = 3;
+
+    // TODO(akalachman): Async support.
+    public static LocationTree getRootLocation(Context context) {
+        if (ROOT == null) {
+            Log.v(TAG, "Tree needs rebuilding");
+            rebuild(context);
+        }
+        return ROOT;
+    }
+
+    // TODO(akalachman): Async support.
+    public static LocationTree rebuild(Context context) {
+        Log.v(TAG, "Rebuilding tree and LocationTreeFactory");
+        FACTORY = new LocationTreeFactory(context);
+        ROOT = FACTORY.build();
+        return ROOT;
+    }
+
+    public static LocationTree rebuild() {
+        if (FACTORY == null) {
+            Log.w(TAG, "Could not rebuild LocationTree");
+        } else {
+            Log.v(TAG, "Rebuilding tree with existing LocationTreeFactory");
+            ROOT = FACTORY.build();
+        }
+        return ROOT;
+    }
+
+    public static void clearTreeIndex() {
+        mAllChildren.clear();
+    }
+
+    public static void putTreeIndex(String uuid, LocationTree locationTree) {
+        mAllChildren.put(uuid, locationTree);
+    }
+
+    public static LocationTree getLocationForUuid(String uuid) {
+        return mAllChildren.get(uuid);
+    }
+
+    public static LocationTree getZoneForUuid(String uuid) {
+        LocationTree locationTree = getLocationForUuid(uuid);
+        if (locationTree == null) {
+            return null;
+        }
+
+        return locationTree.getAncestorOrThisWithDepth(ZONE_DEPTH);
+    }
+
+    public static LocationTree getTentForUuid(String uuid) {
+        LocationTree locationTree = getLocationForUuid(uuid);
+        if (locationTree == null) {
+            return null;
+        }
+
+        return locationTree.getAncestorOrThisWithDepth(TENT_DEPTH);
+    }
+
+    // Limit location tree construction to this package.
+    LocationTree(LocationTree parent, Location location, int patientCount) {
         mParent = parent;
         mLocation = location;
         mChildren = new TreeMap<String, LocationTree>();
         mPatientCount = patientCount;
+        EventBus.getDefault().register(this);
     }
 
     public int getPatientCount() {
@@ -90,11 +170,11 @@ public class LocationTree implements Comparable<LocationTree> {
     }
 
     public static LocationTree[] getTents(Context context, LocationTree root) {
-        return getLocationArrayForDepth(context, root, 2);
+        return getLocationArrayForDepth(context, root, TENT_DEPTH);
     }
 
     public static LocationTree[] getZones(Context context, LocationTree root) {
-        return getLocationArrayForDepth(context, root, 1);
+        return getLocationArrayForDepth(context, root, ZONE_DEPTH);
     }
 
     private static LocationTree[] getLocationArrayForDepth(
@@ -161,5 +241,26 @@ public class LocationTree implements Comparable<LocationTree> {
         // Compare using the current locale.
         return mLocation.names.get(mSortLocale).compareTo(
                 another.getLocation().names.get(mSortLocale));
+    }
+
+    public LocationTree[] getSubtreeLocationArray() {
+        TreeMap<String, LocationTree> subtreeLocations = getAllSubtreeLocations();
+        LocationTree[] locationArray = new LocationTree[subtreeLocations.size()];
+        subtreeLocations.values().toArray(locationArray);
+        return locationArray;
+    }
+
+    public TreeMap<String, LocationTree> getAllSubtreeLocations() {
+        TreeMap<String, LocationTree> subtreeLocations = new TreeMap<String, LocationTree>();
+        subtreeLocations.put(getLocation().uuid, this);
+        for (LocationTree subtree : getChildren().values()) {
+            subtreeLocations.putAll(subtree.getAllSubtreeLocations());
+        }
+        return subtreeLocations;
+    }
+
+    public synchronized void onEvent(CreatePatientSucceededEvent event) {
+        // TODO(akalachman): Re-enable once this is async.
+        // rebuild();
     }
 }

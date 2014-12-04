@@ -25,6 +25,8 @@ public abstract class PatientSearchActivity extends BaseActivity
     private OnSearchListener mSearchListener;
     private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
 
+    protected static final int ODK_ACTIVITY_REQUEST = 1;
+
     public SearchView getSearchView() {
         return mSearchView;
     }

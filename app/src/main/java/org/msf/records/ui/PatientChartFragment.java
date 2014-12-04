@@ -25,6 +25,7 @@ import org.msf.records.controllers.PatientChartController;
 import org.msf.records.events.mvcmodels.ModelEvent;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
+import org.msf.records.model.LocationTree;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
@@ -32,7 +33,6 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientAge;
 import org.msf.records.net.model.PatientChart;
-import org.msf.records.net.model.PatientLocation;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.view.VitalView;
@@ -229,13 +229,23 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
     private void updatePatientInfoUI( View rootView )
     {
+        String zoneName = getActivity().getResources().getString(R.string.unknown_zone);
+        String tentName = getActivity().getResources().getString(R.string.unknown_tent);
+
+        if (mPatient.assigned_location != null) {
+            LocationTree patientZone = LocationTree.getZoneForUuid(mPatient.assigned_location.uuid);
+            LocationTree patientTent = LocationTree.getTentForUuid(mPatient.assigned_location.uuid);
+            zoneName = (patientZone == null) ? zoneName : patientZone.toString();
+            tentName = (patientTent == null) ? tentName : patientTent.toString();
+        }
+
         ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.given_name + " " + mPatient.family_name );
         ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( "#" + mPatient.id );
 
         ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.gender.equals( "M" ) ? "Male" : "Female" );
         ((TextView)rootView.findViewById( R.id.patient_chart_age )).setText(Integer.toString( mPatient.age.years ) );
 
-        ((TextView)rootView.findViewById( R.id.patient_chart_location )).setText( mPatient.assigned_location.zone + "/" + mPatient.assigned_location.tent );
+        ((TextView)rootView.findViewById( R.id.patient_chart_location )).setText( zoneName + "/" + tentName );
 
         GregorianCalendar nowDate = new GregorianCalendar();
         GregorianCalendar admissionDate = new GregorianCalendar();
@@ -341,10 +351,9 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         mPatient.id = data.getString(PatientProjection.COLUMN_ID );
 
-        PatientLocation assigned_location = new PatientLocation();
-        assigned_location.tent = data.getString(PatientProjection.COLUMN_LOCATION_TENT );
-        assigned_location.zone = data.getString(PatientProjection.COLUMN_LOCATION_ZONE );
-        mPatient.assigned_location = assigned_location;
+        LocationTree location = LocationTree.getLocationForUuid(
+                data.getString(PatientProjection.COLUMN_LOCATION_UUID));
+        mPatient.assigned_location = (location == null) ? null : location.getLocation();
 
         mPatient.admission_timestamp = data.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
 

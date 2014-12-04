@@ -85,4 +85,6 @@
     <string name="n_present_patients">%d present patients</string>
 
     <string name="string_with_paren" formatted="false">%s (%s)</string>
+    <string name="unknown_tent">Unknown Tent</string>
+    <string name="unknown_zone">Unknown zone</string>
 </resources>
