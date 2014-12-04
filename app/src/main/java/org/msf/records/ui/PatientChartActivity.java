@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import com.android.debug.hv.ViewServer;
 
 import org.msf.records.R;
+import org.msf.records.controllers.PatientChartController;
 import org.msf.records.net.Constants;
 
 import javax.annotation.Nullable;
@@ -48,6 +49,9 @@ public class PatientChartActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_patient_chart);
+
+        // TODO(dxchen): Dagger this!
+        PatientChartController.INSTANCE.register(this);
 
         ViewServer.get(this).addWindow(this);
 
@@ -114,25 +118,6 @@ public class PatientChartActivity extends BaseActivity {
         ViewServer.get(this).removeWindow(this);
     }
 
-    private int savePatientUuidForRequestCode(String patientUuid) {
-        synchronized (patientUuids) {
-            patientUuids[nextIndex] = patientUuid;
-            int requestCode = BASE_ODK_REQUEST + nextIndex;
-            nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
-            return requestCode;
-        }
-    }
-
-    @Nullable
-    private String getAndClearPatientUuidForRequestCode(int requestCode) {
-        synchronized (patientUuids) {
-            int index = requestCode - BASE_ODK_REQUEST;
-            String patientUuid = patientUuids[index];
-            patientUuids[index] = null;
-            return patientUuid;
-        }
-    }
-
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
@@ -144,9 +129,8 @@ public class PatientChartActivity extends BaseActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        OdkActivityLauncher.fetchAndShowXform(
-                                PatientChartActivity.this, Constants.ADD_OBSERVATION_UUID,
-                                savePatientUuidForRequestCode(mPatientUuid));
+                        PatientChartController.INSTANCE.startChartUpdate(
+                                PatientChartActivity.this, mPatientUuid);
                         return true;
                     }
                 });
@@ -169,15 +153,5 @@ public class PatientChartActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
         outState.putString(PATIENT_UUID_KEY, mPatientUuid);
         outState.putStringArray(PATIENT_UUIDS_BUNDLE_KEY, patientUuids);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
-        if (patientUuid == null) {
-            Log.e(TAG, "Received unknown request code: " + requestCode);
-            return;
-        }
-        OdkActivityLauncher.sendOdkResultToServer(this, patientUuid, resultCode, data);
     }
 }

@@ -32,10 +32,9 @@ import butterknife.ButterKnife;
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
  */
-public class PatientChartFragment extends Fragment {
+public class PatientChartFragment extends ControllableFragment {
 
     private static final String TAG = PatientChartFragment.class.getName();
-    private View mChartView;
 
     public static PatientChartFragment newInstance(String patientUuid) {
         PatientChartFragment fragment = new PatientChartFragment();
@@ -89,6 +88,7 @@ public class PatientChartFragment extends Fragment {
         return fragment;
     }
 
+    private View mChartView;
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 

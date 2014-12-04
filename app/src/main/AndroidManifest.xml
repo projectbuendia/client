@@ -133,6 +133,9 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <receiver android:name=".sync.SyncManager$SyncStatusBroadcastReceiver" />
+
     </application>
 
 </manifest>
