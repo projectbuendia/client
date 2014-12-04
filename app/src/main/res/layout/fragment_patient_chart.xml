@@ -21,6 +21,7 @@
             android:fontFamily="sans-serif-condensed"
             android:textSize="30sp"
             android:gravity="left"
+            android:id="@+id/patient_chart_fullname"
             android:text="FirstName LastName"/>
 
         <TextView
@@ -29,6 +30,7 @@
             android:fontFamily="sans-serif-condensed"
             android:textSize="30sp"
             android:gravity="right"
+            android:id="@+id/patient_chart_id"
             android:text="PatientID#"/>
 
     </LinearLayout>
@@ -47,6 +49,7 @@
             android:gravity="left"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/darker_gray"
+            android:id="@+id/patient_chart_age"
             android:text="Age"/>
 
         <TextView
@@ -56,6 +59,7 @@
             android:gravity="left"
             android:fontFamily="sans-serif-condensed"
             android:text="Sex"
+            android:id="@+id/patient_chart_gender"
             android:textColor="@android:color/darker_gray"/>
 
         <TextView
@@ -65,6 +69,7 @@
             android:gravity="right"
             android:fontFamily="sans-serif-condensed"
             android:text="EMC Location/Tent#"
+            android:id="@+id/patient_chart_location"
             android:textColor="@android:color/darker_gray"/>
 
     </LinearLayout>
@@ -82,6 +87,7 @@
             android:textSize="30sp"
             android:gravity="left"
             android:text="Day 4"
+            android:id="@+id/patient_chart_days"
             android:fontFamily="sans-serif-condensed"/>
 
         <TextView
@@ -89,6 +95,7 @@
             android:layout_height="wrap_content"
             android:textSize="25sp"
             android:gravity="right"
+            android:id="@+id/patient_chart_last_observation_date_time"
             android:fontFamily="sans-serif-condensed"
             android:text="29 NOV 2014 07:18"/>
 
