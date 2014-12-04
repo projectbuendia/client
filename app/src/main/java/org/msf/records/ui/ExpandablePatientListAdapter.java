@@ -15,8 +15,9 @@ import android.widget.TextView;
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.filter.TentFilter;
+import org.msf.records.model.LocationTree;
 import org.msf.records.model.Status;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.utils.PatientCountDisplay;
@@ -30,11 +31,6 @@ import butterknife.InjectView;
 public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
-
-    /**
-     * Projection for querying the content provider.
-     */
-    private static final String[] PROJECTION = PatientProjection.getProjectionColumns();
 
     private Context mContext;
     private String mQueryFilterTerm;
@@ -72,12 +68,14 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     protected Cursor getChildrenCursor(Cursor groupCursor) {
         Cursor itemCursor = getGroup(groupCursor.getPosition());
 
-        String tent = itemCursor.getString(PatientProjection.COLUMN_LOCATION_TENT);
+        String tent = itemCursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
         Log.d(TAG, "Getting child cursor for tent: " + tent);
 
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory().getFilterQueryProvider(
-                        mContext, new FilterGroup(getSelectionFilter(), new TentFilter(tent)));
+                        mContext,
+                        new FilterGroup(getSelectionFilter(),
+                        new LocationUuidFilter(tent)));
 
         Cursor childCursor = null;
 
@@ -100,10 +98,15 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
         int patientCount = getChildrenCursor(cursor).getCount();
+        String locationUuid = cursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
+        String tentName = context.getResources().getString(R.string.unknown_tent);
+        LocationTree location = LocationTree.getTentForUuid(locationUuid);
+        if (location != null) {
+            tentName = location.toString();
+        }
 
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
-        item.setText(PatientCountDisplay.getPatientCountTitle(
-                context, patientCount, cursor.getString(PatientProjection.COLUMN_LOCATION_TENT)));
+        item.setText(PatientCountDisplay.getPatientCountTitle(context, patientCount, tentName));
     }
 
     @Override

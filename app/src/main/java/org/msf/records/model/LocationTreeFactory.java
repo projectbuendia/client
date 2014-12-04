@@ -153,7 +153,10 @@ public class LocationTreeFactory {
 
         // Start the tree from the single known root. Forests are NOT supported.
         Location root = Iterables.get(mLocationsByParent.get(null), 0);
+
+        LocationTree.clearTreeIndex();
         LocationTree tree = new LocationTree(null, root, getPatientCount(root.uuid));
+        LocationTree.putTreeIndex(root.uuid, tree);
 
         // With all locations initialized, recursively add children to the tree.
         addChildren(tree);
@@ -170,6 +173,7 @@ public class LocationTreeFactory {
             LocationTree childTree =
                     new LocationTree(root, location, getPatientCount(location.uuid));
             root.getChildren().put(location.uuid, childTree);
+            LocationTree.putTreeIndex(location.uuid, childTree);
             addChildren(childTree);
         }
     }
