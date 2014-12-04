@@ -11,8 +11,16 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.msf.records.R;
+import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.TentFilter;
+import org.msf.records.model.LocationTree;
+import org.msf.records.model.LocationTreeFactory;
 import org.msf.records.view.SubtitledButtonView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -48,9 +56,23 @@ public class TentSelectionFragment extends Fragment implements
 
         mTentGrid.setOnItemClickListener(this);
 
-        TentListAdapter adapter = new TentListAdapter(
-                getActivity(), FilterManager.getTentFilters(getActivity()));
+        TentListAdapter adapter = new TentListAdapter(getActivity());
         mTentGrid.setAdapter(adapter);
+
+        mTentGrid.setOnItemClickListener(new GridView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                LocationTree selectedItem = (LocationTree)parent.getItemAtPosition(position);
+                Intent roundIntent = new Intent(getActivity(), RoundActivity.class);
+                roundIntent.putExtra(
+                        RoundActivity.TENT_NAME_KEY, selectedItem.toString());
+                roundIntent.putExtra(
+                        RoundActivity.TENT_UUID_KEY, selectedItem.getLocation().uuid);
+                roundIntent.putExtra(
+                        RoundActivity.TENT_PATIENT_COUNT_KEY, selectedItem.getPatientCount());
+                startActivity(roundIntent);
+            }
+        });
 
         mAllPatientsButton.setOnClickListener(new View.OnClickListener() {
             @Override

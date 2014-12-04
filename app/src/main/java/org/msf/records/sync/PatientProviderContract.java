@@ -52,6 +52,11 @@ public class PatientProviderContract {
     static final String PATH_PATIENTS_TENTS = "tents";
 
     /**
+     * Path component for counts of patients per tent. Visible for re-use in MsfRecordsProvider.
+     */
+    static final String PATH_TENT_PATIENT_COUNTS = "tentpatients";
+
+    /**
      * Fully qualified URI for "patient" resources.
      */
     public static final Uri CONTENT_URI =
@@ -62,6 +67,9 @@ public class PatientProviderContract {
 
     public static final Uri CONTENT_URI_PATIENT_TENTS =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_TENTS).build();
+
+    public static final Uri CONTENT_URI_TENT_PATIENT_COUNTS =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_TENT_PATIENT_COUNTS).build();
 
     /**
      * Columns supported by "patients" records.
@@ -91,11 +99,21 @@ public class PatientProviderContract {
         /**
          * Patient zone
          */
+        @Deprecated
         public static final String COLUMN_NAME_LOCATION_ZONE = "location_zone";
         /**
          * Patient tent
          */
+        @Deprecated
         public static final String COLUMN_NAME_LOCATION_TENT = "location_tent";
+        /**
+         * Patient location uuid
+         */
+        public static final String COLUMN_NAME_LOCATION_UUID = "location_uuid";
+        /**
+         * Patient count per tent
+         */
+        public static final String COLUMN_NAME_TENT_PATIENT_COUNT = "tent_patient_count";
         /**
          * Patient age (years)
          */
