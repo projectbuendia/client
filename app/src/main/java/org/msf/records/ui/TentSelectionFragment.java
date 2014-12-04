@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.msf.records.R;
+import org.msf.records.filter.FilterManager;
 import org.msf.records.view.SubtitledButtonView;
 
 import butterknife.ButterKnife;
@@ -47,11 +48,8 @@ public class TentSelectionFragment extends Fragment implements
 
         mTentGrid.setOnItemClickListener(this);
 
-        // TODO(akalachman): Remove and allow adapter to retrieve its own list.
-        String[] values = new String[] {
-                "S1", "S2", "P1", "P2", "C1", "C2", "C3", "C4", "C5", "C6", "Morgue"
-        };
-        TentListAdapter adapter = new TentListAdapter(getActivity(), values);
+        TentListAdapter adapter = new TentListAdapter(
+                getActivity(), FilterManager.getTentFilters(getActivity()));
         mTentGrid.setAdapter(adapter);
 
         mAllPatientsButton.setOnClickListener(new View.OnClickListener() {
