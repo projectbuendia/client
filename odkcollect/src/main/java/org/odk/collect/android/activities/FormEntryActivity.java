@@ -59,6 +59,7 @@ import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.logic.FormController.FailedConstraint;
 import org.odk.collect.android.logic.FormTraverser;
 import org.odk.collect.android.logic.FormVisitor;
+import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.preferences.PreferencesActivity;
 import org.odk.collect.android.provider.FormsProviderAPI.FormsColumns;
 import org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns;
@@ -1959,7 +1960,7 @@ public class FormEntryActivity
 					Collect.getInstance()
 							.getActivityLogger()
 							.logInstanceAction(this, "createClearDialog",
-									"cancel", qw.getPrompt().getIndex());
+                                    "cancel", qw.getPrompt().getIndex());
 					break;
 				}
 			}
@@ -2445,7 +2446,14 @@ public class FormEntryActivity
 //			}
 //		}
 
-        setTitle(formController.getFormTitle());
+        Patient patient = getIntent().getParcelableExtra("patient");
+        if (patient != null) {
+            setTitle(
+                    patient.getGivenName() + " " + patient.getFamilyName() + " (" + patient.getId()
+                            + ") - " + formController.getFormTitle());
+        } else {
+            setTitle(formController.getFormTitle());
+        }
 
 		populateViews();
 	}

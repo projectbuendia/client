@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
 
+import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.ui.ControllableActivity;
 import org.msf.records.ui.OdkActivityLauncher;
@@ -43,7 +44,8 @@ public class PatientChartController extends BaseController {
         OdkActivityLauncher.fetchAndShowXform(
                 activity,
                 Constants.ADD_OBSERVATION_UUID,
-                savePatientUuidForRequestCode(patientUuid));
+                savePatientUuidForRequestCode(patientUuid),
+                PatientModel.INSTANCE.getOdkPatient(patientUuid));
     }
 
     private int savePatientUuidForRequestCode(String patientUuid) {
