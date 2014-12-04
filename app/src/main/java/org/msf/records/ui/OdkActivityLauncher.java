@@ -16,6 +16,7 @@ import com.google.common.base.Charsets;
 import org.json.JSONObject;
 import org.msf.records.App;
 import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.model.Patient;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
@@ -54,6 +55,14 @@ public class OdkActivityLauncher {
 
     public static void fetchAndShowXform(final Activity callingActivity, final String uuidToShow,
                                          final int requestCode) {
+        fetchAndShowXform(callingActivity, uuidToShow, requestCode, null /*patient*/);
+    }
+
+    public static void fetchAndShowXform(
+            final Activity callingActivity,
+            final String uuidToShow,
+            final int requestCode,
+            final org.odk.collect.android.model.Patient patient) {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
@@ -68,7 +77,7 @@ public class OdkActivityLauncher {
                             public void formWritten(File path, String uuid) {
                                 Log.i(TAG, "wrote form " + path);
                                 showOdkCollect(callingActivity, requestCode,
-                                        OdkDatabase.getFormIdForPath(path));
+                                        OdkDatabase.getFormIdForPath(path), patient);
                             }
                         }).execute(findUuid(response, uuidToShow));
                     }
@@ -76,10 +85,21 @@ public class OdkActivityLauncher {
     }
 
     public static void showOdkCollect(Activity callingActivity, int requestCode, long formId) {
+        showOdkCollect(callingActivity, requestCode, formId, null /*patient*/);
+    }
+
+    public static void showOdkCollect(
+            Activity callingActivity,
+            int requestCode,
+            long formId,
+            final org.odk.collect.android.model.Patient patient) {
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
         intent.setAction(Intent.ACTION_PICK);
+        if (patient != null) {
+            intent.putExtra("patient", patient);
+        }
         callingActivity.startActivityForResult(intent, requestCode);
     }
 
