@@ -1,13 +1,17 @@
 package org.msf.records.ui;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -15,6 +19,8 @@ import com.google.common.collect.Maps;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.UuidFilter;
 import org.msf.records.controllers.PatientChartController;
 import org.msf.records.events.mvcmodels.ModelEvent;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
@@ -23,14 +29,22 @@ import org.msf.records.mvcmodels.Models;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.PatientAge;
 import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.PatientLocation;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.PatientProjection;
 import org.msf.records.view.VitalView;
 import org.msf.records.widget.DataGridView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
@@ -38,7 +52,7 @@ import de.greenrobot.event.EventBus;
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
  */
-public class PatientChartFragment extends ControllableFragment {
+public class PatientChartFragment extends ControllableFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = PatientChartFragment.class.getName();
 
@@ -93,8 +107,9 @@ public class PatientChartFragment extends ControllableFragment {
                 });
         return fragment;
     }
-
     private View mChartView;
+    private long mLastObservation = Long.MIN_VALUE;
+    private Patient mPatient = new Patient();
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 
@@ -109,18 +124,8 @@ public class PatientChartFragment extends ControllableFragment {
         PatientChartController.INSTANCE.register(this);
 
         Bundle bundle = savedInstanceState != null ? savedInstanceState : getArguments();
-        mPatientUuid = bundle.getString(PatientChartActivity.PATIENT_ID_KEY);
-        if (mPatientUuid == null) {
-            Log.e(
-                    TAG,
-                    "No patient ID was provided to the patient chart. This indicates a "
-                            + "programming error. Returning to the patient list.");
 
-            Intent patientListIntent = new Intent(getActivity(), PatientListActivity.class);
-            startActivity(patientListIntent);
-
-            return;
-        }
+        parsePatientInfo( bundle );
 
         mLayoutInflater = LayoutInflater.from(getActivity());
     }
@@ -140,6 +145,10 @@ public class PatientChartFragment extends ControllableFragment {
     public void onResume() {
         super.onResume();
 
+        retrievePatientData();
+
+        // Update our patient's vitals
+        updatePatientUI();
         EventBus.getDefault().registerSticky(this);
 //
 //        // Retrieve the view
@@ -154,6 +163,11 @@ public class PatientChartFragment extends ControllableFragment {
 //
 //        mObservationsFetchedToken = new Object();
 //        PatientChartModel.INSTANCE.fetchObservations(mObservationsFetchedToken);
+    }
+
+    private void retrievePatientData()
+    {
+        getLoaderManager().restartLoader(1, null, this);
     }
 
     @Override
@@ -213,6 +227,32 @@ public class PatientChartFragment extends ControllableFragment {
         updatePatientVitalsUI(view, conceptsToLatestObservations);
     }
 
+    private void updatePatientInfoUI( View rootView )
+    {
+        ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.given_name + " " + mPatient.family_name );
+        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( "#" + mPatient.id );
+
+        ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.gender.equals( "M" ) ? "Male" : "Female" );
+        ((TextView)rootView.findViewById( R.id.patient_chart_age )).setText(Integer.toString( mPatient.age.years ) );
+
+        ((TextView)rootView.findViewById( R.id.patient_chart_location )).setText( mPatient.assigned_location.zone + "/" + mPatient.assigned_location.tent );
+
+        GregorianCalendar nowDate = new GregorianCalendar();
+        GregorianCalendar admissionDate = new GregorianCalendar();
+        nowDate.setTimeInMillis( System.currentTimeMillis() );
+        nowDate.set( Calendar.HOUR, 0 );
+        nowDate.set( Calendar.MINUTE, 0 );
+
+        admissionDate.setTimeInMillis(mPatient.admission_timestamp * 1000);
+        admissionDate.set( Calendar.HOUR, 0 );
+        admissionDate.set( Calendar.MINUTE, 0 );
+
+        ((TextView)rootView.findViewById( R.id.patient_chart_days )).setText("Day " + Long.toString( TimeUnit.MILLISECONDS.toDays( nowDate.getTimeInMillis() - admissionDate.getTimeInMillis() ) ) );
+    }
+
+    private void Timestamp(long l) {
+    }
+
     private Map<String, LocalizedChartHelper.LocalizedObservation> sortObservations( final ArrayList<LocalizedChartHelper.LocalizedObservation> observations )
     {
 
@@ -239,6 +279,7 @@ public class PatientChartFragment extends ControllableFragment {
             }
         }
 
+        updateLatestEncounter( latestEncounterTimeMillis );
         return conceptsToLatestObservations;
     }
 
@@ -253,12 +294,86 @@ public class PatientChartFragment extends ControllableFragment {
         observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
         if ( observation == null )
         {
-            vital.setValue( "N/A" );
-            Log.e( "PatientChart", "Missing observation" );
+            vital.setValue("N/A");
         }
         else {
             vital.setValue( observation.localizedValue );
         }
 
+    }
+
+    private void parsePatientInfo( Bundle bundle )
+    {
+        mPatientUuid = bundle.getString(PatientChartActivity.PATIENT_ID_KEY);
+        if (mPatientUuid == null) {
+            Log.e(
+                    TAG,
+                    "No patient ID was provided to the patient chart. This indicates a "
+                            + "programming error. Returning to the patient list.");
+
+            Intent patientListIntent = new Intent(getActivity(), PatientListActivity.class);
+            startActivity(patientListIntent);
+
+            return;
+        }
+
+
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new FilterQueryProviderFactory().getCursorLoader( getActivity(), new UuidFilter(), mPatientUuid );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        data.moveToFirst();
+
+        mPatient.uuid = mPatientUuid;
+        mPatient.given_name = data.getString(PatientProjection.COLUMN_GIVEN_NAME );
+        mPatient.family_name = data.getString(PatientProjection.COLUMN_FAMILY_NAME );
+        mPatient.gender = data.getString(PatientProjection.COLUMN_GENDER );
+
+        PatientAge age = new PatientAge();
+        age.years = data.getInt(PatientProjection.COLUMN_AGE_YEARS);
+        age.months = data.getInt(PatientProjection.COLUMN_AGE_YEARS);
+        mPatient.age = age;
+
+        mPatient.id = data.getString(PatientProjection.COLUMN_ID );
+
+        PatientLocation assigned_location = new PatientLocation();
+        assigned_location.tent = data.getString(PatientProjection.COLUMN_LOCATION_TENT );
+        assigned_location.zone = data.getString(PatientProjection.COLUMN_LOCATION_ZONE );
+        mPatient.assigned_location = assigned_location;
+
+        mPatient.admission_timestamp = data.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+
+        updateLatestEncounter( mPatient.admission_timestamp * 1000  );
+        Log.e( "Test", Long.toString(mPatient.admission_timestamp));
+
+        updatePatientInfoUI(getView());
+
+        data.close();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    private void updateLatestEncounter( long encounterTimeMilli )
+    {
+        if ( encounterTimeMilli < mLastObservation )
+            return;
+
+        mLastObservation = encounterTimeMilli;
+
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(encounterTimeMilli);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat( "dd MMM yyyy HH:mm");
+
+        //dateFormatter.setTimeZone( calendar.getTimeZone() );
+
+        ((TextView)getView().findViewById(R.id.patient_chart_last_observation_date_time)).setText(dateFormatter.format(calendar.getTime()));
     }
 }
