@@ -36,9 +36,11 @@ public class FilterManager {
         LocationTree tree = new LocationTreeFactory(context).build();
 
         List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
-        for (Object zone : tree.getLocationsForDepth(1)) {
-            filters.add(new FilterGroup(
-                    baseFilters, new ZoneFilter(zone.toString())).setName(zone.toString()));
+        if (tree != null) {
+            for (Object zone : tree.getLocationsForDepth(1)) {
+                filters.add(new FilterGroup(
+                        baseFilters, new ZoneFilter(zone.toString())).setName(zone.toString()));
+            }
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
         filters.toArray(filterArray);
@@ -49,9 +51,11 @@ public class FilterManager {
         LocationTree tree = new LocationTreeFactory(context).build();
 
         List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
-        for (Object tent : tree.getLocationsForDepth(2)) {
-            filters.add(new FilterGroup(
-                    baseFilters, new TentFilter(tent.toString())).setName(tent.toString()));
+        if (tree != null) {
+            for (Object tent : tree.getLocationsForDepth(2)) {
+                filters.add(new FilterGroup(
+                        baseFilters, new TentFilter(tent.toString())).setName(tent.toString()));
+            }
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
         filters.toArray(filterArray);
