@@ -1,12 +1,9 @@
 package org.msf.records.controllers;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.msf.records.events.CreatePatientSucceededEvent;
-import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.net.Constants;
 import org.msf.records.ui.ControllableActivity;
 import org.msf.records.ui.OdkActivityLauncher;
