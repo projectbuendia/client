@@ -205,7 +205,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         ArrayList<LocalizedChartHelper.LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
-        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations( observations );
+        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations( LocalizedChartHelper.getMostRecentObservations( getActivity().getContentResolver(), mPatientUuid ) );
 
         // Update the observations
         ViewGroup.LayoutParams params =
@@ -265,13 +265,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         // Find the latest observation for each observation type.
         for (LocalizedChartHelper.LocalizedObservation observation : observations) {
 
-            // If no other observations for this concept have been seen or if this is the
-            if (!conceptsToLatestObservations.containsKey(observation.conceptUuid)
-                    || observation.encounterTimeMillis >
-                    conceptsToLatestObservations.get(observation.conceptUuid)
-                            .encounterTimeMillis) {
                 conceptsToLatestObservations.put(observation.conceptUuid, observation);
-            }
 
             if (observation.encounterTimeMillis > latestEncounterTimeMillis) {
                 latestEncounterTimeMillis = observation.encounterTimeMillis;
@@ -298,17 +292,15 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         // Conscious state
-        Log.e("Conscious test", "test");
         observation = conceptsToLatestObservations.get( "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
         if ( observation != null )
         {
-            Log.e("Conscious test", "Success: " + observation.localizedValue );
             vital = (VitalView)rootView.findViewById( R.id.vital_responsiveness );
             vital.setValue( observation.localizedValue );
         }
 
         // Fluids
-        observation = conceptsToLatestObservations.get( "76fe72f2-972c-4052-83a6-432b95ac6335" );
+        observation = conceptsToLatestObservations.get( "e96f504e-229a-4933-84d1-358abbd687e3" );
         if ( observation != null )
         {
             vital = (VitalView)rootView.findViewById( R.id.vital_diet );
@@ -328,7 +320,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         if ( observation != null )
         {
             textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_temperature );
-            textView.setText( observation.localizedValue );
+            textView.setText( observation.localizedValue + "°" );
         }
 
         // General Condition
@@ -336,22 +328,21 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         if ( observation != null )
         {
             textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_general_condition );
-            textView.setText( observation.localizedValue + "°" );
+            textView.setText( observation.localizedValue );
         }
 
         // Special (Pregnancy and IV)
-        if ( observation != null )
         {
-            String specialText = "";
+            String specialText = new String();
 
             observation = conceptsToLatestObservations.get( "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ); // Pregnancy
-            if ( observation.localizedValue.equals( "YES" ) )
+            if ( observation != null && observation.localizedValue.equals( "Yes" ) )
             {
                 specialText = "Pregnant";
             }
 
             observation = conceptsToLatestObservations.get( "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07" ); // IV
-            if ( observation.localizedValue.equals( "YES" ) )
+            if ( observation != null && observation.localizedValue.equals( "Yes" ) )
             {
                 specialText += "\nIV";
             }
