@@ -19,6 +19,7 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.TentFilter;
 import org.msf.records.model.Status;
 import org.msf.records.sync.PatientProjection;
+import org.msf.records.utils.PatientCountDisplay;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -101,15 +102,8 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int patientCount = getChildrenCursor(cursor).getCount();
 
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
-        if (patientCount == 1) {
-            item.setText(
-                cursor.getString(PatientProjection.COLUMN_LOCATION_TENT) + " " +
-                context.getResources().getString(R.string.one_patient));
-        } else {
-            item.setText(
-                cursor.getString(PatientProjection.COLUMN_LOCATION_TENT) + " " +
-                context.getResources().getString(R.string.n_patients, patientCount));
-        }
+        item.setText(PatientCountDisplay.getPatientCountTitle(
+                context, patientCount, cursor.getString(PatientProjection.COLUMN_LOCATION_TENT)));
     }
 
     @Override

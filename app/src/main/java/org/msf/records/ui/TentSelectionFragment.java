@@ -1,5 +1,6 @@
 package org.msf.records.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,16 +18,18 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.TentFilter;
 import org.msf.records.model.LocationTree;
 import org.msf.records.model.LocationTreeFactory;
+import org.msf.records.model.Zone;
+import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class TentSelectionFragment extends Fragment implements
-        AdapterView.OnItemClickListener{
+public class TentSelectionFragment extends Fragment {
     @InjectView(R.id.tent_selection_tents) GridView mTentGrid;
     @InjectView(R.id.tent_selection_all_patients) SubtitledButtonView mAllPatientsButton;
     @InjectView(R.id.tent_selection_triage) SubtitledButtonView mTriageButton;
@@ -54,9 +57,10 @@ public class TentSelectionFragment extends Fragment implements
 
         ButterKnife.inject(this, view);
 
-        mTentGrid.setOnItemClickListener(this);
+        LocationTree tree = new LocationTreeFactory(getActivity()).build();
 
-        TentListAdapter adapter = new TentListAdapter(getActivity());
+        TentListAdapter adapter = new TentListAdapter(
+                getActivity(), LocationTree.getTents(getActivity(), tree));
         mTentGrid.setAdapter(adapter);
 
         mTentGrid.setOnItemClickListener(new GridView.OnItemClickListener() {
@@ -73,6 +77,26 @@ public class TentSelectionFragment extends Fragment implements
                 startActivity(roundIntent);
             }
         });
+
+
+        mAllPatientsButton.setSubtitle(
+                PatientCountDisplay.getPatientCountSubtitle(
+                        getActivity(), tree.getPatientCount(), true));
+        for (LocationTree zone : LocationTree.getZones(getActivity(), tree)) {
+            switch (zone.getLocation().uuid) {
+                case Zone.TRIAGE_ZONE_UUID:
+                    mTriageButton.setSubtitle(
+                            PatientCountDisplay.getPatientCountSubtitle(
+                                    getActivity(), zone.getPatientCount()));
+                    break;
+                case Zone.DISCHARGED_ZONE_UUID:
+                    mDischargedButton.setSubtitle(
+                            PatientCountDisplay.getPatientCountSubtitle(
+                                    getActivity(), zone.getPatientCount()));
+                    break;
+            }
+        }
+
 
         mAllPatientsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,10 +121,5 @@ public class TentSelectionFragment extends Fragment implements
         });
 
         return view;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // TODO(akalachman): Implement.
     }
 }

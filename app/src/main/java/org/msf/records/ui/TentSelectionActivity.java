@@ -22,8 +22,6 @@ public class TentSelectionActivity extends PatientSearchActivity {
                     .add(R.id.tent_selection_container, TentSelectionFragment.newInstance())
                     .commit();
         }
-
-        // TODO(akalachman): Update ALL PATIENTS, Triage, Discharged counts.
     }
 
 

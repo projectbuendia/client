@@ -1,5 +1,7 @@
 package org.msf.records.model;
 
+import android.content.Context;
+
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -85,6 +87,28 @@ public class LocationTree implements Comparable<LocationTree> {
         }
 
         return locations;
+    }
+
+    public static LocationTree[] getTents(Context context, LocationTree root) {
+        return getLocationArrayForDepth(context, root, 2);
+    }
+
+    public static LocationTree[] getZones(Context context, LocationTree root) {
+        return getLocationArrayForDepth(context, root, 1);
+    }
+
+    private static LocationTree[] getLocationArrayForDepth(
+            Context context, LocationTree root, int depth) {
+        TreeSet<LocationTree> locationTrees;
+        if (root == null) {
+            locationTrees = new TreeSet<LocationTree>();
+        } else {
+            locationTrees = root.getLocationsForDepth(depth);
+        }
+
+        LocationTree[] locationTreeArray = new LocationTree[locationTrees.size()];
+        locationTrees.toArray(locationTreeArray);
+        return locationTreeArray;
     }
 
     @Override
