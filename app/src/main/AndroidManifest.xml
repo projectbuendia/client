@@ -100,6 +100,14 @@
             android:label="@string/title_activity_patient_add"
             android:screenOrientation="portrait" >
         </activity>
+        <activity
+            android:name="org.msf.records.ui.RoundActivity"
+            android:label="@string/title_activity_round"
+            android:parentActivityName="org.msf.records.ui.TentSelectionActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.msf.records.ui.TentSelectionActivity" />
+        </activity>
 
         <provider
             android:name="org.msf.records.sync.MsfRecordsProvider"
@@ -133,15 +141,7 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-
-        <activity
-            android:name="org.msf.records.ui.RoundActivity"
-            android:label="@string/title_activity_round"
-            android:parentActivityName="org.msf.records.ui.TentSelectionActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.TentSelectionActivity" />
-        </activity>
+        <receiver android:name=".sync.SyncManager$SyncStatusBroadcastReceiver" />
     </application>
 
 </manifest>
