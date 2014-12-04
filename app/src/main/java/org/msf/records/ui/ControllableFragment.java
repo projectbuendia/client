@@ -1,9 +1,8 @@
 package org.msf.records.ui;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 
-import org.msf.records.controllers.ActivityController;
 import org.msf.records.controllers.FragmentController;
 
 import java.util.ArrayList;
