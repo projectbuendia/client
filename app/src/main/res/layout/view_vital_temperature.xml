@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="4dp"
-    android:background="#FF0000">
+    android:id="@+id/patient_chart_vital_temperature_parent"
+    android:background="#7A7A7A">
 
     <TextView
         android:id="@+id/vital_name_temperature"

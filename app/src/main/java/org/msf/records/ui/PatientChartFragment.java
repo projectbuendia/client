@@ -2,6 +2,7 @@ package org.msf.records.ui;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -205,7 +207,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         ArrayList<LocalizedChartHelper.LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
-        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations( LocalizedChartHelper.getMostRecentObservations( getActivity().getContentResolver(), mPatientUuid ) );
+        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations(LocalizedChartHelper.getMostRecentObservations(getActivity().getContentResolver(), mPatientUuid));
 
         // Update the observations
         ViewGroup.LayoutParams params =
@@ -319,8 +321,19 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         observation = conceptsToLatestObservations.get( "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
         if ( observation != null )
         {
+            RelativeLayout temperatureBackground = ((RelativeLayout)rootView.findViewById( R.id.patient_chart_vital_temperature_parent ));
+
             textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_temperature );
             textView.setText( observation.localizedValue + "°" );
+
+            if ( Double.parseDouble( observation.localizedValue ) <= 37.5 )
+            {
+                temperatureBackground.setBackgroundColor( Color.parseColor( "#417505" ) );
+            }
+            else
+            {
+                temperatureBackground.setBackgroundColor( Color.parseColor( "#D0021B" ) );
+            }
         }
 
         // General Condition
@@ -329,6 +342,23 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         {
             textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_general_condition );
             textView.setText( observation.localizedValue );
+
+            RelativeLayout generalBackground = ((RelativeLayout)rootView.findViewById( R.id.patient_chart_vital_general_parent ));
+
+            if ( observation.localizedValue.equals( "Good" ) )
+            {
+                generalBackground.setBackgroundColor( Color.parseColor( "#4CAF50" ) );
+            } else if ( observation.localizedValue.equals( "Average" ) )
+            {
+                generalBackground.setBackgroundColor( Color.parseColor( "#FFC927" ) );
+            } else if ( observation.localizedValue.equals( "Poor" ) )
+            {
+                generalBackground.setBackgroundColor( Color.parseColor( "#FF2121" ) );
+            } else if ( observation.localizedValue.equals( "Very Poor" ) )
+            {
+                generalBackground.setBackgroundColor( Color.parseColor( "#D0021B" ) );
+            }
+
         }
 
         // Special (Pregnancy and IV)

@@ -184,6 +184,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
                     convertView.getPaddingLeft(), convertView.getPaddingTop(),
                     convertView.getPaddingRight(), 20);
         }
+
+        // (Shanee) Change patient list color here
+        //holder.mPatientId.setBackgroundColor(Color.BLUE ); // This is how!
     }
 
     static class ViewHolder {
