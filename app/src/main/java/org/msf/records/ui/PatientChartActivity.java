@@ -21,8 +21,6 @@ import javax.annotation.Nullable;
  */
 public class PatientChartActivity extends BaseActivity {
 
-    // TODO(dxchen): This may deprecate the PatientDetail* classes. Remove those if appropriate.
-
     private static final String TAG = PatientChartActivity.class.getName();
 
     /*

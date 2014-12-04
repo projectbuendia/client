@@ -15,6 +15,11 @@ import com.google.common.collect.Maps;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.controllers.PatientChartController;
+import org.msf.records.events.mvcmodels.ModelEvent;
+import org.msf.records.events.mvcmodels.ModelReadyEvent;
+import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
+import org.msf.records.mvcmodels.Models;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
@@ -28,6 +33,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
@@ -92,19 +98,15 @@ public class PatientChartFragment extends ControllableFragment {
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 
-//    @InjectView(R.id.last_updated) TextView mLastUpdated;
-//    @InjectView(R.id.vital_temperature) VitalView mTemperature;
-//    @InjectView(R.id.vital_days_admitted) VitalView mDaysAdmitted;
-//    @InjectView(R.id.vital_pcr) VitalView mPcr;
-//    @InjectView(R.id.vital_food_drink) VitalView mFoodDrink;
-//    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
-//    @InjectView(R.id.vital_mobility) VitalView mMobility;
+    private Object mObservationsFetchedToken;
 
     public PatientChartFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        PatientChartController.INSTANCE.register(this);
 
         Bundle bundle = savedInstanceState != null ? savedInstanceState : getArguments();
         mPatientUuid = bundle.getString(PatientChartActivity.PATIENT_ID_KEY);
@@ -138,8 +140,41 @@ public class PatientChartFragment extends ControllableFragment {
     public void onResume() {
         super.onResume();
 
-        // Update our patient's vitals
-        updatePatientUI();
+        EventBus.getDefault().registerSticky(this);
+//
+//        // Retrieve the view
+//        View view = getView();
+//        ViewGroup viewGroup = ((ViewGroup) ((ViewGroup) view).getChildAt(0));
+//
+//        // Remove previous grid view if any
+//        if ( mChartView != null ) {
+//            viewGroup.removeView(mChartView);
+//            mChartView = null;
+//        }
+//
+//        mObservationsFetchedToken = new Object();
+//        PatientChartModel.INSTANCE.fetchObservations(mObservationsFetchedToken);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        EventBus.getDefault().unregister(this);
+    }
+
+    // TODO(dxchen): Replace the below two when https://github.com/greenrobot/EventBus/issues/135 is
+    // resolved.
+    public void onEventMainThread(ModelReadyEvent event) {
+        if (event.shouldRead(Models.OBSERVATIONS)) {
+            updatePatientUI();
+        }
+    }
+
+    public void onEventMainThread(ModelUpdatedEvent event) {
+        if (event.shouldRead(Models.OBSERVATIONS)) {
+            updatePatientUI();
+        }
     }
 
     private void updatePatientUI()
@@ -172,10 +207,10 @@ public class PatientChartFragment extends ControllableFragment {
         // Add the grid view
         mChartView = grid;
         viewGroup.addView(grid);
-
+        viewGroup.invalidate();
 
         // Update vitals
-        updatePatientVitalsUI( view, conceptsToLatestObservations );
+        updatePatientVitalsUI(view, conceptsToLatestObservations);
     }
 
     private Map<String, LocalizedChartHelper.LocalizedObservation> sortObservations( final ArrayList<LocalizedChartHelper.LocalizedObservation> observations )
