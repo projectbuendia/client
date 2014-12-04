@@ -241,8 +241,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         (patient.status != null && !patient.status.equals(status)) ||
                         (patient.admission_timestamp != null &&
                                 !patient.admission_timestamp.equals(admissionTimestamp)) ||
-                        (patient.assigned_location.uuid != null &&
-                            !patient.assigned_location.uuid.equals(locationUuid)) ||
+                        (patient.assigned_location != null &&
+                                patient.assigned_location.uuid != null &&
+                                !patient.assigned_location.uuid.equals(locationUuid)) ||
                         (patient.age.months != ageMonths) ||
                         (patient.age.years != ageYears) ||
                         (patient.gender != null && !patient.gender.equals(gender)) ||
@@ -279,18 +280,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         for (Patient e : patientsMap.values()) {
             Log.i(TAG, "Scheduling insert: entry_id=" + e.id);
-            batch.add(ContentProviderOperation.newInsert(PatientProviderContract.CONTENT_URI)
-                    .withValue(PatientColumns._ID, e.id)
-                    .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, e.given_name)
-                    .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
-                    .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
-                    .withValue(PatientColumns.COLUMN_NAME_STATUS, e.status)
-                    .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
-                    .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, e.assigned_location.uuid)
-                    .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
-                    .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
-                    .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender)
-                    .build());
+            ContentProviderOperation.Builder builder =
+                    ContentProviderOperation.newInsert(PatientProviderContract.CONTENT_URI)
+                            .withValue(PatientColumns._ID, e.id)
+                            .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, e.given_name)
+                            .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
+                            .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
+                            .withValue(PatientColumns.COLUMN_NAME_STATUS, e.status)
+                            .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
+                            .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
+                            .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
+                            .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender);
+
+            if (e.assigned_location != null) {
+                builder
+                        .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, e.assigned_location.uuid);
+            }
+
+            batch.add(builder.build());
+
             syncResult.stats.numInserts++;
         }
         Log.i(TAG, "Merge solution ready. Applying batch update");
