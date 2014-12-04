@@ -18,11 +18,15 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import org.msf.records.App;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.Location;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 
@@ -64,9 +68,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
 
     /**
+     * If this key is present with boolean value true then sync locations.
+     */
+    public static String SYNC_LOCATIONS = "SYNC_LOCATIONS";
+
+    /**
      * Content resolver, for performing database operations.
      */
     private final ContentResolver mContentResolver;
+
+
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -110,6 +121,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 specific = true;
                 updateObservations(provider, syncResult);
             }
+            if (extras.getBoolean(SYNC_LOCATIONS)) {
+                specific = true;
+                updateLocations(provider, syncResult);
+            }
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
@@ -117,29 +132,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 updateConcepts(provider, syncResult);
                 updateChartStructure(provider, syncResult);
                 updateObservations(provider, syncResult);
+                updateLocations(provider, syncResult);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in RPC: " + e.toString());
+            Log.e(TAG, "Error in RPC", e);
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (OperationApplicationException e) {
-            Log.e(TAG, "Error updating database: " + e.toString());
+            Log.e(TAG, "Error updating database", e);
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (InterruptedException e){
-            Log.e(TAG, "Error interruption: " + e.toString());
+            Log.e(TAG, "Error interruption", e);
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (ExecutionException e){
-            Log.e(TAG, "Error failed to execute: " + e.toString());
+            Log.e(TAG, "Error failed to execute", e);
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (Exception e){
-            Log.e(TAG, "Error reading from network: " + e.toString());
+            Log.e(TAG, "Error reading from network", e);
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
@@ -302,6 +318,166 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         chartServer.getConcepts(future, future); // errors handled by caller
         ConceptList conceptList = future.get();
         provider.applyBatch(ChartRpcToDb.conceptRpcToDb(conceptList, syncResult));
+    }
+
+    private void updateLocations(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
+        final ContentResolver contentResolver = getContext().getContentResolver();
+
+        final String[] projection = LocationProjection.getLocationProjection();
+        final String[] namesProjection = LocationProjection.getLocationNamesProjection();
+
+        Log.d(TAG, "Before network call");
+        RequestFuture<List<Location>> future = RequestFuture.newFuture();
+        App.getServer().listLocations(future, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        }, TAG);
+
+        //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
+        List<Location> locations = future.get();
+        Log.d(TAG, "After network call");
+        ArrayList<ContentProviderOperation> batch = new ArrayList<>();
+
+
+        HashMap<String, Location> locationsMap = new HashMap<>();
+        for (Location location : locations) {
+            locationsMap.put(location.uuid, location);
+        }
+
+        // Get list of all items
+        Log.i(TAG, "Fetching local entries for merge");
+        Uri uri = LocationProviderContract.LOCATIONS_CONTENT_URI; // Location tree
+        Uri namesUri = LocationProviderContract.LOCATION_NAMES_CONTENT_URI; // Location names
+        Cursor c = contentResolver.query(uri, projection, null, null, null);
+        assert c != null;
+        Cursor namesCur = contentResolver.query(namesUri, namesProjection, null, null, null);
+        assert namesCur != null;
+        Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
+        Log.i(TAG, "Found " + locations.size() + " external entries. Computing merge solution...");
+
+        String id, parentId;
+
+        // Build map of location names from the database.
+        HashMap<String, HashMap<String, String>> dbLocationNames =
+                new HashMap<String, HashMap<String, String>>();
+        while (namesCur.moveToNext()) {
+            String locationId = namesCur.getString(
+                    LocationProjection.LOCATION_NAME_LOCATION_UUID_COLUMN);
+            String locale = namesCur.getString(LocationProjection.LOCATION_NAME_LOCALE_COLUMN);
+            String name = namesCur.getString(LocationProjection.LOCATION_NAME_NAME_COLUMN);
+            if (locationId == null || locale == null || name == null) {
+                continue;
+            }
+
+            if (!dbLocationNames.containsKey(locationId)) {
+                dbLocationNames.put(locationId, new HashMap<String, String>());
+            }
+
+            dbLocationNames.get(locationId).put(locale, name);
+        }
+        namesCur.close();
+
+        // Iterate through the list of locations
+        while(c.moveToNext()){
+            syncResult.stats.numEntries++;
+
+            id = c.getString(LocationProjection.LOCATION_LOCATION_UUID_COLUMN);
+            parentId = c.getString(LocationProjection.LOCATION_PARENT_UUID_COLUMN);
+
+            Location location = locationsMap.get(id);
+            if (location != null) {
+                // Entry exists. Remove from entry map to prevent insert later.
+                locationsMap.remove(id);
+
+                // Grab the names stored in the database for this location.
+                HashMap<String, String> locationNames = dbLocationNames.get(id);
+
+                // Check to see if the entry needs to be updated
+                Uri existingUri = uri.buildUpon().appendPath(String.valueOf(id)).build();
+
+                if (location.parent_uuid != null && !location.parent_uuid.equals(parentId)) {
+                    // Update existing record
+                    Log.i(TAG, "Scheduling update: " + existingUri);
+                    batch.add(ContentProviderOperation.newUpdate(existingUri)
+                            .withValue(LocationProviderContract.LocationColumns.LOCATION_UUID, id)
+                            .withValue(LocationProviderContract.LocationColumns.PARENT_UUID, parentId)
+                            .build());
+                    syncResult.stats.numUpdates++;
+                } else {
+                    Log.i(TAG, "No action required for " + existingUri);
+                }
+
+                if (location.names != null &&
+                        (locationNames == null || !location.names.equals(locationNames))) {
+                    Uri existingNamesUri = namesUri.buildUpon().appendPath(
+                            String.valueOf(id)).build();
+                    // Update location names by deleting any existing location names and
+                    // repopulating.
+                    Log.i(TAG, "Scheduling location names update: " + existingNamesUri);
+                    batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
+                    syncResult.stats.numDeletes++;
+                    for (String locale : location.names.keySet()) {
+                        batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+                                .withValue(
+                                        LocationProviderContract.LocationColumns.LOCATION_UUID, id)
+                                .withValue(
+                                        LocationProviderContract.LocationColumns.LOCALE, locale)
+                                .withValue(
+                                        LocationProviderContract.LocationColumns.NAME,
+                                        location.names.get(locale))
+                                .build());
+                        syncResult.stats.numInserts++;
+                    }
+                }
+            } else {
+                // Entry doesn't exist. Remove it from the database.
+                Uri deleteUri = uri.buildUpon().appendPath(id).build();
+                Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
+                Log.i(TAG, "Scheduling delete: " + deleteUri);
+                batch.add(ContentProviderOperation.newDelete(deleteUri).build());
+                syncResult.stats.numDeletes++;
+                Log.i(TAG, "Scheduling delete: " + namesDeleteUri);
+                batch.add(ContentProviderOperation.newDelete(namesDeleteUri).build());
+                syncResult.stats.numDeletes++;
+            }
+        }
+        c.close();
+
+
+        for (Location e : locationsMap.values()) {
+            Log.i(TAG, "Scheduling insert: entry_id=" + e.uuid);
+            batch.add(ContentProviderOperation.newInsert(LocationProviderContract.LOCATIONS_CONTENT_URI)
+                    .withValue(LocationProviderContract.LocationColumns.LOCATION_UUID, e.uuid)
+                    .withValue(LocationProviderContract.LocationColumns.PARENT_UUID, e.parent_uuid)
+                    .build());
+            syncResult.stats.numInserts++;
+
+            for (String locale : e.names.keySet()) {
+                Uri existingNamesUri = namesUri.buildUpon().appendPath(
+                        String.valueOf(e.uuid)).build();
+                batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+                        .withValue(
+                                LocationProviderContract.LocationColumns.LOCATION_UUID, e.uuid)
+                        .withValue(
+                                LocationProviderContract.LocationColumns.LOCALE, locale)
+                        .withValue(
+                                LocationProviderContract.LocationColumns.NAME,
+                                e.names.get(locale))
+                        .build());
+                syncResult.stats.numInserts++;
+            }
+        }
+        Log.i(TAG, "Merge solution ready. Applying batch update");
+        mContentResolver.applyBatch(PatientProviderContract.CONTENT_AUTHORITY, batch);
+        mContentResolver.notifyChange(LocationProviderContract.LOCATIONS_CONTENT_URI, null, false);
+        mContentResolver.notifyChange(
+                LocationProviderContract.LOCATION_NAMES_CONTENT_URI, null, false);
+
+        // TODO(akalachman): Update the server as well as the client
     }
 
     private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
