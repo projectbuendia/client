@@ -1,7 +1,9 @@
 package org.odk.collect.android.widgets2.selectone;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 
@@ -10,6 +12,7 @@ import org.javarosa.core.model.data.SelectOneData;
 import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
+import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -21,6 +24,22 @@ import java.util.List;
  * has an on and an off state.
  */
 public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
+
+    private static class OnRadioButtonClickListener implements OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            View currentFocus = ((Activity) view.getContext()).getCurrentFocus();
+            if (currentFocus != null) {
+                currentFocus.clearFocus();
+            }
+
+            FormEntryActivity.hideKeyboard(view.getContext(), view);
+        }
+    }
+
+    private static final OnClickListener ON_RADIO_BUTTON_CLICK_LISTENER =
+            new OnRadioButtonClickListener();
 
     private SelectChoice mYesChoice;
     private SelectChoice mNoChoice;
@@ -49,6 +68,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
         mCheckBox.setId(QuestionWidget.newUniqueId());
         mCheckBox.setEnabled(!isReadOnly);
         mCheckBox.setFocusable(!isReadOnly);
+        mCheckBox.setOnClickListener(ON_RADIO_BUTTON_CLICK_LISTENER);
 
         if (mYesChoice.getValue().equals(defaultAnswer)) {
             mCheckBox.setChecked(true);

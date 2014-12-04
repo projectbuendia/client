@@ -332,10 +332,12 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         {
             RelativeLayout temperatureBackground = ((RelativeLayout)rootView.findViewById( R.id.patient_chart_vital_temperature_parent ));
 
-            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_temperature );
-            textView.setText( observation.localizedValue + "°" );
+            double value = Double.parseDouble(observation.localizedValue);
 
-            if ( Double.parseDouble( observation.localizedValue ) <= 37.5 )
+            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_temperature );
+            textView.setText(String.format("%.1f°", value));
+
+            if (value <= 37.5)
             {
                 temperatureBackground.setBackgroundColor( Color.parseColor( "#417505" ) );
             }

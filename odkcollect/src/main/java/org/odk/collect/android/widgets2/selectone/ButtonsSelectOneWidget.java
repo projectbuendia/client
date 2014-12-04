@@ -1,5 +1,6 @@
 package org.odk.collect.android.widgets2.selectone;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import org.javarosa.core.model.data.SelectOneData;
 import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
+import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.views.FlowRadioGroup;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
@@ -22,6 +24,29 @@ import java.util.List;
  * A {@link SelectOneData} {@link TypedWidget} that displays choices as a flow layout of buttons.
  */
 public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
+
+    private class OnRadioButtonClickListener implements OnClickListener {
+
+        private View mLastPressedView;
+
+        @Override
+        public void onClick(View view) {
+            int i = (Integer) view.getTag();
+
+            if (mLastPressedView == view) {
+                mGroup.clearCheck();
+            }
+
+            mLastPressedView = mGroup.findViewById(mGroup.getCheckedRadioButtonId());
+
+            View currentFocus = ((Activity) view.getContext()).getCurrentFocus();
+            if (currentFocus != null) {
+                currentFocus.clearFocus();
+            }
+
+            FormEntryActivity.hideKeyboard(view.getContext(), view);
+        }
+    }
 
     private final List<SelectChoice> mChoices;
     private final FlowRadioGroup mGroup;
@@ -42,6 +67,8 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
         boolean isReadOnly = forceReadOnly || prompt.isReadOnly();
 
+        OnClickListener onClickListener = new OnRadioButtonClickListener();
+
         for (int i = 0; i < mChoices.size(); i++) {
             SelectChoice choice = mChoices.get(i);
 
@@ -55,6 +82,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
             radioButton.setId(QuestionWidget.newUniqueId());
             radioButton.setEnabled(!isReadOnly);
             radioButton.setFocusable(!isReadOnly);
+            radioButton.setOnClickListener(onClickListener);
 
             if (choice.getValue().equals(defaultAnswer)) {
                 mGroup.check(i);
