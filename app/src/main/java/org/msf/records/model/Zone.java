@@ -28,13 +28,16 @@ public class Zone {
 
     public static final String TRIAGE_ZONE_UUID = "3f75ca61-ec1a-4739-af09-25a84e3dd237";
 
+    public static final String DISCHARGED_ZONE_UUID = "d7ca63c3-6ea0-4357-82fd-0910cc17a2cb";
+
     public static final String[] ORDERED_ZONES = new String[] {
             TRIAGE_ZONE_UUID,
             SUSPECT_ZONE_UUID,
             PROBABLE_ZONE_UUID,
             CONFIRMED_ZONE_UUID,
             MORGUE_ZONE_UUID,
-            OUTSIDE_ZONE_UUID
+            OUTSIDE_ZONE_UUID,
+            DISCHARGED_ZONE_UUID
     };
 
     private static final List<String> zoneList = Arrays.asList(ORDERED_ZONES);

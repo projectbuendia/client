@@ -5,6 +5,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.msf.records.R;
+import org.msf.records.utils.PatientCountDisplay;
 
 public class RoundActivity extends PatientSearchActivity {
     private String mTentName;
@@ -30,8 +31,7 @@ public class RoundActivity extends PatientSearchActivity {
             mTentUuid = savedInstanceState.getString(TENT_UUID_KEY);
         }
 
-        // TODO(akalachman): Make resource string, pluralize.
-        setTitle(mTentName + " (" + mTentPatientCount + " patients)");
+        setTitle(PatientCountDisplay.getPatientCountTitle(this, mTentPatientCount, mTentName));
         setContentView(R.layout.activity_round);
 
         // TODO(akalachman): Initialize fragment.

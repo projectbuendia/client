@@ -11,6 +11,7 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.LocationTree;
 import org.msf.records.model.LocationTreeFactory;
 import org.msf.records.model.Zone;
+import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;
 
 import java.util.TreeSet;
@@ -21,24 +22,9 @@ import java.util.TreeSet;
 public class TentListAdapter extends ArrayAdapter<LocationTree> {
     private final Context context;
 
-    public TentListAdapter(Context context) {
-        super(context, R.layout.listview_cell_tent_selection, getTents(context));
+    public TentListAdapter(Context context, LocationTree[] values) {
+        super(context, R.layout.listview_cell_tent_selection, values);
         this.context = context;
-    }
-
-    private static LocationTree[] getTents(Context context) {
-        LocationTree tree = new LocationTreeFactory(context).build();
-
-        TreeSet<LocationTree> tents;
-        if (tree == null) {
-            tents = new TreeSet<LocationTree>();
-        } else {
-            tents = tree.getLocationsForDepth(2);
-        }
-
-        LocationTree[] values = new LocationTree[tents.size()];
-        tents.toArray(values);
-        return values;
     }
 
     @Override
@@ -52,8 +38,8 @@ public class TentListAdapter extends ArrayAdapter<LocationTree> {
         SubtitledButtonView button =
                 (SubtitledButtonView)rowView.findViewById(R.id.tent_selection_tent);
         button.setTitle(tent.toString());
-        // TODO(akalachman): Make resource string, pluralize.
-        button.setSubtitle(tent.getPatientCount() + " patients");
+        button.setSubtitle(
+                PatientCountDisplay.getPatientCountSubtitle(context, tent.getPatientCount()));
         button.setBackgroundResource(
                 Zone.getBackgroundColorResource(tent.getLocation().parent_uuid));
         button.setTextColor(
