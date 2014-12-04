@@ -3,8 +3,6 @@ package org.msf.records.utils;
 import android.content.Context;
 
 import org.msf.records.R;
-import org.msf.records.model.LocationTree;
-import org.msf.records.model.Zone;
 
 /**
  * PatientCountDisplay provides helper methods for displaying patient counts with support for

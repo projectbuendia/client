@@ -17,6 +17,7 @@ import android.widget.ListView;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
@@ -73,6 +74,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     private SwipeRefreshLayout mSwipeToRefresh;
 
+    // TODO(akalachman): Figure out how to break reliance on this cursor--we already have the info.
     private FilterQueryProviderFactory mFactory =
             new FilterQueryProviderFactory().setUri(
                     PatientProviderContract.CONTENT_URI_PATIENT_TENTS);
@@ -147,11 +149,15 @@ public class PatientListFragment extends ProgressFragment implements
     public void onRefresh() {
         if(!isRefreshing){
             Log.d(TAG, "onRefresh");
-            getLoaderManager().restartLoader(LOADER_LIST_ID, null, this);
+
             //triggers app wide data refresh
             SyncManager.INSTANCE.forceSync();
             isRefreshing = true;
         }
+    }
+
+    public synchronized void onEvent(SyncFinishedEvent event) {
+        stopRefreshing();
     }
 
     private void stopRefreshing(){

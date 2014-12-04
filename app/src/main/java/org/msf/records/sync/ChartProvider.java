@@ -169,6 +169,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
+//        String query = "SELECT obs.encounter_time, group_names." + ChartColumns.NAME + " AS group_name, obs.concept_uuid, names." +
         String query = "SELECT obs.encounter_time," +
                 "group_names." + ChartColumns.NAME + " AS group_name," +
                 "obs.concept_uuid,names." + ChartColumns.NAME + " AS concept_name," +
@@ -202,15 +203,15 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 "value_names." + ChartColumns.CONCEPT_UUID +
                 " AND value_names." + ChartColumns.LOCALE + "=?" + // 1st selection arg
 
-                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 2nd selection arg
-                "obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 3rd selection arg
+//                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 2nd selection arg
+                "WHERE obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 3rd selection arg
                 "names." + ChartColumns.LOCALE + "=? AND " + // 4th selection arg
                 "group_names." + ChartColumns.LOCALE + "=?" + // 5th selection arg
 
                 " ORDER BY chart." + ChartColumns.CHART_ROW + ", obs." + ChartColumns.ENCOUNTER_TIME
                 ;
 
-        return db.rawQuery(query, new String[]{locale, chartUuid, patientUuid, locale, locale});
+        return db.rawQuery(query, new String[]{locale, patientUuid, locale, locale});
     }
 
     private Cursor queryEmptyLocalizedChart(Uri uri, SQLiteDatabase db) {

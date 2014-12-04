@@ -11,6 +11,8 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.model.LocationTree;
+import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -213,13 +215,11 @@ public class OpenMrsServer implements Server {
         Patient patient = gson.fromJson(object.toString(),
                 Patient.class);
 
-        // TODO(akalachman): After the demo, replace with obvious sentinels to avoid confusion.
         if (patient.assigned_location == null) {
-            patient.assigned_location = new PatientLocation();
-            patient.assigned_location.zone = "Suspect Zone";
-            patient.assigned_location.bed = "Bed 5";
-            patient.assigned_location.tent = "Tent 4";
-            patient.assigned_location.uuid = "86976903-645a-4afc-9d4b-d24b05d5db7b";
+            LocationTree location = LocationTree.getLocationForUuid(Zone.TRIAGE_ZONE_UUID);
+            if (location != null) {
+                patient.assigned_location = location.getLocation();
+            }
         }
 
         if (patient.age == null) {

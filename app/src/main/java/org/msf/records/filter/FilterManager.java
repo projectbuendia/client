@@ -2,12 +2,11 @@ package org.msf.records.filter;
 
 import android.content.Context;
 
-import org.msf.records.filter.FilterGroup.FilterType;
-import org.msf.records.model.LocationTree;
-import org.msf.records.model.LocationTreeFactory;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.msf.records.filter.FilterGroup.FilterType;
+import org.msf.records.model.LocationTree;
 
 /**
  * FilterManager is a container for all available patient filters that will be displayed to the
@@ -30,28 +29,14 @@ public class FilterManager {
     }
 
     public static SimpleSelectionFilter[] getZoneFilters(Context context) {
-        LocationTree tree = new LocationTreeFactory(context).build();
+        LocationTree tree = LocationTree.getRootLocation(context);
 
         List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
         if (tree != null) {
-            for (Object zone : tree.getLocationsForDepth(1)) {
+            for (LocationTree zone : tree.getLocationsForDepth(1)) {
                 filters.add(new FilterGroup(
-                        baseFilters, new ZoneFilter(zone.toString())).setName(zone.toString()));
-            }
-        }
-        SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
-        filters.toArray(filterArray);
-        return filterArray;
-    }
-
-    public static SimpleSelectionFilter[] getTentFilters(Context context) {
-        LocationTree tree = new LocationTreeFactory(context).build();
-
-        List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
-        if (tree != null) {
-            for (Object tent : tree.getLocationsForDepth(2)) {
-                filters.add(new FilterGroup(
-                        baseFilters, new TentFilter(tent.toString())).setName(tent.toString()));
+                        baseFilters,
+                        new LocationUuidFilter(zone.getLocation().uuid)).setName(zone.toString()));
             }
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
