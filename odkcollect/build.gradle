@@ -34,7 +34,9 @@ dependencies {
     compile 'net.sf.kxml:kxml2:2.3.0'
     compile 'net.sf.opencsv:opencsv:2.3'
     compile 'org.apache.httpcomponents:httpmime:4.2.5'
-    compile 'org.apache.james:apache-mime4j:0.7.2'
+    compile ('org.apache.james:apache-mime4j:0.7.2')  {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
     compile files('libs/httpclientandroidlib-4.2.1.jar')
     compile files('libs/javarosa-libraries-2014-04-29.jar')
     compile project(':viewserver')

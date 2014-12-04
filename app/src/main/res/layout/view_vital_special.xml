@@ -30,6 +30,7 @@
         android:textColor="#FFFFFF"
         android:textSize="48sp"
         android:maxLines="2"
-        tools:text="Pregnant\nIV"/>
+        android:id="@+id/patient_chart_vital_special"
+        tools:text="N/A"/>
 
 </RelativeLayout>

@@ -148,7 +148,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Conscious"
-                app:vitalValue="Pain"/>
+                app:vitalValue="N/A"/>
 
             <org.msf.records.view.VitalView
                 android:id="@+id/vital_mobility"
@@ -157,7 +157,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Mobility"
-                app:vitalValue="Can't Walk"/>
+                app:vitalValue="N/A"/>
 
             <org.msf.records.view.VitalView
                 android:id="@+id/vital_diet"
@@ -166,7 +166,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Diet"
-                app:vitalValue="Liquid Food"/>
+                app:vitalValue="N/A"/>
 
             <org.msf.records.view.VitalView
                 android:id="@+id/vital_food_drink"
@@ -175,7 +175,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Hydration"
-                app:vitalValue="IV Required"/>
+                app:vitalValue="N/A"/>
 
         </TableRow>
 

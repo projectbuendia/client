@@ -33,7 +33,7 @@ android {
 
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -82,7 +82,6 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
     compile 'de.greenrobot:eventbus:2.4.0' // The event bus
     compile 'joda-time:joda-time:2.5' // Better dates and times
-//    compile 'me.grantland:autofittextview:0.2.+' // Auto-scaling TextView
 
     // Testing
     androidTestCompile files('libs/espresso-1.1-bundled.jar')

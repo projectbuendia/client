@@ -42,7 +42,8 @@
             android:gravity="center"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
-            tools:text="Poor"/>
+            android:id="@+id/patient_chart_vital_general_condition"
+            tools:text="N/A"/>
 
     </RelativeLayout>
 

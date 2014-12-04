@@ -67,10 +67,12 @@ public class TentSelectionFragment extends Fragment {
             }
         });
 
+        if (tree != null) {
+            mAllPatientsButton.setSubtitle(
+                    PatientCountDisplay.getPatientCountSubtitle(
+                            getActivity(), tree.getPatientCount(), true));
+        }
 
-        mAllPatientsButton.setSubtitle(
-                PatientCountDisplay.getPatientCountSubtitle(
-                        getActivity(), tree.getPatientCount(), true));
         for (LocationTree zone : LocationTree.getZones(getActivity(), tree)) {
             switch (zone.getLocation().uuid) {
                 case Zone.TRIAGE_ZONE_UUID:

@@ -19,12 +19,11 @@ import com.google.common.collect.Maps;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.UuidFilter;
 import org.msf.records.controllers.PatientChartController;
-import org.msf.records.events.mvcmodels.ModelEvent;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.UuidFilter;
 import org.msf.records.model.LocationTree;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.net.OpenMrsChartServer;
@@ -145,10 +144,8 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     public void onResume() {
         super.onResume();
 
-        retrievePatientData();
-
         // Update our patient's vitals
-        updatePatientUI();
+//        updatePatientUI();
         EventBus.getDefault().registerSticky(this);
 //
 //        // Retrieve the view
@@ -165,8 +162,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 //        PatientChartModel.INSTANCE.fetchObservations(mObservationsFetchedToken);
     }
 
-    private void retrievePatientData()
-    {
+    private void retrievePatientData() {
         getLoaderManager().restartLoader(1, null, this);
     }
 
@@ -181,12 +177,14 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     // resolved.
     public void onEventMainThread(ModelReadyEvent event) {
         if (event.shouldRead(Models.OBSERVATIONS)) {
+            retrievePatientData();
             updatePatientUI();
         }
     }
 
     public void onEventMainThread(ModelUpdatedEvent event) {
         if (event.shouldRead(Models.OBSERVATIONS)) {
+            retrievePatientData();
             updatePatientUI();
         }
     }
@@ -206,7 +204,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         ArrayList<LocalizedChartHelper.LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
-        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations( observations );
+        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations( LocalizedChartHelper.getMostRecentObservations( getActivity().getContentResolver(), mPatientUuid ) );
 
         // Update the observations
         ViewGroup.LayoutParams params =
@@ -276,13 +274,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         // Find the latest observation for each observation type.
         for (LocalizedChartHelper.LocalizedObservation observation : observations) {
 
-            // If no other observations for this concept have been seen or if this is the
-            if (!conceptsToLatestObservations.containsKey(observation.conceptUuid)
-                    || observation.encounterTimeMillis >
-                    conceptsToLatestObservations.get(observation.conceptUuid)
-                            .encounterTimeMillis) {
                 conceptsToLatestObservations.put(observation.conceptUuid, observation);
-            }
 
             if (observation.encounterTimeMillis > latestEncounterTimeMillis) {
                 latestEncounterTimeMillis = observation.encounterTimeMillis;
@@ -297,17 +289,88 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     {
         // Data structures we are using
         VitalView vital;
+        TextView textView;
         LocalizedChartHelper.LocalizedObservation observation;
 
-        // Update mobility
-        vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
+        // Mobility
         observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
-        if ( observation == null )
+        if ( observation != null )
         {
-            vital.setValue("N/A");
-        }
-        else {
+            vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
             vital.setValue( observation.localizedValue );
+        }
+
+        // Conscious state
+        observation = conceptsToLatestObservations.get( "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
+        if ( observation != null )
+        {
+            vital = (VitalView)rootView.findViewById( R.id.vital_responsiveness );
+            vital.setValue( observation.localizedValue );
+        }
+
+        // Fluids
+        observation = conceptsToLatestObservations.get( "e96f504e-229a-4933-84d1-358abbd687e3" );
+        if ( observation != null )
+        {
+            vital = (VitalView)rootView.findViewById( R.id.vital_diet );
+            vital.setValue( observation.localizedValue );
+        }
+
+        // Hydration
+        observation = conceptsToLatestObservations.get( "162653AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
+        if ( observation != null )
+        {
+            vital = (VitalView)rootView.findViewById( R.id.vital_food_drink );
+            vital.setValue( observation.localizedValue );
+        }
+
+        // Temperature
+        observation = conceptsToLatestObservations.get( "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
+        if ( observation != null )
+        {
+            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_temperature );
+            textView.setText( observation.localizedValue + "°" );
+        }
+
+        // General Condition
+        observation = conceptsToLatestObservations.get( "a3657203-cfed-44b8-8e3f-960f8d4cf3b3" );
+        if ( observation != null )
+        {
+            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_general_condition );
+            textView.setText( observation.localizedValue );
+        }
+
+        // Special (Pregnancy and IV)
+        {
+            String specialText = new String();
+
+            observation = conceptsToLatestObservations.get( "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ); // Pregnancy
+            if ( observation != null && observation.localizedValue.equals( "Yes" ) )
+            {
+                specialText = "Pregnant";
+            }
+
+            observation = conceptsToLatestObservations.get( "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07" ); // IV
+            if ( observation != null && observation.localizedValue.equals( "Yes" ) )
+            {
+                specialText += "\nIV";
+            }
+
+            if ( specialText.isEmpty() )
+            {
+                specialText = "N/A";
+            }
+
+            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_special );
+            textView.setText( specialText );
+        }
+
+        // PCR
+        //observation = conceptsToLatestObservations.get( "" );
+        if ( observation != null )
+        {
+            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_pcr );
+            textView.setText( "Not\nImplemented" );
         }
 
     }
@@ -358,7 +421,6 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         mPatient.admission_timestamp = data.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
 
         updateLatestEncounter( mPatient.admission_timestamp * 1000  );
-        Log.e( "Test", Long.toString(mPatient.admission_timestamp));
 
         updatePatientInfoUI(getView());
 
