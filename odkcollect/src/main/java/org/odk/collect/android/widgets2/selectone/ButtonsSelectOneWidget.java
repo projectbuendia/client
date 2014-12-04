@@ -11,7 +11,6 @@ import org.javarosa.core.model.data.SelectOneData;
 import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
-import org.odk.collect.android.utilities.StringUtils;
 import org.odk.collect.android.views.FlowRadioGroup;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
@@ -51,7 +50,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
             // TODO(dxchen): Un-unscreamify once server work is done.
 
-            radioButton.setText(StringUtils.unscreamify(prompt.getSelectChoiceText(choice)));
+            radioButton.setText(prompt.getSelectChoiceText(choice));
             radioButton.setTag(i);
             radioButton.setId(QuestionWidget.newUniqueId());
             radioButton.setEnabled(!isReadOnly);

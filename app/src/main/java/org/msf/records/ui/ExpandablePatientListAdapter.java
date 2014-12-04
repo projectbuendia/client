@@ -19,7 +19,6 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.TentFilter;
 import org.msf.records.model.Status;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

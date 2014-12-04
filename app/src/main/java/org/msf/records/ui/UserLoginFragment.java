@@ -60,6 +60,7 @@ public class UserLoginFragment extends Fragment {
 
         EventBus.getDefault().register(this);
 
+        // TODO(akalachman): Hook into SyncAdapter so user list still appears offline.
         App.getUserManager().loadKnownUsers();
     }
 

@@ -252,7 +252,7 @@ public class FormEntryActivity
             @Override
             public void onClick(View view) {
                 int height = mScrollView.getMeasuredHeight();
-                mScrollView.smoothScrollBy(0, -height / 2);
+                mScrollView.smoothScrollBy(0, (int) (-height * .8));
             }
         });
 
@@ -262,7 +262,7 @@ public class FormEntryActivity
             @Override
             public void onClick(View view) {
                 int height = mScrollView.getMeasuredHeight();
-                mScrollView.smoothScrollBy(0, height / 2);
+                mScrollView.smoothScrollBy(0, (int) (height * .8));
             }
         });
 

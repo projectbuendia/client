@@ -25,6 +25,7 @@ import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.SyncManager;
 
 import de.greenrobot.event.EventBus;
 
@@ -148,7 +149,7 @@ public class PatientListFragment extends ProgressFragment implements
             Log.d(TAG, "onRefresh");
             getLoaderManager().restartLoader(LOADER_LIST_ID, null, this);
             //triggers app wide data refresh
-            GenericAccountService.triggerRefresh();
+            SyncManager.INSTANCE.forceSync();
             isRefreshing = true;
         }
     }
