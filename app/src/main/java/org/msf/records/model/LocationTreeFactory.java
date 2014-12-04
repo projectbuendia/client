@@ -13,6 +13,8 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.model.Location;
 import org.msf.records.sync.LocationProjection;
 import org.msf.records.sync.LocationProviderContract;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,12 +28,15 @@ public class LocationTreeFactory {
 
     private FilterQueryProviderFactory mLocationQueryFactory;
     private FilterQueryProviderFactory mLocationNamesQueryFactory;
+    private FilterQueryProviderFactory mPatientCountsQueryFactory;
 
     private SimpleSelectionFilter mLocationFilter = new AllFilter();
     private SimpleSelectionFilter mLocationNameFilter = new AllFilter();
+    private SimpleSelectionFilter mPatientCountsFilter = new AllFilter();
 
     private Multimap<String, Location> mLocationsByParent;
     private Map<String, HashMap<String, String>> mLocationNamesMap;
+    private Map<String, Integer> mPatientCountsMap;
 
     private final Context mContext;
 
@@ -48,11 +53,23 @@ public class LocationTreeFactory {
         mLocationNamesQueryFactory.setSortClause(null);
         mLocationNamesQueryFactory.setProjection(LocationProjection.getLocationNamesProjection());
 
+        mPatientCountsQueryFactory = new FilterQueryProviderFactory();
+        mPatientCountsQueryFactory.setUri(PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+        mPatientCountsQueryFactory.setSortClause(null);
+        mPatientCountsQueryFactory.setProjection(PatientProjection.getPatientCountsProjection());
+
         mLocationsByParent = HashMultimap.create();
         mLocationNamesMap = new HashMap<String, HashMap<String, String>>();
+        mPatientCountsMap = new HashMap<String, Integer>();
     }
 
     public LocationTree build() {
+        Cursor patientCountsCursor =
+                mPatientCountsQueryFactory.getFilterQueryProvider(mContext, mPatientCountsFilter)
+                        .runQuery("");
+        buildPatientCounts(patientCountsCursor);
+        patientCountsCursor.close();
+
         Cursor locationCursor =
                 mLocationQueryFactory.getFilterQueryProvider(mContext, mLocationFilter)
                         .runQuery("");
@@ -63,6 +80,7 @@ public class LocationTreeFactory {
                 mLocationNamesQueryFactory.getFilterQueryProvider(mContext, mLocationNameFilter)
                         .runQuery("");
         buildLocationNamesMap(locationNamesCursor);
+
         return buildTree();
     }
 
@@ -72,6 +90,15 @@ public class LocationTreeFactory {
 
     public void setLocationNameFilter(SimpleSelectionFilter locationNameFilter) {
         mLocationNameFilter = locationNameFilter;
+    }
+
+    private void buildPatientCounts(Cursor cursor) {
+        mPatientCountsMap.clear();
+        while (cursor.moveToNext()) {
+            mPatientCountsMap.put(
+                    cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID),
+                    cursor.getInt(PatientProjection.COUNTS_COLUMN_TENT_PATIENT_COUNT));
+        }
     }
 
     // Initializes mLocationsByParent from the given cursor. Does NOT close the cursor.
@@ -126,7 +153,7 @@ public class LocationTreeFactory {
 
         // Start the tree from the single known root. Forests are NOT supported.
         Location root = Iterables.get(mLocationsByParent.get(null), 0);
-        LocationTree tree = new LocationTree(null, root);
+        LocationTree tree = new LocationTree(null, root, getPatientCount(root.uuid));
 
         // With all locations initialized, recursively add children to the tree.
         addChildren(tree);
@@ -140,9 +167,18 @@ public class LocationTreeFactory {
         }
 
         for (Location location : mLocationsByParent.get(root.getLocation().uuid)) {
-            LocationTree childTree = new LocationTree(root, location);
+            LocationTree childTree =
+                    new LocationTree(root, location, getPatientCount(location.uuid));
             root.getChildren().put(location.uuid, childTree);
             addChildren(childTree);
         }
+    }
+
+    private int getPatientCount(String uuid) {
+        if (!mPatientCountsMap.containsKey(uuid)) {
+            return 0;
+        }
+
+        return mPatientCountsMap.get(uuid);
     }
 }

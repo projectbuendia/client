@@ -76,5 +76,6 @@
     <string name="add_user_user_exists_on_server">User already exists on server</string>
     <string name="add_user_server_error">Server error</string>
     <string name="age_months">%dmo</string>
+    <string name="title_activity_round">RoundActivity</string>
 
 </resources>
