@@ -82,7 +82,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
 
     private void setupCustomActionBar(int selectedFilter){
-        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay();
+        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay(this);
         SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<SimpleSelectionFilter>(
                 this,
                 R.layout.patient_list_spinner_dropdown_item,

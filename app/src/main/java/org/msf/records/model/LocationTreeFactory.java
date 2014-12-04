@@ -25,14 +25,8 @@ import java.util.Map;
  * LocationTreeFactory constructs a LocationTree using a database Cursor and listens for changes
  * in location data.
  */
-public class LocationTreeFactory implements LoaderManager.LoaderCallbacks<Cursor> {
+public class LocationTreeFactory {
     private final String TAG = "LocationTree";
-
-    // TODO(akalachman): Consolidate loader ids.
-    private final int LOCATION_LOADER_ID = 5;
-    private final int LOCATION_NAMES_LOADER_ID = 6;
-
-    private static final String TRANSACTION_ID_KEY = "transaction_id";
 
     private FilterQueryProviderFactory mLocationQueryFactory;
     private FilterQueryProviderFactory mLocationNamesQueryFactory;
@@ -44,40 +38,9 @@ public class LocationTreeFactory implements LoaderManager.LoaderCallbacks<Cursor
     private Map<String, HashMap<String, String>> mLocationNamesMap;
 
     private final Context mContext;
-    private final LoaderManager mLoaderManager;
-    private final OnTreeConstructedListener mOnTreeConstructedListener;
-    private final OnTreeConstructionErrorListener mOnTreeConstructionErrorListener;
 
-    private boolean mRefreshingLocations = false;
-    private boolean mRefreshingLocationNames = false;
-
-    public enum ErrorCode {
-        NO_ROOT_LOCATION_ERROR, LOCATION_FETCH_ERROR, LOCATION_NAME_FETCH_ERROR
-    };
-
-    /**
-     * OnTreeConstructedListeners are notified when a LocationTree is built.
-     */
-    public interface OnTreeConstructedListener {
-        public void onTreeConstructed(LocationTree tree);
-    }
-
-    /**
-     * OnTreeConstructionErrorListeners are notified when a LocationTree could not be built.
-     */
-    public interface OnTreeConstructionErrorListener {
-        public void onTreeConstructionError(ErrorCode errorCode);
-    }
-
-    public LocationTreeFactory(
-            Context context,
-            LoaderManager loaderManager,
-            OnTreeConstructedListener onTreeConstructedListener,
-            OnTreeConstructionErrorListener onTreeConstructionErrorListener) {
+    public LocationTreeFactory(Context context) {
         mContext = context;
-        mLoaderManager = loaderManager;
-        mOnTreeConstructedListener = onTreeConstructedListener;
-        mOnTreeConstructionErrorListener = onTreeConstructionErrorListener;
 
         mLocationQueryFactory = new FilterQueryProviderFactory();
         mLocationQueryFactory.setUri(LocationProviderContract.LOCATIONS_CONTENT_URI);
@@ -91,9 +54,20 @@ public class LocationTreeFactory implements LoaderManager.LoaderCallbacks<Cursor
 
         mLocationsByParent = HashMultimap.create();
         mLocationNamesMap = new HashMap<String, HashMap<String, String>>();
+    }
 
-        mLoaderManager.restartLoader(LOCATION_LOADER_ID, null, this);
-        mLoaderManager.restartLoader(LOCATION_NAMES_LOADER_ID, null, this);
+    public LocationTree build() {
+        Cursor locationCursor =
+                mLocationQueryFactory.getFilterQueryProvider(mContext, mLocationFilter)
+                        .runQuery("");
+        buildLocationMap(locationCursor);
+        locationCursor.close();
+
+        Cursor locationNamesCursor =
+                mLocationNamesQueryFactory.getFilterQueryProvider(mContext, mLocationNameFilter)
+                        .runQuery("");
+        buildLocationNamesMap(locationNamesCursor);
+        return buildTree();
     }
 
     public void setLocationFilter(SimpleSelectionFilter locationFilter) {
@@ -102,56 +76,6 @@ public class LocationTreeFactory implements LoaderManager.LoaderCallbacks<Cursor
 
     public void setLocationNameFilter(SimpleSelectionFilter locationNameFilter) {
         mLocationNameFilter = locationNameFilter;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        switch (i) {
-            case LOCATION_LOADER_ID:
-                synchronized (this) {
-                    mRefreshingLocations = true;
-                    return mLocationQueryFactory.getCursorLoader(mContext, mLocationFilter, "");
-                }
-            case LOCATION_NAMES_LOADER_ID:
-                synchronized (this) {
-                    mRefreshingLocationNames = true;
-                    return mLocationNamesQueryFactory.getCursorLoader(
-                            mContext, mLocationNameFilter, "");
-                }
-            default:
-                Log.w(TAG, "Unexpected loader id: " + i);
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        int id = cursorLoader.getId();
-
-        switch (id) {
-            case LOCATION_LOADER_ID:
-                mRefreshingLocations = false;
-                buildLocationMap(cursor);
-                break;
-            case LOCATION_NAMES_LOADER_ID:
-                mRefreshingLocationNames = false;
-                buildLocationNamesMap(cursor);
-                break;
-        }
-
-        if (cursor != null) {
-            cursor.close();
-        }
-
-        if (!mRefreshingLocations && !mRefreshingLocationNames) {
-            LocationTree locationTree = buildTree();
-            if (locationTree == null) {
-                mOnTreeConstructionErrorListener.onTreeConstructionError(
-                        ErrorCode.NO_ROOT_LOCATION_ERROR);
-            } else {
-                mOnTreeConstructedListener.onTreeConstructed(locationTree);
-            }
-        }
     }
 
     // Initializes mLocationsByParent from the given cursor. Does NOT close the cursor.
@@ -223,22 +147,6 @@ public class LocationTreeFactory implements LoaderManager.LoaderCallbacks<Cursor
             LocationTree childTree = new LocationTree(location);
             root.getChildren().put(location.uuid, childTree);
             addChildren(childTree);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        int id = cursorLoader.getId();
-
-        switch (id) {
-            case LOCATION_LOADER_ID:
-                mOnTreeConstructionErrorListener.onTreeConstructionError(
-                        ErrorCode.LOCATION_FETCH_ERROR);
-                break;
-            case LOCATION_NAMES_LOADER_ID:
-                mOnTreeConstructionErrorListener.onTreeConstructionError(
-                        ErrorCode.LOCATION_NAME_FETCH_ERROR);
-                break;
         }
     }
 }

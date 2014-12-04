@@ -1,6 +1,5 @@
 package org.msf.records.model;
 
-import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -32,6 +31,29 @@ public class LocationTree implements Comparable<LocationTree> {
 
     public TreeMap<String, LocationTree> getChildren() {
         return mChildren;
+    }
+
+    public TreeSet<LocationTree> getLocationsForDepth(int depth) {
+        TreeSet<LocationTree> locations = new TreeSet<LocationTree>();
+        if (depth == 0) {
+            locations.addAll(getChildren().values());
+            return locations;
+        }
+
+        for (String uuid : mChildren.keySet()) {
+            locations.addAll(getLocationsForDepth(depth - 1));
+        }
+
+        return locations;
+    }
+
+    @Override
+    public String toString() {
+        if (!mLocation.names.containsKey(mSortLocale)) {
+            return "";
+        }
+
+        return mLocation.names.get(mSortLocale);
     }
 
     @Override
