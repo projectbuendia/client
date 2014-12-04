@@ -4,14 +4,21 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_TENTS;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS_ZONES;
+import static org.msf.records.sync.PatientProviderContract.PATH_TENT_PATIENT_COUNTS;
 
 /**
  * ContentProvider code for handling patient related URIs.
@@ -40,15 +47,30 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
     public static final int ROUTE_TENTS = 4;
 
     /**
+     * URI ID for route: /tentpatients/
+     */
+    public static final int ROUTE_TENT_PATIENT_COUNTS = 5;
+
+    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+    // Simple bean for holding a mutable int (Integer is immutable).
+    private class MutableInt {
+        public MutableInt(int value) {
+            this.value = value;
+        }
+
+        public int value;
+    }
 
     static {
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, ROUTE_PATIENTS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", ROUTE_PATIENTS_ID);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS_ZONES, ROUTE_ZONES);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS_TENTS, ROUTE_TENTS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_TENT_PATIENT_COUNTS, ROUTE_TENT_PATIENT_COUNTS);
     }
 
     @Override
@@ -58,6 +80,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 PATH_PATIENTS + "/*",
                 PATH_PATIENTS_ZONES,
                 PATH_PATIENTS_TENTS,
+                PATH_TENT_PATIENT_COUNTS
         };
     }
 
@@ -67,6 +90,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
         switch (match) {
             case ROUTE_PATIENTS:
             case ROUTE_TENTS:
+            case ROUTE_TENT_PATIENT_COUNTS:
             case ROUTE_ZONES:
                 return PatientProviderContract.CONTENT_TYPE;
             case ROUTE_PATIENTS_ID:
@@ -111,6 +135,30 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                         PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE, "", sortOrder, "");
                 zonesCursor.setNotificationUri(contentResolver, uri);
                 return zonesCursor;
+            case ROUTE_TENT_PATIENT_COUNTS: // Build a cursor manually since we can't use GROUP BY
+                builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
+                        .where(selection, selectionArgs);
+                Cursor allPatients = builder.query(
+                        db, new String[] {
+                                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID
+                        }, sortOrder);
+                HashMap<String, MutableInt> counts = new HashMap<String, MutableInt>();
+                while (allPatients.moveToNext()) {
+                    String locationId = allPatients.getString(0);
+                    if (!counts.containsKey(locationId)) {
+                        counts.put(locationId, new MutableInt(0));
+                    }
+                    counts.get(locationId).value++;
+                }
+
+                MatrixCursor result = new MatrixCursor(new String[] {
+                       PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
+                       PatientProviderContract.PatientColumns.COLUMN_NAME_TENT_PATIENT_COUNT});
+                for (Map.Entry<String, MutableInt> countEntry : counts.entrySet()) {
+                    result.addRow(
+                            new Object[] { countEntry.getKey(), countEntry.getValue().value });
+                }
+                return result;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -130,6 +178,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case ROUTE_PATIENTS_ID:
             case ROUTE_TENTS:
+            case ROUTE_TENT_PATIENT_COUNTS:
             case ROUTE_ZONES:
                 throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
             default:
@@ -162,6 +211,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case ROUTE_TENTS:
             case ROUTE_ZONES:
+            case ROUTE_TENT_PATIENT_COUNTS:
                 throw new UnsupportedOperationException("Delete not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -193,6 +243,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 break;
             case ROUTE_TENTS:
             case ROUTE_ZONES:
+            case ROUTE_TENT_PATIENT_COUNTS:
                 throw new UnsupportedOperationException("Update not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

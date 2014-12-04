@@ -204,7 +204,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, status, locationZone, locationTent, gender;
+        String givenName, familyName, uuid, status, locationZone, locationTent, locationUuid;
+        String gender;
         int ageMonths = -1, ageYears = -1;
         long admissionTimestamp;
 
@@ -220,6 +221,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
             locationZone = c.getString(PatientProjection.COLUMN_LOCATION_ZONE);
             locationTent = c.getString(PatientProjection.COLUMN_LOCATION_TENT);
+            locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
             if (!c.isNull(PatientProjection.COLUMN_AGE_MONTHS)) {
                 ageMonths = c.getInt(PatientProjection.COLUMN_AGE_MONTHS);
             }
@@ -246,6 +248,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             !patient.assigned_location.zone.equals(locationZone)) ||
                         (patient.assigned_location.tent != null &&
                             !patient.assigned_location.tent.equals(locationTent)) ||
+                        (patient.assigned_location.uuid != null &&
+                            !patient.assigned_location.uuid.equals(locationUuid)) ||
                         (patient.age.months != ageMonths) ||
                         (patient.age.years != ageYears) ||
                         (patient.gender != null && !patient.gender.equals(gender)) ||
@@ -261,6 +265,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, locationZone)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, locationTent)
+                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
@@ -293,6 +298,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
                     .withValue(PatientColumns.COLUMN_NAME_LOCATION_ZONE, e.assigned_location.zone)
                     .withValue(PatientColumns.COLUMN_NAME_LOCATION_TENT, e.assigned_location.tent)
+                    .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, e.assigned_location.uuid)
                     .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
                     .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
                     .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender)
