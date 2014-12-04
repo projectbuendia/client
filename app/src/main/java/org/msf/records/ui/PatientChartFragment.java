@@ -144,10 +144,8 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     public void onResume() {
         super.onResume();
 
-        retrievePatientData();
-
         // Update our patient's vitals
-        updatePatientUI();
+//        updatePatientUI();
         EventBus.getDefault().registerSticky(this);
 //
 //        // Retrieve the view
@@ -164,8 +162,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 //        PatientChartModel.INSTANCE.fetchObservations(mObservationsFetchedToken);
     }
 
-    private void retrievePatientData()
-    {
+    private void retrievePatientData() {
         getLoaderManager().restartLoader(1, null, this);
     }
 
@@ -180,12 +177,14 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     // resolved.
     public void onEventMainThread(ModelReadyEvent event) {
         if (event.shouldRead(Models.OBSERVATIONS)) {
+            retrievePatientData();
             updatePatientUI();
         }
     }
 
     public void onEventMainThread(ModelUpdatedEvent event) {
         if (event.shouldRead(Models.OBSERVATIONS)) {
+            retrievePatientData();
             updatePatientUI();
         }
     }
