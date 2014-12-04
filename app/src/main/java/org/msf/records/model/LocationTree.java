@@ -12,13 +12,43 @@ import org.msf.records.net.model.Location;
 public class LocationTree implements Comparable<LocationTree> {
     private final String DEFAULT_LOCALE = "en";
 
+    private LocationTree mParent;
+
     private TreeMap<String, LocationTree> mChildren;
     private Location mLocation;
     private String mSortLocale = DEFAULT_LOCALE;
 
-    public LocationTree(Location location) {
+    public LocationTree(LocationTree parent, Location location) {
+        mParent = parent;
         mLocation = location;
         mChildren = new TreeMap<String, LocationTree>();
+    }
+
+    public LocationTree getAncestorOrThisWithDepth(int depth) {
+        int myDepth = getDepth();
+        int remainingDistance = myDepth - depth;
+
+        LocationTree ancestor = this;
+        while (remainingDistance > 0) {
+            ancestor = ancestor.getParent();
+            remainingDistance--;
+        }
+
+        return ancestor;
+    }
+
+    private int getDepth() {
+        LocationTree tree = this;
+        int depth = 0;
+        while (tree.getParent() != null) {
+            tree = tree.getParent();
+            depth++;
+        }
+        return depth;
+    }
+
+    public LocationTree getParent() {
+        return mParent;
     }
 
     public Location getLocation() {
