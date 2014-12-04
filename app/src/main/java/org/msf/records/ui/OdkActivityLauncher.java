@@ -157,6 +157,8 @@ public class OdkActivityLauncher {
                                 dit.setContentResolver(
                                         Collect.getInstance().getApplication().getContentResolver());
                                 dit.execute(idToDelete);
+
+                                // TODO(dxchen): Change this to a proper event type.
                                 EventBus.getDefault().post(new CreatePatientSucceededEvent());
                             }
                         }
@@ -180,8 +182,10 @@ public class OdkActivityLauncher {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e(TAG, "Did not submit form to server successfully", error);
-                        if (error.networkResponse.statusCode == 500) {
+                        if (error.networkResponse != null
+                                && error.networkResponse.statusCode == 500) {
                             Log.e(TAG, "Internal error stack trace:\n");
+                            // TODO(dxchen): This could throw an NPE!
                             Log.e(TAG, new String(error.networkResponse.data, Charsets.UTF_8));
                         }
                     }

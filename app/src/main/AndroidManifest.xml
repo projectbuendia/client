@@ -87,15 +87,6 @@
                 android:value="org.msf.records.ui.PatientListActivity" />
         </activity>
         <activity
-            android:name="org.msf.records.ui.PatientDetailActivity"
-            android:label="@string/title_patient_detail"
-            android:parentActivityName="org.msf.records.ui.PatientListActivity"
-            android:screenOrientation="portrait" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.PatientListActivity" />
-        </activity>
-        <activity
             android:name="org.msf.records.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName="org.msf.records.ui.PatientListActivity"
@@ -142,6 +133,9 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <receiver android:name=".sync.SyncManager$SyncStatusBroadcastReceiver" />
+
     </application>
 
 </manifest>

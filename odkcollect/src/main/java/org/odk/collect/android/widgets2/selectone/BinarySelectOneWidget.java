@@ -2,7 +2,6 @@ package org.odk.collect.android.widgets2.selectone;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 
@@ -11,7 +10,6 @@ import org.javarosa.core.model.data.SelectOneData;
 import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
-import org.odk.collect.android.utilities.StringUtils;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -47,7 +45,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
 
         boolean isReadOnly = forceReadOnly || prompt.isReadOnly();
 
-        mCheckBox.setText(StringUtils.unscreamify(prompt.getQuestionText()));
+        mCheckBox.setText(prompt.getQuestionText());
         mCheckBox.setId(QuestionWidget.newUniqueId());
         mCheckBox.setEnabled(!isReadOnly);
         mCheckBox.setFocusable(!isReadOnly);

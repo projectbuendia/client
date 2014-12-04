@@ -164,6 +164,5 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
         return view;
     }
-
 }
 
