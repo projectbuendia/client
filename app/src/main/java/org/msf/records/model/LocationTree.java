@@ -36,12 +36,12 @@ public class LocationTree implements Comparable<LocationTree> {
     public TreeSet<LocationTree> getLocationsForDepth(int depth) {
         TreeSet<LocationTree> locations = new TreeSet<LocationTree>();
         if (depth == 0) {
-            locations.addAll(getChildren().values());
+            locations.add(this);
             return locations;
         }
 
-        for (String uuid : mChildren.keySet()) {
-            locations.addAll(getLocationsForDepth(depth - 1));
+        for (LocationTree childLocation : mChildren.values()) {
+            locations.addAll(childLocation.getLocationsForDepth(depth - 1));
         }
 
         return locations;
