@@ -157,6 +157,8 @@ public class OdkActivityLauncher {
                                 dit.setContentResolver(
                                         Collect.getInstance().getApplication().getContentResolver());
                                 dit.execute(idToDelete);
+
+                                // TODO(dxchen): Change this to a proper event type.
                                 EventBus.getDefault().post(new CreatePatientSucceededEvent());
                             }
                         }
