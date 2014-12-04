@@ -40,7 +40,7 @@ public class Patient implements Serializable {
     // Not yet ready.
     public String next_of_kin;
 
-    public PatientLocation assigned_location;
+    public Location assigned_location;
     public PatientAge age;
 
     public Patient() {}

@@ -11,8 +11,6 @@ import org.msf.records.filter.FilterManager;
 import org.msf.records.net.Constants;
 
 public class TentSelectionActivity extends PatientSearchActivity {
-    private static final int ODK_ACTIVITY_REQUEST = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

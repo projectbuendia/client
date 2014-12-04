@@ -3,8 +3,14 @@ package org.msf.records.ui;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import org.msf.records.R;
+import org.msf.records.filter.FilterGroup;
+import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.LocationUuidFilter;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.net.Constants;
 import org.msf.records.utils.PatientCountDisplay;
 
 public class RoundActivity extends PatientSearchActivity {
@@ -12,6 +18,9 @@ public class RoundActivity extends PatientSearchActivity {
     private String mTentUuid;
 
     private int mTentPatientCount;
+
+    private PatientListFragment mFragment;
+    private SimpleSelectionFilter mFilter;
 
     public static final String TENT_NAME_KEY = "tent_name";
     public static final String TENT_PATIENT_COUNT_KEY = "tent_patient_count";
@@ -34,7 +43,14 @@ public class RoundActivity extends PatientSearchActivity {
         setTitle(PatientCountDisplay.getPatientCountTitle(this, mTentPatientCount, mTentName));
         setContentView(R.layout.activity_round);
 
-        // TODO(akalachman): Initialize fragment.
+        mFilter = new FilterGroup(FilterManager.getDefaultFilter(), new LocationUuidFilter(mTentUuid));
+
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.patient_list);
+        mFragment.filterBy(mFilter);
+
+        // TODO(akalachman): Fix weird issue with duplicate groups.
+        // TODO(akalachman): Remove section headers somehow.
     }
 
     @Override
@@ -43,6 +59,20 @@ public class RoundActivity extends PatientSearchActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
-        // TODO(akalachman): Activate search / fragment selection.
+        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        OdkActivityLauncher.fetchAndShowXform(
+                                RoundActivity.this,
+                                Constants.ADD_PATIENT_UUID,
+                                ODK_ACTIVITY_REQUEST);
+
+                        return true;
+                    }
+                });
+
+        super.onExtendOptionsMenu(menu);
     }
 }

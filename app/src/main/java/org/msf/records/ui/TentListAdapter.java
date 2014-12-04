@@ -7,14 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import org.msf.records.R;
-import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.LocationTree;
-import org.msf.records.model.LocationTreeFactory;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;
-
-import java.util.TreeSet;
 
 /**
  * Created by akalachman on 11/30/14.
