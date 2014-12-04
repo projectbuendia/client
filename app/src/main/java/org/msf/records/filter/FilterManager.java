@@ -1,16 +1,13 @@
 package org.msf.records.filter;
 
 import android.content.Context;
-import android.support.v4.app.LoaderManager;
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.msf.records.filter.FilterGroup.FilterType;
 import org.msf.records.model.LocationTree;
 import org.msf.records.model.LocationTreeFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * FilterManager is a container for all available patient filters that will be displayed to the

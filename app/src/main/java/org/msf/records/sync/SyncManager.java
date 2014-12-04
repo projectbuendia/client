@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 
 import de.greenrobot.event.EventBus;
 

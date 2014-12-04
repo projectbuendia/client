@@ -29,6 +29,7 @@
         android:gravity="center"
         android:textColor="#FFFFFF"
         android:textSize="72sp"
-        tools:text="37.2°"/>
+        android:id="@+id/patient_chart_vital_temperature"
+        tools:text="N/A"/>
 
 </RelativeLayout>

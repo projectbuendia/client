@@ -9,8 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
 import static org.msf.records.sync.LocationProviderContract.LocationColumns;
-import static org.msf.records.sync.LocationProviderContract.PATH_LOCATION_NAMES;
 import static org.msf.records.sync.LocationProviderContract.PATH_LOCATIONS;
+import static org.msf.records.sync.LocationProviderContract.PATH_LOCATION_NAMES;
 import static org.msf.records.sync.LocationProviderContract.PATH_SUBLOCATIONS;
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 
