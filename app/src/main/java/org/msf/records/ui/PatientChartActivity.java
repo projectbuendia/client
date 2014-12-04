@@ -1,9 +1,6 @@
 package org.msf.records.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,9 +9,6 @@ import com.android.debug.hv.ViewServer;
 
 import org.msf.records.R;
 import org.msf.records.controllers.PatientChartController;
-import org.msf.records.net.Constants;
-
-import javax.annotation.Nullable;
 
 /**
  * A {@link BaseActivity} that displays a patient's vitals and charts.
