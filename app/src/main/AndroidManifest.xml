@@ -76,9 +76,9 @@
         <activity
             android:name="org.msf.records.ui.PatientChartActivity"
             android:label="@string/title_patient_chart"
-            android:parentActivityName=".ui.PatientListActivity"
+            android:parentActivityName="org.msf.records.ui.PatientListActivity"
             android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow">
+            android:uiOptions="splitActionBarWhenNarrow" >
             <meta-data
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
@@ -133,6 +133,15 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
+        <activity
+            android:name="org.msf.records.ui.RoundActivity"
+            android:label="@string/title_activity_round"
+            android:parentActivityName="org.msf.records.ui.TentSelectionActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.msf.records.ui.TentSelectionActivity" />
+        </activity>
     </application>
 
 </manifest>
