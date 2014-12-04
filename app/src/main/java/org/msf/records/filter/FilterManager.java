@@ -1,8 +1,6 @@
 package org.msf.records.filter;
 
 import android.content.Context;
-import android.support.v4.app.LoaderManager;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;

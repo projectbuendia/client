@@ -29,6 +29,7 @@
         android:textColor="#FFFFFF"
         android:textSize="48sp"
         android:maxLines="2"
-        tools:text="29.5\n28.1"/>
+        android:id="@+id/patient_chart_vital_pcr"
+        tools:text="N/A"/>
 
 </RelativeLayout>

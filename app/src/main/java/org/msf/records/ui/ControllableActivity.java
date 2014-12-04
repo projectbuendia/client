@@ -2,7 +2,6 @@ package org.msf.records.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
 
 import org.msf.records.controllers.ActivityController;
