@@ -1,6 +1,5 @@
 package org.msf.records.net.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,29 +17,6 @@ public class Location {
     public Map<String, String> names;
 
     public Location() {
-    }
-
-
-    // TODO(nfortescue): remove this method when we've got rid of PatientLocation.
-    /**
-     * Code for getting rid of PatientLocation and using Location instead.
-     * @param location
-     */
-    public Location(PatientLocation location) {
-        this.uuid = location.uuid;
-        this.parent_uuid = location.parent_uuid;
-        this.names = new HashMap<>();
-        String name = null;
-        if (location.bed != null) {
-            name = location.bed;
-        } else if (location.tent != null) {
-            name = location.tent;
-        } else if (location.zone != null) {
-            name = location.zone;
-        }
-        if (name != null) {
-            names.put("en", name);
-        }
     }
 
 }
