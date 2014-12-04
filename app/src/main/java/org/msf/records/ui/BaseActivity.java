@@ -26,7 +26,7 @@ import de.greenrobot.event.EventBus;
 /**
  * An abstract {@link FragmentActivity} that is the base for all activities.
  */
-public abstract class BaseActivity extends FragmentActivity {
+public abstract class BaseActivity extends ControllableActivity {
 
     private User lastActiveUser;
     private Menu mMenu;
