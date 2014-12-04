@@ -1,6 +1,5 @@
 package org.msf.records.events.user;
 
-import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
 
 /**

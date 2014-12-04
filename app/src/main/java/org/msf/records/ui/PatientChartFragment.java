@@ -140,69 +140,6 @@ public class PatientChartFragment extends Fragment {
 
         // Update our patient's vitals
         updatePatientUI();
-
-//        // Populate each of the views that we care about.
-//        LocalizedChartHelper.LocalizedObservation temperature =
-//                conceptsToLatestObservations.get("Temperature (C)");
-//        String temperatureValue = "--.-°";
-//        if (temperature != null) {
-//            float temperatureFloat;
-//            try {
-//                temperatureFloat = Float.parseFloat(temperature.localizedValue);
-//                temperatureValue = String.format("%.1f°", temperatureFloat);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mTemperature.setValue(temperatureValue);
-
-//
-//        LocalizedChartHelper.LocalizedObservation pulse =
-//                conceptsToLatestObservations.get("Pulse");
-//        String pulseValue = "--";
-//        if (pulse != null) {
-//            int pulseInt;
-//            try {
-//                pulseInt = Integer.parseInt(pulse.localizedValue);
-//                pulseValue = String.format("%d", pulseInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mHeart.setValue(pulseValue);
-//
-//        LocalizedChartHelper.LocalizedObservation respirations =
-//                conceptsToLatestObservations.get("Respiratory rate");
-//        String respirationsValue = "--";
-//        if (respirations != null) {
-//            int respirationsInt;
-//            try {
-//                respirationsInt = Integer.parseInt(respirations.localizedValue);
-//                respirationsValue = String.format("%d", respirationsInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mRespirations.setValue(respirationsValue);
-//
-//        LocalizedChartHelper.LocalizedObservation systolic =
-//                conceptsToLatestObservations.get("SYSTOLIC BLOOD PRESSURE");
-//        String systolicValue = "--";
-//        if (systolic != null) {
-//            int systolicInt;
-//            try {
-//                systolicInt = Integer.parseInt(systolic.localizedValue);
-//                systolicValue = String.format("%d", systolicInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//
-//        LocalizedChartHelper.LocalizedObservation diastolic =
-//                conceptsToLatestObservations.get("DIASTOLIC BLOOD PRESSURE");
-//        String diastolicValue = "--";
-//        if (systolic != null) {
-//            int diastolicInt;
-//            try {
-//                diastolicInt = Integer.parseInt(systolic.localizedValue);
-//                diastolicValue = String.format("%d", diastolicInt);
-//            } catch (NumberFormatException e) {}
-//        }
-//        mBloodPressure.setValue(String.format("%s/%s", systolicValue, diastolicValue));
-
-
     }
 
     private void updatePatientUI()
@@ -253,14 +190,11 @@ public class PatientChartFragment extends Fragment {
 
         // Find the latest observation for each observation type.
         for (LocalizedChartHelper.LocalizedObservation observation : observations) {
-            if ( observation.conceptUuid.equals( "30143d74-f654-4427-bb92-685f68f92c15" ) )
-            {
-                Log.e( "Test", "Found" );
-            }
+
             // If no other observations for this concept have been seen or if this is the
-            if (!conceptsToLatestObservations.containsKey(observation.conceptName)
+            if (!conceptsToLatestObservations.containsKey(observation.conceptUuid)
                     || observation.encounterTimeMillis >
-                    conceptsToLatestObservations.get(observation.conceptName)
+                    conceptsToLatestObservations.get(observation.conceptUuid)
                             .encounterTimeMillis) {
                 conceptsToLatestObservations.put(observation.conceptUuid, observation);
             }
@@ -280,15 +214,16 @@ public class PatientChartFragment extends Fragment {
         LocalizedChartHelper.LocalizedObservation observation;
 
         // Update mobility
-        /*vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
+        vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
         observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
         if ( observation == null )
         {
+            vital.setValue( "N/A" );
             Log.e( "PatientChart", "Missing observation" );
         }
         else {
             vital.setValue( observation.localizedValue );
         }
-        */
+
     }
 }

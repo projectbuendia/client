@@ -17,11 +17,6 @@ public class WidgetGroupBuilderFactory {
             return new BinarySelectOneTableWidgetGroupBuilder(appearance);
         }
 
-        // TODO(dxchen): Remove this once the server sends back the right appearance.
-        if (group.getQuestionText().startsWith("Symptoms")) {
-            return new BinarySelectOneTableWidgetGroupBuilder(appearance);
-        }
-
         return null;
     }
 }
