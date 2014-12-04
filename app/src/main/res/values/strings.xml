@@ -65,8 +65,6 @@
     <string name="family_name">Family Name</string>
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add New User</string>
-    <string name="one_patient">(1 patient)</string>
-    <string name="n_patients">(%d patients)</string>
     <string name="action_search">Search</string>
     <string name="title_activity_tent_selection">MSF Medical Records</string>
     <string name="today">Today</string>
@@ -76,5 +74,15 @@
     <string name="add_user_user_exists_on_server">User already exists on server</string>
     <string name="add_user_server_error">Server error</string>
     <string name="age_months">%dmo</string>
+    <string name="title_activity_round">RoundActivity</string>
 
+    <string name="no_patients">No patients</string>
+    <string name="one_patient">1 patient</string>
+    <string name="n_patients">%d patients</string>
+
+    <string name="no_present_patients">No present patients</string>
+    <string name="one_present_patient">1 present patient</string>
+    <string name="n_present_patients">%d present patients</string>
+
+    <string name="string_with_paren" formatted="false">%s (%s)</string>
 </resources>

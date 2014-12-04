@@ -8,22 +8,23 @@ import android.widget.ArrayAdapter;
 
 import org.msf.records.R;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.model.LocationTree;
+import org.msf.records.model.LocationTreeFactory;
+import org.msf.records.model.Zone;
+import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;
+
+import java.util.TreeSet;
 
 /**
  * Created by akalachman on 11/30/14.
  */
-// TODO(akalachman): Replace with retrieval of real data.
-public class TentListAdapter extends ArrayAdapter<SimpleSelectionFilter> {
+public class TentListAdapter extends ArrayAdapter<LocationTree> {
     private final Context context;
-    private final SimpleSelectionFilter[] values;
 
-    private final String DEFAULT_SUBTITLE = "34 patients";
-
-    public TentListAdapter(Context context, SimpleSelectionFilter[] values) {
+    public TentListAdapter(Context context, LocationTree[] values) {
         super(context, R.layout.listview_cell_tent_selection, values);
         this.context = context;
-        this.values = values;
     }
 
     @Override
@@ -33,10 +34,16 @@ public class TentListAdapter extends ArrayAdapter<SimpleSelectionFilter> {
         View rowView = inflater.inflate(
                 R.layout.listview_cell_tent_selection, parent, false);
 
+        LocationTree tent = getItem(position);
         SubtitledButtonView button =
                 (SubtitledButtonView)rowView.findViewById(R.id.tent_selection_tent);
-        button.setTitle(values[position].toString());
-        button.setSubtitle(DEFAULT_SUBTITLE);
+        button.setTitle(tent.toString());
+        button.setSubtitle(
+                PatientCountDisplay.getPatientCountSubtitle(context, tent.getPatientCount()));
+        button.setBackgroundResource(
+                Zone.getBackgroundColorResource(tent.getLocation().parent_uuid));
+        button.setTextColor(
+                Zone.getForegroundColorResource(tent.getLocation().parent_uuid));
 
         return rowView;
     }

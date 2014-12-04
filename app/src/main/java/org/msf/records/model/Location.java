@@ -8,6 +8,7 @@ import org.msf.records.R;
 /**
  * Created by danieljulio on 09/10/2014.
  */
+@Deprecated
 public class Location implements Parcelable, ListItem{
 
     public int location;
