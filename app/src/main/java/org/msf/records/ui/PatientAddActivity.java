@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -41,9 +40,6 @@ import static org.msf.records.net.Server.PATIENT_GENDER_KEY;
 import static org.msf.records.net.Server.PATIENT_GIVEN_NAME_KEY;
 import static org.msf.records.net.Server.PATIENT_ID_KEY;
 import static org.msf.records.net.Server.PATIENT_IMPORTANT_INFORMATION_KEY;
-import static org.msf.records.net.Server.PATIENT_LOCATION_BED_KEY;
-import static org.msf.records.net.Server.PATIENT_LOCATION_TENT_KEY;
-import static org.msf.records.net.Server.PATIENT_LOCATION_ZONE_KEY;
 import static org.msf.records.net.Server.PATIENT_MOVEMENT_KEY;
 import static org.msf.records.net.Server.PATIENT_STATUS_KEY;
 
@@ -62,9 +58,6 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
     @InjectView(R.id.add_patient_gender) Spinner mPatientGenderSpinner;
     @InjectView(R.id.add_patient_is_pregnant) Switch mPatientIsPregnantSwitch;
     @InjectView(R.id.add_patient_pregnant_date) TextView mPatientPregantDate;
-    @InjectView(R.id.add_patient_location_zone) Spinner mPatientZoneSpinner;
-    @InjectView(R.id.add_patient_location_tent) EditText mPatientTentET;
-    @InjectView(R.id.add_patient_location_bed) EditText mPatientBedET;
 
     //medical details
     @InjectView(R.id.add_patient_status) Spinner mPatientStatusSpinner;
@@ -200,9 +193,6 @@ public class PatientAddActivity extends Activity implements Response.ErrorListen
         map.put(PATIENT_DOB_MONTHS_KEY, "" + (mPatientAgeTypeSpinner.getSelectedItemPosition() == 1 ? mPatientDoBTV.getText().toString() : -1));
         map.put(PATIENT_MOVEMENT_KEY, mPatientMovementSpinner.getSelectedItem().toString().toLowerCase());
         map.put(PATIENT_STATUS_KEY, mPatientStatusSpinner.getSelectedItem().toString().toLowerCase().replaceAll(" ", "-"));
-        map.put(PATIENT_LOCATION_ZONE_KEY, "" + mPatientZoneSpinner.getSelectedItemPosition());
-        map.put(PATIENT_LOCATION_TENT_KEY, mPatientTentET.getText().toString());
-        map.put(PATIENT_LOCATION_BED_KEY, mPatientBedET.getText().toString());
         map.put(PATIENT_IMPORTANT_INFORMATION_KEY, mPatientImportantInfomationTV.getText().toString());
 
         App.getServer().addPatient(map, this, this, TAG);

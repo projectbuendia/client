@@ -75,7 +75,7 @@ public class PatientChartActivity extends BaseActivity {
             patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
 
             PatientChartFragment fragment = PatientChartFragment.newInstance(
-                    getIntent().getStringExtra(PatientDetailFragment.PATIENT_UUID_KEY));
+                    getIntent().getStringExtra(PatientChartActivity.PATIENT_UUID_KEY));
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.patient_chart_container, fragment)
