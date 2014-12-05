@@ -19,7 +19,8 @@ public class FilterManager {
     private static final FilterGroup baseFilters = new FilterGroup(
             FilterType.OR, new IdFilter(), new NameFilter()).setName("All Patients");
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
-        new FilterGroup(baseFilters, new PregnantFilter()).setName("Pregnant"),
+        // TODO(akalachman): Enable pregnancy filter.
+        // new FilterGroup(baseFilters, new PregnantFilter()).setName("Pregnant"),
         new FilterGroup(baseFilters, new AgeFilter(5)).setName("Children Under 5"),
         new FilterGroup(baseFilters, new AgeFilter(2)).setName("Children Under 2")
     };
