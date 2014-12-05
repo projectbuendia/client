@@ -137,35 +137,19 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 return zonesCursor;
             case ROUTE_TENT_PATIENT_COUNTS: // Build a cursor manually since we can't use GROUP BY
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
-                        .where(selection, selectionArgs);
-                Cursor allPatients = builder.query(
+                        .where(selection, selectionArgs)
+                        .where(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID +
+                                " IS NOT NULL");
+                Cursor countsCursor = builder.query(
                         db, new String[] {
-                                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID
-                        }, sortOrder);
-                HashMap<String, MutableInt> counts = new HashMap<String, MutableInt>();
-                while (allPatients.moveToNext()) {
-                    String locationId = allPatients.getString(0);
-                    if (!counts.containsKey(locationId)) {
-                        counts.put(locationId, new MutableInt(0));
-                    }
-                    counts.get(locationId).value++;
-                }
-
-                MatrixCursor result = new MatrixCursor(new String[] {
-                       LocationProviderContract.LocationColumns._ID,
-                       PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
-                       PatientProviderContract.PatientColumns.COLUMN_NAME_TENT_PATIENT_COUNT});
-                int i = 0;
-                for (Map.Entry<String, MutableInt> countEntry : counts.entrySet()) {
-                    // Reject bad locations.
-                    if (countEntry.getKey() == null) {
-                        continue;
-                    }
-                    result.addRow(
-                            new Object[] { i, countEntry.getKey(), countEntry.getValue().value });
-                    i++;
-                }
-                return result;
+                                PatientProviderContract.PatientColumns._ID,
+                                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
+                                "COUNT(*) AS " + PatientProviderContract.PatientColumns._COUNT,
+                        },  // Projection
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID, // Group
+                        "", sortOrder, "");
+                countsCursor.setNotificationUri(contentResolver, uri);
+                return countsCursor;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
