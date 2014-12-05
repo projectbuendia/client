@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.google.common.collect.Maps;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -49,6 +48,8 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
+
+import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
@@ -205,8 +206,22 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        ArrayList<LocalizedChartHelper.LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
-        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = sortObservations(LocalizedChartHelper.getMostRecentObservations(getActivity().getContentResolver(), mPatientUuid));
+        ArrayList<LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
+        Map<String, LocalizedObservation> conceptsToLatestObservations = LocalizedChartHelper.getMostRecentObservations(getActivity().getContentResolver(), mPatientUuid);
+
+
+        // Update timestamp
+        long latestEncounterTimeMillis = Long.MIN_VALUE;
+        for (LocalizedObservation observation : observations) {
+
+            conceptsToLatestObservations.put(observation.conceptUuid, observation);
+
+            if (observation.encounterTimeMillis > latestEncounterTimeMillis) {
+                latestEncounterTimeMillis = observation.encounterTimeMillis;
+            }
+        }
+
+        updateLatestEncounter( latestEncounterTimeMillis );
 
         // Update the observations
         ViewGroup.LayoutParams params =
@@ -260,39 +275,12 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         ((TextView)rootView.findViewById( R.id.patient_chart_days )).setText("Day " + Long.toString( TimeUnit.MILLISECONDS.toDays( nowDate.getTimeInMillis() - admissionDate.getTimeInMillis() ) ) );
     }
 
-    private void Timestamp(long l) {
-    }
-
-    private Map<String, LocalizedChartHelper.LocalizedObservation> sortObservations( final ArrayList<LocalizedChartHelper.LocalizedObservation> observations )
-    {
-
-        // A map from a concept name to the latest observation for that concept.
-        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations =
-                Maps.newHashMap();
-
-        // The timestamp of the latest encounter made.
-        long latestEncounterTimeMillis = Integer.MIN_VALUE;
-
-        // Find the latest observation for each observation type.
-        for (LocalizedChartHelper.LocalizedObservation observation : observations) {
-
-                conceptsToLatestObservations.put(observation.conceptUuid, observation);
-
-            if (observation.encounterTimeMillis > latestEncounterTimeMillis) {
-                latestEncounterTimeMillis = observation.encounterTimeMillis;
-            }
-        }
-
-        updateLatestEncounter( latestEncounterTimeMillis );
-        return conceptsToLatestObservations;
-    }
-
-    private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations )
+    private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedObservation> conceptsToLatestObservations )
     {
         // Data structures we are using
         VitalView vital;
         TextView textView;
-        LocalizedChartHelper.LocalizedObservation observation;
+        LocalizedObservation observation;
 
         // Mobility
         observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );

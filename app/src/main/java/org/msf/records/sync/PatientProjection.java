@@ -22,6 +22,7 @@ public class PatientProjection {
     };
 
     private static final String[] PATIENT_COUNTS_PROJECTION = new String[] {
+            LocationProviderContract.LocationColumns._ID,
             PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
             PatientProviderContract.PatientColumns.COLUMN_NAME_TENT_PATIENT_COUNT
     };
@@ -41,8 +42,9 @@ public class PatientProjection {
     public static final int COLUMN_GENDER = 10;
     public static final int COLUMN_LOCATION_UUID = 11;
 
-    public static final int COUNTS_COLUMN_LOCATION_UUID = 0;
-    public static final int COUNTS_COLUMN_TENT_PATIENT_COUNT = 1;
+    public static final int COUNTS_COLUMN_ID = 0;
+    public static final int COUNTS_COLUMN_LOCATION_UUID = 1;
+    public static final int COUNTS_COLUMN_TENT_PATIENT_COUNT = 2;
 
     public static String[] getProjectionColumns() {
         return PROJECTION;

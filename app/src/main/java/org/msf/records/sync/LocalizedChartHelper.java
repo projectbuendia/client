@@ -3,8 +3,13 @@ package org.msf.records.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import com.google.common.collect.Maps;
+
+import org.msf.records.net.model.Concept;
+
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,6 +39,7 @@ public class LocalizedChartHelper {
         NO_SYMPTOM_VALUES.add("1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // NORMAL
         NO_SYMPTOM_VALUES.add("db2ac5ad-cc64-4184-b4be-1324730e1882"); // Can talk
         NO_SYMPTOM_VALUES.add("c2a547f7-6329-4273-80c2-eae804897efd"); // Can walk
+        NO_SYMPTOM_VALUES.add(Concept.NONE_UUID); // None
     }
 
     /**
@@ -131,7 +137,7 @@ public class LocalizedChartHelper {
      * localized to English. Ordering will be by concept uuid, and there are not groups or other
      * chart based configurations.
      */
-    public static ArrayList<LocalizedObservation> getMostRecentObservations(
+    public static Map<String, LocalizedObservation> getMostRecentObservations(
             ContentResolver contentResolver, String patientUuid) {
         return getMostRecentObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
     }
@@ -141,24 +147,26 @@ public class LocalizedChartHelper {
      * Ordering will be by concept uuid, and there are not groups or other chart based configurations.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static ArrayList<LocalizedObservation> getMostRecentObservations(
+    public static Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
             ContentResolver contentResolver, String patientUuid, String locale) {
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(ChartProviderContract.makeMostRecentChartUri(
                     patientUuid, locale), null, null, null, null);
 
-            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newHashMap();
             while (cursor.moveToNext()) {
+                String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
+
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         "", /* no group */
-                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
+                        concept_uuid,
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
-                result.add(obs);
+                result.put(concept_uuid, obs);
             }
             return result;
         } finally {
