@@ -95,13 +95,30 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
     }
 
     @Override
+    public boolean forceSetAnswer(Object answer) {
+        if (!(answer instanceof String)) {
+            return false;
+        }
+
+        String typedAnswer = (String) answer;
+        for (int i = 0; i < mChoices.size(); i++) {
+            if (mChoices.get(i).getLabelInnerText().equals(typedAnswer)) {
+                mGroup.check(mGroup.getChildAt(i).getId());
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public SelectOneData getAnswer() {
-        int checkedIndex = mGroup.getCheckedRadioButtonId();
-        if (checkedIndex < 0) {
+        int checkedId = mGroup.getCheckedRadioButtonId();
+        if (checkedId < 0) {
             return null;
         }
 
-        View checkedRadioButton = mGroup.findViewById(checkedIndex);
+        View checkedRadioButton = mGroup.findViewById(checkedId);
         if (checkedRadioButton == null) {
             return null;
         }

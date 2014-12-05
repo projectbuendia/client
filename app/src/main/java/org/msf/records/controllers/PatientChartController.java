@@ -4,10 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
 
+import org.joda.time.DateTime;
+import org.msf.records.App;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
+import org.msf.records.net.model.User;
+import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.ui.ControllableActivity;
 import org.msf.records.ui.OdkActivityLauncher;
+import org.odk.collect.android.model.PrepopulatableFields;
+
+import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
@@ -41,11 +48,45 @@ public class PatientChartController extends BaseController {
     }
 
     public void startChartUpdate(Activity activity, String patientUuid) {
+        PrepopulatableFields fields = new PrepopulatableFields();
+
+        fields.mEncounterTime = DateTime.now();
+        fields.mLocationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.mClinicianName = user.getFullName();
+        }
+
+        ArrayList<LocalizedChartHelper.LocalizedObservation> observations =
+                LocalizedChartHelper.getMostRecentObservations(
+                        activity.getContentResolver(), patientUuid);
+        for (LocalizedChartHelper.LocalizedObservation observation : observations) {
+            if (observation == null
+                    || observation.conceptUuid == null
+                    || observation.localizedValue == null) {
+                continue;
+            }
+
+            // Pregnant.
+            if (observation.conceptUuid.equals("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                    && observation.localizedValue.equals("Yes")) {
+                fields.mPregnant = PrepopulatableFields.YES;
+            }
+
+            // IV fitted.
+            if (observation.conceptUuid.equals("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07")
+                    && observation.localizedValue.equals("Yes")) {
+                fields.mIvFitted = PrepopulatableFields.YES;
+            }
+        }
+
         OdkActivityLauncher.fetchAndShowXform(
                 activity,
                 Constants.ADD_OBSERVATION_UUID,
                 savePatientUuidForRequestCode(patientUuid),
-                PatientModel.INSTANCE.getOdkPatient(patientUuid));
+                PatientModel.INSTANCE.getOdkPatient(patientUuid),
+                fields);
     }
 
     private int savePatientUuidForRequestCode(String patientUuid) {
