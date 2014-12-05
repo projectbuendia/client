@@ -2,6 +2,7 @@ package org.msf.records.ui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,15 +13,22 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.collect.ObjectArrays;
+
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.model.Concept;
 import org.msf.records.model.LocationTree;
 import org.msf.records.model.Status;
+import org.msf.records.sync.ChartProviderContract;
+import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.utils.PatientCountDisplay;
+
+import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -76,17 +84,16 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
                         new FilterGroup(getSelectionFilter(),
                         new LocationUuidFilter(tent)));
 
-        Cursor childCursor = null;
+        Cursor patientsCursor = null;
 
         try {
-            childCursor = queryProvider.runQuery(mQueryFilterTerm);
-            Log.d(TAG, "childCursor " + childCursor.getCount());
-            childCursor.moveToFirst();
+            patientsCursor = queryProvider.runQuery(mQueryFilterTerm);
+            Log.d(TAG, "childCursor " + patientsCursor.getCount());
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
 
-        return childCursor;
+        return patientsCursor;
     }
 
     @Override
@@ -118,7 +125,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindChildView(View convertView, Context context, Cursor cursor, boolean isLastChild) {
-
         ViewHolder holder = null;
         if (convertView != null) {
             holder = (ViewHolder) convertView.getTag();
@@ -127,6 +133,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
         String id = cursor.getString(PatientProjection.COLUMN_ID);
+        String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String status = cursor.getString(PatientProjection.COLUMN_STATUS);
         String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
         int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
@@ -134,6 +141,17 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
+
+        // Grab observations for this patient so we can determine condition and pregnant status.
+        // TODO(akalachman): Get rid of this whole block because it's a gigantic hack.
+        ArrayList<LocalizedChartHelper.LocalizedObservation> observations =
+                LocalizedChartHelper.getMostRecentObservations(mContext.getContentResolver(), uuid);
+        boolean pregnant = false;
+        for (LocalizedChartHelper.LocalizedObservation observation : observations) {
+            if (observation.conceptUuid.equals(Concept.PREGNANCY_UUID)) {
+                pregnant = observation.value.equals(Concept.YES_UUID);
+            }
+        }
 
         if (ageMonths > 0) {
             holder.mPatientAge.setText(
@@ -151,13 +169,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_man));
         }
 
-        // TODO(akalachman): Use pregnancy flag when available in server/patient provider.
         if (gender != null && gender.equals("F")) {
-            // if (patient.pregnant != null && patient.pregnant) {
-            //     holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_pregnant));
-            // } else {
+            if (pregnant) {
+                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_pregnant));
+            } else {
                 holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_woman));
-            // }
+            }
         }
 
         if (gender == null) {

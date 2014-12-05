@@ -85,6 +85,13 @@ public class LocalizedChartHelper {
             return "time=" + encounterTimeMillis + ",group=" + groupName + ",conceptUuid=" +
                     conceptUuid + ",conceptName=" + conceptName + ",value=" + localizedValue;
         }
+
+        // TODO(akalachman): Remove when no longer needed.
+        public static final String[] OBSERVATION_PROJECTION = new String[] {
+                "PatientUuid",
+                "ConceptUuid",
+                "Value"
+        };
     }
 
     /**
