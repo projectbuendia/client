@@ -36,9 +36,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -63,6 +61,7 @@ import org.odk.collect.android.logic.FormController.FailedConstraint;
 import org.odk.collect.android.logic.FormTraverser;
 import org.odk.collect.android.logic.FormVisitor;
 import org.odk.collect.android.model.Patient;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.preferences.PreferencesActivity;
 import org.odk.collect.android.provider.FormsProviderAPI.FormsColumns;
 import org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns;
@@ -322,7 +321,7 @@ public class FormEntryActivity
 		} else if (data == null) {
 			if (!newForm) {
 				if (Collect.getInstance().getFormController() != null) {
-					populateViews();
+					populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
 				} else {
 					Log.w(TAG, "Reloading form and restoring state.");
 					// we need to launch the form loader to load the form
@@ -521,26 +520,24 @@ public class FormEntryActivity
 		}
 	}
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.
-                INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        return true;
-    }
-
-    private void populateViews() {
+    private void populateViews(PrepopulatableFields fields) {
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new QuestionHolderFormVisitor())
+                .addVisitor(new QuestionHolderFormVisitor(fields))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
 
+        private final PrepopulatableFields mFields;
+
+        public QuestionHolderFormVisitor(PrepopulatableFields fields) {
+            mFields = fields;
+        }
+
         @Override
         public void visit(int event, FormController formController) {
-            View view = createView(event, false /*advancingPage*/);
+            View view = createView(event, false /*advancingPage*/, mFields);
             if (view != null) {
                 mQuestionHolder.addView(view);
             }
@@ -1057,9 +1054,10 @@ public class FormEntryActivity
 	 * @param event
 	 * @param advancingPage
 	 *            -- true if this results from advancing through the form
-	 * @return newly created View
+	 * @param fields
+     * @return newly created View
 	 */
-	private View createView(int event, boolean advancingPage) {
+	private View createView(int event, boolean advancingPage, PrepopulatableFields fields) {
 		FormController formController = Collect.getInstance()
 				.getFormController();
 //		setTitle(getString(R.string.app_name) + " > "
@@ -1282,8 +1280,12 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
-				odkv = new ODKView(this, formController.getQuestionPrompts(),
-						groups, advancingPage);
+				odkv = new ODKView(
+                        this,
+                        formController.getQuestionPrompts(),
+						groups,
+                        advancingPage,
+                        fields);
 				Log.i(TAG,
 						"created view for group "
 								+ (groups.length > 0 ? groups[groups.length - 1]
@@ -1301,7 +1303,7 @@ public class FormEntryActivity
                     Log.e(TAG, e1.getMessage(), e1);
                     createErrorDialog(e.getMessage() + "\n\n" + e1.getCause().getMessage(), DO_NOT_EXIT);
                 }
-                return createView(event, advancingPage);
+                return createView(event, advancingPage, fields);
             }
 
 			// Makes a "clear answer" menu pop up on long-click
@@ -2402,7 +2404,7 @@ public class FormEntryActivity
 
 		if (pendingActivityResult) {
 			// set the current view to whatever group we were at...
-			populateViews();
+			populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
 			// process the pending activity request...
 			onActivityResult(requestCode, resultCode, intent);
 			return;
@@ -2466,7 +2468,7 @@ public class FormEntryActivity
             setTitle(formController.getFormTitle());
         }
 
-		populateViews();
+		populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
 	}
 
 	/**

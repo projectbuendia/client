@@ -26,7 +26,7 @@
         android:padding="8dp"
         android:gravity="center"
         android:textColor="#FFFFFF"
-        android:textSize="48sp"
+        android:textSize="36sp"
         android:maxLines="1"
         tools:text="Pain"/>
 

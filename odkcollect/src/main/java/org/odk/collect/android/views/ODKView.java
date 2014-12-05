@@ -47,6 +47,7 @@ import org.odk.collect.android.exception.ExternalParamsException;
 import org.odk.collect.android.exception.JavaRosaException;
 import org.odk.collect.android.external.ExternalAppsUtils;
 import org.odk.collect.android.logic.FormController;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
@@ -83,6 +84,11 @@ public class ODKView extends LinearLayout {
 
     public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
             FormEntryCaption[] groups, boolean advancingPage) {
+        this(context, questionPrompts, groups, advancingPage, null /*fields*/);
+    }
+
+    public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
+                   FormEntryCaption[] groups, boolean advancingPage, PrepopulatableFields fields) {
         super(context);
 
         mWidgets = new ArrayList<QuestionWidget>();
@@ -115,7 +121,8 @@ public class ODKView extends LinearLayout {
                             p,
                             Appearance.fromString(p.getAppearanceHint()),
                             readOnlyOverride,
-                            VIEW_ID + id++);
+                            VIEW_ID + id++,
+                            fields);
                 }
                 mWidgetGroup = builder.build(context);
                 mView.addView((View) mWidgetGroup);
@@ -233,9 +240,22 @@ public class ODKView extends LinearLayout {
             qw.setId(VIEW_ID + id++);
 
             mWidgets.add(qw);
+
+            String questionText = p.getQuestionText().toLowerCase();
+            if (questionText.contains("date and time of encounter")
+                    && qw.forceSetAnswer(fields.mEncounterTime)) {
+                continue;
+            }
+            if (questionText.equals("location")
+                    && qw.forceSetAnswer(fields.mLocationName)) {
+                continue;
+            }
+            if (questionText.equals("clinician")
+                    && qw.forceSetAnswer(fields.mClinicianName)) {
+                continue;
+            }
+
             mView.addView(qw, mLayout);
-
-
         }
 
         addView(mView);
@@ -259,7 +279,7 @@ public class ODKView extends LinearLayout {
 	        }
         }
     }
-    
+
     /**
      * http://code.google.com/p/android/issues/detail?id=8488
      */

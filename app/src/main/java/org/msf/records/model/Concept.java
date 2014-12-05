@@ -13,4 +13,13 @@ public class Concept {
     public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String UNKNOWN_UUID = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    public static final String GENERAL_CONDITION_VERY_POOR_UUID =
+            "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+    public static final String GENERAL_CONDITION_POOR_UUID =
+            "162132AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String GENERAL_CONDITION_FAIR_UUID = "";
+    public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
+
+
 }

@@ -26,6 +26,7 @@ import org.odk.collect.android.activities.FormHierarchyActivity;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.listeners.FormLoaderListener;
 import org.odk.collect.android.logic.FormController;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.DeleteInstancesTask;
@@ -55,14 +56,16 @@ public class OdkActivityLauncher {
 
     public static void fetchAndShowXform(final Activity callingActivity, final String uuidToShow,
                                          final int requestCode) {
-        fetchAndShowXform(callingActivity, uuidToShow, requestCode, null /*patient*/);
+        fetchAndShowXform(
+                callingActivity, uuidToShow, requestCode, null /*patient*/, null /*fields*/);
     }
 
     public static void fetchAndShowXform(
             final Activity callingActivity,
             final String uuidToShow,
             final int requestCode,
-            final org.odk.collect.android.model.Patient patient) {
+            final org.odk.collect.android.model.Patient patient,
+            final PrepopulatableFields fields) {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
@@ -76,8 +79,12 @@ public class OdkActivityLauncher {
                             @Override
                             public void formWritten(File path, String uuid) {
                                 Log.i(TAG, "wrote form " + path);
-                                showOdkCollect(callingActivity, requestCode,
-                                        OdkDatabase.getFormIdForPath(path), patient);
+                                showOdkCollect(
+                                        callingActivity,
+                                        requestCode,
+                                        OdkDatabase.getFormIdForPath(path),
+                                        patient,
+                                        fields);
                             }
                         }).execute(findUuid(response, uuidToShow));
                     }
@@ -85,20 +92,24 @@ public class OdkActivityLauncher {
     }
 
     public static void showOdkCollect(Activity callingActivity, int requestCode, long formId) {
-        showOdkCollect(callingActivity, requestCode, formId, null /*patient*/);
+        showOdkCollect(callingActivity, requestCode, formId, null /*patient*/, null /*fields*/);
     }
 
     public static void showOdkCollect(
             Activity callingActivity,
             int requestCode,
             long formId,
-            final org.odk.collect.android.model.Patient patient) {
+            org.odk.collect.android.model.Patient patient,
+            PrepopulatableFields fields) {
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
         intent.setAction(Intent.ACTION_PICK);
         if (patient != null) {
             intent.putExtra("patient", patient);
+        }
+        if (fields != null) {
+            intent.putExtra("fields", fields);
         }
         callingActivity.startActivityForResult(intent, requestCode);
     }
