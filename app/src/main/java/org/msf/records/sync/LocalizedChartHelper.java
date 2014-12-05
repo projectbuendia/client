@@ -154,7 +154,7 @@ public class LocalizedChartHelper {
             cursor = contentResolver.query(ChartProviderContract.makeMostRecentChartUri(
                     patientUuid, locale), null, null, null, null);
 
-            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newHashMap();
+            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newLinkedHashMap();
             while (cursor.moveToNext()) {
                 String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
 
