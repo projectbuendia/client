@@ -43,14 +43,14 @@
         android:layout_marginTop="4dp">
 
         <TextView
-            android:layout_width="100sp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="25sp"
             android:gravity="left"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/darker_gray"
             android:id="@+id/patient_chart_age"
-            android:text="Age"/>
+            tools:text="88-year-old "/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -58,9 +58,9 @@
             android:textSize="25sp"
             android:gravity="left"
             android:fontFamily="sans-serif-condensed"
-            android:text="Sex"
             android:id="@+id/patient_chart_gender"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/darker_gray"
+            tools:text="Male"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -74,32 +74,41 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp">
 
         <TextView
-            android:layout_width="100sp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="30sp"
-            android:gravity="left"
-            android:text="Day 4"
+            android:layout_alignParentStart="true"
+            android:text="Admitted 4 Days Ago"
             android:id="@+id/patient_chart_days"
             android:fontFamily="sans-serif-condensed"/>
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="25sp"
-            android:gravity="right"
+            android:layout_alignParentEnd="true"
             android:id="@+id/patient_chart_last_observation_date_time"
             android:fontFamily="sans-serif-condensed"
             android:text="29 NOV 2014 07:18"/>
 
-    </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/patient_chart_last_observation_date_time"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="25sp"
+            android:text="Last Observation: "/>
+
+    </RelativeLayout>
 
     <TableLayout
         android:layout_width="match_parent"
@@ -147,8 +156,8 @@
                 android:layout_height="128dp"
                 android:layout_margin="4dp"
                 android:background="#01579b"
-                app:vitalName="Conscious"
-                app:vitalValue="N/A"/>
+                app:vitalName="Conscious State"
+                app:vitalValue="-"/>
 
             <org.msf.records.view.VitalView
                 android:id="@+id/vital_mobility"
@@ -157,7 +166,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Mobility"
-                app:vitalValue="N/A"/>
+                app:vitalValue="-"/>
 
             <org.msf.records.view.VitalView
                 android:id="@+id/vital_diet"
@@ -166,7 +175,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Diet"
-                app:vitalValue="N/A"/>
+                app:vitalValue="-"/>
 
             <org.msf.records.view.VitalView
                 android:id="@+id/vital_food_drink"
@@ -175,7 +184,7 @@
                 android:layout_margin="4dp"
                 android:background="#01579b"
                 app:vitalName="Hydration"
-                app:vitalValue="N/A"/>
+                app:vitalValue="-"/>
 
         </TableRow>
 

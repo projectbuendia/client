@@ -520,14 +520,6 @@ public class FormEntryActivity
 		}
 	}
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.
-                INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-        return true;
-    }
-
     private void populateViews(PrepopulatableFields fields) {
         FormTraverser traverser = new FormTraverser.Builder()
                 .addVisitor(new QuestionHolderFormVisitor(fields))

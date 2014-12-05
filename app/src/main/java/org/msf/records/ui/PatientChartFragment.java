@@ -18,6 +18,8 @@ import android.widget.TextView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.controllers.PatientChartController;
@@ -255,24 +257,35 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.given_name + " " + mPatient.family_name );
-        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( "#" + mPatient.id );
+        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( mPatient.id );
+
+        TextView patientChartAge = (TextView) rootView.findViewById(R.id.patient_chart_age);
+        if ("years".equals(mPatient.age.type)) {
+            patientChartAge.setText(mPatient.age.years + "-year-old ");
+        } else {
+            patientChartAge.setText(mPatient.age.months + "-month-old ");
+        }
 
         ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.gender.equals( "M" ) ? "Male" : "Female" );
-        ((TextView)rootView.findViewById( R.id.patient_chart_age )).setText(Integer.toString( mPatient.age.years ) );
 
         ((TextView)rootView.findViewById( R.id.patient_chart_location )).setText( zoneName + "/" + tentName );
 
-        GregorianCalendar nowDate = new GregorianCalendar();
-        GregorianCalendar admissionDate = new GregorianCalendar();
-        nowDate.setTimeInMillis( System.currentTimeMillis() );
-        nowDate.set( Calendar.HOUR, 0 );
-        nowDate.set( Calendar.MINUTE, 0 );
+        int days = Days
+                .daysBetween(new DateTime(mPatient.admission_timestamp * 1000), DateTime.now())
+                .getDays();
 
-        admissionDate.setTimeInMillis(mPatient.admission_timestamp * 1000);
-        admissionDate.set( Calendar.HOUR, 0 );
-        admissionDate.set( Calendar.MINUTE, 0 );
-
-        ((TextView)rootView.findViewById( R.id.patient_chart_days )).setText("Day " + Long.toString( TimeUnit.MILLISECONDS.toDays( nowDate.getTimeInMillis() - admissionDate.getTimeInMillis() ) ) );
+        TextView patientChartDays = (TextView) rootView.findViewById(R.id.patient_chart_days);
+        switch (days) {
+            case 0:
+                patientChartDays.setText("Admitted Today");
+                break;
+            case 1:
+                patientChartDays.setText("Admitted Yesterday");
+                break;
+            default:
+                patientChartDays.setText("Admitted " + days + " days ago");
+                break;
+        }
     }
 
     private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedObservation> conceptsToLatestObservations )
@@ -378,7 +391,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
             if ( specialText.isEmpty() )
             {
-                specialText = "N/A";
+                specialText = "-";
             }
 
             textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_special );
