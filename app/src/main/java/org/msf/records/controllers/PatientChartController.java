@@ -15,6 +15,7 @@ import org.msf.records.ui.OdkActivityLauncher;
 import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -58,27 +59,20 @@ public class PatientChartController extends BaseController {
             fields.mClinicianName = user.getFullName();
         }
 
-        ArrayList<LocalizedChartHelper.LocalizedObservation> observations =
+        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
                 LocalizedChartHelper.getMostRecentObservations(
                         activity.getContentResolver(), patientUuid);
-        for (LocalizedChartHelper.LocalizedObservation observation : observations) {
-            if (observation == null
-                    || observation.conceptUuid == null
-                    || observation.localizedValue == null) {
-                continue;
-            }
 
-            // Pregnant.
-            if (observation.conceptUuid.equals("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                    && observation.localizedValue.equals("Yes")) {
-                fields.mPregnant = PrepopulatableFields.YES;
-            }
+        if (observations.containsKey("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                && "Yes".equals(
+                        observations.get("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").localizedValue)) {
+            fields.mPregnant = PrepopulatableFields.YES;
+        }
 
-            // IV fitted.
-            if (observation.conceptUuid.equals("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07")
-                    && observation.localizedValue.equals("Yes")) {
-                fields.mIvFitted = PrepopulatableFields.YES;
-            }
+        if (observations.containsKey("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07")
+                && "Yes".equals(
+                        observations.get("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").localizedValue)) {
+            fields.mIvFitted = PrepopulatableFields.YES;
         }
 
         OdkActivityLauncher.fetchAndShowXform(
