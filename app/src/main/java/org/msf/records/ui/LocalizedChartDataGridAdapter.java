@@ -140,7 +140,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
         if (daysDiff == 0) {
             amKey = todayString;
         } else {
-            amKey = todayString + " - " + daysDiff;
+            amKey = "-" + daysDiff + " Day";
         }
         return amKey;
     }

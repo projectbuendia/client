@@ -31,6 +31,6 @@
         android:textSize="36sp"
         android:maxLines="2"
         android:id="@+id/patient_chart_vital_special"
-        tools:text="N/A"/>
+        tools:text="-"/>
 
 </RelativeLayout>
