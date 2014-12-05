@@ -9,6 +9,31 @@ import java.util.Map;
  */
 public class Concept {
 
+    /**
+     * UUID for the (question) concept for Diarrhea.
+     */
+    public static final String DIARRHEA_UUID = "142412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (question) concept for Vomiting.
+     */
+    public static final String VOMITING_UUID = "122983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept None, used for Diarrhea and vomiting.
+     */
+    public static final String NONE_UUID = "1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept Mild, used for Diarrhea and vomiting.
+     */
+    public static final String MILD_UUID = "1498AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept Moderate, used for Diarrhea and vomiting.
+     */
+    public static final String MODERATE_UUID = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept Moderate, used for Diarrhea and vomiting.
+     */
+    public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
     public String uuid;
     public ConceptType type;
     /**

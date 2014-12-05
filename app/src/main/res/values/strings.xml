@@ -87,4 +87,7 @@
     <string name="string_with_paren" formatted="false">%s (%s)</string>
     <string name="unknown_tent">Unknown Tent</string>
     <string name="unknown_zone">Unknown zone</string>
+    <string name="mild_symptom">Mild</string>
+    <string name="moderate_symptom">Moderate</string>
+    <string name="severe_symptom">Severe</string>
 </resources>

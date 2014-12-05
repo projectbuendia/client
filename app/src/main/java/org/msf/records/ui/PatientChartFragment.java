@@ -39,6 +39,7 @@ import org.msf.records.view.VitalView;
 import org.msf.records.widget.DataGridView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -47,6 +48,8 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
+
+import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
@@ -203,13 +206,13 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        Map<String, LocalizedChartHelper.LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
-        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = LocalizedChartHelper.getMostRecentObservations(getActivity().getContentResolver(), mPatientUuid);
+        ArrayList<LocalizedObservation> observations = LocalizedChartHelper.getObservations( getActivity().getContentResolver(), mPatientUuid );
+        Map<String, LocalizedObservation> conceptsToLatestObservations = LocalizedChartHelper.getMostRecentObservations(getActivity().getContentResolver(), mPatientUuid);
 
 
         // Update timestamp
         long latestEncounterTimeMillis = Long.MIN_VALUE;
-        for (LocalizedChartHelper.LocalizedObservation observation : observations.values()) {
+        for (LocalizedObservation observation : observations) {
 
             conceptsToLatestObservations.put(observation.conceptUuid, observation);
 
@@ -272,12 +275,12 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         ((TextView)rootView.findViewById( R.id.patient_chart_days )).setText("Day " + Long.toString( TimeUnit.MILLISECONDS.toDays( nowDate.getTimeInMillis() - admissionDate.getTimeInMillis() ) ) );
     }
 
-    private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations )
+    private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedObservation> conceptsToLatestObservations )
     {
         // Data structures we are using
         VitalView vital;
         TextView textView;
-        LocalizedChartHelper.LocalizedObservation observation;
+        LocalizedObservation observation;
 
         // Mobility
         observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
