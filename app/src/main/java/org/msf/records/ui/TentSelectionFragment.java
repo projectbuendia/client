@@ -24,6 +24,9 @@ public class TentSelectionFragment extends Fragment {
     @InjectView(R.id.tent_selection_triage) SubtitledButtonView mTriageButton;
     @InjectView(R.id.tent_selection_discharged) SubtitledButtonView mDischargedButton;
 
+    private LocationTree mDischargedZone = null;
+    private LocationTree mTriageZone = null;
+
     public static TentSelectionFragment newInstance() {
         TentSelectionFragment fragment = new TentSelectionFragment();
         return fragment;
@@ -55,15 +58,7 @@ public class TentSelectionFragment extends Fragment {
         mTentGrid.setOnItemClickListener(new GridView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                LocationTree selectedItem = (LocationTree)parent.getItemAtPosition(position);
-                Intent roundIntent = new Intent(getActivity(), RoundActivity.class);
-                roundIntent.putExtra(
-                        RoundActivity.TENT_NAME_KEY, selectedItem.toString());
-                roundIntent.putExtra(
-                        RoundActivity.TENT_UUID_KEY, selectedItem.getLocation().uuid);
-                roundIntent.putExtra(
-                        RoundActivity.TENT_PATIENT_COUNT_KEY, selectedItem.getPatientCount());
-                startActivity(roundIntent);
+                launchActivityForLocation((LocationTree) parent.getItemAtPosition(position));
             }
         });
 
@@ -79,11 +74,14 @@ public class TentSelectionFragment extends Fragment {
                     mTriageButton.setSubtitle(
                             PatientCountDisplay.getPatientCountSubtitle(
                                     getActivity(), zone.getPatientCount()));
+                    mTriageZone = zone;
                     break;
+                // TODO(akalachman): Revisit if discharged should be treated differently.
                 case Zone.DISCHARGED_ZONE_UUID:
                     mDischargedButton.setSubtitle(
                             PatientCountDisplay.getPatientCountSubtitle(
                                     getActivity(), zone.getPatientCount()));
+                    mDischargedZone = zone;
                     break;
             }
         }
@@ -100,17 +98,32 @@ public class TentSelectionFragment extends Fragment {
         mDischargedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO(akalachman): Implement.
+                if (mDischargedZone != null) {
+                    launchActivityForLocation(mDischargedZone);
+                }
             }
         });
 
         mTriageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO(akalachman): Implement.
+                if (mTriageZone != null) {
+                    launchActivityForLocation(mTriageZone);
+                }
             }
         });
 
         return view;
+    }
+
+    private void launchActivityForLocation(LocationTree locationTree) {
+        Intent roundIntent = new Intent(getActivity(), RoundActivity.class);
+        roundIntent.putExtra(
+                RoundActivity.LOCATION_NAME_KEY, locationTree.toString());
+        roundIntent.putExtra(
+                RoundActivity.LOCATION_UUID_KEY, locationTree.getLocation().uuid);
+        roundIntent.putExtra(
+                RoundActivity.LOCATION_PATIENT_COUNT_KEY, locationTree.getPatientCount());
+        startActivity(roundIntent);
     }
 }
