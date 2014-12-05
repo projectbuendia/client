@@ -12,12 +12,12 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.msf.records.R;
+import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.TreeSet;
 
 import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -42,7 +42,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final ArrayList<String> columnHeaders = new ArrayList<>();
 
     public LocalizedChartDataGridAdapter(Context context,
-                                         Map<String, LocalizedObservation> observations,
+                                         ArrayList<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         this.mLayoutInflater = layoutInflater;
         Row row = null;
@@ -50,7 +50,16 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
         final String todayString = context.getResources().getString(R.string.today);
         today = new LocalDate(chronology);
-        for (LocalizedObservation ob : observations.values()) {
+
+        // Certain observations (specifically Diarrhea detail and vomiting detail) need to be
+        // expanded into multiple rows at the end of the chart. Store them, then add them to the
+        // rows at the end. This is known to be ugly and hacky.
+        Row mildRow = null;
+        Row moderateRow = null;
+        Row severeRow = null;
+        ArrayList<Row> extraRows = new ArrayList<>();
+
+        for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
             if (LocalizedChartHelper.UNKNOWN_VALUE.equals(ob.value)) {
@@ -60,6 +69,21 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
             if (row == null || !ob.conceptName.equals(row.name)) {
                 row = new Row(ob.conceptName);
                 rows.add(row);
+                if (Concept.DIARRHEA_UUID.equals(ob.conceptUuid)
+                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)) {
+                    // TODO(nfortescue): this should really look up the localized values from the concept database
+                    // otherwise the strings could be inconsistent with the form
+                    severeRow = new Row(ob.conceptName + " (" + context.getResources().getString(R.string.severe_symptom) + ")");
+                    moderateRow = new Row(ob.conceptName + " (" + context.getResources().getString(R.string.moderate_symptom) + ")");
+                    mildRow = new Row(ob.conceptName + " (" + context.getResources().getString(R.string.mild_symptom) + ")");
+                    extraRows.add(severeRow);
+                    extraRows.add(moderateRow);
+                    extraRows.add(mildRow);
+                } else {
+                    mildRow = null;
+                    moderateRow = null;
+                    severeRow = null;
+                }
             }
             DateTime d = new DateTime(ob.encounterTimeMillis, chronology);
             LocalDate localDate = d.toLocalDate();
@@ -70,6 +94,16 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
                 row.dates.add(dateKey);
+                // Do an ugly expansion into the extra rows.
+                if (Concept.MILD_UUID.equals(ob.value) && mildRow != null) {
+                    mildRow.dates.add(dateKey);
+                }
+                if (Concept.MODERATE_UUID.equals(ob.value) && moderateRow != null) {
+                    moderateRow.dates.add(dateKey);
+                }
+                if (Concept.SEVERE_UUID.equals(ob.value) && severeRow != null) {
+                    severeRow.dates.add(dateKey);
+                }
             }
         }
         if (days.isEmpty()) {
@@ -87,6 +121,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
             }
         }
 
+        rows.addAll(extraRows);
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {

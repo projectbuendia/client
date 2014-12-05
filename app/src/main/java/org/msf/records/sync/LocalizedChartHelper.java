@@ -5,6 +5,8 @@ import android.database.Cursor;
 
 import com.google.common.collect.Maps;
 
+import org.msf.records.net.model.Concept;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,6 +39,7 @@ public class LocalizedChartHelper {
         NO_SYMPTOM_VALUES.add("1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // NORMAL
         NO_SYMPTOM_VALUES.add("db2ac5ad-cc64-4184-b4be-1324730e1882"); // Can talk
         NO_SYMPTOM_VALUES.add("c2a547f7-6329-4273-80c2-eae804897efd"); // Can walk
+        NO_SYMPTOM_VALUES.add(Concept.NONE_UUID); // None
     }
 
     /**
@@ -93,7 +96,7 @@ public class LocalizedChartHelper {
     /**
      * Get all observations for a given patient from the local cache, localized to English.
      */
-    public static Map<String, LocalizedObservation> getObservations(ContentResolver contentResolver,
+    public static ArrayList<LocalizedObservation> getObservations(ContentResolver contentResolver,
                                                                   String patientUuid) {
         return getObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
     }
@@ -102,26 +105,24 @@ public class LocalizedChartHelper {
      * Get all observations for a given patient.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static Map<String, LocalizedObservation> getObservations(ContentResolver contentResolver,
+    public static ArrayList<LocalizedObservation> getObservations(ContentResolver contentResolver,
                                                            String patientUuid, String locale) {
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(ChartProviderContract.makeLocalizedChartUri(
                     KNOWN_CHART_UUID, patientUuid, locale), null, null, null, null);
 
-            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newHashMap();
+            ArrayList<LocalizedObservation> result = new ArrayList<>();
             while (cursor.moveToNext()) {
-                String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
-
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
-                        concept_uuid,
+                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
-                result.put(concept_uuid, obs);
+                result.add(obs);
             }
             return result;
         } finally {
