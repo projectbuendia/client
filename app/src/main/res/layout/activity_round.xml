@@ -1,6 +1,6 @@
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tent_patient_list"
+    android:id="@+id/round_patient_list"
     android:name="org.msf.records.ui.PatientListFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"

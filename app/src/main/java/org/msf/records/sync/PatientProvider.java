@@ -152,11 +152,18 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 }
 
                 MatrixCursor result = new MatrixCursor(new String[] {
+                       LocationProviderContract.LocationColumns._ID,
                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
                        PatientProviderContract.PatientColumns.COLUMN_NAME_TENT_PATIENT_COUNT});
+                int i = 0;
                 for (Map.Entry<String, MutableInt> countEntry : counts.entrySet()) {
+                    // Reject bad locations.
+                    if (countEntry.getKey() == null) {
+                        continue;
+                    }
                     result.addRow(
-                            new Object[] { countEntry.getKey(), countEntry.getValue().value });
+                            new Object[] { i, countEntry.getKey(), countEntry.getValue().value });
+                    i++;
                 }
                 return result;
             default:
