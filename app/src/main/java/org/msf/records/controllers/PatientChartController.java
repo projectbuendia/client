@@ -4,10 +4,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
 
+import org.joda.time.DateTime;
+import org.msf.records.App;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
+import org.msf.records.net.model.User;
+import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.ui.ControllableActivity;
 import org.msf.records.ui.OdkActivityLauncher;
+import org.odk.collect.android.model.PrepopulatableFields;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -41,11 +49,38 @@ public class PatientChartController extends BaseController {
     }
 
     public void startChartUpdate(Activity activity, String patientUuid) {
+        PrepopulatableFields fields = new PrepopulatableFields();
+
+        fields.mEncounterTime = DateTime.now();
+        fields.mLocationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.mClinicianName = user.getFullName();
+        }
+
+        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
+                LocalizedChartHelper.getMostRecentObservations(
+                        activity.getContentResolver(), patientUuid);
+
+        if (observations.containsKey("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                && "Yes".equals(
+                        observations.get("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").localizedValue)) {
+            fields.mPregnant = PrepopulatableFields.YES;
+        }
+
+        if (observations.containsKey("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07")
+                && "Yes".equals(
+                        observations.get("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").localizedValue)) {
+            fields.mIvFitted = PrepopulatableFields.YES;
+        }
+
         OdkActivityLauncher.fetchAndShowXform(
                 activity,
                 Constants.ADD_OBSERVATION_UUID,
                 savePatientUuidForRequestCode(patientUuid),
-                PatientModel.INSTANCE.getOdkPatient(patientUuid));
+                PatientModel.INSTANCE.getOdkPatient(patientUuid),
+                fields);
     }
 
     private int savePatientUuidForRequestCode(String patientUuid) {

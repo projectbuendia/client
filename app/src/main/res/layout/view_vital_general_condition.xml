@@ -20,7 +20,7 @@
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:textSize="16sp"
-        android:text="Gen. Condition" />
+        android:text="Condition" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:id="@+id/patient_chart_vital_general_condition"
-            tools:text="N/A"/>
+            tools:text="-"/>
 
     </RelativeLayout>
 

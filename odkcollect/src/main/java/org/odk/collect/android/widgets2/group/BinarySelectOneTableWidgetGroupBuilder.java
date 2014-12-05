@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import org.javarosa.core.model.Constants;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
 
@@ -36,7 +37,8 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
             FormEntryPrompt prompt,
             Appearance appearance,
             boolean forceReadOnly,
-            int id) {
+            int id,
+            PrepopulatableFields fields) {
         if (prompt.getControlType() != Constants.CONTROL_SELECT_ONE) {
             Log.w(
                     TAG,

@@ -2,7 +2,7 @@ package org.msf.records.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +13,6 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.common.collect.ObjectArrays;
-
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -23,12 +21,13 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.Concept;
 import org.msf.records.model.LocationTree;
 import org.msf.records.model.Status;
-import org.msf.records.sync.ChartProviderContract;
+
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.utils.PatientCountDisplay;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -130,6 +129,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        String patient_uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
         String id = cursor.getString(PatientProjection.COLUMN_ID);
@@ -143,14 +143,32 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         holder.mPatientId.setText(id);
 
         // Grab observations for this patient so we can determine condition and pregnant status.
-        // TODO(akalachman): Get rid of this whole block because it's a gigantic hack.
-        ArrayList<LocalizedChartHelper.LocalizedObservation> observations =
-                LocalizedChartHelper.getMostRecentObservations(mContext.getContentResolver(), uuid);
+        // TODO(akalachman): Get rid of this whole block as it's inefficient.
         boolean pregnant = false;
-        for (LocalizedChartHelper.LocalizedObservation observation : observations) {
-            if (observation.conceptUuid.equals(Concept.PREGNANCY_UUID)) {
-                pregnant = observation.value.equals(Concept.YES_UUID);
+        String condition = null;
+        Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
+                LocalizedChartHelper.getMostRecentObservations(mContext.getContentResolver(), uuid);
+        if (observationMap != null) {
+            pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID) &&
+                    observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);
+            if (observationMap.containsKey(Concept.GENERAL_CONDITION_UUID)) {
+                condition = observationMap.get(Concept.GENERAL_CONDITION_UUID).value;
             }
+        }
+
+        // TODO(akalachman): Extract colors into helper class + resources.
+        if (condition == null) {
+            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
+        } else if (condition.equals(Concept.GENERAL_CONDITION_GOOD_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#4CAF50"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_FAIR_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#FFC927"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_POOR_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#FF2121"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_VERY_POOR_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#D0021B"));
+        } else {
+            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
         }
 
         if (ageMonths > 0) {
@@ -181,16 +199,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder.mPatientGender.setVisibility(View.GONE);
         }
 
-        if (status == null) {
-            holder.mPatientId.setBackgroundColor(context.getResources().getColor(R.color.transparent));
-            holder.mPatientId.setTextColor(context.getResources().getColor(android.R.color.black));
-        }
-
-        if (status != null && Status.getStatus(status) != null) {
-            holder.mPatientId.setBackgroundColor(context.getResources().getColor(Status.getStatus(status).colorId));
-            holder.mPatientId.setTextColor(context.getResources().getColor(R.color.white));
-        }
-
         // Add a bottom border and extra padding to the last item in each group.
         if (isLastChild) {
             convertView.setBackgroundResource(R.drawable.bottom_border_1dp);
@@ -203,9 +211,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
                     convertView.getPaddingLeft(), convertView.getPaddingTop(),
                     convertView.getPaddingRight(), 20);
         }
-
-        // (Shanee) Change patient list color here
-        //holder.mPatientId.setBackgroundColor(Color.BLUE ); // This is how!
     }
 
     static class ViewHolder {

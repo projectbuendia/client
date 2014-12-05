@@ -132,6 +132,10 @@ public abstract class QuestionWidget extends LinearLayout {
     	}
     }
 
+    public boolean forceSetAnswer(Object answer) {
+        return false;
+    }
+
     // Abstract methods
     public abstract IAnswerData getAnswer();
 
