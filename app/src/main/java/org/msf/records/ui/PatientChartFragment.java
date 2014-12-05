@@ -26,6 +26,7 @@ import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.UuidFilter;
+import org.msf.records.model.Concept;
 import org.msf.records.model.LocationTree;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.net.OpenMrsChartServer;
@@ -295,7 +296,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         LocalizedChartHelper.LocalizedObservation observation;
 
         // Mobility
-        observation = conceptsToLatestObservations.get( "30143d74-f654-4427-bb92-685f68f92c15" );
+        observation = conceptsToLatestObservations.get( Concept.MOBILITY_UUID );
         if ( observation != null )
         {
             vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
@@ -303,7 +304,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         // Conscious state
-        observation = conceptsToLatestObservations.get( "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
+        observation = conceptsToLatestObservations.get( Concept.CONSCIOUS_STATE_UUID );
         if ( observation != null )
         {
             vital = (VitalView)rootView.findViewById( R.id.vital_responsiveness );
@@ -311,7 +312,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         // Fluids
-        observation = conceptsToLatestObservations.get( "e96f504e-229a-4933-84d1-358abbd687e3" );
+        observation = conceptsToLatestObservations.get( Concept.FLUIDS_UUID );
         if ( observation != null )
         {
             vital = (VitalView)rootView.findViewById( R.id.vital_diet );
@@ -319,7 +320,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         // Hydration
-        observation = conceptsToLatestObservations.get( "162653AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
+        observation = conceptsToLatestObservations.get( Concept.HYDRATION_UUID );
         if ( observation != null )
         {
             vital = (VitalView)rootView.findViewById( R.id.vital_food_drink );
@@ -327,7 +328,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         // Temperature
-        observation = conceptsToLatestObservations.get( "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" );
+        observation = conceptsToLatestObservations.get( Concept.TEMPERATURE_UUID );
         if ( observation != null )
         {
             RelativeLayout temperatureBackground = ((RelativeLayout)rootView.findViewById( R.id.patient_chart_vital_temperature_parent ));
@@ -348,7 +349,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
 
         // General Condition
-        observation = conceptsToLatestObservations.get( "a3657203-cfed-44b8-8e3f-960f8d4cf3b3" );
+        observation = conceptsToLatestObservations.get( Concept.GENERAL_CONDITION_UUID );
         if ( observation != null )
         {
             textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_general_condition );
@@ -376,13 +377,13 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         {
             String specialText = new String();
 
-            observation = conceptsToLatestObservations.get( "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" ); // Pregnancy
+            observation = conceptsToLatestObservations.get( Concept.PREGNANCY_UUID );
             if ( observation != null && observation.localizedValue.equals( "Yes" ) )
             {
                 specialText = "Pregnant";
             }
 
-            observation = conceptsToLatestObservations.get( "f50c9c63-3ff9-4c26-9d18-12bfc58a3d07" ); // IV
+            observation = conceptsToLatestObservations.get( Concept.IV_UUID );
             if ( observation != null && observation.localizedValue.equals( "Yes" ) )
             {
                 specialText += "\nIV";
@@ -452,7 +453,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         mPatient.admission_timestamp = data.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
 
-        updateLatestEncounter( mPatient.admission_timestamp * 1000  );
+        updateLatestEncounter(mPatient.admission_timestamp * 1000);
 
         updatePatientInfoUI(getView());
 

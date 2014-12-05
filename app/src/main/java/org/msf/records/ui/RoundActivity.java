@@ -51,7 +51,6 @@ public class RoundActivity extends PatientSearchActivity {
         mFragment = (PatientListFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.round_patient_list);
         mFragment.filterBy(mFilter);
-        // TODO(akalachman): Fix weird issue with duplicate groups.
         // TODO(akalachman): Remove section headers somehow.
     }
 
