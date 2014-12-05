@@ -3,8 +3,11 @@ package org.msf.records.sync;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import com.google.common.collect.Maps;
+
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -90,7 +93,7 @@ public class LocalizedChartHelper {
     /**
      * Get all observations for a given patient from the local cache, localized to English.
      */
-    public static ArrayList<LocalizedObservation> getObservations(ContentResolver contentResolver,
+    public static Map<String, LocalizedObservation> getObservations(ContentResolver contentResolver,
                                                                   String patientUuid) {
         return getObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
     }
@@ -99,24 +102,26 @@ public class LocalizedChartHelper {
      * Get all observations for a given patient.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static ArrayList<LocalizedObservation> getObservations(ContentResolver contentResolver,
+    public static Map<String, LocalizedObservation> getObservations(ContentResolver contentResolver,
                                                            String patientUuid, String locale) {
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(ChartProviderContract.makeLocalizedChartUri(
                     KNOWN_CHART_UUID, patientUuid, locale), null, null, null, null);
 
-            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newHashMap();
             while (cursor.moveToNext()) {
+                String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
+
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
-                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
+                        concept_uuid,
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
-                result.add(obs);
+                result.put(concept_uuid, obs);
             }
             return result;
         } finally {
@@ -131,7 +136,7 @@ public class LocalizedChartHelper {
      * localized to English. Ordering will be by concept uuid, and there are not groups or other
      * chart based configurations.
      */
-    public static ArrayList<LocalizedObservation> getMostRecentObservations(
+    public static Map<String, LocalizedObservation> getMostRecentObservations(
             ContentResolver contentResolver, String patientUuid) {
         return getMostRecentObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
     }
@@ -141,24 +146,26 @@ public class LocalizedChartHelper {
      * Ordering will be by concept uuid, and there are not groups or other chart based configurations.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static ArrayList<LocalizedObservation> getMostRecentObservations(
+    public static Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
             ContentResolver contentResolver, String patientUuid, String locale) {
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(ChartProviderContract.makeMostRecentChartUri(
                     patientUuid, locale), null, null, null, null);
 
-            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newHashMap();
             while (cursor.moveToNext()) {
+                String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
+
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         "", /* no group */
-                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
+                        concept_uuid,
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
-                result.add(obs);
+                result.put(concept_uuid, obs);
             }
             return result;
         } finally {

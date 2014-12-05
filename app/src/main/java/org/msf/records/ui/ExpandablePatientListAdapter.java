@@ -2,6 +2,7 @@ package org.msf.records.ui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +20,11 @@ import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.LocationTree;
 import org.msf.records.model.Status;
+import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.utils.PatientCountDisplay;
+
+import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -124,6 +128,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        String patient_uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
         String id = cursor.getString(PatientProjection.COLUMN_ID);
@@ -188,7 +193,22 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         }
 
         // (Shanee) Change patient list color here
-        //holder.mPatientId.setBackgroundColor(Color.BLUE ); // This is how!
+        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations = LocalizedChartHelper.getMostRecentObservations(convertView.getContext().getContentResolver(), patient_uuid);
+        LocalizedChartHelper.LocalizedObservation observation = conceptsToLatestObservations.get( "a3657203-cfed-44b8-8e3f-960f8d4cf3b3" ); // Get the general condition
+        if ( observation != null ) {
+            if (observation.localizedValue.equals("Good")) {
+                holder.mPatientId.setBackgroundColor(Color.parseColor("#4CAF50"));
+            } else if (observation.localizedValue.equals("Average")) {
+                holder.mPatientId.setBackgroundColor(Color.parseColor("#FFC927"));
+            } else if (observation.localizedValue.equals("Poor")) {
+                holder.mPatientId.setBackgroundColor(Color.parseColor("#FF2121"));
+            } else if (observation.localizedValue.equals("Very Poor")) {
+                holder.mPatientId.setBackgroundColor(Color.parseColor("#D0021B"));
+            }
+        }
+        else {
+            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
+        }
     }
 
     static class ViewHolder {
