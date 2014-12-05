@@ -48,9 +48,6 @@ public class RoundActivity extends PatientSearchActivity {
         mFilter = new FilterGroup(
                 FilterManager.getDefaultFilter(), new LocationUuidFilter(mLocationUuid));
 
-        mFragment = (PatientListFragment)getSupportFragmentManager()
-                .findFragmentById(R.id.round_patient_list);
-        mFragment.filterBy(mFilter);
         // TODO(akalachman): Remove section headers somehow.
     }
 
@@ -59,6 +56,11 @@ public class RoundActivity extends PatientSearchActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
+
+        // TODO(akalachman): Move this back to onCreate when I figure out why it needs to be here.
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.round_patient_list);
+        mFragment.filterBy(mFilter);
 
         menu.findItem(R.id.action_add).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
