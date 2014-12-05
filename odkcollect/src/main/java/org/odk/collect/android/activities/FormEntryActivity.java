@@ -34,8 +34,11 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -517,6 +520,14 @@ public class FormEntryActivity
 			}
 		}
 	}
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.
+                INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        return true;
+    }
 
     private void populateViews() {
         FormTraverser traverser = new FormTraverser.Builder()
@@ -2751,6 +2762,12 @@ public class FormEntryActivity
 //	public void advance() {
 //		next();
 //	}
+
+    public static void hideKeyboard(Context context, View view) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
 	@Override
 	protected void onStart() {
