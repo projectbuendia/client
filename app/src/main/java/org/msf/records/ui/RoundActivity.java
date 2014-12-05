@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
@@ -14,40 +13,43 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
 import org.msf.records.utils.PatientCountDisplay;
 
+// TODO(akalachman): Split RoundActivity from Triage and Discharged, which may behave differently.
 public class RoundActivity extends PatientSearchActivity {
-    private String mTentName;
-    private String mTentUuid;
+    private String mLocationName;
+    private String mLocationUuid;
 
-    private int mTentPatientCount;
+    private int mLocationPatientCount;
 
     private PatientListFragment mFragment;
     private SimpleSelectionFilter mFilter;
 
-    public static final String TENT_NAME_KEY = "tent_name";
-    public static final String TENT_PATIENT_COUNT_KEY = "tent_patient_count";
-    public static final String TENT_UUID_KEY = "tent_uuid";
+    public static final String LOCATION_NAME_KEY = "location_name";
+    public static final String LOCATION_PATIENT_COUNT_KEY = "location_patient_count";
+    public static final String LOCATION_UUID_KEY = "location_uuid";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState == null) {
-            mTentName = getIntent().getStringExtra(TENT_NAME_KEY);
-            mTentPatientCount = getIntent().getIntExtra(TENT_PATIENT_COUNT_KEY, 0);
-            mTentUuid = getIntent().getStringExtra(TENT_UUID_KEY);
+            mLocationName = getIntent().getStringExtra(LOCATION_NAME_KEY);
+            mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
+            mLocationUuid = getIntent().getStringExtra(LOCATION_UUID_KEY);
         } else {
-            mTentName = savedInstanceState.getString(TENT_NAME_KEY);
-            mTentPatientCount = getIntent().getIntExtra(TENT_PATIENT_COUNT_KEY, 0);
-            mTentUuid = savedInstanceState.getString(TENT_UUID_KEY);
+            mLocationName = savedInstanceState.getString(LOCATION_NAME_KEY);
+            mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
+            mLocationUuid = savedInstanceState.getString(LOCATION_UUID_KEY);
         }
 
-        setTitle(PatientCountDisplay.getPatientCountTitle(this, mTentPatientCount, mTentName));
+        setTitle(PatientCountDisplay.getPatientCountTitle(
+                this, mLocationPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
 
-        mFilter = new FilterGroup(FilterManager.getDefaultFilter(), new LocationUuidFilter(mTentUuid));
+        mFilter = new FilterGroup(
+                FilterManager.getDefaultFilter(), new LocationUuidFilter(mLocationUuid));
 
         mFragment = (PatientListFragment)getSupportFragmentManager()
-                .findFragmentById(R.id.tent_patient_list);
+                .findFragmentById(R.id.round_patient_list);
         mFragment.filterBy(mFilter);
         // TODO(akalachman): Fix weird issue with duplicate groups.
         // TODO(akalachman): Remove section headers somehow.
