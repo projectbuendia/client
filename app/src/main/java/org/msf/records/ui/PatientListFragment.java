@@ -168,17 +168,13 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
-        final Cursor oldCursor = mPatientAdapter.getCursor();
+        changeState(State.LOADING);
         mPatientAdapter.filter(mFilterQueryTerm, new Filter.FilterListener() {
             @Override
             public void onFilterComplete(int count) {
+                mPatientAdapter.notifyDataSetChanged();
                 changeState(State.LOADED);
-                stopRefreshing();
-
                 // TODO(akalachman): Investigate "Cursor finalized without prior close()"
-                if (oldCursor != null && !oldCursor.isClosed()) {
-                    oldCursor.close();
-                }
             }
         });
     }
@@ -197,8 +193,7 @@ public class PatientListFragment extends ProgressFragment implements
         allLocationsButton.setOnClickListener(onClickListener);
 
         mFilter = FilterManager.getDefaultFilter();
-        mPatientAdapter = new ExpandablePatientListAdapter(
-                null, getActivity(), mFilterQueryTerm, mFilter);
+        mPatientAdapter = getAdapterInstance();
         mListView.setAdapter(mPatientAdapter);
         filterBy(mFilter);
 
@@ -212,12 +207,31 @@ public class PatientListFragment extends ProgressFragment implements
             @Override
             public void setQuerySubmitted(String q) {
                 App.getServer().cancelPendingRequests(TAG);
-                isRefreshing = false;
+                // isRefreshing = false;
                 mFilterQueryTerm = q;
                 changeState(State.LOADING);
                 loadSearchResults();
             }
         });
+    }
+
+    public void resetAdapter() {
+        mPatientAdapter = getAdapterInstance();
+        mListView.setAdapter(mPatientAdapter);
+    }
+
+    public ExpandablePatientListAdapter getAdapterInstance() {
+        return new ExpandablePatientListAdapter(
+                null, getActivity(), mFilterQueryTerm, mFilter);
+    }
+
+    // TODO(akalachman): REMOVE
+    public void sendQuery(String q) {
+        App.getServer().cancelPendingRequests(TAG);
+        isRefreshing = false;
+        mFilterQueryTerm = q;
+        changeState(State.LOADING);
+        loadSearchResults();
     }
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -323,7 +337,7 @@ public class PatientListFragment extends ProgressFragment implements
         if (id == LOADER_LIST_ID) {
             mPatientAdapter.setGroupCursor(cursor);
             changeState(State.LOADED);
-            stopRefreshing();
+            // stopRefreshing();
         }
     }
 
