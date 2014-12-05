@@ -77,7 +77,7 @@ public class PatientListFragment extends ProgressFragment implements
     // TODO(akalachman): Figure out how to break reliance on this cursor--we already have the info.
     private FilterQueryProviderFactory mFactory =
             new FilterQueryProviderFactory().setUri(
-                    PatientProviderContract.CONTENT_URI_PATIENT_TENTS);
+                    PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
 
 
     private boolean isRefreshing;

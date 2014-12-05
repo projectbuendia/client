@@ -68,7 +68,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     protected Cursor getChildrenCursor(Cursor groupCursor) {
         Cursor itemCursor = getGroup(groupCursor.getPosition());
 
-        String tent = itemCursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
+        String tent = itemCursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
 
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory().getFilterQueryProvider(
@@ -97,7 +97,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
         int patientCount = getChildrenCursor(cursor).getCount();
-        String locationUuid = cursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
+        String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
         LocationTree location = LocationTree.getTentForUuid(locationUuid);
         if (location != null) {
