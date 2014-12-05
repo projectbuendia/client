@@ -17,6 +17,7 @@ import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.TreeSet;
 
 import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -41,7 +42,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final ArrayList<String> columnHeaders = new ArrayList<>();
 
     public LocalizedChartDataGridAdapter(Context context,
-                                         ArrayList<LocalizedObservation> observations,
+                                         Map<String, LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         this.mLayoutInflater = layoutInflater;
         Row row = null;
@@ -49,7 +50,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
         final String todayString = context.getResources().getString(R.string.today);
         today = new LocalDate(chronology);
-        for (LocalizedObservation ob : observations) {
+        for (LocalizedObservation ob : observations.values()) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
             if (LocalizedChartHelper.UNKNOWN_VALUE.equals(ob.value)) {
