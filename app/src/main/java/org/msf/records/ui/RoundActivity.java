@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
@@ -46,9 +47,8 @@ public class RoundActivity extends PatientSearchActivity {
         mFilter = new FilterGroup(FilterManager.getDefaultFilter(), new LocationUuidFilter(mTentUuid));
 
         mFragment = (PatientListFragment)getSupportFragmentManager()
-                .findFragmentById(R.id.patient_list);
+                .findFragmentById(R.id.tent_patient_list);
         mFragment.filterBy(mFilter);
-
         // TODO(akalachman): Fix weird issue with duplicate groups.
         // TODO(akalachman): Remove section headers somehow.
     }

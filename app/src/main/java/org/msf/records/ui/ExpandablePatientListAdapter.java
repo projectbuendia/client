@@ -69,7 +69,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         Cursor itemCursor = getGroup(groupCursor.getPosition());
 
         String tent = itemCursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
-        Log.d(TAG, "Getting child cursor for tent: " + tent);
 
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory().getFilterQueryProvider(
