@@ -18,10 +18,13 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.Location;
+import org.msf.records.model.LocationTree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientProjection;
@@ -77,7 +80,9 @@ public class PatientListFragment extends ProgressFragment implements
     // TODO(akalachman): Figure out how to break reliance on this cursor--we already have the info.
     private FilterQueryProviderFactory mFactory =
             new FilterQueryProviderFactory().setUri(
-                    PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+                    PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS)
+            .setSortClause(LocationTree.getLocationSortClause(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
 
 
     private boolean isRefreshing;
@@ -87,7 +92,10 @@ public class PatientListFragment extends ProgressFragment implements
     SimpleSelectionFilter mFilter;
 
     public void filterBy(SimpleSelectionFilter filter) {
-        mFilter = filter;
+        // Tack on a location filter to the filter to show only known locations.
+        mFilter = new FilterGroup(
+                new LocationUuidFilter(
+                        LocationTree.getRootLocation(getActivity()).getLocation().uuid), filter);
         mPatientAdapter.setSelectionFilter(mFilter);
         mPatientAdapter.setFilterQueryProvider(
                 mFactory.getFilterQueryProvider(getActivity(), filter));

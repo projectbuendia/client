@@ -3,6 +3,7 @@ package org.msf.records.model;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -262,5 +263,29 @@ public class LocationTree implements Comparable<LocationTree> {
     public synchronized void onEvent(CreatePatientSucceededEvent event) {
         // TODO(akalachman): Re-enable once this is async.
         // rebuild();
+    }
+
+    // TODO(akalachman): Cache this or get rid of it once data model is refactored.
+    public static String getLocationSortClause(final String fieldName) {
+        if (mAllChildren.size() == 0) {
+            return "";
+        }
+
+        Collection<LocationTree> allLocations = mAllChildren.values();
+        TreeSet<LocationTree> sortedLocations = new TreeSet<LocationTree>();
+        sortedLocations.addAll(allLocations);
+
+        StringBuilder sb = new StringBuilder(" CASE ");
+        sb.append(fieldName);
+        int i = 0;
+        for (LocationTree tree : sortedLocations) {
+            sb.append(" WHEN '");
+            sb.append(tree.getLocation().uuid);
+            sb.append("' THEN ");
+            sb.append(i);
+            i++;
+        }
+        sb.append(" END ");
+        return sb.toString();
     }
 }

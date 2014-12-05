@@ -24,6 +24,7 @@ import org.msf.records.model.Status;
 
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
 
 import java.util.ArrayList;
@@ -77,11 +78,21 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
         String tent = itemCursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
 
+        StringBuilder sortBuilder = new StringBuilder();
+
+        sortBuilder.append(PatientProviderContract.PatientColumns._ID);
+        sortBuilder.append(",");
+        sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME);
+        sortBuilder.append(",");
+        sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
+
         FilterQueryProvider queryProvider =
-                new FilterQueryProviderFactory().getFilterQueryProvider(
-                        mContext,
-                        new FilterGroup(getSelectionFilter(),
-                        new LocationUuidFilter(tent)));
+                new FilterQueryProviderFactory()
+                        .setSortClause(sortBuilder.toString())
+                        .getFilterQueryProvider(
+                            mContext,
+                            new FilterGroup(getSelectionFilter(),
+                            new LocationUuidFilter(tent)));
 
         Cursor patientsCursor = null;
 
@@ -158,7 +169,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
         // TODO(akalachman): Extract colors into helper class + resources.
         if (condition == null) {
-            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#D8D8D8"));
         } else if (condition.equals(Concept.GENERAL_CONDITION_GOOD_UUID)) {
             holder.mPatientId.setBackgroundColor(Color.parseColor("#4CAF50"));
         } else if (condition.equals(Concept.GENERAL_CONDITION_FAIR_UUID)) {
