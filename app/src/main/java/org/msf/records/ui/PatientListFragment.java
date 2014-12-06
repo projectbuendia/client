@@ -93,9 +93,16 @@ public class PatientListFragment extends ProgressFragment implements
 
     public void filterBy(SimpleSelectionFilter filter) {
         // Tack on a location filter to the filter to show only known locations.
-        mFilter = new FilterGroup(
-                new LocationUuidFilter(
-                        LocationTree.getRootLocation(getActivity()).getLocation().uuid), filter);
+        LocationTree tree = LocationTree.getRootLocation(getActivity());
+        if (tree == null || tree.getLocation() == null) {
+            mFilter = filter;
+        } else {
+            // Tack on a location filter to the filter to show only known locations.
+            mFilter = new FilterGroup(
+                    new LocationUuidFilter(
+                            LocationTree.getRootLocation(getActivity()).getLocation().uuid), filter);
+        }
+
         mPatientAdapter.setSelectionFilter(mFilter);
         mPatientAdapter.setFilterQueryProvider(
                 mFactory.getFilterQueryProvider(getActivity(), filter));
