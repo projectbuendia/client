@@ -103,7 +103,8 @@
         <activity
             android:name="org.msf.records.ui.RoundActivity"
             android:label="@string/title_activity_round"
-            android:parentActivityName="org.msf.records.ui.TentSelectionActivity" >
+            android:parentActivityName="org.msf.records.ui.TentSelectionActivity"
+            android:screenOrientation="portrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.msf.records.ui.TentSelectionActivity" />

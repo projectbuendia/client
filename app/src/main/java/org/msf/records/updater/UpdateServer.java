@@ -14,7 +14,7 @@ import org.msf.records.net.VolleySingleton;
  */
 public class UpdateServer {
 
-    public static final String ROOT_URL = "http://buendia.whitespell.com:8081/";
+    public static final String ROOT_URL = "http://buendia.whitespell.com:8080/";
 
     private final VolleySingleton mVolley;
     private final String mRootUrl;
