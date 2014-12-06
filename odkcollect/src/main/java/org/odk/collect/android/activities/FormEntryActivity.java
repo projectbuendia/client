@@ -26,6 +26,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
@@ -34,7 +36,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -82,6 +83,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Objects;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -195,6 +197,7 @@ public class FormEntryActivity
 	private SaveToDiskTask mSaveToDiskTask;
 
     private String stepMessage = "";
+    private ODKView mTargetView;
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
@@ -532,6 +535,16 @@ public class FormEntryActivity
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 60));
 
         mQuestionHolder.addView(bottomPaddingView);
+
+        if (mTargetView != null) {
+            (new Handler(Looper.getMainLooper())).post(new Runnable() {
+
+                @Override
+                public void run() {
+                    mScrollView.scrollTo(0, mTargetView.getTop());
+                }
+            });
+        }
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
@@ -1293,6 +1306,10 @@ public class FormEntryActivity
 						groups,
                         advancingPage,
                         fields);
+                if (fields.mTargetGroup != null
+                        && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
+                    mTargetView = odkv;
+                }
 				Log.i(TAG,
 						"created view for group "
 								+ (groups.length > 0 ? groups[groups.length - 1]

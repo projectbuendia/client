@@ -21,6 +21,7 @@ public class PrepopulatableFields implements Parcelable {
     public String mClinicianName;
     public int mPregnant = UNSPECIFIED;
     public int mIvFitted = UNSPECIFIED;
+    public String mTargetGroup;
 
     public PrepopulatableFields() {}
 
@@ -30,6 +31,7 @@ public class PrepopulatableFields implements Parcelable {
         mClinicianName = Parcels.readNullableString(in);
         mPregnant = in.readInt();
         mIvFitted = in.readInt();
+        mTargetGroup = Parcels.readNullableString(in);
     }
 
     @Override
@@ -44,6 +46,7 @@ public class PrepopulatableFields implements Parcelable {
         Parcels.writeNullableString(dest, mClinicianName);
         dest.writeInt(mPregnant);
         dest.writeInt(mIvFitted);
+        Parcels.writeNullableString(dest, mTargetGroup);
     }
 
     @SuppressWarnings("unused")
