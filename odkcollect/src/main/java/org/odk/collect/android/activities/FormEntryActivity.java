@@ -36,6 +36,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -525,6 +526,12 @@ public class FormEntryActivity
                 .addVisitor(new QuestionHolderFormVisitor(fields))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
+
+        View bottomPaddingView = new View(this);
+        bottomPaddingView.setLayoutParams(
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 60));
+
+        mQuestionHolder.addView(bottomPaddingView);
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {

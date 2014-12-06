@@ -167,9 +167,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 (TextView) view.findViewById(R.id.data_grid_header_text);
         textView.setText(rows.get(row).name);
 
-        if (row % 2 == 0) {
-            textView.setBackgroundColor(0xFFCCCCCC);
-        }
+        textView.setBackgroundColor((row % 2 == 0) ? 0xffe1e1e1 : 0xffcccccc);
 
         return view;
     }
@@ -190,15 +188,15 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 R.layout.data_grid_cell_chart, null /*root*/);
         Row rowData = rows.get(rowIndex);
         String dateKey = columnHeaders.get(columnIndex);
-        boolean visible = rowData.dates.contains(dateKey);
-        view.findViewById(R.id.data_grid_cell_chart_image)
-                .setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-
-        if (rowIndex % 2 == 0) {
-            ((ViewGroup) view).getChildAt(0).setBackgroundColor(0xFFCCCCCC);
+        boolean isActive = rowData.dates.contains(dateKey);
+        if (isActive) {
+            view.findViewById(R.id.data_grid_cell_chart_image)
+                    .setBackgroundResource(R.drawable.chart_cell_active);
         }
+
+        ((ViewGroup) view).getChildAt(0)
+                .setBackgroundColor((rowIndex % 2 == 0) ? 0xffe1e1e1 : 0xffcccccc);
 
         return view;
     }
 }
-
