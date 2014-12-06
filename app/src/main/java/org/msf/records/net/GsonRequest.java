@@ -12,6 +12,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import org.apache.http.protocol.HTTP;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class GsonRequest<T> extends Request<T> {
         try {
             String json = new String(
                     response.data,
-                    HttpHeaderParser.parseCharset(response.headers));
+                    HTTP.UTF_8);  // TODO(dxchen): HttpHeaderParser.parseCharset(response.headers).
             Gson gsonParser = gson.create();
             if(array){
                 JsonParser parser = new JsonParser();

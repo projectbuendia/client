@@ -101,7 +101,7 @@ public class ODKView extends LinearLayout {
         mLayout =
             new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-        mLayout.setMargins(10, 0, 10, 0);
+//        mLayout.setMargins(10, 0, 10, 0);
 
         // display which group you are in as well as the question
 
