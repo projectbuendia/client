@@ -132,6 +132,7 @@ public class TentSelectionFragment extends Fragment {
         super.onResume();
 
         EventBus.getDefault().register(this);
+        // TODO(akalachman): ProgressBar for this operation, or eliminate need to sync EVERYTHING.
         new LocationManager().loadLocations();
     }
 
