@@ -1,5 +1,11 @@
 package org.msf.records.user;
 
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
+import android.content.OperationApplicationException;
+import android.content.SyncResult;
+import android.database.Cursor;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -8,7 +14,12 @@ import com.android.volley.VolleyError;
 import org.msf.records.App;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
+import org.msf.records.sync.ChartProviderContract;
+import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.RpcToDb;
+import org.msf.records.sync.UserProviderContract;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,9 +29,42 @@ import java.util.concurrent.CountDownLatch;
  * A store for users.
  */
 public class UserStore {
-    private final String TAG = "UserStore";
+    private static final String TAG = "UserStore";
 
     public Set<User> loadKnownUsers() {
+        Cursor cursor = null;
+        try {
+            Log.i(TAG, "Retrieving users from db");
+            // Request users from database.
+            cursor = App.getInstance().getContentResolver()
+                .query(UserProviderContract.USERS_CONTENT_URI, null, null, null,
+                        UserProviderContract.UserColumns.FULL_NAME);
+
+            // If no data was retrieved from database, force a sync from server.
+            Log.i(TAG, "No users found in db -- refreshing");
+            if (cursor.getCount() == 0) {
+                return syncKnownUsers();
+            }
+
+            // Initiate users from database data and return the result.
+            int fullNameColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.FULL_NAME);
+            int uuidColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.UUID);
+            Set<User> result = new HashSet<User>();
+            while (cursor.moveToNext()) {
+                User user =
+                        User.create(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
+                result.add(user);
+            }
+            return result;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public Set<User> syncKnownUsers() {
+        Log.i(TAG, "Getting user list from server");
         // Make an async call to the server and use a CountDownLatch to block until the result is
         // returned.
         final CountDownLatch latch = new CountDownLatch(1);
@@ -46,11 +90,20 @@ public class UserStore {
         } catch (InterruptedException e) {
             Log.e(TAG, "Interrupted while loading user list", e);
         }
-        return users;
-    }
 
-    public Set<User> syncKnownUsers() {
-        throw new UnsupportedOperationException();
+        Log.i(TAG, "Updating user db with retrieved users");
+        ContentResolver resolver = App.getInstance().getContentResolver();
+        try {
+            resolver.applyBatch(
+                    PatientProviderContract.CONTENT_AUTHORITY,
+                    RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to update database", e);
+        } catch (OperationApplicationException e) {
+            Log.e(TAG, "Failed to update database", e);
+        }
+
+        return users;
     }
 
     public User addUser(NewUser user) throws VolleyError {

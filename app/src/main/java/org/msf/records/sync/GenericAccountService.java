@@ -61,6 +61,7 @@ public class GenericAccountService extends Service {
         b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
         b.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
         b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        b.putBoolean(SyncAdapter.SYNC_USERS, true);
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
                 PatientProviderContract.CONTENT_AUTHORITY, // Content authority

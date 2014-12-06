@@ -70,6 +70,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static String SYNC_LOCATIONS = "SYNC_LOCATIONS";
 
     /**
+     * If this key is present with boolean value true then sync users.
+     */
+    public static String SYNC_USERS = "SYNC_USERS";
+
+    /**
      * Content resolver, for performing database operations.
      */
     private final ContentResolver mContentResolver;
@@ -122,6 +127,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 specific = true;
                 updateLocations(provider, syncResult);
             }
+            if (extras.getBoolean(SYNC_USERS)) {
+                specific = true;
+                updateUsers(provider, syncResult);
+            }
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
@@ -130,6 +139,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 updateChartStructure(provider, syncResult);
                 updateObservations(provider, syncResult);
                 updateLocations(provider, syncResult);
+                updateUsers(provider, syncResult);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error in RPC", e);
@@ -319,7 +329,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<ConceptList> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
         ConceptList conceptList = future.get();
-        provider.applyBatch(ChartRpcToDb.conceptRpcToDb(conceptList, syncResult));
+        provider.applyBatch(RpcToDb.conceptRpcToDb(conceptList, syncResult));
     }
 
     private void updateLocations(final ContentProviderClient provider, SyncResult syncResult)
@@ -492,7 +502,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // When we do a chart update, delete everything first.
         provider.delete(ChartProviderContract.CHART_CONTENT_URI, null, null);
         syncResult.stats.numDeletes++;
-        provider.applyBatch(ChartRpcToDb.chartStructureRpcToDb(conceptList, syncResult));
+        provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult)
@@ -529,7 +539,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         ChartColumns.PATIENT_UUID + "=?",
                         new String[]{patientChart.uuid});
                 // Add the new observations
-                provider.applyBatch(ChartRpcToDb.observationsRpcToDb(patientChart, syncResult));
+                provider.applyBatch(RpcToDb.observationsRpcToDb(patientChart, syncResult));
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error interruption: " + e.toString());
                 syncResult.stats.numIoExceptions++;
@@ -544,5 +554,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 return;
             }
         }
+    }
+
+    private void updateUsers(final ContentProviderClient provider, SyncResult syncResult) {
+        App.getUserManager().syncKnownUsers();
     }
 }
