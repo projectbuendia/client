@@ -29,6 +29,7 @@ public class PrepopulatableFields implements Parcelable {
         mLocationName = Parcels.readNullableString(in);
         mClinicianName = Parcels.readNullableString(in);
         mPregnant = in.readInt();
+        mIvFitted = in.readInt();
     }
 
     @Override
