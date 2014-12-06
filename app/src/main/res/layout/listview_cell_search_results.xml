@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:paddingLeft="20dp"
+        android:paddingLeft="12dp"
         android:paddingRight="20dp"
         android:paddingBottom="2dp"
         android:paddingTop="2dp"
+        android:gravity="center_vertical"
         android:layout_weight="1">
 
         <TextView
@@ -28,40 +30,46 @@
             android:width="120dp"
             android:gravity="center"
             android:textColor="@color/white"
-            android:background="@android:color/darker_gray"/>
+            android:background="@android:color/darker_gray"
+            tools:text="Kh.1234" />
 
         <TextView
             android:id="@+id/listview_cell_search_results_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="36sp"
             android:maxLines="1"
             android:ellipsize="end"
             android:scrollHorizontally="true"
-            android:singleLine="true"/>
+            android:singleLine="true"
+            tools:text="Horatio Thornthrower" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_gravity="right"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginRight="12dp">
 
         <ImageView
             android:id="@+id/listview_cell_search_results_gender"
             android:layout_gravity="center"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginRight="-20dp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            tools:src="@drawable/gender_man" />
 
         <TextView
             android:id="@+id/listview_cell_search_results_age"
             android:gravity="center_vertical|right"
             android:layout_gravity="center_vertical|right"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAlignment="gravity"/>
+            android:minWidth="60dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            tools:text="88"/>
 
         </LinearLayout>
 

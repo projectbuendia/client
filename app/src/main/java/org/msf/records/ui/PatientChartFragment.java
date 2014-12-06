@@ -443,7 +443,10 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         PatientAge age = new PatientAge();
         age.years = data.getInt(PatientProjection.COLUMN_AGE_YEARS);
-        age.months = data.getInt(PatientProjection.COLUMN_AGE_YEARS);
+        age.months = data.getInt(PatientProjection.COLUMN_AGE_MONTHS);
+        if (age.years > 0) {
+            age.type = "years";
+        }
         mPatient.age = age;
 
         mPatient.id = data.getString(PatientProjection.COLUMN_ID );
