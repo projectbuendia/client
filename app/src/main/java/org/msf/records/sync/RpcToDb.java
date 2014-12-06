@@ -11,9 +11,11 @@ import org.msf.records.net.model.Concept;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.User;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 import static org.msf.records.sync.ChartProviderContract.CHART_CONTENT_URI;
 import static org.msf.records.sync.ChartProviderContract.CONCEPT_NAMES_CONTENT_URI;
@@ -23,9 +25,9 @@ import static org.msf.records.sync.ChartProviderContract.ChartColumns;
  * A helper class for turning the Java beans that are the result of chart RPC calls into
  * appropriate ContentProviderOperations for inserting into the DB.
  */
-public class ChartRpcToDb {
+public class RpcToDb {
 
-    private static final String TAG = "ChartRpcToDb";
+    private static final String TAG = "RpcToDb";
 
     /**
      * Convert a concept response into appropriate inserts in the concept and concept_name tables.
@@ -128,6 +130,27 @@ public class ChartRpcToDb {
                         .build());
                 syncResult.stats.numInserts++;
             }
+        }
+        return operations;
+    }
+
+    /**
+     * Given a set of users, replaces the current set of users with users from that set.
+     */
+    public static ArrayList<ContentProviderOperation> userSetFromRpcToDb(
+            Set<User> response, SyncResult syncResult) {
+        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+        // Delete all users before inserting.
+        operations.add(
+                ContentProviderOperation.newDelete(UserProviderContract.USERS_CONTENT_URI).build());
+        // TODO(akalachman): Update syncResult delete counts.
+        for (User user : response) {
+            operations.add(ContentProviderOperation
+                    .newInsert(UserProviderContract.USERS_CONTENT_URI)
+                    .withValue(UserProviderContract.UserColumns.UUID, user.getId())
+                    .withValue(UserProviderContract.UserColumns.FULL_NAME, user.getFullName())
+                    .build());
+            syncResult.stats.numInserts++;
         }
         return operations;
     }

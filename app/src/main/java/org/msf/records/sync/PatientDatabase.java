@@ -129,6 +129,15 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ")" +
                     ")";
 
+    static final String USERS_TABLE_NAME = "users";
+
+    private static final String SQL_CREATE_USERS =
+            CREATE_TABLE + USERS_TABLE_NAME + " (" +
+                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                    UserProviderContract.UserColumns.UUID + TYPE_TEXT + COMMA_SEP +
+                    UserProviderContract.UserColumns.FULL_NAME + TYPE_TEXT + COMMA_SEP + ")"
+            + ")";
+
     private static String makeDropTable(String tableName) {
         return "DROP TABLE IF EXISTS " + tableName;
     }
@@ -146,6 +155,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_LOCATIONS);
         db.execSQL(SQL_CREATE_LOCATION_NAMES);
         db.execSQL(SQL_CREATE_OBSERVATIONS);
+        db.execSQL(SQL_CREATE_USERS);
     }
 
     @Override
@@ -159,6 +169,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(makeDropTable(CHARTS_TABLE_NAME));
         db.execSQL(makeDropTable(LOCATIONS_TABLE_NAME));
         db.execSQL(makeDropTable(LOCATION_NAMES_TABLE_NAME));
+        db.execSQL(makeDropTable(USERS_TABLE_NAME));
         onCreate(db);
     }
 }
