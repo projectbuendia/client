@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
@@ -21,6 +23,7 @@ import de.greenrobot.event.EventBus;
  */
 public class UserLoginActivity extends FragmentActivity {
     private UserLoginFragment mFragment = null;
+    private static final String TAG = "UserLoginActivity";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

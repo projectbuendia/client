@@ -33,18 +33,26 @@ public class UserStore {
 
     public Set<User> loadKnownUsers() {
         Cursor cursor = null;
+        ContentProviderClient client = null;
         try {
             Log.i(TAG, "Retrieving users from db");
+            client = App.getInstance().getContentResolver()
+                            .acquireContentProviderClient(UserProviderContract.USERS_CONTENT_URI);
+
             // Request users from database.
-            cursor = App.getInstance().getContentResolver()
-                .query(UserProviderContract.USERS_CONTENT_URI, null, null, null,
-                        UserProviderContract.UserColumns.FULL_NAME);
+            try {
+                cursor = client.query(UserProviderContract.USERS_CONTENT_URI, null, null, null,
+                            UserProviderContract.UserColumns.FULL_NAME);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error accessing db", e);
+            }
 
             // If no data was retrieved from database, force a sync from server.
-            Log.i(TAG, "No users found in db -- refreshing");
-            if (cursor.getCount() == 0) {
+            if (cursor == null || cursor.getCount() == 0) {
+                Log.i(TAG, "No users found in db -- refreshing");
                 return syncKnownUsers();
             }
+            Log.i(TAG, "Found " + cursor.getCount() + " users in db");
 
             // Initiate users from database data and return the result.
             int fullNameColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.FULL_NAME);
@@ -59,6 +67,10 @@ public class UserStore {
         } finally {
             if (cursor != null) {
                 cursor.close();
+            }
+
+            if (client != null) {
+                client.release();
             }
         }
     }
@@ -92,15 +104,17 @@ public class UserStore {
         }
 
         Log.i(TAG, "Updating user db with retrieved users");
-        ContentResolver resolver = App.getInstance().getContentResolver();
+        ContentProviderClient client =
+                App.getInstance().getContentResolver().acquireContentProviderClient(
+                        UserProviderContract.USERS_CONTENT_URI);
         try {
-            resolver.applyBatch(
-                    PatientProviderContract.CONTENT_AUTHORITY,
-                    RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
+            client.applyBatch(RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to update database", e);
         } catch (OperationApplicationException e) {
             Log.e(TAG, "Failed to update database", e);
+        } finally {
+            client.release();
         }
 
         return users;

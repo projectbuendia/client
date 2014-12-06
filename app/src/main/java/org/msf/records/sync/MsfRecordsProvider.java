@@ -61,7 +61,8 @@ public class MsfRecordsProvider extends ContentProvider {
     PatientDatabase mDatabaseHelper;
 
     private static final SubContentProvider [] SUB_PROVIDERS = new SubContentProvider[] {
-            new PatientProvider(), new ChartProvider(), new LocationProvider()
+            new PatientProvider(), new ChartProvider(), new LocationProvider(),
+            new UserProvider()
     };
     /**
      * UriMatcher, used to decode incoming URIs.

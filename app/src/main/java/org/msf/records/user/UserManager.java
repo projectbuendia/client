@@ -1,6 +1,7 @@
 package org.msf.records.user;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -55,6 +56,7 @@ import de.greenrobot.event.EventBus;
  */
 public class UserManager {
 
+    private static final String TAG = "UserManager";
     /**
      * A lock object for the set of known users. If used with {@link #mActiveUserLock}, this lock
      * must be acquired first.
@@ -213,7 +215,8 @@ public class UserManager {
             try {
                 newKnownUsers = mUserStore.loadKnownUsers();
             } catch (Exception e) {
-                // TODO(dxchen): Log. Figure out type of exception to throw.
+                // TODO(dxchen): Figure out type of exception to throw.
+                Log.e(TAG, "Load users task failed", e);
                 EventBus.getDefault().post(
                         new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
 
@@ -238,7 +241,8 @@ public class UserManager {
             try {
                 syncedKnownUsers = mUserStore.syncKnownUsers();
             } catch (Exception e) {
-                // TODO(dxchen): Log. Figure out the type of exception to throw.
+                // TODO(dxchen): Figure out the type of exception to throw.
+                Log.e(TAG, "User sync failed", e);
                 EventBus.getDefault().post(
                         new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
 
