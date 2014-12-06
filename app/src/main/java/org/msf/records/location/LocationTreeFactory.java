@@ -1,4 +1,4 @@
-package org.msf.records.model;
+package org.msf.records.location;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -10,6 +10,7 @@ import com.google.common.collect.Multimap;
 import org.msf.records.filter.AllFilter;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.location.LocationTree;
 import org.msf.records.net.model.Location;
 import org.msf.records.sync.LocationProjection;
 import org.msf.records.sync.LocationProviderContract;
@@ -40,7 +41,7 @@ public class LocationTreeFactory {
 
     private final Context mContext;
 
-    public LocationTreeFactory(Context context) {
+    LocationTreeFactory(Context context) {
         mContext = context;
 
         mLocationQueryFactory = new FilterQueryProviderFactory();
