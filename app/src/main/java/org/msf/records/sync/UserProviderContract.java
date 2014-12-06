@@ -46,6 +46,6 @@ public class UserProviderContract {
         /**
          * User's full name
          */
-        public static final String FULL_NAME = "parent_uuid";
+        public static final String FULL_NAME = "full_name";
     }
 }

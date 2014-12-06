@@ -27,7 +27,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 9;
+    public static final int DATABASE_VERSION = 10;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -135,8 +135,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
             CREATE_TABLE + USERS_TABLE_NAME + " (" +
                     _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     UserProviderContract.UserColumns.UUID + TYPE_TEXT + COMMA_SEP +
-                    UserProviderContract.UserColumns.FULL_NAME + TYPE_TEXT + COMMA_SEP + ")"
-            + ")";
+                    UserProviderContract.UserColumns.FULL_NAME + TYPE_TEXT + ")";
 
     private static String makeDropTable(String tableName) {
         return "DROP TABLE IF EXISTS " + tableName;
