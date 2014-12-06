@@ -19,15 +19,13 @@ import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.Concept;
-import org.msf.records.model.LocationTree;
-import org.msf.records.model.Status;
+import org.msf.records.location.LocationTree;
 
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import butterknife.ButterKnife;
@@ -90,9 +88,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
                 new FilterQueryProviderFactory()
                         .setSortClause(sortBuilder.toString())
                         .getFilterQueryProvider(
-                            mContext,
-                            new FilterGroup(getSelectionFilter(),
-                            new LocationUuidFilter(tent)));
+                                mContext,
+                                new FilterGroup(getSelectionFilter(),
+                                        new LocationUuidFilter(tent)));
 
         Cursor patientsCursor = null;
 

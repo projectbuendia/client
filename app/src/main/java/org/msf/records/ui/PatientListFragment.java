@@ -13,18 +13,22 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Filter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.events.location.LocationsLoadFailedEvent;
+import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.location.LocationManager;
 import org.msf.records.model.Location;
-import org.msf.records.model.LocationTree;
+import org.msf.records.location.LocationTree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientProjection;
@@ -90,17 +94,15 @@ public class PatientListFragment extends ProgressFragment implements
     String mFilterQueryTerm = "";
 
     SimpleSelectionFilter mFilter;
+    private static LocationTree mRoot = null;
 
     public void filterBy(SimpleSelectionFilter filter) {
         // Tack on a location filter to the filter to show only known locations.
-        LocationTree tree = LocationTree.getRootLocation(getActivity());
-        if (tree == null || tree.getLocation() == null) {
+        if (mRoot == null || mRoot.getLocation() == null) {
             mFilter = filter;
         } else {
             // Tack on a location filter to the filter to show only known locations.
-            mFilter = new FilterGroup(
-                    new LocationUuidFilter(
-                            LocationTree.getRootLocation(getActivity()).getLocation().uuid), filter);
+            mFilter = new FilterGroup(new LocationUuidFilter(mRoot.getLocation().uuid), filter);
         }
 
         mPatientAdapter.setSelectionFilter(mFilter);
@@ -143,7 +145,6 @@ public class PatientListFragment extends ProgressFragment implements
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.fragment_patient_list);
-
     }
 
     @Override
@@ -151,6 +152,7 @@ public class PatientListFragment extends ProgressFragment implements
         super.onResume();
 
         EventBus.getDefault().register(this);
+        new LocationManager().loadLocations();
     }
 
     @Override
@@ -169,6 +171,14 @@ public class PatientListFragment extends ProgressFragment implements
             SyncManager.INSTANCE.forceSync();
             isRefreshing = true;
         }
+    }
+
+    public synchronized void onEvent(LocationsLoadedEvent event) {
+        mRoot = event.mLocationTree;
+    }
+
+    public synchronized void onEvent(LocationsLoadFailedEvent event) {
+        Toast.makeText(getActivity(), R.string.location_load_error, Toast.LENGTH_SHORT).show();
     }
 
     public synchronized void onEvent(SyncFinishedEvent event) {

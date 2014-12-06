@@ -1,6 +1,6 @@
 package org.msf.records.filter;
 
-import org.msf.records.model.LocationTree;
+import org.msf.records.location.LocationTree;
 import org.msf.records.sync.PatientProviderContract;
 
 /**

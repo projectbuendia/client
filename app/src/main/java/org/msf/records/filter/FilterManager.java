@@ -5,8 +5,12 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup.FilterType;
-import org.msf.records.model.LocationTree;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * FilterManager is a container for all available patient filters that will be displayed to the
@@ -14,6 +18,7 @@ import org.msf.records.model.LocationTree;
  */
 public class FilterManager {
     private static final String TAG = "FilterManager";
+    private static LocationTree mRoot = null;
 
     // Id and name filters should always be applied.
     private static final FilterGroup baseFilters = new FilterGroup(
@@ -25,16 +30,24 @@ public class FilterManager {
         new FilterGroup(baseFilters, new AgeFilter(2)).setName("Children Under 2")
     };
 
+    private static class LocationSyncSubscriber {
+        public synchronized void onEvent(LocationsLoadedEvent event) {
+            mRoot = event.mLocationTree;
+        }
+    }
+
+    static {
+        EventBus.getDefault().register(new LocationSyncSubscriber());
+    }
+
     public static SimpleSelectionFilter getDefaultFilter() {
         return baseFilters;
     }
 
     public static SimpleSelectionFilter[] getZoneFilters(Context context) {
-        LocationTree tree = LocationTree.getRootLocation(context);
-
         List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
-        if (tree != null) {
-            for (LocationTree zone : tree.getLocationsForDepth(1)) {
+        if (mRoot != null) {
+            for (LocationTree zone : mRoot.getLocationsForDepth(1)) {
                 filters.add(new FilterGroup(
                         baseFilters,
                         new LocationUuidFilter(zone.getLocation().uuid)).setName(zone.toString()));

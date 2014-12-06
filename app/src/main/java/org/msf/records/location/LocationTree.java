@@ -1,4 +1,4 @@
-package org.msf.records.model;
+package org.msf.records.location;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 
 import de.greenrobot.event.EventBus;
@@ -19,8 +20,6 @@ import de.greenrobot.event.EventBus;
  *
  * LocationTree should be used as a singleton.
  */
-// TODO(akalachman): Dagger this!
-// TODO(akalachman): Cleanup init/re-init.
 public class LocationTree implements Comparable<LocationTree> {
     private final String DEFAULT_LOCALE = "en";
 
@@ -33,42 +32,12 @@ public class LocationTree implements Comparable<LocationTree> {
     private String mSortLocale = DEFAULT_LOCALE;
     private int mPatientCount;
 
-    private static LocationTree ROOT = null;
-    private static LocationTreeFactory FACTORY = null;
-
     private static final String TAG = "LocationTree";
 
     public static final int FACILITY_DEPTH = 0;
     public static final int ZONE_DEPTH = 1;
     public static final int TENT_DEPTH = 2;
     public static final int BED_DEPTH = 3;
-
-    // TODO(akalachman): Async support.
-    public static LocationTree getRootLocation(Context context) {
-        if (ROOT == null) {
-            Log.v(TAG, "Tree needs rebuilding");
-            rebuild(context);
-        }
-        return ROOT;
-    }
-
-    // TODO(akalachman): Async support.
-    public static LocationTree rebuild(Context context) {
-        Log.v(TAG, "Rebuilding tree and LocationTreeFactory");
-        FACTORY = new LocationTreeFactory(context);
-        ROOT = FACTORY.build();
-        return ROOT;
-    }
-
-    public static LocationTree rebuild() {
-        if (FACTORY == null) {
-            Log.w(TAG, "Could not rebuild LocationTree");
-        } else {
-            Log.v(TAG, "Rebuilding tree with existing LocationTreeFactory");
-            ROOT = FACTORY.build();
-        }
-        return ROOT;
-    }
 
     public static void clearTreeIndex() {
         mAllChildren.clear();

@@ -90,4 +90,5 @@
     <string name="mild_symptom">Mild</string>
     <string name="moderate_symptom">Moderate</string>
     <string name="severe_symptom">Severe</string>
+    <string name="location_load_error">Error loading location resources</string>
 </resources>

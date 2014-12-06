@@ -11,13 +11,12 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.msf.records.model.LocationTree;
+import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientAge;
-import org.msf.records.net.model.PatientLocation;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 

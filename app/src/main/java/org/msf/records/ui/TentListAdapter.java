@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 import org.msf.records.R;
-import org.msf.records.model.LocationTree;
+import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;

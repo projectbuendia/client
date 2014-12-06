@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -28,7 +27,7 @@ import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.model.Concept;
-import org.msf.records.model.LocationTree;
+import org.msf.records.location.LocationTree;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
@@ -44,10 +43,8 @@ import org.msf.records.widget.DataGridView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

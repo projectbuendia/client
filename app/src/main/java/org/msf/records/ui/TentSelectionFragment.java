@@ -8,15 +8,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.msf.records.R;
-import org.msf.records.model.LocationTree;
+import org.msf.records.events.location.LocationsLoadFailedEvent;
+import org.msf.records.events.location.LocationsLoadedEvent;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.view.SubtitledButtonView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 
 public class TentSelectionFragment extends Fragment {
     @InjectView(R.id.tent_selection_tents) GridView mTentGrid;
@@ -24,6 +29,7 @@ public class TentSelectionFragment extends Fragment {
     @InjectView(R.id.tent_selection_triage) SubtitledButtonView mTriageButton;
     @InjectView(R.id.tent_selection_discharged) SubtitledButtonView mDischargedButton;
 
+    private static LocationTree mRoot = null;
     private LocationTree mDischargedZone = null;
     private LocationTree mTriageZone = null;
 
@@ -36,23 +42,14 @@ public class TentSelectionFragment extends Fragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public synchronized void onEventMainThread(LocationsLoadFailedEvent event) {
+        Toast.makeText(getActivity(), R.string.location_load_error, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tent_selection, container, false);
-
-        ButterKnife.inject(this, view);
-
-        LocationTree tree = LocationTree.getRootLocation(getActivity());
-
+    public synchronized void onEventMainThread(LocationsLoadedEvent event) {
+        mRoot = event.mLocationTree;
         TentListAdapter adapter = new TentListAdapter(
-                getActivity(), LocationTree.getTents(getActivity(), tree));
+                getActivity(), LocationTree.getTents(getActivity(), mRoot));
         mTentGrid.setAdapter(adapter);
 
         mTentGrid.setOnItemClickListener(new GridView.OnItemClickListener() {
@@ -62,13 +59,13 @@ public class TentSelectionFragment extends Fragment {
             }
         });
 
-        if (tree != null) {
+        if (mRoot != null) {
             mAllPatientsButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
-                            getActivity(), tree.getPatientCount(), true));
+                            getActivity(), mRoot.getPatientCount(), true));
         }
 
-        for (LocationTree zone : LocationTree.getZones(getActivity(), tree)) {
+        for (LocationTree zone : LocationTree.getZones(getActivity(), mRoot)) {
             switch (zone.getLocation().uuid) {
                 case Zone.TRIAGE_ZONE_UUID:
                     mTriageButton.setSubtitle(
@@ -112,8 +109,37 @@ public class TentSelectionFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_tent_selection, container, false);
+
+        ButterKnife.inject(this, view);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        EventBus.getDefault().register(this);
+        new LocationManager().loadLocations();
+    }
+
+    @Override
+    public void onPause() {
+        EventBus.getDefault().unregister(this);
+
+        super.onPause();
     }
 
     private void launchActivityForLocation(LocationTree locationTree) {
