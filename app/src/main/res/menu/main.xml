@@ -7,9 +7,10 @@
       android:title="@string/action_search"
       android:showAsAction="ifRoom|collapseActionView"
       android:actionViewClass="android.widget.SearchView"/>
-      
+
     <item
         android:showAsAction="ifRoom"
         android:id="@+id/action_add"
+        android:icon="@drawable/ic_action_add"
         android:title="Add Patient"/>
 </menu>
