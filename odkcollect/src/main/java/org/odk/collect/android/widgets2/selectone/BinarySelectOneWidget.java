@@ -13,6 +13,7 @@ import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.activities.FormEntryActivity;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -77,12 +78,38 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
         // Remove the views added by the base class.
         removeAllViews();
 
-        // Force a wide layout.
-//        ViewGroup.LayoutParams params =
-//                new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-//        setLayoutParams(params);
-
         addView(mCheckBox);
+    }
+
+    @Override
+    public boolean forceSetAnswer(Object answer) {
+        if (!(answer instanceof Integer)) {
+            return false;
+        }
+
+        int typedAnswer = (Integer) answer;
+        if (typedAnswer == PrepopulatableFields.YES) {
+            mCheckBox.setChecked(true);
+        }
+
+        return false;
+    }
+
+    @Override
+    public SelectOneData getAnswer() {
+        return new SelectOneData(new Selection(mCheckBox.isChecked() ? mYesChoice : mNoChoice));
+    }
+
+    @Override
+    public void clearAnswer() {
+        mCheckBox.setChecked(false);
+    }
+
+    @Override
+    public void setFocus(Context context) {
+        InputMethodManager inputManager = (InputMethodManager) context
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 
     private void setYesNoChoices(FormEntryPrompt prompt) {
@@ -101,22 +128,5 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
                         "The select choices in the current prompt must be either (in order): yes, "
                                 + "no; or unknown, yes, and no.");
         }
-    }
-
-    @Override
-    public SelectOneData getAnswer() {
-        return new SelectOneData(new Selection(mCheckBox.isChecked() ? mYesChoice : mNoChoice));
-    }
-
-    @Override
-    public void clearAnswer() {
-        mCheckBox.setChecked(false);
-    }
-
-    @Override
-    public void setFocus(Context context) {
-        InputMethodManager inputManager = (InputMethodManager) context
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 }

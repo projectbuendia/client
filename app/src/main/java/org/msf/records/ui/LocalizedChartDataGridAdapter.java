@@ -17,6 +17,7 @@ import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
@@ -28,8 +29,10 @@ import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 public class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private static class Row {
+
         private final String name;
-        private final HashSet<String> dates = new HashSet<>();
+        private final HashMap<String, String> datesToValues = new HashMap<>();
+//        private final HashSet<String> dates = new HashSet<>();
 
         private Row(String name) {
             this.name = name;
@@ -93,16 +96,16 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
             days.add(localDate);
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
-                row.dates.add(dateKey);
+                row.datesToValues.put(dateKey, ob.value);
                 // Do an ugly expansion into the extra rows.
                 if (Concept.MILD_UUID.equals(ob.value) && mildRow != null) {
-                    mildRow.dates.add(dateKey);
+                    mildRow.datesToValues.put(dateKey, ob.value);
                 }
                 if (Concept.MODERATE_UUID.equals(ob.value) && moderateRow != null) {
-                    moderateRow.dates.add(dateKey);
+                    moderateRow.datesToValues.put(dateKey, ob.value);
                 }
                 if (Concept.SEVERE_UUID.equals(ob.value) && severeRow != null) {
-                    severeRow.dates.add(dateKey);
+                    severeRow.datesToValues.put(dateKey, ob.value);
                 }
             }
         }
@@ -184,14 +187,30 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(
-                R.layout.data_grid_cell_chart, null /*root*/);
         Row rowData = rows.get(rowIndex);
+        View view = mLayoutInflater.inflate(
+                R.layout.data_grid_cell_chart_text, null /*root*/);
         String dateKey = columnHeaders.get(columnIndex);
-        boolean isActive = rowData.dates.contains(dateKey);
-        if (isActive) {
-            view.findViewById(R.id.data_grid_cell_chart_image)
-                    .setBackgroundResource(R.drawable.chart_cell_active);
+
+        View imageView = view.findViewById(R.id.data_grid_cell_chart_image);
+
+        if (rowData.name.startsWith("Temperature")) {
+            String temperatureString = rowData.datesToValues.get(dateKey);
+            TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
+            if (temperatureString != null) {
+                double temperature = Double.parseDouble(temperatureString);
+                textView.setText(String.format("%.1f", temperature));
+                if (temperature < 37.5) {
+                    imageView.setBackgroundResource(R.drawable.chart_cell_good);
+                } else {
+                    imageView.setBackgroundResource(R.drawable.chart_cell_bad);
+                }
+            }
+        } else {
+            boolean isActive = rowData.datesToValues.containsKey(dateKey);
+            if (isActive) {
+                imageView.setBackgroundResource(R.drawable.chart_cell_active);
+            }
         }
 
         ((ViewGroup) view).getChildAt(0)
