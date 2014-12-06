@@ -14,7 +14,6 @@ import org.msf.records.ui.ControllableActivity;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -49,6 +48,10 @@ public class PatientChartController extends BaseController {
     }
 
     public void startChartUpdate(Activity activity, String patientUuid) {
+        startChartUpdate(activity, patientUuid, null /*targetField*/);
+    }
+
+    public void startChartUpdate(Activity activity, String patientUuid, String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
         fields.mEncounterTime = DateTime.now();
@@ -74,6 +77,8 @@ public class PatientChartController extends BaseController {
                         observations.get("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").localizedValue)) {
             fields.mIvFitted = PrepopulatableFields.YES;
         }
+
+        fields.mTargetGroup = targetGroup;
 
         OdkActivityLauncher.fetchAndShowXform(
                 activity,

@@ -148,20 +148,30 @@ public class PatientChartFragment extends ControllableFragment implements Loader
                 (ViewGroup) inflater.inflate(R.layout.fragment_patient_chart, container, false);
         ButterKnife.inject(this, view);
 
-        View.OnClickListener listener = new View.OnClickListener() {
+        View.OnClickListener onVitalsClickListener = new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-
+                PatientChartController.INSTANCE.startChartUpdate(getActivity(), mPatientUuid);
             }
         };
 
-        mGeneralCondition.setOnClickListener(listener);
-        mTemperature.setOnClickListener(listener);
-        mResponsiveness.setOnClickListener(listener);
-        mMobility.setOnClickListener(listener);
-        mDiet.setOnClickListener(listener);
-        mHydration.setOnClickListener(listener);
+        View.OnClickListener onSignsAndSymptomsClickListener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                PatientChartController.INSTANCE.startChartUpdate(
+                        getActivity(), mPatientUuid, "Symptoms the patient reports (first set)");
+            }
+        };
+
+        mGeneralCondition.setOnClickListener(onVitalsClickListener);
+        mTemperature.setOnClickListener(onVitalsClickListener);
+
+        mResponsiveness.setOnClickListener(onSignsAndSymptomsClickListener);
+        mMobility.setOnClickListener(onSignsAndSymptomsClickListener);
+        mDiet.setOnClickListener(onSignsAndSymptomsClickListener);
+        mHydration.setOnClickListener(onSignsAndSymptomsClickListener);
 
         return view;
     }
