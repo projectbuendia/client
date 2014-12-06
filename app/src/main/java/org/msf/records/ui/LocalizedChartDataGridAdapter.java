@@ -200,7 +200,7 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
             if (temperatureString != null) {
                 double temperature = Double.parseDouble(temperatureString);
                 textView.setText(String.format("%.1f", temperature));
-                if (temperature < 37.5) {
+                if (temperature <= 37.5) {
                     imageView.setBackgroundResource(R.drawable.chart_cell_good);
                 } else {
                     imageView.setBackgroundResource(R.drawable.chart_cell_bad);

@@ -27,6 +27,6 @@
         android:layout_marginTop="-10dp"
         android:layout_alignParentBottom="true"
         android:gravity="center_vertical"
-        tools:text="89 present patients" />
+        tools:text="89 patients" />
 
 </LinearLayout>

@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
 import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -112,13 +113,20 @@ public class PatientChartFragment extends ControllableFragment implements Loader
                 });
         return fragment;
     }
-    private View mChartView;
     private long mLastObservation = Long.MIN_VALUE;
     private Patient mPatient = new Patient();
     private String mPatientUuid;
     private LayoutInflater mLayoutInflater;
 
-    private Object mObservationsFetchedToken;
+    private View mChartView;
+
+    @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralCondition;
+    @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperature;
+
+    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
+    @InjectView(R.id.vital_mobility) VitalView mMobility;
+    @InjectView(R.id.vital_diet) VitalView mDiet;
+    @InjectView(R.id.vital_food_drink) VitalView mHydration;
 
     public PatientChartFragment() {}
 
@@ -142,6 +150,21 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         ViewGroup view =
                 (ViewGroup) inflater.inflate(R.layout.fragment_patient_chart, container, false);
         ButterKnife.inject(this, view);
+
+        View.OnClickListener listener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+
+            }
+        };
+
+        mGeneralCondition.setOnClickListener(listener);
+        mTemperature.setOnClickListener(listener);
+        mResponsiveness.setOnClickListener(listener);
+        mMobility.setOnClickListener(listener);
+        mDiet.setOnClickListener(listener);
+        mHydration.setOnClickListener(listener);
 
         return view;
     }
@@ -289,122 +312,96 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         }
     }
 
-    private void updatePatientVitalsUI( final View rootView, final Map<String, LocalizedObservation> conceptsToLatestObservations )
-    {
+    private void updatePatientVitalsUI(
+            final View rootView,
+            final Map<String, LocalizedObservation> conceptsToLatestObservations) {
         // Data structures we are using
         VitalView vital;
         TextView textView;
         LocalizedObservation observation;
 
-        // Mobility
-        observation = conceptsToLatestObservations.get( Concept.MOBILITY_UUID );
-        if ( observation != null )
-        {
-            vital = (VitalView)rootView.findViewById( R.id.vital_mobility );
-            vital.setValue( observation.localizedValue );
+        // Conscious state
+        observation = conceptsToLatestObservations.get(Concept.CONSCIOUS_STATE_UUID);
+        if (observation != null) {
+            mResponsiveness.setValue(observation.localizedValue);
         }
 
-        // Conscious state
-        observation = conceptsToLatestObservations.get( Concept.CONSCIOUS_STATE_UUID );
-        if ( observation != null )
-        {
-            vital = (VitalView)rootView.findViewById( R.id.vital_responsiveness );
-            vital.setValue( observation.localizedValue );
+        // Mobility
+        observation = conceptsToLatestObservations.get(Concept.MOBILITY_UUID);
+        if (observation != null) {
+            mMobility.setValue(observation.localizedValue);
         }
 
         // Fluids
-        observation = conceptsToLatestObservations.get( Concept.FLUIDS_UUID );
-        if ( observation != null )
-        {
-            vital = (VitalView)rootView.findViewById( R.id.vital_diet );
-            vital.setValue( observation.localizedValue );
+        observation = conceptsToLatestObservations.get(Concept.FLUIDS_UUID);
+        if (observation != null) {
+            mDiet.setValue(observation.localizedValue);
         }
 
         // Hydration
-        observation = conceptsToLatestObservations.get( Concept.HYDRATION_UUID );
-        if ( observation != null )
-        {
-            vital = (VitalView)rootView.findViewById( R.id.vital_food_drink );
-            vital.setValue( observation.localizedValue );
+        observation = conceptsToLatestObservations.get(Concept.HYDRATION_UUID);
+        if (observation != null) {
+            mHydration.setValue(observation.localizedValue);
         }
 
         // Temperature
-        observation = conceptsToLatestObservations.get( Concept.TEMPERATURE_UUID );
-        if ( observation != null )
-        {
-            RelativeLayout temperatureBackground = ((RelativeLayout)rootView.findViewById( R.id.patient_chart_vital_temperature_parent ));
-
+        observation = conceptsToLatestObservations.get(Concept.TEMPERATURE_UUID);
+        if (observation != null) {
             double value = Double.parseDouble(observation.localizedValue);
 
-            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_temperature );
+            textView = (TextView) mTemperature.findViewById(R.id.patient_chart_vital_temperature);
             textView.setText(String.format("%.1f°", value));
 
-            if (value <= 37.5)
-            {
-                temperatureBackground.setBackgroundColor( Color.parseColor( "#417505" ) );
-            }
-            else
-            {
-                temperatureBackground.setBackgroundColor( Color.parseColor( "#D0021B" ) );
+            if (value <= 37.5) {
+                mTemperature.setBackgroundColor(Color.parseColor("#417505"));
+            } else {
+                mTemperature.setBackgroundColor(Color.parseColor("#D0021B"));
             }
         }
 
         // General Condition
-        observation = conceptsToLatestObservations.get( Concept.GENERAL_CONDITION_UUID );
-        if ( observation != null )
-        {
-            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_general_condition );
-            textView.setText( observation.localizedValue );
+        observation = conceptsToLatestObservations.get(Concept.GENERAL_CONDITION_UUID);
+        if (observation != null) {
+            textView = (TextView) rootView.findViewById(R.id.patient_chart_vital_general_condition);
+            textView.setText(observation.localizedValue);
 
-            RelativeLayout generalBackground = ((RelativeLayout)rootView.findViewById( R.id.patient_chart_vital_general_parent ));
-
-            if ( observation.localizedValue.equals( "Good" ) )
-            {
-                generalBackground.setBackgroundColor( Color.parseColor( "#4CAF50" ) );
-            } else if ( observation.localizedValue.equals( "Average" ) )
-            {
-                generalBackground.setBackgroundColor( Color.parseColor( "#FFC927" ) );
-            } else if ( observation.localizedValue.equals( "Poor" ) )
-            {
-                generalBackground.setBackgroundColor( Color.parseColor( "#FF2121" ) );
-            } else if ( observation.localizedValue.equals( "Very Poor" ) )
-            {
-                generalBackground.setBackgroundColor( Color.parseColor( "#D0021B" ) );
+            if (observation.localizedValue.equals("Good")) {
+                mGeneralCondition.setBackgroundColor(Color.parseColor("#4CAF50"));
+            } else if (observation.localizedValue.equals("Average")) {
+                mGeneralCondition.setBackgroundColor(Color.parseColor("#FFC927"));
+            } else if (observation.localizedValue.equals("Poor")) {
+                mGeneralCondition.setBackgroundColor(Color.parseColor("#FF2121"));
+            } else if (observation.localizedValue.equals("Very Poor")) {
+                mGeneralCondition.setBackgroundColor(Color.parseColor("#D0021B"));
             }
 
         }
 
         // Special (Pregnancy and IV)
-        {
-            String specialText = new String();
+        String specialText = new String();
 
-            observation = conceptsToLatestObservations.get( Concept.PREGNANCY_UUID );
-            if ( observation != null && observation.localizedValue.equals( "Yes" ) )
-            {
-                specialText = "Pregnant";
-            }
-
-            observation = conceptsToLatestObservations.get( Concept.IV_UUID );
-            if ( observation != null && observation.localizedValue.equals( "Yes" ) )
-            {
-                specialText += "\nIV";
-            }
-
-            if ( specialText.isEmpty() )
-            {
-                specialText = "-";
-            }
-
-            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_special );
-            textView.setText( specialText );
+        observation = conceptsToLatestObservations.get(Concept.PREGNANCY_UUID);
+        if (observation != null && observation.localizedValue.equals("Yes")) {
+            specialText = "Pregnant";
         }
+
+        observation = conceptsToLatestObservations.get(Concept.IV_UUID);
+        if (observation != null && observation.localizedValue.equals("Yes")) {
+            specialText += "\nIV";
+        }
+
+        if (specialText.isEmpty()) {
+            specialText = "-";
+        }
+
+        textView = (TextView) rootView.findViewById(R.id.patient_chart_vital_special);
+        textView.setText(specialText);
 
         // PCR
         //observation = conceptsToLatestObservations.get( "" );
-        if ( observation != null )
-        {
-            textView = (TextView)rootView.findViewById( R.id.patient_chart_vital_pcr );
-            textView.setText( "Not\nImplemented" );
+        if (observation != null) {
+            textView = (TextView) rootView.findViewById(R.id.patient_chart_vital_pcr);
+            textView.setText("Not\nImplemented");
         }
 
     }
