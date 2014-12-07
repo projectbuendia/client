@@ -56,7 +56,8 @@ import de.greenrobot.event.EventBus;
  */
 public class UserManager {
 
-    private static final String TAG = "UserManager";
+    private static final String TAG = UserManager.class.getName();
+
     /**
      * A lock object for the set of known users. If used with {@link #mActiveUserLock}, this lock
      * must be acquired first.
@@ -153,25 +154,6 @@ public class UserManager {
 
                 return true;
             }
-        }
-    }
-
-    /**
-     * Unsets the current active user, returning the previous active user or {@code null} if no
-     * user was active.
-     *
-     * <p>This method will post an {@link ActiveUserUnsetEvent} if there was a previous active user.
-     */
-    public User unsetActiveUser(User activeUser) {
-        synchronized(mActiveUserLock) {
-            User previousActiveUser = mActiveUser;
-            mActiveUser = null;
-
-            if (previousActiveUser != null) {
-                // TODO(dxchen): Post ActiveUserUnsetEvent.
-            }
-
-            return previousActiveUser;
         }
     }
 
