@@ -152,7 +152,8 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
             @Override
             public void onClick(View view) {
-                PatientChartController.INSTANCE.startChartUpdate(getActivity(), mPatientUuid);
+                PatientChartController.INSTANCE.startChartUpdate(
+                        getActivity(), mPatientUuid, "Vital signs");
             }
         };
 
