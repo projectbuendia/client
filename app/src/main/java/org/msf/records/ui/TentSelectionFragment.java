@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
-public class TentSelectionFragment extends Fragment {
+public class TentSelectionFragment extends ProgressFragment {
     @InjectView(R.id.tent_selection_tents) GridView mTentGrid;
     @InjectView(R.id.tent_selection_all_patients) SubtitledButtonView mAllPatientsButton;
     @InjectView(R.id.tent_selection_triage) SubtitledButtonView mTriageButton;
@@ -44,6 +44,7 @@ public class TentSelectionFragment extends Fragment {
 
     public synchronized void onEventMainThread(LocationsLoadFailedEvent event) {
         Toast.makeText(getActivity(), R.string.location_load_error, Toast.LENGTH_SHORT).show();
+        changeState(State.LOADED);
     }
 
     public synchronized void onEventMainThread(LocationsLoadedEvent event) {
@@ -109,19 +110,19 @@ public class TentSelectionFragment extends Fragment {
                 }
             }
         });
+        changeState(State.LOADED);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_tent_selection);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tent_selection, container, false);
-
+        View view = super.onCreateView(inflater, container, savedInstanceState);
         ButterKnife.inject(this, view);
 
         return view;
@@ -132,7 +133,8 @@ public class TentSelectionFragment extends Fragment {
         super.onResume();
 
         EventBus.getDefault().register(this);
-        // TODO(akalachman): ProgressBar for this operation, or eliminate need to sync EVERYTHING.
+
+        changeState(State.LOADING);
         new LocationManager().loadLocations();
     }
 
