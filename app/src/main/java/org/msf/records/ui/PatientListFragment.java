@@ -38,10 +38,7 @@ import org.msf.records.sync.SyncManager;
 import de.greenrobot.event.EventBus;
 
 /**
- * A list fragment representing a list of Patients. This fragment
- * also supports tablet devices by allowing list items to be given an
- * 'activated' state upon selection. This helps indicate which item is
- * currently being viewed in a {@link PatientDetailFragment}.
+ * A list fragment representing a list of Patients.
  * <p>
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
@@ -240,23 +237,9 @@ public class PatientListFragment extends ProgressFragment implements
         });
     }
 
-    public void resetAdapter() {
-        mPatientAdapter = getAdapterInstance();
-        mListView.setAdapter(mPatientAdapter);
-    }
-
     public ExpandablePatientListAdapter getAdapterInstance() {
         return new ExpandablePatientListAdapter(
                 null, getActivity(), mFilterQueryTerm, mFilter);
-    }
-
-    // TODO(akalachman): REMOVE
-    public void sendQuery(String q) {
-        App.getServer().cancelPendingRequests(TAG);
-        isRefreshing = false;
-        mFilterQueryTerm = q;
-        changeState(State.LOADING);
-        loadSearchResults();
     }
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -324,18 +307,6 @@ public class PatientListFragment extends ProgressFragment implements
 
     public void onEvent(CreatePatientSucceededEvent event) {
         onRefresh();
-    }
-
-    /**
-     * Turns on activate-on-click mode. When this mode is on, list items will be
-     * given the 'activated' state when touched.
-     */
-    public void setActivateOnItemClick(boolean activateOnItemClick) {
-        // When setting CHOICE_MODE_SINGLE, ListView will automatically
-        // give items the 'activated' state when touched.
-        mListView.setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
     }
 
     private void setActivatedPosition(int position) {
