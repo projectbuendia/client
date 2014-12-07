@@ -1306,7 +1306,8 @@ public class FormEntryActivity
 						groups,
                         advancingPage,
                         fields);
-                if (fields.mTargetGroup != null
+                if (fields != null
+                        && fields.mTargetGroup != null
                         && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
                     mTargetView = odkv;
                 }
