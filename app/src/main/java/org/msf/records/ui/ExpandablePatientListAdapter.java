@@ -193,14 +193,14 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         }
 
         if (gender != null && gender.equals("M")) {
-            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_man));
+            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_male));
         }
 
         if (gender != null && gender.equals("F")) {
             if (pregnant) {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_pregnant));
+                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female_pregnant));
             } else {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_woman));
+                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female));
             }
         }
 
