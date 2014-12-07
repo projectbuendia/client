@@ -69,7 +69,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ChartColumns.CONCEPT_TYPE + TYPE_TEXT +
                     ")";
 
-    static final String CONCEPT_NAMES_TABLE_NAME = "concept_names";
+    public static final String CONCEPT_NAMES_TABLE_NAME = "concept_names";
 
     private static final String SQL_CREATE_CONCEPT_NAMES =
             CREATE_TABLE + CONCEPT_NAMES_TABLE_NAME + " (" +
@@ -102,7 +102,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                 ")" +
                 ")";
 
-    static final String OBSERVATIONS_TABLE_NAME = "observations";
+    public static final String OBSERVATIONS_TABLE_NAME = "observations";
 
     private static final String SQL_CREATE_OBSERVATIONS =
             CREATE_TABLE + OBSERVATIONS_TABLE_NAME + " (" +
@@ -116,7 +116,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ChartColumns.ENCOUNTER_UUID + COMMA_SEP + ChartColumns.CONCEPT_UUID + ")" +
                     ")";
 
-    static final String CHARTS_TABLE_NAME = "charts";
+    public static final String CHARTS_TABLE_NAME = "charts";
 
     private static final String SQL_CREATE_CHARTS =
             CREATE_TABLE + CHARTS_TABLE_NAME + " (" +
