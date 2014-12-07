@@ -2434,26 +2434,26 @@ public class FormEntryActivity
 			onActivityResult(requestCode, resultCode, intent);
 			return;
 		}
-
-		// it can be a normal flow for a pending activity result to restore from
-		// a savepoint
-		// (the call flow handled by the above if statement). For all other use
-		// cases, the
-		// user should be notified, as it means they wandered off doing other
-		// things then
-		// returned to ODK Collect and chose Edit Saved Form, but that the
-		// savepoint for that
-		// form is newer than the last saved version of their form data.
-		if (hasUsedSavepoint) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(FormEntryActivity.this,
-							getString(R.string.savepoint_used),
-							Toast.LENGTH_LONG).show();
-				}
-			});
-		}
+//
+//		// it can be a normal flow for a pending activity result to restore from
+//		// a savepoint
+//		// (the call flow handled by the above if statement). For all other use
+//		// cases, the
+//		// user should be notified, as it means they wandered off doing other
+//		// things then
+//		// returned to ODK Collect and chose Edit Saved Form, but that the
+//		// savepoint for that
+//		// form is newer than the last saved version of their form data.
+//		if (hasUsedSavepoint) {
+//			runOnUiThread(new Runnable() {
+//				@Override
+//				public void run() {
+//					Toast.makeText(FormEntryActivity.this,
+//							getString(R.string.savepoint_used),
+//							Toast.LENGTH_LONG).show();
+//				}
+//			});
+//		}
 
 		// Set saved answer path
 		if (formController.getInstancePath() == null) {
