@@ -8,10 +8,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.msf.records.R;
+import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
+
+import de.greenrobot.event.EventBus;
 
 
 /**
@@ -80,6 +83,10 @@ public class PatientListActivity extends PatientSearchActivity {
         outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
     }
 
+    public synchronized void onEvent(LocationsLoadedEvent event) {
+        // Update filters when locations update, as zones may have changed.
+        setupCustomActionBar(getActionBar().getSelectedNavigationIndex());
+    }
 
     private void setupCustomActionBar(int selectedFilter){
         final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay(this);
