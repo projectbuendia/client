@@ -2,6 +2,7 @@ package org.msf.records.user;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
@@ -156,6 +157,22 @@ public class UserStore {
 
         if (result.error != null) {
             throw result.error;
+        }
+
+        // Write the resulting user to the database.
+        Log.i(TAG, "Updating user db with new user");
+        ContentProviderClient client =
+                App.getInstance().getContentResolver().acquireContentProviderClient(
+                        UserProviderContract.USERS_CONTENT_URI);
+        try {
+            ContentValues values = new ContentValues();
+            values.put(UserProviderContract.UserColumns.UUID, result.user.getId());
+            values.put(UserProviderContract.UserColumns.FULL_NAME, result.user.getFullName());
+            client.insert(UserProviderContract.USERS_CONTENT_URI, values);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to update database", e);
+        } finally {
+            client.release();
         }
 
         return result.user;
