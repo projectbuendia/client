@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"
-            tools:src="@drawable/gender_man" />
+            tools:src="@drawable/ic_gender_male" />
 
         <TextView
             android:id="@+id/listview_cell_search_results_age"
