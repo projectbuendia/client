@@ -16,10 +16,8 @@ package org.odk.collect.android.widgets;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,7 +32,6 @@ import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.views.MediaLayout;
-import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +68,7 @@ public abstract class QuestionWidget extends LinearLayout {
         super(context);
 
         mQuestionFontsize = Collect.getQuestionFontsize();
-        mAnswerFontsize = mQuestionFontsize + 2;
+        mAnswerFontsize = mQuestionFontsize * 4;
 
         mPrompt = p;
 
@@ -82,10 +79,10 @@ public abstract class QuestionWidget extends LinearLayout {
         mLayoutParams =
             new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-        mLayoutParams.setMargins(10, 0, 10, 0);
+        mLayoutParams.setMargins(10, 10, 10, 0);
 
         addQuestionText(p);
-        addHelpText(p);
+//        addHelpText(p);
     }
 
     public void playAudio() {
@@ -135,6 +132,10 @@ public abstract class QuestionWidget extends LinearLayout {
     	}
     }
 
+    public boolean forceSetAnswer(Object answer) {
+        return false;
+    }
+
     // Abstract methods
     public abstract IAnswerData getAnswer();
 
@@ -176,12 +177,10 @@ public abstract class QuestionWidget extends LinearLayout {
         // Add the text view. Textview always exists, regardless of whether there's text.
         mQuestionText = (TextView) LayoutInflater.from(getContext())
                 .inflate(R.layout.template_text_view_question, null);
-//        mQuestionText = new TextView(getContext());
 
         // TODO(dxchen): Un-unscreamify once server work is done.
 
-        mQuestionText
-                .setText(promptText == null ? "" : ButtonsSelectOneWidget.unscreamify(promptText));
+        mQuestionText.setText(promptText == null ? "" : promptText);
 
         // TODO(dxchen): Remove this hack!
         if (promptText != null && promptText.toLowerCase().equals("date of birth")) {
@@ -208,27 +207,27 @@ public abstract class QuestionWidget extends LinearLayout {
         addView(mediaLayout, mLayoutParams);
     }
 
-
-    /**
-     * Add a TextView containing the help text.
-     */
-    private void addHelpText(FormEntryPrompt p) {
-
-        String s = p.getHelpText();
-
-        if (s != null && !s.equals("")) {
-            mHelpText = new TextView(getContext());
-            mHelpText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize - 3);
-            mHelpText.setPadding(0, -5, 0, 7);
-            // wrap to the widget of view
-            mHelpText.setHorizontallyScrolling(false);
-            mHelpText.setText(s);
-            mHelpText.setTypeface(null, Typeface.ITALIC);
-
-            addView(mHelpText, mLayoutParams);
-        }
-    }
-
+//
+//    /**
+//     * Add a TextView containing the help text.
+//     */
+//    private void addHelpText(FormEntryPrompt p) {
+//
+//        String s = p.getHelpText();
+//
+//        if (s != null && !s.equals("")) {
+//            mHelpText = new TextView(getContext());
+//            mHelpText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mQuestionFontsize - 3);
+//            mHelpText.setPadding(0, -5, 0, 7);
+//            // wrap to the widget of view
+//            mHelpText.setHorizontallyScrolling(false);
+//            mHelpText.setText(s);
+//            mHelpText.setTypeface(null, Typeface.ITALIC);
+//
+//            addView(mHelpText, mLayoutParams);
+//        }
+//    }
+//
 
     /**
      * Every subclassed widget should override this, adding any views they may contain, and calling

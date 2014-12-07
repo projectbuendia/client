@@ -2,28 +2,19 @@ package org.msf.records.ui;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.SearchView;
 
-import com.squareup.otto.Subscribe;
-
-import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.events.location.LocationsLoadedEvent;
+import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
+
+import de.greenrobot.event.EventBus;
 
 
 /**
@@ -42,25 +33,14 @@ import org.odk.collect.android.tasks.DiskSyncTask;
  * {@link PatientListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class PatientListActivity extends FragmentActivity
-        implements PatientListFragment.Callbacks {
+public class PatientListActivity extends PatientSearchActivity {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
 
-    private SearchView mSearchView;
+    private static final String SELECTED_FILTER_KEY = "selected_filter";
 
-    private View mScanBtn, mAddPatientBtn, mSettingsBtn;
-
-    private OnSearchListener mSearchListener;
-
-    interface OnSearchListener {
-        void setQuerySubmitted(String q);
-    }
-
-    public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListener = onSearchListener;
-    }
+    private PatientListFragment mFragment;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -71,11 +51,7 @@ public class PatientListActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Crashlytics is really painful on the emulator.
-//        Crashlytics.start(this);
         setContentView(R.layout.activity_patient_list);
-
-        getActionBar().setDisplayShowHomeEnabled(false);
 
         if (findViewById(R.id.patient_detail_container) != null) {
             // The detail container view will be present only in the
@@ -83,7 +59,6 @@ public class PatientListActivity extends FragmentActivity
             // res/values-sw600dp). If this view is present, then the
             // activity should be in two-pane mode.
             mTwoPane = true;
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
             // Create a main screen shown when no patient is selected.
             MainScreenFragment mainScreenFragment = new MainScreenFragment();
@@ -91,142 +66,74 @@ public class PatientListActivity extends FragmentActivity
             // Add the fragment to the container.
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.patient_detail_container, mainScreenFragment).commit();
-
-            setupCustomActionBar();
         }
+
+        int selectedFilter = 0;  // Default filter == all patients
+        if (savedInstanceState != null) {
+            selectedFilter = savedInstanceState.getInt(SELECTED_FILTER_KEY, 0);
+        }
+        setupCustomActionBar(selectedFilter);
 
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        App.getMainThreadBus().register(this);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
     }
 
-    @Override
-    protected void onPause() {
-        App.getMainThreadBus().unregister(this);
-
-        super.onPause();
+    public synchronized void onEvent(LocationsLoadedEvent event) {
+        // Update filters when locations update, as zones may have changed.
+        setupCustomActionBar(getActionBar().getSelectedNavigationIndex());
     }
 
-    private void setupCustomActionBar(){
-        final LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext()
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
+    private void setupCustomActionBar(int selectedFilter){
+        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay(this);
+        SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<SimpleSelectionFilter>(
+                this,
+                R.layout.patient_list_spinner_dropdown_item,
+                R.layout.patient_list_spinner_expanded_dropdown_item,
+                R.layout.patient_list_spinner_expanded_section_divider,
+                filters);
+
+        ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int position, long id) {
+                mFragment.filterBy(filters[position]);
+                return true;
+            }
+        };
+
         final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions(
-                ActionBar.DISPLAY_SHOW_CUSTOM,
-                ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
-                        | ActionBar.DISPLAY_SHOW_TITLE);
-        final View customActionBarView = inflater.inflate(
-                R.layout.actionbar_custom_main, null);
+        actionBar.setLogo(R.drawable.ic_launcher);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionBar.setListNavigationCallbacks(adapter, callback);
+        actionBar.setSelectedNavigationItem(selectedFilter);
 
-//        mAddPatientBtn = customActionBarView.findViewById(R.id.actionbar_add_patient);
-//        mScanBtn = customActionBarView.findViewById(R.id.actionbar_scan);
-        mSettingsBtn = customActionBarView.findViewById(R.id.actionbar_settings);
-        mSearchView = (SearchView) customActionBarView.findViewById(R.id.actionbar_custom_main_search);
-        mSearchView.setIconifiedByDefault(false);
-        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-    }
-
-    /**
-     * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given uuid/name/id was selected.
-     */
-    @Override
-    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
-        Intent detailIntent = new Intent(this, PatientDetailActivity.class);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-        detailIntent.putExtra(PatientDetailActivity.PATIENT_UUID_KEY, uuid);
-        detailIntent.putExtra(PatientDetailFragment.PATIENT_UUID_KEY, uuid);
-        startActivity(detailIntent);
+        mFragment = (PatientListFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.patient_list);
+        mFragment.filterBy(filters[selectedFilter]);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        if(!mTwoPane) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.main, menu);
+    public void onExtendOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
 
-            menu.findItem(R.id.action_add).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    startActivity(PatientAddActivity.class);
-                    return false;
-                }
-            });
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        OdkActivityLauncher.fetchAndShowXform(
+                                PatientListActivity.this,
+                                Constants.ADD_PATIENT_UUID,
+                                ODK_ACTIVITY_REQUEST);
 
-            menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startActivity(SettingsActivity.class);
-                return false;
-              }
-            });
-
-            menu.findItem(R.id.action_scan).setOnMenuItemClickListener(new OnMenuItemClickListener() {
-              @Override
-              public boolean onMenuItemClick(MenuItem item) {
-                startScanBracelet();
-                return false;
-              }
-            });
-
-            MenuItem searchMenuItem = menu.findItem(R.id.action_search);
-            mSearchView = (SearchView) searchMenuItem.getActionView();
-            mSearchView.setIconifiedByDefault(false);
-
-            searchMenuItem.expandActionView();
-        } else {
-//          mAddPatientBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              startActivity(PatientAddActivity.class);
-//            }
-//          });
-
-          mSettingsBtn.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                  startActivity(SettingsActivity.class);
-              }
-          });
-
-//          mScanBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//              startScanBracelet();
-//            }
-//          });
-        }
-
-        InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-          @Override
-          public boolean onQueryTextSubmit(String query) {
-
-            InputMethodManager mgr = (InputMethodManager) getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-            mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-            return true;
-          }
-
-          @Override
-          public boolean onQueryTextChange(String newText) {
-            if (mSearchListener != null)
-              mSearchListener.setQuerySubmitted(newText);
-            return true;
-          }
-        });
-
-        return true;
+                        return true;
+                    }
+                });
+        super.onExtendOptionsMenu(menu);
     }
 
     private enum ScanAction {
@@ -243,15 +150,6 @@ public class PatientListActivity extends FragmentActivity
                 break;
             case FAKE_SCAN:
                 showFakeScanProgress();
-                break;
-        }
-    }
-
-    public void onButtonClicked(View view) {
-        switch (view.getId()) {
-            case R.id.new_patient_button:
-                OdkActivityLauncher.fetchAndShowXform(this, Constants.ADD_PATIENT_UUID,
-                        ODK_ACTIVITY_REQUEST);
                 break;
         }
     }

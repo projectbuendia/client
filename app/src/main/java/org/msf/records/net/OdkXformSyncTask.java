@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
-import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -45,7 +44,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     @Override
     protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
 
-        OpenMrsXformsConnection openMrsXformsConnection = App.getmOpenMrsXformsConnection();
+        OpenMrsXformsConnection openMrsXformsConnection =
+                new OpenMrsXformsConnection(App.getConnectionDetails());
 
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
             final File proposedPath = formInfo.makeFileForForm();

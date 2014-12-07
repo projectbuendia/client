@@ -1,253 +1,228 @@
 package org.msf.records.ui;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Typeface;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
+import android.widget.CursorTreeAdapter;
+import android.widget.Filter;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.msf.records.R;
-import org.msf.records.cache.PatientOpenHelper;
-import org.msf.records.model.Patient;
-import org.msf.records.model.Status;
+import org.msf.records.filter.FilterGroup;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.LocationUuidFilter;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.model.Concept;
+import org.msf.records.location.LocationTree;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.utils.PatientCountDisplay;
+
 import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Created by akalachman on 11/20/14.
+ * Created by Gil on 24/11/14.
  */
-public class ExpandablePatientListAdapter extends BaseExpandableListAdapter {
+public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
-    private Activity context;
-    private Map<String, Map<String, Tent>> tentsByZone;
-    private List<String> zones;
-    private final String UNKNOWN_ZONE = "Unknown Zone";
-    private final String UNKNOWN_TENT = "Unknown Tent";
+    private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
 
-    private PatientOpenHelper patientDb;
+    private Context mContext;
+    private String mQueryFilterTerm;
+    private SimpleSelectionFilter mFilter;
 
-    public ExpandablePatientListAdapter(Activity context) {
-        this.context = context;
-        tentsByZone = new HashMap<String, Map<String, Tent>>();
-        zones = new ArrayList<String>();
-        patientDb = new PatientOpenHelper(context);
+    public ExpandablePatientListAdapter(
+            Cursor cursor, Context context, String queryFilterTerm,
+            SimpleSelectionFilter filter) {
+        super(cursor, context);
+        mContext = context;
+        mQueryFilterTerm = queryFilterTerm;
+        mFilter = filter;
+    }
+
+    public SimpleSelectionFilter getSelectionFilter() {
+        return mFilter;
+    }
+
+    public void setSelectionFilter(SimpleSelectionFilter filter) {
+        mFilter = filter;
+    }
+
+    public void filter(CharSequence constraint, Filter.FilterListener listener) {
+        setGroupCursor(null); // Reset the group cursor.
+
+        // Set the query filter term as a member variable so it can be retrieved when
+        // getting patients-per-tent.
+        mQueryFilterTerm = constraint.toString();
+
+        // Perform the actual filtering.
+        getFilter().filter(constraint, listener);
     }
 
     @Override
-    public Object getChild(int groupPosition, int childPosition) {
-        return allListItemsForZone(zones.get(groupPosition)).get(childPosition);
-    }
+    protected Cursor getChildrenCursor(Cursor groupCursor) {
+        Cursor itemCursor = getGroup(groupCursor.getPosition());
 
-    public Patient getPatient(int groupPosition, int childPosition) {
+        String tent = itemCursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
+
+        StringBuilder sortBuilder = new StringBuilder();
+
+        sortBuilder.append(PatientProviderContract.PatientColumns._ID);
+        sortBuilder.append(",");
+        sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME);
+        sortBuilder.append(",");
+        sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
+
+        FilterQueryProvider queryProvider =
+                new FilterQueryProviderFactory()
+                        .setSortClause(sortBuilder.toString())
+                        .getFilterQueryProvider(
+                                mContext,
+                                new FilterGroup(getSelectionFilter(),
+                                        new LocationUuidFilter(tent)));
+
+        Cursor patientsCursor = null;
+
         try {
-            return (Patient) getChild(groupPosition, childPosition);
-        } catch (ClassCastException e) {
-            return null;
+            patientsCursor = queryProvider.runQuery(mQueryFilterTerm);
+            Log.d(TAG, "childCursor " + patientsCursor.getCount());
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
+
+        return patientsCursor;
     }
 
     @Override
-    public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
+    protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
+        return LayoutInflater.from(context).inflate(R.layout.listview_tent_header, null);
     }
 
     @Override
-    public View getChildView(final int groupPosition, final int childPosition,
-                             boolean isLastChild, View convertView, ViewGroup parent) {
-        Object listItem = getChild(groupPosition, childPosition);
-        if (listItem instanceof String) {
-            return getTentNameView((String)listItem, convertView);
+    protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+        int patientCount = getChildrenCursor(cursor).getCount();
+        String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
+        String tentName = context.getResources().getString(R.string.unknown_tent);
+        LocationTree location = LocationTree.getTentForUuid(locationUuid);
+        if (location != null) {
+            tentName = location.toString();
         }
-        final Patient patient = (Patient)listItem;
 
+        TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
+        item.setText(PatientCountDisplay.getPatientCountTitle(context, patientCount, tentName));
+    }
+
+    @Override
+    protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
+        View view = LayoutInflater.from(context).inflate(R.layout.listview_cell_search_results, parent, false);
+        ViewHolder holder = new ViewHolder(view);
+        view.setTag(holder);
+        return view;
+    }
+
+    @Override
+    protected void bindChildView(View convertView, Context context, Cursor cursor, boolean isLastChild) {
         ViewHolder holder = null;
         if (convertView != null) {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        if (convertView == null || holder == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.listview_cell_search_results, parent, false);
-            holder = new ViewHolder(convertView);
-            convertView.setTag(holder);
-        }
+        String patient_uuid = cursor.getString(PatientProjection.COLUMN_UUID);
+        String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
+        String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
+        String id = cursor.getString(PatientProjection.COLUMN_ID);
+        String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
+        String status = cursor.getString(PatientProjection.COLUMN_STATUS);
+        String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
+        int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
+        int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
 
-        holder.mPatientName.setText(patient.given_name + " " + patient.family_name);
-        holder.mPatientId.setText(patient.id);
+        holder.mPatientName.setText(givenName + " " + familyName);
+        holder.mPatientId.setText(id);
 
-        if (patient.age.type != null && patient.age.type.equals("months")) {
-            holder.mPatientAge.setText("<1");
-        }
-
-        if (patient.age.type != null && patient.age.type.equals("years")) {
-            holder.mPatientAge.setText("" + patient.age.years);
-        }
-
-        if (patient.age.type == null) {
-            holder.mPatientAge.setText("99");
-            holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
-        }
-
-        if (patient.gender != null && patient.gender.equals("M")) {
-            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_man));
-        }
-
-        if (patient.gender != null && patient.gender.equals("F")) {
-            if (patient.pregnant != null && patient.pregnant) {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_pregnant));
-            } else {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.gender_woman));
+        // Grab observations for this patient so we can determine condition and pregnant status.
+        // TODO(akalachman): Get rid of this whole block as it's inefficient.
+        boolean pregnant = false;
+        String condition = null;
+        Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
+                LocalizedChartHelper.getMostRecentObservations(mContext.getContentResolver(), uuid);
+        if (observationMap != null) {
+            pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID) &&
+                    observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);
+            if (observationMap.containsKey(Concept.GENERAL_CONDITION_UUID)) {
+                condition = observationMap.get(Concept.GENERAL_CONDITION_UUID).value;
             }
         }
 
-        if (patient.gender == null) {
+        // TODO(akalachman): Extract colors into helper class + resources.
+        if (condition == null) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#D8D8D8"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_GOOD_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#4CAF50"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_FAIR_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#FFC927"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_POOR_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#FF2121"));
+        } else if (condition.equals(Concept.GENERAL_CONDITION_VERY_POOR_UUID)) {
+            holder.mPatientId.setBackgroundColor(Color.parseColor("#D0021B"));
+        } else {
+            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
+        }
+
+        if (ageMonths > 0) {
+            holder.mPatientAge.setText(
+                    context.getResources().getString(R.string.age_months, ageMonths));
+        } else if (ageYears > 0) {
+            holder.mPatientAge.setText(
+                    context.getResources().getString(R.string.age_years, ageYears));
+        } else {
+            holder.mPatientAge.setText(
+                    context.getResources().getString(R.string.age_years, 99));
+            holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
+        }
+
+        if (gender != null && gender.equals("M")) {
+            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_male));
+        }
+
+        if (gender != null && gender.equals("F")) {
+            if (pregnant) {
+                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female_pregnant));
+            } else {
+                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female));
+            }
+        }
+
+        if (gender == null) {
             holder.mPatientGender.setVisibility(View.GONE);
         }
 
-        if (patient.status == null) {
-            holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(R.color.transparent));
+        // Add a bottom border and extra padding to the last item in each group.
+        if (isLastChild) {
+            convertView.setBackgroundResource(R.drawable.bottom_border_1dp);
+            convertView.setPadding(
+                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                    convertView.getPaddingRight(), 40);
+        } else {
+            convertView.setBackgroundResource(0);
+            convertView.setPadding(
+                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                    convertView.getPaddingRight(), 20);
         }
-
-        if (patient.status != null && Status.getStatus(patient.status) != null) {
-            holder.mPatientListStatusColorIndicator.setBackgroundColor(context.getResources().getColor(Status.getStatus(patient.status).colorId));
-        }
-
-        return convertView;
-    }
-
-    private View getTentNameView(String tentName, View convertView) {
-        if (convertView == null || convertView.findViewById(R.id.patient_list_tent_tv) == null) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.listview_tent_header, null);
-        }
-        TextView item = (TextView) convertView.findViewById(R.id.patient_list_tent_tv);
-        item.setText(tentName);
-        return convertView;
-    }
-
-    @Override
-    public int getChildrenCount(int groupPosition) {
-        if (groupPosition >= zones.size()) {
-            return 0;
-        }
-
-        return allListItemsForZone(zones.get(groupPosition)).size();
-    }
-
-    @Override
-    public Object getGroup(int groupPosition) {
-        return zones.get(groupPosition);
-    }
-
-    @Override
-    public int getGroupCount() {
-        return zones.size();
-    }
-
-    @Override
-    public long getGroupId(int groupPosition) {
-        return groupPosition;
-    }
-
-    @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
-        String zone = (String) getGroup(groupPosition);
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.listview_zone_header, null);
-        }
-        TextView item = (TextView) convertView.findViewById(R.id.patient_list_zone_tv);
-        item.setText(zone);
-        return convertView;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
-    }
-
-    public void clear() {
-        tentsByZone.clear();
-        zones.clear();
-    }
-
-    public void addAll(Collection<? extends Patient> patients) {
-        // Inject entries from local cache.
-        for (Patient patient : patients) {
-            add(patient);
-        }
-    }
-
-    public void add(final Patient patient) {
-        // If the patient exists in local cache, inject it.
-        Patient patientToAdd = patientDb.getPatient(patient.uuid);
-        if (patientToAdd == null) {
-            patientToAdd = patient;
-        }
-
-        String zone = UNKNOWN_ZONE;
-        if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.zone != null) {
-            zone = patientToAdd.assigned_location.zone;
-        }
-        if (!tentsByZone.containsKey(zone)) {
-            tentsByZone.put(zone, new HashMap<String, Tent>());
-            zones.add(zone);
-        }
-
-        Map<String, Tent> tents = tentsByZone.get(zone);
-        String tentName = UNKNOWN_TENT;
-        if (patientToAdd.assigned_location != null &&
-                patientToAdd.assigned_location.tent != null) {
-            tentName = patientToAdd.assigned_location.tent;
-        }
-        if (!tents.containsKey(tentName)) {
-            Tent tent = new Tent();
-            tent.name = tentName;
-            tents.put(tentName, tent);
-        }
-
-        tents.get(tentName).patients.add(patientToAdd);
-    }
-
-    // TODO(akalachman): Use this for grouping.
-    private class Tent {
-        public String name;
-        public List<Patient> patients = new ArrayList<Patient>();
-    }
-
-    private List<Object> allListItemsForZone(String zone) {
-        List<Object> listItems = new ArrayList<Object>();
-        for (Tent tent : tentsByZone.get(zone).values()) {
-            listItems.add(tent.name);
-            listItems.addAll(tent.patients);
-        }
-
-        return listItems;
     }
 
     static class ViewHolder {
-        @InjectView(R.id.listview_cell_search_results_color_indicator) ImageView mPatientListStatusColorIndicator;
         @InjectView(R.id.listview_cell_search_results_name) TextView mPatientName;
         @InjectView(R.id.listview_cell_search_results_id) TextView mPatientId;
         @InjectView(R.id.listview_cell_search_results_gender) ImageView mPatientGender;

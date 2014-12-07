@@ -1,2 +1,4 @@
-/build
+/build/*
+!build/outputs/apk/app-debug.apk
+
 .idea/workspace.xml

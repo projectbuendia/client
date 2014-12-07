@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_search"
-        android:title="Search"
-        android:showAsAction="always"
-        android:icon="@null"
-        android:queryHint="Patient id or name"
-        android:actionViewClass="android.widget.SearchView" />
-    <item android:showAsAction="ifRoom"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+      android:id="@+id/action_search"
+      android:icon="@drawable/ic_action_search"
+      android:title="@string/action_search"
+      android:showAsAction="ifRoom|collapseActionView"
+      android:actionViewClass="android.widget.SearchView"/>
+
+    <item
+        android:showAsAction="ifRoom"
         android:id="@+id/action_add"
+        android:icon="@drawable/ic_action_add"
         android:title="Add Patient"/>
-    <item android:showAsAction="ifRoom"
-        android:id="@+id/action_scan"
-        android:title="Scan"/>
-    <item android:showAsAction="ifRoom"
-        android:id="@+id/action_settings"
-        android:title="Settings"/>
 </menu>

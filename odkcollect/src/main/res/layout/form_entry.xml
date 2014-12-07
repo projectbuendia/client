@@ -23,29 +23,44 @@ the License.
     android:divider="?android:attr/dividerHorizontal"
     android:id="@+id/rl" >
 
-    <ListView
-        android:id="@+id/sidebar"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:choiceMode="singleChoice"
-        tools:layout="@android:layout/list_content" >
-    </ListView>
-
     <ScrollView
         android:id="@+id/question_holder_scroller"
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="5"
+        android:layout_weight="1"
         android:layout_alignParentTop="true">
 
         <LinearLayout
             android:id="@+id/questionholder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusableInTouchMode="true"  />
 
     </ScrollView>
+
+    <RelativeLayout
+        android:layout_width="96dp"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/button_down"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_alignParentBottom="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_down" />
+
+        <ImageButton
+            android:id="@+id/button_up"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_above="@id/button_down"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_up" />
+
+    </RelativeLayout>
 
 </LinearLayout>

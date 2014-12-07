@@ -1,12 +1,12 @@
 package org.msf.records.ui;
 
 
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Charsets;
 
 import org.msf.records.App;
 
@@ -58,6 +59,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     @Override
     public void onErrorResponse(VolleyError error){
         changeErrorState(error.toString());
+        Log.e("server", new String(error.networkResponse.data, Charsets.UTF_8));
     }
 
     @Override

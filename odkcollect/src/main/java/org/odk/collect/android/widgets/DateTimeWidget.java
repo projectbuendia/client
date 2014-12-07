@@ -236,6 +236,23 @@ public class DateTimeWidget extends QuestionWidget {
         }
     }
 
+    @Override
+    public boolean forceSetAnswer(Object answer) {
+        if (!(answer instanceof DateTime)) {
+            return false;
+        }
+
+        DateTime typedAnswer = (DateTime) answer;
+        mDatePicker.init(
+                typedAnswer.getYear(),
+                typedAnswer.getMonthOfYear() - 1,
+                typedAnswer.getDayOfMonth(),
+                mDateListener);
+        mTimePicker.setCurrentHour(typedAnswer.getHourOfDay());
+        mTimePicker.setCurrentMinute(typedAnswer.getMinuteOfHour());
+
+        return true;
+    }
 
     /**
      * Resets date to today.

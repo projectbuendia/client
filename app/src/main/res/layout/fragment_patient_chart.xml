@@ -1,0 +1,195 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context="org.msf.records.ui.PatientChartFragment">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="30sp"
+            android:gravity="left"
+            android:id="@+id/patient_chart_fullname"
+            android:text="FirstName LastName"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="30sp"
+            android:gravity="right"
+            android:id="@+id/patient_chart_id"
+            android:text="PatientID#"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:gravity="left"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@android:color/darker_gray"
+            android:id="@+id/patient_chart_age"
+            tools:text="88-year-old "/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:gravity="left"
+            android:fontFamily="sans-serif-condensed"
+            android:id="@+id/patient_chart_gender"
+            android:textColor="@android:color/darker_gray"
+            tools:text="Male"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:gravity="right"
+            android:fontFamily="sans-serif-condensed"
+            android:text="EMC Location/Tent#"
+            android:id="@+id/patient_chart_location"
+            android:textColor="@android:color/darker_gray"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:layout_alignParentStart="true"
+            android:text="Admitted 4 Days Ago"
+            android:id="@+id/patient_chart_days"
+            android:fontFamily="sans-serif-condensed"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/patient_chart_last_observation_date_time"
+            android:fontFamily="sans-serif-condensed"
+            android:text="29 NOV 2014 07:18"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/patient_chart_last_observation_date_time"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="25sp"
+            android:text="Last Observation: "/>
+
+    </RelativeLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:stretchColumns="*">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <include
+                layout="@layout/view_vital_general_condition"
+                android:id="@+id/patient_chart_general_condition_parent"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_margin="4dp" />
+
+            <include
+                layout="@layout/view_vital_temperature"
+                android:id="@+id/patient_chart_temperature_parent"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_margin="4dp" />
+
+            <include
+                layout="@layout/view_vital_pcr"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_margin="4dp" />
+
+            <include
+                layout="@layout/view_vital_special"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_margin="4dp" />
+
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <org.msf.records.view.VitalView
+                android:id="@+id/vital_responsiveness"
+                android:layout_width="0dp"
+                android:layout_height="128dp"
+                android:layout_margin="4dp"
+                android:background="#01579b"
+                app:vitalName="Conscious State"
+                app:vitalValue="-"/>
+
+            <org.msf.records.view.VitalView
+                android:id="@+id/vital_mobility"
+                android:layout_width="0dp"
+                android:layout_height="128dp"
+                android:layout_margin="4dp"
+                android:background="#01579b"
+                app:vitalName="Mobility"
+                app:vitalValue="-"/>
+
+            <org.msf.records.view.VitalView
+                android:id="@+id/vital_diet"
+                android:layout_width="0dp"
+                android:layout_height="128dp"
+                android:layout_margin="4dp"
+                android:background="#01579b"
+                app:vitalName="Diet"
+                app:vitalValue="-"/>
+
+            <org.msf.records.view.VitalView
+                android:id="@+id/vital_food_drink"
+                android:layout_width="0dp"
+                android:layout_height="128dp"
+                android:layout_margin="4dp"
+                android:background="#01579b"
+                app:vitalName="Hydration"
+                app:vitalValue="-"/>
+
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>

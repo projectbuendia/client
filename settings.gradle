@@ -1,2 +1,6 @@
-include ':app', ':odkcollect', ':viewserver'
+include ':app'
+include ':autofittextview'
+include ':odkcollect'
+include ':snackbar'
 include ':ViewPagerIndicator'
+include ':viewserver'

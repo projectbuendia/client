@@ -16,7 +16,7 @@ import java.io.Serializable;
 /**
  * Created by danieljulio on 06/10/2014.
  */
-
+@Deprecated
 public class ListDialogFragment extends DialogFragment {
 
     private static final String TAG = ListDialogFragment.class.getName();

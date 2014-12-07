@@ -31,9 +31,11 @@
         android:id="@+id/fragment_patient_list_swipe_to_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <ExpandableListView
+        <org.msf.records.view.GroupedListView
             android:id="@+id/fragment_patient_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:childDivider="#00000000"
+            android:dividerHeight="2dp"/>
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>
