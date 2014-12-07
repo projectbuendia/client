@@ -2,7 +2,6 @@ package org.msf.records.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
-import org.msf.records.view.SubtitledButtonView;
+import org.msf.records.widget.SubtitledButtonView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

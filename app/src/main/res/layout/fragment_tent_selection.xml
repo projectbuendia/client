@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/tent_selection_layout">
-        <org.msf.records.view.SubtitledButtonView
+        <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_all_patients"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:clickable="true"
             app:subtitledButtonTitle="ALL PATIENTS"
             app:subtitledButtonSubtitle="No patients"/>
-        <org.msf.records.view.SubtitledButtonView
+        <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_triage"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
             android:verticalSpacing="10dp"
             android:horizontalSpacing="10dp"
             android:stretchMode="columnWidth" />
-        <org.msf.records.view.SubtitledButtonView
+        <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_discharged"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
