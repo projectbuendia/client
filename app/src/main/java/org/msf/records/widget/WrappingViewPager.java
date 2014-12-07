@@ -1,4 +1,4 @@
-package org.msf.records.view;
+package org.msf.records.widget;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
