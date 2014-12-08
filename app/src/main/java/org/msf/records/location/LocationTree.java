@@ -193,23 +193,27 @@ public class LocationTree implements Comparable<LocationTree> {
             return 0;
         }
 
+        // Zone order takes precedence, if zones differ.
+        LocationTree zone = getAncestorOrThisWithDepth(ZONE_DEPTH);
+        LocationTree otherZone = another.getAncestorOrThisWithDepth(ZONE_DEPTH);
+        if (zone != null && otherZone != null
+                && zone.getLocation() != null && otherZone.getLocation() != null) {
+            int zoneComparison = Zone.compareTo(zone.getLocation(), otherZone.getLocation());
+            if (zoneComparison != 0) {
+                return zoneComparison;
+            }
+        }
+
         // On the off-chance that the other location is at a different depth, prefer
         // locations at a smaller depth (facility > zone > tent > bed).
-        Integer depth = getDepth();
+        /*Integer depth = getDepth();
         Integer anotherDepth = another.getDepth();
         int depthComparison = depth.compareTo(anotherDepth);
         if (depthComparison != 0) {
             return depthComparison;
-        }
+        }*/
 
-        // Zone order takes precedence, but a value of 0 means that one or both locations
-        // is not a zone.
-        int zoneComparison = Zone.compareTo(getLocation(), another.getLocation());
-        if (zoneComparison != 0) {
-            return zoneComparison;
-        }
-
-        // Parent order is the next precedent (e.g. tents should be sorted by zone).
+        // Parent order is the next precedent (e.g. beds should be ordered by tent).
         if (getParent() != null && another.getParent() != null) {
             int parentComparison = getParent().compareTo(another.getParent());
             if (parentComparison != 0) {
