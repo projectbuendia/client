@@ -211,7 +211,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, locationUuid;
+        String givenName, familyName, uuid, status, locationUuid;
         String gender;
         int ageMonths = -1, ageYears = -1;
         long admissionTimestamp;
@@ -224,6 +224,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
             familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
             uuid = c.getString(PatientProjection.COLUMN_UUID);
+            status = c.getString(PatientProjection.COLUMN_STATUS);
             admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
             locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
             if (locationUuid == null) {
@@ -248,6 +249,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if ((patient.given_name != null && !patient.given_name.equals(givenName)) ||
                         (patient.family_name != null && !patient.family_name.equals(familyName)) ||
                         (patient.uuid != null && !patient.uuid.equals(uuid)) ||
+                        (patient.status != null && !patient.status.equals(status)) ||
                         (patient.admission_timestamp != null &&
                                 !patient.admission_timestamp.equals(admissionTimestamp)) ||
                         (patient.assigned_location != null &&
@@ -263,6 +265,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, givenName)
                             .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
                             .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
+                            .withValue(PatientColumns.COLUMN_NAME_STATUS, status)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
@@ -294,6 +297,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, e.given_name)
                             .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
                             .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
+                            .withValue(PatientColumns.COLUMN_NAME_STATUS, e.status)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
                             .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
@@ -314,6 +318,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Log.i(TAG, "Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(PatientProviderContract.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI, null, false);
+        mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI_PATIENT_ZONES, null, false);
+        mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI_PATIENT_TENTS, null, false);
 
 
 

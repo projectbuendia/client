@@ -44,6 +44,16 @@ public class PatientProviderContract {
     static final String PATH_PATIENTS = "patients";
 
     /**
+     * Path component for "zones"-type resources.  Visible for re-use in MsfRecordsProvider.
+     */
+    static final String PATH_PATIENTS_ZONES = "zones";
+
+    /**
+     * Path component for "tents"-type resources. Visible for re-use in MsfRecordsProvider.
+     */
+    static final String PATH_PATIENTS_TENTS = "tents";
+
+    /**
      * Path component for counts of patients per tent. Visible for re-use in MsfRecordsProvider.
      */
     static final String PATH_TENT_PATIENT_COUNTS = "tentpatients";
@@ -53,6 +63,12 @@ public class PatientProviderContract {
      */
     public static final Uri CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS).build();
+
+    public static final Uri CONTENT_URI_PATIENT_ZONES =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_ZONES).build();
+
+    public static final Uri CONTENT_URI_PATIENT_TENTS =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_TENTS).build();
 
     public static final Uri CONTENT_URI_TENT_PATIENT_COUNTS =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_TENT_PATIENT_COUNTS).build();
@@ -75,9 +91,23 @@ public class PatientProviderContract {
          */
         public static final String COLUMN_NAME_GIVEN_NAME = "given_name";
         /**
+         * Patient Status
+         */
+        public static final String COLUMN_NAME_STATUS = "status";
+        /**
          * Patient uuid
          */
         public static final String COLUMN_NAME_UUID = "uuid";
+        /**
+         * Patient zone
+         */
+        @Deprecated
+        public static final String COLUMN_NAME_LOCATION_ZONE = "location_zone";
+        /**
+         * Patient tent
+         */
+        @Deprecated
+        public static final String COLUMN_NAME_LOCATION_TENT = "location_tent";
         /**
          * Patient location uuid
          */
