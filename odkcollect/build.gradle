@@ -32,8 +32,6 @@ android {
 }
 
 dependencies {
-    // Build plugins
-    provided 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables.
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -49,6 +47,4 @@ dependencies {
     }
     compile files('libs/httpclientandroidlib-4.2.1.jar')
     compile files('libs/javarosa-libraries-2014-04-29.jar')
-
-    compile 'com.github.frankiesardo:auto-parcel:+' // Easier Parcelables.
 }
