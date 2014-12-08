@@ -19,11 +19,15 @@ package org.odk.collect.android.provider;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import org.odk.collect.android.BuildConfig;
+import org.odk.collect.android.utilities.AppBuildConfig;
+
 /**
  * Convenience definitions for NotePadProvider
  */
 public final class FormsProviderAPI {
-    public static final String AUTHORITY = "org.msf.projectbuendia.odk.collect.android.provider.odk.forms";
+    public static final String AUTHORITY =
+            AppBuildConfig.APPLICATION_ID + ".odk.collect.android.provider.odk.forms";
 
     // This class cannot be instantiated
     private FormsProviderAPI() {}
