@@ -15,22 +15,8 @@ public class Patient implements Serializable {
 
     public String important_information;
 
-    /**
-     * Accepted values:
-     * suspected, probable, confirmed, non-case, convalescent,
-     * can_be_discharged, dischraged, suspected_dead, confirmed_dead
-     */
-    public String status;
-
-    public Boolean pregnant;
-
     // Must be "M" or "F".
     public String gender;
-
-    @Deprecated
-    public String movement;
-    @Deprecated
-    public String eating;
 
     public Long admission_timestamp;
     public Long created_timestamp;
@@ -71,12 +57,6 @@ public class Patient implements Serializable {
         }
         if (source.important_information != null) {
             this.important_information = source.important_information;
-        }
-        if (source.status != null) {
-            this.status = source.status;
-        }
-        if (source.pregnant != null) {
-            this.pregnant = source.pregnant;
         }
         if (source.gender != null) {
             this.gender = source.gender;
