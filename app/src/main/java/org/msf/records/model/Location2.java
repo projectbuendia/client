@@ -1,7 +1,5 @@
 package org.msf.records.model;
 
-import org.msf.records.net.model.PatientLocation;
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -43,19 +41,6 @@ public final class Location2 implements Parcelable {
         return new Location2(zone, tent, bed);
     }
 
-    public static Location2 create(PatientLocation patientLocation) {
-        return new Location2(
-                patientLocation.zone, patientLocation.tent, patientLocation.bed);
-    }
-
-    public PatientLocation toPatientLocation() {
-        PatientLocation location = new PatientLocation();
-        location.zone = zone;
-        location.tent = tent;
-        location.bed = bed;
-        return location;
-    }
-    
     public static final Parcelable.Creator<Location2> CREATOR = new Parcelable.Creator<Location2>() {
         @Override
         public Location2 createFromParcel(Parcel in) {
