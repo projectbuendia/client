@@ -19,7 +19,7 @@
         android:layout_centerInParent="true"
         android:horizontalSpacing="0dp"
         android:verticalSpacing="0dp"
-        android:stretchMode="none"
+        android:stretchMode="spacingWidthUniform"
         android:columnWidth="136dp"
         android:numColumns="auto_fit"
         tools:listitem="@layout/grid_item_user"/>
