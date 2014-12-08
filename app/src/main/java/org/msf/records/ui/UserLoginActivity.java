@@ -1,39 +1,59 @@
 package org.msf.records.ui;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.net.model.User;
+import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
+import org.msf.records.utils.Colorizer;
+
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.events.user.UserAddFailedEvent;
-import org.msf.records.events.user.UserAddedEvent;
-import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
-
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnItemClick;
 import de.greenrobot.event.EventBus;
 
 /**
- * A {@link FragmentActivity} that allows a user to login.
+ * Screen allowing the user to login by selecting their name.
  */
 public class UserLoginActivity extends FragmentActivity {
-    private UserLoginFragment mFragment = null;
-    private static final String TAG = "UserLoginActivity";
 
+    @Inject Colorizer mUserColorizer;
+    
+    @InjectView(R.id.users) GridView mUserListView;
+    private UserLoginController mController;
+    private UserListAdapter mUserListAdapter;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_user_login);
-
-        mFragment = new UserLoginFragment();
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.user_login_container, mFragment)
-                .commit();
+        App.getInstance().inject(this);
+        
+        setContentView(R.layout.fragment_user_login);
+        ButterKnife.inject(this);
+        
+        mUserListAdapter = new UserListAdapter(this);
+        mUserListView.setAdapter(mUserListAdapter);
+        mController = new UserLoginController(
+        		App.getUserManager(),
+        		EventBus.getDefault(),
+        		new MyUi());
     }
 
     @Override
@@ -45,12 +65,7 @@ public class UserLoginActivity extends FragmentActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        EventBus.getDefault().register(new UserAddEventSubscriber());
-                        EventBus.getDefault().register(new UserAddFailedEventSubscriber());
-                        FragmentManager fm = getSupportFragmentManager();
-                        AddNewUserDialogFragment dialogFragment =
-                                AddNewUserDialogFragment.newInstance();
-                        dialogFragment.show(fm, null);
+                    	mController.onAddUserPressed();
                         return true;
                     }
                 }
@@ -61,10 +76,7 @@ public class UserLoginActivity extends FragmentActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        Intent settingsIntent =
-                                new Intent(UserLoginActivity.this, SettingsActivity.class);
-                        startActivity(settingsIntent);
-
+                    	mController.onSettingPressed();
                         return true;
                     }
                 }
@@ -72,46 +84,96 @@ public class UserLoginActivity extends FragmentActivity {
 
         return true;
     }
-
-    private class UserAddEventSubscriber {
-        public UserAddEventSubscriber() {}
-
-        public void onEventMainThread(final UserAddedEvent event) {
-            App.getUserManager().loadKnownUsers();
-        }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	mController.init();
     }
-
-    private class UserAddFailedEventSubscriber {
-        public UserAddFailedEventSubscriber() {}
-
-        public void onEventMainThread(UserAddFailedEvent event) {
-            Toast toast = Toast.makeText(
-                    UserLoginActivity.this, toErrorString(event), Toast.LENGTH_SHORT);
-            toast.show();
+    
+    @Override
+    protected void onPause() {
+    	mController.suspend();
+    	super.onPause();
+    }
+    
+    @OnItemClick(R.id.users)
+    void onUsersItemClick(int position) {
+    	mController.onUserSelected(mUserListAdapter.getItem(position));
+    }
+    
+    private final class UserListAdapter extends ArrayAdapter<User> {
+        public UserListAdapter(Context context) {
+            super(context, R.layout.grid_item_user);
         }
 
-        private String toErrorString(UserAddFailedEvent event) {
-            int errorResource;
-            switch (event.mReason) {
-                case UserAddFailedEvent.REASON_UNKNOWN:
-                    errorResource = R.string.add_user_unknown_error;
-                    break;
-                case UserAddFailedEvent.REASON_INVALID_USER:
-                    errorResource = R.string.add_user_invalid_user;
-                    break;
-                case UserAddFailedEvent.REASON_USER_EXISTS_LOCALLY:
-                    errorResource = R.string.add_user_user_exists_locally;
-                    break;
-                case UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER:
-                    errorResource = R.string.add_user_user_exists_on_server;
-                    break;
-                case UserAddFailedEvent.REASON_SERVER_ERROR:
-                    errorResource = R.string.add_user_server_error;
-                    break;
-                default:
-                    errorResource = R.string.add_user_unknown_error;
+        @Override
+        public View getView(int position, View view, ViewGroup parent) {
+            UserListItemViewHolder holder;
+            if (view != null) {
+                holder = (UserListItemViewHolder) view.getTag();
+            } else {
+                view = LayoutInflater.from(getContext())
+                        .inflate(R.layout.grid_item_user, parent, false);
+                holder = new UserListItemViewHolder(view);
+                view.setTag(holder);
             }
-            return getResources().getString(errorResource);
+
+            User user = getItem(position);
+            holder.initials
+                    .setBackgroundColor(mUserColorizer.getColorArgb(user.getId()));
+            holder.initials.setText(user.getInitials());
+            holder.fullName.setText(user.getFullName());
+
+            return view;
         }
     }
+
+    static final class UserListItemViewHolder {
+        @InjectView(R.id.user_initials) public TextView initials;
+        @InjectView(R.id.user_name) public TextView fullName;
+
+        public UserListItemViewHolder(View view) {
+            ButterKnife.inject(this, view);
+        }
+    }
+    
+    private final class MyUi implements UserLoginController.Ui {
+    	@Override
+    	public void showAddNewUserDialog() {
+            FragmentManager fm = getSupportFragmentManager();
+            AddNewUserDialogFragment dialogFragment = AddNewUserDialogFragment.newInstance();
+            dialogFragment.show(fm, null);
+    	}
+    	
+    	@Override
+    	public void showSettings() {
+            Intent settingsIntent =
+                    new Intent(UserLoginActivity.this, SettingsActivity.class);
+            startActivity(settingsIntent);	
+    	}
+    	
+    	@Override
+    	public void showErrorToast(int stringResourceId) {
+    		Toast toast = Toast.makeText(
+    				UserLoginActivity.this, 
+    				getResources().getString(stringResourceId),
+    				Toast.LENGTH_SHORT);
+    		toast.show();
+    	}
+    	
+    	@Override
+    	public void showTentSelectionScreen() {
+            startActivity(new Intent(UserLoginActivity.this, TentSelectionActivity.class));
+    	}
+    	
+    	@Override
+    	public void showUsers(List<User> users) {
+			mUserListAdapter.setNotifyOnChange(false);
+			mUserListAdapter.clear();
+			mUserListAdapter.addAll(users);
+			mUserListAdapter.notifyDataSetChanged();
+		}
+    }
+
 }

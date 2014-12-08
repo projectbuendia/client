@@ -162,20 +162,8 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             }
         }
 
-        // TODO(akalachman): Extract colors into helper class + resources.
-        if (condition == null) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#D8D8D8"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_GOOD_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#4CAF50"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_FAIR_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#FFC927"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_POOR_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#FF2121"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_VERY_POOR_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#D0021B"));
-        } else {
-            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
-        }
+        holder.mPatientId.setBackgroundResource(
+                Concept.getColorResourceForGeneralCondition(condition));
 
         if (ageMonths > 0) {
             holder.mPatientAge.setText(
