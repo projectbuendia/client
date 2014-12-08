@@ -1,7 +1,5 @@
 package org.msf.records.filter;
 
-import android.util.Log;
-
 import org.msf.records.sync.ChartProviderContract;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.PatientProviderContract;

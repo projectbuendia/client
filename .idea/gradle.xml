@@ -14,7 +14,6 @@
             <option value="$PROJECT_DIR$/autofittextview" />
             <option value="$PROJECT_DIR$/odkcollect" />
             <option value="$PROJECT_DIR$/snackbar" />
-            <option value="$PROJECT_DIR$/viewserver" />
           </set>
         </option>
       </GradleProjectSettings>

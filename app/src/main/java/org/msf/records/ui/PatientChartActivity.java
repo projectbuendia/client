@@ -5,8 +5,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.android.debug.hv.ViewServer;
-
 import org.msf.records.R;
 import org.msf.records.controllers.PatientChartController;
 
@@ -44,8 +42,6 @@ public class PatientChartActivity extends BaseActivity {
 
         // TODO(dxchen): Dagger this!
         PatientChartController.INSTANCE.register(this);
-
-        ViewServer.get(this).addWindow(this);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -94,20 +90,6 @@ public class PatientChartActivity extends BaseActivity {
         if (patientName != null && patientId != null) {
             setTitle(patientName + " (" + patientId + ")");
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        ViewServer.get(this).setFocusedWindow(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        ViewServer.get(this).removeWindow(this);
     }
 
     @Override

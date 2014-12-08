@@ -18,7 +18,6 @@ import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;

@@ -165,6 +165,8 @@ public class Colorizer {
         return paletteBytes;
     }
 
+    // TODO(dxchen): License (MurmurHash).
+
     /**
      * Mixes the specified value so that it is closer to being evenly distributed across all
      * possible integers.

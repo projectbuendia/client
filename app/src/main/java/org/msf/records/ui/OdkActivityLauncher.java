@@ -16,7 +16,6 @@ import com.google.common.base.Charsets;
 import org.json.JSONObject;
 import org.msf.records.App;
 import org.msf.records.events.CreatePatientSucceededEvent;
-import org.msf.records.model.Patient;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;

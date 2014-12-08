@@ -1,9 +1,8 @@
 package org.msf.records.model;
 
-import org.msf.records.net.model.Location;
 import org.msf.records.R;
+import org.msf.records.net.model.Location;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

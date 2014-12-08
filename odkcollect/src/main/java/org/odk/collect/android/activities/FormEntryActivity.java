@@ -45,8 +45,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.debug.hv.ViewServer;
-
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.form.api.FormEntryCaption;
@@ -209,7 +207,6 @@ public class FormEntryActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        ViewServer.get(this).addWindow(this);
 
 		// must be at the beginning of any activity that can be called from an
 		// external intent
@@ -2199,7 +2196,6 @@ public class FormEntryActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-        ViewServer.get(this).setFocusedWindow(this);
 
         if (mErrorMessage != null) {
             if (mAlertDialog != null && !mAlertDialog.isShowing()) {
@@ -2315,7 +2311,6 @@ public class FormEntryActivity
 		}
 
 		super.onDestroy();
-        ViewServer.get(this).removeWindow(this);
 	}
 //
 //	private int mAnimationCompletionSet = 0;

@@ -13,8 +13,12 @@ import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
+import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
 
+import javax.inject.Inject;
+
+import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -22,24 +26,32 @@ import de.greenrobot.event.EventBus;
  */
 public class App extends Application {
 
+    private ObjectGraph mObjectGraph;
+
     /**
      * The current instance of the application.
      */
     private static App sInstance;
 
     private static UserManager sUserManager;
-    private static UpdateManager sUpdateManager;
 
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
 
     private static OpenMrsConnectionDetails mConnectionDetails;
 
+    @Inject Application mApplication;
+    @Inject ActivityHierarchyServer mActivityHierarchyServer;
+    @Inject UserManager mUserManager;
 
     @Override
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
+        buildObjectGraphAndInject();
+
+        registerActivityLifecycleCallbacks(mActivityHierarchyServer);
 
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(this);
@@ -47,8 +59,7 @@ public class App extends Application {
         synchronized (App.class) {
             sInstance = this;
 
-            sUserManager = new UserManager();
-            sUpdateManager = new UpdateManager();
+            sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
 
             mConnectionDetails =
                     new OpenMrsConnectionDetails(
@@ -64,16 +75,21 @@ public class App extends Application {
         PatientChartModel.INSTANCE.init();
     }
 
+    public void buildObjectGraphAndInject() {
+        mObjectGraph = ObjectGraph.create(Modules.list(this));
+        mObjectGraph.inject(this);
+    }
+
+    public void inject(Object o) {
+        mObjectGraph.inject(o);
+    }
+
     public static synchronized App getInstance() {
         return sInstance;
     }
 
     public static synchronized UserManager getUserManager() {
         return sUserManager;
-    }
-
-    public static synchronized UpdateManager getUpdateManager() {
-        return sUpdateManager;
     }
 
     public static synchronized Server getServer() {
