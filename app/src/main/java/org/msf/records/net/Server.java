@@ -1,11 +1,13 @@
 package org.msf.records.net;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
-import org.msf.records.model.Patient;
+import org.msf.records.net.model.Location;
+import org.msf.records.net.model.NewUser;
+import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.User;
 
 import java.util.List;
 import java.util.Map;
@@ -13,8 +15,6 @@ import java.util.Map;
 /**
  * An interfacing abstracting the idea of an RPC to a server. Allows calls to be abstracted between
  * the existing custom project buendia server, and an OpenMSR server.
- *
- * Created by nfortescue on 11/3/14.
  */
 public interface Server {
 
@@ -27,11 +27,7 @@ public interface Server {
     public static final String PATIENT_AGE_TYPE_KEY = "age_type";
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
-    public static final String PATIENT_ORIGIN_LOCATION_KEY = "origin_location";
     public static final String PATIENT_MOVEMENT_KEY = "movement";
-    public static final String PATIENT_LOCATION_ZONE_KEY = "assigned_location_zone_id";
-    public static final String PATIENT_LOCATION_TENT_KEY = "assigned_location_tent_id";
-    public static final String PATIENT_LOCATION_BED_KEY = "assigned_location_bed";
 
     /**
      * Create a patient record for a new patient. Currently we are just using a String-String
@@ -44,6 +40,18 @@ public interface Server {
     public void addPatient(
             Map<String, String> patientArguments,
             Response.Listener<Patient> patientListener,
+            Response.ErrorListener errorListener,
+            String logTag);
+
+    /**
+     * Creates a new user.
+     *
+     * @param user the NewUser to add
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void addUser(
+            NewUser user,
+            Response.Listener<User> userListener,
             Response.ErrorListener errorListener,
             String logTag);
 
@@ -87,6 +95,60 @@ public interface Server {
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, String logTag);
+
+    /**
+     * List all existing users.
+     *
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void listUsers(@Nullable String filterQueryTerm,
+                          Response.Listener<List<User>> userListener,
+                          Response.ErrorListener errorListener, String logTag);
+
+    /**
+     * Add a new location to the server.
+     *
+     * @param location uuid must not be set, parent_uuid must be set, and the names map must have a
+     *                 name for at least one locale.
+     * @param locationListener the listener to be informed of the newly added location
+     * @param errorListener listener to be informed of any errors
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void addLocation(Location location,
+                            final Response.Listener<Location> locationListener,
+                            final Response.ErrorListener errorListener,
+                            final String logTag);
+
+    /**
+     * Update the names for a location on the server.
+     *
+     * @param location the location, only uuid and new locale names for the location will be used,
+     *                 but ideally the other arguments should be correct
+     * @param locationListener the listener to be informed of the newly added location
+     * @param errorListener listener to be informed of any errors
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void updateLocation(Location location,
+                               final Response.Listener<Location> locationListener,
+                               final Response.ErrorListener errorListener,
+                               final String logTag);
+
+    /**
+     * Delete a given location from the server. The location should not be the EMC location or
+     * one of the zones - just a client added location, tent or bed.
+     */
+    public void deleteLocation(String locationUuid,
+                               final Response.ErrorListener errorListener,
+                               final String logTag);
+
+    /**
+     * List all locations.
+     *
+     * @param logTag a unique argument for tagging logs to aid debugging
+     */
+    public void listLocations(Response.Listener<List<Location>> locationListener,
+                              Response.ErrorListener errorListener,
+                              String logTag);
 
     /**
      * Cancel all requests associated with the given tag.

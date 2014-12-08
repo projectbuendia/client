@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="VitalView">
+        <attr name="textColor" format="color" />
+        <attr name="vitalName" format="string" localization="suggested" />
+        <attr name="vitalValue" format="string" />
+        <attr name="vitalValueMaxLines" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="SubtitledButtonView">
+        <attr name="subtitledButtonIsSquare" format="boolean" />
+        <attr name="subtitledButtonTextColor" format="color" />
+        <attr name="subtitledButtonSubtitleTextColor" format="color" />
+        <attr name="subtitledButtonTitle" format="string" localization="suggested" />
+        <attr name="subtitledButtonTitleTextSize" format="dimension" />
+        <attr name="subtitledButtonSubtitle" format="string" localization="suggested" />
+        <attr name="subtitledButtonSubtitleFormat" format="string" />
+    </declare-styleable>
+</resources>

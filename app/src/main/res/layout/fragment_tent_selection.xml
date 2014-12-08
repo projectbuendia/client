@@ -1,0 +1,48 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tent_selection_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.msf.records.ui.TentSelectionFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/tent_selection_layout">
+        <org.msf.records.view.SubtitledButtonView
+            android:id="@+id/tent_selection_all_patients"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_margin="10dp"
+            android:clickable="true"
+            app:subtitledButtonTitle="ALL PATIENTS"
+            app:subtitledButtonSubtitle="No patients"/>
+        <org.msf.records.view.SubtitledButtonView
+            android:id="@+id/tent_selection_triage"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_margin="10dp"
+            app:subtitledButtonTitle="Triage"
+            app:subtitledButtonSubtitle="No patients"/>
+        <GridView
+            android:id="@+id/tent_selection_tents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:numColumns="4"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:stretchMode="columnWidth" />
+        <org.msf.records.view.SubtitledButtonView
+            android:id="@+id/tent_selection_discharged"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_margin="10dp"
+            app:subtitledButtonTitle="Discharged"
+            app:subtitledButtonSubtitle="No patients"/>
+    </LinearLayout>
+
+</FrameLayout>

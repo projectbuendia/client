@@ -1,5 +1,5 @@
 <resources>
-        <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
 
@@ -7,10 +7,10 @@
     <string name="pref_header_general">General</string>
 
     <!-- Open MRS preferences -->
-    <string name="pref_title_use_openmrs">Use OpenMRS</string>
-    <string name="pref_description_use_openmrs">Use OpenMRS as the data storage server</string>
     <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
     <string name="pref_description_openmrs_root_url">The root url for connecting to the OpenMRS server</string>
+    <string name="pref_title_store_form_instances">Store form instances locally</string>
+    <string name="pref_desc_store_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>

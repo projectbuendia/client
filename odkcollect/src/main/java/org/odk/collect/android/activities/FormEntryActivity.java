@@ -27,24 +27,20 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
-//import android.view.GestureDetector;
-//import android.view.GestureDetector.OnGestureListener;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckedTextView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,9 +62,10 @@ import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.logic.FormController.FailedConstraint;
 import org.odk.collect.android.logic.FormTraverser;
 import org.odk.collect.android.logic.FormVisitor;
+import org.odk.collect.android.model.Patient;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.preferences.PreferencesActivity;
 import org.odk.collect.android.provider.FormsProviderAPI.FormsColumns;
-import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns;
 import org.odk.collect.android.tasks.FormLoaderTask;
 import org.odk.collect.android.tasks.SavePointTask;
@@ -83,11 +80,13 @@ import org.odk.collect.android.widgets.QuestionWidget;
 import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+
+//import android.view.GestureDetector;
+//import android.view.GestureDetector.OnGestureListener;
 
 /**
  * FormEntryActivity is responsible for displaying questions, animating
@@ -181,6 +180,8 @@ public class FormEntryActivity
     private ScrollView mScrollView;
 	private LinearLayout mQuestionHolder;
 	private View mCurrentView;
+    private ImageButton mUpButton;
+    private ImageButton mDownButton;
 
 	private AlertDialog mAlertDialog;
 	private ProgressDialog mProgressDialog;
@@ -196,6 +197,7 @@ public class FormEntryActivity
 	private SaveToDiskTask mSaveToDiskTask;
 
     private String stepMessage = "";
+    private ODKView mTargetView;
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
@@ -251,7 +253,27 @@ public class FormEntryActivity
         mScrollView = (ScrollView) findViewById(R.id.question_holder_scroller);
 		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
-		// get admin preference settings
+        mUpButton = (ImageButton) findViewById(R.id.button_up);
+        mUpButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                int height = mScrollView.getMeasuredHeight();
+                mScrollView.smoothScrollBy(0, (int) (-height * .8));
+            }
+        });
+
+        mDownButton = (ImageButton) findViewById(R.id.button_down);
+        mDownButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                int height = mScrollView.getMeasuredHeight();
+                mScrollView.smoothScrollBy(0, (int) (height * .8));
+            }
+        });
+
+        // get admin preference settings
 //		mAdminPreferences = getSharedPreferences(
 //				AdminPreferencesActivity.ADMIN_PREFERENCES, 0);
 
@@ -303,7 +325,7 @@ public class FormEntryActivity
 		} else if (data == null) {
 			if (!newForm) {
 				if (Collect.getInstance().getFormController() != null) {
-					populateViews();
+					populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
 				} else {
 					Log.w(TAG, "Reloading form and restoring state.");
 					// we need to launch the form loader to load the form
@@ -502,109 +524,43 @@ public class FormEntryActivity
 		}
 	}
 
-    private void populateViews() {
-        final List<SidebarItem> sidebarItems = new ArrayList<SidebarItem>();
-        final ArrayAdapter<SidebarItem> sidebarAdapter = new ArrayAdapter<SidebarItem>(
-                this, R.layout.large_list_item_1, sidebarItems);
-
+    private void populateViews(PrepopulatableFields fields) {
         FormTraverser traverser = new FormTraverser.Builder()
-                .addVisitor(new QuestionHolderFormVisitor(sidebarItems))
+                .addVisitor(new QuestionHolderFormVisitor(fields))
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
-        final ListView sidebar = (ListView) findViewById(R.id.sidebar);
-        sidebar.setAdapter(sidebarAdapter);
-        sidebar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        View bottomPaddingView = new View(this);
+        bottomPaddingView.setLayoutParams(
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 60));
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SidebarItem item = sidebarAdapter.getItem(position);
-                mScrollView.smoothScrollTo(0 /*x*/, item.mView.getTop());
-            }
-        });
+        mQuestionHolder.addView(bottomPaddingView);
 
-        // For each item in the sidebar, determine the position of it in the scroll view. Then
-        // register a ViewTreeObserver so that we can highlight it when the user gets there.
-        Runnable runnable = new Runnable() {
+        if (mTargetView != null) {
+            (new Handler(Looper.getMainLooper())).post(new Runnable() {
 
-            @Override
-            public void run() {
-                final int[] positions = new int[sidebarItems.size()];
-                for (int i = 0; i < sidebarItems.size(); i++) {
-                    positions[i] = sidebarItems.get(i).mView.getTop();
+                @Override
+                public void run() {
+                    mScrollView.scrollTo(0, mTargetView.getTop());
                 }
-
-                ((CheckedTextView) sidebar.getChildAt(0)).setChecked(true);
-
-                mScrollView.getViewTreeObserver().addOnScrollChangedListener(
-                        new ViewTreeObserver.OnScrollChangedListener() {
-                            @Override
-                            public void onScrollChanged() {
-                                for (int i = positions.length - 1; i >= 0; i--) {
-                                    if (mScrollView.getScrollY() >= positions[i]) {
-                                        for (int j = 0; j < positions.length; j++) {
-                                            CheckedTextView child =
-                                                    ((CheckedTextView) sidebar.getChildAt(j));
-                                            if (child != null) {
-                                                child.setChecked(false);
-                                            }
-                                        }
-
-                                        CheckedTextView listItemView =
-                                                (CheckedTextView) sidebar.getChildAt(i);
-                                        if (listItemView != null) {
-                                            listItemView.setChecked(true);
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                );
-            }
-        };
-
-        new Handler(getMainLooper()).post(runnable);
+            });
+        }
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
 
-        private final List<SidebarItem> mSidebarItems;
+        private final PrepopulatableFields mFields;
 
-        public QuestionHolderFormVisitor(List<SidebarItem> sidebarItems) {
-            // TODO(giljulio): Pick right type for list.
-            mSidebarItems = sidebarItems;
+        public QuestionHolderFormVisitor(PrepopulatableFields fields) {
+            mFields = fields;
         }
 
         @Override
         public void visit(int event, FormController formController) {
-            View view = createView(event, false /*advancingPage*/);
+            View view = createView(event, false /*advancingPage*/, mFields);
             if (view != null) {
                 mQuestionHolder.addView(view);
             }
-
-            if (event == FormEntryController.EVENT_GROUP) {
-                mSidebarItems.add(new SidebarItem(
-                        Collect.getInstance().getFormController().getLastGroupText(),
-                        view));
-            }
-        }
-    }
-
-    private static class SidebarItem {
-
-        public final String mName;
-        public final View mView;
-        public boolean isActive;
-
-        public SidebarItem(String name, View view) {
-            mName = name;
-            mView = view;
-        }
-
-        @Override
-        public String toString() {
-            return mName;
         }
     }
 
@@ -944,7 +900,7 @@ public class FormEntryActivity
 
             InputMethodManager imm = (InputMethodManager)getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
 
 			saveDataToDisk(EXIT, true /*complete*/, null);
 			return true;
@@ -1118,9 +1074,10 @@ public class FormEntryActivity
 	 * @param event
 	 * @param advancingPage
 	 *            -- true if this results from advancing through the form
-	 * @return newly created View
+	 * @param fields
+     * @return newly created View
 	 */
-	private View createView(int event, boolean advancingPage) {
+	private View createView(int event, boolean advancingPage, PrepopulatableFields fields) {
 		FormController formController = Collect.getInstance()
 				.getFormController();
 //		setTitle(getString(R.string.app_name) + " > "
@@ -1317,6 +1274,23 @@ public class FormEntryActivity
 //					});
 //
 //			return endView;
+//        case FormEntryController.EVENT_GROUP:
+//            FormEntryCaption[] groups = formController.getGroupsForCurrentIndex();
+//            if (groups.length == 0) {
+//                Log.e(
+//                        TAG,
+//                        "Attempted to handle a FormEntryController.EVENT_GROUP when the form was "
+//                                + "not on a group.");
+//                break;
+//            }
+//            WidgetGroupBuilder builder =
+//                    Widget2Factory.INSTANCE.createGroupBuilder(this, groups[groups.length - 1]);
+//            if (builder != null) {
+//                // TODO(dxchen): Use the builder.
+//                break;
+//            }
+//
+//            // Fall through to the next case if we didn't manage to create a builder.
 		case FormEntryController.EVENT_QUESTION:
 		case FormEntryController.EVENT_GROUP:
 		case FormEntryController.EVENT_REPEAT:
@@ -1326,8 +1300,17 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
-				odkv = new ODKView(this, formController.getQuestionPrompts(),
-						groups, advancingPage);
+				odkv = new ODKView(
+                        this,
+                        formController.getQuestionPrompts(),
+						groups,
+                        advancingPage,
+                        fields);
+                if (fields != null
+                        && fields.mTargetGroup != null
+                        && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
+                    mTargetView = odkv;
+                }
 				Log.i(TAG,
 						"created view for group "
 								+ (groups.length > 0 ? groups[groups.length - 1]
@@ -1345,7 +1328,7 @@ public class FormEntryActivity
                     Log.e(TAG, e1.getMessage(), e1);
                     createErrorDialog(e.getMessage() + "\n\n" + e1.getCause().getMessage(), DO_NOT_EXIT);
                 }
-                return createView(event, advancingPage);
+                return createView(event, advancingPage, fields);
             }
 
 			// Makes a "clear answer" menu pop up on long-click
@@ -2015,7 +1998,7 @@ public class FormEntryActivity
 					Collect.getInstance()
 							.getActivityLogger()
 							.logInstanceAction(this, "createClearDialog",
-									"cancel", qw.getPrompt().getIndex());
+                                    "cancel", qw.getPrompt().getIndex());
 					break;
 				}
 			}
@@ -2446,31 +2429,31 @@ public class FormEntryActivity
 
 		if (pendingActivityResult) {
 			// set the current view to whatever group we were at...
-			populateViews();
+			populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
 			// process the pending activity request...
 			onActivityResult(requestCode, resultCode, intent);
 			return;
 		}
-
-		// it can be a normal flow for a pending activity result to restore from
-		// a savepoint
-		// (the call flow handled by the above if statement). For all other use
-		// cases, the
-		// user should be notified, as it means they wandered off doing other
-		// things then
-		// returned to ODK Collect and chose Edit Saved Form, but that the
-		// savepoint for that
-		// form is newer than the last saved version of their form data.
-		if (hasUsedSavepoint) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(FormEntryActivity.this,
-							getString(R.string.savepoint_used),
-							Toast.LENGTH_LONG).show();
-				}
-			});
-		}
+//
+//		// it can be a normal flow for a pending activity result to restore from
+//		// a savepoint
+//		// (the call flow handled by the above if statement). For all other use
+//		// cases, the
+//		// user should be notified, as it means they wandered off doing other
+//		// things then
+//		// returned to ODK Collect and chose Edit Saved Form, but that the
+//		// savepoint for that
+//		// form is newer than the last saved version of their form data.
+//		if (hasUsedSavepoint) {
+//			runOnUiThread(new Runnable() {
+//				@Override
+//				public void run() {
+//					Toast.makeText(FormEntryActivity.this,
+//							getString(R.string.savepoint_used),
+//							Toast.LENGTH_LONG).show();
+//				}
+//			});
+//		}
 
 		// Set saved answer path
 		if (formController.getInstancePath() == null) {
@@ -2501,9 +2484,16 @@ public class FormEntryActivity
 //			}
 //		}
 
-        setTitle(formController.getFormTitle());
+        Patient patient = getIntent().getParcelableExtra("patient");
+        if (patient != null) {
+            setTitle(
+                    patient.getGivenName() + " " + patient.getFamilyName() + " (" + patient.getId()
+                            + ") - " + formController.getFormTitle());
+        } else {
+            setTitle(formController.getFormTitle());
+        }
 
-		populateViews();
+		populateViews((PrepopulatableFields) getIntent().getParcelableExtra("fields"));
 	}
 
 	/**
@@ -2799,6 +2789,12 @@ public class FormEntryActivity
 //	public void advance() {
 //		next();
 //	}
+
+    public static void hideKeyboard(Context context, View view) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
 	@Override
 	protected void onStart() {

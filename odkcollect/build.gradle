@@ -1,4 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+    }
+}
+
 apply plugin: 'com.android.library'
+apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 21
@@ -11,15 +22,23 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
+    // Build plugins
+    apt 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables.
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.0'
     compile 'com.android.support:support-v4:21.0.0'
@@ -29,8 +48,12 @@ dependencies {
     compile 'net.sf.kxml:kxml2:2.3.0'
     compile 'net.sf.opencsv:opencsv:2.3'
     compile 'org.apache.httpcomponents:httpmime:4.2.5'
-    compile 'org.apache.james:apache-mime4j:0.7.2'
+    compile ('org.apache.james:apache-mime4j:0.7.2')  {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
     compile files('libs/httpclientandroidlib-4.2.1.jar')
     compile files('libs/javarosa-libraries-2014-04-29.jar')
     compile project(':viewserver')
+
+    compile 'com.github.frankiesardo:auto-parcel:+' // Easier Parcelables.
 }

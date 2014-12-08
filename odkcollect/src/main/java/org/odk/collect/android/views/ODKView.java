@@ -47,14 +47,17 @@ import org.odk.collect.android.exception.ExternalParamsException;
 import org.odk.collect.android.exception.JavaRosaException;
 import org.odk.collect.android.external.ExternalAppsUtils;
 import org.odk.collect.android.logic.FormController;
+import org.odk.collect.android.model.PrepopulatableFields;
 import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
 import org.odk.collect.android.widgets2.Widget2Factory;
+import org.odk.collect.android.widgets2.common.Appearance;
+import org.odk.collect.android.widgets2.group.WidgetGroup;
+import org.odk.collect.android.widgets2.group.WidgetGroupBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -73,16 +76,22 @@ public class ODKView extends LinearLayout {
 
     private LinearLayout mView;
     private LinearLayout.LayoutParams mLayout;
-    private ArrayList<QuestionWidget> widgets;
+    private ArrayList<QuestionWidget> mWidgets;
+    private WidgetGroup mWidgetGroup;
     private Handler h = null;
     
     public final static String FIELD_LIST = "field-list";
 
     public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
             FormEntryCaption[] groups, boolean advancingPage) {
+        this(context, questionPrompts, groups, advancingPage, null /*fields*/);
+    }
+
+    public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
+                   FormEntryCaption[] groups, boolean advancingPage, PrepopulatableFields fields) {
         super(context);
 
-        widgets = new ArrayList<QuestionWidget>();
+        mWidgets = new ArrayList<QuestionWidget>();
 
         mView = new LinearLayout(getContext());
         mView.setOrientation(LinearLayout.VERTICAL);
@@ -92,7 +101,7 @@ public class ODKView extends LinearLayout {
         mLayout =
             new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-        mLayout.setMargins(10, 0, 10, 0);
+//        mLayout.setMargins(10, 0, 10, 0);
 
         // display which group you are in as well as the question
 
@@ -100,6 +109,27 @@ public class ODKView extends LinearLayout {
 
         // when the grouped fields are populated by an external app, this will get true.
         boolean readOnlyOverride = false;
+
+        if (groups != null && groups.length > 0) {
+            WidgetGroupBuilder<?, ?> builder =
+                    Widget2Factory.INSTANCE.createGroupBuilder(context, groups[groups.length - 1]);
+            if (builder != null) {
+                int id = 0;
+                for (FormEntryPrompt p : questionPrompts) {
+                    builder.createAndAddWidget(
+                            context,
+                            p,
+                            Appearance.fromString(p.getAppearanceHint()),
+                            readOnlyOverride,
+                            VIEW_ID + id++,
+                            fields);
+                }
+                mWidgetGroup = builder.build(context);
+                mView.addView((View) mWidgetGroup);
+                addView(mView);
+                return;
+            }
+        }
 
         // get the group we are showing -- it will be the last of the groups in the groups list
         if (groups != null && groups.length > 0) {
@@ -209,41 +239,56 @@ public class ODKView extends LinearLayout {
 
             qw.setId(VIEW_ID + id++);
 
-            widgets.add(qw);
+            mWidgets.add(qw);
+
+            String questionText = p.getQuestionText().toLowerCase();
+            if (fields != null && questionText != null) {
+                if (questionText.contains("date and time of encounter")
+                        && qw.forceSetAnswer(fields.mEncounterTime)) {
+                    continue;
+                }
+                if (questionText.equals("location")
+                        && qw.forceSetAnswer(fields.mLocationName)) {
+                    continue;
+                }
+                if (questionText.equals("clinician")
+                        && qw.forceSetAnswer(fields.mClinicianName)) {
+                    continue;
+                }
+            }
+
             mView.addView(qw, mLayout);
-
-
         }
 
         addView(mView);
 
         // see if there is an autoplay option. 
         // Only execute it during forward swipes through the form 
-        if ( advancingPage && widgets.size() == 1 ) {
-	        final String playOption = widgets.get(0).getPrompt().getFormElement().getAdditionalAttribute(null, "autoplay");
+        if ( advancingPage && mWidgets.size() == 1 ) {
+	        final String playOption = mWidgets.get(0).getPrompt().getFormElement().getAdditionalAttribute(null, "autoplay");
 	        if ( playOption != null ) {
 	        	h = new Handler();
 	        	h.postDelayed(new Runnable() {
 						@Override
 						public void run() {
 				        	if ( playOption.equalsIgnoreCase("audio") ) {
-				        		widgets.get(0).playAudio();
+				        		mWidgets.get(0).playAudio();
 				        	} else if ( playOption.equalsIgnoreCase("video") ) {
-				        		widgets.get(0).playVideo();
+				        		mWidgets.get(0).playVideo();
 				        	}
 						}
 					}, 150);
 	        }
         }
     }
-    
+
     /**
      * http://code.google.com/p/android/issues/detail?id=8488
      */
     public void recycleDrawables() {
     	this.destroyDrawingCache();
     	mView.destroyDrawingCache();
-    	for ( QuestionWidget q : widgets ) {
+    	for ( QuestionWidget q : mWidgets) {
     		q.recycleDrawables();
     	}
     }
@@ -257,16 +302,23 @@ public class ODKView extends LinearLayout {
      */
     public LinkedHashMap<FormIndex, IAnswerData> getAnswers() {
         LinkedHashMap<FormIndex, IAnswerData> answers = new LinkedHashMap<FormIndex, IAnswerData>();
-        Iterator<QuestionWidget> i = widgets.iterator();
-        while (i.hasNext()) {
-            /*
-             * The FormEntryPrompt has the FormIndex, which is where the answer gets stored. The
-             * QuestionWidget has the answer the user has entered.
-             */
-            QuestionWidget q = i.next();
-            FormEntryPrompt p = q.getPrompt();
-            answers.put(p.getIndex(), q.getAnswer());
+
+        for (QuestionWidget widget : mWidgetGroup != null ? mWidgetGroup.getWidgets() : mWidgets) {
+            FormEntryPrompt p = widget.getPrompt();
+            answers.put(p.getIndex(), widget.getAnswer());
         }
+//
+//
+//        Iterator<QuestionWidget> i = mWidgets.iterator();
+//        while (i.hasNext()) {
+//            /*
+//             * The FormEntryPrompt has the FormIndex, which is where the answer gets stored. The
+//             * QuestionWidget has the answer the user has entered.
+//             */
+//            QuestionWidget q = i.next();
+//            FormEntryPrompt p = q.getPrompt();
+//            answers.put(p.getIndex(), q.getAnswer());
+//        }
 
         return answers;
     }
@@ -281,6 +333,8 @@ public class ODKView extends LinearLayout {
         int i;
         // list all groups in one string
         for (FormEntryCaption g : groups) {
+
+
             i = g.getMultiplicity() + 1;
             t = g.getLongText();
             if (t != null) {
@@ -290,24 +344,27 @@ public class ODKView extends LinearLayout {
                 }
                 s.append(" > ");
             }
+
+            // if any of the groups are invisible, ignore them (and all above)
+            Appearance appearance = Appearance.fromString(g.getAppearanceHint());
+            if (appearance.hasQualifier("invisible")) {
+                s.setLength(0);
+            }
         }
 
-        // build view
+        // If any groups exist, add a TextView that contains the group name.
         if (s.length() > 0) {
             TextView tv = (TextView) LayoutInflater.from(getContext())
                     .inflate(R.layout.template_text_view_group, null);
             tv.setText(s.substring(0, s.length() - 3));
-//            int questionFontsize = Collect.getQuestionFontsize();
-//            tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, questionFontsize - 4);
-//            tv.setPadding(0, 0, 0, 5);
             mView.addView(tv, mLayout);
         }
     }
 
 
     public void setFocus(Context context) {
-        if (widgets.size() > 0) {
-            widgets.get(0).setFocus(context);
+        if (mWidgets.size() > 0) {
+            mWidgets.get(0).setFocus(context);
         }
     }
 
@@ -319,7 +376,7 @@ public class ODKView extends LinearLayout {
      */
     public void setBinaryData(Object answer) {
         boolean set = false;
-        for (QuestionWidget q : widgets) {
+        for (QuestionWidget q : mWidgets) {
             if (q instanceof IBinaryWidget) {
                 if (((IBinaryWidget) q).isWaitingForBinaryData()) {
                     try {
@@ -346,7 +403,7 @@ public class ODKView extends LinearLayout {
         FormController formController = Collect.getInstance().getFormController();
         Set<String> keys = bundle.keySet();
         for (String key : keys) {
-            for (QuestionWidget questionWidget : widgets) {
+            for (QuestionWidget questionWidget : mWidgets) {
                 FormEntryPrompt prompt = questionWidget.getPrompt();
                 TreeReference treeReference = (TreeReference) prompt.getFormElement().getBind().getReference();
                 if (treeReference.getNameLast().equals(key)) {
@@ -373,7 +430,7 @@ public class ODKView extends LinearLayout {
     
     public void cancelWaitingForBinaryData() {
         int count = 0;
-        for (QuestionWidget q : widgets) {
+        for (QuestionWidget q : mWidgets) {
             if (q instanceof IBinaryWidget) {
                 if (((IBinaryWidget) q).isWaitingForBinaryData()) {
                     ((IBinaryWidget) q).cancelWaitingForBinaryData();
@@ -388,7 +445,7 @@ public class ODKView extends LinearLayout {
     }
 
     public boolean suppressFlingGesture(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        for (QuestionWidget q : widgets) {
+        for (QuestionWidget q : mWidgets) {
         	if ( q.suppressFlingGesture(e1, e2, velocityX, velocityY) ) {
         		return true;
         	}
@@ -402,8 +459,8 @@ public class ODKView extends LinearLayout {
     public boolean clearAnswer() {
         // If there's only one widget, clear the answer.
         // If there are more, then force a long-press to clear the answer.
-        if (widgets.size() == 1 && !widgets.get(0).getPrompt().isReadOnly()) {
-            widgets.get(0).clearAnswer();
+        if (mWidgets.size() == 1 && !mWidgets.get(0).getPrompt().isReadOnly()) {
+            mWidgets.get(0).clearAnswer();
             return true;
         } else {
             return false;
@@ -412,14 +469,14 @@ public class ODKView extends LinearLayout {
 
 
     public ArrayList<QuestionWidget> getWidgets() {
-        return widgets;
+        return mWidgets;
     }
 
 
     @Override
     public void setOnFocusChangeListener(OnFocusChangeListener l) {
-        for (int i = 0; i < widgets.size(); i++) {
-            QuestionWidget qw = widgets.get(i);
+        for (int i = 0; i < mWidgets.size(); i++) {
+            QuestionWidget qw = mWidgets.get(i);
             qw.setOnFocusChangeListener(l);
         }
     }
@@ -427,7 +484,7 @@ public class ODKView extends LinearLayout {
     @Override
     public void cancelLongPress() {
         super.cancelLongPress();
-        for (QuestionWidget qw : widgets) {
+        for (QuestionWidget qw : mWidgets) {
             qw.cancelLongPress();
         }
     }

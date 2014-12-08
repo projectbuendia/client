@@ -12,7 +12,9 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_user_login">Login</string>
     <string name="title_patient_list">Patients</string>
+    <string name="title_patient_chart">Patient Chart</string>
     <string name="title_patient_detail">Patient Detail</string>
     <string name="detail_pager_overview">Overview</string>
     <string name="detail_pager_flags">Flags</string>
@@ -22,7 +24,6 @@
     <string name="title_activity_patient_add">New Patient</string>
     <string name="cancel">Cancel</string>
     <string name="done">Done</string>
-
     <string name="status_suspect">Suspect</string>
     <string name="status_probable">Probable</string>
     <string name="status_confirmed">Confirmed</string>
@@ -32,7 +33,6 @@
     <string name="status_discharged">Discharged</string>
     <string name="status_unconfirmed_death">Unconfirmed death</string>
     <string name="status_confirmed_death">Confirmed death</string>
-
     <string name="location_all_zones">All zones</string>
     <string name="location_triage">Triage</string>
     <string name="location_suspected_zone">Suspected zone</string>
@@ -42,11 +42,15 @@
     <string name="location_outside">Outside</string>
     <string name="action_edit_details">Edit Details</string>
     <string name="action_new_patient">+ Create New Patient</string>
+    <string name="action_view_xform">+ View first saved xform</string>
     <string name="action_new_round">New Round</string>
     <string name="action_update_chart">Update Chart</string>
     <string name="action_view_round_archive">Round Archive</string>
-
-    <string name="age_years">%d years</string>
+    <string name="snackbar_update_available">Application update available</string>
+    <string name="snackbar_update_downloaded">Application update downloaded</string>
+    <string name="snackbar_action_download">Download</string>
+    <string name="snackbar_action_install">Install</string>
+    <string name="age_years">%d</string>
     <string name="day_n">%d</string>
     <string name="overview_age">Age</string>
     <string name="overview_days_since_admission">Days Since Admission</string>
@@ -54,4 +58,37 @@
     <string name="overview_assigned_location">Assigned Location</string>
     <string name="overview_instructions">Instructions</string>
     <string name="detail_page_view_chart">View Chart</string>
+    <string name="title_edit_patient_location">Edit Patient Location</string>
+    <string name="add_user_example_username">jsmith</string>
+    <string name="given_name">Given Name</string>
+    <string name="add_user_example_given_name">Jane</string>
+    <string name="family_name">Family Name</string>
+    <string name="add_user_example_family_name">Smith</string>
+    <string name="title_add_new_user">Add New User</string>
+    <string name="action_search">Search</string>
+    <string name="title_activity_tent_selection">MSF Medical Records</string>
+    <string name="today">Today</string>
+    <string name="add_user_unknown_error">Unknown error</string>
+    <string name="add_user_invalid_user">Invalid user</string>
+    <string name="add_user_user_exists_locally">User already exists on tablet</string>
+    <string name="add_user_user_exists_on_server">User already exists on server</string>
+    <string name="add_user_server_error">Server error</string>
+    <string name="age_months">%dmo</string>
+    <string name="title_activity_round">RoundActivity</string>
+
+    <string name="no_patients">No patients</string>
+    <string name="one_patient">1 patient</string>
+    <string name="n_patients">%d patients</string>
+
+    <string name="no_present_patients">No present patients</string>
+    <string name="one_present_patient">1 present patient</string>
+    <string name="n_present_patients">%d present patients</string>
+
+    <string name="string_with_paren" formatted="false">%s (%s)</string>
+    <string name="unknown_tent">Unknown Tent</string>
+    <string name="unknown_zone">Unknown zone</string>
+    <string name="mild_symptom">Mild</string>
+    <string name="moderate_symptom">Moderate</string>
+    <string name="severe_symptom">Severe</string>
+    <string name="location_load_error">Error loading location resources</string>
 </resources>

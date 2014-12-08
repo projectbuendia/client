@@ -11,7 +11,7 @@
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
@@ -22,6 +22,9 @@
                 <data android:mimeType="vnd.android.cursor.item/vnd.odk.instance" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.FormHierarchyActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
     </application>
-
 </manifest>

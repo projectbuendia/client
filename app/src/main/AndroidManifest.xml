@@ -8,8 +8,16 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- Required for fetching data. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required to check if there is a connection to the internet -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <!-- Required to enable our SyncAdapter after it's created. -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <!-- Required because we're manually creating a new account. -->
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <application
         android:name="org.msf.records.App"
@@ -29,11 +37,11 @@
             android:exported="true" />
 
         <activity
-            android:name=".ui.PatientListActivity"
-            android:label="@string/title_patient_list" >
+            android:name="org.msf.records.ui.UserLoginActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH"/>
-
+                <action android:name="android.intent.action.SEARCH" />
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -45,27 +53,96 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.PatientDetailActivity"
-            android:label="@string/title_patient_detail"
-            android:parentActivityName=".ui.PatientListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.PatientListActivity" />
+            android:name="org.msf.records.ui.TentSelectionActivity"
+            android:label="@string/title_activity_tent_selection"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
-            android:name=".ui.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".ui.PatientListActivity" >
+            android:name="org.msf.records.ui.PatientListActivity"
+            android:label="@string/title_patient_list"
+            android:parentActivityName="org.msf.records.ui.TentSelectionActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="org.msf.records.ui.PatientChartActivity"
+            android:label="@string/title_patient_chart"
+            android:parentActivityName="org.msf.records.ui.PatientListActivity"
+            android:screenOrientation="portrait"
+            android:uiOptions="splitActionBarWhenNarrow" >
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.PatientListActivity" />
+                android:value="org.msf.records.ui.PatientListActivity" />
+        </activity>
+        <activity
+            android:name="org.msf.records.ui.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="org.msf.records.ui.PatientListActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.msf.records.ui.PatientListActivity" />
+        </activity>
+        <activity
+            android:name="org.msf.records.ui.PatientAddActivity"
+            android:label="@string/title_activity_patient_add"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="org.msf.records.ui.RoundActivity"
+            android:label="@string/title_activity_round"
+            android:parentActivityName="org.msf.records.ui.TentSelectionActivity"
+            android:screenOrientation="portrait"  >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.msf.records.ui.TentSelectionActivity" />
         </activity>
 
-        <activity
-            android:name=".ui.PatientAddActivity"
-            android:label="@string/title_activity_patient_add" >
-        </activity>
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="0a31f10a42050e1a7c9ce97ace4fda4c5235f280"/>
+        <provider
+            android:name="org.msf.records.sync.MsfRecordsProvider"
+            android:authorities="org.msf.records"
+            android:exported="false" />
+
+        <service
+            android:name="org.msf.records.sync.SyncService"
+            android:exported="true" >
+
+            <!--
+            This intent filter is required. It allows the system to launch our sync service
+            as needed.
+            -->
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <!-- This points to a required XML file which describes our SyncAdapter. -->
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+        <service android:name="org.msf.records.sync.GenericAccountService" >
+
+            <!-- Required filter used by the system to launch our account service. -->
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <!-- This points to an XMLf ile which describes our account service. -->
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <receiver android:name=".sync.SyncManager$SyncStatusBroadcastReceiver" />
     </application>
 
 </manifest>
