@@ -10,7 +10,7 @@ import org.msf.records.R;
 import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
-import org.msf.records.view.SubtitledButtonView;
+import org.msf.records.widget.SubtitledButtonView;
 
 /**
  * Created by akalachman on 11/30/14.

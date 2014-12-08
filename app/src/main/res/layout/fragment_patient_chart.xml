@@ -152,7 +152,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <org.msf.records.view.VitalView
+            <org.msf.records.widget.VitalView
                 android:id="@+id/vital_responsiveness"
                 android:layout_width="0dp"
                 android:layout_height="128dp"
@@ -161,7 +161,7 @@
                 app:vitalName="Conscious State"
                 app:vitalValue="-"/>
 
-            <org.msf.records.view.VitalView
+            <org.msf.records.widget.VitalView
                 android:id="@+id/vital_mobility"
                 android:layout_width="0dp"
                 android:layout_height="128dp"
@@ -170,7 +170,7 @@
                 app:vitalName="Mobility"
                 app:vitalValue="-"/>
 
-            <org.msf.records.view.VitalView
+            <org.msf.records.widget.VitalView
                 android:id="@+id/vital_diet"
                 android:layout_width="0dp"
                 android:layout_height="128dp"
@@ -179,7 +179,7 @@
                 app:vitalName="Diet"
                 app:vitalValue="-"/>
 
-            <org.msf.records.view.VitalView
+            <org.msf.records.widget.VitalView
                 android:id="@+id/vital_food_drink"
                 android:layout_width="0dp"
                 android:layout_height="128dp"

@@ -1,4 +1,4 @@
-package org.msf.records.view;
+package org.msf.records.widget;
 
 import android.annotation.TargetApi;
 import android.content.Context;

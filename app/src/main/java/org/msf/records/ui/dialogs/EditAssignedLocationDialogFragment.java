@@ -12,7 +12,7 @@ import android.view.View;
 import org.msf.records.R;
 import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
-import org.msf.records.view.InstantAutoCompleteTextView;
+import org.msf.records.widget.InstantAutoCompleteTextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
