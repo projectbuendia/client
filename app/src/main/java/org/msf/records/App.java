@@ -1,8 +1,6 @@
 package org.msf.records;
 
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
@@ -11,7 +9,6 @@ import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
-import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
@@ -38,11 +35,12 @@ public class App extends Application {
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
 
-    private static OpenMrsConnectionDetails mConnectionDetails;
+    private static OpenMrsConnectionDetails sConnectionDetails;
 
     @Inject Application mApplication;
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
+    @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
 
     @Override
     public void onCreate() {
@@ -57,9 +55,9 @@ public class App extends Application {
             sInstance = this;
 
             sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
+            sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
 
-            mConnectionDetails = new OpenMrsConnectionDetails(getApplicationContext());
-            mServer = new OpenMrsServer(mConnectionDetails);
+            mServer = new OpenMrsServer(sConnectionDetails);
         }
 
         // TODO(dxchen): Refactor this into the model classes.
@@ -89,6 +87,6 @@ public class App extends Application {
     }
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
-        return mConnectionDetails;
+        return sConnectionDetails;
     }
 }
