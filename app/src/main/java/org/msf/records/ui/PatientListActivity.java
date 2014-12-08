@@ -14,8 +14,6 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
-import de.greenrobot.event.EventBus;
-
 
 /**
  * An activity representing a list of Patients. This activity

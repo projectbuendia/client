@@ -7,7 +7,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.msf.records.R;
-import org.msf.records.filter.FilterManager;
 import org.msf.records.net.Constants;
 
 public class TentSelectionActivity extends PatientSearchActivity {

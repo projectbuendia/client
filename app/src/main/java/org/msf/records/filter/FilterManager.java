@@ -2,13 +2,12 @@ package org.msf.records.filter;
 
 import android.content.Context;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup.FilterType;
-import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 

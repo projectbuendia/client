@@ -2,13 +2,13 @@ package org.msf.records.location;
 
 import android.content.Context;
 
+import org.msf.records.model.Zone;
+import org.msf.records.net.model.Location;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.msf.records.model.Zone;
-import org.msf.records.net.model.Location;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given

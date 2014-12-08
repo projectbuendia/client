@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
-import android.util.Log;
 import android.widget.FilterQueryProvider;
 
 import org.msf.records.sync.PatientProjection;

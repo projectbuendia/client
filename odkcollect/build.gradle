@@ -2,14 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
     }
-
-    dependencies {
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-    }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 21
@@ -37,7 +32,7 @@ android {
 
 dependencies {
     // Build plugins
-    apt 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables.
+    provided 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables.
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -53,7 +48,6 @@ dependencies {
     }
     compile files('libs/httpclientandroidlib-4.2.1.jar')
     compile files('libs/javarosa-libraries-2014-04-29.jar')
-    compile project(':viewserver')
 
     compile 'com.github.frankiesardo:auto-parcel:+' // Easier Parcelables.
 }

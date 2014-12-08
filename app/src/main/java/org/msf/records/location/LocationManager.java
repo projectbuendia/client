@@ -1,12 +1,8 @@
 package org.msf.records.location;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.util.Log;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 import org.msf.records.App;
 import org.msf.records.events.CreatePatientSucceededEvent;
@@ -16,22 +12,7 @@ import org.msf.records.events.location.LocationsSyncFailedEvent;
 import org.msf.records.events.location.LocationsSyncedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.events.user.ActiveUserSetEvent;
-import org.msf.records.events.user.ActiveUserUnsetEvent;
-import org.msf.records.events.user.KnownUsersLoadFailedEvent;
-import org.msf.records.events.user.KnownUsersLoadedEvent;
-import org.msf.records.events.user.KnownUsersSyncFailedEvent;
-import org.msf.records.events.user.KnownUsersSyncedEvent;
-import org.msf.records.events.user.UserAddFailedEvent;
-import org.msf.records.events.user.UserAddedEvent;
-import org.msf.records.events.user.UserDeleteFailedEvent;
-import org.msf.records.events.user.UserDeletedEvent;
-import org.msf.records.net.model.NewUser;
-import org.msf.records.net.model.User;
 import org.msf.records.sync.SyncManager;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 

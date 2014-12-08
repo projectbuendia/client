@@ -4,15 +4,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
 import static org.msf.records.sync.PatientProviderContract.PATH_PATIENTS;
