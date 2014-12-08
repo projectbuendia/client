@@ -1,9 +1,9 @@
 package org.msf.records.utils;
 
-import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.UserLoginFragment;
-
 import javax.inject.Singleton;
+
+import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.UserLoginActivity;
 
 import dagger.Module;
 import dagger.Provides;
@@ -14,7 +14,7 @@ import dagger.Provides;
 @Module(
         injects = {
                 BaseActivity.class,
-                UserLoginFragment.class
+                UserLoginActivity.class
         },
         complete = false,
         library = true
