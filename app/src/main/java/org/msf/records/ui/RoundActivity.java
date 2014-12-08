@@ -47,8 +47,6 @@ public class RoundActivity extends PatientSearchActivity {
 
         mFilter = new FilterGroup(
                 FilterManager.getDefaultFilter(), new LocationUuidFilter(mLocationUuid));
-
-        // TODO(akalachman): Remove section headers somehow.
     }
 
     @Override
