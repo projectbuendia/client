@@ -40,7 +40,7 @@ public final class Location2 implements Parcelable {
     public static Location2 create(String zone, String tent, String bed) {
         return new Location2(zone, tent, bed);
     }
-    
+
     public static final Parcelable.Creator<Location2> CREATOR = new Parcelable.Creator<Location2>() {
         @Override
         public Location2 createFromParcel(Parcel in) {
