@@ -45,10 +45,14 @@ dependencies {
     compile 'joda-time:joda-time:2.5' // Better dates and times
 
     // Testing
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
     androidTestCompile('com.jakewharton.espresso:espresso:1.1-r3') {
+        exclude group: 'com.google.guava'
         exclude group: 'com.squareup.dagger' // Provided by com.squareup.dagger
         exclude group: 'javax.inject' // Provided by com.squareup.dagger
     }
+    androidTestCompile 'org.mockito:mockito-core:1.9.5'
 }
 
 android {
@@ -69,6 +73,7 @@ android {
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 
+        testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
 
         // Allow different sync adapters to be defined for debug and release builds.
