@@ -1,6 +1,7 @@
 package org.msf.records.location;
 
 import android.content.Context;
+import android.content.res.Resources;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -162,7 +163,24 @@ public class LocationTree implements Comparable<LocationTree> {
     public String toString() {
         if (mLocation == null || mLocation.names == null ||
                 !mLocation.names.containsKey(mSortLocale)) {
-            return App.getInstance().getResources().getString(R.string.unknown_location);
+            Resources resources = App.getInstance().getResources();
+
+            // This location is null, try to recover.
+            int depth = getDepth();
+            switch (depth) {
+                case ZONE_DEPTH:
+                    return resources.getString(R.string.unknown_zone);
+                case TENT_DEPTH:
+                    LocationTree parent = getParent();
+                    if (parent == null) {
+                        return resources.getString(R.string.unknown_tent);
+                    } else {
+                        return resources.getString(
+                                R.string.unknown_tent_in_zone, getParent().toString());
+                    }
+                default:
+                    return resources.getString(R.string.unknown_location);
+            }
         }
 
         return mLocation.names.get(mSortLocale);
