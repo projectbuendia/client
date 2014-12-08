@@ -32,6 +32,8 @@ public class TentSelectionFragment extends ProgressFragment {
     private LocationTree mDischargedZone = null;
     private LocationTree mTriageZone = null;
 
+    private boolean loadingLocations = false;
+
     public static TentSelectionFragment newInstance() {
         TentSelectionFragment fragment = new TentSelectionFragment();
         return fragment;
@@ -110,6 +112,7 @@ public class TentSelectionFragment extends ProgressFragment {
             }
         });
         changeState(State.LOADED);
+        loadingLocations = true;
     }
 
     @Override
@@ -133,8 +136,10 @@ public class TentSelectionFragment extends ProgressFragment {
 
         EventBus.getDefault().register(this);
 
-        changeState(State.LOADING);
-        new LocationManager().loadLocations();
+        if (!loadingLocations) {
+            changeState(State.LOADING);
+            new LocationManager().loadLocations();
+        }
     }
 
     @Override
