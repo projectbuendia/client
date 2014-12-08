@@ -2,6 +2,7 @@ package org.msf.records;
 
 import android.app.Application;
 
+import org.msf.records.prefs.PrefsModule;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.PatientChartActivity;
 import org.msf.records.ui.PatientListActivity;
@@ -22,6 +23,7 @@ import dagger.Provides;
  */
 @Module(
         includes = {
+                PrefsModule.class,
                 UpdateModule.class,
                 UserModule.class,
                 UtilsModule.class
