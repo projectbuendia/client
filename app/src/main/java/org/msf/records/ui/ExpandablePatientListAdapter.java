@@ -137,12 +137,10 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        String patient_uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
         String id = cursor.getString(PatientProjection.COLUMN_ID);
         String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
-        String status = cursor.getString(PatientProjection.COLUMN_STATUS);
         String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
         int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
         int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
