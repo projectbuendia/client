@@ -13,10 +13,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_UUID;
 
 /**
@@ -27,7 +24,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 11;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -51,10 +48,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_LOCATION_TENT + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP +
                     COLUMN_NAME_AGE_YEARS + TYPE_INTEGER + COMMA_SEP +
