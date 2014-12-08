@@ -20,6 +20,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.App;
+import org.msf.records.model.Zone;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
@@ -210,7 +211,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, status, locationZone, locationTent, locationUuid;
+        String givenName, familyName, uuid, status, locationUuid;
         String gender;
         int ageMonths = -1, ageYears = -1;
         long admissionTimestamp;
@@ -225,9 +226,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             uuid = c.getString(PatientProjection.COLUMN_UUID);
             status = c.getString(PatientProjection.COLUMN_STATUS);
             admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
-            locationZone = c.getString(PatientProjection.COLUMN_LOCATION_ZONE);
-            locationTent = c.getString(PatientProjection.COLUMN_LOCATION_TENT);
             locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
+            if (locationUuid == null) {
+                locationUuid = Zone.DEFAULT_LOCATION;
+            }
             if (!c.isNull(PatientProjection.COLUMN_AGE_MONTHS)) {
                 ageMonths = c.getInt(PatientProjection.COLUMN_AGE_MONTHS);
             }
@@ -301,9 +303,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender);
 
-            if (e.assigned_location != null) {
-                builder
-                        .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, e.assigned_location.uuid);
+            if (e.assigned_location == null) {
+                builder.withValue(
+                        PatientColumns.COLUMN_NAME_LOCATION_UUID, Zone.DEFAULT_LOCATION);
+            } else {
+                builder.withValue(
+                        PatientColumns.COLUMN_NAME_LOCATION_UUID, e.assigned_location.uuid);
             }
 
             batch.add(builder.build());
