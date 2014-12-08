@@ -1,7 +1,7 @@
 package org.msf.records;
 
 /**
- * Created by dxchen on 12/8/14.
+ * The modules used for injection in a debug build.
  */
 final class Modules {
 

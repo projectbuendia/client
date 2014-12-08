@@ -2,6 +2,12 @@ package org.msf.records;
 
 import android.app.Application;
 
+import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.PatientChartActivity;
+import org.msf.records.ui.PatientListActivity;
+import org.msf.records.ui.PatientSearchActivity;
+import org.msf.records.ui.RoundActivity;
+import org.msf.records.ui.TentSelectionActivity;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;
@@ -21,7 +27,16 @@ import dagger.Provides;
                 UtilsModule.class
         },
         injects = {
-                App.class
+                App.class,
+
+                // TODO(dxchen): Move these into activity-specific modules.
+                // Activities
+                BaseActivity.class,
+                PatientChartActivity.class,
+                PatientListActivity.class,
+                PatientSearchActivity.class,
+                RoundActivity.class,
+                TentSelectionActivity.class
         }
 )
 public final class AppModule {

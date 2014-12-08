@@ -240,10 +240,17 @@ public class UpdateManager {
 
         @Override
         public void onErrorResponse(VolleyError error) {
+            String failure;
+            if (error == null || error.networkResponse == null) {
+                failure = "a network error";
+            } else {
+                failure = String.valueOf(error.networkResponse.statusCode);
+            }
+
             Log.w(
                     TAG,
-                    "Server returned " + error.networkResponse.statusCode + " while downloading "
-                            + "update. Retry will occur shortly.",
+                    "Server failed with " + failure + " while downloading update. Retry will "
+                            + "occur shortly.",
                     error);
         }
     }
