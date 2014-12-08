@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import org.msf.records.BuildConfig;
+
 /**
  * A collection of static variables used in the ContentProvider interface for Patients.
  */
@@ -29,7 +31,7 @@ public class PatientProviderContract {
     /**
      * Content provider authority.
      */
-    public static final String CONTENT_AUTHORITY = "org.msf.records";
+    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.records";
 
     /**
      * Base URI. (content://org.msf.records)
