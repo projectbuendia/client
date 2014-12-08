@@ -373,16 +373,8 @@ public class PatientChartFragment extends ControllableFragment implements Loader
             textView = (TextView) rootView.findViewById(R.id.patient_chart_vital_general_condition);
             textView.setText(observation.localizedValue);
 
-            if (observation.localizedValue.equals("Good")) {
-                mGeneralCondition.setBackgroundColor(Color.parseColor("#4CAF50"));
-            } else if (observation.localizedValue.equals("Average")) {
-                mGeneralCondition.setBackgroundColor(Color.parseColor("#FFC927"));
-            } else if (observation.localizedValue.equals("Poor")) {
-                mGeneralCondition.setBackgroundColor(Color.parseColor("#FF2121"));
-            } else if (observation.localizedValue.equals("Very Poor")) {
-                mGeneralCondition.setBackgroundColor(Color.parseColor("#D0021B"));
-            }
-
+            mGeneralCondition.setBackgroundResource(
+                    Concept.getColorResourceForGeneralCondition(observation.value));
         }
 
         // Special (Pregnancy and IV)

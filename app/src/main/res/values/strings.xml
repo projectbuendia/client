@@ -91,4 +91,6 @@
     <string name="moderate_symptom">Moderate</string>
     <string name="severe_symptom">Severe</string>
     <string name="location_load_error">Error loading location resources</string>
+    <string name="unknown_location">Unknown Location</string>
+    <string name="unknown_tent_in_zone">%s (No Tent Assigned)</string>
 </resources>
