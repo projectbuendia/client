@@ -2,6 +2,7 @@ package org.msf.records;
 
 import android.app.Application;
 
+import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;
 
@@ -15,6 +16,7 @@ import dagger.Provides;
  */
 @Module(
         includes = {
+                UpdateModule.class,
                 UserModule.class,
                 UtilsModule.class
         },
