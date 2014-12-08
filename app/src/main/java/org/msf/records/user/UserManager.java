@@ -207,8 +207,17 @@ public class UserManager {
 
             synchronized (mKnownUsersLock) {
                 mKnownUsers = new HashSet<User>(newKnownUsers);
-                EventBus.getDefault()
-                        .post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(newKnownUsers)));
+
+                if (mKnownUsers.isEmpty()) {
+                    Log.e(TAG, "No users returned from db");
+                    mKnownUsers = null;
+                    EventBus.getDefault()
+                            .post(new KnownUsersLoadFailedEvent(
+                                    KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
+                } else {
+                    EventBus.getDefault()
+                            .post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(newKnownUsers)));
+                }
             }
 
             return null;
