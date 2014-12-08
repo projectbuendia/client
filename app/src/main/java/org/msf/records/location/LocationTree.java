@@ -1,18 +1,14 @@
 package org.msf.records.location;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
@@ -75,7 +71,6 @@ public class LocationTree implements Comparable<LocationTree> {
         mLocation = location;
         mChildren = new TreeMap<String, LocationTree>();
         mPatientCount = patientCount;
-        EventBus.getDefault().register(this);
     }
 
     public int getPatientCount() {
@@ -227,11 +222,6 @@ public class LocationTree implements Comparable<LocationTree> {
             subtreeLocations.putAll(subtree.getAllSubtreeLocations());
         }
         return subtreeLocations;
-    }
-
-    public synchronized void onEvent(CreatePatientSucceededEvent event) {
-        // TODO(akalachman): Re-enable once this is async.
-        // rebuild();
     }
 
     // TODO(akalachman): Cache this or get rid of it once data model is refactored.
