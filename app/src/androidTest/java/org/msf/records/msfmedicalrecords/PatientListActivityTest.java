@@ -20,10 +20,10 @@ import org.msf.records.R;
 import org.msf.records.ui.PatientListActivity;
 
 /**
- * Espresso functional tests that test the flow from the {@link PatientListActivity}.
- *
- * @author mtnguyen@google.com (Minh T. Nguyen)
- */
+* Espresso functional tests that test the flow from the {@link PatientListActivity}.
+*
+* @author mtnguyen@google.com (Minh T. Nguyen)
+*/
 public class PatientListActivityTest extends
     ActivityInstrumentationTestCase2<PatientListActivity> {
 

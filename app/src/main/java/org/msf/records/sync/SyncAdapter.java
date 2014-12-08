@@ -23,7 +23,6 @@ import org.msf.records.App;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.Location;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 

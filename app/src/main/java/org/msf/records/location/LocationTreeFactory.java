@@ -10,7 +10,6 @@ import com.google.common.collect.Multimap;
 import org.msf.records.filter.AllFilter;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.location.LocationTree;
 import org.msf.records.net.model.Location;
 import org.msf.records.sync.LocationProjection;
 import org.msf.records.sync.LocationProviderContract;
