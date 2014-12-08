@@ -59,7 +59,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.msf.records" // If changed, change odkcollect/build.gradle as well.
+        applicationId "org.msf.records"
 
         minSdkVersion 19
         targetSdkVersion 20
@@ -67,16 +67,25 @@ android {
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 
+        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+
+        // Allow different sync adapters to be defined for debug and release builds.
+        resValue "string", "sync_authority", applicationId + '.provider.records'
+        resValue "string", "account_type", applicationId
+        buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}\""
+
         buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
-
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
 
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
             versionNameSuffix '-dev'
+
+            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
+            resValue "string", "account_type", defaultConfig.applicationId + '.dev'
+            buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
 
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -87,12 +96,12 @@ android {
 
     packagingOptions {
         exclude 'LICENSE.txt'
-        exclude 'META-INF/DEPENDENCIES' // otherwise we get duplicates
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/services/javax.annotation.processing.Processor'
-        exclude 'META-INF/NOTICE' // otherwise we get duplicates
-        exclude 'META-INF/NOTICE.txt' // otherwise we get duplicates
-        exclude 'META-INF/LICENSE' // otherwise we get duplicates
-        exclude 'META-INF/LICENSE.txt' // otherwise we get duplicates
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
     }
 
     lintOptions {
