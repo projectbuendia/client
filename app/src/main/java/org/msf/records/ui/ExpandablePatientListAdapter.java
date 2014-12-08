@@ -18,9 +18,8 @@ import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.model.Concept;
 import org.msf.records.location.LocationTree;
-
+import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;

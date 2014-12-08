@@ -15,12 +15,17 @@ import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
 import org.odk.collect.android.application.Collect;
 
+import javax.inject.Inject;
+
+import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
 /**
  * Created by Gil on 08/10/2014.
  */
 public class App extends Application {
+
+    private ObjectGraph mObjectGraph;
 
     /**
      * The current instance of the application.
@@ -35,11 +40,15 @@ public class App extends Application {
 
     private static OpenMrsConnectionDetails mConnectionDetails;
 
+    @Inject Application mApplication;
 
     @Override
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
+        mObjectGraph = ObjectGraph.create(Modules.list(this));
+        mObjectGraph.inject(this);
 
         SharedPreferences preferences =
                 PreferenceManager.getDefaultSharedPreferences(this);

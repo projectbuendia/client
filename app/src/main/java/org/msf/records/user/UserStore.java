@@ -1,7 +1,6 @@
 package org.msf.records.user;
 
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
@@ -15,12 +14,9 @@ import com.android.volley.VolleyError;
 import org.msf.records.App;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
-import org.msf.records.sync.ChartProviderContract;
-import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.sync.RpcToDb;
 import org.msf.records.sync.UserProviderContract;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
