@@ -30,8 +30,8 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                               JSONObject jsonRequest,
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
-        this(connectionDetails.userName, connectionDetails.password,
-                connectionDetails.rootUrl + urlSuffix,
+        this(connectionDetails.getUserName(), connectionDetails.getPassword(),
+                connectionDetails.getRootUrl() + urlSuffix,
                 jsonRequest, listener, errorListener);
     }
 
@@ -40,8 +40,8 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
         super(method, url, jsonRequest, listener, errorListener);
-        this.mUsername = connectionDetails.userName;
-        this.mPassword = connectionDetails.password;
+        this.mUsername = connectionDetails.getUserName();
+        this.mPassword = connectionDetails.getPassword();
     }
 
     @Override

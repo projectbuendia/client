@@ -53,20 +53,12 @@ public class App extends Application {
 
         registerActivityLifecycleCallbacks(mActivityHierarchyServer);
 
-        SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
-
         synchronized (App.class) {
             sInstance = this;
 
             sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
 
-            mConnectionDetails =
-                    new OpenMrsConnectionDetails(
-                            preferences.getString("openmrs_root_url", null),
-                            preferences.getString("openmrs_user", null),
-                            preferences.getString("openmrs_password", null),
-                            getApplicationContext());
+            mConnectionDetails = new OpenMrsConnectionDetails(getApplicationContext());
             mServer = new OpenMrsServer(mConnectionDetails);
         }
 

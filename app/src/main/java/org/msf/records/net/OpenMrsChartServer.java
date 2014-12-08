@@ -33,34 +33,34 @@ public class OpenMrsChartServer {
                          Response.Listener<PatientChart> patientListener,
                          Response.ErrorListener errorListener) {
         GsonRequest<PatientChart> request = new GsonRequest<>(
-                mConnectionDetails.rootUrl + "/patientencounters/" + patientUuid,
+                mConnectionDetails.getRootUrl() + "/patientencounters/" + patientUuid,
                 PatientChart.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
     public void getConcepts(Response.Listener<ConceptList> conceptListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<ConceptList> request = new GsonRequest<ConceptList>(
-                mConnectionDetails.rootUrl + "/concept",
+                mConnectionDetails.getRootUrl() + "/concept",
                 ConceptList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
     public void getChartStructure(
             String uuid, Response.Listener<ChartStructure> chartListener,
             Response.ErrorListener errorListener) {
         GsonRequest<ChartStructure> request = new GsonRequest<ChartStructure>(
-                mConnectionDetails.rootUrl + "/chart/" + uuid + "?v=full",
+                mConnectionDetails.getRootUrl() + "/chart/" + uuid + "?v=full",
                 ChartStructure.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {
         };
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 }

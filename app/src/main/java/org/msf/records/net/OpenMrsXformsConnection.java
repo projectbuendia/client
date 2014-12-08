@@ -59,7 +59,7 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
     /**
@@ -110,7 +110,7 @@ public class OpenMrsXformsConnection {
                 },
                 errorListener
         );
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
     /**
@@ -159,7 +159,7 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
 }

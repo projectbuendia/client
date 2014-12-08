@@ -75,7 +75,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     private void putIfSet(Map<String, String> patientArguments, String key, JSONObject name, String param) throws JSONException {
@@ -144,7 +144,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -178,7 +178,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -207,7 +207,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     private Patient parsePatientJson(JSONObject object) throws JSONException {
@@ -267,7 +267,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     private User parseUserJson(JSONObject object) throws JSONException {
@@ -306,7 +306,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -341,7 +341,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     public void deleteLocation(String locationUuid,
@@ -352,7 +352,7 @@ public class OpenMrsServer implements Server {
                 null,
                 null,
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     @Override
@@ -382,7 +382,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        mConnectionDetails.volley.addToRequestQueue(request, logTag);
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
     private Location parseLocationJson(JSONObject object) {
@@ -391,6 +391,6 @@ public class OpenMrsServer implements Server {
 
     @Override
     public void cancelPendingRequests(String logTag) {
-        mConnectionDetails.volley.cancelPendingRequests(logTag);
+        mConnectionDetails.getVolley().cancelPendingRequests(logTag);
     }
 }
