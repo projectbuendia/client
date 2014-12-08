@@ -75,8 +75,8 @@ public class UserManager {
     private Set<User> mKnownUsers;
     private User mActiveUser;
 
-    public UserManager() {
-        mUserStore = new UserStore();
+    public UserManager(UserStore userStore) {
+        mUserStore = userStore;
     }
 
     /**

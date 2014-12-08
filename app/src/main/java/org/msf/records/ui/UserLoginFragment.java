@@ -20,11 +20,13 @@ import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
-import org.msf.records.utils.Constants;
+import org.msf.records.utils.Colorizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -36,8 +38,16 @@ import de.greenrobot.event.EventBus;
  */
 public class UserLoginFragment extends Fragment {
 
+    @Inject Colorizer mUserColorizer;
+
     @InjectView(R.id.users) GridView mUsersGrid;
     private UserListAdapter mUserListAdapter;
+
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        App.getInstance().inject(this);
+    }
 
     @Override
     public View onCreateView(
@@ -111,7 +121,7 @@ public class UserLoginFragment extends Fragment {
         getActivity().startActivity(new Intent(getActivity(), TentSelectionActivity.class));
     }
 
-    static class UserListAdapter extends ArrayAdapter<User> {
+    class UserListAdapter extends ArrayAdapter<User> {
 
         public UserListAdapter(Context context) {
             super(context, R.layout.grid_item_user);
@@ -119,32 +129,33 @@ public class UserLoginFragment extends Fragment {
 
         @Override
         public View getView(int position, View view, ViewGroup parent) {
-            ViewHolder holder;
+            UserListItemViewHolder holder;
             if (view != null) {
-                holder = (ViewHolder) view.getTag();
+                holder = (UserListItemViewHolder) view.getTag();
             } else {
                 view = LayoutInflater.from(getContext())
                         .inflate(R.layout.grid_item_user, parent, false);
-                holder = new ViewHolder(view);
+                holder = new UserListItemViewHolder(view);
                 view.setTag(holder);
             }
 
             User user = getItem(position);
             holder.mInitials
-                    .setBackgroundColor(Constants.USER_COLORIZER.getColorArgb(user.getId()));
+                    .setBackgroundColor(mUserColorizer.getColorArgb(user.getId()));
             holder.mInitials.setText(user.getInitials());
             holder.mName.setText(user.getFullName());
 
             return view;
         }
+    }
 
-        static class ViewHolder {
-            @InjectView(R.id.user_initials) TextView mInitials;
-            @InjectView(R.id.user_name) TextView mName;
+    static class UserListItemViewHolder {
 
-            public ViewHolder(View view) {
-                ButterKnife.inject(this, view);
-            }
+        @InjectView(R.id.user_initials) TextView mInitials;
+        @InjectView(R.id.user_name) TextView mName;
+
+        public UserListItemViewHolder(View view) {
+            ButterKnife.inject(this, view);
         }
     }
 }
