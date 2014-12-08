@@ -13,6 +13,8 @@ def versionPatch = 0
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 
+def releaseRepoRoot = file('../../release/')
+
 dependencies {
     // Build plugins
     provided 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables
@@ -78,19 +80,12 @@ android {
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
     }
 
-    buildTypes {
-        debug {
-            applicationIdSuffix '.dev'
-            versionNameSuffix '-dev'
-
-            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
-            resValue "string", "account_type", defaultConfig.applicationId + '.dev'
-            buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
-
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+    signingConfigs {
         release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            storeFile file(new File(releaseRepoRoot, 'keys/org.msf.records.jks'))
+            storePassword ''
+            keyAlias 'org.msf.records'
+            keyPassword ''
         }
     }
 
@@ -107,4 +102,46 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.dev'
+            versionNameSuffix '-dev'
+
+            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
+            resValue "string", "account_type", defaultConfig.applicationId + '.dev'
+            buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    taskGraph ->
+        if (taskGraph.hasTask(':app:assembleRelease')) {
+            def pass = ''
+            if (!android.signingConfigs.release.storeFile.exists()) {
+                throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
+            }
+            if (System.console() == null) {
+                throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.");
+            }
+
+            pass = System.console().readPassword("\nPlease enter key passphrase: ")
+            pass = new String(pass)
+
+            if (pass.size() <= 0) {
+                throw new IllegalArgumentException("You must enter a password to proceed.")
+            }
+
+            android.signingConfigs.release.storePassword = pass
+            android.signingConfigs.release.keyPassword = pass
+        }
 }
