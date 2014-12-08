@@ -1,9 +1,10 @@
 package org.msf.records;
 
 /**
- * Created by dxchen on 12/8/14.
+ * The modules used for injection in a release build.
  */
 final class Modules {
+
     static Object[] list(App app) {
         return new Object[] {
                 new AppModule(app)

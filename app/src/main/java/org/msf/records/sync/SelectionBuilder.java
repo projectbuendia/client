@@ -42,6 +42,7 @@ import java.util.Map;
  * thread safe.
  */
 public class SelectionBuilder {
+
     private static final String TAG = SelectionBuilder.class.getSimpleName();
 
     private String mTable = null;

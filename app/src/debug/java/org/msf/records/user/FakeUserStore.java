@@ -9,7 +9,7 @@ import org.msf.records.user.UserStore;
 import java.util.Set;
 
 /**
- * A fake user store for testing out user flows before we have server integration.
+ * A fake {@link UserStore} for testing out user flows before we have server integration.
  */
 public class FakeUserStore extends UserStore {
 
