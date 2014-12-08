@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
@@ -154,8 +155,11 @@ public class UserLoginActivity extends FragmentActivity {
     	
     	@Override
     	public void showErrorToast(int stringResourceId) {
-    		// TODO Auto-generated method stub
-    		
+    		Toast toast = Toast.makeText(
+    				UserLoginActivity.this, 
+    				getResources().getString(stringResourceId),
+    				Toast.LENGTH_SHORT);
+    		toast.show();
     	}
     	
     	@Override
