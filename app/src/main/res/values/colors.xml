@@ -18,6 +18,11 @@
     <color name="status_discharged">#b3b3b3</color>
     <color name="zone_outside">#FFFFFF</color>
     <color name="zone_triage">#FFFFFF</color>
+    <color name="general_condition_good">#4CAF50</color>
+    <color name="general_condition_fair">#FFC927</color>
+    <color name="general_condition_poor">#FF2121</color>
+    <color name="general_condition_very_poor">#D0021B</color>
+    <color name="general_condition_unknown">#D8D8D8</color>
 
 
 </resources>
