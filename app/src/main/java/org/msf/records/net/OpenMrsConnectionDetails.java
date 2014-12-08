@@ -1,49 +1,49 @@
 package org.msf.records.net;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Base64;
 
-import org.msf.records.App;
+import org.msf.records.inject.Qualifiers;
+import org.msf.records.prefs.StringPreference;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 /**
  * OpenMrsConnectionDetails provides up-to-date preferences for connecting to Open MRS, as they are
  * shared between various classes. This might be a sign that those classes should be combined.
  */
 public class OpenMrsConnectionDetails {
-    private final VolleySingleton volley;
-    private final SharedPreferences preferences;
+
+    private final VolleySingleton mVolley;
+    private final StringPreference mOpenMrsRootUrl;
+    private final StringPreference mOpenMrsUser;
+    private final StringPreference mOpenMrsPassword;
 
     public VolleySingleton getVolley() {
-        return volley;
+        return mVolley;
     }
 
     public String getRootUrl() {
-        return preferences.getString("openmrs_root_url", null);
+        return mOpenMrsRootUrl.get();
     }
 
     public String getUserName() {
-        return preferences.getString("openmrs_user", null);
+        return mOpenMrsUser.get();
     }
 
     public String getPassword() {
-        return preferences.getString("openmrs_password", null);
+        return mOpenMrsPassword.get();
     }
 
-    public OpenMrsConnectionDetails(Context context, VolleySingleton volley) {
-        this.volley = volley;
-        this.preferences =
-                PreferenceManager.getDefaultSharedPreferences(App.getInstance());
-    }
-
-    public OpenMrsConnectionDetails(Context context) {
-        this(App.getInstance(), VolleySingleton.getInstance(context.getApplicationContext()));
+    public OpenMrsConnectionDetails(
+            VolleySingleton volley,
+            @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
+            @Qualifiers.OpenMrsUser StringPreference openMrsUser,
+            @Qualifiers.OpenMrsPassword StringPreference openMrsPassword) {
+        mVolley = volley;
+        mOpenMrsRootUrl = openMrsRootUrl;
+        mOpenMrsUser = openMrsUser;
+        mOpenMrsPassword = openMrsPassword;
     }
 
     public Map<String, String> addAuthHeader(HashMap<String, String> params) {

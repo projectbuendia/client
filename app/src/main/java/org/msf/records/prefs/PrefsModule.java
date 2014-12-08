@@ -4,10 +4,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import org.msf.records.App;
 import org.msf.records.inject.Qualifiers;
-import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.UserLoginFragment;
 
 import javax.inject.Singleton;
 
@@ -15,7 +12,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * A Dagger module that provides bindings for utilities.
+ * A Dagger module that provides bindings for preferences.
  */
 @Module(
         complete = false,
