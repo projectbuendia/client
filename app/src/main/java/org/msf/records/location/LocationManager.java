@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import org.msf.records.App;
+import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.location.LocationsSyncFailedEvent;
@@ -98,6 +99,15 @@ public class LocationManager {
      */
     public synchronized void syncLocations() {
         new SyncLocationsTask().execute();
+    }
+
+    public synchronized void onEvent(CreatePatientSucceededEvent event) {
+        // If a patient was just created, we need to rebuild the location tree so that patient
+        // counts remain up-to-date.
+        // TODO(akalachman): If/when we can access the new patient here, only update counts.
+        synchronized (mLocationsLock) {
+            new LoadLocationsTask().execute();
+        }
     }
 
     public synchronized void onEvent(LocationsSyncedEvent event) {
