@@ -34,7 +34,6 @@ public class App extends Application {
     private static App sInstance;
 
     private static UserManager sUserManager;
-    private static UpdateManager sUpdateManager;
 
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
@@ -61,7 +60,6 @@ public class App extends Application {
             sInstance = this;
 
             sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
-            sUpdateManager = new UpdateManager();
 
             mConnectionDetails =
                     new OpenMrsConnectionDetails(
@@ -92,10 +90,6 @@ public class App extends Application {
 
     public static synchronized UserManager getUserManager() {
         return sUserManager;
-    }
-
-    public static synchronized UpdateManager getUpdateManager() {
-        return sUpdateManager;
     }
 
     public static synchronized Server getServer() {

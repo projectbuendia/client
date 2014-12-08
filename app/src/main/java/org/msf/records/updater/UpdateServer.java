@@ -14,6 +14,9 @@ import org.msf.records.net.VolleySingleton;
  */
 public class UpdateServer {
 
+    /**
+     * TODO(dxchen): Dagger this.
+     */
     public static final String ROOT_URL = "http://buendia.whitespell.com:8080/";
 
     private final VolleySingleton mVolley;

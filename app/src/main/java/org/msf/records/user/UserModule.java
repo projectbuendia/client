@@ -1,8 +1,5 @@
 package org.msf.records.user;
 
-import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.UserLoginFragment;
-
 import javax.inject.Singleton;
 
 import dagger.Module;

@@ -27,6 +27,7 @@ dependencies {
     compile 'com.github.frankiesardo:auto-parcel:+' // Automatic Parcelables
     compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
     compile 'com.google.code.gson:gson:2.3' // JSON parser
+    compile 'com.google.guava:guava:18.0' // Google common libraries
     compile 'com.jakewharton:butterknife:5.1.2' // View injection
     compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
     compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
