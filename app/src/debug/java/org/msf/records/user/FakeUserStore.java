@@ -1,4 +1,4 @@
-package org.msf.records.user.testing;
+package org.msf.records.user;
 
 import com.google.common.collect.Sets;
 

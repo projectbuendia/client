@@ -8,8 +8,10 @@ import android.os.Bundle;
 
 /** A "view server" adaptation which automatically hooks itself up to all activities. */
 public interface ActivityHierarchyServer extends Application.ActivityLifecycleCallbacks {
+
     /** An {@link ActivityHierarchyServer} which does nothing. */
     ActivityHierarchyServer NONE = new ActivityHierarchyServer() {
+
         @Override public void onActivityCreated(Activity activity, Bundle bundle) {}
         @Override public void onActivityStarted(Activity activity) {}
         @Override public void onActivityResumed(Activity activity) {}

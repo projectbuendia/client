@@ -16,7 +16,9 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
-import org.msf.records.utils.Constants;
+import org.msf.records.utils.Colorizer;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -28,6 +30,8 @@ import de.greenrobot.event.EventBus;
  */
 public abstract class BaseActivity extends ControllableActivity {
 
+    @Inject Colorizer mUserColorizer;
+
     private User lastActiveUser;
     private Menu mMenu;
     private MenuPopupWindow mPopupWindow;
@@ -35,6 +39,8 @@ public abstract class BaseActivity extends ControllableActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        App.getInstance().inject(this);
     }
 
     @Override
@@ -96,7 +102,7 @@ public abstract class BaseActivity extends ControllableActivity {
                 .getActionView()
                 .findViewById(R.id.user_initials);
 
-        initials.setBackgroundColor(Constants.USER_COLORIZER.getColorArgb(user.getId()));
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.getId()));
         initials.setText(user.getInitials());
     }
 

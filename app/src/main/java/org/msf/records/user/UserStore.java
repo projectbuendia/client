@@ -26,7 +26,8 @@ import java.util.concurrent.CountDownLatch;
  * A store for users.
  */
 public class UserStore {
-    private static final String TAG = "UserStore";
+
+    private static final String TAG = UserStore.class.getName();
 
     public Set<User> loadKnownUsers() {
         Cursor cursor = null;

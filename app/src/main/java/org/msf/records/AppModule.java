@@ -2,15 +2,22 @@ package org.msf.records;
 
 import android.app.Application;
 
+import org.msf.records.user.UserModule;
+import org.msf.records.utils.UtilsModule;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by dxchen on 12/8/14.
+ * A Dagger module that provides the top-level bindings for the app.
  */
 @Module(
+        includes = {
+                UserModule.class,
+                UtilsModule.class
+        },
         injects = {
                 App.class
         }
