@@ -11,7 +11,6 @@ android {
     buildToolsVersion "19.1.0"
 
     defaultConfig {
-        applicationId "org.odk.collect.android"
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
@@ -19,8 +18,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
