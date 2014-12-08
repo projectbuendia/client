@@ -39,6 +39,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
             mLastPressedView = mGroup.findViewById(mGroup.getCheckedRadioButtonId());
 
+            // Unfocus any currently-focused view and hide the soft keyboard.
             View currentFocus = ((Activity) view.getContext()).getCurrentFocus();
             if (currentFocus != null) {
                 currentFocus.clearFocus();

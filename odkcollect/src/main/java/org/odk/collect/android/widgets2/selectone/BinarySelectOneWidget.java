@@ -30,6 +30,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
 
         @Override
         public void onClick(View view) {
+            // Unfocus any currently-focused view and hide the soft keyboard.
             View currentFocus = ((Activity) view.getContext()).getCurrentFocus();
             if (currentFocus != null) {
                 currentFocus.clearFocus();

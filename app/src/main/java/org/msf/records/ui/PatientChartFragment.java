@@ -37,7 +37,7 @@ import org.msf.records.net.model.PatientAge;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.view.VitalView;
+import org.msf.records.widget.VitalView;
 import org.msf.records.widget.DataGridView;
 
 import java.text.SimpleDateFormat;
