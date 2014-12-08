@@ -2,6 +2,8 @@ package org.msf.records.location;
 
 import android.content.Context;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 
@@ -158,8 +160,9 @@ public class LocationTree implements Comparable<LocationTree> {
 
     @Override
     public String toString() {
-        if (!mLocation.names.containsKey(mSortLocale)) {
-            return "";
+        if (mLocation == null || mLocation.names == null ||
+                !mLocation.names.containsKey(mSortLocale)) {
+            return App.getInstance().getResources().getString(R.string.unknown_location);
         }
 
         return mLocation.names.get(mSortLocale);
@@ -198,14 +201,12 @@ public class LocationTree implements Comparable<LocationTree> {
 
         // If neither location is a zone and there is no name for one or both locations in this
         // locale, return equal as we don't know how to compare them.
-        if (!mLocation.names.containsKey(mSortLocale) ||
-                !another.getLocation().names.containsKey(mSortLocale)) {
+        if (toString().isEmpty() || another.toString().isEmpty()) {
             return 0;
         }
 
         // Compare using the current locale.
-        return mLocation.names.get(mSortLocale).compareTo(
-                another.getLocation().names.get(mSortLocale));
+        return toString().compareTo(another.toString());
     }
 
     public LocationTree[] getSubtreeLocationArray() {
