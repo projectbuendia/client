@@ -5,6 +5,7 @@ import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
@@ -14,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.TimingLogger;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -104,42 +106,55 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
         Log.i(TAG, "Beginning network synchronization");
+        TimingLogger timings = new TimingLogger(TAG, "onPerformSync");
         try {
             boolean specific = false;
             if (extras.getBoolean(SYNC_PATIENTS)) {
                 specific = true;
                 // default behaviour
                 updatePatientData(syncResult);
+                timings.addSplit("update patient data specified");
             }
             if (extras.getBoolean(SYNC_CONCEPTS)) {
                 specific = true;
                 updateConcepts(provider, syncResult);
+                timings.addSplit("update concepts specified");
             }
             if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
                 specific = true;
+                timings.addSplit("update chart specified");
                 updateChartStructure(provider, syncResult);
             }
             if (extras.getBoolean(SYNC_OBSERVATIONS)) {
                 specific = true;
                 updateObservations(provider, syncResult);
+                timings.addSplit("update observations specified");
             }
             if (extras.getBoolean(SYNC_LOCATIONS)) {
                 specific = true;
                 updateLocations(provider, syncResult);
+                timings.addSplit("update locations specified");
             }
             if (extras.getBoolean(SYNC_USERS)) {
                 specific = true;
                 updateUsers(provider, syncResult);
+                timings.addSplit("update users specified");
             }
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
                 updatePatientData(syncResult);
+                timings.addSplit("update all (patients)");
                 updateConcepts(provider, syncResult);
+                timings.addSplit("update all (concepts)");
                 updateChartStructure(provider, syncResult);
+                timings.addSplit("update all (chart)");
                 updateObservations(provider, syncResult);
+                timings.addSplit("update all (observations)");
                 updateLocations(provider, syncResult);
+                timings.addSplit("update all (locations)");
                 updateUsers(provider, syncResult);
+                timings.addSplit("update all (users)");
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error in RPC", e);
@@ -167,6 +182,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             getContext().sendBroadcast(syncFailedIntent);
             return;
         }
+        timings.dumpToLog();
         Log.i(TAG, "Network synchronization complete");
 
         // Fire a broadcast indicating that sync has completed.
@@ -377,6 +393,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     future, future);
             futures.add(future);
         }
+        int i=0;
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        ArrayList<ContentValues> toInsert = new ArrayList<>();
         for (RequestFuture<PatientChart> future : futures) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             try {
@@ -386,11 +405,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     continue;
                 }
                 // Delete all existing observations for the patient.
-                provider.delete(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
-                        ChartColumns.PATIENT_UUID + "=?",
-                        new String[]{patientChart.uuid});
+                ops.add(ContentProviderOperation.newDelete(ChartProviderContract.OBSERVATIONS_CONTENT_URI)
+                        .withSelection(ChartColumns.PATIENT_UUID + "=?", new String[]{patientChart.uuid})
+                        .build());
                 // Add the new observations
-                provider.applyBatch(RpcToDb.observationsRpcToDb(patientChart, syncResult));
+                RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
+                i++;
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error interruption: " + e.toString());
                 syncResult.stats.numIoExceptions++;
@@ -405,6 +425,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 return;
             }
         }
+        provider.applyBatch(ops);
+        provider.bulkInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
+                toInsert.toArray(new ContentValues[toInsert.size()]));
     }
 
     private void updateUsers(final ContentProviderClient provider, SyncResult syncResult) {

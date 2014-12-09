@@ -1,9 +1,9 @@
 package org.msf.records.utils;
 
-import javax.inject.Singleton;
-
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.UserLoginActivity;
+
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;

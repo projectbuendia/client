@@ -1,6 +1,9 @@
 package org.msf.records.ui;
 
-import static org.mockito.Mockito.verify;
+import android.test.AndroidTestCase;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -8,12 +11,9 @@ import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.user.UserManager;
 
-import android.test.AndroidTestCase;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-
 import de.greenrobot.event.EventBus;
+
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link UserLoginController}.

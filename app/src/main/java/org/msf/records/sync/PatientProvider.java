@@ -141,6 +141,17 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
+    public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                          ContentValues[] values) {
+        // TODO(nfortescue): optimise this.
+        int numValues = values.length;
+        for (int i = 0; i < numValues; i++) {
+            insert(dbHelper, contentResolver, uri, values[i]);
+        }
+        return numValues;
+    }
+
+    @Override
     public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
                       String selection, String[] selectionArgs) {
         SelectionBuilder builder = new SelectionBuilder();

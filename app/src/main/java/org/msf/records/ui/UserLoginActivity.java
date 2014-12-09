@@ -1,15 +1,5 @@
 package org.msf.records.ui;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.net.model.User;
-import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
-import org.msf.records.utils.Colorizer;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +14,17 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.net.model.User;
+import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
+import org.msf.records.utils.Colorizer;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;

@@ -2,6 +2,7 @@ package org.msf.records.sync;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
@@ -114,10 +115,9 @@ public class RpcToDb {
     /**
      * Convert a ChartStructure response into appropriate inserts in the chart table.
      */
-    public static ArrayList<ContentProviderOperation> observationsRpcToDb(
-            PatientChart response, SyncResult syncResult) {
+    public static void observationsRpcToDb(
+            PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
         final String patientUuid = response.uuid;
-        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
         for (Encounter encounter : response.encounters) {
             if (encounter.uuid == null) {
                 Log.e(TAG, "Encounter uuid was null for " + patientUuid);
@@ -130,20 +130,20 @@ public class RpcToDb {
                 continue;
             }
             final int encounterTime = (int) (timestamp.getMillis() / 1000); // seconds since epoch
+            ContentValues base = new ContentValues();
+            base.put(ChartColumns.PATIENT_UUID, patientUuid);
+            base.put(ChartColumns.ENCOUNTER_UUID, encounterUuid);
+            base.put(ChartColumns.ENCOUNTER_TIME, encounterTime);
+
             for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
                 final String conceptUuid = (String) entry.getKey();
-                operations.add(ContentProviderOperation
-                        .newInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI)
-                        .withValue(ChartColumns.PATIENT_UUID, patientUuid)
-                        .withValue(ChartColumns.ENCOUNTER_UUID, encounterUuid)
-                        .withValue(ChartColumns.ENCOUNTER_TIME, encounterTime)
-                        .withValue(ChartColumns.CONCEPT_UUID, conceptUuid)
-                        .withValue(ChartColumns.VALUE, entry.getValue().toString())
-                        .build());
+                ContentValues values = new ContentValues(base);
+                values.put(ChartColumns.CONCEPT_UUID, conceptUuid);
+                values.put(ChartColumns.VALUE, entry.getValue().toString());
+                result.add(values);
                 syncResult.stats.numInserts++;
             }
         }
-        return operations;
     }
 
     /**
