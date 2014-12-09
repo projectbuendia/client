@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Resources related to the network configuration. -->
+<resources>
+
+    <!-- The root URLs for OpenMRS on each of our three different configurations: GCE, Edison on
+         LAN, and localhost emulator. It would have been nice to separate the host and path
+         components but you cannot concatenate string resources in XML. -->
+    <string name="openmrs_root_url_gce">
+        http://104.155.15.141:8080/openmrs/ws/rest/v1/projectbuendia
+    </string>
+    <string name="openmrs_root_url_edison">
+        http://10.0.0.198:8080/openmrs/ws/rest/v1/projectbuendia
+    </string>
+    <string name="openmrs_url_localhost">
+        http://10.0.2.2:8080/openmrs/ws/rest/v1/projectbuendia
+    </string>
+
+    <!-- The default values for OpenMRS options. -->
+    <string name="openmrs_root_url_default">@string/openmrs_root_url_gce</string>
+    <string name="openmrs_user_default">android</string>
+    <string name="openmrs_password_default">Android123</string>
+
+    <!-- The default value for whether to keep XForm instances locally. -->
+    <bool name="keep_form_instances_locally_default">false</bool>
+
+</resources>
