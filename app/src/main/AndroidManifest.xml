@@ -18,6 +18,7 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <!-- Required because we're manually creating a new account. -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-sdk android:minSdkVersion="14"/>
 
     <application
         android:name="org.msf.records.App"
