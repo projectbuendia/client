@@ -6,6 +6,7 @@ import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.msf.records.App;
+import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.net.model.User;
@@ -66,15 +67,13 @@ public class PatientChartController extends BaseController {
                 LocalizedChartHelper.getMostRecentObservations(
                         activity.getContentResolver(), patientUuid);
 
-        if (observations.containsKey("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                && "Yes".equals(
-                        observations.get("5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").localizedValue)) {
+        if (observations.containsKey(Concept.PREGNANCY_UUID)
+                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
             fields.mPregnant = PrepopulatableFields.YES;
         }
 
-        if (observations.containsKey("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07")
-                && "Yes".equals(
-                        observations.get("f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").localizedValue)) {
+        if (observations.containsKey(Concept.IV_UUID)
+                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
             fields.mIvFitted = PrepopulatableFields.YES;
         }
 
