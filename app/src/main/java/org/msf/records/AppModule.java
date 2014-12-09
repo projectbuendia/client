@@ -1,6 +1,7 @@
 package org.msf.records;
 
 import android.app.Application;
+import android.content.res.Resources;
 
 import org.msf.records.net.NetModule;
 import org.msf.records.prefs.PrefsModule;
@@ -53,5 +54,9 @@ public final class AppModule {
 
     @Provides @Singleton Application provideApplication() {
         return mApp;
+    }
+
+    @Provides @Singleton Resources provideResources(Application app) {
+        return app.getResources();
     }
 }
