@@ -1,30 +1,61 @@
 package org.msf.records.ui;
 
+import org.msf.records.R;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
+import org.msf.records.net.Constants;
+
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
+import de.greenrobot.event.EventBus;
 
-import org.msf.records.R;
-import org.msf.records.net.Constants;
+/**
+ * Displays a list of tents and allows users to search through a list of patients.
+ */
+public final class TentSelectionActivity extends PatientSearchActivity {
+	
+	private TentSelectionController mController;
 
-public class TentSelectionActivity extends PatientSearchActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mController = new TentSelectionController(
+        		new LocationManager(),
+        		new MyUi(),
+        		EventBus.getDefault());
+        
         setContentView(R.layout.activity_tent_selection);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.tent_selection_container, TentSelectionFragment.newInstance())
+                    .add(R.id.tent_selection_container, new TentSelectionFragment())
                     .commit();
         }
     }
-
-
+    
+    TentSelectionController getController() {
+    	return mController;
+    }
+    
+    @Override
+    protected void onStart() {
+    	super.onStart();
+    	mController.init();
+    }
+    
+    @Override
+    protected void onStop() {
+    	mController.suspend();
+    	super.onStop();
+    }
+    
     @Override
     public void onExtendOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
+        // Inflate the menu items for use in the action bar.
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
@@ -48,27 +79,48 @@ public class TentSelectionActivity extends PatientSearchActivity {
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                // When the search view is expanded, replace the tent selection fragment with
-                // a patient list.
-                PatientListFragment newFragment = new PatientListFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.tent_selection_container, newFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                return true;
+            	mController.onSearchPressed();
+            	return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                // When the search view is closed, replace the patient list with the tent selection
-                // fragment.
-                TentSelectionFragment newFragment = new TentSelectionFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.tent_selection_container, newFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                return true;
+            	mController.onSearchCancelled();
+            	return true;
             }
         });
+    }
+    
+    private final class MyUi implements TentSelectionController.Ui {
+    	public void switchToTentSelectionScreen() {
+            switchToFragment(new TentSelectionFragment());
+    	}
+    	
+    	public void switchToPatientListScreen() {
+            switchToFragment(new PatientListFragment());
+    	}
+    	@Override
+    	public void showErrorMessage(int stringResourceId) {
+    		Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
+    	}
+    	
+    	@Override
+    	public void launchActivityForLocation(LocationTree locationTree) {
+		   Intent roundIntent = new Intent(TentSelectionActivity.this, RoundActivity.class);
+		    roundIntent.putExtra(
+		            RoundActivity.LOCATION_NAME_KEY, locationTree.toString());
+		    roundIntent.putExtra(
+		            RoundActivity.LOCATION_UUID_KEY, locationTree.getLocation().uuid);
+		    roundIntent.putExtra(
+		            RoundActivity.LOCATION_PATIENT_COUNT_KEY, locationTree.getPatientCount());
+		    startActivity(roundIntent);
+    	}
+    }
+    
+    private void switchToFragment(Fragment newFragment) {
+    	getSupportFragmentManager().beginTransaction()
+				.replace(R.id.tent_selection_container, newFragment)
+				.addToBackStack(null)
+				.commit();
     }
 }
