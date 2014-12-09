@@ -25,6 +25,7 @@ import org.msf.records.App;
 import org.msf.records.model.Zone;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.Concept;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
@@ -32,8 +33,11 @@ import org.msf.records.net.model.PatientChart;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static org.msf.records.sync.ChartProviderContract.CONCEPTS_CONTENT_URI;
+import static org.msf.records.sync.ChartProviderContract.CONCEPT_NAMES_CONTENT_URI;
 import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns;
 
@@ -343,7 +347,39 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<ConceptList> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
         ConceptList conceptList = future.get();
-        provider.applyBatch(RpcToDb.conceptRpcToDb(conceptList, syncResult));
+        ArrayList<ContentValues> conceptInserts = new ArrayList<>();
+        ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
+        for (Concept concept : conceptList.results) {
+            // This is safe because we have implemented insert on the content provider
+            // with replace.
+            ContentValues conceptInsert = new ContentValues();
+            conceptInsert.put(ChartColumns._ID, concept.uuid);
+            conceptInsert.put(ChartColumns.CONCEPT_TYPE, concept.type.name());
+            conceptInserts.add(conceptInsert);
+            syncResult.stats.numInserts++;
+            for (Map.Entry<String, String> entry : concept.names.entrySet()) {
+                String locale = entry.getKey();
+                if (locale == null) {
+                    Log.e(TAG, "null locale in concept name rpc for " + concept);
+                    continue;
+                }
+                String name = entry.getValue();
+                if (name == null) {
+                    Log.e(TAG, "null name in concept name rpc for " + concept);
+                    continue;
+                }
+                ContentValues conceptNameInsert = new ContentValues();
+                conceptNameInsert.put(ChartColumns.CONCEPT_UUID, concept.uuid);
+                conceptNameInsert.put(ChartColumns.LOCALE, locale);
+                conceptNameInsert.put(ChartColumns.NAME, name);
+                conceptNameInserts.add(conceptNameInsert);
+                syncResult.stats.numInserts++;
+            }
+        }
+        provider.bulkInsert(CONCEPTS_CONTENT_URI,
+                conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
+        provider.bulkInsert(CONCEPT_NAMES_CONTENT_URI,
+                conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
     }
 
     private void updateLocations(final ContentProviderClient provider, SyncResult syncResult)
