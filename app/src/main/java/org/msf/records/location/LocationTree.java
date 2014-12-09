@@ -1,7 +1,10 @@
 package org.msf.records.location;
 
 import android.content.Context;
+import android.content.res.Resources;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 
@@ -160,8 +163,26 @@ public class LocationTree implements Comparable<LocationTree> {
 
     @Override
     public String toString() {
-        if (!mLocation.names.containsKey(mSortLocale)) {
-            return "";
+        if (mLocation == null || mLocation.names == null ||
+                !mLocation.names.containsKey(mSortLocale)) {
+            Resources resources = App.getInstance().getResources();
+
+            // This location is null, try to recover.
+            int depth = getDepth();
+            switch (depth) {
+                case ZONE_DEPTH:
+                    return resources.getString(R.string.unknown_zone);
+                case TENT_DEPTH:
+                    LocationTree parent = getParent();
+                    if (parent == null) {
+                        return resources.getString(R.string.unknown_tent);
+                    } else {
+                        return resources.getString(
+                                R.string.unknown_tent_in_zone, getParent().toString());
+                    }
+                default:
+                    return resources.getString(R.string.unknown_location);
+            }
         }
 
         return mLocation.names.get(mSortLocale);
@@ -174,23 +195,27 @@ public class LocationTree implements Comparable<LocationTree> {
             return 0;
         }
 
+        // Zone order takes precedence, if zones differ.
+        LocationTree zone = getAncestorOrThisWithDepth(ZONE_DEPTH);
+        LocationTree otherZone = another.getAncestorOrThisWithDepth(ZONE_DEPTH);
+        if (zone != null && otherZone != null
+                && zone.getLocation() != null && otherZone.getLocation() != null) {
+            int zoneComparison = Zone.compareTo(zone.getLocation(), otherZone.getLocation());
+            if (zoneComparison != 0) {
+                return zoneComparison;
+            }
+        }
+
         // On the off-chance that the other location is at a different depth, prefer
         // locations at a smaller depth (facility > zone > tent > bed).
-        Integer depth = getDepth();
+        /*Integer depth = getDepth();
         Integer anotherDepth = another.getDepth();
         int depthComparison = depth.compareTo(anotherDepth);
         if (depthComparison != 0) {
             return depthComparison;
-        }
+        }*/
 
-        // Zone order takes precedence, but a value of 0 means that one or both locations
-        // is not a zone.
-        int zoneComparison = Zone.compareTo(getLocation(), another.getLocation());
-        if (zoneComparison != 0) {
-            return zoneComparison;
-        }
-
-        // Parent order is the next precedent (e.g. tents should be sorted by zone).
+        // Parent order is the next precedent (e.g. beds should be ordered by tent).
         if (getParent() != null && another.getParent() != null) {
             int parentComparison = getParent().compareTo(another.getParent());
             if (parentComparison != 0) {
@@ -200,14 +225,12 @@ public class LocationTree implements Comparable<LocationTree> {
 
         // If neither location is a zone and there is no name for one or both locations in this
         // locale, return equal as we don't know how to compare them.
-        if (!mLocation.names.containsKey(mSortLocale) ||
-                !another.getLocation().names.containsKey(mSortLocale)) {
+        if (toString().isEmpty() || another.toString().isEmpty()) {
             return 0;
         }
 
         // Compare using the current locale.
-        return mLocation.names.get(mSortLocale).compareTo(
-                another.getLocation().names.get(mSortLocale));
+        return toString().compareTo(another.toString());
     }
 
     public LocationTree[] getSubtreeLocationArray() {

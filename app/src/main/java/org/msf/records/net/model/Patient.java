@@ -21,6 +21,8 @@ public class Patient implements Serializable {
     public Long admission_timestamp;
     public Long created_timestamp;
     public Long first_showed_symptoms_timestamp;
+    // Birth date in seconds since epoch.
+    public Long dob_timestamp;
 
     public String origin_location;
     // Not yet ready.
