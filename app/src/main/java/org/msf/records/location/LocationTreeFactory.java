@@ -1,30 +1,29 @@
 package org.msf.records.location;
 
-import android.content.Context;
-import android.database.Cursor;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.msf.records.filter.AllFilter;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.model.LocalizedString;
 import org.msf.records.net.model.Location;
 import org.msf.records.sync.LocationProjection;
 import org.msf.records.sync.LocationProviderContract;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 
-import java.util.HashMap;
-import java.util.Map;
+import android.content.Context;
+import android.database.Cursor;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * LocationTreeFactory constructs a LocationTree using a database Cursor and listens for changes
  * in location data.
  */
 public class LocationTreeFactory {
-    private final String TAG = "LocationTree";
 
     private FilterQueryProviderFactory mLocationQueryFactory;
     private FilterQueryProviderFactory mLocationNamesQueryFactory;
@@ -35,7 +34,11 @@ public class LocationTreeFactory {
     private SimpleSelectionFilter mPatientCountsFilter = new AllFilter();
 
     private Multimap<String, Location> mLocationsByParent;
-    private Map<String, HashMap<String, String>> mLocationNamesMap;
+    private Map<String, LocalizedString.Builder> mLocationNamesByUuid;
+    /** 
+     * Map from location UUID to number of patients at that location. This excludes any patients contained with
+     * a smaller location within that location.
+     */
     private Map<String, Integer> mPatientCountsMap;
 
     private final Context mContext;
@@ -59,8 +62,8 @@ public class LocationTreeFactory {
         mPatientCountsQueryFactory.setProjection(PatientProjection.getPatientCountsProjection());
 
         mLocationsByParent = HashMultimap.create();
-        mLocationNamesMap = new HashMap<String, HashMap<String, String>>();
-        mPatientCountsMap = new HashMap<String, Integer>();
+        mLocationNamesByUuid = new HashMap<>();
+        mPatientCountsMap = new HashMap<>();
     }
 
     public LocationTree build() {
@@ -121,7 +124,7 @@ public class LocationTreeFactory {
 
     // Initializes mLocationNamesMap from the given cursor. Does NOT close the cursor.
     private void buildLocationNamesMap(Cursor cursor) {
-        mLocationNamesMap.clear();
+    	mLocationNamesByUuid.clear();
         while (cursor.moveToNext()) {
             String name = cursor.getString(LocationProjection.LOCATION_NAME_NAME_COLUMN);
             String locale = cursor.getString(LocationProjection.LOCATION_NAME_LOCALE_COLUMN);
@@ -131,10 +134,10 @@ public class LocationTreeFactory {
                 continue;
             }
 
-            if (!mLocationNamesMap.containsKey(uuid)) {
-                mLocationNamesMap.put(uuid, new HashMap<String, String>());
+            if (!mLocationNamesByUuid.containsKey(uuid)) {
+            	mLocationNamesByUuid.put(uuid, new LocalizedString.Builder());
             }
-            mLocationNamesMap.get(uuid).put(locale, name);
+            mLocationNamesByUuid.get(uuid).addTranslation(locale, name);
         }
     }
 
@@ -146,43 +149,13 @@ public class LocationTreeFactory {
 
         // Map location names to this location as necessary.
         for (Location location : mLocationsByParent.values()) {
-            if (mLocationNamesMap.containsKey(location.uuid)) {
-                location.names = mLocationNamesMap.get(location.uuid);
+            if (mLocationNamesByUuid.containsKey(location.uuid)) {
+                location.names = mLocationNamesByUuid.get(location.uuid).build();
             }
         }
 
-        // Start the tree from the single known root. Forests are NOT supported.
-        Location root = Iterables.get(mLocationsByParent.get(null), 0);
-
-        LocationTree.clearTreeIndex();
-        LocationTree tree = new LocationTree(null, root, getPatientCount(root.uuid));
-        LocationTree.putTreeIndex(root.uuid, tree);
-
-        // With all locations initialized, recursively add children to the tree.
-        addChildren(tree);
-
-        return tree;
-    }
-
-    private void addChildren(LocationTree root) {
-        if (!mLocationsByParent.containsKey(root.getLocation().uuid)) {
-            return;
-        }
-
-        for (Location location : mLocationsByParent.get(root.getLocation().uuid)) {
-            LocationTree childTree =
-                    new LocationTree(root, location, getPatientCount(location.uuid));
-            root.getChildren().put(location.uuid, childTree);
-            LocationTree.putTreeIndex(location.uuid, childTree);
-            addChildren(childTree);
-        }
-    }
-
-    private int getPatientCount(String uuid) {
-        if (!mPatientCountsMap.containsKey(uuid)) {
-            return 0;
-        }
-
-        return mPatientCountsMap.get(uuid);
+       return new LocationTree(
+        		mLocationsByParent,
+        		mPatientCountsMap);
     }
 }

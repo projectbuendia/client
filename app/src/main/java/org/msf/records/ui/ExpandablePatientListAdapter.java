@@ -1,8 +1,22 @@
 package org.msf.records.ui;
 
+import java.util.Map;
+
+import org.msf.records.R;
+import org.msf.records.filter.FilterGroup;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.LocationUuidFilter;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.utils.PatientCountDisplay;
+
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,21 +26,6 @@ import android.widget.Filter;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.msf.records.R;
-import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.LocationUuidFilter;
-import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.location.LocationTree;
-import org.msf.records.model.Concept;
-import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
-import org.msf.records.utils.PatientCountDisplay;
-
-import java.util.Map;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -83,13 +82,15 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         sortBuilder.append(",");
         sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
 
+        // TODO: Don't use the singleton here.
+        LocationSubtree tentSubtree = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(tent);
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory()
                         .setSortClause(sortBuilder.toString())
                         .getFilterQueryProvider(
                                 mContext,
                                 new FilterGroup(getSelectionFilter(),
-                                        new LocationUuidFilter(tent)));
+                                        new LocationUuidFilter(tentSubtree)));
 
         Cursor patientsCursor = null;
 
@@ -113,7 +114,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int patientCount = getChildrenCursor(cursor).getCount();
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
-        LocationTree location = LocationTree.getTentForUuid(locationUuid);
+        LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
         if (location != null) {
             tentName = location.toString();
         }
