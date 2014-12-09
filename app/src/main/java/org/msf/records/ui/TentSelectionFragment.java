@@ -1,7 +1,9 @@
 package org.msf.records.ui;
 
+import java.util.List;
+
 import org.msf.records.R;
-import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
@@ -27,13 +29,14 @@ public final class TentSelectionFragment extends ProgressFragment {
 
     private TentSelectionController mController;
     private MyUi mMyUi = new MyUi();
+    private TentListAdapter mAdapter;
     
     public TentSelectionFragment() {
         // Required empty public constructor
     }
 
     @OnItemClick(R.id.tent_selection_tents) void onTentGridClicked(int position) {
-    	mController.onTentSelected((LocationTree) mTentGrid.getItemAtPosition(position));
+    	mController.onTentSelected(mAdapter.getItem(position));
     }
     
     @OnClick(R.id.tent_selection_all_patients) void onAllPatientsClicked(View v) {
@@ -99,10 +102,9 @@ public final class TentSelectionFragment extends ProgressFragment {
     	}
     	
     	@Override
-    	public void setTents(LocationTree[] tents) {
-    		TentListAdapter adapter = 
-    				new TentListAdapter(getActivity(), tents);
-    		mTentGrid.setAdapter(adapter);
+    	public void setTents(List<LocationSubtree> tents) {
+    		mAdapter = new TentListAdapter(getActivity(), tents);
+    		mTentGrid.setAdapter(mAdapter);
 		}
     	
     	@Override

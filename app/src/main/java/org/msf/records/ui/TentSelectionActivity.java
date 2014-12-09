@@ -2,7 +2,7 @@ package org.msf.records.ui;
 
 import org.msf.records.R;
 import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
 
 import android.content.Intent;
@@ -105,14 +105,14 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     	}
     	
     	@Override
-    	public void launchActivityForLocation(LocationTree locationTree) {
+    	public void launchActivityForLocation(LocationSubtree subtree) {
 		   Intent roundIntent = new Intent(TentSelectionActivity.this, RoundActivity.class);
 		    roundIntent.putExtra(
-		            RoundActivity.LOCATION_NAME_KEY, locationTree.toString());
+		            RoundActivity.LOCATION_NAME_KEY, subtree.toString());
 		    roundIntent.putExtra(
-		            RoundActivity.LOCATION_UUID_KEY, locationTree.getLocation().uuid);
+		            RoundActivity.LOCATION_UUID_KEY, subtree.getLocation().uuid);
 		    roundIntent.putExtra(
-		            RoundActivity.LOCATION_PATIENT_COUNT_KEY, locationTree.getPatientCount());
+		            RoundActivity.LOCATION_PATIENT_COUNT_KEY, subtree.getPatientCount());
 		    startActivity(roundIntent);
     	}
     }
