@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.annotation.Nullable;
+
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
  * locale.
@@ -137,16 +139,16 @@ public class LocationTree implements Comparable<LocationTree> {
         return locations;
     }
 
-    public static LocationTree[] getTents(Context context, LocationTree root) {
+    public static LocationTree[] getTents(Context context, @Nullable LocationTree root) {
         return getLocationArrayForDepth(context, root, TENT_DEPTH);
     }
 
-    public static LocationTree[] getZones(Context context, LocationTree root) {
+    public static LocationTree[] getZones(Context context, @Nullable LocationTree root) {
         return getLocationArrayForDepth(context, root, ZONE_DEPTH);
     }
 
     private static LocationTree[] getLocationArrayForDepth(
-            Context context, LocationTree root, int depth) {
+            Context context, @Nullable LocationTree root, int depth) {
         TreeSet<LocationTree> locationTrees;
         if (root == null) {
             locationTrees = new TreeSet<LocationTree>();
