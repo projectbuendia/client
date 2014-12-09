@@ -55,6 +55,7 @@ import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
  */
+// TODO(akalachman): Change all hardcoded strings to resources.
 public class PatientChartFragment extends ControllableFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = PatientChartFragment.class.getName();
@@ -381,12 +382,12 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         String specialText = new String();
 
         observation = conceptsToLatestObservations.get(Concept.PREGNANCY_UUID);
-        if (observation != null && observation.localizedValue.equals("Yes")) {
+        if (observation != null && observation.value.equals(Concept.YES_UUID)) {
             specialText = "Pregnant";
         }
 
         observation = conceptsToLatestObservations.get(Concept.IV_UUID);
-        if (observation != null && observation.localizedValue.equals("Yes")) {
+        if (observation != null && observation.value.equals(Concept.YES_UUID)) {
             specialText += "\nIV";
         }
 
