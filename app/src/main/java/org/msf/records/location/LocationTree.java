@@ -14,8 +14,11 @@ import java.util.TreeSet;
 
 import javax.annotation.Nullable;
 
+import org.msf.records.R;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
+
+import android.content.res.Resources;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -35,7 +38,7 @@ public final class LocationTree {
     public static final int TENT_DEPTH = 2;
     public static final int BED_DEPTH = 3;
     
-	public static final class LocationSubtree {
+	public final class LocationSubtree {
 		private Location mLocation;
 	    private int mPatientCount;
 	    private TreeMap<String, LocationSubtree> mChildren = new TreeMap<>();
@@ -64,12 +67,39 @@ public final class LocationTree {
 	    		child.addToCollectionRecursively(collection);
 	    	}
 	    }
+	    
+	    @Override
+	    public String toString() {
+	        if (mLocation == null 
+	        		|| mLocation.names == null
+	        		|| mLocation.names.getTranslationForLocale(mLocale) == null) {	
+	            // This location is null, try to recover.
+	            int depth = getDepthOfSubtree(this);
+	            switch (depth) {
+	                case ZONE_DEPTH:
+	                    return mResources.getString(R.string.unknown_zone);
+	                case TENT_DEPTH:
+	                	LocationSubtree parent = getParent(this);
+	                    if (parent == null) {
+	                        return mResources.getString(R.string.unknown_tent);
+	                    } else {
+	                        return mResources.getString(
+	                                R.string.unknown_tent_in_zone, 
+	                                parent.toString());
+	                    }
+	                default:
+	                    return mResources.getString(R.string.unknown_location);
+	            }
+	        }
 
+	        return mLocation.names.getTranslationForLocale(mLocale);
+	    }
 	}
 	
-    private final String DEFAULT_LOCALE = "en";
-    private String mSortLocale = DEFAULT_LOCALE;
+    private static final String DEFAULT_LOCALE = "en";
 
+    private final Resources mResources;
+    private final String mLocale = DEFAULT_LOCALE;;
     private final Map<String, LocationSubtree> mUuidToSubtree = new HashMap<>();  
     private final LocationSubtree mTreeRoot;
     
@@ -78,9 +108,11 @@ public final class LocationTree {
      *        This excludes any patients contained with a smaller location within that location.
      */
     public LocationTree(
+    		Resources resources,
     		Multimap<String, Location> locationByParentUuid,
     	    Map<String, Integer> patientCountByUuid) {
     	
+    	mResources = resources;
     	// Start the tree from the single known root. Forests are NOT supported.
     	Location root = Iterables.getOnlyElement(locationByParentUuid.get(null));
     	
@@ -105,7 +137,13 @@ public final class LocationTree {
     	}
     }
     
-    private static void addChildren(
+
+   
+    @Nullable private LocationSubtree getParent(LocationSubtree subtree) {
+    	return mUuidToSubtree.get(subtree.mLocation.parent_uuid);
+    }
+    
+    private void addChildren(
     		LocationSubtree root, 
     		Multimap<String, Location> locationByParentUuid,
     	    Map<String, Integer> patientCountByUuid) {
@@ -162,11 +200,6 @@ public final class LocationTree {
     	return null;
 	}
 
-
-    public void setSortLocale(String sortLocale) {
-        mSortLocale = sortLocale;
-    }
-
     public TreeMap<String, LocationSubtree> getChildren() {
         TreeMap<String, LocationSubtree> result = new TreeMap<>();
         result.putAll(mUuidToSubtree);
@@ -191,6 +224,17 @@ public final class LocationTree {
 
     public List<LocationSubtree> getZones() {
         return getLocationsForDepth(ZONE_DEPTH);
+    }
+    
+    private int getDepthOfSubtree(LocationSubtree subtree) {
+    	int depth = 0;
+    	for (;;) {
+    		subtree = mUuidToSubtree.get(subtree.mLocation.parent_uuid);
+    		if (subtree == null) {
+    			return depth;
+    		}
+    		depth++;
+    	}
     }
 
 //    @Override

@@ -3,6 +3,7 @@ package org.msf.records.location;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.msf.records.App;
 import org.msf.records.filter.AllFilter;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
@@ -155,6 +156,7 @@ public class LocationTreeFactory {
         }
 
        return new LocationTree(
+    		   	App.getInstance().getResources(),
         		mLocationsByParent,
         		mPatientCountsMap);
     }
