@@ -333,7 +333,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         Log.i(TAG, "Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(PatientProviderContract.CONTENT_AUTHORITY, batch);
+        Log.i(TAG, "batch apply done");
         mContentResolver.notifyChange(PatientProviderContract.CONTENT_URI, null, false);
+        Log.i(TAG, "change notified");
 
 
 
@@ -386,7 +388,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> batch = RpcToDb.locationsRpcToDb(syncResult);
-        Log.i(TAG, "Merge solution ready. Applying batch update");
+        Log.i(TAG, "locations Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(PatientProviderContract.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(LocationProviderContract.LOCATIONS_CONTENT_URI, null, false);
         mContentResolver.notifyChange(
@@ -430,8 +432,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             futures.add(future);
         }
         int i=0;
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
+        TimingLogger timingLogger = new TimingLogger(TAG, "obs update");
+
         for (RequestFuture<PatientChart> future : futures) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             try {
@@ -441,9 +445,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     continue;
                 }
                 // Delete all existing observations for the patient.
-                ops.add(ContentProviderOperation.newDelete(ChartProviderContract.OBSERVATIONS_CONTENT_URI)
-                        .withSelection(ChartColumns.PATIENT_UUID + "=?", new String[]{patientChart.uuid})
-                        .build());
+                toDelete.add(patientChart.uuid);
                 // Add the new observations
                 RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
                 i++;
@@ -461,9 +463,28 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 return;
             }
         }
-        provider.applyBatch(ops);
+        timingLogger.addSplit("making operations");
+        StringBuilder select = new StringBuilder(ChartColumns.PATIENT_UUID);
+        select.append(" IN (");
+        boolean first = true;
+        for (String uuid : toDelete) {
+            if (first) {
+                first = false;
+            } else {
+                select.append(',');
+            }
+            select.append('\"');
+            select.append(uuid);
+            select.append('\"');
+        }
+        select.append(")");
+        provider.delete(ChartProviderContract.OBSERVATIONS_CONTENT_URI, select.toString(),
+                new String[0]);
+        timingLogger.addSplit("batch deletes");
         provider.bulkInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
+        timingLogger.addSplit("bulk inserts");
+        timingLogger.dumpToLog();
     }
 
     private void updateUsers(final ContentProviderClient provider, SyncResult syncResult) {
