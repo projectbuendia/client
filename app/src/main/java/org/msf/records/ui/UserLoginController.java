@@ -1,8 +1,8 @@
 package org.msf.records.ui;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import android.util.Log;
+
+import com.google.common.collect.Ordering;
 
 import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
@@ -11,9 +11,9 @@ import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.user.UserManager;
 
-import android.util.Log;
-
-import com.google.common.collect.Ordering;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 

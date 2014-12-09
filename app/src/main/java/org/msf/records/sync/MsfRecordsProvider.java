@@ -45,9 +45,12 @@ public class MsfRecordsProvider extends ContentProvider {
         public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
                           ContentValues values);
 
-        /**
-         * @see android.content.ContentProvider#delete(android.net.Uri, String, String[])
-         */
+        public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                              ContentValues[] values);
+
+            /**
+             * @see android.content.ContentProvider#delete(android.net.Uri, String, String[])
+             */
         public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
                           String selection, String[] selectionArgs);
 
@@ -117,6 +120,14 @@ public class MsfRecordsProvider extends ContentProvider {
         Context ctx = getContext();
         assert ctx != null;
         return subProvider.insert(mDatabaseHelper, ctx.getContentResolver(), uri, values);
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        SubContentProvider subProvider = getSubProvider(uri);
+        Context ctx = getContext();
+        assert ctx != null;
+        return subProvider.bulkInsert(mDatabaseHelper, ctx.getContentResolver(), uri, values);
     }
 
     @Override
