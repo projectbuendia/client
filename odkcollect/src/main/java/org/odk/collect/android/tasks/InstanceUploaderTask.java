@@ -77,8 +77,8 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
     private InstanceUploaderListener mStateListener;
 
     public static class Outcome {
-        public Uri mAuthRequestingServer = null;
-        public HashMap<String, String> mResults = new HashMap<String,String>();
+        public Uri authRequestingServer = null;
+        public HashMap<String, String> results = new HashMap<String,String>();
     }
 
     /**
@@ -140,7 +140,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 	WebUtils.discardEntityBytes(response);
             		// we need authentication, so stop and return what we've
                     // done so far.
-                	outcome.mAuthRequestingServer = u;
+                	outcome.authRequestingServer = u;
                     return false;
                 } else if (statusCode == 204) {
                 	Header[] locations = response.getHeaders("Location");
@@ -157,11 +157,11 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                             } else {
                                 // Don't follow a redirection attempt to a different host.
                                 // We can't tell if this is a spoof or not.
-                            	outcome.mResults.put(
-                                    id,
-                                    fail
-                                            + "Unexpected redirection attempt to a different host: "
-                                            + uNew.toString());
+                            	outcome.results.put(
+                                        id,
+                                        fail
+                                                + "Unexpected redirection attempt to a different host: "
+                                                + uNew.toString());
                                 cv.put(InstanceColumns.STATUS,
                                     InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                                 Collect.getInstance().getApplication().getContentResolver()
@@ -170,7 +170,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                            outcome.mResults.put(id, fail + urlString + " " + e.toString());
+                            outcome.results.put(id, fail + urlString + " " + e.toString());
                             cv.put(InstanceColumns.STATUS,
                                 InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                             Collect.getInstance().getApplication().getContentResolver()
@@ -184,10 +184,10 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
 
                     Log.w(t, "Status code on Head request: " + statusCode);
                     if (statusCode >= HttpStatus.SC_OK && statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
-                    	outcome.mResults.put(
-                            id,
-                            fail
-                                    + "Invalid status code on Head request.  If you have a web proxy, you may need to login to your network. ");
+                    	outcome.results.put(
+                                id,
+                                fail
+                                        + "Invalid status code on Head request.  If you have a web proxy, you may need to login to your network. ");
                         cv.put(InstanceColumns.STATUS,
                             InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                         Collect.getInstance().getApplication().getContentResolver()
@@ -199,7 +199,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 e.printStackTrace();
                 Log.e(t, e.toString());
                 WebUtils.clearHttpConnectionManager();
-                outcome.mResults.put(id, fail + "Client Protocol Exception");
+                outcome.results.put(id, fail + "Client Protocol Exception");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -207,7 +207,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 e.printStackTrace();
                 Log.e(t, e.toString());
                 WebUtils.clearHttpConnectionManager();
-                outcome.mResults.put(id, fail + "Connection Timeout");
+                outcome.results.put(id, fail + "Connection Timeout");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -215,7 +215,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 e.printStackTrace();
                 Log.e(t, e.toString());
                 WebUtils.clearHttpConnectionManager();
-                outcome.mResults.put(id, fail + e.toString() + " :: Network Connection Failed");
+                outcome.results.put(id, fail + e.toString() + " :: Network Connection Failed");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -223,7 +223,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 e.printStackTrace();
                 Log.e(t, e.toString());
                 WebUtils.clearHttpConnectionManager();
-                outcome.mResults.put(id, fail + "Connection Timeout");
+                outcome.results.put(id, fail + "Connection Timeout");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -231,7 +231,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 e.printStackTrace();
                 Log.e(t, e.toString());
                 WebUtils.clearHttpConnectionManager();
-                outcome.mResults.put(id, fail + "Network Connection Refused");
+                outcome.results.put(id, fail + "Network Connection Refused");
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -243,7 +243,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 if (msg == null) {
                     msg = e.toString();
                 }
-                outcome.mResults.put(id, fail + "Generic Exception: " + msg);
+                outcome.results.put(id, fail + "Generic Exception: " + msg);
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -278,7 +278,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
         }
 
         if (!instanceFile.exists() && !submissionFile.exists()) {
-        	outcome.mResults.put(id, fail + "instance XML file does not exist!");
+        	outcome.results.put(id, fail + "instance XML file does not exist!");
             cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
             Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
             return true;
@@ -440,14 +440,14 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 // If it wasn't, the submission has failed.
                 if (responseCode != HttpStatus.SC_CREATED && responseCode != HttpStatus.SC_ACCEPTED) {
                     if (responseCode == HttpStatus.SC_OK) {
-                    	outcome.mResults.put(id, fail + "Network login failure? Again?");
+                    	outcome.results.put(id, fail + "Network login failure? Again?");
                     } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
                 		// clear the cookies -- should not be necessary?
                     	Collect.getInstance().getCookieStore().clear();
-                    	outcome.mResults.put(id, fail + response.getStatusLine().getReasonPhrase()
+                    	outcome.results.put(id, fail + response.getStatusLine().getReasonPhrase()
                                 + " (" + responseCode + ") at " + urlString);
                     } else {
-                    	outcome.mResults.put(id, fail + response.getStatusLine().getReasonPhrase()
+                    	outcome.results.put(id, fail + response.getStatusLine().getReasonPhrase()
                                 + " (" + responseCode + ") at " + urlString);
                     }
                     cv.put(InstanceColumns.STATUS,
@@ -464,7 +464,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
                 if (msg == null) {
                     msg = e.toString();
                 }
-                outcome.mResults.put(id, fail + "Generic Exception: " + msg);
+                outcome.results.put(id, fail + "Generic Exception: " + msg);
                 cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMISSION_FAILED);
                 Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
                 return true;
@@ -472,7 +472,7 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
         }
 
         // if it got here, it must have worked
-        outcome.mResults.put(id, Collect.getInstance().getApplication().getString(R.string.success));
+        outcome.results.put(id, Collect.getInstance().getApplication().getString(R.string.success));
         cv.put(InstanceColumns.STATUS, InstanceProviderAPI.STATUS_SUBMITTED);
         Collect.getInstance().getApplication().getContentResolver().update(toUpdate, cv, null, null);
         return true;
@@ -567,13 +567,13 @@ public class InstanceUploaderTask extends AsyncTask<Long, Integer, InstanceUploa
     protected void onPostExecute(Outcome outcome) {
         synchronized (this) {
             if (mStateListener != null) {
-                if (outcome.mAuthRequestingServer != null) {
-                    mStateListener.authRequest(outcome.mAuthRequestingServer, outcome.mResults);
+                if (outcome.authRequestingServer != null) {
+                    mStateListener.authRequest(outcome.authRequestingServer, outcome.results);
                 } else {
-                    mStateListener.uploadingComplete(outcome.mResults);
+                    mStateListener.uploadingComplete(outcome.results);
                     
                     StringBuilder selection = new StringBuilder();
-                    Set<String> keys = outcome.mResults.keySet();
+                    Set<String> keys = outcome.results.keySet();
                     Iterator<String> it = keys.iterator();
 
                     String[] selectionArgs = new String[keys.size()+1];

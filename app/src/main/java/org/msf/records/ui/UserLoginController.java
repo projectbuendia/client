@@ -90,7 +90,7 @@ final class UserLoginController {
     		if (DEBUG) {
     			Log.d(TAG, "User added");
     		}
-            insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.mAddedUser);
+            insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
             mUi.showUsers(mUsersSortedByName);
         }
 
@@ -104,7 +104,7 @@ final class UserLoginController {
 
     /** Converts a {@link UserAddFailedEvent} to an error string resource id. */
     private static int errorToStringId(UserAddFailedEvent event) {
-        switch (event.mReason) {
+        switch (event.reason) {
             case UserAddFailedEvent.REASON_UNKNOWN:
                 return R.string.add_user_unknown_error;
             case UserAddFailedEvent.REASON_INVALID_USER:

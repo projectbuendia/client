@@ -55,12 +55,12 @@ public class PatientChartController extends BaseController {
     public void startChartUpdate(Activity activity, String patientUuid, String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
-        fields.mEncounterTime = DateTime.now();
-        fields.mLocationName = "Triage";
+        fields.encounterTime = DateTime.now();
+        fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
         if (user != null) {
-            fields.mClinicianName = user.getFullName();
+            fields.clinicianName = user.getFullName();
         }
 
         Map<String, LocalizedChartHelper.LocalizedObservation> observations =
@@ -69,15 +69,15 @@ public class PatientChartController extends BaseController {
 
         if (observations.containsKey(Concept.PREGNANCY_UUID)
                 && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
-            fields.mPregnant = PrepopulatableFields.YES;
+            fields.pregnant = PrepopulatableFields.YES;
         }
 
         if (observations.containsKey(Concept.IV_UUID)
                 && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
-            fields.mIvFitted = PrepopulatableFields.YES;
+            fields.ivFitted = PrepopulatableFields.YES;
         }
 
-        fields.mTargetGroup = targetGroup;
+        fields.targetGroup = targetGroup;
 
         OdkActivityLauncher.fetchAndShowXform(
                 activity,

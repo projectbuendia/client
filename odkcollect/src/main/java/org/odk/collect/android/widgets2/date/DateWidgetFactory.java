@@ -20,7 +20,7 @@ public class DateWidgetFactory extends TypedWidgetFactory<DateData> {
             return null;
         }
 
-        if ("minimal".equals(appearance.mPrimaryAppearance)) {
+        if ("minimal".equals(appearance.primaryAppearance)) {
             return new TimeElapsedDateWidget(context, prompt, appearance, forceReadOnly);
         }
 

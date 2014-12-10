@@ -244,15 +244,15 @@ public class ODKView extends LinearLayout {
             String questionText = p.getQuestionText().toLowerCase();
             if (fields != null && questionText != null) {
                 if (questionText.contains("date and time of encounter")
-                        && qw.forceSetAnswer(fields.mEncounterTime)) {
+                        && qw.forceSetAnswer(fields.encounterTime)) {
                     continue;
                 }
                 if (questionText.equals("location")
-                        && qw.forceSetAnswer(fields.mLocationName)) {
+                        && qw.forceSetAnswer(fields.locationName)) {
                     continue;
                 }
                 if (questionText.equals("clinician")
-                        && qw.forceSetAnswer(fields.mClinicianName)) {
+                        && qw.forceSetAnswer(fields.clinicianName)) {
                     continue;
                 }
             }

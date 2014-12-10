@@ -144,15 +144,15 @@ public class UpdateManager {
                     new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
             DownloadManager.Request request =
-                    new DownloadManager.Request(availableUpdateInfo.mUpdateUri)
+                    new DownloadManager.Request(availableUpdateInfo.updateUri)
                             .setTitle(
                                     "Downloading update v"
-                                            + availableUpdateInfo.mAvailableVersion.toString())
+                                            + availableUpdateInfo.availableVersion.toString())
                             .setDestinationInExternalFilesDir(
                                     App.getInstance(),
                                     null /*dirType*/,
                                     "androidclient_"
-                                            + availableUpdateInfo.mAvailableVersion.toString())
+                                            + availableUpdateInfo.availableVersion.toString())
                             .setNotificationVisibility(
                                     DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             mDownloadId = mDownloadManager.enqueue(request);
@@ -165,7 +165,7 @@ public class UpdateManager {
      * Installs a downloaded update.
      */
     public void installUpdate(DownloadedUpdateInfo updateInfo) {
-        Uri apkUri = Uri.fromFile(new File(updateInfo.mPath));
+        Uri apkUri = Uri.fromFile(new File(updateInfo.path));
         Intent installIntent = new Intent(Intent.ACTION_VIEW)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .setDataAndType(apkUri, "application/vnd.android.package-archive");
@@ -221,8 +221,8 @@ public class UpdateManager {
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
 
                 if (mLastDownloadedUpdateInfo.shouldInstall()
-                        && mLastDownloadedUpdateInfo.mDownloadedVersion
-                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.mAvailableVersion)) {
+                        && mLastDownloadedUpdateInfo.downloadedVersion
+                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
                     // If there's already a downloaded update that is as recent as the available
                     // update, post an UpdateDownloadedEvent.
                     EventBus.getDefault()

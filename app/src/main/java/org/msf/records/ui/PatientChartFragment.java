@@ -210,7 +210,7 @@ public class PatientChartFragment extends ControllableFragment {
     }
 
     public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-        mPatient = event.mItem;
+        mPatient = event.item;
         updatePatientInfoUI(getView());
         refreshPatientChart();
     }
@@ -277,29 +277,29 @@ public class PatientChartFragment extends ControllableFragment {
 
         // TODO: Don't use this singleton
         LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
-        if (mPatient.mLocationUuid != null) {
-            LocationSubtree patientZone = locationTree.getZoneForUuid(mPatient.mLocationUuid);
-            LocationSubtree patientTent = locationTree.getTentForUuid(mPatient.mLocationUuid);
+        if (mPatient.locationUuid != null) {
+            LocationSubtree patientZone = locationTree.getZoneForUuid(mPatient.locationUuid);
+            LocationSubtree patientTent = locationTree.getTentForUuid(mPatient.locationUuid);
             zoneName = (patientZone == null) ? zoneName : patientZone.toString();
             tentName = (patientTent == null) ? tentName : patientTent.toString();
         }
 
-        ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.mGivenName + " " + mPatient.mFamilyName );
-        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( mPatient.mId );
+        ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.givenName + " " + mPatient.familyName);
+        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( mPatient.id);
 
         TextView patientChartAge = (TextView) rootView.findViewById(R.id.patient_chart_age);
-        if (mPatient.mAge.getStandardDays() >= 2 * 365) {
-            patientChartAge.setText(mPatient.mAge.getStandardDays() / 365 + "-year-old ");
+        if (mPatient.age.getStandardDays() >= 2 * 365) {
+            patientChartAge.setText(mPatient.age.getStandardDays() / 365 + "-year-old ");
         } else {
-            patientChartAge.setText(mPatient.mAge.getStandardDays() / 30 + "-month-old ");
+            patientChartAge.setText(mPatient.age.getStandardDays() / 30 + "-month-old ");
         }
 
-        ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.mGender == AppPatient.GENDER_MALE ? "Male" : "Female");
+        ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.gender == AppPatient.GENDER_MALE ? "Male" : "Female");
 
         ((TextView)rootView.findViewById( R.id.patient_chart_location )).setText( zoneName + "/" + tentName );
 
         int days = Days
-                .daysBetween(mPatient.mAdmissionDateTime, DateTime.now())
+                .daysBetween(mPatient.admissionDateTime, DateTime.now())
                 .getDays();
 
         TextView patientChartDays = (TextView) rootView.findViewById(R.id.patient_chart_days);
@@ -430,8 +430,6 @@ public class PatientChartFragment extends ControllableFragment {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTimeInMillis(encounterTimeMilli);
         SimpleDateFormat dateFormatter = new SimpleDateFormat( "dd MMM yyyy HH:mm");
-
-        //dateFormatter.setTimeZone( calendar.getTimeZone() );
 
         ((TextView)getView().findViewById(R.id.patient_chart_last_observation_date_time)).setText(dateFormatter.format(calendar.getTime()));
     }

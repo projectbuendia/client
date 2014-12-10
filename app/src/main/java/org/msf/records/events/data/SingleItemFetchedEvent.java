@@ -13,9 +13,9 @@ import org.msf.records.events.CrudEventBus;
  */
 public class SingleItemFetchedEvent<T> {
 
-    public final T mItem;
+    public final T item;
 
     public SingleItemFetchedEvent(T item) {
-        mItem = item;
+        this.item = item;
     }
 }
