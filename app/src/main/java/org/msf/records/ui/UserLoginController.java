@@ -1,8 +1,8 @@
 package org.msf.records.ui;
 
-import android.util.Log;
-
-import com.google.common.collect.Ordering;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
@@ -10,12 +10,11 @@ import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.user.UserManager;
+import org.msf.records.utils.EventBusRegistrationInterface;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import android.util.Log;
 
-import de.greenrobot.event.EventBus;
+import com.google.common.collect.Ordering;
 
 /**
  * Controller for {@link UserLoginActivity}.
@@ -35,7 +34,7 @@ final class UserLoginController {
     	void showTentSelectionScreen();
     }
     
-    private final EventBus mEventBus;
+    private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<User>();
@@ -43,7 +42,7 @@ final class UserLoginController {
 	
     public UserLoginController(
     		UserManager userManager,
-    		EventBus eventBus,
+    		EventBusRegistrationInterface eventBus,
     		Ui ui) {
     	mUserManager = userManager;
     	mEventBus = eventBus;
@@ -80,7 +79,7 @@ final class UserLoginController {
     	/** Updates the UI when the list of users is loaded. */
     	public void onEventMainThread(KnownUsersLoadedEvent event) {
     		if (DEBUG) {
-    			Log.d(TAG, "Loaded list of " + event. mKnownUsers.size() + " users");
+    			Log.d(TAG, "Loaded list of " + event. mKnownUsers.size() + " users ", new Throwable());
     		}
     		mUsersSortedByName.clear();
     		mUsersSortedByName.addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.mKnownUsers));
@@ -103,6 +102,7 @@ final class UserLoginController {
         }
     }
 
+    /** Converts a {@link UserAddFailedEvent} to an error string resource id. */
     private static int errorToStringId(UserAddFailedEvent event) {
         switch (event.mReason) {
             case UserAddFailedEvent.REASON_UNKNOWN:
