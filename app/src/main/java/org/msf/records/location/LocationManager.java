@@ -43,7 +43,9 @@ public class LocationManager {
     static void rebuild() {
         FACTORY = new LocationTreeFactory(App.getInstance());
         ROOT = FACTORY.build();
+        LocationTree.SINGLETON_INSTANCE = ROOT;
     }
+    
 
     public LocationManager() {
         EventBus.getDefault().register(this);

@@ -1,5 +1,36 @@
 package org.msf.records.ui;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.controllers.PatientChartController;
+import org.msf.records.events.mvcmodels.ModelReadyEvent;
+import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.UuidFilter;
+import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
+import org.msf.records.mvcmodels.Models;
+import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.PatientAge;
+import org.msf.records.net.model.PatientChart;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.VitalView;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -13,44 +44,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.controllers.PatientChartController;
-import org.msf.records.events.mvcmodels.ModelReadyEvent;
-import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
-import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.UuidFilter;
-import org.msf.records.location.LocationTree;
-import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.Models;
-import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.model.ChartStructure;
-import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.Patient;
-import org.msf.records.net.model.PatientAge;
-import org.msf.records.net.model.PatientChart;
-import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.PatientProjection;
-import org.msf.records.widget.DataGridView;
-import org.msf.records.widget.VitalView;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.Map;
-
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
-
-import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
@@ -281,9 +281,11 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         String zoneName = getActivity().getResources().getString(R.string.unknown_zone);
         String tentName = getActivity().getResources().getString(R.string.unknown_tent);
 
+        // TODO: Don't use this singleton
+        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
         if (mPatient.assigned_location != null) {
-            LocationTree patientZone = LocationTree.getZoneForUuid(mPatient.assigned_location.uuid);
-            LocationTree patientTent = LocationTree.getTentForUuid(mPatient.assigned_location.uuid);
+            LocationSubtree patientZone = locationTree.getZoneForUuid(mPatient.assigned_location.uuid);
+            LocationSubtree patientTent = locationTree.getTentForUuid(mPatient.assigned_location.uuid);
             zoneName = (patientZone == null) ? zoneName : patientZone.toString();
             tentName = (patientTent == null) ? tentName : patientTent.toString();
         }
@@ -448,7 +450,7 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         mPatient.id = data.getString(PatientProjection.COLUMN_ID );
 
-        LocationTree location = LocationTree.getLocationForUuid(
+        LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(
                 data.getString(PatientProjection.COLUMN_LOCATION_UUID));
         mPatient.assigned_location = (location == null) ? null : location.getLocation();
 
