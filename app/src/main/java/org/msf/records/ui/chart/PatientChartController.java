@@ -16,14 +16,12 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
@@ -53,24 +51,33 @@ final class PatientChartController {
      * through the array. The array is persisted through activity restart in the savedInstanceState.
      */
     private static final int BASE_ODK_REQUEST = 100;
-    // In reality we probably never need more than one request, but be safe.
+    /** Maximum concurrent ODK forms assigned request codes. */
     private static final int MAX_ODK_REQUESTS = 10;
     private int nextIndex = 0;
 
     // TODO: Use a map for this instead of an array.
-    /** Pending requests. */
     private final String[] mPatientUuids;
     private AppPatient mPatient = new AppPatient();
-
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
 
     public interface Ui {
+    	/** Sets the activity title. */
     	void setTitle(String title);
+
+    	/** Updates the UI showing current observation values for this patient. */
 		void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
-		void setLatestEncounter(long latestEncounterTimeMillis);
+
+		/** Updates the UI showing the historic log of observation values for this patient. */
 		void setObservationHistory(List<LocalizedObservation> observations);
+
+		/** Shows the last time a user interacted with this patient. */
+		void setLatestEncounter(long latestEncounterTimeMillis);
+
+		/** Shows the patient's personal details. */
 		void setPatient(AppPatient patient);
+
+		/** Starts a new form activity to collect observations from the user. */
 		void fetchAndShowXform(
 	    		String formUuid,
 	    		int requestCode,
@@ -78,14 +85,7 @@ final class PatientChartController {
 	    		PrepopulatableFields fields);
     }
 
-    public Bundle getState() {
-    	Bundle bundle = new Bundle();
-    	bundle.putStringArray("pendingUuids", mPatientUuids);
-    	return bundle;
-    }
-
     private final OpenMrsChartServer mServer;
-    private final FilterQueryProviderFactory mFilterQueryProviderFactory;
     private final EventBusRegistrationInterface mEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
@@ -113,7 +113,6 @@ final class PatientChartController {
     		OpenMrsChartServer server,
     		EventBusRegistrationInterface eventBus,
     		CrudEventBus crudEventBus,
-    		FilterQueryProviderFactory filterQueryProviderFactory,
     		Ui ui,
     		OdkResultSender odkResultSender,
     		ObservationsProvider observationsProvider,
@@ -122,7 +121,6 @@ final class PatientChartController {
     	mServer = server;
     	mEventBus = eventBus;
     	mCrudEventBus = crudEventBus;
-    	mFilterQueryProviderFactory = filterQueryProviderFactory;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
     	mObservationsProvider = observationsProvider;
@@ -133,6 +131,14 @@ final class PatientChartController {
     	}
     }
 
+    /** Returns the state of the controller. This should be saved to preserve it over activity restarts. */
+    public Bundle getState() {
+    	Bundle bundle = new Bundle();
+    	bundle.putStringArray("pendingUuids", mPatientUuids);
+    	return bundle;
+    }
+
+    /** Sets the current patient. */
     public void setPatient(
     		String patientUuid,
     		@Nullable String patientName,
@@ -146,6 +152,7 @@ final class PatientChartController {
         }
     }
 
+    /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
     	mEventBus.registerSticky(mEventBusSubscriber);
     	mCrudEventBus.register(mEventBusSubscriber);
@@ -153,7 +160,7 @@ final class PatientChartController {
     	mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
-
+	/** Releases any resources used by the controller. */
     public void suspend() {
     	mEventBus.unregister(mEventBusSubscriber);
     	mCrudEventBus.unregister(mEventBusSubscriber);
@@ -204,6 +211,7 @@ final class PatientChartController {
                 });
     }
 
+    /** Gets the latest observation values and displays them on the UI. */
     private void updatePatientUI() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
@@ -219,7 +227,8 @@ final class PatientChartController {
         }
 
         if (DEBUG) {
-        	Log.d(TAG, "Showing " + observations.size() + " observations, and " + conceptsToLatestObservations.size() + " latest observations");
+        	Log.d(TAG, "Showing " + observations.size() + " observations, and "
+        			+ conceptsToLatestObservations.size() + " latest observations");
         }
 
         mUi.setLatestEncounter(mLastObservation);
@@ -266,15 +275,21 @@ final class PatientChartController {
                 fields);
     }
 
+    /**
+     * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
+     */
     private int savePatientUuidForRequestCode(String patientUuid) {
-        synchronized (mPatientUuids) {
-            mPatientUuids[nextIndex] = patientUuid;
-            int requestCode = BASE_ODK_REQUEST + nextIndex;
-            nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
-            return requestCode;
-        }
+        mPatientUuids[nextIndex] = patientUuid;
+        int requestCode = BASE_ODK_REQUEST + nextIndex;
+        nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
+        return requestCode;
     }
 
+    /**
+     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient UUID.
+     *
+     * <p>Also removes details of that requestCode from the controller's state.
+     */
     @Nullable public String getAndClearPatientUuidForRequestCode(int requestCode) {
         int index = requestCode - BASE_ODK_REQUEST;
         String patientUuid = mPatientUuids[index];
@@ -290,6 +305,5 @@ final class PatientChartController {
     		updatePatientUI();
     	}
     }
-
 
 }
