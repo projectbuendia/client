@@ -29,7 +29,7 @@ import de.greenrobot.event.EventBus;
 /**
  * An abstract {@link FragmentActivity} that is the base for all activities.
  */
-public abstract class BaseActivity extends ControllableActivity {
+public abstract class BaseActivity extends FragmentActivity {
 
     @Inject Colorizer mUserColorizer;
 
