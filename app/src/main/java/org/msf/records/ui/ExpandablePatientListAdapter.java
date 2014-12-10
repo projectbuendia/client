@@ -11,12 +11,6 @@ import android.widget.Filter;
 import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-
-import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
@@ -30,6 +24,13 @@ import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
+
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * Created by Gil on 24/11/14.
@@ -143,10 +144,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindChildView(View convertView, Context context, Cursor cursor, boolean isLastChild) {
-        ViewHolder holder = null;
-        if (convertView != null) {
-            holder = (ViewHolder) convertView.getTag();
-        }
 
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
@@ -156,8 +153,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
         int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
 
-        holder.mPatientName.setText(givenName + " " + familyName);
-        holder.mPatientId.setText(id);
 
         // Grab observations for this patient so we can determine condition and pregnant status.
         // TODO(akalachman): Get rid of this whole block as it's inefficient.
@@ -173,6 +168,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             }
         }
 
+        if (convertView == null) {
+            return;
+        }
+        ViewHolder holder = (ViewHolder) convertView.getTag();
+        holder.mPatientName.setText(givenName + " " + familyName);
+        holder.mPatientId.setText(id);
         holder.mPatientId.setBackgroundResource(
                 Concept.getColorResourceForGeneralCondition(condition));
 
