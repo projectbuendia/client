@@ -21,7 +21,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 /**
- * LocationTreeFactory constructs a LocationTree using a database Cursor and listens for changes
+ * Constructs a {@link LocationTree} using a database Cursor and listens for changes
  * in location data.
  */
 public class LocationTreeFactory {
@@ -42,11 +42,7 @@ public class LocationTreeFactory {
      */
     private Map<String, Integer> mPatientCountsMap;
 
-    private final Context mContext;
-
     LocationTreeFactory(Context context) {
-        mContext = context;
-
         mLocationQueryFactory = new FilterQueryProviderFactory(context);
         mLocationQueryFactory.setUri(LocationProviderContract.LOCATIONS_CONTENT_URI);
         mLocationQueryFactory.setSortClause(null);
