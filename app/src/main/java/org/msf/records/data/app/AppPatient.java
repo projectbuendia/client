@@ -2,7 +2,6 @@ package org.msf.records.data.app;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.joda.time.Period;
 
 /**
  * An app model patient.
