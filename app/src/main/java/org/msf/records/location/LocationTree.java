@@ -308,12 +308,6 @@ public final class LocationTree {
     	}
     }
 
-    private TreeMap<String, LocationSubtree> getAllSubtreeLocations() {
-        TreeMap<String, LocationSubtree> subtreeLocations = new TreeMap<>();
-        subtreeLocations.putAll(mUuidToSubtree);
-        return subtreeLocations;
-    }
-
     // TODO(akalachman): Cache this or get rid of it once data model is refactored.
     public String getLocationSortClause(String fieldName) {
     	if (mUuidToSubtree.isEmpty()) {
