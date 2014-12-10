@@ -47,17 +47,17 @@ public class LocationTreeFactory {
     LocationTreeFactory(Context context) {
         mContext = context;
 
-        mLocationQueryFactory = new FilterQueryProviderFactory();
+        mLocationQueryFactory = new FilterQueryProviderFactory(context);
         mLocationQueryFactory.setUri(LocationProviderContract.LOCATIONS_CONTENT_URI);
         mLocationQueryFactory.setSortClause(null);
         mLocationQueryFactory.setProjection(LocationProjection.getLocationProjection());
 
-        mLocationNamesQueryFactory = new FilterQueryProviderFactory();
+        mLocationNamesQueryFactory = new FilterQueryProviderFactory(context);
         mLocationNamesQueryFactory.setUri(LocationProviderContract.LOCATION_NAMES_CONTENT_URI);
         mLocationNamesQueryFactory.setSortClause(null);
         mLocationNamesQueryFactory.setProjection(LocationProjection.getLocationNamesProjection());
 
-        mPatientCountsQueryFactory = new FilterQueryProviderFactory();
+        mPatientCountsQueryFactory = new FilterQueryProviderFactory(context);
         mPatientCountsQueryFactory.setUri(PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
         mPatientCountsQueryFactory.setSortClause(null);
         mPatientCountsQueryFactory.setProjection(PatientProjection.getPatientCountsProjection());
@@ -69,19 +69,19 @@ public class LocationTreeFactory {
 
     public LocationTree build() {
         Cursor patientCountsCursor =
-                mPatientCountsQueryFactory.getFilterQueryProvider(mContext, mPatientCountsFilter)
+                mPatientCountsQueryFactory.getFilterQueryProvider(mPatientCountsFilter)
                         .runQuery("");
         buildPatientCounts(patientCountsCursor);
         patientCountsCursor.close();
 
         Cursor locationCursor =
-                mLocationQueryFactory.getFilterQueryProvider(mContext, mLocationFilter)
+                mLocationQueryFactory.getFilterQueryProvider(mLocationFilter)
                         .runQuery("");
         buildLocationMap(locationCursor);
         locationCursor.close();
 
         Cursor locationNamesCursor =
-                mLocationNamesQueryFactory.getFilterQueryProvider(mContext, mLocationNameFilter)
+                mLocationNamesQueryFactory.getFilterQueryProvider(mLocationNameFilter)
                         .runQuery("");
         buildLocationNamesMap(locationNamesCursor);
 

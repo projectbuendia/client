@@ -92,10 +92,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         }
 
         FilterQueryProvider queryProvider =
-                new FilterQueryProviderFactory()
+                new FilterQueryProviderFactory(mContext)
                         .setSortClause(sortBuilder.toString())
                         .getFilterQueryProvider(
-                                mContext,
                                 new FilterGroup(getSelectionFilter(),
                                         new LocationUuidFilter(tentSubtree)));
 
