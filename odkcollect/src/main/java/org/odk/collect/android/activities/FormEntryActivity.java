@@ -1297,12 +1297,7 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
-				odkv = new ODKView(
-                        this,
-                        formController.getQuestionPrompts(),
-						groups,
-                        advancingPage,
-                        fields);
+				odkv = new ODKView(this, prompts, groups, advancingPage, fields);
                 if (fields != null
                         && fields.mTargetGroup != null
                         && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
