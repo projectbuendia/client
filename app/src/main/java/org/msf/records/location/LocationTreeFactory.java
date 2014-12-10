@@ -36,7 +36,7 @@ public class LocationTreeFactory {
 
     private Multimap<String, Location> mLocationsByParent;
     private Map<String, LocalizedString.Builder> mLocationNamesByUuid;
-    /** 
+    /**
      * Map from location UUID to number of patients at that location. This excludes any patients contained with
      * a smaller location within that location.
      */
@@ -151,7 +151,7 @@ public class LocationTreeFactory {
         // Map location names to this location as necessary.
         for (Location location : mLocationsByParent.values()) {
             if (mLocationNamesByUuid.containsKey(location.uuid)) {
-                location.names = mLocationNamesByUuid.get(location.uuid).build();
+                location.names = mLocationNamesByUuid.get(location.uuid).build().asMap();
             }
         }
 

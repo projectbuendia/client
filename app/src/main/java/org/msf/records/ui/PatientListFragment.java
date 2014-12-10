@@ -78,12 +78,7 @@ public class PatientListFragment extends ProgressFragment implements
     private SwipeRefreshLayout mSwipeToRefresh;
 
     // TODO(akalachman): Figure out how to break reliance on this cursor--we already have the info.
-    private FilterQueryProviderFactory mFactory =
-            new FilterQueryProviderFactory().setUri(
-                    PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS)
-            .setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
-
+    private FilterQueryProviderFactory mFactory;
 
     private boolean isRefreshing;
 
@@ -134,6 +129,15 @@ public class PatientListFragment extends ProgressFragment implements
      * fragment (e.g. upon screen orientation changes).
      */
     public PatientListFragment() {
+        mFactory = new FilterQueryProviderFactory().setUri(
+                        PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        if (locationTree != null) {
+        	mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
+        } else {
+        	Log.e(TAG, "Location tree does not exist yet");
+        }
     }
 
     @Override

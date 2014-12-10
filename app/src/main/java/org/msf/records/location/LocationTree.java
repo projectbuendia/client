@@ -31,13 +31,13 @@ import com.google.common.collect.Multimap;
 public final class LocationTree {
 
 	// TODO(rjlothian): Fix all code that depends on having a singleton and rRemove this.
-	@Nullable public static LocationTree SINGLETON_INSTANCE; 
-	
+	@Nullable public static LocationTree SINGLETON_INSTANCE;
+
     public static final int FACILITY_DEPTH = 0;
     public static final int ZONE_DEPTH = 1;
     public static final int TENT_DEPTH = 2;
     public static final int BED_DEPTH = 3;
-    
+
 	public final class LocationSubtree {
 		private Location mLocation;
 	    private int mPatientCount;
@@ -46,7 +46,7 @@ public final class LocationTree {
 	    public Location getLocation() {
 	    	return mLocation;
 	    }
-	    
+
 	    public int getPatientCount() {
 	        int patientCount = mPatientCount;
 	        for (LocationSubtree child : mChildren.values()) {
@@ -54,25 +54,25 @@ public final class LocationTree {
 	        }
 	        return patientCount;
 	    }
-	    
+
 	    public List<LocationSubtree> thisAndAllDescendents() {
 	    	List<LocationSubtree> result = new ArrayList<>();
 	    	addToCollectionRecursively(result);
 	    	return result;
 	    }
-	    
+
 	    private void addToCollectionRecursively(Collection<LocationSubtree> collection) {
 	    	collection.add(this);
 	    	for (LocationSubtree child : mChildren.values()) {
 	    		child.addToCollectionRecursively(collection);
 	    	}
 	    }
-	    
+
 	    @Override
 	    public String toString() {
-	        if (mLocation == null 
+	        if (mLocation == null
 	        		|| mLocation.names == null
-	        		|| mLocation.names.getTranslationForLocale(mLocale) == null) {	
+	        		|| mLocation.names.get(mLocale) == null) {
 	            // This location is null, try to recover.
 	            int depth = getDepthOfSubtree(this);
 	            switch (depth) {
@@ -84,7 +84,7 @@ public final class LocationTree {
 	                        return mResources.getString(R.string.unknown_tent);
 	                    } else {
 	                        return mResources.getString(
-	                                R.string.unknown_tent_in_zone, 
+	                                R.string.unknown_tent_in_zone,
 	                                parent.toString());
 	                    }
 	                default:
@@ -92,17 +92,17 @@ public final class LocationTree {
 	            }
 	        }
 
-	        return mLocation.names.getTranslationForLocale(mLocale);
+	        return mLocation.names.get(mLocale);
 	    }
 	}
-	
+
     private static final String DEFAULT_LOCALE = "en";
 
     private final Resources mResources;
     private final String mLocale = DEFAULT_LOCALE;;
-    private final Map<String, LocationSubtree> mUuidToSubtree = new HashMap<>();  
+    private final Map<String, LocationSubtree> mUuidToSubtree = new HashMap<>();
     private final LocationSubtree mTreeRoot;
-    
+
     /**
      * @param patientCountByUuid gives the number of patients at each location, specified by UUID.
      *        This excludes any patients contained with a smaller location within that location.
@@ -111,55 +111,55 @@ public final class LocationTree {
     		Resources resources,
     		Multimap<String, Location> locationByParentUuid,
     	    Map<String, Integer> patientCountByUuid) {
-    	
+
     	mResources = resources;
     	// Start the tree from the single known root. Forests are NOT supported.
     	Location root = Iterables.getOnlyElement(locationByParentUuid.get(null));
-    	
+
     	mTreeRoot = new LocationSubtree();
     	mTreeRoot.mLocation = root;
     	mTreeRoot.mPatientCount = getOrZeroIfMissing(patientCountByUuid, root.uuid);
-    	
+
         // Recursively add children to the tree.
         addChildren(mTreeRoot, locationByParentUuid, patientCountByUuid);
-        
+
         populateMap(mTreeRoot, mUuidToSubtree);
     }
-    
+
     public LocationSubtree getRoot() {
     	return mTreeRoot;
     }
-    
+
     private static void populateMap(LocationSubtree subtree, Map<String, LocationSubtree> uuidToSubtree) {
     	uuidToSubtree.put(subtree.mLocation.uuid, subtree);
     	for (LocationSubtree child : subtree.mChildren.values()) {
     		populateMap(child, uuidToSubtree);
     	}
     }
-    
 
-   
+
+
     @Nullable private LocationSubtree getParent(LocationSubtree subtree) {
     	return mUuidToSubtree.get(subtree.mLocation.parent_uuid);
     }
-    
+
     private void addChildren(
-    		LocationSubtree root, 
+    		LocationSubtree root,
     		Multimap<String, Location> locationByParentUuid,
     	    Map<String, Integer> patientCountByUuid) {
         for (Location location : locationByParentUuid.get(root.mLocation.uuid)) {
             LocationSubtree subtree = new LocationSubtree();
             subtree.mLocation = location;
             subtree.mPatientCount = getOrZeroIfMissing(patientCountByUuid, location.uuid);
-            root.mChildren.put(location.uuid, subtree);          
+            root.mChildren.put(location.uuid, subtree);
             addChildren(subtree, locationByParentUuid, patientCountByUuid);
         }
     }
-    
+
     @Nullable public LocationSubtree getLocationByUuid(String uuid) {
     	return mUuidToSubtree.get(uuid);
     }
-    
+
     /**
      * Returns the zone containing the given location UUID, or null if no such zone exists.
      */
@@ -225,7 +225,7 @@ public final class LocationTree {
     public List<LocationSubtree> getZones() {
         return getLocationsForDepth(ZONE_DEPTH);
     }
-    
+
     private int getDepthOfSubtree(LocationSubtree subtree) {
     	int depth = 0;
     	for (;;) {
@@ -274,13 +274,13 @@ public final class LocationTree {
 		Collections.reverse(result);
 		return result;
     }
-    
-    
+
+
     private final class SubtreeComparator implements Comparator<LocationSubtree> {
     	@Override
     	public int compare(LocationSubtree lhs, LocationSubtree rhs) {
     		if (lhs == rhs) return 0;
-    		
+
     		List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
     		List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
     		for (int i = 0;; i++) {
@@ -293,7 +293,7 @@ public final class LocationTree {
     			} else {
     				LocationSubtree subtreeA = pathA.get(i);
     				LocationSubtree subtreeB = pathB.get(i);
-    				
+
     				int compare;
 	    			if (i == ZONE_DEPTH) {
 	    				compare = Zone.compareTo(subtreeA.getLocation(), subtreeB.getLocation());
@@ -307,7 +307,7 @@ public final class LocationTree {
     		}
     	}
     }
-    
+
     public LocationTree[] getSubtreeLocationArray() {
         TreeMap<String, LocationSubtree> subtreeLocations = getAllSubtreeLocations();
         LocationTree[] locationArray = new LocationTree[subtreeLocations.size()];
@@ -345,7 +345,7 @@ public final class LocationTree {
         sb.append(" END ");
         return sb.toString();
     }
-    
+
     private static <T> int getOrZeroIfMissing(Map<T, Integer> map, T key) {
     	if (map.containsKey(key)) {
     		return map.get(key);

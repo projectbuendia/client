@@ -19,7 +19,7 @@ import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by Gil on 08/10/2014.
+ * Created by Gil on 08/10/2014.\
  */
 public class App extends Application {
 
