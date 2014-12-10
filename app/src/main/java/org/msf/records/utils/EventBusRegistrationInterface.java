@@ -9,9 +9,6 @@ public interface EventBusRegistrationInterface {
 	/** See {@link EventBus#register(Object)}. */
 	void register(Object receiver);
 
-	/** See {@link EventBus#registerSticky(Object)}. */
-	void registerSticky(Object receiver);
-
 	/** See {@link EventBus#unregister(Object)}. */
 	void unregister(Object receiver);
 }

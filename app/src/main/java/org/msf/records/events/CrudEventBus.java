@@ -1,30 +1,11 @@
 package org.msf.records.events;
 
-import de.greenrobot.event.EventBus;
+public interface CrudEventBus {
 
-/**
- * An {@link EventBus} wrapper to be used by asynchronous CRUD operations on the data model.
- */
-public class CrudEventBus {
+	void register(Object subscriber);
 
-    final EventBus mWrapped;
+	void unregister(Object subscriber);
 
-    /**
-     * Creates a new {@link CrudEventBus} that wraps the specified {@link EventBus}.
-     */
-    CrudEventBus(EventBus wrapped) {
-        mWrapped = wrapped;
-    }
+	void post(Object event);
 
-    public void register(Object subscriber) {
-        mWrapped.register(subscriber);
-    }
-
-    public void unregister(Object subscriber) {
-        mWrapped.unregister(subscriber);
-    }
-
-    public void post(Object event) {
-        mWrapped.post(event);
-    }
 }
