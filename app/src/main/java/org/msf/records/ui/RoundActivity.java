@@ -33,15 +33,9 @@ public class RoundActivity extends PatientSearchActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            mLocationName = getIntent().getStringExtra(LOCATION_NAME_KEY);
-            mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
-            mLocationUuid = getIntent().getStringExtra(LOCATION_UUID_KEY);
-        } else {
-            mLocationName = savedInstanceState.getString(LOCATION_NAME_KEY);
-            mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
-            mLocationUuid = savedInstanceState.getString(LOCATION_UUID_KEY);
-        }
+        mLocationName = getIntent().getStringExtra(LOCATION_NAME_KEY);
+        mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
+        mLocationUuid = getIntent().getStringExtra(LOCATION_UUID_KEY);
 
         setTitle(PatientCountDisplay.getPatientCountTitle(
                 this, mLocationPatientCount, mLocationName));
