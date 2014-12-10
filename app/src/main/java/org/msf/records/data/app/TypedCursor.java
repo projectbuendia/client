@@ -10,7 +10,7 @@ import android.database.Cursor;
  *
  * @param <T> the type of the array elements
  */
-public abstract class TypedCursor<T extends ModelTypeBase> implements Iterable<T> {
+public abstract class TypedCursor<T extends AppTypeBase> implements Iterable<T> {
 
     /**
      * Returns the number of items in this lazy array.

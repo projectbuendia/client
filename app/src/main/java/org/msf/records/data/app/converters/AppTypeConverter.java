@@ -1,15 +1,17 @@
-package org.msf.records.data.app;
+package org.msf.records.data.app.converters;
 
 import android.database.Cursor;
+
+import org.msf.records.data.app.AppTypeBase;
 
 /**
  * An interface for a converter that converts between model data types and Android database
  * abstractions.
  */
-public interface ModelConverter<T extends ModelTypeBase> {
+public interface AppTypeConverter<T extends AppTypeBase> {
 
     /**
      * Converts the current position in a {@link Cursor} to a model data type.
      */
-    T convert(Cursor cursor);
+    T fromCursor(Cursor cursor);
 }
