@@ -83,7 +83,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.PatientChartActivity"
+            android:name="org.msf.records.ui.chart.PatientChartActivity"
             android:label="@string/title_patient_chart"
             android:parentActivityName="org.msf.records.ui.PatientListActivity"
             android:screenOrientation="portrait"
