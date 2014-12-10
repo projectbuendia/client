@@ -245,12 +245,12 @@ final class PatientChartController {
     public void onAddObservationPressed(String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
-        fields.mEncounterTime = DateTime.now();
-        fields.mLocationName = "Triage";
+        fields.encounterTime = DateTime.now();
+        fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
         if (user != null) {
-            fields.mClinicianName = user.getFullName();
+            fields.clinicianName = user.getFullName();
         }
 
         Map<String, LocalizedChartHelper.LocalizedObservation> observations =
@@ -258,15 +258,15 @@ final class PatientChartController {
 
         if (observations.containsKey(Concept.PREGNANCY_UUID)
                 && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
-            fields.mPregnant = PrepopulatableFields.YES;
+            fields.pregnant = PrepopulatableFields.YES;
         }
 
         if (observations.containsKey(Concept.IV_UUID)
                 && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
-            fields.mIvFitted = PrepopulatableFields.YES;
+            fields.ivFitted = PrepopulatableFields.YES;
         }
 
-        fields.mTargetGroup = targetGroup;
+        fields.targetGroup = targetGroup;
 
         mUi.fetchAndShowXform(
                 Constants.ADD_OBSERVATION_UUID,
@@ -300,7 +300,7 @@ final class PatientChartController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
     	public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-    		mPatient = event.mItem;
+    		mPatient = event.item;
     		mUi.setPatient(mPatient);
     		updatePatientUI();
     	}

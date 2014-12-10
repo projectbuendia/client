@@ -5,7 +5,7 @@ package org.msf.records.data.app;
  */
 public class AppUser extends AppTypeBase<Integer> {
 
-    public String mUuid;
+    public String uuid;
 
-    public String mFullName;
+    public String fullName;
 }

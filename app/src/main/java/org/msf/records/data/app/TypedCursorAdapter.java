@@ -31,7 +31,7 @@ public abstract class TypedCursorAdapter<T extends AppTypeBase> extends BaseAdap
     /**
      * {@inheritDoc}
      *
-     * <p>The ID of an item will be the value of its {@link AppTypeBase#mId} field if its ID is a
+     * <p>The ID of an item will be the value of its {@link AppTypeBase#id} field if its ID is a
      * byte, short, int, or long; otherwise, it will be the hash of that value.
      */
     @Override
@@ -43,7 +43,7 @@ public abstract class TypedCursorAdapter<T extends AppTypeBase> extends BaseAdap
         if (item == null) {
             return 0;
         }
-        Object id = item.mId;
+        Object id = item.id;
         if (id == null) {
             return 0;
         }
