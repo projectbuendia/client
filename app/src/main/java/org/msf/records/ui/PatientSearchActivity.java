@@ -14,6 +14,7 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
+import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
 
 import javax.inject.Inject;

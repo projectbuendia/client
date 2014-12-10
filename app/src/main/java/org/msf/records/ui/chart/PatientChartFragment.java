@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.chart;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,7 +10,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.controllers.PatientChartController;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -28,6 +27,9 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.PatientProjection;
+import org.msf.records.ui.ControllableFragment;
+import org.msf.records.ui.LocalizedChartDataGridAdapter;
+import org.msf.records.ui.PatientListActivity;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 

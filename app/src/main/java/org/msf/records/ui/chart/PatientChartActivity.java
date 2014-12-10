@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.chart;
 
 import android.os.Bundle;
 import android.view.Menu;
@@ -6,14 +6,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.msf.records.R;
-import org.msf.records.controllers.PatientChartController;
+import org.msf.records.ui.BaseActivity;
 
 /**
- * A {@link BaseActivity} that displays a patient's vitals and charts.
+ * Activity displaying a patient's vitals and charts.
  */
-public class PatientChartActivity extends BaseActivity {
-
-    private static final String TAG = PatientChartActivity.class.getName();
+public final class PatientChartActivity extends BaseActivity {
 
     /*
      * The ODK code for filling in a form has no way of attaching metadata to it This means we can't
@@ -28,7 +26,7 @@ public class PatientChartActivity extends BaseActivity {
     public static final String PATIENT_UUID_KEY = "PATIENT_UUID";
     public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
     public static final String PATIENT_ID_KEY = "PATIENT_ID";
-    private int nextIndex = 0;
+
     private final String[] patientUuids = new String[MAX_ODK_REQUESTS];
 
 
