@@ -46,9 +46,9 @@ public class SelectionBuilder {
     private static final String TAG = SelectionBuilder.class.getSimpleName();
 
     private String mTable = null;
-    private Map<String, String> mProjectionMap = Maps.newHashMap();
-    private StringBuilder mSelection = new StringBuilder();
-    private ArrayList<String> mSelectionArgs = Lists.newArrayList();
+    private final Map<String, String> mProjectionMap = Maps.newHashMap();
+    private final StringBuilder mSelection = new StringBuilder();
+    private final ArrayList<String> mSelectionArgs = Lists.newArrayList();
 
     /**
      * Reset any internal state, allowing this builder to be recycled.

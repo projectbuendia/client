@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.msf.records" >
 
     <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
@@ -31,13 +32,15 @@
         <provider
             android:name="org.odk.collect.android.provider.FormsProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.forms"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" /> <!-- need to export to MSF app -->
 
         <!-- Content Provider for ODK form instances. -->
         <provider
             android:name="org.odk.collect.android.provider.InstanceProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.instances"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" /> <!-- need to export to MSF app -->
 
         <!-- Content Provider for medical records. -->
         <provider

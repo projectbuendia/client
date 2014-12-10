@@ -17,8 +17,8 @@ public class PatientModel {
     public static final PatientModel INSTANCE = new PatientModel();
 
     public Patient getOdkPatient(String patientUuid) {
-        Cursor cursor = new FilterQueryProviderFactory()
-                .getCursorLoader(App.getInstance(), new UuidFilter(), patientUuid)
+        Cursor cursor = new FilterQueryProviderFactory(App.getInstance())
+                .getCursorLoader(new UuidFilter(), patientUuid)
                 .loadInBackground();
 
         cursor.moveToFirst();

@@ -635,9 +635,8 @@ public class FormsProvider extends ContentProvider {
 								.getAsString(FormsColumns.FORM_FILE_PATH);
 						String oldFile = update.getString(update
 								.getColumnIndex(FormsColumns.FORM_FILE_PATH));
-
-						if (formFile != null
-								&& formFile.equalsIgnoreCase(oldFile)) {
+                        assert formFile != null;
+						if (formFile.equalsIgnoreCase(oldFile)) {
 							// Files are the same, so we may have just copied
 							// over something we had
 							// already
@@ -661,7 +660,7 @@ public class FormsProvider extends ContentProvider {
 					}
 
 					// Make sure that the necessary fields are all set
-					if (values.containsKey(FormsColumns.DATE) == true) {
+					if (values.containsKey(FormsColumns.DATE)) {
 						Date today = new Date();
 						String ts = new SimpleDateFormat(getContext()
 								.getString(R.string.added_on_date_at_time),

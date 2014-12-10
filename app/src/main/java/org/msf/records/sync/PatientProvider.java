@@ -38,15 +38,6 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-    // Simple bean for holding a mutable int (Integer is immutable).
-    private class MutableInt {
-        public MutableInt(int value) {
-            this.value = value;
-        }
-
-        public int value;
-    }
-
     static {
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, ROUTE_PATIENTS);
         sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", ROUTE_PATIENTS_ID);
@@ -145,8 +136,8 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                           ContentValues[] values) {
         // TODO(nfortescue): optimise this.
         int numValues = values.length;
-        for (int i = 0; i < numValues; i++) {
-            insert(dbHelper, contentResolver, uri, values[i]);
+        for (ContentValues value : values) {
+            insert(dbHelper, contentResolver, uri, value);
         }
         return numValues;
     }
