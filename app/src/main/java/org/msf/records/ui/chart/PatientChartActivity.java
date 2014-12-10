@@ -3,7 +3,6 @@ package org.msf.records.ui.chart;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,24 +31,19 @@ import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
 import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.model.Patient;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
-import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.PrepopulatableFields;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Activity displaying a patient's vitals and charts.
@@ -136,7 +130,6 @@ public final class PatientChartActivity extends BaseActivity {
         mController = new PatientChartController(
         		mModel,
         		new OpenMrsChartServer(App.getConnectionDetails()),
-        		new EventBusWrapper(EventBus.getDefault()),
         		mCrudEventBusProvider.get(),
         		mMyUi,
         		odkResultSender,
