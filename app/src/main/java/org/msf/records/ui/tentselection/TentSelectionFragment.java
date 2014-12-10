@@ -1,9 +1,11 @@
-package org.msf.records.ui;
+package org.msf.records.ui.tentselection;
 
 import java.util.List;
 
 import org.msf.records.R;
 import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.ui.PatientListActivity;
+import org.msf.records.ui.ProgressFragment;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
@@ -30,7 +32,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     private TentSelectionController mController;
     private MyUi mMyUi = new MyUi();
     private TentListAdapter mAdapter;
-    
+
     public TentSelectionFragment() {
         // Required empty public constructor
     }
@@ -38,20 +40,20 @@ public final class TentSelectionFragment extends ProgressFragment {
     @OnItemClick(R.id.tent_selection_tents) void onTentGridClicked(int position) {
     	mController.onTentSelected(mAdapter.getItem(position));
     }
-    
+
     @OnClick(R.id.tent_selection_all_patients) void onAllPatientsClicked(View v) {
     	Intent listIntent = new Intent(getActivity(), PatientListActivity.class);
         startActivity(listIntent);
     }
-    
+
     @OnClick(R.id.tent_selection_discharged) void onDischargedClicked(View v) {
     	mController.onDischargedPressed();
     }
-     
-    @OnClick(R.id.tent_selection_triage) void onTriageClicked(View v) {  
+
+    @OnClick(R.id.tent_selection_triage) void onTriageClicked(View v) {
     	mController.onTriagePressed();
     }
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +72,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mController.attachFragmentUi(mMyUi);       
+        mController.attachFragmentUi(mMyUi);
     }
 
     @Override
@@ -86,27 +88,27 @@ public final class TentSelectionFragment extends ProgressFragment {
                     PatientCountDisplay.getPatientCountSubtitle(
                             getActivity(), patientCount));
     	}
-    	
+
     	@Override
     	public void setTriagePatientCount(int patientCount) {
             mTriageButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
-                            getActivity(), patientCount));	
+                            getActivity(), patientCount));
     	}
-    	
+
     	@Override
     	public void setPatientCount(int patientCount) {
     		mAllPatientsButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
                             getActivity(), patientCount, true));
     	}
-    	
+
     	@Override
     	public void setTents(List<LocationSubtree> tents) {
     		mAdapter = new TentListAdapter(getActivity(), tents);
     		mTentGrid.setAdapter(mAdapter);
 		}
-    	
+
     	@Override
     	public void showSpinner(boolean show) {
     		changeState(show ? State.LOADING : State.LOADED);
