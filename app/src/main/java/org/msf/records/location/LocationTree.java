@@ -308,13 +308,6 @@ public final class LocationTree {
     	}
     }
 
-    public LocationTree[] getSubtreeLocationArray() {
-        TreeMap<String, LocationSubtree> subtreeLocations = getAllSubtreeLocations();
-        LocationTree[] locationArray = new LocationTree[subtreeLocations.size()];
-        subtreeLocations.values().toArray(locationArray);
-        return locationArray;
-    }
-
     private TreeMap<String, LocationSubtree> getAllSubtreeLocations() {
         TreeMap<String, LocationSubtree> subtreeLocations = new TreeMap<>();
         subtreeLocations.putAll(mUuidToSubtree);
