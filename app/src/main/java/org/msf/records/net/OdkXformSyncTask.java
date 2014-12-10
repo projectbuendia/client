@@ -82,7 +82,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             if (!isNew) {
                 Log.i(TAG, "Using form " + formInfo.uuid + " from local cache.");
-                formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                if (formWrittenListener != null) {
+                    formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                }
                 continue;
             }
 

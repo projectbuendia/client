@@ -306,7 +306,7 @@ public class EncryptionUtils {
 
 		Cursor formCursor = null;
 		try {
-			if (cr.getType(mUri) == InstanceColumns.CONTENT_ITEM_TYPE) {
+			if (InstanceColumns.CONTENT_ITEM_TYPE.equals(cr.getType(mUri))) {
 				// chain back to the Form record...
 				String[] selectionArgs = null;
 				String selection = null;
