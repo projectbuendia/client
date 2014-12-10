@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.userlogin;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.verify;
@@ -8,6 +8,8 @@ import org.mockito.MockitoAnnotations;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.net.model.User;
+import org.msf.records.ui.FakeEventBus;
+import org.msf.records.ui.userlogin.UserLoginController;
 import org.msf.records.user.UserManager;
 
 import android.test.AndroidTestCase;

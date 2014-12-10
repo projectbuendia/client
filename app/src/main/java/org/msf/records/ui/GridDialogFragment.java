@@ -38,8 +38,8 @@ public class GridDialogFragment extends DialogFragment {
     ListItem[] mIconListDialogs;
     OnItemClickListener mItemClickListener;
 
-    public static abstract class OnItemClickListener implements Serializable {
-        public abstract void onGridItemClick(int position);
+    public interface OnItemClickListener extends Serializable {
+        void onGridItemClick(int position);
     }
 
     @Override
