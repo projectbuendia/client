@@ -52,7 +52,7 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchSingleAsyncTask<AppPatient> task = new FetchSingleAsyncTask<>(
-                mContentResolver, new UuidFilter(), uuid, mConverters.mPatient, bus);
+                mContentResolver, new UuidFilter(), uuid, mConverters.patient, bus);
         task.execute();
     }
 

@@ -13,11 +13,11 @@ public class UserDeleteFailedEvent {
     public static final int REASON_USER_DOES_NOT_EXIST_ON_SERVER = 3;
     public static final int REASON_SERVER_ERROR = 4;
 
-    public final User mUser;
-    public final int mReasonUnknown;
+    public final User user;
+    public final int reason;
 
-    public UserDeleteFailedEvent(User user, int reasonUnknown) {
-        mUser = user;
-        mReasonUnknown = reasonUnknown;
+    public UserDeleteFailedEvent(User user, int reason) {
+        this.user = user;
+        this.reason = reason;
     }
 }

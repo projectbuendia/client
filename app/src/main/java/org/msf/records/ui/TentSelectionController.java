@@ -140,10 +140,10 @@ final class TentSelectionController {
 
 	    public void onEventMainThread(LocationsLoadedEvent event) {
 	    	if (DEBUG) {
-	    		Log.d(TAG, "Loaded location tree: " + event.mLocationTree + " after "
+	    		Log.d(TAG, "Loaded location tree: " + event.locationTree + " after "
 	    				+ (SystemClock.currentThreadTimeMillis() - mLoadRequestTimeMs) + "ms");
 	    	}
-	    	mLocationTree = event.mLocationTree;
+	    	mLocationTree = event.locationTree;
 	        for (LocationSubtree zone : mLocationTree.getZones()) {
 	            switch (zone.getLocation().uuid) {
 	                case Zone.TRIAGE_ZONE_UUID:

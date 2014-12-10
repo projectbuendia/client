@@ -174,7 +174,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     public synchronized void onEvent(LocationsLoadedEvent event) {
-    	mLocationTree = event.mLocationTree;
+    	mLocationTree = event.locationTree;
     }
 
     public synchronized void onEvent(LocationsLoadFailedEvent event) {
