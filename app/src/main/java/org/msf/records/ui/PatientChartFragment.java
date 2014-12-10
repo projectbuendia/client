@@ -1,61 +1,57 @@
 package org.msf.records.ui;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.Map;
-
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.controllers.PatientChartController;
-import org.msf.records.events.mvcmodels.ModelReadyEvent;
-import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
-import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.UuidFilter;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.Models;
-import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.model.ChartStructure;
-import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.Patient;
-import org.msf.records.net.model.PatientAge;
-import org.msf.records.net.model.PatientChart;
-import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.sync.PatientProjection;
-import org.msf.records.widget.DataGridView;
-import org.msf.records.widget.VitalView;
-
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.controllers.PatientChartController;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
+import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.PatientChart;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.VitalView;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
  */
-public class PatientChartFragment extends ControllableFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PatientChartFragment extends ControllableFragment {
 
     private static final String TAG = PatientChartFragment.class.getName();
 
@@ -111,9 +107,15 @@ public class PatientChartFragment extends ControllableFragment implements Loader
         return fragment;
     }
     private long mLastObservation = Long.MIN_VALUE;
-    private Patient mPatient = new Patient();
+    private AppPatient mPatient;
     private String mPatientUuid;
+
+    @Inject AppModel mModel;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+
     private LayoutInflater mLayoutInflater;
+
+    private CrudEventBus mCrudEventBus;
 
     private View mChartView;
 
@@ -130,14 +132,14 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         PatientChartController.INSTANCE.register(this);
 
         Bundle bundle = savedInstanceState != null ? savedInstanceState : getArguments();
-
         parsePatientInfo( bundle );
 
         mLayoutInflater = LayoutInflater.from(getActivity());
+
+        App.getInstance().inject(this);
     }
 
     @Override
@@ -181,52 +183,44 @@ public class PatientChartFragment extends ControllableFragment implements Loader
     public void onResume() {
         super.onResume();
 
-        // Update our patient's vitals
-//        updatePatientUI();
-        EventBus.getDefault().registerSticky(this);
-//
-//        // Retrieve the view
-//        View view = getView();
-//        ViewGroup viewGroup = ((ViewGroup) ((ViewGroup) view).getChildAt(0));
-//
-//        // Remove previous grid view if any
-//        if ( mChartView != null ) {
-//            viewGroup.removeView(mChartView);
-//            mChartView = null;
-//        }
-//
-//        mObservationsFetchedToken = new Object();
-//        PatientChartModel.INSTANCE.fetchObservations(mObservationsFetchedToken);
-    }
+        EventBus.getDefault().register(this);
 
-    private void retrievePatientData() {
-        getLoaderManager().restartLoader(1, null, this);
+        mCrudEventBus = mCrudEventBusProvider.get();
+        mCrudEventBus.register(this);
+
+        mModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
+
+        // Update our patient's vitals
+//        refreshPatientChart();
+//        EventBus.getDefault().registerSticky(this);
     }
+//
+//    private void retrievePatientData() {
+//        getLoaderManager().restartLoader(1, null, this);
+//    }
 
     @Override
     public void onPause() {
-        super.onPause();
+        mCrudEventBus.unregister(this);
+        mCrudEventBus = null;
 
         EventBus.getDefault().unregister(this);
+
+        super.onPause();
     }
 
-    // TODO(dxchen): Replace the below two when https://github.com/greenrobot/EventBus/issues/135 is
-    // resolved.
-    public void onEventMainThread(ModelReadyEvent event) {
-        if (event.shouldRead(Models.OBSERVATIONS)) {
-            retrievePatientData();
-            updatePatientUI();
-        }
+    public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
+        mPatient = event.mItem;
+        updatePatientInfoUI(getView());
+        refreshPatientChart();
     }
 
-    public void onEventMainThread(ModelUpdatedEvent event) {
-        if (event.shouldRead(Models.OBSERVATIONS)) {
-            retrievePatientData();
-            updatePatientUI();
-        }
-    }
-
-    private void updatePatientUI()
+    /**
+     * Refreshes the patient chart.
+     *
+     * <p>Currently, this happens synchronously on the main thread, which is unideal.
+     */
+    private void refreshPatientChart()
     {
         // Retrieve the view
         View view = getView();
@@ -283,29 +277,29 @@ public class PatientChartFragment extends ControllableFragment implements Loader
 
         // TODO: Don't use this singleton
         LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
-        if (mPatient.assigned_location != null) {
-            LocationSubtree patientZone = locationTree.getZoneForUuid(mPatient.assigned_location.uuid);
-            LocationSubtree patientTent = locationTree.getTentForUuid(mPatient.assigned_location.uuid);
+        if (mPatient.mLocationUuid != null) {
+            LocationSubtree patientZone = locationTree.getZoneForUuid(mPatient.mLocationUuid);
+            LocationSubtree patientTent = locationTree.getTentForUuid(mPatient.mLocationUuid);
             zoneName = (patientZone == null) ? zoneName : patientZone.toString();
             tentName = (patientTent == null) ? tentName : patientTent.toString();
         }
 
-        ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.given_name + " " + mPatient.family_name );
-        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( mPatient.id );
+        ((TextView)rootView.findViewById( R.id.patient_chart_fullname )).setText( mPatient.mGivenName + " " + mPatient.mFamilyName );
+        ((TextView)rootView.findViewById( R.id.patient_chart_id )).setText( mPatient.mId );
 
         TextView patientChartAge = (TextView) rootView.findViewById(R.id.patient_chart_age);
-        if ("years".equals(mPatient.age.type)) {
-            patientChartAge.setText(mPatient.age.years + "-year-old ");
+        if (mPatient.mAge.getStandardDays() >= 2 * 365) {
+            patientChartAge.setText(mPatient.mAge.getStandardDays() / 365 + "-year-old ");
         } else {
-            patientChartAge.setText(mPatient.age.months + "-month-old ");
+            patientChartAge.setText(mPatient.mAge.getStandardDays() / 30 + "-month-old ");
         }
 
-        ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.gender.equals( "M" ) ? "Male" : "Female" );
+        ((TextView)rootView.findViewById( R.id.patient_chart_gender )).setText( mPatient.mGender == AppPatient.GENDER_MALE ? "Male" : "Female");
 
         ((TextView)rootView.findViewById( R.id.patient_chart_location )).setText( zoneName + "/" + tentName );
 
         int days = Days
-                .daysBetween(new DateTime(mPatient.admission_timestamp * 1000), DateTime.now())
+                .daysBetween(mPatient.mAdmissionDateTime, DateTime.now())
                 .getDays();
 
         TextView patientChartDays = (TextView) rootView.findViewById(R.id.patient_chart_days);
@@ -423,48 +417,6 @@ public class PatientChartFragment extends ControllableFragment implements Loader
             return;
         }
 
-
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new FilterQueryProviderFactory().getCursorLoader( getActivity(), new UuidFilter(), mPatientUuid );
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        data.moveToFirst();
-
-        mPatient.uuid = mPatientUuid;
-        mPatient.given_name = data.getString(PatientProjection.COLUMN_GIVEN_NAME );
-        mPatient.family_name = data.getString(PatientProjection.COLUMN_FAMILY_NAME );
-        mPatient.gender = data.getString(PatientProjection.COLUMN_GENDER );
-
-        PatientAge age = new PatientAge();
-        age.years = data.getInt(PatientProjection.COLUMN_AGE_YEARS);
-        age.months = data.getInt(PatientProjection.COLUMN_AGE_MONTHS);
-        if (age.years > 0) {
-            age.type = "years";
-        }
-        mPatient.age = age;
-
-        mPatient.id = data.getString(PatientProjection.COLUMN_ID );
-
-        LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(
-                data.getString(PatientProjection.COLUMN_LOCATION_UUID));
-        mPatient.assigned_location = (location == null) ? null : location.getLocation();
-
-        mPatient.admission_timestamp = data.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
-
-        updateLatestEncounter(mPatient.admission_timestamp * 1000);
-
-        updatePatientInfoUI(getView());
-
-        data.close();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
 
     }
 
