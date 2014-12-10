@@ -1,9 +1,13 @@
-package org.msf.records.ui;
+package org.msf.records.ui.tentselection;
 
 import org.msf.records.R;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
+import org.msf.records.ui.OdkActivityLauncher;
+import org.msf.records.ui.PatientListFragment;
+import org.msf.records.ui.PatientSearchActivity;
+import org.msf.records.ui.RoundActivity;
 import org.msf.records.utils.EventBusWrapper;
 
 import android.content.Intent;
@@ -19,7 +23,7 @@ import de.greenrobot.event.EventBus;
  * Displays a list of tents and allows users to search through a list of patients.
  */
 public final class TentSelectionActivity extends PatientSearchActivity {
-	
+
 	private TentSelectionController mController;
 
     @Override
@@ -29,7 +33,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         		new LocationManager(),
         		new MyUi(),
         		new EventBusWrapper(EventBus.getDefault()));
-        
+
         setContentView(R.layout.activity_tent_selection);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -37,23 +41,23 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                     .commit();
         }
     }
-    
+
     TentSelectionController getController() {
     	return mController;
     }
-    
+
     @Override
     protected void onStart() {
     	super.onStart();
     	mController.init();
     }
-    
+
     @Override
     protected void onStop() {
     	mController.suspend();
     	super.onStop();
     }
-    
+
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar.
@@ -91,33 +95,36 @@ public final class TentSelectionActivity extends PatientSearchActivity {
             }
         });
     }
-    
+
     private final class MyUi implements TentSelectionController.Ui {
-    	public void switchToTentSelectionScreen() {
+    	@Override
+		public void switchToTentSelectionScreen() {
             switchToFragment(new TentSelectionFragment());
     	}
-    	
-    	public void switchToPatientListScreen() {
+
+    	@Override
+		public void switchToPatientListScreen() {
             switchToFragment(new PatientListFragment());
     	}
     	@Override
     	public void showErrorMessage(int stringResourceId) {
     		Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
     	}
-    	
+
     	@Override
     	public void launchActivityForLocation(LocationSubtree subtree) {
-		   Intent roundIntent = new Intent(TentSelectionActivity.this, RoundActivity.class);
-		    roundIntent.putExtra(
-		            RoundActivity.LOCATION_NAME_KEY, subtree.toString());
-		    roundIntent.putExtra(
-		            RoundActivity.LOCATION_UUID_KEY, subtree.getLocation().uuid);
-		    roundIntent.putExtra(
-		            RoundActivity.LOCATION_PATIENT_COUNT_KEY, subtree.getPatientCount());
-		    startActivity(roundIntent);
-    	}
+			Intent roundIntent =
+					new Intent(TentSelectionActivity.this, RoundActivity.class);
+			roundIntent.putExtra(RoundActivity.LOCATION_NAME_KEY,
+					subtree.toString());
+			roundIntent.putExtra(RoundActivity.LOCATION_UUID_KEY,
+					subtree.getLocation().uuid);
+			roundIntent.putExtra(RoundActivity.LOCATION_PATIENT_COUNT_KEY,
+					subtree.getPatientCount());
+			startActivity(roundIntent);
+		}
     }
-    
+
     private void switchToFragment(Fragment newFragment) {
     	getSupportFragmentManager().beginTransaction()
 				.replace(R.id.tent_selection_container, newFragment)

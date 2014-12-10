@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.tentselection;
 
 import java.util.HashSet;
 import java.util.List;

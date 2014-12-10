@@ -1,24 +1,18 @@
-package org.msf.records.ui;
+package org.msf.records.ui.chart;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.TextView;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.Map;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.controllers.PatientChartController;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
@@ -32,20 +26,28 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.ui.ControllableFragment;
+import org.msf.records.ui.LocalizedChartDataGridAdapter;
+import org.msf.records.ui.PatientListActivity;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.Map;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
 import de.greenrobot.event.EventBus;
 
 /**
