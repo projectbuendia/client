@@ -1,4 +1,4 @@
-package org.msf.records.controllers;
+package org.msf.records.ui.chart;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.msf.records.App;
+import org.msf.records.controllers.BaseController;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
@@ -22,7 +23,7 @@ import javax.annotation.Nullable;
 /**
  * A {@link BaseController} for views that use the patient chart.
  */
-public class PatientChartController extends BaseController {
+final class PatientChartController extends BaseController {
 
     // TODO(dxchen): Dagger this!
     public static final PatientChartController INSTANCE = new PatientChartController();

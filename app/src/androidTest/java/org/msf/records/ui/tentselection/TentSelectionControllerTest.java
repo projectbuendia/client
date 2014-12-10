@@ -1,10 +1,12 @@
-package org.msf.records.ui;
+package org.msf.records.ui.tentselection;
 
 import static org.mockito.Mockito.verify;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.location.LocationManager;
+import org.msf.records.ui.FakeEventBus;
+import org.msf.records.ui.tentselection.TentSelectionController;
 
 import android.test.AndroidTestCase;
 
