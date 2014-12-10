@@ -1,9 +1,6 @@
 package org.msf.records.ui;
 
-import android.test.AndroidTestCase;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import static org.mockito.Mockito.verify;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -11,9 +8,10 @@ import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.user.UserManager;
 
-import de.greenrobot.event.EventBus;
+import android.test.AndroidTestCase;
 
-import static org.mockito.Mockito.verify;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Tests for {@link UserLoginController}.
@@ -23,7 +21,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
 	private UserLoginController mController;
 	@Mock private UserManager mMockUserManager; 
 	@Mock private UserLoginController.Ui mMockUi;
-	private EventBus mEventBus;
+	private FakeEventBus mFakeEventBus;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -32,10 +30,10 @@ public class UserLoginControllerTest extends AndroidTestCase {
 		
 		// TODO: Create a fake event bus so we can check whether the controller
 		// unregistered its event handler.
-		mEventBus = new EventBus();
+		mFakeEventBus = new FakeEventBus();
 		mController = new UserLoginController(
 				mMockUserManager,
-				mEventBus,
+				mFakeEventBus,
 				mMockUi);
 	}
 	
@@ -46,13 +44,24 @@ public class UserLoginControllerTest extends AndroidTestCase {
 		mMockUserManager.loadKnownUsers();
     }
 	
-	public void testKnownUsersLoadedEvent_UpdatesUi() {
+	public void testSuspend_UnregistersFromEventBus() {
+		// GIVEN an initialized controller
+		mController.init();
+		// WHEN the controller is suspended
+		mController.suspend();
+		// THEN the controller unregisters from the event bus
+		assertEquals(0, mFakeEventBus.countRegisteredReceivers());
+	}
+
+	public void testKnownUsersLoadedEvent_UpdatesUi() throws Exception {
 		// GIVEN the controller is inited
 		mController.init();
 		// WHEN a KnownUsersLoadedEvent is sent over the event bus
 		User user = User.create("idA", "nameA");
-		mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
+		mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
 		// THEN the UI is updated
 		verify(mMockUi).showUsers(ImmutableList.of(user));
     }
+	
+
 }

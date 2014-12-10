@@ -13,9 +13,9 @@ import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
+import org.msf.records.utils.EventBusRegistrationInterface;
 
 import android.util.Log;
-import de.greenrobot.event.EventBus;
 
 final class TentSelectionController {
 
@@ -40,7 +40,7 @@ final class TentSelectionController {
 	private final LocationManager mLocationManager;
 	private final Ui mUi;
 	private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
-	private final EventBus mEventBus;
+	private final EventBusRegistrationInterface mEventBus;
 	private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
 	
 	private boolean mLoadedLocationTree;
@@ -51,7 +51,7 @@ final class TentSelectionController {
 	public TentSelectionController(
 			LocationManager locationManager,
 			Ui ui,
-			EventBus eventBus) {
+			EventBusRegistrationInterface eventBus) {
 		mLocationManager = locationManager;
 		mUi = ui;
 		mEventBus = eventBus;
