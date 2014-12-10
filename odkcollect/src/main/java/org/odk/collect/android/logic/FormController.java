@@ -685,8 +685,9 @@ public class FormController {
                     event = stepToNextEvent(FormController.STEP_OVER_GROUP);
                     switch (event) {
                         case FormEntryController.EVENT_QUESTION:
-                        case FormEntryController.EVENT_END_OF_FORM:
                             break group_skip;
+                        case FormEntryController.EVENT_END_OF_FORM:
+                            break;
                         case FormEntryController.EVENT_PROMPT_NEW_REPEAT:
                             break group_skip;
                         case FormEntryController.EVENT_GROUP:
