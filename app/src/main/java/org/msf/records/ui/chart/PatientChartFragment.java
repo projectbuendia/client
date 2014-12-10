@@ -1,13 +1,18 @@
 package org.msf.records.ui.chart;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.Map;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.TextView;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -26,34 +31,28 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.ui.ControllableFragment;
 import org.msf.records.ui.LocalizedChartDataGridAdapter;
 import org.msf.records.ui.PatientListActivity;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.TextView;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
 import de.greenrobot.event.EventBus;
 
 /**
  * A {@link Fragment} that displays a patient's vitals and charts.
  */
-public class PatientChartFragment extends ControllableFragment {
+public class PatientChartFragment extends Fragment {
 
     private static final String TAG = PatientChartFragment.class.getName();
 
@@ -134,7 +133,6 @@ public class PatientChartFragment extends ControllableFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PatientChartController.INSTANCE.register(this);
 
         Bundle bundle = savedInstanceState != null ? savedInstanceState : getArguments();
         parsePatientInfo( bundle );
