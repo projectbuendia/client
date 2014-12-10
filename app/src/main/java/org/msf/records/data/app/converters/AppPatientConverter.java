@@ -3,6 +3,7 @@ package org.msf.records.data.app.converters;
 import android.database.Cursor;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
@@ -44,16 +45,16 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
         }
     }
 
-    private static Period getAgeFromYearsAndMonths(int years, int months) {
+    private static Duration getAgeFromYearsAndMonths(int years, int months) {
         if (years != 0 && months != 0) {
             // TODO(dxchen0: This indicates a data error. Decide the right thing to do.
-            return Period.years(years);
+            return Duration.standardDays(years * 365);
         }
 
         if (years != 0) {
-            return Period.years(years);
+            return Duration.standardDays(years * 365);
         } else {
-            return Period.months(months);
+            return Duration.standardDays(months * 30);
         }
     }
 }

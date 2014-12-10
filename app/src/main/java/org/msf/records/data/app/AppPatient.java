@@ -1,6 +1,7 @@
 package org.msf.records.data.app;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Period;
 
 /**
@@ -16,7 +17,7 @@ public class AppPatient extends AppTypeBase<String> {
 
     public String mGivenName;
     public String mFamilyName;
-    public Period mAge;
+    public Duration mAge;
     public int mGender;
 
     public DateTime mAdmissionDateTime;

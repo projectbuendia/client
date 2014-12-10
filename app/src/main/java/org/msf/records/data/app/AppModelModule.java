@@ -1,8 +1,9 @@
 package org.msf.records.data.app;
 
-import android.app.Application;
+import android.content.ContentResolver;
 
 import org.msf.records.data.app.converters.AppTypeConverterModule;
+import org.msf.records.data.app.converters.AppTypeConverters;
 
 import javax.inject.Singleton;
 
@@ -21,7 +22,8 @@ import dagger.Provides;
 )
 public class AppModelModule {
 
-    @Provides @Singleton AppModel provideAppModel(Application app) {
-        return new AppModel(app);
+    @Provides @Singleton AppModel provideAppModel(
+            ContentResolver contentResolver, AppTypeConverters converters) {
+        return new AppModel(contentResolver, converters);
     }
 }

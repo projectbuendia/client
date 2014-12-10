@@ -37,9 +37,9 @@ public class OpenMrsConnectionDetails {
 
     public OpenMrsConnectionDetails(
             VolleySingleton volley,
-            @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
-            @Qualifiers.OpenMrsUser StringPreference openMrsUser,
-            @Qualifiers.OpenMrsPassword StringPreference openMrsPassword) {
+            StringPreference openMrsRootUrl,
+            StringPreference openMrsUser,
+            StringPreference openMrsPassword) {
         mVolley = volley;
         mOpenMrsRootUrl = openMrsRootUrl;
         mOpenMrsUser = openMrsUser;

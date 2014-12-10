@@ -51,8 +51,9 @@ public class AppModel {
      * with the {@link AppPatient} on the specified event bus when complete.
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
-        new FetchSingleAsyncTask<AppPatient>(
+        FetchSingleAsyncTask<AppPatient> task = new FetchSingleAsyncTask<>(
                 mContentResolver, new UuidFilter(), uuid, mConverters.mPatient, bus);
+        task.execute();
     }
 
     /**
@@ -121,7 +122,7 @@ public class AppModel {
                         mFilter.getSelectionArgs(mConstraint),
                         null);
 
-                if (cursor == null) {
+                if (cursor == null || !cursor.moveToFirst()) {
                     return new SingleItemFetchFailedEvent();
                 }
 
