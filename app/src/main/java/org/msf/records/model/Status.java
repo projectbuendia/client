@@ -16,11 +16,11 @@ public class Status implements Parcelable, ListItem {
 
     private static HashMap<String, Status> STATUSES;
 
-    public String key;
-    public int nameId;
-    public int squareIconId;
-    public int roundIconId;
-    public int colorId;
+    public final String key;
+    public final int nameId;
+    public final int squareIconId;
+    public final int roundIconId;
+    public final int colorId;
 
     public Status(String key, int nameId, int squareIconId, int roundIconId, int colorId) {
         this.key = key;
@@ -39,7 +39,7 @@ public class Status implements Parcelable, ListItem {
     }
 
     static {
-        STATUSES = new HashMap<String, Status>();
+        STATUSES = new HashMap<>();
         for (Status status : new Status[]{
                 new Status("SUSPECTED_CASE", R.string.status_suspect, R.drawable.square_suspect, R.drawable.round_suspect, R.color.status_suspect),
                 new Status("PROBABLE_CASE", R.string.status_probable, R.drawable.square_probable, R.drawable.round_probable, R.color.status_probable),
