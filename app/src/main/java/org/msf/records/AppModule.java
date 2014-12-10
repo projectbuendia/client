@@ -1,5 +1,9 @@
 package org.msf.records;
 
+import android.app.Application;
+import android.content.ContentResolver;
+import android.content.res.Resources;
+
 import javax.inject.Singleton;
 
 import org.msf.records.data.app.AppModelModule;
@@ -11,15 +15,11 @@ import org.msf.records.ui.PatientListActivity;
 import org.msf.records.ui.PatientSearchActivity;
 import org.msf.records.ui.RoundActivity;
 import org.msf.records.ui.chart.PatientChartActivity;
-import org.msf.records.ui.chart.PatientChartFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;
 
-import android.app.Application;
-import android.content.ContentResolver;
-import android.content.res.Resources;
 import dagger.Module;
 import dagger.Provides;
 
@@ -47,9 +47,6 @@ import dagger.Provides;
                 PatientSearchActivity.class,
                 RoundActivity.class,
                 TentSelectionActivity.class,
-
-                // TODO(dxchen): Move these into fragment-specific modules.
-                PatientChartFragment.class
         }
 )
 public final class AppModule {
