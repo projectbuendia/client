@@ -10,7 +10,7 @@ import org.msf.records.ui.PatientChartActivity;
 import org.msf.records.ui.PatientListActivity;
 import org.msf.records.ui.PatientSearchActivity;
 import org.msf.records.ui.RoundActivity;
-import org.msf.records.ui.TentSelectionActivity;
+import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;

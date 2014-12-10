@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.userlogin;
 
 import java.util.ArrayList;
 import java.util.Comparator;
