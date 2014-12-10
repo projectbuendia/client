@@ -7,9 +7,10 @@ import org.msf.records.location.LocationTree;
  * database.
  */
 public class LocationsLoadedEvent {
-    public final LocationTree mLocationTree;
+
+    public final LocationTree locationTree;
 
     public LocationsLoadedEvent(LocationTree locationTree) {
-        mLocationTree = locationTree;
+        this.locationTree = locationTree;
     }
 }

@@ -4,7 +4,6 @@ import android.database.Cursor;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.joda.time.Period;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
 
@@ -17,20 +16,20 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
     public AppPatient fromCursor(Cursor cursor) {
         AppPatient patient = new AppPatient();
 
-        patient.mId = cursor.getString(PatientProjection.COLUMN_ID);
+        patient.id = cursor.getString(PatientProjection.COLUMN_ID);
 
-        patient.mUuid = cursor.getString(PatientProjection.COLUMN_UUID);
-        patient.mGivenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
-        patient.mFamilyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
-        patient.mAge = getAgeFromYearsAndMonths(
+        patient.uuid = cursor.getString(PatientProjection.COLUMN_UUID);
+        patient.givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
+        patient.familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
+        patient.age = getAgeFromYearsAndMonths(
                 cursor.getInt(PatientProjection.COLUMN_AGE_YEARS),
                 cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS));
-        patient.mGender = getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER));
+        patient.gender = getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER));
 
-        patient.mAdmissionDateTime =
+        patient.admissionDateTime =
                 new DateTime(cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000);
 
-        patient.mLocationUuid = cursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
+        patient.locationUuid = cursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
 
         return patient;
     }

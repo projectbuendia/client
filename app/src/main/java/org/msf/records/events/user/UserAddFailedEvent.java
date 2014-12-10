@@ -13,11 +13,11 @@ public class UserAddFailedEvent {
     public static final int REASON_USER_EXISTS_ON_SERVER = 3;
     public static final int REASON_SERVER_ERROR = 4;
 
-    public final NewUser mUser;
-    public final int mReason;
+    public final NewUser user;
+    public final int reason;
 
     public UserAddFailedEvent(NewUser user, int reason) {
-        mUser = user;
-        mReason = reason;
+        this.user = user;
+        this.reason = reason;
     }
 }

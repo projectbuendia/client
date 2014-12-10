@@ -8,7 +8,6 @@ import org.msf.records.filter.FilterGroup.FilterType;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 
-import android.content.Context;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -31,7 +30,7 @@ public class FilterManager {
     @SuppressWarnings("unused") // Called by reflection from event bus.
     private static class LocationSyncSubscriber {
         public synchronized void onEvent(LocationsLoadedEvent event) {
-            mRoot = event.mLocationTree;
+            mRoot = event.locationTree;
         }
     }
 

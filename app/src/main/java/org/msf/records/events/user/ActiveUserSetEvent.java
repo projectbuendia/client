@@ -10,18 +10,18 @@ public class ActiveUserSetEvent {
     /**
      * The previous active user.
      */
-    public final User mPreviousActiveUser;
+    public final User previousActiveUser;
 
     /**
      * The current active user.
      */
-    public final User mActiveUser;
+    public final User activeUser;
 
     /**
      * Creates a new {@link ActiveUserSetEvent}.
      */
     public ActiveUserSetEvent(User previousActiveUser, User activeUser) {
-        mPreviousActiveUser = previousActiveUser;
-        mActiveUser = activeUser;
+        this.previousActiveUser = previousActiveUser;
+        this.activeUser = activeUser;
     }
 }

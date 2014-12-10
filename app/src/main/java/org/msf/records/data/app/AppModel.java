@@ -52,7 +52,7 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchSingleAsyncTask<AppPatient> task = new FetchSingleAsyncTask<>(
-                mContentResolver, new UuidFilter(), uuid, mConverters.mPatient, bus);
+                mContentResolver, new UuidFilter(), uuid, mConverters.patient, bus);
         task.execute();
     }
 
@@ -83,6 +83,10 @@ public class AppModel {
             }
         }
     }
+
+    // TODO(dxchen): Implement.
+    private abstract static class FetchTypedCursorAsyncTask<T extends AppTypeBase>
+            extends AsyncTask<Void, Void, Object> {}
 
     /**
      * An {@link AsyncTask} that fetches a single item from the data store.

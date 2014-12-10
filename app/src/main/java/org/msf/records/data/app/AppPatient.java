@@ -13,14 +13,14 @@ public class AppPatient extends AppTypeBase<String> {
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
 
-    public String mUuid;
+    public String uuid;
 
-    public String mGivenName;
-    public String mFamilyName;
-    public Duration mAge;
-    public int mGender;
+    public String givenName;
+    public String familyName;
+    public Duration age;
+    public int gender;
 
-    public DateTime mAdmissionDateTime;
+    public DateTime admissionDateTime;
 
-    public String mLocationUuid;
+    public String locationUuid;
 }
