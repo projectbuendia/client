@@ -14,16 +14,17 @@ import de.greenrobot.event.EventBus;
 /**
  * Fake event bus implementation. The real {@link EventBus} is not suitable for unit tests
  * because it calls methods on a separate thread to the test thread. This is because the
- * 'main thread' is not the same as the test thread. 
+ * 'main thread' is not the same as the test thread.
  */
 public final class FakeEventBus implements EventBusRegistrationInterface {
-	
+
 	private static final String METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD = "onEventMainThread";
 	private static final Set<String> IGNORED_METHOD_NAMES = ImmutableSet.of(
 			"equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait");
-			
+
 	private final Set<Object> mRegisteredReceivers = new HashSet<Object>();
-	
+
+	@Override
 	public void register(Object receiver) {
 		for (Method method : receiver.getClass().getMethods()) {
 			// We only support a subset of the event bus functionality, so we check methods on the
@@ -33,7 +34,7 @@ public final class FakeEventBus implements EventBusRegistrationInterface {
 			if (!IGNORED_METHOD_NAMES.contains((method.getName()))) {
 				Preconditions.checkArgument(
 						method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD),
-						"Method was called " + method.getName() + ". Fake event bus only supports methods called " 
+						"Method was called " + method.getName() + ". Fake event bus only supports methods called "
 								+ METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD);
 				Preconditions.checkArgument(
 						method.getParameterTypes().length == 1,
@@ -42,16 +43,22 @@ public final class FakeEventBus implements EventBusRegistrationInterface {
 		}
 		mRegisteredReceivers.add(receiver);
 	}
-	
+
+	@Override
+	public void registerSticky(Object receiver) {
+		// TODO: Implement stickiness
+		register(receiver);
+	}
+
 	@Override
 	public void unregister(Object receiver) {
 		mRegisteredReceivers.remove(receiver);
 	}
-	
+
 	public int countRegisteredReceivers() {
 		return mRegisteredReceivers.size();
 	}
-	
+
 	public void post(Object event) throws Exception {
 		for (Object receiver : mRegisteredReceivers) {
 			for (Method method : receiver.getClass().getMethods()) {
