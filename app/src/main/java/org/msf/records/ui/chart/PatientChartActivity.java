@@ -41,7 +41,6 @@ import org.msf.records.net.model.Patient;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.LocalizedChartDataGridAdapter;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
@@ -69,14 +68,14 @@ public final class PatientChartActivity extends BaseActivity {
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
-    private View mChartView;
-
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
 
+    @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
     @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionContainer;
     @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperature;
+    @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperatureTextView;
 
     @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
     @InjectView(R.id.vital_mobility) VitalView mMobility;
@@ -139,7 +138,6 @@ public final class PatientChartActivity extends BaseActivity {
         		new OpenMrsChartServer(App.getConnectionDetails()),
         		new EventBusWrapper(EventBus.getDefault()),
         		mCrudEventBusProvider.get(),
-        		new FilterQueryProviderFactory(getApplicationContext()),
         		mMyUi,
         		odkResultSender,
         		observationsProvider,
@@ -230,19 +228,20 @@ public final class PatientChartActivity extends BaseActivity {
        	mController.onAddObservationPressed("Symptoms the patient reports (first set)");
     }
 
+    /** Updates a {@link VitalView} to display a new observation value. */
+	private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
+		if (observation != null) {
+			view.setValue(observation.localizedValue);
+		} else {
+			view.setValue("-");
+		}
+	}
+
     private final class MyUi implements PatientChartController.Ui {
     	@Override
     	public void setTitle(String title) {
     		PatientChartActivity.this.setTitle(title);
     	}
-
-		private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
-			if (observation != null) {
-				view.setValue(observation.localizedValue);
-			} else {
-				view.setValue("-");
-			}
-		}
 
 		@Override
 		public void setLatestEncounter(long encounterTimeMilli) {
@@ -257,24 +256,17 @@ public final class PatientChartActivity extends BaseActivity {
 
 	    @Override
 		public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-			TextView textView;
-			LocalizedObservation observation;
 
-			// Conscious state
 			showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
-			// Mobility
 			showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
-			// Fluids
 			showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
-			// Hydration
 			showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
+
 			// Temperature
-			observation = observations.get(Concept.TEMPERATURE_UUID);
+			LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
 			if (observation != null) {
 			    double value = Double.parseDouble(observation.localizedValue);
-
-			    textView = (TextView) mTemperature.findViewById(R.id.patient_chart_vital_temperature);
-			    textView.setText(String.format("%.1f°", value));
+			    mTemperatureTextView.setText(String.format("%.1f°", value));
 
 			    if (value <= 37.5) {
 			        mTemperature.setBackgroundColor(Color.parseColor("#417505"));
@@ -384,6 +376,4 @@ public final class PatientChartActivity extends BaseActivity {
 	    	OdkActivityLauncher.fetchAndShowXform(PatientChartActivity.this, formUuid, requestCode, patient, fields);
 	    }
     }
-
-
 }
