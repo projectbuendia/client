@@ -16,6 +16,8 @@ import butterknife.InjectView;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -83,7 +85,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
 
         // TODO: Don't use the singleton here.
-        LocationSubtree tentSubtree = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(tent);
+        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        @Nullable LocationSubtree tentSubtree = null;
+        if (locationTree != null) {
+        	 tentSubtree = locationTree.getLocationByUuid(tent);
+        }
+
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory()
                         .setSortClause(sortBuilder.toString())
@@ -114,9 +121,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int patientCount = getChildrenCursor(cursor).getCount();
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
-        LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
-        if (location != null) {
-            tentName = location.toString();
+        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        if (locationTree != null) {
+	        	LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
+	        if (location != null) {
+	            tentName = location.toString();
+	        }
         }
 
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
