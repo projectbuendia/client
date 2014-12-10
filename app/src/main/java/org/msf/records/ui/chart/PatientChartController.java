@@ -94,6 +94,7 @@ final class PatientChartController {
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
 
+    /** Sends ODK form data. */
     public interface OdkResultSender {
         void sendOdkResultToServer(
                 @Nullable String patientUuid,
@@ -166,6 +167,56 @@ final class PatientChartController {
     	mCrudEventBus.unregister(mEventBusSubscriber);
     }
 
+    public void onXFormResult(int requestCode, int resultCode, Intent data) {
+    	String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
+        if (patientUuid == null) {
+            Log.e(TAG, "Received unknown request code: " + requestCode);
+            return;
+        }
+
+        // This will fire a CreatePatientSucceededEvent.
+        mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
+    }
+
+    /** Call when the user has indicated they want to add observation data. */
+    public void onAddObservationPressed() {
+        onAddObservationPressed(null);
+    }
+
+    /** Call when the user has indicated they want to add observation data. */
+    public void onAddObservationPressed(String targetGroup) {
+        PrepopulatableFields fields = new PrepopulatableFields();
+
+        fields.mEncounterTime = DateTime.now();
+        fields.mLocationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.mClinicianName = user.getFullName();
+        }
+
+        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
+        		mObservationsProvider.getMostRecentObservations(mPatientUuid);
+
+        if (observations.containsKey(Concept.PREGNANCY_UUID)
+                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
+            fields.mPregnant = PrepopulatableFields.YES;
+        }
+
+        if (observations.containsKey(Concept.IV_UUID)
+                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
+            fields.mIvFitted = PrepopulatableFields.YES;
+        }
+
+        fields.mTargetGroup = targetGroup;
+
+        mUi.fetchAndShowXform(
+                Constants.ADD_OBSERVATION_UUID,
+                savePatientUuidForRequestCode(mPatientUuid),
+                PatientModel.INSTANCE.getOdkPatient(mPatientUuid),
+                fields);
+    }
+
     private void prodServer() {
     	// TODO(dxchen): This doesn't properly handle configuration changes. We should pass this
         // into the fragment arguments.
@@ -236,45 +287,6 @@ final class PatientChartController {
     	mUi.setObservationHistory(observations);
     }
 
-    /** Call when the user has indicated they want to add observation data. */
-    public void onAddObservationPressed() {
-        onAddObservationPressed(null);
-    }
-
-    /** Call when the user has indicated they want to add observation data. */
-    public void onAddObservationPressed(String targetGroup) {
-        PrepopulatableFields fields = new PrepopulatableFields();
-
-        fields.mEncounterTime = DateTime.now();
-        fields.mLocationName = "Triage";
-
-        User user = App.getUserManager().getActiveUser();
-        if (user != null) {
-            fields.mClinicianName = user.getFullName();
-        }
-
-        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
-        		mObservationsProvider.getMostRecentObservations(mPatientUuid);
-
-        if (observations.containsKey(Concept.PREGNANCY_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
-            fields.mPregnant = PrepopulatableFields.YES;
-        }
-
-        if (observations.containsKey(Concept.IV_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
-            fields.mIvFitted = PrepopulatableFields.YES;
-        }
-
-        fields.mTargetGroup = targetGroup;
-
-        mUi.fetchAndShowXform(
-                Constants.ADD_OBSERVATION_UUID,
-                savePatientUuidForRequestCode(mPatientUuid),
-                PatientModel.INSTANCE.getOdkPatient(mPatientUuid),
-                fields);
-    }
-
     /**
      * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
      */
@@ -290,7 +302,7 @@ final class PatientChartController {
      *
      * <p>Also removes details of that requestCode from the controller's state.
      */
-    @Nullable public String getAndClearPatientUuidForRequestCode(int requestCode) {
+    @Nullable private String getAndClearPatientUuidForRequestCode(int requestCode) {
         int index = requestCode - BASE_ODK_REQUEST;
         String patientUuid = mPatientUuids[index];
         mPatientUuids[index] = null;
