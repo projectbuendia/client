@@ -23,10 +23,10 @@
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/btnFinishDraw"
+            android:id="@+id/btnCancelDraw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/save_and_close" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/btnResetDraw"
@@ -35,10 +35,10 @@
             android:text="@string/reset_image" />
 
         <Button
-            android:id="@+id/btnCancelDraw"
+            android:id="@+id/btnFinishDraw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/cancel" />
+            android:text="@string/save_and_close" />
     </LinearLayout>
 
 </RelativeLayout>
