@@ -276,92 +276,86 @@ public class FileUtils {
             isr = new InputStreamReader(is);
         }
 
-        if (isr != null) {
-
-            Document doc;
+        Document doc;
+        try {
+            doc = XFormParser.getXMLDocument(isr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("Unable to parse XML document", e);
+        } finally {
             try {
-                doc = XFormParser.getXMLDocument(isr);
+                isr.close();
             } catch (IOException e) {
-				e.printStackTrace();
-				throw new IllegalStateException("Unable to parse XML document", e);
-			} finally {
-                try {
-                    isr.close();
-                } catch (IOException e) {
-                    Log.w(t, xmlFile.getAbsolutePath() + " Error closing form reader");
-                    e.printStackTrace();
-                }
+                Log.w(t, xmlFile.getAbsolutePath() + " Error closing form reader");
+                e.printStackTrace();
+            }
+        }
+
+        String xforms = "http://www.w3.org/2002/xforms";
+        String html = doc.getRootElement().getNamespace();
+
+        Element head = doc.getRootElement().getElement(html, "head");
+        Element title = head.getElement(html, "title");
+        if (title != null) {
+            fields.put(TITLE, XFormParser.getXMLText(title, true));
+        }
+        Element model = getChildElement(head, "model");
+
+        Element cur = getChildElement(model,"instance");
+
+        int idx = cur.getChildCount();
+        int i;
+        for (i = 0; i < idx; ++i) {
+            if (cur.isText(i))
+                continue;
+            if (cur.getType(i) == Node.ELEMENT) {
+                break;
+            }
+        }
+
+        if (i < idx) {
+            cur = cur.getElement(i); // this is the first data element
+            String id = cur.getAttributeValue(null, "id");
+            String xmlns = cur.getNamespace();
+
+            String version = cur.getAttributeValue(null, "version");
+            String uiVersion = cur.getAttributeValue(null, "uiVersion");
+            if ( uiVersion != null ) {
+                // pre-OpenRosa 1.0 variant of spec
+                Log.e(t, "Obsolete use of uiVersion -- IGNORED -- only using version: " + version);
             }
 
-            String xforms = "http://www.w3.org/2002/xforms";
-            String html = doc.getRootElement().getNamespace();
-
-            Element head = doc.getRootElement().getElement(html, "head");
-            Element title = head.getElement(html, "title");
-            if (title != null) {
-                fields.put(TITLE, XFormParser.getXMLText(title, true));
-            }
-            Element model = getChildElement(head, "model");
-
-            Element cur = getChildElement(model,"instance");
-
-            int idx = cur.getChildCount();
-            int i;
-            for (i = 0; i < idx; ++i) {
-                if (cur.isText(i))
-                    continue;
-                if (cur.getType(i) == Node.ELEMENT) {
-                    break;
-                }
-            }
-
-            if (i < idx) {
-                cur = cur.getElement(i); // this is the first data element
-                String id = cur.getAttributeValue(null, "id");
-                String xmlns = cur.getNamespace();
-
-                String version = cur.getAttributeValue(null, "version");
-                String uiVersion = cur.getAttributeValue(null, "uiVersion");
-                if ( uiVersion != null ) {
-                	// pre-OpenRosa 1.0 variant of spec
-                	Log.e(t, "Obsolete use of uiVersion -- IGNORED -- only using version: " + version);
-                }
-
-                fields.put(FORMID, (id == null) ? xmlns : id);
-                fields.put(VERSION, (version == null) ? null : version);
-            } else {
-                throw new IllegalStateException(xmlFile.getAbsolutePath() + " could not be parsed");
-            }
-            try {
-                Element submission = model.getElement(xforms, "submission");
-                String submissionUri = submission.getAttributeValue(null, "action");
-                fields.put(SUBMISSIONURI, (submissionUri == null) ? null : submissionUri);
-                String base64RsaPublicKey = submission.getAttributeValue(null, "base64RsaPublicKey");
-                fields.put(BASE64_RSA_PUBLIC_KEY,
-                  (base64RsaPublicKey == null || base64RsaPublicKey.trim().length() == 0)
-                  ? null : base64RsaPublicKey.trim());
-            } catch (Exception e) {
-                Log.i(t, xmlFile.getAbsolutePath() + " does not have a submission element");
-                // and that's totally fine.
-            }
-
+            fields.put(FORMID, (id == null) ? xmlns : id);
+            fields.put(VERSION, (version == null) ? null : version);
+        } else {
+            throw new IllegalStateException(xmlFile.getAbsolutePath() + " could not be parsed");
+        }
+        try {
+            Element submission = model.getElement(xforms, "submission");
+            String submissionUri = submission.getAttributeValue(null, "action");
+            fields.put(SUBMISSIONURI, (submissionUri == null) ? null : submissionUri);
+            String base64RsaPublicKey = submission.getAttributeValue(null, "base64RsaPublicKey");
+            fields.put(BASE64_RSA_PUBLIC_KEY,
+                    (base64RsaPublicKey == null || base64RsaPublicKey.trim().length() == 0)
+                            ? null : base64RsaPublicKey.trim());
+        } catch (Exception e) {
+            Log.i(t, xmlFile.getAbsolutePath() + " does not have a submission element");
+            // and that's totally fine.
         }
         return fields;
     }
 
     // needed because element.getelement fails when there are attributes
     private static Element getChildElement(Element parent, String childName) {
-        Element e = null;
         int c = parent.getChildCount();
-        int i = 0;
-        for (i = 0; i < c; i++) {
+        for (int i = 0; i < c; i++) {
             if (parent.getType(i) == Node.ELEMENT) {
                 if (parent.getElement(i).getName().equalsIgnoreCase(childName)) {
                     return parent.getElement(i);
                 }
             }
         }
-        return e;
+        return null;
     }
 
     public static void deleteAndReport(File file) {
