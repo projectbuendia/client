@@ -96,8 +96,7 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mPatientAdapter.setSelectionFilter(mFilter);
-        mPatientAdapter.setFilterQueryProvider(
-                mFactory.getFilterQueryProvider(getActivity(), filter));
+        mPatientAdapter.setFilterQueryProvider(mFactory.getFilterQueryProvider(filter));
         loadSearchResults();
     }
 
@@ -128,21 +127,21 @@ public class PatientListFragment extends ProgressFragment implements
      * fragment (e.g. upon screen orientation changes).
      */
     public PatientListFragment() {
-        mFactory = new FilterQueryProviderFactory().setUri(
-                        PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
-        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
-        if (locationTree != null) {
-        	mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
-        } else {
-        	Log.e(TAG, "Location tree does not exist yet");
-        }
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
+        		PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+		LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+		if (locationTree != null) {
+			mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
+		                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
+		} else {
+			Log.e(TAG, "Location tree does not exist yet");
+		}
         setContentView(R.layout.fragment_patient_list);
     }
 
@@ -322,7 +321,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return mFactory.getCursorLoader(getActivity(), mFilter, "");
+        return mFactory.getCursorLoader(mFilter, "");
     }
 
     @Override
