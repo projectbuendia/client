@@ -6,6 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
@@ -14,13 +19,8 @@ import org.joda.time.chrono.ISOChronology;
 import org.msf.records.R;
 import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.widget.DataGridAdapter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
-
-import static org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 
 /**
  * Attach the local cache of chart data into the necessary view for the chart history.
@@ -40,11 +40,11 @@ public class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
-    private final ArrayList<Row> rows = new ArrayList<>();
-    private final ArrayList<String> columnHeaders = new ArrayList<>();
+    private final List<Row> rows = new ArrayList<>();
+    private final List<String> columnHeaders = new ArrayList<>();
 
     public LocalizedChartDataGridAdapter(Context context,
-                                         ArrayList<LocalizedObservation> observations,
+                                         List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         this.mLayoutInflater = layoutInflater;
         Row row = null;
