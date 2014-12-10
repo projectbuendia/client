@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.chart;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -25,7 +25,7 @@ import org.msf.records.widget.DataGridAdapter;
 /**
  * Attach the local cache of chart data into the necessary view for the chart history.
  */
-public class LocalizedChartDataGridAdapter implements DataGridAdapter {
+final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private static class Row {
 
