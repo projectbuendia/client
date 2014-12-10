@@ -414,7 +414,9 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         Object [] bindings = new Object[first.size()];
         for (ContentValues values : allValues) {
             statement.clearBindings();
-            assert values.size() == first.size();
+            if (values.size() != first.size()) {
+                throw new AssertionError();
+            }
             for (int i=0; i< bindings.length; i++) {
                 Object value = values.get(columns[i]);
                 // This isn't super safe, but is in our context.
@@ -448,7 +450,9 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         sql.append('(');
 
         int size = (columns != null && columns.length > 0) ? columns.length : 0;
-        assert size > 0;
+        if (size <= 0) {
+            throw new AssertionError();
+        }
         int i = 0;
         for (String colName : columns) {
             sql.append((i > 0) ? "," : "");
