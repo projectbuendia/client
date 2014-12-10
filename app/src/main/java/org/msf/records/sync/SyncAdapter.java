@@ -55,32 +55,32 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * If this key is present with boolean value true then sync patients.
      */
-    public static String SYNC_PATIENTS = "SYNC_PATIENTS";
+    public static final String SYNC_PATIENTS = "SYNC_PATIENTS";
 
     /**
      * If this key is present with boolean value true then sync concepts.
      */
-    public static String SYNC_CONCEPTS = "SYNC_CONCEPTS";
+    public static final String SYNC_CONCEPTS = "SYNC_CONCEPTS";
 
     /**
      * If this key is present with boolean value true then sync the chart structure.
      */
-    public static String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
+    public static final String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
 
     /**
      * If this key is present with boolean value true then sync the observations.
      */
-    public static String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
+    public static final String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
 
     /**
      * If this key is present with boolean value true then sync locations.
      */
-    public static String SYNC_LOCATIONS = "SYNC_LOCATIONS";
+    public static final String SYNC_LOCATIONS = "SYNC_LOCATIONS";
 
     /**
      * If this key is present with boolean value true then sync users.
      */
-    public static String SYNC_USERS = "SYNC_USERS";
+    public static final String SYNC_USERS = "SYNC_USERS";
 
     /**
      * Content resolver, for performing database operations.

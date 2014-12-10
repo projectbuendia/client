@@ -39,7 +39,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
     private String mQueryFilterTerm;
     private SimpleSelectionFilter mFilter;
 
