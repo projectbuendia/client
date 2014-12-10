@@ -1,11 +1,13 @@
 package org.msf.records.net;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.CustomSerialization;
 import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.PatientChartList;
 
 import java.util.HashMap;
 
@@ -38,6 +40,18 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+    }
+
+    public void getAllCharts(Response.Listener<PatientChartList> patientListener,
+                             Response.ErrorListener errorListener) {
+        GsonRequest<PatientChartList> request = new GsonRequest<>(
+                mConnectionDetails.getRootUrl() + "/patientencounters",
+                PatientChartList.class, false,
+                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+                patientListener, errorListener);
+        CustomSerialization.registerTo(request.getGson());
+        request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 

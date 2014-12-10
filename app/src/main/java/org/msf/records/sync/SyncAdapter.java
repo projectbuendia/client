@@ -29,12 +29,14 @@ import org.msf.records.net.model.Concept;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.PatientChartList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.msf.records.sync.ChartProviderContract.CONCEPTS_CONTENT_URI;
 import static org.msf.records.sync.ChartProviderContract.CONCEPT_NAMES_CONTENT_URI;
@@ -424,44 +426,44 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
-        ArrayList<RequestFuture<PatientChart>> futures = new ArrayList<>();
-        while (c.moveToNext()) {
-            RequestFuture<PatientChart> future = RequestFuture.newFuture();
-            chartServer.getChart(c.getString(c.getColumnIndex(PatientColumns.COLUMN_NAME_UUID)),
-                    future, future);
-            futures.add(future);
-        }
-        int i=0;
+        RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
+
+        Log.d(TAG, "requesting all charts");
+        chartServer.getAllCharts(listFuture, listFuture);
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         TimingLogger timingLogger = new TimingLogger(TAG, "obs update");
-
-        for (RequestFuture<PatientChart> future : futures) {
-            // As we are doing multiple request in parallel, deal with exceptions in the loop.
-            try {
-                PatientChart patientChart = future.get();
+        try {
+            Log.d(TAG, "awaiting parsed response");
+            PatientChartList patientChartList = listFuture.get(100, TimeUnit.SECONDS);
+            Log.d(TAG, "got response ");
+            timingLogger.addSplit("Get all charts RPC");
+            for (PatientChart patientChart : patientChartList.results) {
+                // As we are doing multiple request in parallel, deal with exceptions in the loop.
+                timingLogger.addSplit("awaiting future");
                 if (patientChart.uuid == null) {
                     Log.e(TAG, "null patient id in observation response");
                     continue;
                 }
                 // Delete all existing observations for the patient.
                 toDelete.add(patientChart.uuid);
+                timingLogger.addSplit("added delete to list");
                 // Add the new observations
                 RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
-                i++;
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Error interruption: " + e.toString());
-                syncResult.stats.numIoExceptions++;
-                return;
-            } catch (ExecutionException e){
-                Log.e(TAG, "Error failed to execute: " + e.toString());
-                syncResult.stats.numIoExceptions++;
-                return;
-            } catch (Exception e){
-                Log.e(TAG, "Error reading from network: " + e.toString());
-                syncResult.stats.numIoExceptions++;
-                return;
+                timingLogger.addSplit("added obs to list");
             }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Error interruption: ", e);
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (ExecutionException e){
+            Log.e(TAG, "Error failed to execute: ", e);
+            syncResult.stats.numIoExceptions++;
+            return;
+        } catch (Exception e){
+            Log.e(TAG, "Error reading from network: ", e);
+            syncResult.stats.numIoExceptions++;
+            return;
         }
         timingLogger.addSplit("making operations");
         StringBuilder select = new StringBuilder(ChartColumns.PATIENT_UUID);
