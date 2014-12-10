@@ -1,36 +1,69 @@
 package org.msf.records.data.app;
 
-import android.app.Application;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.os.AsyncTask;
 
+import org.msf.records.data.app.converters.AppTypeConverter;
+import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.events.data.TypedCursorFetchedEvent;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.UuidFilter;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
 /**
  * A model that manages all data access within the application.
  *
- * <p>This model's {@code fetch} methods often provide {@link TypedCursor}s as results, which must
+ * <p>This model's {@code fetch} methods often provide {@link TypedCursor}s as results, which MUST
  * be closed when the consumer is done with them.
  */
 public class AppModel {
 
-    private final Application mApp;
+    private final ContentResolver mContentResolver;
+    private final AppTypeConverters mConverters;
 
     private final CrudEventBusErrorSubscriber mCrudEventBusErrorSubscriber;
 
-    AppModel(Application app) {
-        mApp = app;
+    AppModel(ContentResolver contentResolver, AppTypeConverters converters) {
+        mContentResolver = contentResolver;
+        mConverters = converters;
         mCrudEventBusErrorSubscriber = new CrudEventBusErrorSubscriber();
     }
 
     /**
-     * Asynchronously fetches patients, posting a {@link DataFetchedEvent}&lt;{@link Patient}&gt;
-     * on {@code bus} when complete.
+     * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
+     * {@link AppPatient}s on the specified event bus when complete.
      */
     public void fetchPatients(CrudEventBus bus) {
         bus.register(mCrudEventBusErrorSubscriber);
 
         // TODO(dxchen): Asynchronously fetch patients.
+    }
+
+    /**
+     * Asynchronously fetches a single patient by UUID, posting a {@link SingleItemFetchedEvent}
+     * with the {@link AppPatient} on the specified event bus when complete.
+     */
+    public void fetchSinglePatient(CrudEventBus bus, String uuid) {
+        new FetchSingleAsyncTask<AppPatient>(
+                mContentResolver, new UuidFilter(), uuid, mConverters.mPatient, bus);
+    }
+
+    /**
+     * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
+     * {@link AppUser}s on the specified event bus when complete.
+     */
+    public void fetchUsers(CrudEventBus bus) {
+        // Register for error events so that we can close cursors if we need to.
+        bus.register(mCrudEventBusErrorSubscriber);
+
+        // TODO(dxchen): Asynchronously fetch users.
     }
 
     /**
@@ -42,19 +75,67 @@ public class AppModel {
          * Handles {@link NoSubscriberEvent}s.
          */
         public void onEvent(NoSubscriberEvent event) {
-            if (event.originalEvent instanceof DataFetchedEvent<?>) {
+            if (event.originalEvent instanceof TypedCursorFetchedEvent<?>) {
                 // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
                 // the event won't be managed by anyone else; therefore, we close it ourselves.
-                ((DataFetchedEvent<?>) event.originalEvent).mCursor.close();
+                ((TypedCursorFetchedEvent<?>) event.originalEvent).mCursor.close();
             }
         }
     }
 
-    private static class Patient extends ModelTypeBase {}
+    /**
+     * An {@link AsyncTask} that fetches a single item from the data store.
+     */
+    private static class FetchSingleAsyncTask<T extends AppTypeBase>
+            extends AsyncTask<Void, Void, Object> {
 
-    // TODO(dxchen): Move to events package.
-    private static class DataFetchedEvent<T extends ModelTypeBase> {
+        private final ContentResolver mContentResolver;
+        private final SimpleSelectionFilter mFilter;
+        private final String mConstraint;
+        private final AppTypeConverter<T> mConverter;
+        private final CrudEventBus mBus;
 
-        public TypedCursor<T> mCursor;
+        public FetchSingleAsyncTask(
+                ContentResolver contentResolver,
+                SimpleSelectionFilter filter,
+                String constraint,
+                AppTypeConverter<T> converter,
+                CrudEventBus bus) {
+            mContentResolver = contentResolver;
+            mFilter = filter;
+            mConstraint = constraint;
+            mConverter = converter;
+            mBus = bus;
+        }
+
+        @Override
+        protected Object doInBackground(Void... voids) {
+            // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
+            // different types of queries.
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(
+                        PatientProviderContract.CONTENT_URI,
+                        PatientProjection.getProjectionColumns(),
+                        mFilter.getSelectionString(),
+                        mFilter.getSelectionArgs(mConstraint),
+                        null);
+
+                if (cursor == null) {
+                    return new SingleItemFetchFailedEvent();
+                }
+
+                return new SingleItemFetchedEvent<>(mConverter.fromCursor(cursor));
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            mBus.post(result);
+        }
     }
 }

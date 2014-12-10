@@ -1,6 +1,7 @@
 package org.msf.records;
 
 import android.app.Application;
+import android.content.ContentResolver;
 import android.content.res.Resources;
 
 import org.msf.records.net.NetModule;
@@ -54,6 +55,10 @@ public final class AppModule {
 
     @Provides @Singleton Application provideApplication() {
         return mApp;
+    }
+
+    @Provides @Singleton ContentResolver provideContentResolver(Application app) {
+        return app.getContentResolver();
     }
 
     @Provides @Singleton Resources provideResources(Application app) {

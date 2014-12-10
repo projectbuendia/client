@@ -4,10 +4,12 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.util.SparseArray;
 
+import org.msf.records.data.app.converters.AppTypeConverter;
+
 import java.util.Iterator;
 
 /**
- * A {@link TypedCursor} that's backed by a {@link ModelConverter} and a {@link Cursor}.
+ * A {@link TypedCursor} that's backed by a {@link AppTypeConverter} and a {@link Cursor}.
  *
  * <p>This data structure is NOT thread-safe. It should only be accessed from one thread, generally
  * the main thread. Furthermore, only one {@link Iterator} should be created on it at a time.
@@ -17,7 +19,7 @@ import java.util.Iterator;
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
  * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedConvertedCursor<T extends ModelTypeBase, U extends ModelConverter<T>>
+class TypedConvertedCursor<T extends AppTypeBase, U extends AppTypeConverter<T>>
         extends TypedCursor<T> {
 
     private final U mConverter;
@@ -63,7 +65,7 @@ class TypedConvertedCursor<T extends ModelTypeBase, U extends ModelConverter<T>>
                 return null;
             }
 
-            convertedItem = mConverter.convert(mCursor);
+            convertedItem = mConverter.fromCursor(mCursor);
             mCursor.moveToPosition(originalPosition);
 
             mConvertedItems.put(position, convertedItem);
@@ -109,7 +111,7 @@ class TypedConvertedCursor<T extends ModelTypeBase, U extends ModelConverter<T>>
             int position = mCursor.getPosition();
             T convertedItem = mConvertedItems.get(position);
             if (convertedItem == null) {
-                convertedItem = mConverter.convert(mCursor);
+                convertedItem = mConverter.fromCursor(mCursor);
             }
 
             return convertedItem;
