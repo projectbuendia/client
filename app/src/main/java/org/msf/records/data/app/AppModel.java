@@ -70,6 +70,7 @@ public class AppModel {
     /**
      * A subscriber that handles error events posted to {@link CrudEventBus}es.
      */
+    @SuppressWarnings("unused") // Called by reflection from event bus.
     private static class CrudEventBusErrorSubscriber {
 
         /**

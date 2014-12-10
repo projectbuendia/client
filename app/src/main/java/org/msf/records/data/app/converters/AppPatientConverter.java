@@ -4,7 +4,6 @@ import android.database.Cursor;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.joda.time.Period;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
 
