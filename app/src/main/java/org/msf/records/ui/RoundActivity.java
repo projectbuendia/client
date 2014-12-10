@@ -22,7 +22,7 @@ public class RoundActivity extends PatientSearchActivity {
 
     private int mLocationPatientCount;
 
-    private SingleLocationPatientListFragment mFragment;
+    private RoundFragment mFragment;
     private SimpleSelectionFilter mFilter;
 
     public static final String LOCATION_NAME_KEY = "location_name";
@@ -60,7 +60,7 @@ public class RoundActivity extends PatientSearchActivity {
         inflater.inflate(R.menu.main, menu);
 
         // TODO(akalachman): Move this back to onCreate when I figure out why it needs to be here.
-        mFragment = (SingleLocationPatientListFragment)getSupportFragmentManager()
+        mFragment = (RoundFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.round_patient_list);
         mFragment.filterBy(mFilter);
 

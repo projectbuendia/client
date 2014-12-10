@@ -1,7 +1,7 @@
 package org.msf.records.utils;
 
 import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.UserLoginActivity;
+import org.msf.records.ui.userlogin.UserLoginActivity;
 
 import javax.inject.Singleton;
 

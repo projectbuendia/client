@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.tentselection;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import android.widget.ArrayAdapter;
 /**
  * Created by akalachman on 11/30/14.
  */
-public class TentListAdapter extends ArrayAdapter<LocationSubtree> {
+final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
     private final Context context;
 
     public TentListAdapter(Context context, List<LocationSubtree> values) {

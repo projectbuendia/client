@@ -1,6 +1,5 @@
 package org.msf.records.ui;
 
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
@@ -22,10 +21,8 @@ import com.google.common.base.Charsets;
 
 import org.msf.records.App;
 
-
 /**
  * A simple {@link Fragment} subclass.
- *
  */
 public abstract class ProgressFragment extends Fragment implements  Response.ErrorListener {
 
