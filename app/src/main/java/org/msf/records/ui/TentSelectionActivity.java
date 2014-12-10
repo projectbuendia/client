@@ -4,6 +4,7 @@ import org.msf.records.R;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
+import org.msf.records.utils.EventBusWrapper;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,7 +28,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         mController = new TentSelectionController(
         		new LocationManager(),
         		new MyUi(),
-        		EventBus.getDefault());
+        		new EventBusWrapper(EventBus.getDefault()));
         
         setContentView(R.layout.activity_tent_selection);
         if (savedInstanceState == null) {

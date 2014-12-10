@@ -226,7 +226,7 @@ public class RpcToDb {
                     Log.i(TAG, "Scheduling location names update: " + existingNamesUri);
                     batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
                     syncResult.stats.numDeletes++;
-                    for (String locale : location.names.getLocales()) {
+                    for (String locale : location.names.keySet()) {
                         batch.add(ContentProviderOperation.newInsert(existingNamesUri)
                                 .withValue(
                                         LocationProviderContract.LocationColumns.LOCATION_UUID, id)
@@ -234,7 +234,7 @@ public class RpcToDb {
                                         LocationProviderContract.LocationColumns.LOCALE, locale)
                                 .withValue(
                                         LocationProviderContract.LocationColumns.NAME,
-                                        location.names.getTranslationForLocale(locale))
+                                        location.names.get(locale))
                                 .build());
                         syncResult.stats.numInserts++;
                     }
@@ -262,19 +262,21 @@ public class RpcToDb {
                     .build());
             syncResult.stats.numInserts++;
 
-            for (String locale : location.names.getLocales()) {
-                Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                        String.valueOf(location.uuid)).build();
-                batch.add(ContentProviderOperation.newInsert(existingNamesUri)
-                        .withValue(
-                                LocationProviderContract.LocationColumns.LOCATION_UUID, location.uuid)
-                        .withValue(
-                                LocationProviderContract.LocationColumns.LOCALE, locale)
-                        .withValue(
-                                LocationProviderContract.LocationColumns.NAME,
-                                location.names.getTranslationForLocale(locale))
-                        .build());
-                syncResult.stats.numInserts++;
+            if (location.names != null) {
+	            for (String locale : location.names.keySet()) {
+	                Uri existingNamesUri = namesUri.buildUpon().appendPath(
+	                        String.valueOf(location.uuid)).build();
+	                batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+	                        .withValue(
+	                                LocationProviderContract.LocationColumns.LOCATION_UUID, location.uuid)
+	                        .withValue(
+	                                LocationProviderContract.LocationColumns.LOCALE, locale)
+	                        .withValue(
+	                                LocationProviderContract.LocationColumns.NAME,
+	                                location.names.get(locale))
+	                        .build());
+	                syncResult.stats.numInserts++;
+	            }
             }
         }
 
