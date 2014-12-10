@@ -1,20 +1,5 @@
 package org.msf.records.ui;
 
-import android.app.Activity;
-import android.database.Cursor;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ExpandableListView;
-import android.widget.Filter;
-import android.widget.ListView;
-import android.widget.Toast;
-
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
@@ -35,6 +20,20 @@ import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.sync.SyncManager;
 
+import android.app.Activity;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ExpandableListView;
+import android.widget.Filter;
+import android.widget.ListView;
+import android.widget.Toast;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -82,7 +81,7 @@ public class PatientListFragment extends ProgressFragment implements
     private FilterQueryProviderFactory mFactory =
             new FilterQueryProviderFactory().setUri(
                     PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS)
-            .setSortClause(LocationTree.getLocationSortClause(
+            .setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
                     PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
 
 
@@ -91,15 +90,15 @@ public class PatientListFragment extends ProgressFragment implements
     String mFilterQueryTerm = "";
 
     SimpleSelectionFilter mFilter;
-    private static LocationTree mRoot = null;
+    private LocationTree mLocationTree;
 
     public void filterBy(SimpleSelectionFilter filter) {
         // Tack on a location filter to the filter to show only known locations.
-        if (mRoot == null || mRoot.getLocation() == null) {
+        if (mLocationTree == null || mLocationTree.getRoot().getLocation() == null) {
             mFilter = filter;
         } else {
             // Tack on a location filter to the filter to show only known locations.
-            mFilter = new FilterGroup(new LocationUuidFilter(mRoot.getLocation().uuid), filter);
+            mFilter = new FilterGroup(new LocationUuidFilter(mLocationTree.getRoot()), filter);
         }
 
         mPatientAdapter.setSelectionFilter(mFilter);
@@ -171,7 +170,7 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     public synchronized void onEvent(LocationsLoadedEvent event) {
-        mRoot = event.mLocationTree;
+    	mLocationTree = event.mLocationTree;
     }
 
     public synchronized void onEvent(LocationsLoadFailedEvent event) {

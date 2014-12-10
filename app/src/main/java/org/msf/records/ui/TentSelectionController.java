@@ -1,6 +1,7 @@
 package org.msf.records.ui;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -10,6 +11,7 @@ import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
 
 import android.util.Log;
@@ -23,12 +25,12 @@ final class TentSelectionController {
 	public interface Ui {
 		void switchToTentSelectionScreen();
 		void switchToPatientListScreen();
-		void launchActivityForLocation(LocationTree location);
+		void launchActivityForLocation(LocationSubtree location);
 		void showErrorMessage(int stringResourceId);
 	}
 	
 	public interface TentFragmentUi {
-		void setTents(LocationTree[] tents);
+		void setTents(List<LocationSubtree> tents);
 		void setPatientCount(int patientCount);
 		void setTriagePatientCount(int patientCount);
 		void setDischargedPatientCount(int dischargedPatientCount);
@@ -43,8 +45,8 @@ final class TentSelectionController {
 	
 	private boolean mLoadedLocationTree;
 	@Nullable private LocationTree mLocationTree;
-	@Nullable private LocationTree mTriageZone;
-	@Nullable private LocationTree mDischargedZone;
+	@Nullable private LocationSubtree mTriageZone;
+	@Nullable private LocationSubtree mDischargedZone;
 
 	public TentSelectionController(
 			LocationManager locationManager,
@@ -85,10 +87,12 @@ final class TentSelectionController {
 	
 	private void populateFragmentUi(TentFragmentUi fragmentUi) {
 		fragmentUi.showSpinner(!mLoadedLocationTree);
-		fragmentUi.setTents(LocationTree.getTents(null, mLocationTree));
-    	fragmentUi.setPatientCount(mLocationTree == null ? 0 : mLocationTree.getPatientCount());
-        fragmentUi.setDischargedPatientCount(mDischargedZone == null ? 0 : mDischargedZone.getPatientCount());
-    	fragmentUi.setTriagePatientCount(mTriageZone == null ? 0 : mTriageZone.getPatientCount());
+		if (mLocationTree != null) {
+			fragmentUi.setTents(mLocationTree.getTents());
+	    	fragmentUi.setPatientCount(mLocationTree == null ? 0 : mLocationTree.getRoot().getPatientCount());
+	        fragmentUi.setDischargedPatientCount(mDischargedZone == null ? 0 : mDischargedZone.getPatientCount());
+	    	fragmentUi.setTriagePatientCount(mTriageZone == null ? 0 : mTriageZone.getPatientCount());
+		}
 	}
 	
 	public void suspend() {	
@@ -114,7 +118,7 @@ final class TentSelectionController {
 		mUi.launchActivityForLocation(mTriageZone);
 	}
 	
-	public void onTentSelected(LocationTree tent) {
+	public void onTentSelected(LocationSubtree tent) {
 		mUi.launchActivityForLocation(tent);
 	}
 	
@@ -136,7 +140,7 @@ final class TentSelectionController {
 	    		Log.d(TAG, "Loaded location tree: " + event.mLocationTree);
 	    	}
 	    	mLocationTree = event.mLocationTree;	   
-	        for (LocationTree zone : LocationTree.getZones(null, mLocationTree)) {
+	        for (LocationSubtree zone : mLocationTree.getZones()) {
 	            switch (zone.getLocation().uuid) {
 	                case Zone.TRIAGE_ZONE_UUID:
 	                    mTriageZone = zone;
