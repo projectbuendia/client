@@ -238,7 +238,7 @@
   <string name="open_url">URL öffnen</string>
   <string name="ext_file_no_data_error">Die Datei enthält keine Daten!</string>
   <string name="fs_create_media_folder_error">Das media Verzeichnis \'%s\' kann nicht angelegt werden.</string>
-  <string name="survey_loading_reading_csv_message">Lese CSV Dateien ...</string>
-  <string name="survey_saving_saving_message">Speichere auf SD-Karte...</string>
+  <string name="survey_loading_reading_csv_message">Lese CSV Dateien …</string>
+  <string name="survey_saving_saving_message">Speichere auf SD-Karte…</string>
   <string name="change_server_url">Server URL</string>
 </resources>
