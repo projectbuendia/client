@@ -18,14 +18,14 @@ import com.google.common.collect.Ordering;
 
 /**
  * Controller for {@link UserLoginActivity}.
- * 
+ *
  * <p>Don't add untestable dependencies to this class.
  */
 final class UserLoginController {
-	
+
 	private static final String TAG = UserLoginController.class.getSimpleName();
 	private static final boolean DEBUG = true;
-	
+
     public interface Ui {
     	void showAddNewUserDialog();
     	void showSettings();
@@ -33,13 +33,13 @@ final class UserLoginController {
     	void showUsers(List<User> users);
     	void showTentSelectionScreen();
     }
-    
+
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<User>();
 	private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
-	
+
     public UserLoginController(
     		UserManager userManager,
     		EventBusRegistrationInterface eventBus,
@@ -48,16 +48,16 @@ final class UserLoginController {
     	mEventBus = eventBus;
     	mUi = ui;
     }
-    
+
     public void init() {
     	mEventBus.register(mSubscriber);
     	mUserManager.loadKnownUsers();
     }
-    
+
     public void suspend() {
     	mEventBus.unregister(mSubscriber);
     }
-    
+
     /** Call when the user presses the 'add user' button. */
     public void onAddUserPressed() {
     	mUi.showAddNewUserDialog();
@@ -67,7 +67,7 @@ final class UserLoginController {
     public void onSettingPressed() {
 		mUi.showSettings();
     }
-    
+
     /** Call when the user taps to select a user. */
     public void onUserSelected(User user) {
         mUserManager.setActiveUser(user);
@@ -79,7 +79,7 @@ final class UserLoginController {
     	/** Updates the UI when the list of users is loaded. */
     	public void onEventMainThread(KnownUsersLoadedEvent event) {
     		if (DEBUG) {
-    			Log.d(TAG, "Loaded list of " + event. mKnownUsers.size() + " users ", new Throwable());
+    			Log.d(TAG, "Loaded list of " + event. mKnownUsers.size() + " users");
     		}
     		mUsersSortedByName.clear();
     		mUsersSortedByName.addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.mKnownUsers));
@@ -93,7 +93,7 @@ final class UserLoginController {
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.mAddedUser);
             mUi.showUsers(mUsersSortedByName);
         }
-        
+
         public void onEventMainThread(UserAddFailedEvent event) {
         	if (DEBUG) {
     			Log.d(TAG, "Failed to add user");
@@ -119,7 +119,7 @@ final class UserLoginController {
                 return R.string.add_user_unknown_error;
         }
     }
-    
+
     /** Given a sorted list, inserts a new element in the correct position to maintain the sorted order. */
     private static <T> void insertIntoSortedList(List<T> list, Comparator<T> comparator, T newItem) {
     	 int i;
