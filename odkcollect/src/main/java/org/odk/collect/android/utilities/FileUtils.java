@@ -48,9 +48,6 @@ import java.util.HashMap;
 public class FileUtils {
     private final static String t = "FileUtils";
 
-    // Used to validate and display valid form names.
-    public static final String VALID_FILENAME = "[ _\\-A-Za-z0-9]*.x[ht]*ml";
-
     public static final String FORMID = "formid";
     public static final String VERSION = "version"; // arbitrary string in OpenRosa 1.0
     public static final String TITLE = "title";
@@ -115,13 +112,14 @@ public class FileUtils {
             return null;
 
         } finally {
-            // Close the input stream
-            try {
-                is.close();
-            } catch (IOException e) {
-                Log.e(t, "Cannot close input stream for " + file.getName());
-                e.printStackTrace();
-                return null;
+            if (is != null) {
+                // Close the input stream
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    Log.e(t, "Cannot close input stream for " + file.getName());
+                    e.printStackTrace();
+                }
             }
         }
     }
