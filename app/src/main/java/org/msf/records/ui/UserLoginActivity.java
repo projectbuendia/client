@@ -76,7 +76,7 @@ public class UserLoginActivity extends FragmentActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                    	mController.onSettingPressed();
+                    	mController.onSettingsPressed();
                         return true;
                     }
                 }

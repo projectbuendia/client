@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.msf.records.R;
+import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
@@ -64,7 +65,7 @@ final class UserLoginController {
     }
 
     /** Call when the user presses the settings button. */
-    public void onSettingPressed() {
+    public void onSettingsPressed() {
 		mUi.showSettings();
     }
 
@@ -85,6 +86,11 @@ final class UserLoginController {
     		mUsersSortedByName.addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.mKnownUsers));
     		mUi.showUsers(mUsersSortedByName);
         }
+
+    	public void onEventMainThread(KnownUsersLoadFailedEvent event) {
+    		Log.e(TAG, "Failed to load list of users");
+    		mUi.showErrorToast(R.string.error_occured);
+    	}
 
         public void onEventMainThread(UserAddedEvent event) {
     		if (DEBUG) {
