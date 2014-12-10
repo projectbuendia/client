@@ -183,15 +183,7 @@ public final class PatientChartActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	String patientUuid = mController.getAndClearPatientUuidForRequestCode(requestCode);
-        if (patientUuid == null) {
-            Log.e(TAG, "Received unknown request code: " + requestCode);
-            return;
-        }
-
-        // This will fire a CreatePatientSucceededEvent.
-        OdkActivityLauncher.sendOdkResultToServer(
-        		PatientChartActivity.this, patientUuid, resultCode, data);
+    	mController.onXFormResult(requestCode, resultCode, data);
     }
 
     @Override
