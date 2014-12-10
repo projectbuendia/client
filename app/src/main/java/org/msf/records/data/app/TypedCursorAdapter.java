@@ -1,4 +1,4 @@
-package org.msf.records.data;
+package org.msf.records.data.app;
 
 import android.content.Context;
 import android.view.View;
@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 /**
  * A {@link BaseAdapter} backed by a {@link TypedCursor}.
  */
-public abstract class TypedCursorAdapter<T extends BaseModel> extends BaseAdapter {
+public abstract class TypedCursorAdapter<T extends ModelTypeBase> extends BaseAdapter {
 
     private final Context mContext;
     private TypedCursor<T> mTypedCursor;
@@ -31,7 +31,7 @@ public abstract class TypedCursorAdapter<T extends BaseModel> extends BaseAdapte
     /**
      * {@inheritDoc}
      *
-     * <p>The ID of an item will be the value of its {@link BaseModel#mId} field if its ID is a
+     * <p>The ID of an item will be the value of its {@link ModelTypeBase#mId} field if its ID is a
      * byte, short, int, or long; otherwise, it will be the hash of that value.
      */
     @Override

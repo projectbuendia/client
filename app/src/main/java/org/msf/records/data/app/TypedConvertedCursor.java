@@ -1,7 +1,7 @@
-package org.msf.records.data;
+package org.msf.records.data.app;
 
+import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.util.SparseArray;
 
 import java.util.Iterator;
@@ -15,9 +15,9 @@ import java.util.Iterator;
  * <p>This data structure does NOT notify anyone when the data set changes (i.e., it does not
  * provide a mechanism to access {@link Cursor#registerDataSetObserver}). This is because the
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
- * does, however, pass along data set changes
+ * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedConvertedCursor<T extends BaseModel, U extends ModelConverter<T>>
+class TypedConvertedCursor<T extends ModelTypeBase, U extends ModelConverter<T>>
         extends TypedCursor<T> {
 
     private final U mConverter;
@@ -37,14 +37,24 @@ class TypedConvertedCursor<T extends BaseModel, U extends ModelConverter<T>>
     /**
      * {@inheritDoc}
      *
-     * <p>If the backing {@link Cursor} is a database cursor, calling this method will be expensive.
+     * <p>If the backing {@link Cursor} is a database cursor, calling this method may be expensive.
      * Wherever possible, prefer to iterate.
      */
+    @Override
     public int getCount() {
+        if (mIsClosed) {
+            return 0;
+        }
+
         return mCursor.getCount();
     }
 
+    @Override
     public T get(int position) {
+        if (mIsClosed) {
+            return null;
+        }
+
         T convertedItem = mConvertedItems.get(position);
         if (convertedItem == null) {
             int originalPosition = mCursor.getPosition();
@@ -70,17 +80,18 @@ class TypedConvertedCursor<T extends BaseModel, U extends ModelConverter<T>>
     @Override
     public void close() {
         mCursor.close();
+
         mIsClosed = true;
     }
 
     @Override
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mCursor.registerDataSetObserver(observer);
+    public void registerContentObserver(ContentObserver observer) {
+        mCursor.registerContentObserver(observer);
     }
 
     @Override
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mCursor.unregisterDataSetObserver(observer);
+    public void unregisterContentObserver(ContentObserver observer) {
+        mCursor.unregisterContentObserver(observer);
     }
 
     private class LazyConverterIterator implements Iterator<T> {

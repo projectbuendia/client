@@ -7,7 +7,7 @@ import de.greenrobot.event.EventBus;
  */
 public class CrudEventBus {
 
-    private final EventBus mWrapped;
+    final EventBus mWrapped;
 
     /**
      * Creates a new {@link CrudEventBus} that wraps the specified {@link EventBus}.
