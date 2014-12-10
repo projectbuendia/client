@@ -84,6 +84,10 @@ public class AppModel {
         }
     }
 
+    // TODO(dxchen): Implement.
+    private abstract static class FetchTypedCursorAsyncTask<T extends AppTypeBase>
+            extends AsyncTask<Void, Void, Object> {}
+
     /**
      * An {@link AsyncTask} that fetches a single item from the data store.
      */
