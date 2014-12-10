@@ -350,7 +350,8 @@ public class EncryptionUtils {
 				formCursor.moveToFirst();
 			}
 
-			formId = formCursor.getString(formCursor.getColumnIndex(FormsColumns.JR_FORM_ID));
+            assert formCursor != null;
+            formId = formCursor.getString(formCursor.getColumnIndex(FormsColumns.JR_FORM_ID));
 			if (formId == null || formId.length() == 0) {
 				Log.e(t, "No FormId specified???");
 				return null;
