@@ -1,8 +1,7 @@
-package org.msf.records.data;
+package org.msf.records.data.app;
 
+import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
 
 /**
  * A {@link Cursor}-like data structure that exposes a type-safe interface.
@@ -11,7 +10,7 @@ import android.database.DataSetObserver;
  *
  * @param <T> the type of the array elements
  */
-public abstract class TypedCursor<T extends BaseModel> implements Iterable<T> {
+public abstract class TypedCursor<T extends ModelTypeBase> implements Iterable<T> {
 
     /**
      * Returns the number of items in this lazy array.
@@ -26,10 +25,12 @@ public abstract class TypedCursor<T extends BaseModel> implements Iterable<T> {
 
     /**
      * Closes the {@link TypedCursor} and any backing types.
+     *
+     * <p>Subsequent calls to {@code get} methods will return dummy values.
      */
     public abstract void close();
 
-    public abstract void registerDataSetObserver(DataSetObserver observer);
+    public abstract void registerContentObserver(ContentObserver observer);
 
-    public abstract void unregisterDataSetObserver(DataSetObserver observer);
+    public abstract void unregisterContentObserver(ContentObserver observer);
 }
