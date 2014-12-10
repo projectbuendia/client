@@ -331,28 +331,28 @@ public final class PatientChartActivity extends BaseActivity {
 
 	        // TODO: Don't use this singleton
 	        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
-	        if (patient.mLocationUuid != null) {
-	            LocationSubtree patientZone = locationTree.getZoneForUuid(patient.mLocationUuid);
-	            LocationSubtree patientTent = locationTree.getTentForUuid(patient.mLocationUuid);
+	        if (patient.locationUuid != null) {
+	            LocationSubtree patientZone = locationTree.getZoneForUuid(patient.locationUuid);
+	            LocationSubtree patientTent = locationTree.getTentForUuid(patient.locationUuid);
 	            zoneName = (patientZone == null) ? zoneName : patientZone.toString();
 	            tentName = (patientTent == null) ? tentName : patientTent.toString();
 	        }
 
-	        mPatientFullNameView.setText(patient.mGivenName + " " + patient.mFamilyName);
-	        mPatientIdView.setText(patient.mId);
+	        mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
+	        mPatientIdView.setText(patient.id);
 
-	        if (patient.mAge.getStandardDays() >= 2 * 365) {
-	        	mPatientAgeView.setText(patient.mAge.getStandardDays() / 365 + "-year-old ");
+	        if (patient.age.getStandardDays() >= 2 * 365) {
+	        	mPatientAgeView.setText(patient.age.getStandardDays() / 365 + "-year-old ");
 	        } else {
-	        	mPatientAgeView.setText(patient.mAge.getStandardDays() / 30 + "-month-old ");
+	        	mPatientAgeView.setText(patient.age.getStandardDays() / 30 + "-month-old ");
 
 	        }
 
-	        mPatientGenderView.setText(patient.mGender == AppPatient.GENDER_MALE ? "Male" : "Female");
+	        mPatientGenderView.setText(patient.gender == AppPatient.GENDER_MALE ? "Male" : "Female");
 	        mPatientLocationView.setText(zoneName + "/" + tentName);
 
 	        int days = Days
-	                .daysBetween(patient.mAdmissionDateTime, DateTime.now())
+	                .daysBetween(patient.admissionDateTime, DateTime.now())
 	                .getDays();
 	        switch (days) {
 	            case 0:

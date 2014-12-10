@@ -300,7 +300,7 @@ final class PatientChartController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
     	public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-    		mPatient = event.mItem;
+    		mPatient = event.item;
     		mUi.setPatient(mPatient);
     		updatePatientUI();
     	}
