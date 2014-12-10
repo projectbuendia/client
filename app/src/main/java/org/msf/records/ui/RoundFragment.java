@@ -1,11 +1,11 @@
 package org.msf.records.ui;
 
 /**
- * SingleLocationPatientListFragment is a PatientListFragment that expects to only show results
- * for a single location, which changes the UI accordingly.
+ * A {@link PatientListFragment} that expects to only show results for a single location.
+ * The UI is adjusted accordingly.
  */
-public class SingleLocationPatientListFragment extends PatientListFragment {
-    public SingleLocationPatientListFragment() {
+public class RoundFragment extends PatientListFragment {
+    public RoundFragment() {
         // Mandatory default constructor.
         super();
     }
