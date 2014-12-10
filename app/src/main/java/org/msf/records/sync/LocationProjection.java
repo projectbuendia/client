@@ -16,13 +16,13 @@ public class LocationProjection {
             LocationProviderContract.LocationColumns.NAME
     };
 
-    public static int LOCATION_LOCATION_UUID_COLUMN = 0;
-    public static int LOCATION_PARENT_UUID_COLUMN = 1;
+    public static final int LOCATION_LOCATION_UUID_COLUMN = 0;
+    public static final int LOCATION_PARENT_UUID_COLUMN = 1;
 
-    public static int LOCATION_NAME_ID_COLUMN = 0;
-    public static int LOCATION_NAME_LOCATION_UUID_COLUMN = 1;
-    public static int LOCATION_NAME_LOCALE_COLUMN = 2;
-    public static int LOCATION_NAME_NAME_COLUMN = 3;
+    public static final int LOCATION_NAME_ID_COLUMN = 0;
+    public static final int LOCATION_NAME_LOCATION_UUID_COLUMN = 1;
+    public static final int LOCATION_NAME_LOCALE_COLUMN = 2;
+    public static final int LOCATION_NAME_NAME_COLUMN = 3;
 
     public static String[] getLocationProjection() { return LOCATION_PROJECTION; }
     public static String[] getLocationNamesProjection() { return LOCATION_NAMES_PROJECTION; }
