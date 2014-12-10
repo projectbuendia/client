@@ -1,5 +1,15 @@
 package org.msf.records.location;
 
+import android.content.res.Resources;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+
+import org.msf.records.R;
+import org.msf.records.model.Zone;
+import org.msf.records.net.model.Location;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,16 +23,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.annotation.Nullable;
-
-import org.msf.records.R;
-import org.msf.records.model.Zone;
-import org.msf.records.net.model.Location;
-
-import android.content.res.Resources;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
@@ -70,7 +70,8 @@ public final class LocationTree {
 
 	    @Override
 	    public String toString() {
-	        if (mLocation == null
+            String mLocale = DEFAULT_LOCALE;
+            if (mLocation == null
 	        		|| mLocation.names == null
 	        		|| mLocation.names.get(mLocale) == null) {
 	            // This location is null, try to recover.
@@ -99,7 +100,6 @@ public final class LocationTree {
     private static final String DEFAULT_LOCALE = "en";
 
     private final Resources mResources;
-    private final String mLocale = DEFAULT_LOCALE;;
     private final Map<String, LocationSubtree> mUuidToSubtree = new HashMap<>();
     private final LocationSubtree mTreeRoot;
 
