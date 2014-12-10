@@ -68,7 +68,7 @@ android {
         applicationId "org.msf.records"
 
         minSdkVersion 19
-        targetSdkVersion 20
+        targetSdkVersion 19
 
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"

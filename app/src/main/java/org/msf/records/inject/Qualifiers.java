@@ -8,6 +8,14 @@ import javax.inject.Qualifier;
 
 public class Qualifiers {
 
+    // .events
+
+    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    public @interface CrudEventBusBuilder {}
+
+
+    // .net
+
     @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
     public @interface OpenMrsRootUrl {}
 
