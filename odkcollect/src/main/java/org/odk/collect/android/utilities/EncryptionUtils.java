@@ -306,7 +306,7 @@ public class EncryptionUtils {
 
 		Cursor formCursor = null;
 		try {
-			if (cr.getType(mUri) == InstanceColumns.CONTENT_ITEM_TYPE) {
+			if (InstanceColumns.CONTENT_ITEM_TYPE.equals(cr.getType(mUri))) {
 				// chain back to the Form record...
 				String[] selectionArgs = null;
 				String selection = null;
@@ -350,7 +350,8 @@ public class EncryptionUtils {
 				formCursor.moveToFirst();
 			}
 
-			formId = formCursor.getString(formCursor.getColumnIndex(FormsColumns.JR_FORM_ID));
+            assert formCursor != null;
+            formId = formCursor.getString(formCursor.getColumnIndex(FormsColumns.JR_FORM_ID));
 			if (formId == null || formId.length() == 0) {
 				Log.e(t, "No FormId specified???");
 				return null;

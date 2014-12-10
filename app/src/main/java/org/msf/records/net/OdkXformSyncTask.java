@@ -35,7 +35,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     private static final String TAG = "OdkXformSyncTask";
 
     @Nullable
-    private FormWrittenListener formWrittenListener;
+    private final FormWrittenListener formWrittenListener;
 
     public OdkXformSyncTask(@Nullable FormWrittenListener formWrittenListener) {
         this.formWrittenListener = formWrittenListener;
@@ -82,7 +82,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             if (!isNew) {
                 Log.i(TAG, "Using form " + formInfo.uuid + " from local cache.");
-                formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                if (formWrittenListener != null) {
+                    formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                }
                 continue;
             }
 

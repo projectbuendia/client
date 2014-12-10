@@ -1,25 +1,5 @@
 package org.msf.records.ui;
 
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
-import org.msf.records.events.location.LocationsLoadFailedEvent;
-import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.events.sync.SyncFinishedEvent;
-import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.FilterManager;
-import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.LocationUuidFilter;
-import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
-import org.msf.records.model.Location;
-import org.msf.records.net.Constants;
-import org.msf.records.sync.GenericAccountService;
-import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
-import org.msf.records.sync.SyncManager;
-
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -34,6 +14,26 @@ import android.widget.ExpandableListView;
 import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.events.location.LocationsLoadFailedEvent;
+import org.msf.records.events.location.LocationsLoadedEvent;
+import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.filter.FilterGroup;
+import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.FilterQueryProviderFactory;
+import org.msf.records.filter.LocationUuidFilter;
+import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
+import org.msf.records.net.Constants;
+import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.SyncManager;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -47,7 +47,6 @@ public class PatientListFragment extends ProgressFragment implements
         SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
-    private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -97,8 +96,7 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mPatientAdapter.setSelectionFilter(mFilter);
-        mPatientAdapter.setFilterQueryProvider(
-                mFactory.getFilterQueryProvider(getActivity(), filter));
+        mPatientAdapter.setFilterQueryProvider(mFactory.getFilterQueryProvider(filter));
         loadSearchResults();
     }
 
@@ -129,21 +127,21 @@ public class PatientListFragment extends ProgressFragment implements
      * fragment (e.g. upon screen orientation changes).
      */
     public PatientListFragment() {
-        mFactory = new FilterQueryProviderFactory().setUri(
-                        PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
-        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
-        if (locationTree != null) {
-        	mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
-        } else {
-        	Log.e(TAG, "Location tree does not exist yet");
-        }
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
+        		PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+		LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+		if (locationTree != null) {
+			mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
+		                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
+		} else {
+			Log.e(TAG, "Location tree does not exist yet");
+		}
         setContentView(R.layout.fragment_patient_list);
     }
 
@@ -253,7 +251,6 @@ public class PatientListFragment extends ProgressFragment implements
                     FragmentManager fm = getChildFragmentManager();
                     ListDialogFragment dialogListFragment = new ListDialogFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putParcelableArray(ITEM_LIST_KEY, Location.getLocation());
                     dialogListFragment.setArguments(bundle);
                     dialogListFragment.show(fm, null);
                     break;
@@ -324,7 +321,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return mFactory.getCursorLoader(getActivity(), mFilter, "");
+        return mFactory.getCursorLoader(mFilter, "");
     }
 
     @Override

@@ -304,18 +304,15 @@ public class DrawActivity extends Activity {
 			// dimensions will not be known.
 			Log.e(t,"view has zero width or zero height");
 		} else {
-			FileOutputStream fos;
-			fos = new FileOutputStream(f);
+			FileOutputStream fos = new FileOutputStream(f);
 			Bitmap bitmap = Bitmap.createBitmap(drawView.getWidth(),
 					drawView.getHeight(), Bitmap.Config.ARGB_8888);
 			Canvas canvas = new Canvas(bitmap);
 			drawView.draw(canvas);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 70, fos);
 			try {
-				if ( fos != null ) {
-					fos.flush();
-					fos.close();
-				}
+                fos.flush();
+                fos.close();
 			} catch ( Exception e) {
 			}
 		}
