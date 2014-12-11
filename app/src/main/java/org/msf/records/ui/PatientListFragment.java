@@ -15,6 +15,8 @@ import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
@@ -58,6 +60,8 @@ public class PatientListFragment extends ProgressFragment implements
      * The id to identify which Cursor is returned
      */
     private static final int LOADER_LIST_ID = 0;
+
+    @Inject LocationManager mLocationManager;
 
     /**
      * The fragment's current callback object, which is notified of list item
@@ -133,6 +137,7 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
         mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
         		PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
 		LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
@@ -150,7 +155,7 @@ public class PatientListFragment extends ProgressFragment implements
         super.onResume();
 
         EventBus.getDefault().register(this);
-        new LocationManager().loadLocations();
+        mLocationManager.loadLocations();
     }
 
     @Override
