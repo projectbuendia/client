@@ -30,4 +30,9 @@ public class NetModule {
             @Qualifiers.OpenMrsPassword StringPreference openMrsPassword) {
         return new OpenMrsConnectionDetails(volley, openMrsRootUrl, openMrsUser, openMrsPassword);
     }
+
+    @Provides @Singleton OpenMrsServer provideOpenMrsServer(
+            OpenMrsConnectionDetails connectionDetails) {
+        return new OpenMrsServer(connectionDetails);
+    }
 }
