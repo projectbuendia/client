@@ -3,18 +3,18 @@ package org.msf.records.ui.tentselection;
 import static org.mockito.Mockito.verify;
 
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.Suppress;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
+import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 import org.msf.records.ui.FakeEventBus;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 
 /**
  * Tests for {@link TentSelectionController}.
@@ -58,22 +58,35 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 		assertEquals(0, mFakeEventBus.countRegisteredReceivers());
 	}
 
-	@Suppress // Not passing yet
 	public void testLoadLocations_HidesSpinner() {
-		// GIVEN an initialized controller
+		// GIVEN an initialized controller with a fragment attached
 		mController.init();
+		mController.attachFragmentUi(mMockFragmentUi);
 		// WHEN the location tree is loaded
 		LocationTree locationTree = newLocationTree();
 		mFakeEventBus.post(new LocationsLoadedEvent(locationTree));
-		// THEN the controller hides the proress spinner
+		// THEN the controller hides the progress spinner
 		verify(mMockFragmentUi).showSpinner(false);
 	}
 
 	private LocationTree newLocationTree() {
-		return new LocationTree(
-				getContext().getResources(),
-				ImmutableMultimap.<String, Location>of(null, new Location()),
-				ImmutableMap.<String, Integer>of());
+		ImmutableList<Location> locations = ImmutableList.of(
+				newLocation("root", "", null),
+				newLocation("Probable Zone", Zone.PROBABLE_ZONE_UUID, ""));
+		ImmutableMap<String, Integer> patientCountByUuid = ImmutableMap.of(
+				Zone.PROBABLE_ZONE_UUID, 3);
+		// THEN it should succeed
+		return  new LocationTree(
+		getContext().getResources(),
+		locations,
+		patientCountByUuid);
 	}
 
+	private Location newLocation(String name, String uuid, String parentUuid) {
+		Location location = new Location();
+		location.names = ImmutableMap.of("en", name);
+		location.uuid = uuid;
+		location.parent_uuid = parentUuid;
+		return location;
+	}
 }

@@ -2,16 +2,6 @@ package org.msf.records.location;
 
 import android.content.res.Resources;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-
-import org.msf.records.R;
-import org.msf.records.model.Zone;
-import org.msf.records.net.model.Location;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +15,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.annotation.Nullable;
+
+import org.msf.records.R;
+import org.msf.records.model.Zone;
+import org.msf.records.net.model.Location;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
@@ -111,16 +111,25 @@ public final class LocationTree {
      */
     public LocationTree(
     		Resources resources,
-    		Multimap<String, Location> locationByParentUuid,
+    		Collection<Location> locations,
     	    Map<String, Integer> patientCountByUuid) {
 
     	mResources = resources;
-    	// Start the tree from the single known root. Forests are NOT supported.
-    	Location root = Iterables.getOnlyElement(locationByParentUuid.get(null));
+    	Location root = null;
+    	Multimap<String, Location> locationByParentUuid = ArrayListMultimap.create();
+    	for (Location location : locations) {
+    		if (location.parent_uuid == null) {
+    			Preconditions.checkArgument(root == null, "Should only have one root (parent_uuid null) element");
+    			root = location;
+    		}
+			locationByParentUuid.put(location.parent_uuid, location);
+    	}
+    	Preconditions.checkArgument(root != null, "Should have a root (parent_uuid null) element");
 
     	mTreeRoot = new LocationSubtree();
     	mTreeRoot.mLocation = root;
     	mTreeRoot.mPatientCount = getOrZeroIfMissing(patientCountByUuid, root.uuid);
+
 
         // Recursively add children to the tree.
         addChildren(mTreeRoot, locationByParentUuid, patientCountByUuid);
@@ -138,8 +147,6 @@ public final class LocationTree {
     		populateMap(child, uuidToSubtree);
     	}
     }
-
-
 
     @Nullable private LocationSubtree getParent(LocationSubtree subtree) {
     	return mUuidToSubtree.get(subtree.mLocation.parent_uuid);
