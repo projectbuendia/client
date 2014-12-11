@@ -17,11 +17,6 @@ public final class EventBusWrapper implements EventBusRegistrationInterface {
 	}
 
 	@Override
-	public void registerSticky(Object receiver) {
-		mEventBus.registerSticky(receiver);
-	}
-
-	@Override
 	public void unregister(Object receiver) {
 		mEventBus.unregister(receiver);
 	}

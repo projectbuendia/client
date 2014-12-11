@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
+import org.msf.records.events.DefaultCrudEventBus;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;

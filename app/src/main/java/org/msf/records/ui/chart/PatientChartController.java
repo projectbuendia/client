@@ -26,7 +26,6 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.utils.EventBusRegistrationInterface;
 import org.odk.collect.android.model.PrepopulatableFields;
 
 import com.android.volley.Response;
@@ -86,7 +85,6 @@ final class PatientChartController {
     }
 
     private final OpenMrsChartServer mServer;
-    private final EventBusRegistrationInterface mEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
@@ -112,7 +110,6 @@ final class PatientChartController {
     public PatientChartController(
     		AppModel appModel,
     		OpenMrsChartServer server,
-    		EventBusRegistrationInterface eventBus,
     		CrudEventBus crudEventBus,
     		Ui ui,
     		OdkResultSender odkResultSender,
@@ -120,7 +117,6 @@ final class PatientChartController {
     		@Nullable Bundle savedState) {
     	mAppModel = appModel;
     	mServer = server;
-    	mEventBus = eventBus;
     	mCrudEventBus = crudEventBus;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
@@ -139,7 +135,7 @@ final class PatientChartController {
     	return bundle;
     }
 
-    /** Sets the current patient. */
+    /** Sets the current patient. This should be called before init. */
     public void setPatient(
     		String patientUuid,
     		@Nullable String patientName,
@@ -154,8 +150,7 @@ final class PatientChartController {
     }
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
-    public void init() {
-    	mEventBus.registerSticky(mEventBusSubscriber);
+    public void init() {;
     	mCrudEventBus.register(mEventBusSubscriber);
     	prodServer();
     	mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
@@ -163,7 +158,6 @@ final class PatientChartController {
 
 	/** Releases any resources used by the controller. */
     public void suspend() {
-    	mEventBus.unregister(mEventBusSubscriber);
     	mCrudEventBus.unregister(mEventBusSubscriber);
     }
 
