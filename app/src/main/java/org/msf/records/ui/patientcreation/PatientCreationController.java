@@ -1,6 +1,7 @@
 package org.msf.records.ui.patientcreation;
 
 import android.os.SystemClock;
+import android.text.Editable;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -34,7 +35,25 @@ final class PatientCreationController {
 	private static final String TAG = PatientCreationController.class.getSimpleName();
 	private static final boolean DEBUG = true;
 
+    static final int AGE_UNKNOWN = 0;
+    static final int AGE_YEARS = 1;
+    static final int AGE_MONTHS = 2;
+
+    static final int SEX_UNKNOWN = 0;
+    static final int SEX_MALE = 1;
+    static final int SEX_FEMALE = 2;
+
     public interface Ui {
+
+        static final int FIELD_UNKNOWN = 0;
+        static final int FIELD_ID = 1;
+        static final int FIELD_GIVEN_NAME = 2;
+        static final int FIELD_FAMILY_NAME = 3;
+        static final int FIELD_AGE = 4;
+        static final int FIELD_AGE_UNITS = 5;
+        static final int FIELD_SEX = 6;
+
+        void onValidationError(int field, String message);
 
         void onCreateFailed();
         void onCreateSucceeded();
@@ -52,7 +71,19 @@ final class PatientCreationController {
         mAddPatientListener = new AddPatientListener();
     }
 
-    public void createPatient() {
+    public void createPatient(
+            CharSequence id,
+            CharSequence givenName,
+            CharSequence familyName,
+            CharSequence age,
+            int ageUnits,
+            int sex) {
+
+        // Validate the input.
+        if (id == null || id.equals("")) {
+            mUi.onValidationError();
+        }
+
         mServer.addPatient(null, mAddPatientListener, mAddPatientListener, TAG);
     }
 
