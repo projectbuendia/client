@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 
 import org.msf.records.R;
 import org.msf.records.inject.Qualifiers;
-import org.msf.records.net.Constants;
 
 import javax.inject.Singleton;
 

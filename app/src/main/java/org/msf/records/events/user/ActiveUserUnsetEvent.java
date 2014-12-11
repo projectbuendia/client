@@ -29,12 +29,12 @@ public class ActiveUserUnsetEvent {
      * deleted from the server, this object will no longer be known to
      * {@link org.msf.records.user.UserManager}.
      */
-    public final User mPreviousActiveUser;
+    public final User previousActiveUser;
 
     /**
      * The reason why the active user was unset.
      */
-    public final int mReason;
+    public final int reason;
 
     /**
      * Creates a new {@link ActiveUserUnsetEvent}.
@@ -43,7 +43,7 @@ public class ActiveUserUnsetEvent {
      * @param reason the reason why the active user was unset
      */
     public ActiveUserUnsetEvent(User previousActiveUser, int reason) {
-        mPreviousActiveUser = previousActiveUser;
-        mReason = reason;
+        this.previousActiveUser = previousActiveUser;
+        this.reason = reason;
     }
 }

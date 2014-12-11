@@ -8,6 +8,10 @@ import java.util.Map;
  */
 public class Location {
 
+	// Note: this class is constructed by reflection by Gson.
+	// TODO: Network model classes should only be used when talking to the network.
+	// We currently use them throughout the app.
+
     public String uuid;
     public String parent_uuid;
 

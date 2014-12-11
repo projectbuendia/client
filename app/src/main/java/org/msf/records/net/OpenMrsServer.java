@@ -1,17 +1,14 @@
 package org.msf.records.net;
 
-import android.support.annotation.Nullable;
-import android.util.Log;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
@@ -20,9 +17,13 @@ import org.msf.records.net.model.PatientAge;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.google.gson.Gson;
 
 /**
  * Implementation of Server RPCs that will talk to OpenMRS.
@@ -214,10 +215,11 @@ public class OpenMrsServer implements Server {
         Patient patient = gson.fromJson(object.toString(),
                 Patient.class);
 
+        // TODO(rjlothian): This shouldn't be done here.
         if (patient.assigned_location == null) {
-            LocationTree location = LocationTree.getLocationForUuid(Zone.TRIAGE_ZONE_UUID);
-            if (location != null) {
-                patient.assigned_location = location.getLocation();
+            LocationSubtree subtree = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
+            if (subtree != null) {
+                patient.assigned_location = subtree.getLocation();
             }
         }
 

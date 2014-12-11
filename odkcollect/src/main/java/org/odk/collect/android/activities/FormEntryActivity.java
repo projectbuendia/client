@@ -81,7 +81,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Objects;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -1297,15 +1296,10 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
-				odkv = new ODKView(
-                        this,
-                        formController.getQuestionPrompts(),
-						groups,
-                        advancingPage,
-                        fields);
+				odkv = new ODKView(this, prompts, groups, advancingPage, fields);
                 if (fields != null
-                        && fields.mTargetGroup != null
-                        && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
+                        && fields.targetGroup != null
+                        && fields.targetGroup.equals(groups[groups.length - 1].getLongText())) {
                     mTargetView = odkv;
                 }
 				Log.i(TAG,

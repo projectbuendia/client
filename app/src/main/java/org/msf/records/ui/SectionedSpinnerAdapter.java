@@ -12,10 +12,9 @@ import android.widget.ArrayAdapter;
  * an arbitrary resource and are not clickable.
  */
 public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
-    private T[] mItems;
-    private Context mContext;
-    private int mSectionBorderResource;
-    private LayoutInflater mInflater;
+    private final T[] mItems;
+    private final int mSectionBorderResource;
+    private final LayoutInflater mInflater;
 
     private enum ViewType {
         SECTION_BORDER, LIST_ITEM
@@ -25,12 +24,11 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
             Context context, int collapsedResource, int dropDownResource,
             int sectionBorderResource, T[] items) {
         super(context, collapsedResource, items);
-        mContext = context;
         mItems = items;
         mSectionBorderResource = sectionBorderResource;
         setDropDownViewResource(dropDownResource);
 
-        mInflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     }
 

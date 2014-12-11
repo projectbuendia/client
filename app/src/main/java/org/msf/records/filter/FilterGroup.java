@@ -10,8 +10,8 @@ import java.util.List;
 public class FilterGroup implements SimpleSelectionFilter {
     private static final String DEFAULT_FILTER_NAME = "";
 
-    private FilterType mFilterType;
-    private List<SimpleSelectionFilter> mFilters;
+    private final FilterType mFilterType;
+    private final List<SimpleSelectionFilter> mFilters;
     private String mName = DEFAULT_FILTER_NAME;
 
     /**

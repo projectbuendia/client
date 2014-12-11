@@ -1,7 +1,5 @@
 package org.msf.records.model;
 
-import android.graphics.Color;
-
 import org.msf.records.R;
 
 public class Concept {

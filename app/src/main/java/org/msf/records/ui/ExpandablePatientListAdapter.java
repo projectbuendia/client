@@ -2,7 +2,6 @@ package org.msf.records.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +18,7 @@ import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
@@ -26,6 +26,8 @@ import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
 
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -37,7 +39,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
     private String mQueryFilterTerm;
     private SimpleSelectionFilter mFilter;
 
@@ -83,13 +85,19 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         sortBuilder.append(",");
         sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
 
+        // TODO: Don't use the singleton here.
+        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        @Nullable LocationSubtree tentSubtree = null;
+        if (locationTree != null) {
+        	 tentSubtree = locationTree.getLocationByUuid(tent);
+        }
+
         FilterQueryProvider queryProvider =
-                new FilterQueryProviderFactory()
+                new FilterQueryProviderFactory(mContext)
                         .setSortClause(sortBuilder.toString())
                         .getFilterQueryProvider(
-                                mContext,
                                 new FilterGroup(getSelectionFilter(),
-                                        new LocationUuidFilter(tent)));
+                                        new LocationUuidFilter(tentSubtree)));
 
         Cursor patientsCursor = null;
 
@@ -113,9 +121,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int patientCount = getChildrenCursor(cursor).getCount();
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
-        LocationTree location = LocationTree.getTentForUuid(locationUuid);
-        if (location != null) {
-            tentName = location.toString();
+        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        if (locationTree != null) {
+	        	LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
+	        if (location != null) {
+	            tentName = location.toString();
+	        }
         }
 
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
@@ -132,10 +143,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindChildView(View convertView, Context context, Cursor cursor, boolean isLastChild) {
-        ViewHolder holder = null;
-        if (convertView != null) {
-            holder = (ViewHolder) convertView.getTag();
-        }
 
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
@@ -145,8 +152,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
         int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
 
-        holder.mPatientName.setText(givenName + " " + familyName);
-        holder.mPatientId.setText(id);
 
         // Grab observations for this patient so we can determine condition and pregnant status.
         // TODO(akalachman): Get rid of this whole block as it's inefficient.
@@ -162,6 +167,12 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             }
         }
 
+        if (convertView == null) {
+            return;
+        }
+        ViewHolder holder = (ViewHolder) convertView.getTag();
+        holder.mPatientName.setText(givenName + " " + familyName);
+        holder.mPatientId.setText(id);
         holder.mPatientId.setBackgroundResource(
                 Concept.getColorResourceForGeneralCondition(condition));
 
