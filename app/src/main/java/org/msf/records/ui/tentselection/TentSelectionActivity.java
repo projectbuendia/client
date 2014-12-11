@@ -99,13 +99,17 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     private final class MyUi implements TentSelectionController.Ui {
     	@Override
 		public void switchToTentSelectionScreen() {
-            switchToFragment(new TentSelectionFragment());
+    		getSupportFragmentManager().popBackStack();
     	}
 
     	@Override
 		public void switchToPatientListScreen() {
-            switchToFragment(new PatientListFragment());
+        	getSupportFragmentManager().beginTransaction()
+    				.replace(R.id.tent_selection_container, new PatientListFragment())
+    				.addToBackStack(null)
+    				.commit();
     	}
+
     	@Override
     	public void showErrorMessage(int stringResourceId) {
     		Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
@@ -123,12 +127,5 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 					subtree.getPatientCount());
 			startActivity(roundIntent);
 		}
-    }
-
-    private void switchToFragment(Fragment newFragment) {
-    	getSupportFragmentManager().beginTransaction()
-				.replace(R.id.tent_selection_container, newFragment)
-				.addToBackStack(null)
-				.commit();
     }
 }
