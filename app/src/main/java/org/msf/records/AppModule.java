@@ -15,6 +15,7 @@ import org.msf.records.ui.PatientListActivity;
 import org.msf.records.ui.PatientSearchActivity;
 import org.msf.records.ui.RoundActivity;
 import org.msf.records.ui.chart.PatientChartActivity;
+import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
@@ -41,6 +42,7 @@ import dagger.Provides;
 
                 // TODO(dxchen): Move these into activity-specific modules.
                 // Activities
+                PatientCreationActivity.class,
                 BaseActivity.class,
                 PatientChartActivity.class,
                 PatientListActivity.class,

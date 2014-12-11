@@ -1,0 +1,202 @@
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:padding="16dp"
+    android:stretchColumns="1">
+
+    <TableRow>
+
+        <TextView
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:text="ID" />
+
+        <EditText
+            android:id="@+id/patient_creation_text_patient_id"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp" />
+
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Given Name" />
+
+        <EditText
+            android:id="@+id/patient_creation_text_patient_given_name"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp" />
+
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Family Name" />
+
+        <EditText
+            android:id="@+id/patient_creation_text_patient_family_name"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp" />
+
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Age" />
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content">
+
+                <EditText
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:visibility="invisible"
+                    android:text="000"/>
+
+                <EditText
+                    android:id="@+id/patient_creation_text_age"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="3"
+                    tools:text="18" />
+
+            </FrameLayout>
+
+            <RadioGroup
+                android:id="@+id/patient_creation_radiogroup_age_units"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/patient_creation_radiogroup_age_units_years"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Years"/>
+
+                <RadioButton
+                    android:id="@+id/patient_creation_radiogroup_age_units_months"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Months"/>
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Sex" />
+
+        <RadioGroup
+            android:id="@+id/patient_creation_radiogroup_sex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/patient_creation_radiogroup_age_sex_male"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Male"/>
+
+            <RadioButton
+                android:id="@+id/patient_creation_radiogroup_age_sex_female"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Female"/>
+
+        </RadioGroup>
+
+    </TableRow>
+
+    <TableRow
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/patient_creation_button_create"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create" />
+
+    </TableRow>
+
+</TableLayout>
+
+<!--<FrameLayout-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--xmlns:tools="http://schemas.android.com/tools"-->
+    <!--android:id="@+id/tent_selection_content"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:layout_width="match_parent"-->
+    <!--tools:context="org.msf.records.ui.tentselection.TentSelectionFragment">-->
+
+    <!---->
+    <!---->
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="vertical"-->
+        <!--android:id="@+id/tent_selection_layout">-->
+        <!--<org.msf.records.widget.SubtitledButtonView-->
+            <!--android:id="@+id/tent_selection_all_patients"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:clickable="true"-->
+            <!--app:subtitledButtonTitle="ALL PATIENTS"-->
+            <!--app:subtitledButtonSubtitle="No patients"/>-->
+        <!--<org.msf.records.widget.SubtitledButtonView-->
+            <!--android:id="@+id/tent_selection_triage"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_margin="10dp"-->
+            <!--app:subtitledButtonTitle="Triage"-->
+            <!--app:subtitledButtonSubtitle="No patients"/>-->
+        <!--<GridView-->
+            <!--android:id="@+id/tent_selection_tents"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:numColumns="4"-->
+            <!--android:verticalSpacing="10dp"-->
+            <!--android:horizontalSpacing="10dp"-->
+            <!--android:stretchMode="columnWidth" />-->
+        <!--<org.msf.records.widget.SubtitledButtonView-->
+            <!--android:id="@+id/tent_selection_discharged"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_margin="10dp"-->
+            <!--app:subtitledButtonTitle="Discharged"-->
+            <!--app:subtitledButtonSubtitle="No patients"/>-->
+    <!--</LinearLayout>-->
+
+<!--</FrameLayout>-->

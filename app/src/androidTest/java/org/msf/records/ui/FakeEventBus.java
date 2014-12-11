@@ -1,9 +1,11 @@
 package org.msf.records.ui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.utils.EventBusRegistrationInterface;
 
 import com.google.common.base.Preconditions;
@@ -16,7 +18,7 @@ import de.greenrobot.event.EventBus;
  * because it calls methods on a separate thread to the test thread. This is because the
  * 'main thread' is not the same as the test thread.
  */
-public final class FakeEventBus implements EventBusRegistrationInterface {
+public final class FakeEventBus implements EventBusRegistrationInterface, CrudEventBus {
 
 	private static final String METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD = "onEventMainThread";
 	private static final Set<String> IGNORED_METHOD_NAMES = ImmutableSet.of(
@@ -45,12 +47,6 @@ public final class FakeEventBus implements EventBusRegistrationInterface {
 	}
 
 	@Override
-	public void registerSticky(Object receiver) {
-		// TODO: Implement stickiness
-		register(receiver);
-	}
-
-	@Override
 	public void unregister(Object receiver) {
 		mRegisteredReceivers.remove(receiver);
 	}
@@ -59,13 +55,20 @@ public final class FakeEventBus implements EventBusRegistrationInterface {
 		return mRegisteredReceivers.size();
 	}
 
-	public void post(Object event) throws Exception {
+	@Override
+	public void post(Object event) {
 		for (Object receiver : mRegisteredReceivers) {
 			for (Method method : receiver.getClass().getMethods()) {
 				if (method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD)) {
 					Class<?> parameter = method.getParameterTypes()[0];
 					if (parameter.isInstance(event)) {
-						method.invoke(receiver, event);
+						try {
+							method.invoke(receiver, event);
+						} catch (InvocationTargetException e) {
+							throw new RuntimeException(e.getCause());
+						} catch (IllegalAccessException | IllegalArgumentException e) {
+							throw new RuntimeException(e);
+						}
 					}
 				}
 			}

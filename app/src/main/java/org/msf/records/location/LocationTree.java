@@ -2,14 +2,6 @@ package org.msf.records.location;
 
 import android.content.res.Resources;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
-
-import org.msf.records.R;
-import org.msf.records.model.Zone;
-import org.msf.records.net.model.Location;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +15,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.annotation.Nullable;
+
+import org.msf.records.R;
+import org.msf.records.model.Zone;
+import org.msf.records.net.model.Location;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
@@ -109,16 +111,25 @@ public final class LocationTree {
      */
     public LocationTree(
     		Resources resources,
-    		Multimap<String, Location> locationByParentUuid,
+    		Collection<Location> locations,
     	    Map<String, Integer> patientCountByUuid) {
 
     	mResources = resources;
-    	// Start the tree from the single known root. Forests are NOT supported.
-    	Location root = Iterables.getOnlyElement(locationByParentUuid.get(null));
+    	Location root = null;
+    	Multimap<String, Location> locationByParentUuid = ArrayListMultimap.create();
+    	for (Location location : locations) {
+    		if (location.parent_uuid == null) {
+    			Preconditions.checkArgument(root == null, "Should only have one root (parent_uuid null) element");
+    			root = location;
+    		}
+			locationByParentUuid.put(location.parent_uuid, location);
+    	}
+    	Preconditions.checkArgument(root != null, "Should have a root (parent_uuid null) element");
 
     	mTreeRoot = new LocationSubtree();
     	mTreeRoot.mLocation = root;
     	mTreeRoot.mPatientCount = getOrZeroIfMissing(patientCountByUuid, root.uuid);
+
 
         // Recursively add children to the tree.
         addChildren(mTreeRoot, locationByParentUuid, patientCountByUuid);
@@ -136,8 +147,6 @@ public final class LocationTree {
     		populateMap(child, uuidToSubtree);
     	}
     }
-
-
 
     @Nullable private LocationSubtree getParent(LocationSubtree subtree) {
     	return mUuidToSubtree.get(subtree.mLocation.parent_uuid);
@@ -200,13 +209,20 @@ public final class LocationTree {
     	return null;
 	}
 
+    /**
+     * Returns the whole tree as a map from parent UUID to subtree.
+     */
     public TreeMap<String, LocationSubtree> getChildren() {
         TreeMap<String, LocationSubtree> result = new TreeMap<>();
         result.putAll(mUuidToSubtree);
         return result;
     }
 
-    public ImmutableList<LocationSubtree> getLocationsForDepth(int depth) {
+    /**
+     * Returns a list of all locations with the given depth in the tree, ordered by the
+     * standard location ordering.
+     */
+    public List<LocationSubtree> getLocationsForDepth(int depth) {
         ImmutableList<LocationSubtree> currentLevel = ImmutableList.of(mTreeRoot);
         for (int currentDepth = 0; currentDepth < depth; currentDepth++) {
         	ImmutableList.Builder<LocationSubtree> newLevel = ImmutableList.builder();
@@ -215,13 +231,19 @@ public final class LocationTree {
         	}
         	currentLevel = newLevel.build();
         }
-        return currentLevel;
+        return Ordering.from(new SubtreeComparator()).sortedCopy(currentLevel);
     }
 
+    /**
+     * Returns a list of the tents in the tree, ordered by the standard location ordering.
+     */
     public List<LocationSubtree> getTents() {
         return getLocationsForDepth(TENT_DEPTH);
     }
 
+    /**
+     * Returns a list of the zones in the tree, ordered by {@link Zone#compareTo(Location, Location)}.
+     */
     public List<LocationSubtree> getZones() {
         return getLocationsForDepth(ZONE_DEPTH);
     }
@@ -275,7 +297,6 @@ public final class LocationTree {
 		return result;
     }
 
-
     private final class SubtreeComparator implements Comparator<LocationSubtree> {
     	@Override
     	public int compare(LocationSubtree lhs, LocationSubtree rhs) {
@@ -298,7 +319,19 @@ public final class LocationTree {
 	    			if (i == ZONE_DEPTH) {
 	    				compare = Zone.compareTo(subtreeA.getLocation(), subtreeB.getLocation());
 	    			} else {
-	    				compare = subtreeA.mLocation.uuid.compareTo(subtreeB.mLocation.uuid);
+	    				// TODO: Tents are usually called something like "Probable 5". The normal
+	    				// string comparison works fine when the number is < 10, but it puts
+	    				// "Probable 10" before "Probable 5". Let's modify this to handle larger
+	    				// tent numbers correctly.
+	    				String nameA = subtreeA.mLocation.names.get(DEFAULT_LOCALE);
+	    				if (nameA == null) {
+	    					nameA = "";
+	    				}
+	    				String nameB = subtreeB.mLocation.names.get(DEFAULT_LOCALE);
+	    				if (nameB == null) {
+	    					nameB = "";
+	    				}
+	    				compare = nameA.compareTo(nameB);
 	    			}
 	    			if (compare != 0) {
 	    				return compare;
@@ -333,6 +366,9 @@ public final class LocationTree {
         return sb.toString();
     }
 
+    /**
+     * Returns {@code map.get(key)} or 0 if no entry for that key exists.
+     */
     private static <T> int getOrZeroIfMissing(Map<T, Integer> map, T key) {
     	if (map.containsKey(key)) {
     		return map.get(key);
