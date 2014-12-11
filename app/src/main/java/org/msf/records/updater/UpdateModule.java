@@ -2,6 +2,8 @@ package org.msf.records.updater;
 
 import android.app.Application;
 
+import org.msf.records.App;
+import org.msf.records.net.VolleySingleton;
 import org.msf.records.ui.PatientSearchActivity;
 
 import javax.inject.Singleton;
@@ -22,7 +24,7 @@ import dagger.Provides;
 public class UpdateModule {
 
     @Provides @Singleton UpdateServer provideUpdateServer() {
-        return new UpdateServer(null /*rootUrl*/);
+        return new UpdateServer(VolleySingleton.getInstance(App.getInstance()), null /*rootUrl*/);
     }
 
     @Provides @Singleton UpdateManager provideUpdateManager(

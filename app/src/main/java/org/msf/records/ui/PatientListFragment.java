@@ -62,6 +62,7 @@ public class PatientListFragment extends ProgressFragment implements
     private static final int LOADER_LIST_ID = 0;
 
     @Inject LocationManager mLocationManager;
+    @Inject SyncManager mSyncManager;
 
     /**
      * The fragment's current callback object, which is notified of list item
@@ -171,7 +172,7 @@ public class PatientListFragment extends ProgressFragment implements
             Log.d(TAG, "onRefresh");
 
             //triggers app wide data refresh
-            SyncManager.INSTANCE.forceSync();
+            mSyncManager.forceSync();
             isRefreshing = true;
         }
     }
