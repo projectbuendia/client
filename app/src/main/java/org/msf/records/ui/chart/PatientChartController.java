@@ -57,7 +57,7 @@ final class PatientChartController {
 
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
-    private AppPatient mPatient = new AppPatient();
+    private AppPatient mPatient = AppPatient.builder().build();
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
 
