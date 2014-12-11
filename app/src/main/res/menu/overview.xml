@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:showAsAction="always"
+        android:id="@+id/action_relocate_patient"
+        android:title="Relocate Patient"/>
+    <item android:showAsAction="always"
         android:id="@+id/action_update_chart"
         android:title="@string/action_update_chart"/>
 </menu>
