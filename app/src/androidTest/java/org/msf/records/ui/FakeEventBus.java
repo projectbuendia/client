@@ -64,9 +64,9 @@ public final class FakeEventBus implements EventBusRegistrationInterface, CrudEv
 					if (parameter.isInstance(event)) {
 						try {
 							method.invoke(receiver, event);
-						} catch (IllegalAccessException
-								| IllegalArgumentException
-								| InvocationTargetException e) {
+						} catch (InvocationTargetException e) {
+							throw new RuntimeException(e.getCause());
+						} catch (IllegalAccessException | IllegalArgumentException e) {
 							throw new RuntimeException(e);
 						}
 					}

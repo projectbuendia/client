@@ -4,7 +4,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.Suppress;
 
 import java.util.List;
 import java.util.Map;
@@ -79,13 +78,12 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mMockAppModel.fetchSinglePatient(mFakeCrudEventBus, PATIENT_UUID_1);
 	}
 
-	@Suppress // Not passing yet
 	public void testPatientDetailsLoaded_SetsObservationsOnUi() {
 		// GIVEN the observations provider is set up to return some dummy data
 		List<LocalizedChartHelper.LocalizedObservation> allObservations =
 				ImmutableList.of(OBSERVATION_A);
 		Map<String, LocalizedChartHelper.LocalizedObservation> recentObservations =
-				ImmutableMap.of("blah", OBSERVATION_A);
+				ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
 		when(mMockObservationsProvider.getObservations(PATIENT_UUID_1))
 				.thenReturn(allObservations);
 		when(mMockObservationsProvider.getMostRecentObservations(PATIENT_UUID_1))
