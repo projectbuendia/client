@@ -38,13 +38,15 @@ public class LocationManager {
 
     private final EventBus mEventBus;
     private final Context mContext;
+    private final SyncManager mSyncManager;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
 
     @Nullable private LocationTree mLocationTree;
 
-    public LocationManager(EventBus eventBus, Context context) {
+    public LocationManager(EventBus eventBus, Context context, SyncManager syncManager) {
     	mEventBus = checkNotNull(eventBus);
     	mContext = checkNotNull(context);
+    	mSyncManager = checkNotNull(syncManager);
     }
 
     public void init() {
@@ -117,9 +119,8 @@ public class LocationManager {
         	if (DEBUG) {
         		Log.d(TAG, "Location tree not in cache. Attempting to load from network.");
         	}
-            SyncManager syncManager = SyncManager.INSTANCE;
-            if (!syncManager.isSyncing()) {
-                syncManager.forceSync();
+            if (!mSyncManager.isSyncing()) {
+                mSyncManager.forceSync();
             } else {
             	Log.d(TAG, "Already syncing");
             }
