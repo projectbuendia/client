@@ -12,31 +12,26 @@ import java.util.Calendar;
 import java.util.Locale;
 
 /**
- * Created by Gil on 03/10/2014.
+ * Utility methods.
  */
 public class Utils {
 
     /**
-     *  Convenience method to convert a byte array to a hex string.
+     * Converts a byte array to a hex string.
      *
-     * @param  data  the byte[] to convert
-     * @return String the converted byte[]
+     * <p>The resulting strings will have two characters per byte.
      */
-
     public static String bytesToHex(byte[] data) {
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < data.length; i++) {
-            buf.append(byteToHex(data[i]).toUpperCase());
+            buf.append(byteToHex(data[i]).toUpperCase(Locale.US));
             buf.append(" ");
         }
         return (buf.toString());
     }
 
     /**
-     *  method to convert a byte to a hex string.
-     *
-     * @param  data  the byte to convert
-     * @return String the converted byte
+     * Converts a byte to a two-character hex string.
      */
     public static String byteToHex(byte data) {
         StringBuffer buf = new StringBuffer();
@@ -46,13 +41,10 @@ public class Utils {
     }
 
     /**
-     *  Convenience method to convert an int to a hex char.
-     *
-     * @param  i  the int to convert
-     * @return char the converted char
+     * Converts an integer between 0 and 15 to a hex char.
      */
     public static char toHexChar(int i) {
-        if ((0 <= i) && (i <= 9)) {
+        if (0 <= i && i <= 9) {
             return (char) ('0' + i);
         } else {
             return (char) ('a' + (i - 10));
@@ -60,10 +52,7 @@ public class Utils {
     }
 
     /**
-     *  Convenience method to convert timestamp to date
-     *
-     * @param  timestamp  the long to convert
-     * @return String the converted date
+     * Converts a timestamp to a date string.
      */
     public static String timestampToDate(Long timestamp) {
         if (timestamp == null) {
@@ -75,7 +64,7 @@ public class Utils {
     }
 
     /**
-     *  Convenience method to calculate time difference between given timestamp and current timestamp
+     *  Calculates the time difference between given timestamp and current timestamp.
      *
      * @param  timestamp  the long to compare with current date
      * @return Period between the 2 dates
@@ -90,7 +79,7 @@ public class Utils {
     }
 
     /**
-     * Encode a URL parameter, catching the useless exception that never happens.
+     * Encodes a URL parameter, catching the useless exception that never happens.
      */
     public static String urlEncode(String s) {
         try {
@@ -99,5 +88,9 @@ public class Utils {
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError("UTF-8 should be supported in every JVM");
         }
+    }
+
+    private Utils() {
+    	// Prevent instantiation.
     }
 }

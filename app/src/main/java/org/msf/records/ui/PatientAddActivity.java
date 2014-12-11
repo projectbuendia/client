@@ -43,8 +43,11 @@ import static org.msf.records.net.Server.PATIENT_IMPORTANT_INFORMATION_KEY;
 import static org.msf.records.net.Server.PATIENT_MOVEMENT_KEY;
 import static org.msf.records.net.Server.PATIENT_STATUS_KEY;
 
-
-public class PatientAddActivity extends Activity implements Response.ErrorListener, Response.Listener<Patient> {
+/**
+ * Activity allowing the user to add a new patient.
+ */
+public final class PatientAddActivity extends Activity
+		implements Response.ErrorListener, Response.Listener<Patient> {
 
     private static final String TAG = PatientAddActivity.class.getSimpleName();
 

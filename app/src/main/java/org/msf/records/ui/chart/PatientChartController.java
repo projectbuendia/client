@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,6 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.utils.EventBusRegistrationInterface;
 import org.odk.collect.android.model.PrepopulatableFields;
 
 import com.android.volley.Response;
@@ -57,7 +57,7 @@ final class PatientChartController {
 
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
-    private AppPatient mPatient = new AppPatient();
+    private AppPatient mPatient = AppPatient.builder().build();
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
 
@@ -86,7 +86,6 @@ final class PatientChartController {
     }
 
     private final OpenMrsChartServer mServer;
-    private final EventBusRegistrationInterface mEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
@@ -94,6 +93,7 @@ final class PatientChartController {
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
 
+    /** Sends ODK form data. */
     public interface OdkResultSender {
         void sendOdkResultToServer(
                 @Nullable String patientUuid,
@@ -111,7 +111,6 @@ final class PatientChartController {
     public PatientChartController(
     		AppModel appModel,
     		OpenMrsChartServer server,
-    		EventBusRegistrationInterface eventBus,
     		CrudEventBus crudEventBus,
     		Ui ui,
     		OdkResultSender odkResultSender,
@@ -119,7 +118,6 @@ final class PatientChartController {
     		@Nullable Bundle savedState) {
     	mAppModel = appModel;
     	mServer = server;
-    	mEventBus = eventBus;
     	mCrudEventBus = crudEventBus;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
@@ -138,7 +136,7 @@ final class PatientChartController {
     	return bundle;
     }
 
-    /** Sets the current patient. */
+    /** Sets the current patient. This should be called before init. */
     public void setPatient(
     		String patientUuid,
     		@Nullable String patientName,
@@ -153,8 +151,7 @@ final class PatientChartController {
     }
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
-    public void init() {
-    	mEventBus.registerSticky(mEventBusSubscriber);
+    public void init() {;
     	mCrudEventBus.register(mEventBusSubscriber);
     	prodServer();
     	mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
@@ -162,8 +159,57 @@ final class PatientChartController {
 
 	/** Releases any resources used by the controller. */
     public void suspend() {
-    	mEventBus.unregister(mEventBusSubscriber);
     	mCrudEventBus.unregister(mEventBusSubscriber);
+    }
+
+    public void onXFormResult(int requestCode, int resultCode, Intent data) {
+    	String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
+        if (patientUuid == null) {
+            Log.e(TAG, "Received unknown request code: " + requestCode);
+            return;
+        }
+
+        // This will fire a CreatePatientSucceededEvent.
+        mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
+    }
+
+    /** Call when the user has indicated they want to add observation data. */
+    public void onAddObservationPressed() {
+        onAddObservationPressed(null);
+    }
+
+    /** Call when the user has indicated they want to add observation data. */
+    public void onAddObservationPressed(String targetGroup) {
+        PrepopulatableFields fields = new PrepopulatableFields();
+
+        fields.encounterTime = DateTime.now();
+        fields.locationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.clinicianName = user.getFullName();
+        }
+
+        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
+        		mObservationsProvider.getMostRecentObservations(mPatientUuid);
+
+        if (observations.containsKey(Concept.PREGNANCY_UUID)
+                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
+            fields.pregnant = PrepopulatableFields.YES;
+        }
+
+        if (observations.containsKey(Concept.IV_UUID)
+                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
+            fields.ivFitted = PrepopulatableFields.YES;
+        }
+
+        fields.targetGroup = targetGroup;
+
+        mUi.fetchAndShowXform(
+                Constants.ADD_OBSERVATION_UUID,
+                savePatientUuidForRequestCode(mPatientUuid),
+                PatientModel.INSTANCE.getOdkPatient(mPatientUuid),
+                fields);
     }
 
     private void prodServer() {
@@ -216,10 +262,12 @@ final class PatientChartController {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
-        Map<String, LocalizedObservation> conceptsToLatestObservations = mObservationsProvider.getMostRecentObservations(mPatientUuid);
+        Map<String, LocalizedObservation> conceptsToLatestObservations =
+        		new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
         for (LocalizedObservation observation : observations) {
+        	// TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
             conceptsToLatestObservations.put(observation.conceptUuid, observation);
             mLastObservation = Math.max(
             		mLastObservation,
@@ -234,45 +282,6 @@ final class PatientChartController {
         mUi.setLatestEncounter(mLastObservation);
         mUi.updatePatientVitalsUI(conceptsToLatestObservations);
     	mUi.setObservationHistory(observations);
-    }
-
-    /** Call when the user has indicated they want to add observation data. */
-    public void onAddObservationPressed() {
-        onAddObservationPressed(null);
-    }
-
-    /** Call when the user has indicated they want to add observation data. */
-    public void onAddObservationPressed(String targetGroup) {
-        PrepopulatableFields fields = new PrepopulatableFields();
-
-        fields.encounterTime = DateTime.now();
-        fields.locationName = "Triage";
-
-        User user = App.getUserManager().getActiveUser();
-        if (user != null) {
-            fields.clinicianName = user.getFullName();
-        }
-
-        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
-        		mObservationsProvider.getMostRecentObservations(mPatientUuid);
-
-        if (observations.containsKey(Concept.PREGNANCY_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
-            fields.pregnant = PrepopulatableFields.YES;
-        }
-
-        if (observations.containsKey(Concept.IV_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
-            fields.ivFitted = PrepopulatableFields.YES;
-        }
-
-        fields.targetGroup = targetGroup;
-
-        mUi.fetchAndShowXform(
-                Constants.ADD_OBSERVATION_UUID,
-                savePatientUuidForRequestCode(mPatientUuid),
-                PatientModel.INSTANCE.getOdkPatient(mPatientUuid),
-                fields);
     }
 
     /**
@@ -290,7 +299,7 @@ final class PatientChartController {
      *
      * <p>Also removes details of that requestCode from the controller's state.
      */
-    @Nullable public String getAndClearPatientUuidForRequestCode(int requestCode) {
+    @Nullable private String getAndClearPatientUuidForRequestCode(int requestCode) {
         int index = requestCode - BASE_ODK_REQUEST;
         String patientUuid = mPatientUuids[index];
         mPatientUuids[index] = null;
