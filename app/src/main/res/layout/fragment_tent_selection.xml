@@ -27,15 +27,7 @@
             android:layout_margin="10dp"
             app:subtitledButtonTitle="Triage"
             app:subtitledButtonSubtitle="No patients"/>
-        <GridView
-            android:id="@+id/tent_selection_tents"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:numColumns="4"
-            android:verticalSpacing="10dp"
-            android:horizontalSpacing="10dp"
-            android:stretchMode="columnWidth" />
+        <include layout="@layout/tent_grid" />
         <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_discharged"
             android:layout_height="wrap_content"
