@@ -13,9 +13,6 @@ import org.odk.collect.android.model.Patient;
  */
 public class PatientModel {
 
-    // TODO(dxchen): Dagger this!
-    public static final PatientModel INSTANCE = new PatientModel();
-
     public Patient getOdkPatient(String patientUuid) {
         Cursor cursor = new FilterQueryProviderFactory(App.getInstance())
                 .getCursorLoader(new UuidFilter(), patientUuid)
