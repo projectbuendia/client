@@ -6,6 +6,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 
 import java.util.List;
@@ -372,6 +373,101 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         return result;
     }
 
+    @Override
+    public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                          ContentValues[] allValues) {
+        if (allValues.length == 0) {
+            return 0;
+        }
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
+        assert db != null;
+        final int match = sUriMatcher.match(uri);
+        String tableName;
+        switch (match) {
+            case OBSERVATIONS:
+                tableName = PatientDatabase.OBSERVATIONS_TABLE_NAME;
+                break;
+            case CONCEPT_NAMES:
+                tableName = PatientDatabase.CONCEPT_NAMES_TABLE_NAME;
+                break;
+            case CONCEPTS:
+                tableName = PatientDatabase.CONCEPTS_TABLE_NAME;
+                break;
+            case CHART_STRUCTURE:
+                tableName = PatientDatabase.CHARTS_TABLE_NAME;
+                break;
+            case EMPTY_LOCALIZED_CHART:
+                throw new UnsupportedOperationException("Localized charts are query only");
+            case LOCALIZED_CHART:
+                throw new UnsupportedOperationException("Localized observations are query only");
+            case MOST_RECENT_CHART:
+                throw new UnsupportedOperationException("Most recent chart is query only");
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        int numValues = allValues.length;
+        ContentValues first = allValues[0];
+        String [] columns = first.keySet().toArray(new String[first.size()]);
+        SQLiteStatement statement = makeInsertStatement(db, tableName, columns);
+        db.beginTransaction();
+        Object [] bindings = new Object[first.size()];
+        for (ContentValues values : allValues) {
+            statement.clearBindings();
+            if (values.size() != first.size()) {
+                throw new AssertionError();
+            }
+            for (int i=0; i< bindings.length; i++) {
+                Object value = values.get(columns[i]);
+                // This isn't super safe, but is in our context.
+                int bindingIndex = i + 1;
+                if (value instanceof String) {
+                    statement.bindString(bindingIndex, (String) value);
+                } else if ((value instanceof Long) || value instanceof Integer) {
+                    statement.bindLong(bindingIndex, ((Number) value).longValue());
+                } else if ((value instanceof Double) || value instanceof Float) {
+                    statement.bindDouble(bindingIndex, ((Number) value).doubleValue());
+                }
+                bindings[i] = value;
+            }
+            statement.executeInsert();
+        }
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        // Send broadcast to registered ContentObservers, to refresh UI.
+        contentResolver.notifyChange(uri, null, false);
+        return numValues;
+    }
+
+    private SQLiteStatement makeInsertStatement(SQLiteDatabase db, String table,
+                                                String [] columns) {
+        // I kind of hoped this would be provided by SQLiteDatase or DatabaseHelper,
+        // But it doesn't seem to be. Innards copied from SQLiteDabase.insertWithOnConflict
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT OR REPLACE ");
+        sql.append(" INTO ");
+        sql.append(table);
+        sql.append('(');
+
+        int size = (columns != null && columns.length > 0) ? columns.length : 0;
+        if (size <= 0) {
+            throw new AssertionError();
+        }
+        int i = 0;
+        for (String colName : columns) {
+            sql.append((i > 0) ? "," : "");
+            sql.append(colName);
+            i++;
+        }
+        sql.append(')');
+        sql.append(" VALUES (");
+        for (i = 0; i < size; i++) {
+            sql.append((i > 0) ? ",?" : "?");
+        }
+        sql.append(')');
+
+        return db.compileStatement(sql.toString());
+    }
     @Override
     public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
                       String selection, String[] selectionArgs) {

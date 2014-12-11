@@ -23,7 +23,6 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
-import org.msf.records.updater.testing.FakeUpdateServer;
 
 import java.io.File;
 
@@ -145,15 +144,15 @@ public class UpdateManager {
                     new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
             DownloadManager.Request request =
-                    new DownloadManager.Request(availableUpdateInfo.mUpdateUri)
+                    new DownloadManager.Request(availableUpdateInfo.updateUri)
                             .setTitle(
                                     "Downloading update v"
-                                            + availableUpdateInfo.mAvailableVersion.toString())
+                                            + availableUpdateInfo.availableVersion.toString())
                             .setDestinationInExternalFilesDir(
                                     App.getInstance(),
                                     null /*dirType*/,
                                     "androidclient_"
-                                            + availableUpdateInfo.mAvailableVersion.toString())
+                                            + availableUpdateInfo.availableVersion.toString())
                             .setNotificationVisibility(
                                     DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             mDownloadId = mDownloadManager.enqueue(request);
@@ -166,7 +165,7 @@ public class UpdateManager {
      * Installs a downloaded update.
      */
     public void installUpdate(DownloadedUpdateInfo updateInfo) {
-        Uri apkUri = Uri.fromFile(new File(updateInfo.mPath));
+        Uri apkUri = Uri.fromFile(new File(updateInfo.path));
         Intent installIntent = new Intent(Intent.ACTION_VIEW)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .setDataAndType(apkUri, "application/vnd.android.package-archive");
@@ -222,8 +221,8 @@ public class UpdateManager {
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
 
                 if (mLastDownloadedUpdateInfo.shouldInstall()
-                        && mLastDownloadedUpdateInfo.mDownloadedVersion
-                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.mAvailableVersion)) {
+                        && mLastDownloadedUpdateInfo.downloadedVersion
+                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
                     // If there's already a downloaded update that is as recent as the available
                     // update, post an UpdateDownloadedEvent.
                     EventBus.getDefault()
@@ -291,29 +290,36 @@ public class UpdateManager {
                 mIsDownloadInProgress = false;
                 App.getInstance().unregisterReceiver(this);
 
-                Cursor cursor = mDownloadManager.query(
-                        new DownloadManager.Query().setFilterById(receivedDownloadId));
-                if (!cursor.moveToFirst()) {
-                    Log.w(TAG, "Received download ID " + receivedDownloadId + " does not exist.");
-                    // TODO(dxchen): Consider firing an event.
-                    return;
-                }
+                Cursor cursor = null;
+                final String uriString;
+                try {
+                    cursor = mDownloadManager.query(
+                            new DownloadManager.Query().setFilterById(receivedDownloadId));
+                    if (!cursor.moveToFirst()) {
+                        Log.w(TAG, "Received download ID " + receivedDownloadId + " does not exist.");
+                        // TODO(dxchen): Consider firing an event.
+                        return;
+                    }
 
-                int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
-                if (status != DownloadManager.STATUS_SUCCESSFUL) {
-                    Log.w(TAG, "Update download failed with status " + status + ".");
-                    // TODO(dxchen): Consider firing an event.
-                    return;
-                }
+                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    if (status != DownloadManager.STATUS_SUCCESSFUL) {
+                        Log.w(TAG, "Update download failed with status " + status + ".");
+                        // TODO(dxchen): Consider firing an event.
+                        return;
+                    }
 
-                String uriString =
-                        cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                if (uriString == null) {
-                    Log.w(TAG, "No path for a downloaded file exists.");
-                    // TODO(dxchen): Consider firing an event.
-                    return;
+                    uriString =
+                            cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                    if (uriString == null) {
+                        Log.w(TAG, "No path for a downloaded file exists.");
+                        // TODO(dxchen): Consider firing an event.
+                        return;
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
-
                 Uri uri;
                 try {
                     Uri.parse(uriString);

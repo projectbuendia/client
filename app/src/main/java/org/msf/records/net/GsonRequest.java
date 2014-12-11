@@ -1,5 +1,7 @@
 package org.msf.records.net;
 
+import android.util.Log;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
@@ -78,6 +80,7 @@ public class GsonRequest<T> extends Request<T> {
                     response.data,
                     HTTP.UTF_8);  // TODO(dxchen): HttpHeaderParser.parseCharset(response.headers).
             Gson gsonParser = gson.create();
+            Log.d("SyncAdapter", "parsing response");
             if(array){
                 JsonParser parser = new JsonParser();
                 JsonArray array = (JsonArray) parser.parse(json);

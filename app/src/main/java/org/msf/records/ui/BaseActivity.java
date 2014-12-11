@@ -16,6 +16,7 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
+import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Colorizer;
 
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ import de.greenrobot.event.EventBus;
 /**
  * An abstract {@link FragmentActivity} that is the base for all activities.
  */
-public abstract class BaseActivity extends ControllableActivity {
+public abstract class BaseActivity extends FragmentActivity {
 
     @Inject Colorizer mUserColorizer;
 

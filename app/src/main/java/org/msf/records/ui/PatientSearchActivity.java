@@ -14,6 +14,7 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
+import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
 
 import javax.inject.Inject;
@@ -131,7 +132,7 @@ public abstract class PatientSearchActivity extends BaseActivity
 
                     @Override
                     public void onActionClicked() {
-                        mUpdateManager.downloadUpdate(event.mUpdateInfo);
+                        mUpdateManager.downloadUpdate(event.updateInfo);
                     }
                 });
         if (updateAvailableSnackbar.isDismissed()) {
@@ -150,7 +151,7 @@ public abstract class PatientSearchActivity extends BaseActivity
 
                     @Override
                     public void onActionClicked() {
-                        mUpdateManager.installUpdate(event.mUpdateInfo);
+                        mUpdateManager.installUpdate(event.updateInfo);
                     }
                 });
         if (updateDownloadedSnackbar.isDismissed()) {

@@ -2,6 +2,7 @@ package org.msf.records;
 
 import android.app.Application;
 
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
@@ -14,12 +15,13 @@ import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by Gil on 08/10/2014.
+ * Created by Gil on 08/10/2014.\
  */
 public class App extends Application {
 
@@ -41,6 +43,10 @@ public class App extends Application {
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
+
+    // TODO(dxchen): Factor into individual fragment and activity classes when we introduce proper
+    // scoped injection.
+    @Inject public Provider<CrudEventBus> mCrudEventBusProvider;
 
     @Override
     public void onCreate() {

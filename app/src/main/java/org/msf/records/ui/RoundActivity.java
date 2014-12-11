@@ -10,6 +10,8 @@ import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
 import org.msf.records.utils.PatientCountDisplay;
 
@@ -20,7 +22,7 @@ public class RoundActivity extends PatientSearchActivity {
 
     private int mLocationPatientCount;
 
-    private SingleLocationPatientListFragment mFragment;
+    private RoundFragment mFragment;
     private SimpleSelectionFilter mFilter;
 
     public static final String LOCATION_NAME_KEY = "location_name";
@@ -45,8 +47,10 @@ public class RoundActivity extends PatientSearchActivity {
                 this, mLocationPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
 
-        mFilter = new FilterGroup(
-                FilterManager.getDefaultFilter(), new LocationUuidFilter(mLocationUuid));
+        // TODO: Don't use this singleton.
+        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        LocationSubtree subtree = locationTree.getLocationByUuid(mLocationUuid);
+        mFilter = new FilterGroup(FilterManager.getDefaultFilter(), new LocationUuidFilter(subtree));
     }
 
     @Override
@@ -56,7 +60,7 @@ public class RoundActivity extends PatientSearchActivity {
         inflater.inflate(R.menu.main, menu);
 
         // TODO(akalachman): Move this back to onCreate when I figure out why it needs to be here.
-        mFragment = (SingleLocationPatientListFragment)getSupportFragmentManager()
+        mFragment = (RoundFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.round_patient_list);
         mFragment.filterBy(mFilter);
 

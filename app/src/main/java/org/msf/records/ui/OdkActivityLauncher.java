@@ -2,6 +2,7 @@ package org.msf.records.ui;
 
 import android.app.Activity;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -40,7 +41,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
-
 import static android.provider.BaseColumns._ID;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
@@ -116,13 +116,12 @@ public class OdkActivityLauncher {
     /**
      * Convenient shared code for handling an ODK activity result.
      *
-     * @param callingActivity the calling activity, used for getting content resolvers
      * @param patientUuid the patient to add an observation to, or null to create a new patient
      * @param resultCode the result code sent from Android activity transition
      * @param data the incoming intent
      */
     public static void sendOdkResultToServer(
-            Activity callingActivity,
+            Context context,
             @Nullable String patientUuid,
             int resultCode,
             Intent data) {
@@ -139,7 +138,7 @@ public class OdkActivityLauncher {
 
         Uri uri = data.getData();
 
-        if (!callingActivity.getContentResolver().getType(uri).equals(
+        if (!context.getContentResolver().getType(uri).equals(
                 InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
             Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
             return;
@@ -147,7 +146,7 @@ public class OdkActivityLauncher {
 
         Cursor instanceCursor = null;
         try {
-            instanceCursor = callingActivity.getContentResolver().query(uri,
+            instanceCursor = context.getContentResolver().query(uri,
                     null, null, null, null);
             if (instanceCursor.getCount() != 1) {
                 Log.e(TAG, "The form that we tried to load did not exist: " + uri);
@@ -170,7 +169,7 @@ public class OdkActivityLauncher {
             final long idToDelete = instanceCursor.getLong(columnIndex);
 
             SharedPreferences preferences =
-                    PreferenceManager.getDefaultSharedPreferences(callingActivity.getApplicationContext());
+                    PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
             final boolean keepFormInstancesLocally =
                     preferences.getBoolean("keep_form_instances_locally", false);
 

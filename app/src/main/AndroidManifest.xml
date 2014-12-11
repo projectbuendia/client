@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.msf.records" >
 
     <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
@@ -31,13 +32,15 @@
         <provider
             android:name="org.odk.collect.android.provider.FormsProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.forms"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" /> <!-- need to export to MSF app -->
 
         <!-- Content Provider for ODK form instances. -->
         <provider
             android:name="org.odk.collect.android.provider.InstanceProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.instances"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" /> <!-- need to export to MSF app -->
 
         <!-- Content Provider for medical records. -->
         <provider
@@ -46,7 +49,7 @@
             android:exported="false" />
 
         <activity
-            android:name="org.msf.records.ui.UserLoginActivity"
+            android:name="org.msf.records.ui.userlogin.UserLoginActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -62,7 +65,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.TentSelectionActivity"
+            android:name="org.msf.records.ui.tentselection.TentSelectionActivity"
             android:label="@string/title_activity_tent_selection"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -74,7 +77,7 @@
         <activity
             android:name="org.msf.records.ui.PatientListActivity"
             android:label="@string/title_patient_list"
-            android:parentActivityName="org.msf.records.ui.TentSelectionActivity"
+            android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -83,7 +86,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.PatientChartActivity"
+            android:name="org.msf.records.ui.chart.PatientChartActivity"
             android:label="@string/title_patient_chart"
             android:parentActivityName="org.msf.records.ui.PatientListActivity"
             android:screenOrientation="portrait"
@@ -112,7 +115,7 @@
         <activity
             android:name="org.msf.records.ui.RoundActivity"
             android:label="@string/title_activity_round"
-            android:parentActivityName="org.msf.records.ui.TentSelectionActivity"
+            android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
             android:screenOrientation="portrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -72,6 +72,9 @@ public class Patient implements Serializable {
         if (source.first_showed_symptoms_timestamp != null) {
             this.first_showed_symptoms_timestamp = source.first_showed_symptoms_timestamp;
         }
+        if (source.dob_timestamp != null) {
+            this.dob_timestamp = source.dob_timestamp;
+        }
         // Deliberately do not merge location recursively, as you should set it all at once.
         if (source.assigned_location != null) {
             this.assigned_location = source.assigned_location;

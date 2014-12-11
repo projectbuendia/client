@@ -6,7 +6,7 @@ import org.msf.records.sync.PatientProviderContract;
  * AgeFilter returns only patients below a specified age in years (exact matches are NOT returned).
  */
 public class AgeFilter implements SimpleSelectionFilter {
-    private int mYears;
+    private final int mYears;
 
     public AgeFilter(int years) {
         mYears = years;
