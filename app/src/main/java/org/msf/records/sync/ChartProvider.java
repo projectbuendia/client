@@ -173,7 +173,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 //        String query = "SELECT obs.encounter_time, group_names." + ChartColumns.NAME + " AS group_name, obs.concept_uuid, names." +
         String query = "SELECT obs.encounter_time," +
                 "group_names." + ChartColumns.NAME + " AS group_name," +
-                "obs.concept_uuid,names." + ChartColumns.NAME + " AS concept_name," +
+                "chart." + ChartColumns.CONCEPT_UUID + "," +
+                "names." + ChartColumns.NAME + " AS concept_name," +
                 // Localized value for concept values
                 "obs." + ChartColumns.VALUE +
                 ",coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
@@ -187,14 +188,16 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 "names." + ChartColumns.CONCEPT_UUID +
 
                 " INNER JOIN " +
-                PatientDatabase.OBSERVATIONS_TABLE_NAME +" obs " +
-                "ON obs." + ChartColumns.CONCEPT_UUID + "=" +
-                "names." + ChartColumns.CONCEPT_UUID +
-
-                " INNER JOIN " +
                 PatientDatabase.CONCEPT_NAMES_TABLE_NAME +" group_names " +
                 "ON chart." + ChartColumns.GROUP_UUID + "=" +
                 "group_names." + ChartColumns.CONCEPT_UUID +
+
+                " LEFT JOIN " +
+                PatientDatabase.OBSERVATIONS_TABLE_NAME +" obs " +
+                "ON chart." + ChartColumns.CONCEPT_UUID + "=" +
+                "obs." + ChartColumns.CONCEPT_UUID + " AND " +
+                "(obs." + ChartColumns.PATIENT_UUID + "=? OR " + // 2nd selection arg
+                "obs." + ChartColumns.PATIENT_UUID + " IS NULL)" +
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
@@ -204,15 +207,15 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 "value_names." + ChartColumns.CONCEPT_UUID +
                 " AND value_names." + ChartColumns.LOCALE + "=?" + // 1st selection arg
 
-//                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 2nd selection arg
-                "WHERE obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 3rd selection arg
-                "names." + ChartColumns.LOCALE + "=? AND " + // 4th selection arg
-                "group_names." + ChartColumns.LOCALE + "=?" + // 5th selection arg
+//                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " +
+                " WHERE " +
+                "names." + ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
+                "group_names." + ChartColumns.LOCALE + "=?" + // 4th selection arg
 
                 " ORDER BY chart." + ChartColumns.CHART_ROW + ", obs." + ChartColumns.ENCOUNTER_TIME
                 ;
 
-        return db.rawQuery(query, new String[]{locale, patientUuid, locale, locale});
+        return db.rawQuery(query, new String[]{patientUuid, locale, locale, locale});
     }
 
     private Cursor queryEmptyLocalizedChart(Uri uri, SQLiteDatabase db) {
@@ -468,6 +471,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 
         return db.compileStatement(sql.toString());
     }
+
     @Override
     public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
                       String selection, String[] selectionArgs) {
