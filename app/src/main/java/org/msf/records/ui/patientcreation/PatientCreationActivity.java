@@ -25,6 +25,7 @@ import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
@@ -54,15 +55,50 @@ public final class PatientCreationActivity extends BaseActivity {
         mController = new PatientCreationController(new MyUi(), mServer);
 
         setContentView(R.layout.activity_patient_creation);
+        ButterKnife.inject(this);
     }
 
     @OnClick(R.id.patient_creation_button_create)
     void onCreateClick() {
         mController.createPatient(
-        );
+                mId.getText(),
+                mGivenName.getText(),
+                mFamilyName.getText(),
+                mAge.getText(),
+                getAgeUnits(),
+                getSex());
+    }
+
+    private int getAgeUnits() {
+        int checkedAgeUnitsId = mAgeUnits.getCheckedRadioButtonId();
+        switch (checkedAgeUnitsId) {
+            case R.id.patient_creation_radiogroup_age_units_years:
+                return PatientCreationController.AGE_YEARS;
+            case R.id.patient_creation_radiogroup_age_units_months:
+                return PatientCreationController.AGE_MONTHS;
+            default:
+                return PatientCreationController.AGE_UNKNOWN;
+        }
+    }
+
+    private int getSex() {
+        int checkedSexId = mSex.getCheckedRadioButtonId();
+        switch (checkedSexId) {
+            case R.id.patient_creation_radiogroup_age_sex_male:
+                return PatientCreationController.SEX_MALE;
+            case R.id.patient_creation_radiogroup_age_sex_female:
+                return PatientCreationController.SEX_FEMALE;
+            default:
+                return PatientCreationController.SEX_UNKNOWN;
+        }
     }
 
     private final class MyUi implements PatientCreationController.Ui {
+
+        @Override
+        public void onValidationError(int field, String message) {
+
+        }
 
         @Override
         public void onCreateFailed() {
