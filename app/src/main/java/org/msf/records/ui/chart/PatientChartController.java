@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -261,10 +262,12 @@ final class PatientChartController {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
-        Map<String, LocalizedObservation> conceptsToLatestObservations = mObservationsProvider.getMostRecentObservations(mPatientUuid);
+        Map<String, LocalizedObservation> conceptsToLatestObservations =
+        		new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
         for (LocalizedObservation observation : observations) {
+        	// TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
             conceptsToLatestObservations.put(observation.conceptUuid, observation);
             mLastObservation = Math.max(
             		mLastObservation,

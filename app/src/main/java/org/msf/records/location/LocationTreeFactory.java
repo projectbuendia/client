@@ -3,6 +3,8 @@ package org.msf.records.location;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.msf.records.App;
 import org.msf.records.filter.AllFilter;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -34,7 +36,7 @@ public class LocationTreeFactory {
     private SimpleSelectionFilter mLocationNameFilter = new AllFilter();
     private SimpleSelectionFilter mPatientCountsFilter = new AllFilter();
 
-    private Multimap<String, Location> mLocationsByParent;
+    private Multimap<String, Location> mLocationsByParentUuid;
     private Map<String, LocalizedString.Builder> mLocationNamesByUuid;
     /**
      * Map from location UUID to number of patients at that location. This excludes any patients contained with
@@ -58,7 +60,7 @@ public class LocationTreeFactory {
         mPatientCountsQueryFactory.setSortClause(null);
         mPatientCountsQueryFactory.setProjection(PatientProjection.getPatientCountsProjection());
 
-        mLocationsByParent = HashMultimap.create();
+        mLocationsByParentUuid = HashMultimap.create();
         mLocationNamesByUuid = new HashMap<>();
         mPatientCountsMap = new HashMap<>();
     }
@@ -103,7 +105,7 @@ public class LocationTreeFactory {
 
     // Initializes mLocationsByParent from the given cursor. Does NOT close the cursor.
     private void buildLocationMap(Cursor cursor) {
-        mLocationsByParent.clear();
+        mLocationsByParentUuid.clear();
         while (cursor.moveToNext()) {
             String uuid = cursor.getString(LocationProjection.LOCATION_LOCATION_UUID_COLUMN);
             String parent_uuid = cursor.getString(LocationProjection.LOCATION_PARENT_UUID_COLUMN);
@@ -115,7 +117,7 @@ public class LocationTreeFactory {
             Location location = new Location();
             location.uuid = uuid;
             location.parent_uuid = parent_uuid;
-            mLocationsByParent.put(parent_uuid, location);
+            mLocationsByParentUuid.put(parent_uuid, location);
         }
     }
 
@@ -139,13 +141,13 @@ public class LocationTreeFactory {
     }
 
     // Constructs the LocationTree or returns null if the root node is missing.
-    private LocationTree buildTree() {
-        if (!mLocationsByParent.containsKey(null)) {
+    @Nullable private LocationTree buildTree() {
+        if (!mLocationsByParentUuid.containsKey(null)) {
             return null;
         }
 
         // Map location names to this location as necessary.
-        for (Location location : mLocationsByParent.values()) {
+        for (Location location : mLocationsByParentUuid.values()) {
             if (mLocationNamesByUuid.containsKey(location.uuid)) {
                 location.names = mLocationNamesByUuid.get(location.uuid).build().asMap();
             }
@@ -153,7 +155,7 @@ public class LocationTreeFactory {
 
        return new LocationTree(
     		   	App.getInstance().getResources(),
-        		mLocationsByParent,
+        		mLocationsByParentUuid.values(),
         		mPatientCountsMap);
     }
 }
