@@ -14,24 +14,22 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
 
     @Override
     public AppPatient fromCursor(Cursor cursor) {
-        AppPatient patient = new AppPatient();
-
-        patient.id = cursor.getString(PatientProjection.COLUMN_ID);
-
-        patient.uuid = cursor.getString(PatientProjection.COLUMN_UUID);
-        patient.givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
-        patient.familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
-        patient.age = getAgeFromYearsAndMonths(
-                cursor.getInt(PatientProjection.COLUMN_AGE_YEARS),
-                cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS));
-        patient.gender = getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER));
-
-        patient.admissionDateTime =
-                new DateTime(cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000);
-
-        patient.locationUuid = cursor.getString(PatientProjection.COLUMN_LOCATION_UUID);
-
-        return patient;
+    	return AppPatient.builder()
+        		.setId(cursor.getString(PatientProjection.COLUMN_ID))
+        		.setUuid(cursor.getString(PatientProjection.COLUMN_UUID))
+        		.setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
+    			.setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
+        		.setAge(
+    					getAgeFromYearsAndMonths(
+    							cursor.getInt(PatientProjection.COLUMN_AGE_YEARS),
+    							cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS)))
+				.setGender(
+						getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER)))
+				.setAdmissiondateTime(
+						new DateTime(cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000))
+				.setLocationUuid(
+						cursor.getString(PatientProjection.COLUMN_LOCATION_UUID))
+        		.build();
     }
 
     private static int getGenderFromString(String genderString) {
