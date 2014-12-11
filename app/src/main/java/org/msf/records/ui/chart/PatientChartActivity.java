@@ -34,6 +34,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
+import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -64,6 +65,7 @@ public final class PatientChartActivity extends BaseActivity {
 
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject PatientModel mPatientModel;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -134,7 +136,8 @@ public final class PatientChartActivity extends BaseActivity {
         		mMyUi,
         		odkResultSender,
         		observationsProvider,
-        		controllerState);
+        		controllerState,
+        		mPatientModel);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);

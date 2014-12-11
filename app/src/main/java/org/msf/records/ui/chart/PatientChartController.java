@@ -92,6 +92,7 @@ final class PatientChartController {
     private final ObservationsProvider mObservationsProvider;
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
+    private final PatientModel mPatientModel;
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
@@ -115,13 +116,15 @@ final class PatientChartController {
     		Ui ui,
     		OdkResultSender odkResultSender,
     		ObservationsProvider observationsProvider,
-    		@Nullable Bundle savedState) {
+    		@Nullable Bundle savedState,
+    		PatientModel patientModel) {
     	mAppModel = appModel;
     	mServer = server;
     	mCrudEventBus = crudEventBus;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
     	mObservationsProvider = observationsProvider;
+    	mPatientModel = patientModel;
     	if (savedState != null) {
     		mPatientUuids = savedState.getStringArray(KEY_PENDING_UUIDS);
     	} else {
@@ -208,7 +211,7 @@ final class PatientChartController {
         mUi.fetchAndShowXform(
                 Constants.ADD_OBSERVATION_UUID,
                 savePatientUuidForRequestCode(mPatientUuid),
-                PatientModel.INSTANCE.getOdkPatient(mPatientUuid),
+                mPatientModel.getOdkPatient(mPatientUuid),
                 fields);
     }
 

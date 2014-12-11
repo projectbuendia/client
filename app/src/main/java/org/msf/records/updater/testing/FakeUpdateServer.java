@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import com.android.volley.Response;
 
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.net.VolleySingleton;
 import org.msf.records.updater.UpdateServer;
 
 import java.util.Arrays;
@@ -26,8 +27,8 @@ public class FakeUpdateServer extends UpdateServer {
 
     private final UpdateInfo mUpdateInfo;
 
-    public FakeUpdateServer() {
-        super(null /*rootUrl*/);
+    public FakeUpdateServer(VolleySingleton volleySingleton) {
+        super(volleySingleton, null /*rootUrl*/);
         mHandler = new Handler(Looper.getMainLooper());
         mUpdateInfo = new UpdateInfo();
         mUpdateInfo.androidClient = new UpdateInfo.ComponentUpdateInfo();

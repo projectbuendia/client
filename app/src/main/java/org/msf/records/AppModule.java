@@ -9,8 +9,11 @@ import javax.inject.Singleton;
 import org.msf.records.data.app.AppModelModule;
 import org.msf.records.events.EventsModule;
 import org.msf.records.location.LocationManager;
+import org.msf.records.mvcmodels.PatientChartModel;
+import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.NetModule;
 import org.msf.records.prefs.PrefsModule;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.PatientListActivity;
 import org.msf.records.ui.PatientListFragment;
@@ -77,8 +80,25 @@ public final class AppModule {
         return app.getResources();
     }
 
-    @Provides @Singleton LocationManager provideLocationManager() {
-    	LocationManager locationManager = new LocationManager(EventBus.getDefault(), App.getInstance());
+    @Provides @Singleton SyncManager provideSyncManager() {
+    	return new SyncManager();
+    }
+
+    @Provides @Singleton PatientChartModel providePatientChartModel(SyncManager syncManager) {
+    	PatientChartModel patientChartModel = new PatientChartModel(EventBus.getDefault(), syncManager);
+    	patientChartModel.init();
+    	return patientChartModel;
+    }
+
+    @Provides @Singleton PatientModel providePatientModel() {
+    	return new PatientModel();
+    }
+
+    @Provides @Singleton LocationManager provideLocationManager(SyncManager syncManager) {
+    	LocationManager locationManager = new LocationManager(
+    			EventBus.getDefault(),
+    			App.getInstance(),
+    			syncManager);
     	locationManager.init();
     	return locationManager;
     }
