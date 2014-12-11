@@ -43,6 +43,7 @@ public class App extends Application {
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
+    @Inject PatientChartModel mPatientChartModel;
 
     @Override
     public void onCreate() {
@@ -64,7 +65,6 @@ public class App extends Application {
 
         // TODO(dxchen): Refactor this into the model classes.
         EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
-        PatientChartModel.INSTANCE.init();
     }
 
     public void buildObjectGraphAndInject() {

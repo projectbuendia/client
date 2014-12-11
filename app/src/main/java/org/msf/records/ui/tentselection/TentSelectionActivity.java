@@ -1,22 +1,29 @@
 package org.msf.records.ui.tentselection;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import javax.inject.Inject;
+
+import org.msf.records.App;
+import org.msf.records.AppModule;
 import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppModelModule;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
+import org.msf.records.sync.GenericAccountService;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.PatientListFragment;
 import org.msf.records.ui.PatientSearchActivity;
 import org.msf.records.ui.RoundActivity;
 import org.msf.records.utils.EventBusWrapper;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.Toast;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -26,11 +33,14 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
 	private TentSelectionController mController;
 
+	@Inject LocationManager mLocationManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
         mController = new TentSelectionController(
-        		new LocationManager(),
+        		mLocationManager,
         		new MyUi(),
         		new EventBusWrapper(EventBus.getDefault()));
 
@@ -39,6 +49,11 @@ public final class TentSelectionActivity extends PatientSearchActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.tent_selection_container, new TentSelectionFragment())
                     .commit();
+        }
+
+        if(Constants.OFFLINE_SUPPORT){
+            // Create account, if needed
+            GenericAccountService.registerSyncAccount(this);
         }
     }
 

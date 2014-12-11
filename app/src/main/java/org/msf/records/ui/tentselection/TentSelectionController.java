@@ -153,7 +153,7 @@ final class TentSelectionController {
 	    public void onEventMainThread(LocationsLoadedEvent event) {
 	    	if (DEBUG) {
 	    		Log.d(TAG, "Loaded location tree: " + event.locationTree + " after "
-	    				+ (SystemClock.currentThreadTimeMillis() - mLoadRequestTimeMs) + "ms");
+	    				+ (SystemClock.elapsedRealtime() - mLoadRequestTimeMs) + "ms");
 	    	}
 	    	mLocationTree = event.locationTree;
 	        for (LocationSubtree zone : mLocationTree.getZones()) {
