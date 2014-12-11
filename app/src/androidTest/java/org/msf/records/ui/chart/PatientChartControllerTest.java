@@ -92,7 +92,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
 		mController.init();
 		// WHEN that patient's details are loaded
-		AppPatient patient = new AppPatient();
+		AppPatient patient = AppPatient.builder().build();
 		mFakeCrudEventBus.post(new SingleItemFetchedEvent<AppPatient>(patient));
 		// THEN the controller puts observations on the UI
 		verify(mMockUi).setObservationHistory(allObservations);
@@ -104,7 +104,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
 		mController.init();
 		// WHEN that patient's details are loaded
-		AppPatient patient = new AppPatient();
+		AppPatient patient = AppPatient.builder().build();
 		mFakeCrudEventBus.post(new SingleItemFetchedEvent<AppPatient>(patient));
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
