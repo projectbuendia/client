@@ -1,6 +1,7 @@
 package org.msf.records.ui.chart;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,8 @@ import org.msf.records.widget.DataGridAdapter;
  * Attach the local cache of chart data into the necessary view for the chart history.
  */
 final class LocalizedChartDataGridAdapter implements DataGridAdapter {
+
+    private static final String TAG = "LocalizedChartDataGridAdapter";
 
     private static class Row {
 
@@ -64,10 +67,6 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
-            if (LocalizedChartHelper.UNKNOWN_VALUE.equals(ob.value)) {
-                // This gives no extra information, ignore it.
-                continue;
-            }
             if (row == null || !ob.conceptName.equals(row.name)) {
                 row = new Row(ob.conceptName);
                 rows.add(row);
@@ -87,12 +86,19 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     severeRow = null;
                 }
             }
+
+            if (ob.value == null || LocalizedChartHelper.UNKNOWN_VALUE.equals(ob.value)) {
+                // Don't display any dots or handle dates if there are no positive observations.
+                continue;
+            }
+
             DateTime d = new DateTime(ob.encounterTimeMillis, chronology);
             LocalDate localDate = d.toLocalDate();
             String amKey = toAmKey(todayString, localDate);
             String pmKey = toPmKey(amKey); // this is never displayed to the user
             String dateKey = d.getHourOfDay() < 12 ? amKey : pmKey;
             days.add(localDate);
+
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
                 row.datesToValues.put(dateKey, ob.value);
@@ -193,16 +199,21 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
         View imageView = view.findViewById(R.id.data_grid_cell_chart_image);
 
+        // TODO(dxchen): Switch to Temperature concept UUID.
         if (rowData.name.startsWith("Temperature")) {
             String temperatureString = rowData.datesToValues.get(dateKey);
             TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
             if (temperatureString != null) {
-                double temperature = Double.parseDouble(temperatureString);
-                textView.setText(String.format("%.1f", temperature));
-                if (temperature <= 37.5) {
-                    imageView.setBackgroundResource(R.drawable.chart_cell_good);
-                } else {
-                    imageView.setBackgroundResource(R.drawable.chart_cell_bad);
+                try {
+                    double temperature = Double.parseDouble(temperatureString);
+                    textView.setText(String.format("%.1f", temperature));
+                    if (temperature <= 37.5) {
+                        imageView.setBackgroundResource(R.drawable.chart_cell_good);
+                    } else {
+                        imageView.setBackgroundResource(R.drawable.chart_cell_bad);
+                    }
+                } catch (NumberFormatException e) {
+                    Log.w(TAG, "Temperature format was invalid", e);
                 }
             }
         } else {

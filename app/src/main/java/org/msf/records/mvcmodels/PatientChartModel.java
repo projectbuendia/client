@@ -12,23 +12,28 @@ import de.greenrobot.event.EventBus;
  */
 public class PatientChartModel {
 
-    // TODO(dxchen): Dagger this!
-    public static final PatientChartModel INSTANCE = new PatientChartModel();
+    private final SyncManager mSyncManager;
+    private final EventBus mEventBus;
 
-    public void init() {
-        EventBus.getDefault().register(this);
+    public PatientChartModel(EventBus eventBus, SyncManager syncManager) {
+    	mEventBus = eventBus;
+    	mSyncManager = syncManager;
     }
 
-    public synchronized void onEvent(CreatePatientSucceededEvent event) {
+    public void init() {
+        mEventBus.register(this);
+    }
+
+    public void onEvent(CreatePatientSucceededEvent event) {
         // When a new patient is created, sync from the server to get the latest info for
         // everything.
-        SyncManager.INSTANCE.forceSync();
+        mSyncManager.forceSync();
     }
 
     /**
      * Called when a sync finishes and fires a {@link ModelUpdatedEvent}.
      */
-    public synchronized void onEvent(SyncFinishedEvent event) {
+    public void onEvent(SyncFinishedEvent event) {
         EventBus.getDefault().post(new ModelUpdatedEvent(Models.OBSERVATIONS));
     }
 }

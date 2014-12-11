@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.ui.FakeEventBus;
@@ -41,6 +42,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private PatientChartController.Ui mMockUi;
 	@Mock private OdkResultSender mMockOdkResultSender;
 	@Mock private ObservationsProvider mMockObservationsProvider;
+	@Mock private PatientModel mMockPatientModel;
 	private FakeEventBus mFakeCrudEventBus;
 
 	@Override
@@ -56,7 +58,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 				mMockUi,
 				mMockOdkResultSender,
 				mMockObservationsProvider,
-				null);
+				null,
+				mMockPatientModel);
 	}
 
 	public void testSuspend_UnregistersFromEventBus() {

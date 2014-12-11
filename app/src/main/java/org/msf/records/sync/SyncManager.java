@@ -19,9 +19,6 @@ public class SyncManager {
 
     private static final String TAG = SyncManager.class.getName();
 
-    // TODO(dxchen): Dagger this!
-    public static final SyncManager INSTANCE = new SyncManager();
-
     static final String SYNC_STATUS = "sync-status";
     static final int STARTED = 1;
     static final int COMPLETED = 2;
