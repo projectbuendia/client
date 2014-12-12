@@ -233,7 +233,7 @@ public class OpenMrsServer implements Server {
             // TODO(akalachman): After the demo, replace with obvious sentinel to avoid confusion.
             patient.age = new PatientAge();
             patient.age.type = "years";
-            patient.age.years = 24;
+            patient.age.years = -1;
         }
 
         patient.first_showed_symptoms_timestamp = 0L;
