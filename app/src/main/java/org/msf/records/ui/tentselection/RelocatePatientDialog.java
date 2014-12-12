@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.R;
@@ -62,7 +63,9 @@ public class RelocatePatientDialog {
 
     private void setTents(List<LocationTree.LocationSubtree> tents) {
         if (gridView != null) {
-            TentListAdapter adapter = new TentListAdapter(context, tents);
+            TentListAdapter adapter = new TentListAdapter(
+                    context, tents,
+                    Optional.<LocationTree.LocationSubtree>absent());
             gridView.setAdapter(adapter);
         }
     }
