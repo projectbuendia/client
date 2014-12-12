@@ -17,7 +17,8 @@
         <EditText
             android:id="@+id/patient_creation_text_patient_id"
             android:layout_height="wrap_content"
-            android:layout_width="0dp" />
+            android:layout_width="0dp"
+            android:singleLine="true" />
 
     </TableRow>
 
@@ -32,7 +33,8 @@
         <EditText
             android:id="@+id/patient_creation_text_patient_given_name"
             android:layout_height="wrap_content"
-            android:layout_width="0dp" />
+            android:layout_width="0dp"
+            android:singleLine="true" />
 
     </TableRow>
 
@@ -47,7 +49,8 @@
         <EditText
             android:id="@+id/patient_creation_text_patient_family_name"
             android:layout_height="wrap_content"
-            android:layout_width="0dp" />
+            android:layout_width="0dp"
+            android:singleLine="true" />
 
     </TableRow>
 
@@ -64,24 +67,14 @@
             android:layout_width="0dp"
             android:gravity="center_vertical">
 
-            <FrameLayout
+            <EditText
+                android:id="@+id/patient_creation_text_age"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content">
-
-                <EditText
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:visibility="invisible"
-                    android:text="000"/>
-
-                <EditText
-                    android:id="@+id/patient_creation_text_age"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxLength="3"
-                    tools:text="18" />
-
-            </FrameLayout>
+                android:minEms="3"
+                android:maxLength="3"
+                android:singleLine="true"
+                android:numeric="signed" />
 
             <RadioGroup
                 android:id="@+id/patient_creation_radiogroup_age_units"
