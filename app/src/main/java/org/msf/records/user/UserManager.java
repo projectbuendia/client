@@ -241,10 +241,12 @@ public class UserManager {
             }
 
             synchronized (mKnownUsersLock) {
+                Set<User> knownUsers = mKnownUsers == null ? ImmutableSet.<User>of() : mKnownUsers;
+
                 ImmutableSet<User> addedUsers =
-                        ImmutableSet.copyOf(Sets.difference(syncedKnownUsers, mKnownUsers));
+                        ImmutableSet.copyOf(Sets.difference(syncedKnownUsers, knownUsers));
                 ImmutableSet<User> deletedUsers =
-                        ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedKnownUsers));
+                        ImmutableSet.copyOf(Sets.difference(knownUsers, syncedKnownUsers));
 
                 mKnownUsers = syncedKnownUsers;
 
