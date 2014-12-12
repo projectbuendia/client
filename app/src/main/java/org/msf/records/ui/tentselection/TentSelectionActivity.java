@@ -22,6 +22,7 @@ import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.PatientListFragment;
 import org.msf.records.ui.PatientSearchActivity;
 import org.msf.records.ui.RoundActivity;
+import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.EventBusWrapper;
 
 import de.greenrobot.event.EventBus;
@@ -84,10 +85,9 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        OdkActivityLauncher.fetchAndShowXform(
+                        startActivity(new Intent(
                                 TentSelectionActivity.this,
-                                Constants.ADD_PATIENT_UUID,
-                                ODK_ACTIVITY_REQUEST);
+                                PatientCreationActivity.class));
 
                         return true;
                     }

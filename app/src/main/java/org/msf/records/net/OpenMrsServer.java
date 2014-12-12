@@ -44,7 +44,6 @@ public class OpenMrsServer implements Server {
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
-
         JSONObject requestBody = new JSONObject();
         try {
             putIfSet(patientArguments, Server.PATIENT_ID_KEY, requestBody,
@@ -216,8 +215,9 @@ public class OpenMrsServer implements Server {
                 Patient.class);
 
         // TODO(rjlothian): This shouldn't be done here.
-        if (patient.assigned_location == null) {
-            LocationSubtree subtree = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
+        if (patient.assigned_location == null && LocationTree.SINGLETON_INSTANCE != null) {
+            LocationSubtree subtree =
+                    LocationTree.SINGLETON_INSTANCE.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
             if (subtree != null) {
                 patient.assigned_location = subtree.getLocation();
             }
