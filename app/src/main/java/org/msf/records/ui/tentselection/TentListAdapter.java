@@ -13,16 +13,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 /**
  * Adapter for displaying a list of tents (locations).
  */
 final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
     private final Context context;
+    private final Optional<LocationSubtree> selectedTent;
 
-    public TentListAdapter(Context context, List<LocationSubtree> values) {
-        super(context, R.layout.listview_cell_tent_selection, values);
+    public TentListAdapter(
+            Context context,
+            List<LocationSubtree> tents,
+            Optional<LocationSubtree> selectedTent) {
+        super(context, R.layout.listview_cell_tent_selection, tents);
         this.context = context;
+        this.selectedTent = Preconditions.checkNotNull(selectedTent);
     }
 
     @Override
@@ -48,6 +57,11 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
                 Zone.getBackgroundColorResource(tent.getLocation().parent_uuid));
         button.setTextColor(
                 Zone.getForegroundColorResource(tent.getLocation().parent_uuid));
+
+        if (selectedTent.isPresent() &&
+                selectedTent.get().getLocation().uuid == tent.getLocation().uuid) {
+            view.setBackgroundResource(android.R.color.black);
+        }
 
         return view;
     }
