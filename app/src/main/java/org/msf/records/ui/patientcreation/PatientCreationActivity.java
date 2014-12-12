@@ -1,6 +1,9 @@
 package org.msf.records.ui.patientcreation;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -25,6 +28,7 @@ import butterknife.OnClick;
 public final class PatientCreationActivity extends BaseActivity {
 
 	private PatientCreationController mController;
+    private AlertDialog mAlertDialog;
 
     @Inject OpenMrsServer mServer;
 
@@ -42,9 +46,30 @@ public final class PatientCreationActivity extends BaseActivity {
         App.getInstance().inject(this);
 
         mController = new PatientCreationController(new MyUi(), mServer);
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setTitle("Discard Changes?")
+                .setMessage("This will discard all changes. Are you sure?")
+                .setPositiveButton(
+                        "Yes",
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                finish();
+                            }
+                        }
+                )
+                .setNegativeButton("No", null)
+                .create();
 
         setContentView(R.layout.activity_patient_creation);
         ButterKnife.inject(this);
+    }
+
+    @OnClick(R.id.patient_creation_button_cancel)
+    void onCancelClick() {
+        mAlertDialog.show();
     }
 
     @OnClick(R.id.patient_creation_button_create)
@@ -56,6 +81,17 @@ public final class PatientCreationActivity extends BaseActivity {
                 mAge.getText().toString(),
                 getAgeUnits(),
                 getSex());
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            mAlertDialog.show();
+            return true;
+        }
+        else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     private int getAgeUnits() {
