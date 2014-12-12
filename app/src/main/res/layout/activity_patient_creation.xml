@@ -22,7 +22,8 @@
                 android:id="@+id/patient_creation_text_patient_id"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:inputType="textCapWords" />
 
         </TableRow>
 
@@ -39,7 +40,8 @@
                 android:id="@+id/patient_creation_text_patient_given_name"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:inputType="textCapWords" />
 
         </TableRow>
 
@@ -56,7 +58,8 @@
                 android:id="@+id/patient_creation_text_patient_family_name"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:inputType="textCapWords" />
 
         </TableRow>
 
