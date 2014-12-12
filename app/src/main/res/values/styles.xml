@@ -2,10 +2,21 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+
+        <!-- Action Bar -->
         <item name="android:actionBarStyle" >@style/thick_ab_style</item>
-        <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
         <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
         <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+
+        <!-- Widgets -->
+        <item name="android:textViewStyle">@style/Widget.Buendia.TextView</item>
+        <item name="android:editTextStyle">@style/Widget.Buendia.EditText</item>
+        <item name="android:buttonStyle">@style/Widget.Buendia.Button</item>
+        <item name="android:radioButtonStyle">
+            @style/Widget.Buendia.CompoundButton.RadioButton
+        </item>
+
+        <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
     </style>
 
     <style name="thick_ab_style" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
