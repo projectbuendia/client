@@ -44,6 +44,7 @@
     <string name="action_new_patient">+ Create New Patient</string>
     <string name="action_view_xform">+ View first saved xform</string>
     <string name="action_new_round">New Round</string>
+    <string name="action_assign_location">Assign location</string>
     <string name="action_update_chart">Update Chart</string>
     <string name="action_view_round_archive">Round Archive</string>
     <string name="snackbar_update_available">Application update available</string>
