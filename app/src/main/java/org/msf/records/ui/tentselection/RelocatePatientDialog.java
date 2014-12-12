@@ -19,7 +19,10 @@ import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Zone;
 import org.msf.records.utils.EventBusRegistrationInterface;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -91,8 +94,11 @@ public final class RelocatePatientDialog
                     initialTent == null
                             ? Optional.<String>absent()
                             : Optional.of(initialTent.getLocation().uuid);
+            List<LocationSubtree> locations = locationTree.getTents();
+            LocationSubtree dischargedZone = locationTree.getZoneForUuid(Zone.DISCHARGED_ZONE_UUID);
+            locations.add(dischargedZone);
             adapter = new TentListAdapter(
-                    context, locationTree.getTents(),
+                    context, locations,
                     initialTentUuid);
             gridView.setAdapter(adapter);
             gridView.setOnItemClickListener(this);
