@@ -101,7 +101,7 @@ public final class RelocatePatientDialog
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String newTentUuid = ((LocationSubtree) adapter.getItem(position)).getLocation().uuid;
+        String newTentUuid = adapter.getItem(position).getLocation().uuid;
         if (!isCurrentTent(newTentUuid)) {
             tentSelectedCallback.onNewTentSelected(newTentUuid);
         }
