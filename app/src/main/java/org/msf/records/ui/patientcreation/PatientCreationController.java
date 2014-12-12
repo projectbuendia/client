@@ -1,32 +1,17 @@
 package org.msf.records.ui.patientcreation;
 
-import android.os.SystemClock;
-import android.text.Editable;
-import android.util.Log;
-
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
-import org.msf.records.R;
-import org.msf.records.events.location.LocationsLoadFailedEvent;
-import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.events.net.AddPatientFailedEvent;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.model.Zone;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-import org.msf.records.utils.EventBusRegistrationInterface;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nullable;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -122,12 +107,25 @@ final class PatientCreationController {
         patientArguments.put(Server.PATIENT_ID_KEY, id);
         patientArguments.put(Server.PATIENT_GIVEN_NAME_KEY, givenName);
         patientArguments.put(Server.PATIENT_FAMILY_NAME_KEY, familyName);
-
-        // TODO(dxchen,nfortescue): Add patient should support age.
-
+        patientArguments.put(Server.PATIENT_BIRTHDATE_KEY, getBirthdateFromAge(ageInt, ageUnits));
         patientArguments.put(Server.PATIENT_GENDER_KEY, sex == SEX_MALE ? "M" : "F");
 
         mServer.addPatient(patientArguments, mAddPatientListener, mAddPatientListener, TAG);
+    }
+
+    private static final DateTimeFormatter BIRTHDATE_FORMATTER =
+            DateTimeFormat.forPattern("yyyy-MM-dd");
+
+    private String getBirthdateFromAge(int ageInt, int ageUnits) {
+        DateTime now = DateTime.now();
+        switch (ageUnits) {
+            case AGE_YEARS:
+                return now.minusYears(ageInt).toString(BIRTHDATE_FORMATTER);
+            case AGE_MONTHS:
+                return now.minusMonths(ageInt).toString(BIRTHDATE_FORMATTER);
+            default:
+                return null;
+        }
     }
 
     private final class AddPatientListener
