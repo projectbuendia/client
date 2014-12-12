@@ -19,6 +19,7 @@ import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.Server;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;
@@ -37,6 +38,9 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.msf.records.ui.tentselection.RelocatePatientDialog.TentSelectedCallback;
 
 /**
  * Controller for {@link PatientChartActivity}.
@@ -125,7 +129,7 @@ final class PatientChartController {
     		@Nullable Bundle savedState,
     		PatientModel patientModel) {
     	mAppModel = appModel;
-    	mServer = server;
+    	mServer = checkNotNull(server);
     	mCrudEventBus = crudEventBus;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
@@ -303,12 +307,24 @@ final class PatientChartController {
         return requestCode;
     }
 
-    public void showRelocatePatientDialog(Context context, LocationManager locationManager) {
+    public void showRelocatePatientDialog(
+            Context context,
+            LocationManager locationManager,
+            final Server server) {
+        TentSelectedCallback callback =
+                new TentSelectedCallback() {
+                    @Override
+                    public void onNewTentSelected(String newTentUuid) {
+                        server.updatePatientLocation(mPatient.uuid, newTentUuid);
+                    }
+                };
         new RelocatePatientDialog(
                 context,
                 locationManager,
                 new EventBusWrapper(EventBus.getDefault()),
-                mPatient.locationUuid)
+                mPatient.uuid,
+                mPatient.locationUuid,
+                callback)
                 .show();
     }
 
