@@ -1,15 +1,12 @@
 package org.msf.records.ui.chart;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
 import org.msf.records.App;
@@ -17,6 +14,7 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.location.LocationManager;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
@@ -27,10 +25,18 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.ui.tentselection.RelocatePatientDialog;
+import org.msf.records.utils.EventBusWrapper;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Controller for {@link PatientChartActivity}.
@@ -295,6 +301,15 @@ final class PatientChartController {
         int requestCode = BASE_ODK_REQUEST + nextIndex;
         nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
         return requestCode;
+    }
+
+    public void showRelocatePatientDialog(Context context, LocationManager locationManager) {
+        new RelocatePatientDialog(
+                context,
+                locationManager,
+                new EventBusWrapper(EventBus.getDefault()),
+                mPatient.locationUuid)
+                .show();
     }
 
     /**

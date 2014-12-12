@@ -18,8 +18,6 @@ import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.utils.EventBusRegistrationInterface;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
 /**
@@ -35,14 +33,17 @@ public class RelocatePatientDialog implements DialogInterface.OnDismissListener 
     private final LocationManager locationManager;
     private final EventBusRegistrationInterface eventBus;
     private final EventBusSubscriber eventBusSubscriber = new EventBusSubscriber();
+    private final String initialPatientLocationUuid;
 
     public RelocatePatientDialog(
             Context context,
             LocationManager locationManager,
-            EventBusRegistrationInterface eventBus) {
+            EventBusRegistrationInterface eventBus,
+            String patientLocationUuid) {
         this.context = Preconditions.checkNotNull(context);
         this.locationManager = Preconditions.checkNotNull(locationManager);
         this.eventBus = Preconditions.checkNotNull(eventBus);
+        this.initialPatientLocationUuid = Preconditions.checkNotNull(patientLocationUuid);
     }
 
     public void show() {
@@ -64,11 +65,17 @@ public class RelocatePatientDialog implements DialogInterface.OnDismissListener 
         locationManager.loadLocations();
     }
 
-    private void setTents(List<LocationTree.LocationSubtree> tents) {
+    private void setTents(LocationTree locationTree) {
         if (gridView != null) {
+            LocationTree.LocationSubtree initialTent =
+                    locationTree.getTentForUuid(initialPatientLocationUuid);
+            Optional<String> initialTentUuid =
+                    initialTent == null
+                            ? Optional.<String>absent()
+                            : Optional.of(initialTent.getLocation().uuid);
             TentListAdapter adapter = new TentListAdapter(
-                    context, tents,
-                    Optional.<LocationTree.LocationSubtree>absent());
+                    context, locationTree.getTents(),
+                    initialTentUuid);
             gridView.setAdapter(adapter);
         }
     }
@@ -86,7 +93,7 @@ public class RelocatePatientDialog implements DialogInterface.OnDismissListener 
         }
 
         public void onEventMainThread(LocationsLoadedEvent event) {
-            setTents(event.locationTree.getTents());
+            setTents(event.locationTree);
         }
     }
 }
