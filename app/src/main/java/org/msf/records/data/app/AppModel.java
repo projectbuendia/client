@@ -64,8 +64,6 @@ public class AppModel {
     public void fetchUsers(CrudEventBus bus) {
         // Register for error events so that we can close cursors if we need to.
         bus.register(mCrudEventBusErrorSubscriber);
-
-        // TODO(dxchen): Asynchronously fetch users.
     }
 
     /**
