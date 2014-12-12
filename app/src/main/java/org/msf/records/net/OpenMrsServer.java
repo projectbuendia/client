@@ -182,6 +182,11 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
+    public void updatePatientLocation(String patientId, String newLocationId) {
+        // TODO(sdoerner): Implement.
+    }
+
+    @Override
     public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<Patient>> patientListener,

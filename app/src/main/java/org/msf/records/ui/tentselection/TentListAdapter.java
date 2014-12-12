@@ -33,6 +33,10 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         this.selectedTentUuid = Preconditions.checkNotNull(selectedTent);
     }
 
+    public Optional<String> getSelectedTentUuid() {
+        return selectedTentUuid;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
