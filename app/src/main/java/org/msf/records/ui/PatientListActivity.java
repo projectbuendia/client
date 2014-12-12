@@ -12,6 +12,7 @@ import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
+import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
 
@@ -123,10 +124,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        OdkActivityLauncher.fetchAndShowXform(
-                                PatientListActivity.this,
-                                Constants.ADD_PATIENT_UUID,
-                                ODK_ACTIVITY_REQUEST);
+                        startActivity(PatientCreationActivity.class);
 
                         return true;
                     }

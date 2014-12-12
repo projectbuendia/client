@@ -1,34 +1,23 @@
 package org.msf.records.ui.patientcreation;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.android.volley.VolleyError;
+
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsServer;
+import org.msf.records.net.model.Patient;
 import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.PatientListFragment;
-import org.msf.records.ui.RoundActivity;
-import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 
 /**
  * A {@link BaseActivity} that allows users to create a new patient.
@@ -61,10 +50,10 @@ public final class PatientCreationActivity extends BaseActivity {
     @OnClick(R.id.patient_creation_button_create)
     void onCreateClick() {
         mController.createPatient(
-                mId.getText(),
-                mGivenName.getText(),
-                mFamilyName.getText(),
-                mAge.getText(),
+                mId.getText().toString(),
+                mGivenName.getText().toString(),
+                mFamilyName.getText().toString(),
+                mAge.getText().toString(),
                 getAgeUnits(),
                 getSex());
     }
@@ -97,17 +86,39 @@ public final class PatientCreationActivity extends BaseActivity {
 
         @Override
         public void onValidationError(int field, String message) {
-
+            switch (field) {
+                case PatientCreationController.Ui.FIELD_ID:
+                    mId.setError(message);
+                    break;
+                case PatientCreationController.Ui.FIELD_GIVEN_NAME:
+                    mGivenName.setError(message);
+                    break;
+                case PatientCreationController.Ui.FIELD_FAMILY_NAME:
+                    mFamilyName.setError(message);
+                    break;
+                case PatientCreationController.Ui.FIELD_AGE:
+                    mAge.setError(message);
+                    break;
+                case PatientCreationController.Ui.FIELD_AGE_UNITS:
+                    // TODO(dxchen): Handle.
+                    break;
+                case PatientCreationController.Ui.FIELD_SEX:
+                    // TODO(dxchen): Handle.
+                    break;
+            }
         }
 
         @Override
-        public void onCreateFailed() {
-
+        public void onCreateFailed(VolleyError error) {
+            Toast.makeText(
+                    PatientCreationActivity.this,
+                    "Unable to add patient: " + error,
+                    Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        public void onCreateSucceeded() {
-
+        public void onCreateSucceeded(Patient response) {
+            finish();
         }
     }
 }
