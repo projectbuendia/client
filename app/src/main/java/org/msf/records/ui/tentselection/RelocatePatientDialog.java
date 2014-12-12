@@ -2,6 +2,7 @@ package org.msf.records.ui.tentselection;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -24,7 +25,7 @@ import javax.annotation.Nullable;
 /**
  * Popup dialog showing tents in order to relocate patients into one of them.
  */
-public class RelocatePatientDialog {
+public class RelocatePatientDialog implements DialogInterface.OnDismissListener {
 
     public static final boolean DEBUG = true;
     public static final String TAG = RelocatePatientDialog.class.getSimpleName();
@@ -33,6 +34,7 @@ public class RelocatePatientDialog {
     private final Context context;
     private final LocationManager locationManager;
     private final EventBusRegistrationInterface eventBus;
+    private final EventBusSubscriber eventBusSubscriber = new EventBusSubscriber();
 
     public RelocatePatientDialog(
             Context context,
@@ -52,12 +54,13 @@ public class RelocatePatientDialog {
         new AlertDialog.Builder(context)
             .setTitle(R.string.action_assign_location)
             .setView(frameLayout)
+            .setOnDismissListener(this)
             .create()
             .show();
     }
 
     private void startListeningForLocations() {
-        eventBus.register(new EventBusSubscriber());
+        eventBus.register(eventBusSubscriber);
         locationManager.loadLocations();
     }
 
@@ -68,6 +71,11 @@ public class RelocatePatientDialog {
                     Optional.<LocationTree.LocationSubtree>absent());
             gridView.setAdapter(adapter);
         }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        eventBus.unregister(eventBusSubscriber);
     }
 
     private final class EventBusSubscriber {
