@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import com.google.common.base.Optional;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -107,7 +109,8 @@ public final class TentSelectionFragment extends ProgressFragment {
 
     	@Override
     	public void setTents(List<LocationSubtree> tents) {
-    		mAdapter = new TentListAdapter(getActivity(), tents);
+    		mAdapter =
+                    new TentListAdapter(getActivity(), tents, Optional.<String>absent());
     		mTentGrid.setAdapter(mAdapter);
 		}
 
