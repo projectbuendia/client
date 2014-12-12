@@ -110,7 +110,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     	@Override
     	public void setTents(List<LocationSubtree> tents) {
     		mAdapter =
-                    new TentListAdapter(getActivity(), tents, Optional.<LocationSubtree>absent());
+                    new TentListAdapter(getActivity(), tents, Optional.<String>absent());
     		mTentGrid.setAdapter(mAdapter);
 		}
 
