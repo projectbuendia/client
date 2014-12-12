@@ -14,6 +14,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -31,6 +32,7 @@ import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
@@ -42,6 +44,8 @@ import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.ui.tentselection.RelocatePatientDialog;
+import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.PrepopulatableFields;
@@ -66,6 +70,7 @@ public final class PatientChartActivity extends BaseActivity {
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
+    @Inject LocationManager locationManager;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -165,6 +170,21 @@ public final class PatientChartActivity extends BaseActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.overview, menu);
+
+        menu.findItem(R.id.action_relocate_patient).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        new RelocatePatientDialog(
+                                PatientChartActivity.this,
+                                locationManager,
+                                new EventBusWrapper(EventBus.getDefault()))
+                                .show();
+                        return true;
+                    }
+                }
+        );
 
         menu.findItem(R.id.action_update_chart).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
