@@ -90,6 +90,14 @@ public interface Server {
             String logTag);
 
     /**
+     * Update the location of a patient
+     *
+     * @param patientId the id of the patient to update
+     * @param newLocationId the id of the new location that the patient is assigned to
+     */
+    public void updatePatientLocation(String patientId, String newLocationId);
+
+    /**
      * List all existing patients.
      *
      * @param logTag a unique argument for tagging logs to aid debugging

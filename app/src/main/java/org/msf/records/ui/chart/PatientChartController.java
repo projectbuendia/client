@@ -1,8 +1,34 @@
 package org.msf.records.ui.chart;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
+import org.joda.time.DateTime;
+import org.msf.records.App;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.location.LocationManager;
+import org.msf.records.model.Concept;
+import org.msf.records.mvcmodels.PatientModel;
+import org.msf.records.net.Constants;
+import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.net.Server;
+import org.msf.records.net.model.ChartStructure;
+import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.User;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.ui.tentselection.RelocatePatientDialog;
+import org.msf.records.utils.EventBusWrapper;
+import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,26 +37,10 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.joda.time.DateTime;
-import org.msf.records.App;
-import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppPatient;
-import org.msf.records.events.CrudEventBus;
-import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.Constants;
-import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.model.ChartStructure;
-import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.PatientChart;
-import org.msf.records.net.model.User;
-import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.odk.collect.android.model.PrepopulatableFields;
+import de.greenrobot.event.EventBus;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.msf.records.ui.tentselection.RelocatePatientDialog.TentSelectedCallback;
 
 /**
  * Controller for {@link PatientChartActivity}.
@@ -119,7 +129,7 @@ final class PatientChartController {
     		@Nullable Bundle savedState,
     		PatientModel patientModel) {
     	mAppModel = appModel;
-    	mServer = server;
+    	mServer = checkNotNull(server);
     	mCrudEventBus = crudEventBus;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
@@ -295,6 +305,27 @@ final class PatientChartController {
         int requestCode = BASE_ODK_REQUEST + nextIndex;
         nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
         return requestCode;
+    }
+
+    public void showRelocatePatientDialog(
+            Context context,
+            LocationManager locationManager,
+            final Server server) {
+        TentSelectedCallback callback =
+                new TentSelectedCallback() {
+                    @Override
+                    public void onNewTentSelected(String newTentUuid) {
+                        server.updatePatientLocation(mPatient.uuid, newTentUuid);
+                    }
+                };
+        new RelocatePatientDialog(
+                context,
+                locationManager,
+                new EventBusWrapper(EventBus.getDefault()),
+                mPatient.uuid,
+                mPatient.locationUuid,
+                callback)
+                .show();
     }
 
     /**

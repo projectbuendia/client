@@ -1,19 +1,25 @@
 package org.msf.records.ui.tentselection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Optional;
 
 import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Zone;
 import org.msf.records.utils.EventBusRegistrationInterface;
 
 import java.util.List;
@@ -23,23 +29,42 @@ import javax.annotation.Nullable;
 /**
  * Popup dialog showing tents in order to relocate patients into one of them.
  */
-public class RelocatePatientDialog {
-
+public final class RelocatePatientDialog
+        implements DialogInterface.OnDismissListener, AdapterView.OnItemClickListener {
     public static final boolean DEBUG = true;
     public static final String TAG = RelocatePatientDialog.class.getSimpleName();
 
+    @Nullable private AlertDialog dialog;
     @Nullable private GridView gridView;
+    @Nullable private TentListAdapter adapter;
     private final Context context;
     private final LocationManager locationManager;
     private final EventBusRegistrationInterface eventBus;
+    private final EventBusSubscriber eventBusSubscriber = new EventBusSubscriber();
+    private final String patientId;
+    private final String initialPatientLocationUuid;
+    private final TentSelectedCallback tentSelectedCallback;
+
+    public interface TentSelectedCallback {
+        /**
+         * Called when then user selects a tent that is not the currently selected one.
+         */
+        void onNewTentSelected(String newTentUuid);
+    }
 
     public RelocatePatientDialog(
             Context context,
             LocationManager locationManager,
-            EventBusRegistrationInterface eventBus) {
-        this.context = Preconditions.checkNotNull(context);
-        this.locationManager = Preconditions.checkNotNull(locationManager);
-        this.eventBus = Preconditions.checkNotNull(eventBus);
+            EventBusRegistrationInterface eventBus,
+            String patientId,
+            String patientLocationUuid,
+            TentSelectedCallback tentSelectedCallback) {
+        this.context = checkNotNull(context);
+        this.locationManager = checkNotNull(locationManager);
+        this.eventBus = checkNotNull(eventBus);
+        this.patientId = checkNotNull(patientId);
+        this.initialPatientLocationUuid = checkNotNull(patientLocationUuid);
+        this.tentSelectedCallback = checkNotNull(tentSelectedCallback);
     }
 
     public void show() {
@@ -48,23 +73,56 @@ public class RelocatePatientDialog {
         gridView = (GridView) frameLayout.findViewById(R.id.tent_selection_tents);
         startListeningForLocations();
 
-        new AlertDialog.Builder(context)
+        dialog = new AlertDialog.Builder(context)
             .setTitle(R.string.action_assign_location)
             .setView(frameLayout)
-            .create()
-            .show();
+            .setOnDismissListener(this)
+            .create();
+        dialog.show();
     }
 
     private void startListeningForLocations() {
-        eventBus.register(new EventBusSubscriber());
+        eventBus.register(eventBusSubscriber);
         locationManager.loadLocations();
     }
 
-    private void setTents(List<LocationTree.LocationSubtree> tents) {
+    private void setTents(LocationTree locationTree) {
         if (gridView != null) {
-            TentListAdapter adapter = new TentListAdapter(context, tents);
+            LocationSubtree initialTent =
+                    locationTree.getTentForUuid(initialPatientLocationUuid);
+            Optional<String> initialTentUuid =
+                    initialTent == null
+                            ? Optional.<String>absent()
+                            : Optional.of(initialTent.getLocation().uuid);
+            List<LocationSubtree> locations = locationTree.getTents();
+            LocationSubtree dischargedZone = locationTree.getZoneForUuid(Zone.DISCHARGED_ZONE_UUID);
+            locations.add(dischargedZone);
+            adapter = new TentListAdapter(
+                    context, locations,
+                    initialTentUuid);
             gridView.setAdapter(adapter);
+            gridView.setOnItemClickListener(this);
         }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String newTentUuid = adapter.getItem(position).getLocation().uuid;
+        if (!isCurrentTent(newTentUuid)) {
+            tentSelectedCallback.onNewTentSelected(newTentUuid);
+        }
+        dialog.dismiss();
+    }
+
+    private boolean isCurrentTent(String newTentUuid) {
+        Optional<String> selectedTentUuid = adapter.getSelectedTentUuid();
+        return selectedTentUuid.isPresent() &&
+                newTentUuid.equals(selectedTentUuid.get());
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        eventBus.unregister(eventBusSubscriber);
     }
 
     private final class EventBusSubscriber {
@@ -75,7 +133,7 @@ public class RelocatePatientDialog {
         }
 
         public void onEventMainThread(LocationsLoadedEvent event) {
-            setTents(event.locationTree.getTents());
+            setTents(event.locationTree);
         }
     }
 }
