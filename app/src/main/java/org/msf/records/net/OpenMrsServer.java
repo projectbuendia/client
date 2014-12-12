@@ -52,6 +52,12 @@ public class OpenMrsServer implements Server {
                     Server.PATIENT_GIVEN_NAME_KEY);
             putIfSet(patientArguments, Server.PATIENT_FAMILY_NAME_KEY, requestBody,
                     Server.PATIENT_FAMILY_NAME_KEY);
+            putIfSet(patientArguments, Server.PATIENT_AGE_TYPE_KEY, requestBody,
+                    Server.PATIENT_AGE_TYPE_KEY);
+            putIfSet(patientArguments, Server.PATIENT_DOB_YEARS_KEY, requestBody,
+                    Server.PATIENT_DOB_YEARS_KEY);
+            putIfSet(patientArguments, Server.PATIENT_DOB_MONTHS_KEY, requestBody,
+                    Server.PATIENT_DOB_MONTHS_KEY);
             putIfSet(patientArguments, Server.PATIENT_GENDER_KEY, requestBody,
                     Server.PATIENT_GENDER_KEY);
         } catch (JSONException e) {
@@ -227,7 +233,7 @@ public class OpenMrsServer implements Server {
             // TODO(akalachman): After the demo, replace with obvious sentinel to avoid confusion.
             patient.age = new PatientAge();
             patient.age.type = "years";
-            patient.age.years = 24;
+            patient.age.years = -1;
         }
 
         patient.first_showed_symptoms_timestamp = 0L;

@@ -241,7 +241,7 @@ public class FormEntryActivity
                         }
                 )
                 .setNegativeButton(R.string.no, null)
-                .create();;
+                .create();
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
