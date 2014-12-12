@@ -31,6 +31,7 @@ public final class RelocatePatientDialog
     public static final boolean DEBUG = true;
     public static final String TAG = RelocatePatientDialog.class.getSimpleName();
 
+    @Nullable private AlertDialog dialog;
     @Nullable private GridView gridView;
     @Nullable private TentListAdapter adapter;
     private final Context context;
@@ -69,12 +70,12 @@ public final class RelocatePatientDialog
         gridView = (GridView) frameLayout.findViewById(R.id.tent_selection_tents);
         startListeningForLocations();
 
-        new AlertDialog.Builder(context)
+        dialog = new AlertDialog.Builder(context)
             .setTitle(R.string.action_assign_location)
             .setView(frameLayout)
             .setOnDismissListener(this)
-            .create()
-            .show();
+            .create();
+        dialog.show();
     }
 
     private void startListeningForLocations() {
@@ -104,6 +105,7 @@ public final class RelocatePatientDialog
         if (!isCurrentTent(newTentUuid)) {
             tentSelectedCallback.onNewTentSelected(newTentUuid);
         }
+        dialog.dismiss();
     }
 
     private boolean isCurrentTent(String newTentUuid) {
