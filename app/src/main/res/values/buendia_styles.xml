@@ -6,6 +6,10 @@
         <item name="android:textSize">26sp</item>
     </style>
 
+    <style name="TextAppearance.Buendia.Tiny">
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="TextAppearance.Buendia.Small">
         <item name="android:textSize">18sp</item>
     </style>
@@ -16,6 +20,10 @@
 
     <style name="TextAppearance.Buendia.Large">
         <item name="android:textSize">32sp</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Huge">
+        <item name="android:textSize">40sp</item>
     </style>
 
     <!-- Widgets -->
@@ -38,6 +46,10 @@
     <!-- Button -->
     <style name="Widget.Buendia.Button" parent="android:Widget.Holo.Light.Button">
         <item name="android:textAppearance">@style/TextAppearance.Buendia.Large</item>
+    </style>
+
+    <style name="Widget.Buendia.Button.Colorful" parent="Widget.Buendia.Button">
+        <item name="android:textColor">#FFFFFF</item>
     </style>
 
     <!-- Radio Button -->
