@@ -1,0 +1,203 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <TableLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:padding="16dp"
+        android:stretchColumns="1">
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="center_vertical"
+                android:text="ID" />
+
+            <EditText
+                android:id="@+id/patient_creation_text_patient_id"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:inputType="textCapWords" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="center_vertical"
+                android:text="Given Name" />
+
+            <EditText
+                android:id="@+id/patient_creation_text_patient_given_name"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:inputType="textCapWords" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="center_vertical"
+                android:text="Family Name" />
+
+            <EditText
+                android:id="@+id/patient_creation_text_patient_family_name"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:inputType="textCapWords" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="center_vertical"
+                android:text="Age" />
+
+            <LinearLayout
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/patient_creation_text_age"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="24dp"
+                    android:minEms="3"
+                    android:maxLength="3"
+                    android:singleLine="true"
+                    android:numeric="signed" />
+
+                <RadioGroup
+                    android:id="@+id/patient_creation_radiogroup_age_units"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/patient_creation_radiogroup_age_units_years"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Years"/>
+
+                    <RadioButton
+                        android:id="@+id/patient_creation_radiogroup_age_units_months"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Months"/>
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="center_vertical"
+                android:text="Sex" />
+
+            <RadioGroup
+                android:id="@+id/patient_creation_radiogroup_sex"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/patient_creation_radiogroup_age_sex_male"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Male"/>
+
+                <RadioButton
+                    android:id="@+id/patient_creation_radiogroup_age_sex_female"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Female"/>
+
+            </RadioGroup>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="center_vertical"
+                android:text="Location" />
+
+            <LinearLayout
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/patient_creation_text_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="24dp"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/gray_600"
+                    android:text="Unassigned"/>
+
+                <Button
+                    android:id="@+id/patient_creation_button_change_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Change"/>
+
+            </LinearLayout>
+
+        </TableRow>
+    </TableLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/patient_creation_button_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel" />
+
+        <Button
+            android:id="@+id/patient_creation_button_create"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Create" />
+
+    </LinearLayout>
+
+</RelativeLayout>

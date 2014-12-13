@@ -10,7 +10,8 @@ public class Appearance {
 
     private static final Appearance EMPTY = new Appearance("", new HashSet<String>());
 
-    public final String mPrimaryAppearance;
+    public final String primaryAppearance;
+
     private final Set<String> mQualifiers;
 
     public static Appearance fromString(String appearanceString) {
@@ -34,7 +35,7 @@ public class Appearance {
     }
 
     public Appearance(String primaryAppearance, Set<String> qualifiers) {
-        mPrimaryAppearance = primaryAppearance;
+        this.primaryAppearance = primaryAppearance;
         mQualifiers = qualifiers;
     }
 

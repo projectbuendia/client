@@ -7,5 +7,5 @@ package org.msf.records.data.app;
  */
 public abstract class AppTypeBase<T> {
 
-    public T mId;
+    public T id;
 }

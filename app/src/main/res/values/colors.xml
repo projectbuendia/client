@@ -7,6 +7,9 @@
     <color name="red">#FF0000</color>
     <color name="transparent">#00000000</color>
 
+    <color name="gray_400">#BDBDBD</color>
+    <color name="gray_600">#757575</color>
+
     <color name="status_probable">#fbb03b</color>
     <color name="status_suspect">#ffff00</color>
     <color name="status_confirmed">#ff0000</color>
@@ -18,6 +21,7 @@
     <color name="status_discharged">#b3b3b3</color>
     <color name="zone_outside">#FFFFFF</color>
     <color name="zone_triage">#FFFFFF</color>
+    <color name="zone_tent_selected_padding">@android:color/black</color>
     <color name="general_condition_good">#4CAF50</color>
     <color name="general_condition_fair">#FFC927</color>
     <color name="general_condition_poor">#FF2121</color>

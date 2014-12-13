@@ -18,6 +18,11 @@ import org.msf.records.utils.EventBusRegistrationInterface;
 import android.os.SystemClock;
 import android.util.Log;
 
+/**
+ * Controller for {@link TentSelectionActivity}.
+ *
+ * Avoid adding untestable dependencies to this class.
+ */
 final class TentSelectionController {
 
 	private static final String TAG = TentSelectionController.class.getSimpleName();
@@ -88,6 +93,39 @@ final class TentSelectionController {
 		mFragmentUis.remove(fragmentUi);
 	}
 
+	/** Frees any resources used by the controller. */
+	public void suspend() {
+		if (DEBUG) {
+			Log.d(TAG, "Controller suspended.");
+		}
+		mEventBus.unregister(mEventBusSubscriber);
+	}
+
+	/** Call when the user presses the search button. */
+	public void onSearchPressed() {
+		mUi.switchToPatientListScreen();
+	}
+
+	/** Call when the user exits search mode. */
+	public void onSearchCancelled() {
+		mUi.switchToTentSelectionScreen();
+	}
+
+	/** Call when the user presses the discharged zone. */
+	public void onDischargedPressed() {
+		mUi.launchActivityForLocation(mDischargedZone);
+	}
+
+	/** Call when the user presses the triage zone. */
+	public void onTriagePressed() {
+		mUi.launchActivityForLocation(mTriageZone);
+	}
+
+	/** Call when the user presses a tent. */
+	public void onTentSelected(LocationSubtree tent) {
+		mUi.launchActivityForLocation(tent);
+	}
+
 	private void populateFragmentUi(TentFragmentUi fragmentUi) {
 		fragmentUi.showSpinner(!mLoadedLocationTree);
 		if (mLocationTree != null) {
@@ -98,32 +136,6 @@ final class TentSelectionController {
 		}
 	}
 
-	public void suspend() {
-		if (DEBUG) {
-			Log.d(TAG, "Controller suspended.");
-		}
-		mEventBus.unregister(mEventBusSubscriber);
-	}
-
-	public void onSearchPressed() {
-		mUi.switchToPatientListScreen();
-	}
-
-	public void onSearchCancelled() {
-		mUi.switchToTentSelectionScreen();
-	}
-
-	public void onDischargedPressed() {
-		mUi.launchActivityForLocation(mDischargedZone);
-	}
-
-	public void onTriagePressed() {
-		mUi.launchActivityForLocation(mTriageZone);
-	}
-
-	public void onTentSelected(LocationSubtree tent) {
-		mUi.launchActivityForLocation(tent);
-	}
 
 	@SuppressWarnings("unused") // Called by reflection from EventBus
 	private final class EventBusSubscriber {
@@ -140,10 +152,10 @@ final class TentSelectionController {
 
 	    public void onEventMainThread(LocationsLoadedEvent event) {
 	    	if (DEBUG) {
-	    		Log.d(TAG, "Loaded location tree: " + event.mLocationTree + " after "
-	    				+ (SystemClock.currentThreadTimeMillis() - mLoadRequestTimeMs) + "ms");
+	    		Log.d(TAG, "Loaded location tree: " + event.locationTree + " after "
+	    				+ (SystemClock.elapsedRealtime() - mLoadRequestTimeMs) + "ms");
 	    	}
-	    	mLocationTree = event.mLocationTree;
+	    	mLocationTree = event.locationTree;
 	        for (LocationSubtree zone : mLocationTree.getZones()) {
 	            switch (zone.getLocation().uuid) {
 	                case Zone.TRIAGE_ZONE_UUID:

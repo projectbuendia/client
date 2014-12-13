@@ -9,12 +9,16 @@ import org.msf.records.ui.ProgressFragment;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+
+import com.google.common.base.Optional;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -58,7 +62,6 @@ public final class TentSelectionFragment extends ProgressFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_tent_selection);
-        mController = ((TentSelectionActivity) getActivity()).getController();
     }
 
     @Override
@@ -70,16 +73,17 @@ public final class TentSelectionFragment extends ProgressFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        mController.attachFragmentUi(mMyUi);
+    public void onViewStateRestored(Bundle savedInstanceState) {
+    	super.onViewStateRestored(savedInstanceState);
+        mController = ((TentSelectionActivity) getActivity()).getController();
+    	mController.attachFragmentUi(mMyUi);
     }
 
-    @Override
-    public void onPause() {
-    	mController.detachFragmentUi(mMyUi);
-        super.onPause();
-    }
+	@Override
+	public void onDestroyView() {
+		mController.detachFragmentUi(mMyUi);
+		super.onDestroyView();
+	}
 
     private final class MyUi implements TentSelectionController.TentFragmentUi {
     	@Override
@@ -105,7 +109,8 @@ public final class TentSelectionFragment extends ProgressFragment {
 
     	@Override
     	public void setTents(List<LocationSubtree> tents) {
-    		mAdapter = new TentListAdapter(getActivity(), tents);
+    		mAdapter = new TentListAdapter(
+                    getActivity(), tents, Optional.<String>absent(), false /*shouldAbbreviate*/);
     		mTentGrid.setAdapter(mAdapter);
 		}
 

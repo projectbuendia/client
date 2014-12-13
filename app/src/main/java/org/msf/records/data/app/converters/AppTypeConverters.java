@@ -5,9 +5,9 @@ package org.msf.records.data.app.converters;
  */
 public class AppTypeConverters {
 
-    public final AppPatientConverter mPatient;
+    public final AppPatientConverter patient;
 
     AppTypeConverters(AppPatientConverter patientConverter) {
-        mPatient = patientConverter;
+        patient = patientConverter;
     }
 }

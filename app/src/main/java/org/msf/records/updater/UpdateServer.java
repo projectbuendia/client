@@ -2,28 +2,24 @@ package org.msf.records.updater;
 
 import android.support.annotation.Nullable;
 
-import com.android.volley.Response;
-
-import org.msf.records.App;
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.net.GsonRequest;
 import org.msf.records.net.VolleySingleton;
+
+import com.android.volley.Response;
 
 /**
  * An object that talks to the update server.
  */
 public class UpdateServer {
 
-    /**
-     * TODO(dxchen): Dagger this.
-     */
     public static final String ROOT_URL = "http://buendia.whitespell.com:8080/";
 
     private final VolleySingleton mVolley;
     private final String mRootUrl;
 
-    public UpdateServer(@Nullable String rootUrl) {
-        mVolley = VolleySingleton.getInstance(App.getInstance());
+    public UpdateServer(VolleySingleton volley, @Nullable String rootUrl) {
+        mVolley = volley;
         mRootUrl = rootUrl == null ? ROOT_URL : rootUrl;
     }
 

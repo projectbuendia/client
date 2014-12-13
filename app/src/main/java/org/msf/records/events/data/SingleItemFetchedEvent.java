@@ -1,7 +1,7 @@
 package org.msf.records.events.data;
 
 import org.msf.records.data.app.TypedCursor;
-import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.DefaultCrudEventBus;
 
 /**
  * An event bus event indicating that a single item has been fetched from the data store.
@@ -9,13 +9,13 @@ import org.msf.records.events.CrudEventBus;
  * <p>Unlike {@link TypedCursorFetchedEvent}, this class directly provides the fetched item (rather
  * than providing a {@link TypedCursor} to lazy-load fetched items).
  *
- * <p>This event should only ever be posted on a {@link CrudEventBus}.
+ * <p>This event should only ever be posted on a {@link DefaultCrudEventBus}.
  */
 public class SingleItemFetchedEvent<T> {
 
-    public final T mItem;
+    public final T item;
 
     public SingleItemFetchedEvent(T item) {
-        mItem = item;
+        this.item = item;
     }
 }

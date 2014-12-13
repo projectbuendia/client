@@ -2,7 +2,7 @@ package org.msf.records;
 
 import android.app.Application;
 
-import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.DefaultCrudEventBus;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
@@ -43,10 +43,7 @@ public class App extends Application {
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
-
-    // TODO(dxchen): Factor into individual fragment and activity classes when we introduce proper
-    // scoped injection.
-    @Inject public Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject PatientChartModel mPatientChartModel;
 
     @Override
     public void onCreate() {
@@ -68,7 +65,6 @@ public class App extends Application {
 
         // TODO(dxchen): Refactor this into the model classes.
         EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
-        PatientChartModel.INSTANCE.init();
     }
 
     public void buildObjectGraphAndInject() {

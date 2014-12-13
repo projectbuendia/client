@@ -14,10 +14,10 @@ public class AvailableUpdateInfo {
 
     private static final String TAG = AvailableUpdateInfo.class.getName();
 
-    public final boolean mIsValid;
-    public final Version mCurrentVersion;
-    public final Version mAvailableVersion;
-    public final Uri mUpdateUri;
+    public final boolean isValid;
+    public final Version currentVersion;
+    public final Version availableVersion;
+    public final Uri updateUri;
 
     public static AvailableUpdateInfo getInvalid(Version currentVersion) {
         return new AvailableUpdateInfo(
@@ -80,16 +80,16 @@ public class AvailableUpdateInfo {
             Version currentVersion,
             Version availableVersion,
             Uri updateUri) {
-        mIsValid = isValid;
-        mCurrentVersion = currentVersion;
-        mAvailableVersion = availableVersion;
-        mUpdateUri = updateUri;
+        this.isValid = isValid;
+        this.currentVersion = currentVersion;
+        this.availableVersion = availableVersion;
+        this.updateUri = updateUri;
     }
 
     /**
      * Returns whether this update is valid and is newer than current version.
      */
     public boolean shouldUpdate() {
-        return mIsValid && mAvailableVersion.greaterThan(mCurrentVersion);
+        return isValid && availableVersion.greaterThan(currentVersion);
     }
 }

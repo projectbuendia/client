@@ -22,9 +22,13 @@ public interface Server {
     public static final String PATIENT_STATUS_KEY = "status";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
+    @Deprecated
     public static final String PATIENT_DOB_YEARS_KEY = "age_years";
+    @Deprecated
     public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
+    @Deprecated
     public static final String PATIENT_AGE_TYPE_KEY = "age_type";
+    public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
     public static final String PATIENT_MOVEMENT_KEY = "movement";
@@ -84,6 +88,14 @@ public interface Server {
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);
+
+    /**
+     * Update the location of a patient
+     *
+     * @param patientId the id of the patient to update
+     * @param newLocationId the id of the new location that the patient is assigned to
+     */
+    public void updatePatientLocation(String patientId, String newLocationId);
 
     /**
      * List all existing patients.
