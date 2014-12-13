@@ -1,6 +1,7 @@
 package org.msf.records.data.app.converters;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -11,6 +12,8 @@ import org.msf.records.sync.PatientProjection;
  * A {@link AppTypeConverter} that converts {@link AppPatient}s.
  */
 public class AppPatientConverter implements AppTypeConverter<AppPatient> {
+
+    private static final String TAG = AppPatientConverter.class.getSimpleName();
 
     @Override
     public AppPatient fromCursor(Cursor cursor) {
@@ -25,8 +28,8 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
     							cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS)))
 				.setGender(
 						getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER)))
-				.setAdmissiondateTime(
-						new DateTime(cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000))
+				.setAdmissiondateTime(new DateTime(
+                        cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000))
 				.setLocationUuid(
 						cursor.getString(PatientProjection.COLUMN_LOCATION_UUID))
         		.build();
@@ -44,7 +47,10 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
 
     private static Duration getAgeFromYearsAndMonths(int years, int months) {
         if (years != 0 && months != 0) {
-            // TODO(dxchen0: This indicates a data error. Decide the right thing to do.
+            Log.w(
+                    TAG,
+                    "Attempted to parse a Patient from the database that has neither years nor "
+                            + "months set. This indicates invalid data in the database.");
             return Duration.standardDays(years * 365);
         }
 
