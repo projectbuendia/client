@@ -17,10 +17,10 @@ public class DownloadedUpdateInfo {
 
     private static final String TAG = DownloadedUpdateInfo.class.getName();
 
-    public final boolean mIsValid;
-    private final Version mCurrentVersion;
-    public Version mDownloadedVersion;
-    public final String mPath;
+    public final boolean isValid;
+    private final Version currentVersion;
+    public Version downloadedVersion;
+    public final String path;
 
     public static DownloadedUpdateInfo getInvalid(Version currentVersion) {
         return new DownloadedUpdateInfo(
@@ -53,13 +53,13 @@ public class DownloadedUpdateInfo {
 
     private DownloadedUpdateInfo(
             boolean isValid, Version currentVersion, Version downloadedVersion, String path) {
-        mIsValid = isValid;
-        mCurrentVersion = currentVersion;
-        mDownloadedVersion = downloadedVersion;
-        mPath = path;
+        this.isValid = isValid;
+        this.currentVersion = currentVersion;
+        this.downloadedVersion = downloadedVersion;
+        this.path = path;
     }
 
     public boolean shouldInstall() {
-        return mIsValid && mDownloadedVersion.greaterThan(mCurrentVersion);
+        return isValid && downloadedVersion.greaterThan(currentVersion);
     }
 }

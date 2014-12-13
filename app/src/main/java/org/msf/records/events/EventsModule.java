@@ -25,6 +25,6 @@ public class EventsModule {
 
     @Provides CrudEventBus provideCrudEventBus(
             @Qualifiers.CrudEventBusBuilder EventBusBuilder crudEventBusBuilder) {
-        return new CrudEventBus(crudEventBusBuilder.build());
+        return new DefaultCrudEventBus(crudEventBusBuilder.build());
     }
 }

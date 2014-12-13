@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
+import org.msf.records.events.DefaultCrudEventBus;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
@@ -52,7 +53,7 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchSingleAsyncTask<AppPatient> task = new FetchSingleAsyncTask<>(
-                mContentResolver, new UuidFilter(), uuid, mConverters.mPatient, bus);
+                mContentResolver, new UuidFilter(), uuid, mConverters.patient, bus);
         task.execute();
     }
 
@@ -63,13 +64,12 @@ public class AppModel {
     public void fetchUsers(CrudEventBus bus) {
         // Register for error events so that we can close cursors if we need to.
         bus.register(mCrudEventBusErrorSubscriber);
-
-        // TODO(dxchen): Asynchronously fetch users.
     }
 
     /**
      * A subscriber that handles error events posted to {@link CrudEventBus}es.
      */
+    @SuppressWarnings("unused") // Called by reflection from event bus.
     private static class CrudEventBusErrorSubscriber {
 
         /**
@@ -83,6 +83,10 @@ public class AppModel {
             }
         }
     }
+
+    // TODO(dxchen): Implement.
+    private abstract static class FetchTypedCursorAsyncTask<T extends AppTypeBase>
+            extends AsyncTask<Void, Void, Object> {}
 
     /**
      * An {@link AsyncTask} that fetches a single item from the data store.

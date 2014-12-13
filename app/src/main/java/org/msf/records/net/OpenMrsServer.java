@@ -44,7 +44,6 @@ public class OpenMrsServer implements Server {
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
-
         JSONObject requestBody = new JSONObject();
         try {
             putIfSet(patientArguments, Server.PATIENT_ID_KEY, requestBody,
@@ -53,8 +52,17 @@ public class OpenMrsServer implements Server {
                     Server.PATIENT_GIVEN_NAME_KEY);
             putIfSet(patientArguments, Server.PATIENT_FAMILY_NAME_KEY, requestBody,
                     Server.PATIENT_FAMILY_NAME_KEY);
+            putIfSet(patientArguments, Server.PATIENT_AGE_TYPE_KEY, requestBody,
+                    Server.PATIENT_AGE_TYPE_KEY);
+            putIfSet(patientArguments, Server.PATIENT_DOB_YEARS_KEY, requestBody,
+                    Server.PATIENT_DOB_YEARS_KEY);
+            putIfSet(patientArguments, Server.PATIENT_DOB_MONTHS_KEY, requestBody,
+                    Server.PATIENT_DOB_MONTHS_KEY);
+            putIfSet(patientArguments, Server.PATIENT_BIRTHDATE_KEY, requestBody,
+                    Server.PATIENT_BIRTHDATE_KEY);
             putIfSet(patientArguments, Server.PATIENT_GENDER_KEY, requestBody,
                     Server.PATIENT_GENDER_KEY);
+
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
             // So treat like NPE and rethrow.
@@ -183,6 +191,11 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
+    public void updatePatientLocation(String patientId, String newLocationId) {
+        // TODO(sdoerner): Implement.
+    }
+
+    @Override
     public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<Patient>> patientListener,
@@ -216,8 +229,9 @@ public class OpenMrsServer implements Server {
                 Patient.class);
 
         // TODO(rjlothian): This shouldn't be done here.
-        if (patient.assigned_location == null) {
-            LocationSubtree subtree = LocationTree.SINGLETON_INSTANCE.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
+        if (patient.assigned_location == null && LocationTree.SINGLETON_INSTANCE != null) {
+            LocationSubtree subtree =
+                    LocationTree.SINGLETON_INSTANCE.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
             if (subtree != null) {
                 patient.assigned_location = subtree.getLocation();
             }
@@ -227,7 +241,7 @@ public class OpenMrsServer implements Server {
             // TODO(akalachman): After the demo, replace with obvious sentinel to avoid confusion.
             patient.age = new PatientAge();
             patient.age.type = "years";
-            patient.age.years = 24;
+            patient.age.years = -1;
         }
 
         patient.first_showed_symptoms_timestamp = 0L;

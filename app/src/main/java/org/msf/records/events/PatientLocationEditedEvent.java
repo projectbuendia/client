@@ -7,9 +7,9 @@ import org.msf.records.model.Location2;
  */
 public class PatientLocationEditedEvent {
 
-    public final Location2 mLocation;
+    public final Location2 location;
 
     public PatientLocationEditedEvent(Location2 location) {
-        mLocation = location;
+        this.location = location;
     }
 }

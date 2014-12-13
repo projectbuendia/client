@@ -81,7 +81,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Objects;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -242,7 +241,7 @@ public class FormEntryActivity
                         }
                 )
                 .setNegativeButton(R.string.no, null)
-                .create();;
+                .create();
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
@@ -1299,8 +1298,8 @@ public class FormEntryActivity
 						.getGroupsForCurrentIndex();
 				odkv = new ODKView(this, prompts, groups, advancingPage, fields);
                 if (fields != null
-                        && fields.mTargetGroup != null
-                        && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
+                        && fields.targetGroup != null
+                        && fields.targetGroup.equals(groups[groups.length - 1].getLongText())) {
                     mTargetView = odkv;
                 }
 				Log.i(TAG,

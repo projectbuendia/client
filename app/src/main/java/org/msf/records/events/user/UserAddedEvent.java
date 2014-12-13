@@ -9,11 +9,11 @@ import org.msf.records.net.model.User;
  */
 public class UserAddedEvent extends KnownUsersChangedEvent {
 
-    public final User mAddedUser;
+    public final User addedUser;
 
     public UserAddedEvent(User addedUser) {
         super(ImmutableSet.of(addedUser), ImmutableSet.<User>of());
 
-        mAddedUser = addedUser;
+        this.addedUser = addedUser;
     }
 }
