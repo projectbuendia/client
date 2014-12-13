@@ -17,24 +17,31 @@ import org.msf.records.widget.SubtitledButtonView;
 
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 /**
  * Adapter for displaying a list of tents (locations).
  */
 final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
+
     private final Context context;
-    private final Optional<String> selectedTentUuid;
+    private final Optional<String> selectedLocationUuid;
+    private final boolean mShouldAbbreviate;
 
     public TentListAdapter(
             Context context,
             List<LocationSubtree> tents,
-            Optional<String> selectedTent) {
+            Optional<String> selectedTent,
+            boolean shouldAbbreviate) {
         super(context, R.layout.listview_cell_tent_selection, tents);
         this.context = context;
-        this.selectedTentUuid = Preconditions.checkNotNull(selectedTent);
+        this.selectedLocationUuid = Preconditions.checkNotNull(selectedTent);
+        mShouldAbbreviate = shouldAbbreviate;
     }
 
-    public Optional<String> getSelectedTentUuid() {
-        return selectedTentUuid;
+    public Optional<String> getSelectedLocationUuid() {
+        return selectedLocationUuid;
     }
 
     @Override
@@ -42,30 +49,58 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view;
+        ViewHolder holder;
         if (convertView != null) {
         	view = convertView;
+            holder = (ViewHolder) convertView.getTag();
         } else {
         	view = inflater.inflate(
                 R.layout.listview_cell_tent_selection, parent, false);
+            holder = new ViewHolder(view);
+            view.setTag(holder);
         }
 
-        // TODO: Apply view holder pattern here to avoid calling findViewById.
         LocationSubtree tent = getItem(position);
-        SubtitledButtonView button =
-                (SubtitledButtonView)view.findViewById(R.id.tent_selection_tent);
-        button.setTitle(tent.toString());
-        button.setSubtitle(
+        holder.mButton.setTitle(abbreviateIfNeeded(tent.toString()));
+        holder.mButton.setSubtitle(
                 PatientCountDisplay.getPatientCountSubtitle(context, tent.getPatientCount()));
-        button.setBackgroundResource(
+        holder.mButton.setBackgroundResource(
                 Zone.getBackgroundColorResource(tent.getLocation().parent_uuid));
-        button.setTextColor(
+        holder.mButton.setTextColor(
                 Zone.getForegroundColorResource(tent.getLocation().parent_uuid));
 
-        if (selectedTentUuid.isPresent() &&
-                selectedTentUuid.get() == tent.getLocation().uuid) {
+        if (selectedLocationUuid.isPresent() &&
+                selectedLocationUuid.get() == tent.getLocation().uuid) {
             view.setBackgroundResource(R.color.zone_tent_selected_padding);
         }
 
         return view;
+    }
+
+    private final String abbreviateIfNeeded(String tentString) {
+        if (!mShouldAbbreviate) {
+            return tentString;
+        }
+
+        String parts[] = tentString.split("\\s+");
+        StringBuilder abbreviatedTentString = new StringBuilder();
+        for (String part : parts) {
+            if (part.matches("^\\d+$")) {
+                abbreviatedTentString.append(part);
+            } else {
+                abbreviatedTentString.append(part.charAt(0));
+            }
+        }
+
+        return abbreviatedTentString.toString();
+    }
+
+    static class ViewHolder {
+        
+        @InjectView(R.id.tent_selection_tent) SubtitledButtonView mButton;
+
+        public ViewHolder(View view) {
+            ButterKnife.inject(this, view);
+        }
     }
 }

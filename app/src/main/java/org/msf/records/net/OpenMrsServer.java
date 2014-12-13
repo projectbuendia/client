@@ -58,8 +58,11 @@ public class OpenMrsServer implements Server {
                     Server.PATIENT_DOB_YEARS_KEY);
             putIfSet(patientArguments, Server.PATIENT_DOB_MONTHS_KEY, requestBody,
                     Server.PATIENT_DOB_MONTHS_KEY);
+            putIfSet(patientArguments, Server.PATIENT_BIRTHDATE_KEY, requestBody,
+                    Server.PATIENT_BIRTHDATE_KEY);
             putIfSet(patientArguments, Server.PATIENT_GENDER_KEY, requestBody,
                     Server.PATIENT_GENDER_KEY);
+
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
             // So treat like NPE and rethrow.

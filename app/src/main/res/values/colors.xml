@@ -7,6 +7,9 @@
     <color name="red">#FF0000</color>
     <color name="transparent">#00000000</color>
 
+    <color name="gray_400">#BDBDBD</color>
+    <color name="gray_600">#757575</color>
+
     <color name="status_probable">#fbb03b</color>
     <color name="status_suspect">#ffff00</color>
     <color name="status_confirmed">#ff0000</color>

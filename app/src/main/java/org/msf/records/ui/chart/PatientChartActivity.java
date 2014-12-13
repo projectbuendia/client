@@ -14,7 +14,6 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -68,7 +67,7 @@ public final class PatientChartActivity extends BaseActivity {
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
-    @Inject LocationManager locationManager;
+    @Inject LocationManager mLocationManager;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -175,7 +174,7 @@ public final class PatientChartActivity extends BaseActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         mController.showRelocatePatientDialog(
-                                PatientChartActivity.this, locationManager, App.getServer());
+                                PatientChartActivity.this, mLocationManager, App.getServer());
                         return true;
                     }
                 }
@@ -223,10 +222,11 @@ public final class PatientChartActivity extends BaseActivity {
     }
 
     @OnClick({
-    	R.id.vital_responsiveness,
-    	R.id.vital_mobility,
-    	R.id.vital_diet,
-    	R.id.vital_food_drink}) void onSignsAndSymptomsPressed(View v) {
+            R.id.vital_responsiveness,
+            R.id.vital_mobility,
+            R.id.vital_diet,
+            R.id.vital_food_drink})
+    void onSignsAndSymptomsPressed(View v) {
 
        	mController.onAddObservationPressed("Symptoms the patient reports (first set)");
     }

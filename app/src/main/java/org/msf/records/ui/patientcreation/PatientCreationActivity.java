@@ -6,21 +6,28 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.google.common.base.Optional;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.model.Patient;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.tentselection.AssignLocationDialog;
+import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 /**
  * A {@link BaseActivity} that allows users to create a new patient.
@@ -31,6 +38,7 @@ public final class PatientCreationActivity extends BaseActivity {
     private AlertDialog mAlertDialog;
 
     @Inject OpenMrsServer mServer;
+    @Inject LocationManager mLocationManager;
 
     @InjectView(R.id.patient_creation_text_patient_id) EditText mId;
     @InjectView(R.id.patient_creation_text_patient_given_name) EditText mGivenName;
@@ -38,6 +46,11 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_text_age) EditText mAge;
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
+    @InjectView(R.id.patient_creation_text_location) TextView mLocation;
+
+    private String mLocationUuid;
+
+    private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +78,29 @@ public final class PatientCreationActivity extends BaseActivity {
 
         setContentView(R.layout.activity_patient_creation);
         ButterKnife.inject(this);
+
+        mTentSelectedCallback = new AssignLocationDialog.TentSelectedCallback() {
+
+            @Override public boolean onNewTentSelected(String newTentUuid) {
+                mLocationUuid = newTentUuid;
+
+                LocationTree.LocationSubtree location =
+                        LocationTree.SINGLETON_INSTANCE.getLocationByUuid(newTentUuid);
+                mLocation.setText(location.toString());
+
+                return true;
+            }
+        };
+    }
+
+    @OnClick(R.id.patient_creation_button_change_location)
+    void onChangeLocationClick() {
+        new AssignLocationDialog(
+                this,
+                mLocationManager,
+                new EventBusWrapper(EventBus.getDefault()),
+                mLocationUuid == null ? Optional.<String>absent() : Optional.of(mLocationUuid),
+                mTentSelectedCallback).show();
     }
 
     @OnClick(R.id.patient_creation_button_cancel)
@@ -80,7 +116,8 @@ public final class PatientCreationActivity extends BaseActivity {
                 mFamilyName.getText().toString(),
                 mAge.getText().toString(),
                 getAgeUnits(),
-                getSex());
+                getSex(),
+                mLocationUuid);
     }
 
     @Override

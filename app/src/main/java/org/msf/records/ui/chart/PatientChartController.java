@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.msf.records.App;
@@ -26,7 +27,7 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.ui.tentselection.RelocatePatientDialog;
+import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.EventBusWrapper;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -40,7 +41,7 @@ import javax.annotation.Nullable;
 import de.greenrobot.event.EventBus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.msf.records.ui.tentselection.RelocatePatientDialog.TentSelectedCallback;
+import static org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
 
 /**
  * Controller for {@link PatientChartActivity}.
@@ -314,18 +315,20 @@ final class PatientChartController {
         TentSelectedCallback callback =
                 new TentSelectedCallback() {
                     @Override
-                    public void onNewTentSelected(String newTentUuid) {
+                    public boolean onNewTentSelected(String newTentUuid) {
                         server.updatePatientLocation(mPatient.uuid, newTentUuid);
+
+                        // TODO(dxchen): Have this return false and then dismiss the dialog when the
+                        // server calls back.
+                        return true;
                     }
                 };
-        new RelocatePatientDialog(
+        new AssignLocationDialog(
                 context,
                 locationManager,
                 new EventBusWrapper(EventBus.getDefault()),
-                mPatient.uuid,
-                mPatient.locationUuid,
-                callback)
-                .show();
+                Optional.of(mPatient.locationUuid),
+                callback).show();
     }
 
     /**
