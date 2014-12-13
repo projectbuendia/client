@@ -308,7 +308,7 @@ final class PatientChartController {
         return requestCode;
     }
 
-    public void showRelocatePatientDialog(
+    public void showAssignLocationDialog(
             Context context,
             LocationManager locationManager,
             final Server server) {
