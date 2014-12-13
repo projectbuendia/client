@@ -60,7 +60,8 @@ final class PatientCreationController {
     }
 
     public void createPatient(
-            String id, String givenName, String familyName, String age, int ageUnits, int sex) {
+            String id, String givenName, String familyName, String age, int ageUnits, int sex,
+            String locationUuid) {
         // Validate the input.
         boolean hasValidationErrors = false;
         if (id == null || id.equals("")) {
@@ -99,6 +100,8 @@ final class PatientCreationController {
             hasValidationErrors = true;
         }
 
+        // TODO(dxchen): Do we need to validate location?
+
         if (hasValidationErrors) {
             return;
         }
@@ -109,6 +112,8 @@ final class PatientCreationController {
         patientArguments.put(Server.PATIENT_FAMILY_NAME_KEY, familyName);
         patientArguments.put(Server.PATIENT_BIRTHDATE_KEY, getBirthdateFromAge(ageInt, ageUnits));
         patientArguments.put(Server.PATIENT_GENDER_KEY, sex == SEX_MALE ? "M" : "F");
+
+        // TODO(dxchen): Add patient location to the patient arguments.
 
         mServer.addPatient(patientArguments, mAddPatientListener, mAddPatientListener, TAG);
     }
