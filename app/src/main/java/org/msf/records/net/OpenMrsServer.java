@@ -1,8 +1,16 @@
 package org.msf.records.net;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,18 +26,9 @@ import org.msf.records.net.model.PatientDelta;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
-import android.support.annotation.Nullable;
-import android.util.Log;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of Server RPCs that will talk to OpenMRS.
@@ -59,16 +58,19 @@ public class OpenMrsServer implements Server {
             public void onErrorResponse(VolleyError error) {
                 String message = error.getMessage();
                 try {
-                    String text = new String(error.networkResponse.data);
-                    JsonObject result = new JsonParser().parse(text).getAsJsonObject();
-                    if (result.has("error")) {
-                        JsonObject errorObject = result.getAsJsonObject("error");
-                        JsonElement element = errorObject.get("message");
-                        if (element == null || element.isJsonNull()) {
-                            element = errorObject.get("code");
-                        }
-                        if (element != null && element.isJsonPrimitive()) {
-                            message = element.getAsString();
+                    if (error.networkResponse != null &&
+                        error.networkResponse.data != null) {
+                        String text = new String(error.networkResponse.data);
+                        JsonObject result = new JsonParser().parse(text).getAsJsonObject();
+                        if (result.has("error")) {
+                            JsonObject errorObject = result.getAsJsonObject("error");
+                            JsonElement element = errorObject.get("message");
+                            if (element == null || element.isJsonNull()) {
+                                element = errorObject.get("code");
+                            }
+                            if (element != null && element.isJsonPrimitive()) {
+                                message = element.getAsString();
+                            }
                         }
                     }
                 } catch (JsonParseException | IllegalStateException |
