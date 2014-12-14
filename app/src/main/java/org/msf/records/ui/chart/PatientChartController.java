@@ -23,7 +23,9 @@ import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
+import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.PatientDelta;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -104,6 +106,8 @@ final class PatientChartController {
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final PatientModel mPatientModel;
+
+    private AssignLocationDialog mAssignLocationDialog;
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
@@ -312,23 +316,30 @@ final class PatientChartController {
             Context context,
             LocationManager locationManager,
             final Server server) {
+
+        final TentSelectionListener listener = new TentSelectionListener();
+
         TentSelectedCallback callback =
                 new TentSelectedCallback() {
                     @Override
                     public boolean onNewTentSelected(String newTentUuid) {
-                        server.updatePatientLocation(mPatient.uuid, newTentUuid);
+                        PatientDelta patientDelta = new PatientDelta();
+                        patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
-                        // TODO(dxchen): Have this return false and then dismiss the dialog when the
-                        // server calls back.
-                        return true;
+                        server.updatePatient(mPatient.uuid, patientDelta, listener, listener, TAG);
+
+                        return false;
                     }
                 };
-        new AssignLocationDialog(
+
+        mAssignLocationDialog = new AssignLocationDialog(
                 context,
                 locationManager,
                 new EventBusWrapper(EventBus.getDefault()),
                 Optional.of(mPatient.locationUuid),
-                callback).show();
+                callback);
+
+        mAssignLocationDialog.show();
     }
 
     /**
@@ -352,4 +363,23 @@ final class PatientChartController {
     	}
     }
 
+    private final class TentSelectionListener
+            implements Response.Listener<Patient>, Response.ErrorListener {
+
+        @Override public void onResponse(Patient patient) {
+            // TODO(kpy): Synchronously write the new patient to the database.
+
+            if (mAssignLocationDialog != null) {
+                mAssignLocationDialog.dismiss();
+                mAssignLocationDialog = null;
+            }
+
+            // Refetch the patient from the database so that we can update UI.
+            mAppModel.fetchSinglePatient(mCrudEventBus, patient.uuid);
+        }
+
+        @Override public void onErrorResponse(VolleyError error) {
+            // TODO(kpy): Determine what to do here: show a toast?
+        }
+    }
 }
