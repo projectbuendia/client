@@ -6,6 +6,11 @@ import java.io.Serializable;
  * Created by Gil on 03/10/2014.
  */
 public class Patient implements Serializable {
+
+    public static final int GENDER_UNKNOWN = 0;
+    public static final int GENDER_MALE = 1;
+    public static final int GENDER_FEMALE = 2;
+
     // Internal identifier.
     public String uuid;
     // User-specified identifier.

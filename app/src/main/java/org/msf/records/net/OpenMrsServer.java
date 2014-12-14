@@ -14,6 +14,7 @@ import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientAge;
+import org.msf.records.net.model.PatientDelta;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
@@ -125,6 +126,35 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
+        mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
+    }
+
+    @Override
+    public void addPatient(
+            PatientDelta patientDelta,
+            final Response.Listener<Patient> patientListener,
+            final Response.ErrorListener errorListener,
+            final String logTag) {
+        JSONObject json = new JSONObject();
+        if (!patientDelta.serializeToJson(json)) {
+            throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
+        }
+
+        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/patient",
+                json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            patientListener.onResponse(patientFromJson(response));
+                        } catch (JSONException e) {
+                            Log.e(logTag, "Failed to parse response", e);
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                wrapErrorListener(errorListener));
         mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
