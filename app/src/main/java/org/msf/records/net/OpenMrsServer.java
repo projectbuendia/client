@@ -146,7 +146,7 @@ public class OpenMrsServer implements Server {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            patientListener.onResponse(parsePatientJson(response));
+                            patientListener.onResponse(patientFromJson(response));
                         } catch (JSONException e) {
                             Log.e(logTag, "Failed to parse response", e);
                             errorListener.onErrorResponse(
@@ -154,7 +154,7 @@ public class OpenMrsServer implements Server {
                         }
                     }
                 },
-                errorListener);
+                wrapErrorListener(errorListener));
         mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
