@@ -2,16 +2,12 @@ package org.msf.records.ui.patientcreation;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.net.OpenMrsServer;
-import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.msf.records.net.model.PatientDelta;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -21,7 +17,6 @@ import java.util.Map;
 final class PatientCreationController {
 
 	private static final String TAG = PatientCreationController.class.getSimpleName();
-	private static final boolean DEBUG = true;
 
     static final int AGE_UNKNOWN = 0;
     static final int AGE_YEARS = 1;
@@ -106,28 +101,24 @@ final class PatientCreationController {
             return;
         }
 
-        Map<String, String> patientArguments = new HashMap<>();
-        patientArguments.put(Server.PATIENT_ID_KEY, id);
-        patientArguments.put(Server.PATIENT_GIVEN_NAME_KEY, givenName);
-        patientArguments.put(Server.PATIENT_FAMILY_NAME_KEY, familyName);
-        patientArguments.put(Server.PATIENT_BIRTHDATE_KEY, getBirthdateFromAge(ageInt, ageUnits));
-        patientArguments.put(Server.PATIENT_GENDER_KEY, sex == SEX_MALE ? "M" : "F");
+        PatientDelta patientDelta = new PatientDelta();
+        patientDelta.id = Optional.of(id);
+        patientDelta.givenName = Optional.of(givenName);
+        patientDelta.familyName = Optional.of(familyName);
+        patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
+        patientDelta.gender = Optional.of(sex);
+        patientDelta.assignedLocationUuid = Optional.of(locationUuid);
 
-        // TODO(dxchen): Add patient location to the patient arguments.
-
-        mServer.addPatient(patientArguments, mAddPatientListener, mAddPatientListener, TAG);
+        mServer.addPatient(patientDelta, mAddPatientListener, mAddPatientListener, TAG);
     }
 
-    private static final DateTimeFormatter BIRTHDATE_FORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd");
-
-    private String getBirthdateFromAge(int ageInt, int ageUnits) {
+    private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {
         DateTime now = DateTime.now();
         switch (ageUnits) {
             case AGE_YEARS:
-                return now.minusYears(ageInt).toString(BIRTHDATE_FORMATTER);
+                return now.minusYears(ageInt);
             case AGE_MONTHS:
-                return now.minusMonths(ageInt).toString(BIRTHDATE_FORMATTER);
+                return now.minusMonths(ageInt);
             default:
                 return null;
         }
