@@ -7,6 +7,7 @@ import com.android.volley.Response;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
+import org.msf.records.net.model.PatientDelta;
 import org.msf.records.net.model.User;
 
 import java.util.List;
@@ -22,16 +23,14 @@ public interface Server {
     public static final String PATIENT_STATUS_KEY = "status";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
-    @Deprecated
-    public static final String PATIENT_DOB_YEARS_KEY = "age_years";
-    @Deprecated
-    public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
-    @Deprecated
-    public static final String PATIENT_AGE_TYPE_KEY = "age_type";
+    @Deprecated public static final String PATIENT_DOB_YEARS_KEY = "age_years";
+    @Deprecated public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
+    @Deprecated public static final String PATIENT_AGE_TYPE_KEY = "age_type";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
     public static final String PATIENT_MOVEMENT_KEY = "movement";
+    public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
 
     /**
      * Create a patient record for a new patient. Currently we are just using a String-String
@@ -41,8 +40,18 @@ public interface Server {
      * @param patientArguments a String-String map for the patient arguments, key constants
      * @param logTag a unique argument for tagging logs to aid debugging
      */
+    @Deprecated
     public void addPatient(
             Map<String, String> patientArguments,
+            Response.Listener<Patient> patientListener,
+            Response.ErrorListener errorListener,
+            String logTag);
+
+    /**
+     * Adds a patient.
+     */
+    void addPatient(
+            PatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);
