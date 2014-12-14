@@ -9,7 +9,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
 import com.google.common.base.Optional;
 
 import org.msf.records.App;
@@ -20,6 +19,7 @@ import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.model.Patient;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
+import org.msf.records.utils.BigToast;
 import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
@@ -172,21 +172,32 @@ public final class PatientCreationActivity extends BaseActivity {
                 case PatientCreationController.Ui.FIELD_AGE:
                     mAge.setError(message);
                     break;
-                case PatientCreationController.Ui.FIELD_AGE_UNITS:
-                    // TODO(dxchen): Handle.
-                    break;
-                case PatientCreationController.Ui.FIELD_SEX:
+                default:
+                    // A stopgap.  We have to do something visible or nothing
+                    // will happen at all when the Create button is pressed.
+                    Toast.makeText(
+                            PatientCreationActivity.this, message,
+                            Toast.LENGTH_SHORT).show();
                     // TODO(dxchen): Handle.
                     break;
             }
         }
 
         @Override
-        public void onCreateFailed(VolleyError error) {
-            Toast.makeText(
-                    PatientCreationActivity.this,
-                    "Unable to add patient: " + error,
-                    Toast.LENGTH_SHORT).show();
+        public void clearValidationErrors() {
+            mId.setError(null);
+            mGivenName.setError(null);
+            mFamilyName.setError(null);
+            mAge.setError(null);
+            // TODO(kpy): If the validation error indicators for age units
+            // and for sex are also persistent like the error indicators
+            // for the above four fields, they should be cleared as well.
+        }
+
+        @Override
+        public void onCreateFailed(Exception error) {
+            BigToast.show(PatientCreationActivity.this,
+                    "Unable to add patient: " + error.getMessage());
         }
 
         @Override
