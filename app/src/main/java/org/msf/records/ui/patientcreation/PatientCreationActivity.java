@@ -19,8 +19,8 @@ import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.PatientListFragment;
 import org.msf.records.ui.RoundActivity;
+import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;

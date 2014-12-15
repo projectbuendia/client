@@ -23,13 +23,13 @@ public class ListDialogFragment extends DialogFragment {
     private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
     public static final String GRID_ITEM_DONE_LISTENER = "GRID_ITEM_DONE_LISTENER";
 
-    ArrayAdapter mListAdapter;
+    ArrayAdapter<String> mListAdapter;
     ListView mListView;
     OnItemClickListener mItemClickListener;
     String[] mArray;
 
-    public static abstract class OnItemClickListener implements Serializable {
-        public abstract void onListItemClick(int position);
+    public interface OnItemClickListener extends Serializable {
+        void onListItemClick(int position);
     }
 
     @Override

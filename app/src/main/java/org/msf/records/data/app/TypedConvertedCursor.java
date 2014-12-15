@@ -19,21 +19,17 @@ import java.util.Iterator;
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
  * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedConvertedCursor<T extends AppTypeBase, U extends AppTypeConverter<T>>
-        extends TypedCursor<T> {
+final class TypedConvertedCursor<T> implements TypedCursor<T> {
 
-    private final U mConverter;
+    private final AppTypeConverter<T> mConverter;
     private final Cursor mCursor;
-
-    private final SparseArray<T> mConvertedItems;
+    private final SparseArray<T> mConvertedItems = new SparseArray<>();
 
     private boolean mIsClosed;
 
-    public TypedConvertedCursor(U converter, Cursor cursor) {
+    public TypedConvertedCursor(AppTypeConverter<T> converter, Cursor cursor) {
         mConverter = converter;
         mCursor = cursor;
-
-        mConvertedItems = new SparseArray<>();
     }
 
     /**
@@ -96,7 +92,7 @@ class TypedConvertedCursor<T extends AppTypeBase, U extends AppTypeConverter<T>>
         mCursor.unregisterContentObserver(observer);
     }
 
-    private class LazyConverterIterator implements Iterator<T> {
+    private final class LazyConverterIterator implements Iterator<T> {
 
         @Override
         public boolean hasNext() {

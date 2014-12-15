@@ -2,6 +2,8 @@ package org.msf.records.data.app.converters;
 
 import android.database.Cursor;
 
+import javax.annotation.concurrent.Immutable;
+
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.msf.records.data.app.AppPatient;
@@ -10,7 +12,8 @@ import org.msf.records.sync.PatientProjection;
 /**
  * A {@link AppTypeConverter} that converts {@link AppPatient}s.
  */
-public class AppPatientConverter implements AppTypeConverter<AppPatient> {
+@Immutable
+public final class AppPatientConverter implements AppTypeConverter<AppPatient> {
 
     @Override
     public AppPatient fromCursor(Cursor cursor) {

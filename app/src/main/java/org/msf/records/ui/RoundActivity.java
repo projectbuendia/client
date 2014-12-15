@@ -56,7 +56,7 @@ public class RoundActivity extends PatientSearchActivity {
         // TODO(akalachman): Move this back to onCreate when I figure out why it needs to be here.
         mFragment = (RoundFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.round_patient_list);
-        mFragment.filterBy(mFilter);
+        mFragment.setFilter(mFilter);
 
         menu.findItem(R.id.action_add).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {

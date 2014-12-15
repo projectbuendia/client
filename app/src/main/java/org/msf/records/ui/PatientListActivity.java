@@ -12,39 +12,28 @@ import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.net.Constants;
+import org.msf.records.ui.patientlist.PatientListFragment;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
 
 /**
- * An activity representing a list of Patients. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link PatientDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
- * <p>
- * The activity makes heavy use of fragments. The list of items is a
+ * An activity representing a list of Patients.
+ *
+ * <p>The activity makes heavy use of fragments. The list of items is a
  * {@link PatientListFragment} and the item details
  * (if present) is a {@link PatientDetailFragment}.
- * <p>
- * This activity also implements the required
- * {@link PatientListFragment.Callbacks} interface
+ *
+ * <p>This activity also implements the required
+ * {@link PatientListFragment.ActivityCallbacks} interface
  * to listen for item selections.
  */
 public class PatientListActivity extends PatientSearchActivity {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
-
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientListFragment mFragment;
-
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +41,6 @@ public class PatientListActivity extends PatientSearchActivity {
         setContentView(R.layout.activity_patient_list);
 
         if (findViewById(R.id.patient_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-large and
-            // res/values-sw600dp). If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-
             // Create a main screen shown when no patient is selected.
             MainScreenFragment mainScreenFragment = new MainScreenFragment();
 
@@ -86,9 +69,9 @@ public class PatientListActivity extends PatientSearchActivity {
         setupCustomActionBar(getActionBar().getSelectedNavigationIndex());
     }
 
-    private void setupCustomActionBar(int selectedFilter){
+    private void setupCustomActionBar(int selectedFilter) {
         final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay();
-        SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<SimpleSelectionFilter>(
+        SectionedSpinnerAdapter<SimpleSelectionFilter> adapter = new SectionedSpinnerAdapter<>(
                 this,
                 R.layout.patient_list_spinner_dropdown_item,
                 R.layout.patient_list_spinner_expanded_dropdown_item,
@@ -98,7 +81,7 @@ public class PatientListActivity extends PatientSearchActivity {
         ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long id) {
-                mFragment.filterBy(filters[position]);
+                mFragment.setFilter(filters[position]);
                 return true;
             }
         };
@@ -112,7 +95,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
         mFragment = (PatientListFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.patient_list);
-        mFragment.filterBy(filters[selectedFilter]);
+        mFragment.setFilter(filters[selectedFilter]);
     }
 
     @Override

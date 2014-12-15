@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/patient_list"
-        android:name="org.msf.records.ui.PatientListFragment"
+        android:name="org.msf.records.ui.patientlist.PatientListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"

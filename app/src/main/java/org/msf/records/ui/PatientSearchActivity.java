@@ -15,6 +15,7 @@ import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.ui.chart.PatientChartActivity;
+import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.updater.UpdateManager;
 
 import javax.inject.Inject;
@@ -24,7 +25,7 @@ import javax.inject.Inject;
  * Clicking on patients in the list displays details for that patient.
  */
 public abstract class PatientSearchActivity extends BaseActivity
-        implements PatientListFragment.Callbacks {
+        implements PatientListFragment.ActivityCallbacks {
 
     @Inject UpdateManager mUpdateManager;
 
@@ -59,7 +60,7 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     /**
-     * Callback method from {@link PatientListFragment.Callbacks}
+     * Callback method from {@link PatientListFragment.ActivityCallbacks}
      * indicating that the item with the given uuid/name/id was selected.
      */
     @Override

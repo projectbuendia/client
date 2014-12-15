@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
-import org.msf.records.events.DefaultCrudEventBus;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
@@ -28,7 +27,6 @@ public class AppModel {
 
     private final ContentResolver mContentResolver;
     private final AppTypeConverters mConverters;
-
     private final CrudEventBusErrorSubscriber mCrudEventBusErrorSubscriber;
 
     AppModel(ContentResolver contentResolver, AppTypeConverters converters) {
@@ -41,10 +39,12 @@ public class AppModel {
      * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
      * {@link AppPatient}s on the specified event bus when complete.
      */
-    public void fetchPatients(CrudEventBus bus) {
+    public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.register(mCrudEventBusErrorSubscriber);
 
-        // TODO(dxchen): Asynchronously fetch patients.
+        FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<AppPatient>(
+                mContentResolver, filter, constraint, mConverters.patient, bus);
+        task.execute();
     }
 
     /**
@@ -56,6 +56,7 @@ public class AppModel {
                 mContentResolver, new UuidFilter(), uuid, mConverters.patient, bus);
         task.execute();
     }
+
 
     /**
      * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
@@ -86,14 +87,59 @@ public class AppModel {
         }
     }
 
-    // TODO(dxchen): Implement.
-    private abstract static class FetchTypedCursorAsyncTask<T extends AppTypeBase>
-            extends AsyncTask<Void, Void, Object> {}
+    private static class FetchTypedCursorAsyncTask<T>
+            extends AsyncTask<Void, Void, TypedCursor<T>> {
+
+        private final ContentResolver mContentResolver;
+        private final SimpleSelectionFilter mFilter;
+        private final String mConstraint;
+        private final AppTypeConverter<T> mConverter;
+        private final CrudEventBus mBus;
+
+        public FetchTypedCursorAsyncTask(
+                ContentResolver contentResolver,
+                SimpleSelectionFilter filter,
+                String constraint,
+                AppTypeConverter<T> converter,
+                CrudEventBus bus) {
+            mContentResolver = contentResolver;
+            mFilter = filter;
+            mConstraint = constraint;
+            mConverter = converter;
+            mBus = bus;
+        }
+
+        @Override
+        protected  TypedCursor<T> doInBackground(Void... voids) {
+            // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
+            // different types of queries.
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(
+                        PatientProviderContract.CONTENT_URI,
+                        PatientProjection.getProjectionColumns(),
+                        mFilter.getSelectionString(),
+                        mFilter.getSelectionArgs(mConstraint),
+                        null);
+
+                return new TypedConvertedCursor<>(mConverter, cursor);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(TypedCursor<T> result) {
+            mBus.post(new TypedCursorFetchedEvent<T>(result));
+        }
+    }
 
     /**
      * An {@link AsyncTask} that fetches a single item from the data store.
      */
-    private static class FetchSingleAsyncTask<T extends AppTypeBase>
+    private static class FetchSingleAsyncTask<T>
             extends AsyncTask<Void, Void, Object> {
 
         private final ContentResolver mContentResolver;
@@ -145,4 +191,5 @@ public class AppModel {
             mBus.post(result);
         }
     }
+
 }
