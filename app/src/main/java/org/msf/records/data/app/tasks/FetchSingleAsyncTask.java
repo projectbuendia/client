@@ -52,7 +52,7 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
                     null);
 
             if (cursor == null || !cursor.moveToFirst()) {
-                return new SingleItemFetchFailedEvent();
+                return new SingleItemFetchFailedEvent("empty response from provider");
             }
 
             return new SingleItemFetchedEvent<>(mConverter.fromCursor(cursor));
