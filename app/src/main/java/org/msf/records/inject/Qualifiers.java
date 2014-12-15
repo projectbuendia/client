@@ -25,5 +25,8 @@ public class Qualifiers {
     @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
     public @interface OpenMrsPassword {}
 
+    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    public @interface XformUpdateClientCache {}
+
     private Qualifiers() {}
 }

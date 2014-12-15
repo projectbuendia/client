@@ -155,6 +155,11 @@ public class ChartProviderContract {
         public static final String CONCEPT_UUID = "concept_uuid";
 
         /**
+         * The id used to represent the concept in xforms (for client side parsing).
+         * In reality this is the openmrs ID, but the client doesn't need to know that.
+         */
+        public static final String XFORM_ID = "xform_id";
+        /**
          * Type for a concept like numeric, coded, etc.
          */
         public static final String CONCEPT_TYPE = "concept_type";

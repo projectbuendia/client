@@ -21,7 +21,6 @@ import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.Server;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;

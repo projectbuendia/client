@@ -11,9 +11,30 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.inject.Qualifiers;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
+import org.msf.records.mvcmodels.PatientModel;
+import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.prefs.BooleanPreference;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.OdkActivityLauncher;
+import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
+import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.VitalView;
+import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -24,28 +45,9 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppPatient;
-import org.msf.records.events.CrudEventBus;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
-import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
-import org.msf.records.widget.DataGridView;
-import org.msf.records.widget.VitalView;
-import org.odk.collect.android.model.PrepopulatableFields;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 
 /**
  * Activity displaying a patient's vitals and charts.
@@ -68,6 +70,7 @@ public final class PatientChartActivity extends BaseActivity {
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
     @Inject LocationManager mLocationManager;
+    @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -103,7 +106,8 @@ public final class PatientChartActivity extends BaseActivity {
         OdkResultSender odkResultSender = new OdkResultSender() {
 			@Override
 			public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-				OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid, resultCode, data);
+				OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
+                        mUpdateClientCache.get(), resultCode, data);
 			}
 		};
 
@@ -267,7 +271,7 @@ public final class PatientChartActivity extends BaseActivity {
 
 			// Temperature
 			LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
-			if (observation != null) {
+			if (observation != null && observation.localizedValue != null) {
 			    double value = Double.parseDouble(observation.localizedValue);
 			    mTemperatureTextView.setText(String.format("%.1f°", value));
 

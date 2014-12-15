@@ -52,4 +52,13 @@ public class PrefsModule {
                 "openmrs_password",
                 resources.getString(R.string.openmrs_password_default));
     }
+
+    @Provides @Singleton @Qualifiers.XformUpdateClientCache
+    BooleanPreference provideXformUpdateClientCache(
+            SharedPreferences sharedPreferences, Resources resources) {
+        return new BooleanPreference(
+                sharedPreferences,
+                "xform_update_client_cache",
+                resources.getBoolean(R.bool.xform_update_client_cache));
+    }
 }
