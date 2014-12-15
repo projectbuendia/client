@@ -1,8 +1,7 @@
 package org.msf.records.ui.tentselection;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
@@ -10,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.google.common.base.Optional;
 
@@ -25,6 +25,8 @@ import org.msf.records.utils.EventBusRegistrationInterface;
 import java.util.List;
 
 import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A dialog that allows users to assign or change a patient's location.
@@ -45,6 +47,8 @@ public final class AssignLocationDialog
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final Optional<String> mCurrentLocationUuid;
     private final TentSelectedCallback mTentSelectedCallback;
+    private ProgressDialog mProgressDialog;
+    private View mPreviousView;
 
     // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
@@ -86,6 +90,16 @@ public final class AssignLocationDialog
         mDialog.show();
     }
 
+    public void onPatientUpdateFailed( int reason )
+    {
+        mAdapter.setSelectedView( mPreviousView );
+        mPreviousView = null;
+
+        Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ), Toast.LENGTH_SHORT ).show();
+        mProgressDialog.dismiss();
+        //dismiss();
+    }
+
     private void startListeningForLocations() {
         mEventBus.register(mEventBusSubscriber);
         mLocationManager.loadLocations();
@@ -106,14 +120,20 @@ public final class AssignLocationDialog
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String newTentUuid = mAdapter.getItem(position).getLocation().uuid;
+        mPreviousView = mAdapter.getSelectedView();
+        mAdapter.setSelectedView( view );
+        mProgressDialog = ProgressDialog.show(mContext, "Updating Patient",
+                "Please wait...", true);
         if (isCurrentTent(newTentUuid) || mTentSelectedCallback.onNewTentSelected(newTentUuid)) {
             dismiss();
         }
 
         // TODO(kpy): Show a progress spinner somewhere on the dialog.
+
     }
 
     public void dismiss() {
+        mProgressDialog.dismiss();
         mDialog.dismiss();
     }
 
