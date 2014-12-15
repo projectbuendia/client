@@ -1,14 +1,13 @@
 package org.msf.records.ui.patientcreation;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
-import org.msf.records.net.OpenMrsServer;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
-import org.msf.records.net.Server;
-import org.msf.records.net.model.Patient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.SingleItemFetchedEvent;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -28,6 +27,7 @@ final class PatientCreationController {
     static final int SEX_FEMALE = 2;
 
     public interface Ui {
+
         static final int FIELD_UNKNOWN = 0;
         static final int FIELD_ID = 1;
         static final int FIELD_GIVEN_NAME = 2;
@@ -45,20 +45,33 @@ final class PatientCreationController {
         /** Invoked when the server RPC to create a patient fails. */
         void onCreateFailed(Exception error);
 
-        /** Invoked when the server RPC to create a patient succeeds. */
-        void onCreateSucceeded(Patient response);
+        /** Invoked when the server RPC to create a patient succeeds.
+         * @param patient*/
+        void onCreateSucceeded(AppPatient patient);
     }
 
 	private final Ui mUi;
-    private final Server mServer;
+    private final CrudEventBus mCrudEventBus;
+    private AppModel mModel;
 
-    private final AddPatientListener mAddPatientListener;
+    private final EventSubscriber mEventBusSubscriber;
 
-	public PatientCreationController(Ui ui, Server server) {
+	public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
 		mUi = ui;
-        mServer = server;
+        mCrudEventBus = crudEventBus;
+        mModel = model;
 
-        mAddPatientListener = new AddPatientListener();
+        mEventBusSubscriber = new EventSubscriber();
+    }
+
+    /** Initializes the controller, setting async operations going to collect data required by the UI. */
+    public void init() {
+        mCrudEventBus.register(mEventBusSubscriber);
+    }
+
+    /** Releases any resources used by the controller. */
+    public void suspend() {
+        mCrudEventBus.unregister(mEventBusSubscriber);
     }
 
     public void createPatient(
@@ -117,7 +130,7 @@ final class PatientCreationController {
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid = Optional.of(locationUuid);
 
-        mServer.addPatient(patientDelta, mAddPatientListener, mAddPatientListener, TAG);
+        mModel.addPatient(mCrudEventBus, patientDelta);
     }
 
     private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {
@@ -132,19 +145,11 @@ final class PatientCreationController {
         }
     }
 
-    private final class AddPatientListener
-            implements Response.Listener<Patient>, Response.ErrorListener {
+    @SuppressWarnings("unused") // Called by reflection from EventBus.
+    private final class EventSubscriber {
 
-        @Override public void onResponse(Patient response) {
-            // TODO(dxchen): Write the newly-added patient to the model directly so that we do not
-            // have to do a sync afterwards to see the patient. Make sure not to call the UI
-            // callback until the model add has finished.
-
-            mUi.onCreateSucceeded(response);
-        }
-
-        @Override public void onErrorResponse(VolleyError error) {
-            mUi.onCreateFailed(error);
+        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
+            mUi.onCreateSucceeded(event.item);
         }
     }
 }
