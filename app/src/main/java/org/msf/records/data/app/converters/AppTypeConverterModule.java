@@ -10,7 +10,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * A Dagger module that provides bindings for the app model.
+ * A Dagger module that provides bindings for the app model's {@link AppTypeConverters}.
  */
 @Module(
         complete = false,

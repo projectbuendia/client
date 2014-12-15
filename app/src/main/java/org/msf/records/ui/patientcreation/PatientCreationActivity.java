@@ -13,16 +13,19 @@ import com.google.common.base.Optional;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
-import org.msf.records.net.OpenMrsServer;
-import org.msf.records.net.model.Patient;
+import org.msf.records.net.Server;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.BigToast;
 import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -37,7 +40,8 @@ public final class PatientCreationActivity extends BaseActivity {
 	private PatientCreationController mController;
     private AlertDialog mAlertDialog;
 
-    @Inject OpenMrsServer mServer;
+    @Inject AppModel mModel;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject LocationManager mLocationManager;
 
     @InjectView(R.id.patient_creation_text_patient_id) EditText mId;
@@ -58,7 +62,8 @@ public final class PatientCreationActivity extends BaseActivity {
 
         App.getInstance().inject(this);
 
-        mController = new PatientCreationController(new MyUi(), mServer);
+        mController =
+                new PatientCreationController(new MyUi(), mCrudEventBusProvider.get(), mModel);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setTitle("Discard Changes?")
@@ -201,7 +206,7 @@ public final class PatientCreationActivity extends BaseActivity {
         }
 
         @Override
-        public void onCreateSucceeded(Patient response) {
+        public void onCreateSucceeded(AppPatient patient) {
             finish();
         }
     }
