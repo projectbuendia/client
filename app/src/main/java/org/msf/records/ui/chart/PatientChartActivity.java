@@ -90,6 +90,7 @@ public final class PatientChartActivity extends BaseActivity {
     @InjectView(R.id.patient_chart_age) TextView mPatientAgeView;
     @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
+    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
 
     public PatientChartController getController() {
     	return mController;
@@ -254,7 +255,14 @@ public final class PatientChartActivity extends BaseActivity {
 
 	        //dateFormatter.setTimeZone( calendar.getTimeZone() );
 
-	    	mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+            if (calendar.getTime().getTime() != 0) {
+                mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+                mLastObservationLabel.setVisibility(View.VISIBLE);
+            } else {
+                mLastObservationTimeView.setText(R.string.last_observation_none);
+                mLastObservationLabel.setVisibility(View.GONE);
+            }
+
 	    }
 
 	    @Override
