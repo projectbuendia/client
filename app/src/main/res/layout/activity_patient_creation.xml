@@ -182,21 +182,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@android:color/black">
 
         <Button
+            android:layout_margin="10dp"
             android:id="@+id/patient_creation_button_cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="Cancel"
+            android:textColor="@android:color/white"
+            android:background="@android:color/holo_red_dark"/>
 
         <Button
+            android:layout_margin="10dp"
             android:id="@+id/patient_creation_button_create"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Create" />
+            android:text="Create"
+            android:textColor="@android:color/white"
+            android:background="@android:color/holo_green_dark"/>
 
     </LinearLayout>
 
