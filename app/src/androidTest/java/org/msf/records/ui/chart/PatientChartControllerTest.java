@@ -16,6 +16,7 @@ import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
@@ -43,7 +44,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private OdkResultSender mMockOdkResultSender;
 	@Mock private ObservationsProvider mMockObservationsProvider;
 	@Mock private PatientModel mMockPatientModel;
+	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
+	private FakeEventBus mFakeEventBus;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -51,15 +54,18 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		MockitoAnnotations.initMocks(this);
 
 		mFakeCrudEventBus = new FakeEventBus();
+		mFakeEventBus = new FakeEventBus();
 		mController = new PatientChartController(
 				mMockAppModel,
 				mMockServer,
+				mFakeEventBus,
 				mFakeCrudEventBus,
 				mMockUi,
 				mMockOdkResultSender,
 				mMockObservationsProvider,
 				null,
-				mMockPatientModel);
+				mMockPatientModel,
+				mMockSyncManager);
 	}
 
 	public void testSuspend_UnregistersFromEventBus() {
