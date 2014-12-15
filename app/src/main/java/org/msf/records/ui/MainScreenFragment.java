@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.msf.records.R;
+import org.msf.records.ui.patientlist.PatientListActivity;
 
 /**
  * A fragment representing the main screen, allowing patients and rounds to be added.

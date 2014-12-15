@@ -4,7 +4,7 @@ import android.app.Application;
 
 import org.msf.records.App;
 import org.msf.records.net.VolleySingleton;
-import org.msf.records.ui.PatientSearchActivity;
+import org.msf.records.ui.patientlist.PatientSearchActivity;
 
 import javax.inject.Singleton;
 
