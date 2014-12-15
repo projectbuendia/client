@@ -94,4 +94,6 @@
     <string name="location_load_error">Error loading location resources</string>
     <string name="unknown_location">Unknown Location</string>
     <string name="unknown_tent_in_zone">%s (No Tent Assigned)</string>
+    <string name="last_observation">"Last Observation: "</string>
+    <string name="last_observation_none">No Observations</string>
 </resources>

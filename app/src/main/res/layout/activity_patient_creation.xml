@@ -198,7 +198,7 @@
             android:layout_weight="1"
             android:text="Cancel"
             android:textColor="@android:color/white"
-            android:background="@android:color/holo_red_dark"/>
+            android:background="@drawable/bg_cancel_button"/>
 
         <Button
             android:layout_margin="10dp"
@@ -208,7 +208,7 @@
             android:layout_weight="1"
             android:text="Create"
             android:textColor="@android:color/white"
-            android:background="@android:color/holo_green_dark"/>
+            android:background="@drawable/bg_create_button"/>
 
     </LinearLayout>
 
