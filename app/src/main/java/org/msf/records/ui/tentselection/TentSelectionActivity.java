@@ -19,10 +19,10 @@ import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.PatientListFragment;
-import org.msf.records.ui.PatientSearchActivity;
-import org.msf.records.ui.RoundActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
+import org.msf.records.ui.patientlist.PatientListFragment;
+import org.msf.records.ui.patientlist.PatientSearchActivity;
+import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.utils.EventBusWrapper;
 
 import de.greenrobot.event.EventBus;

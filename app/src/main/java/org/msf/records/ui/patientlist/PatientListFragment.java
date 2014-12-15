@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.patientlist;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -35,6 +35,9 @@ import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.ExpandablePatientListAdapter;
+import org.msf.records.ui.ListDialogFragment;
+import org.msf.records.ui.ProgressFragment;
 
 import de.greenrobot.event.EventBus;
 
