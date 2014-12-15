@@ -28,7 +28,7 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
     							cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS)))
 				.setGender(
 						getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER)))
-				.setAdmissiondateTime(new DateTime(
+				.setAdmissionDateTime(new DateTime(
                         cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000))
 				.setLocationUuid(
 						cursor.getString(PatientProjection.COLUMN_LOCATION_UUID))

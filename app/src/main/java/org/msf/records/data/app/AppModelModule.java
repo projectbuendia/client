@@ -1,9 +1,9 @@
 package org.msf.records.data.app;
 
-import android.content.ContentResolver;
-
 import org.msf.records.data.app.converters.AppTypeConverterModule;
 import org.msf.records.data.app.converters.AppTypeConverters;
+import org.msf.records.data.app.tasks.AppAsyncTaskFactory;
+import org.msf.records.data.app.tasks.AppAsyncTaskModule;
 
 import javax.inject.Singleton;
 
@@ -15,7 +15,8 @@ import dagger.Provides;
  */
 @Module(
         includes = {
-                AppTypeConverterModule.class
+                AppTypeConverterModule.class,
+                AppAsyncTaskModule.class
         },
         complete = false,
         library = true
@@ -23,7 +24,8 @@ import dagger.Provides;
 public class AppModelModule {
 
     @Provides @Singleton AppModel provideAppModel(
-            ContentResolver contentResolver, AppTypeConverters converters) {
-        return new AppModel(contentResolver, converters);
+            AppTypeConverters converters,
+            AppAsyncTaskFactory taskFactory) {
+        return new AppModel(converters, taskFactory);
     }
 }
