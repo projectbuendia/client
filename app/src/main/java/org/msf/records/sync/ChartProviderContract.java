@@ -195,5 +195,10 @@ public class ChartProviderContract {
          * UUID for a concept representing a group (section) in a chart.
          */
         public static final String GROUP_UUID = "group_uuid";
+        /**
+         * A boolean (0 or 1) column indicating 1 if this is an observation cached from an xform
+         * that has not yet been sent.
+         */
+        public static final String TEMP_CACHE = "temp_cache";
     }
 }

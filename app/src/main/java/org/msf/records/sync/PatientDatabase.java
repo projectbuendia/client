@@ -24,7 +24,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 12;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -106,6 +106,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ChartColumns.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
                     ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
                     ChartColumns.VALUE + TYPE_INTEGER + COMMA_SEP +
+                    ChartColumns.TEMP_CACHE + TYPE_INTEGER + COMMA_SEP + //actually boolean
                     UNIQUE_INDEX + ChartColumns.PATIENT_UUID + COMMA_SEP +
                     ChartColumns.ENCOUNTER_UUID + COMMA_SEP + ChartColumns.CONCEPT_UUID + ")" +
                     ")";
