@@ -4,13 +4,13 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
+import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * An interfacing abstracting the idea of an RPC to a server. Allows calls to be abstracted between
@@ -22,27 +22,30 @@ public interface Server {
     public static final String PATIENT_STATUS_KEY = "status";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
-    @Deprecated
-    public static final String PATIENT_DOB_YEARS_KEY = "age_years";
-    @Deprecated
-    public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
-    @Deprecated
-    public static final String PATIENT_AGE_TYPE_KEY = "age_type";
+    @Deprecated public static final String PATIENT_DOB_YEARS_KEY = "age_years";
+    @Deprecated public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
+    @Deprecated public static final String PATIENT_AGE_TYPE_KEY = "age_type";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
     public static final String PATIENT_MOVEMENT_KEY = "movement";
+    public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
 
     /**
-     * Create a patient record for a new patient. Currently we are just using a String-String
-     * map for parameters, but this is a bit close in implementation details to the old Buendia UI
-     * so it will probably need to be generalized in future.
-     *
-     * @param patientArguments a String-String map for the patient arguments, key constants
-     * @param logTag a unique argument for tagging logs to aid debugging
+     * Adds a patient.
      */
-    public void addPatient(
-            Map<String, String> patientArguments,
+    void addPatient(
+            AppPatientDelta patientDelta,
+            Response.Listener<Patient> patientListener,
+            Response.ErrorListener errorListener,
+            String logTag);
+
+    /**
+     * Updates a patient.
+     */
+    public void updatePatient(
+            String patientId,
+            AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);
@@ -69,22 +72,6 @@ public interface Server {
      */
     public void getPatient(
             String patientId,
-            Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
-
-    /**
-     * Update a patient record for an existing patient. Currently we are just using a String-String
-     * map for parameters, but this is a bit close in implementation details to the old Buendia UI
-     * so it will probably need to be generalized in future.
-     *
-     * @param patientChanges a Patient map for the patient arguments. If a field is null then
-     *                         the value is not touched. There is no way to delete values.
-     * @param logTag a unique argument for tagging logs to aid debugging
-     */
-    public void updatePatient(
-            String patientId,
-            Patient patientChanges,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);

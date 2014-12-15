@@ -70,7 +70,7 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
                 Zone.getForegroundColorResource(tent.getLocation().parent_uuid));
 
         if (selectedLocationUuid.isPresent() &&
-                selectedLocationUuid.get() == tent.getLocation().uuid) {
+                selectedLocationUuid.get().equals(tent.getLocation().uuid)) {
             view.setBackgroundResource(R.color.zone_tent_selected_padding);
         }
 
