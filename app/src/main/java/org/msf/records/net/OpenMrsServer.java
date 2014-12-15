@@ -57,20 +57,23 @@ public class OpenMrsServer implements Server {
             public void onErrorResponse(VolleyError error) {
                 String message = error.getMessage();
                 try {
-                    String text = new String(error.networkResponse.data);
-                    JsonObject result = new JsonParser().parse(text).getAsJsonObject();
-                    if (result.has("error")) {
-                        JsonObject errorObject = result.getAsJsonObject("error");
-                        JsonElement element = errorObject.get("message");
-                        if (element == null || element.isJsonNull()) {
-                            element = errorObject.get("code");
-                        }
-                        if (element != null && element.isJsonPrimitive()) {
-                            message = element.getAsString();
+                    if (error.networkResponse != null) {
+                        String text = new String(error.networkResponse.data);
+                        JsonObject result = new JsonParser().parse(text).getAsJsonObject();
+                        if (result.has("error")) {
+                            JsonObject errorObject = result.getAsJsonObject("error");
+                            JsonElement element = errorObject.get("message");
+                            if (element == null || element.isJsonNull()) {
+                                element = errorObject.get("code");
+                            }
+                            if (element != null && element.isJsonPrimitive()) {
+                                message = element.getAsString();
+                            }
                         }
                     }
-                } catch (JsonParseException | IllegalStateException |
-                         UnsupportedOperationException e) {
+                } catch (JsonParseException
+                        | IllegalStateException
+                        | UnsupportedOperationException e) {
                     e.printStackTrace();
                 }
                 errorListener.onErrorResponse(new VolleyError(message, error));
