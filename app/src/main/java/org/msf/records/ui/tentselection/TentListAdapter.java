@@ -28,6 +28,7 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
     private final Context context;
     private final Optional<String> selectedLocationUuid;
     private final boolean mShouldAbbreviate;
+    private View mSelectedView;
 
     public TentListAdapter(
             Context context,
@@ -71,10 +72,25 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
 
         if (selectedLocationUuid.isPresent() &&
                 selectedLocationUuid.get().equals(tent.getLocation().uuid)) {
-            view.setBackgroundResource(R.color.zone_tent_selected_padding);
+            setSelectedView( view );
         }
 
         return view;
+    }
+
+    public View getSelectedView() { return mSelectedView; }
+    public void setSelectedView( View view )
+    {
+        if ( mSelectedView != null ) {
+            mSelectedView.setBackgroundResource(R.drawable.tent_selector);
+        }
+
+        mSelectedView = view;
+
+        if ( view != null )
+        {
+            view.setBackgroundResource(R.color.zone_tent_selected_padding);
+        }
     }
 
     private final String abbreviateIfNeeded(String tentString) {
