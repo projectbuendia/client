@@ -120,14 +120,16 @@ public class DateTimeWidget extends QuestionWidget {
         if ( showCalendar ) {
         	scrollView = new HorizontalScrollView(context);
         	LinearLayout ll = new LinearLayout(context);
+            ll.setGravity(Gravity.CENTER);
         	ll.addView(mDatePicker);
+            ll.addView(mTimePicker);
         	ll.setPadding(10, 10, 10, 10);
         	scrollView.addView(ll);
         	addView(scrollView);
         } else {
         	addView(mDatePicker);
+            addView(mTimePicker);
         }
-        addView(mTimePicker);
 
         // If there's an answer, use it.
         setAnswer();

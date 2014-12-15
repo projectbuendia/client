@@ -97,6 +97,18 @@ public final class PatientCreationActivity extends BaseActivity {
         };
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mController.init();
+    }
+
+    @Override
+    protected void onStop() {
+        mController.suspend();
+        super.onStop();
+    }
+
     @OnClick(R.id.patient_creation_button_change_location)
     void onChangeLocationClick() {
         new AssignLocationDialog(
@@ -176,6 +188,16 @@ public final class PatientCreationActivity extends BaseActivity {
                 case PatientCreationController.Ui.FIELD_AGE:
                     mAge.setError(message);
                     break;
+                case PatientCreationController.Ui.FIELD_LOCATION:
+                    //TODO(mathewi) Using setError doesn't really work properly. Implement a better
+                    // UI
+                    // fallthrough
+                case PatientCreationController.Ui.FIELD_AGE_UNITS:
+                    //TODO(mathewi) implement errors for age unit
+                    // fallthrough
+                case PatientCreationController.Ui.FIELD_SEX:
+                    //TODO(mathewi) implement errors for sex
+                    // fallthrough
                 default:
                     // A stopgap.  We have to do something visible or nothing
                     // will happen at all when the Create button is pressed.
