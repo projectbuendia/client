@@ -7,7 +7,6 @@ import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Optional;
 
@@ -180,9 +179,7 @@ public final class PatientCreationActivity extends BaseActivity {
                 default:
                     // A stopgap.  We have to do something visible or nothing
                     // will happen at all when the Create button is pressed.
-                    Toast.makeText(
-                            PatientCreationActivity.this, message,
-                            Toast.LENGTH_SHORT).show();
+                    BigToast.show(PatientCreationActivity.this, message);
                     // TODO(dxchen): Handle.
                     break;
             }
