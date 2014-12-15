@@ -358,6 +358,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             // with replace.
             ContentValues conceptInsert = new ContentValues();
             conceptInsert.put(ChartColumns._ID, concept.uuid);
+            conceptInsert.put(ChartColumns.XFORM_ID, concept.xform_id);
             conceptInsert.put(ChartColumns.CONCEPT_TYPE, concept.type.name());
             conceptInserts.add(conceptInsert);
             syncResult.stats.numInserts++;
@@ -486,6 +487,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.bulkInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
+        // Remove all temporary observations now we have the real ones
+        provider.delete(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
+                ChartColumns.TEMP_CACHE + "!=0",
+                new String[0]);
+        timingLogger.addSplit("delete temp observations");
         timingLogger.dumpToLog();
     }
 

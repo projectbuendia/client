@@ -12,4 +12,6 @@ public enum ConceptType {
     CODED,
     @SerializedName("none")
     NONE,
+    @SerializedName("text")
+    TEXT,
 }

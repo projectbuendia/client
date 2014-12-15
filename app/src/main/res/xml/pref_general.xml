@@ -44,4 +44,11 @@
         android:summary="@string/pref_desc_store_form_instances"
         android:defaultValue="@bool/keep_form_instances_locally_default" />
 
+    <!-- Whether to instantly update the local cache when an xform is submitted locally -->
+    <CheckBoxPreference
+        android:key="xform_update_client_cache"
+        android:title="@string/pref_title_xform_update_client_cache"
+        android:summary="@string/pref_desc_xform_update_client_cache"
+        android:defaultValue="@bool/xform_update_client_cache" />
+
 </PreferenceScreen>
