@@ -69,6 +69,9 @@ public final class PatientChartActivity extends BaseActivity {
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
+    // TODO(dxchen): Refactor.
+    private boolean mIsFetchingXform = false;
+
     @Inject AppModel mModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -205,6 +208,7 @@ public final class PatientChartActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mIsFetchingXform = false;
     	mController.onXFormResult(requestCode, resultCode, data);
     }
 
@@ -395,7 +399,13 @@ public final class PatientChartActivity extends BaseActivity {
 	    		int requestCode,
 	    		org.odk.collect.android.model.Patient patient,
 	    		PrepopulatableFields fields) {
-	    	OdkActivityLauncher.fetchAndShowXform(PatientChartActivity.this, formUuid, requestCode, patient, fields);
+            if (mIsFetchingXform) {
+                return;
+            }
+            
+            mIsFetchingXform = true;
+	    	OdkActivityLauncher.fetchAndShowXform(
+                    PatientChartActivity.this, formUuid, requestCode, patient, fields);
 	    }
     }
 }
