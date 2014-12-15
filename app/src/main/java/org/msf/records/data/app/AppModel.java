@@ -1,7 +1,10 @@
 package org.msf.records.data.app;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.AsyncTask;
 
+import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.data.app.tasks.AppAddPatientAsyncTask;
 import org.msf.records.data.app.tasks.AppAsyncTaskFactory;
@@ -10,8 +13,11 @@ import org.msf.records.data.app.tasks.FetchSingleAsyncTask;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
+import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
@@ -26,12 +32,12 @@ import de.greenrobot.event.NoSubscriberEvent;
  */
 public class AppModel {
 
-    private static final String TAG = AppModel.class.getSimpleName();
-
+    private final ContentResolver mContentResolver;
     private final AppTypeConverters mConverters;
     private final AppAsyncTaskFactory mTaskFactory;
 
-    AppModel(AppTypeConverters converters, AppAsyncTaskFactory taskFactory) {
+    AppModel(ContentResolver contentResolver, AppTypeConverters converters, AppAsyncTaskFactory taskFactory) {
+    	mContentResolver = contentResolver;
         mConverters = converters;
         mTaskFactory = taskFactory;
     }
@@ -40,11 +46,12 @@ public class AppModel {
      * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
      * {@link AppPatient}s on the specified event bus when complete.
      */
-    public void fetchPatients(CrudEventBus bus) {
-        // Register for error events so that we can close cursors if we need to.
+    public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.register(new CrudEventBusErrorSubscriber(bus));
 
-        // TODO(dxchen): Asynchronously fetch patients.
+        FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<AppPatient>(
+                mContentResolver, filter, constraint, mConverters.patient, bus);
+        task.execute();
     }
 
     /**
@@ -95,6 +102,8 @@ public class AppModel {
     @SuppressWarnings("unused") // Called by reflection from event bus.
     private static class CrudEventBusErrorSubscriber {
 
+    	// TODO(rjlothian): This memory freeing strategy feels error prone.
+    	// We don't unregister from the bus if delivery succeeds...
         private final CrudEventBus mBus;
 
         public CrudEventBusErrorSubscriber(CrudEventBus bus) {
@@ -115,7 +124,52 @@ public class AppModel {
         }
     }
 
-    // TODO(dxchen): Implement.
-    private abstract static class FetchTypedCursorAsyncTask<T extends AppTypeBase>
-            extends AsyncTask<Void, Void, Object> {}
+    private static class FetchTypedCursorAsyncTask<T>
+    		extends AsyncTask<Void, Void, TypedCursor<T>> {
+
+		private final ContentResolver mContentResolver;
+		private final SimpleSelectionFilter mFilter;
+		private final String mConstraint;
+		private final AppTypeConverter<T> mConverter;
+		private final CrudEventBus mBus;
+
+		public FetchTypedCursorAsyncTask(
+		        ContentResolver contentResolver,
+		        SimpleSelectionFilter filter,
+		        String constraint,
+		        AppTypeConverter<T> converter,
+		        CrudEventBus bus) {
+		    mContentResolver = contentResolver;
+		    mFilter = filter;
+		    mConstraint = constraint;
+		    mConverter = converter;
+		    mBus = bus;
+		}
+
+		@Override
+		protected  TypedCursor<T> doInBackground(Void... voids) {
+		    // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
+		    // different types of queries.
+		    Cursor cursor = null;
+		    try {
+		        cursor = mContentResolver.query(
+		                PatientProviderContract.CONTENT_URI,
+		                PatientProjection.getProjectionColumns(),
+		                mFilter.getSelectionString(),
+		                mFilter.getSelectionArgs(mConstraint),
+		                null);
+
+		        return new TypedConvertedCursor<>(mConverter, cursor);
+		    } finally {
+		        if (cursor != null) {
+		            cursor.close();
+		        }
+		    }
+		}
+
+		@Override
+		protected void onPostExecute(TypedCursor<T> result) {
+		    mBus.post(new TypedCursorFetchedEvent<T>(result));
+		}
+	}
 }
