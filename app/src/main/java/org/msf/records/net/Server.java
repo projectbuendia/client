@@ -4,14 +4,13 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
+import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
-import org.msf.records.net.model.PatientDelta;
 import org.msf.records.net.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * An interfacing abstracting the idea of an RPC to a server. Allows calls to be abstracted between
@@ -36,7 +35,7 @@ public interface Server {
      * Adds a patient.
      */
     void addPatient(
-            PatientDelta patientDelta,
+            AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);
@@ -46,7 +45,7 @@ public interface Server {
      */
     public void updatePatient(
             String patientId,
-            PatientDelta patientDelta,
+            AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener,
             String logTag);

@@ -6,8 +6,9 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.msf.records.net.OpenMrsServer;
+import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-import org.msf.records.net.model.PatientDelta;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -49,11 +50,11 @@ final class PatientCreationController {
     }
 
 	private final Ui mUi;
-    private final OpenMrsServer mServer;
+    private final Server mServer;
 
     private final AddPatientListener mAddPatientListener;
 
-	public PatientCreationController(Ui ui, OpenMrsServer server) {
+	public PatientCreationController(Ui ui, Server server) {
 		mUi = ui;
         mServer = server;
 
@@ -108,7 +109,7 @@ final class PatientCreationController {
             return;
         }
 
-        PatientDelta patientDelta = new PatientDelta();
+        AppPatientDelta patientDelta = new AppPatientDelta();
         patientDelta.id = Optional.of(id);
         patientDelta.givenName = Optional.of(givenName);
         patientDelta.familyName = Optional.of(familyName);

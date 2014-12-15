@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.msf.records.App;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.location.LocationManager;
@@ -23,9 +24,7 @@ import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
-import org.msf.records.net.model.PatientDelta;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -169,7 +168,7 @@ final class PatientChartController {
     }
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
-    public void init() {;
+    public void init() {
     	mCrudEventBus.register(mEventBusSubscriber);
     	prodServer();
     	mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
@@ -251,7 +250,7 @@ final class PatientChartController {
                 new Response.Listener<ConceptList>() {
                     @Override
                     public void onResponse(ConceptList response) {
-                        Log.i(TAG,  "Response: " + Integer.toString(response.results.length));
+                        Log.i(TAG, "Response: " + Integer.toString(response.results.length));
                     }
                 },
                 new Response.ErrorListener() {
@@ -314,20 +313,16 @@ final class PatientChartController {
 
     public void showAssignLocationDialog(
             Context context,
-            LocationManager locationManager,
-            final Server server) {
-
-        final TentSelectionListener listener = new TentSelectionListener();
-
+            LocationManager locationManager) {
         TentSelectedCallback callback =
                 new TentSelectedCallback() {
+
                     @Override
                     public boolean onNewTentSelected(String newTentUuid) {
-                        PatientDelta patientDelta = new PatientDelta();
+                        AppPatientDelta patientDelta = new AppPatientDelta();
                         patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
-                        server.updatePatient(mPatient.uuid, patientDelta, listener, listener, TAG);
-
+                        mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, patientDelta);
                         return false;
                     }
                 };
@@ -356,30 +351,17 @@ final class PatientChartController {
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
+
     	public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
     		mPatient = event.item;
     		mUi.setPatient(mPatient);
-    		updatePatientUI();
-    	}
-    }
-
-    private final class TentSelectionListener
-            implements Response.Listener<Patient>, Response.ErrorListener {
-
-        @Override public void onResponse(Patient patient) {
-            // TODO(kpy): Synchronously write the new patient to the database.
 
             if (mAssignLocationDialog != null) {
                 mAssignLocationDialog.dismiss();
                 mAssignLocationDialog = null;
             }
 
-            // Refetch the patient from the database so that we can update UI.
-            mAppModel.fetchSinglePatient(mCrudEventBus, patient.uuid);
-        }
-
-        @Override public void onErrorResponse(VolleyError error) {
-            // TODO(kpy): Determine what to do here: show a toast?
-        }
+    		updatePatientUI();
+    	}
     }
 }
