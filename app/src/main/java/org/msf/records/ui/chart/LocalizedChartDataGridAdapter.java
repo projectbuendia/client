@@ -1,5 +1,6 @@
 package org.msf.records.ui.chart;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,15 +33,17 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private static class Row {
 
-        private final String name;
+        private final String mConceptUuid;
+        private final String mName;
         private final HashMap<String, String> datesToValues = new HashMap<>();
-//        private final HashSet<String> dates = new HashSet<>();
 
-        private Row(String name) {
-            this.name = name;
+        private Row(String conceptUuid, String name) {
+            mConceptUuid = conceptUuid;
+            mName = name;
         }
     }
 
+    private final Context mContext;
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
@@ -49,6 +52,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     public LocalizedChartDataGridAdapter(Context context,
                                          List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
+        mContext = context;
         this.mLayoutInflater = layoutInflater;
         Row row = null;
         TreeSet<LocalDate> days = new TreeSet<>();
@@ -67,16 +71,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
-            if (row == null || !ob.conceptName.equals(row.name)) {
-                row = new Row(ob.conceptName);
+            if (row == null || !ob.conceptName.equals(row.mName)) {
+                row = new Row(ob.conceptUuid, ob.conceptName);
                 rows.add(row);
                 if (Concept.DIARRHEA_UUID.equals(ob.conceptUuid)
                         || Concept.VOMITING_UUID.equals(ob.conceptUuid)) {
                     // TODO(nfortescue): this should really look up the localized values from the concept database
                     // otherwise the strings could be inconsistent with the form
-                    severeRow = new Row(ob.conceptName + " (" + context.getResources().getString(R.string.severe_symptom) + ")");
-                    moderateRow = new Row(ob.conceptName + " (" + context.getResources().getString(R.string.moderate_symptom) + ")");
-                    mildRow = new Row(ob.conceptName + " (" + context.getResources().getString(R.string.mild_symptom) + ")");
+                    severeRow = new Row(null, ob.conceptName + " (" + context.getResources().getString(R.string.severe_symptom) + ")");
+                    moderateRow = new Row(null, ob.conceptName + " (" + context.getResources().getString(R.string.moderate_symptom) + ")");
+                    mildRow = new Row(null, ob.conceptName + " (" + context.getResources().getString(R.string.mild_symptom) + ")");
                     extraRows.add(severeRow);
                     extraRows.add(moderateRow);
                     extraRows.add(mildRow);
@@ -137,7 +141,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     context.getContentResolver(),
                     LocalizedChartHelper.ENGLISH_LOCALE);
             for (LocalizedObservation ob : emptyChart) {
-                rows.add(new Row(ob.conceptName));
+                rows.add(new Row(ob.conceptUuid, ob.conceptName));
             }
         }
     }
@@ -173,7 +177,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 R.layout.data_grid_row_header_chart, null /*root*/);
         TextView textView =
                 (TextView) view.findViewById(R.id.data_grid_header_text);
-        textView.setText(rows.get(row).name);
+        textView.setText(rows.get(row).mName);
 
         textView.setBackgroundColor((row % 2 == 0) ? 0xffe1e1e1 : 0xffcccccc);
 
@@ -192,15 +196,14 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
-        Row rowData = rows.get(rowIndex);
+        final Row rowData = rows.get(rowIndex);
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_cell_chart_text, null /*root*/);
-        String dateKey = columnHeaders.get(columnIndex);
+        final String dateKey = columnHeaders.get(columnIndex);
 
         View imageView = view.findViewById(R.id.data_grid_cell_chart_image);
 
-        // TODO(dxchen): Switch to Temperature concept UUID.
-        if (rowData.name.startsWith("Temperature")) {
+        if (Concept.TEMPERATURE_UUID.equals(rowData.mConceptUuid)) {
             String temperatureString = rowData.datesToValues.get(dateKey);
             TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
             if (temperatureString != null) {
@@ -215,6 +218,19 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 } catch (NumberFormatException e) {
                     Log.w(TAG, "Temperature format was invalid", e);
                 }
+            }
+        } else if (Concept.NOTES_UUID.equals(rowData.mConceptUuid)) {
+            boolean isActive = rowData.datesToValues.containsKey(dateKey);
+            if (isActive) {
+                imageView.setBackgroundResource(R.drawable.chart_cell_active_pressable);
+                imageView.setOnClickListener(new View.OnClickListener() {
+
+                    @Override public void onClick(View view) {
+                        new AlertDialog.Builder(mContext)
+                                .setMessage(rowData.datesToValues.get(dateKey))
+                                .show();
+                    }
+                });
             }
         } else {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
