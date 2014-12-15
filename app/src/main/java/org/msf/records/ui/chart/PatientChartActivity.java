@@ -14,6 +14,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -39,10 +40,12 @@ import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.PrepopulatableFields;
@@ -65,9 +68,11 @@ public final class PatientChartActivity extends BaseActivity {
     private final MyUi mMyUi = new MyUi();
 
     @Inject AppModel mModel;
+    @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
     @Inject LocationManager mLocationManager;
+    @Inject SyncManager mSyncManager;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -135,12 +140,14 @@ public final class PatientChartActivity extends BaseActivity {
         mController = new PatientChartController(
         		mModel,
         		new OpenMrsChartServer(App.getConnectionDetails()),
+                new EventBusWrapper(mEventBus),
         		mCrudEventBusProvider.get(),
         		mMyUi,
         		odkResultSender,
         		observationsProvider,
         		controllerState,
-        		mPatientModel);
+        		mPatientModel,
+                mSyncManager);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
