@@ -31,6 +31,7 @@ import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
+import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -42,7 +43,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
 
@@ -100,7 +100,7 @@ final class PatientChartController {
     }
 
     private final OpenMrsChartServer mServer;
-    private final EventBusWrapper mDefaultEventBus;
+    private final EventBusRegistrationInterface mDefaultEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
@@ -130,7 +130,7 @@ final class PatientChartController {
     public PatientChartController(
     		AppModel appModel,
     		OpenMrsChartServer server,
-            EventBusWrapper defaultEventBus,
+    		EventBusRegistrationInterface defaultEventBus,
     		CrudEventBus crudEventBus,
     		Ui ui,
     		OdkResultSender odkResultSender,
