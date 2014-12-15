@@ -267,7 +267,7 @@ public final class PatientChartActivity extends BaseActivity {
 
 			// Temperature
 			LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
-			if (observation != null) {
+			if (observation != null && observation.localizedValue != null) {
 			    double value = Double.parseDouble(observation.localizedValue);
 			    mTemperatureTextView.setText(String.format("%.1f°", value));
 
@@ -280,7 +280,7 @@ public final class PatientChartActivity extends BaseActivity {
 
 			// General Condition
 			observation = observations.get(Concept.GENERAL_CONDITION_UUID);
-			if (observation != null) {
+			if (observation != null && observation.localizedValue != null) {
 			    mGeneralCondition.setText(observation.localizedValue);
 			    mGeneralConditionContainer.setBackgroundResource(
 			            Concept.getColorResourceForGeneralCondition(observation.value));
@@ -290,12 +290,12 @@ public final class PatientChartActivity extends BaseActivity {
 			String specialText = new String();
 
 			observation = observations.get(Concept.PREGNANCY_UUID);
-			if (observation != null && observation.localizedValue.equals("Yes")) {
+			if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
 			    specialText = "Pregnant";
 			}
 
 			observation = observations.get(Concept.IV_UUID);
-			if (observation != null && observation.localizedValue.equals("Yes")) {
+			if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
 			    specialText += "\nIV";
 			}
 
