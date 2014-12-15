@@ -168,15 +168,23 @@
                     android:textColor="@color/gray_600"
                     android:text="Unassigned"/-->
 
-                <Button
+                <FrameLayout
                     android:id="@+id/patient_creation_button_change_location"
-                    android:layout_width="280dp"
-                    android:layout_height="60dp"
-                    android:padding="5dp"
-                    android:layout_margin="5dp"
-                    android:textColor="@color/white"
-                    android:background="#DC3B05"
-                    android:text="@string/patient_creation_location_assign"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:foreground="@drawable/fg_button_assign_location">
+
+                    <TextView
+                        android:id="@+id/patient_creation_text_change_location"
+                        android:layout_width="280dp"
+                        android:layout_height="60dp"
+                        android:padding="4dp"
+                        android:layout_margin="5dp"
+                        android:gravity="center"
+                        android:background="#CCCCCC"
+                        android:text="@string/patient_creation_location_assign"/>
+
+                </FrameLayout>
 
             </LinearLayout>
 

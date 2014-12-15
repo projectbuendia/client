@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.google.common.base.Optional;
 
@@ -49,7 +51,7 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_text_age) EditText mAge;
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
-    @InjectView(R.id.patient_creation_button_change_location) Button mLocation;
+    @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
 
     private String mLocationUuid;
 
@@ -90,11 +92,11 @@ public final class PatientCreationActivity extends BaseActivity {
 
                 LocationTree.LocationSubtree location =
                         LocationTree.SINGLETON_INSTANCE.getLocationByUuid(newTentUuid);
-                mLocation.setText(location.toString());
-                mLocation.setBackgroundResource(Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
-
-                int textColor = getResources().getColor( Zone.getForegroundColorResource(location.getLocation().parent_uuid) );
-                mLocation.setTextColor(textColor);
+                mLocationText.setText(location.toString());
+                mLocationText.setBackgroundResource(
+                        Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
+                mLocationText.setTextColor(getResources().getColor(
+                        Zone.getForegroundColorResource(location.getLocation().parent_uuid)));
 
                 return true;
             }
