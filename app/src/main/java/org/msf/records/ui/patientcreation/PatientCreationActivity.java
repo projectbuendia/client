@@ -4,9 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import com.google.common.base.Optional;
 
@@ -17,7 +17,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
-import org.msf.records.net.Server;
+import org.msf.records.model.Zone;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.BigToast;
@@ -49,7 +49,7 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_text_age) EditText mAge;
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
-    @InjectView(R.id.patient_creation_text_location) TextView mLocation;
+    @InjectView(R.id.patient_creation_button_change_location) Button mLocation;
 
     private String mLocationUuid;
 
@@ -91,6 +91,10 @@ public final class PatientCreationActivity extends BaseActivity {
                 LocationTree.LocationSubtree location =
                         LocationTree.SINGLETON_INSTANCE.getLocationByUuid(newTentUuid);
                 mLocation.setText(location.toString());
+                mLocation.setBackgroundResource(Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
+
+                int textColor = getResources().getColor( Zone.getForegroundColorResource(location.getLocation().parent_uuid) );
+                mLocation.setTextColor(textColor);
 
                 return true;
             }

@@ -158,20 +158,25 @@
                 android:layout_width="match_parent"
                 android:gravity="center_vertical">
 
-                <TextView
+                <!--TextView
                     android:id="@+id/patient_creation_text_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:padding="5dp"
                     android:layout_marginRight="24dp"
                     android:gravity="center_vertical"
                     android:textColor="@color/gray_600"
-                    android:text="Unassigned"/>
+                    android:text="Unassigned"/-->
 
                 <Button
                     android:id="@+id/patient_creation_button_change_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Change"/>
+                    android:layout_width="280dp"
+                    android:layout_height="60dp"
+                    android:padding="5dp"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/white"
+                    android:background="#DC3B05"
+                    android:text="Assign Location"/>
 
             </LinearLayout>
 
