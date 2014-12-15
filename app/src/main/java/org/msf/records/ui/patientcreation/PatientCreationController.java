@@ -35,6 +35,7 @@ final class PatientCreationController {
         static final int FIELD_AGE = 4;
         static final int FIELD_AGE_UNITS = 5;
         static final int FIELD_SEX = 6;
+        static final int FIELD_LOCATION = 7;
 
         /** Adds a validation error message for a specific field. */
         void onValidationError(int field, String message);
@@ -116,7 +117,10 @@ final class PatientCreationController {
             hasValidationErrors = true;
         }
 
-        // TODO(dxchen): Do we need to validate location?
+        if (locationUuid == null) {
+            mUi.onValidationError(Ui.FIELD_LOCATION, "Please select a location");
+            hasValidationErrors = true;
+        }
 
         if (hasValidationErrors) {
             return;
