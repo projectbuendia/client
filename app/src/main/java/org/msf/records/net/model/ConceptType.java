@@ -15,6 +15,4 @@ public enum ConceptType {
     TEXT,
     @SerializedName("none")
     NONE,
-    @SerializedName("text")
-    TEXT,
 }

@@ -33,6 +33,7 @@ import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.PrepopulatableFields;
