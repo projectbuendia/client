@@ -186,6 +186,7 @@
         android:background="@android:color/black">
 
         <Button
+            android:layout_margin="10dp"
             android:id="@+id/patient_creation_button_cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -195,6 +196,7 @@
             android:background="@android:color/holo_red_dark"/>
 
         <Button
+            android:layout_margin="10dp"
             android:id="@+id/patient_creation_button_create"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

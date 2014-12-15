@@ -97,6 +97,18 @@ public final class PatientCreationActivity extends BaseActivity {
         };
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mController.init();
+    }
+
+    @Override
+    protected void onStop() {
+        mController.suspend();
+        super.onStop();
+    }
+
     @OnClick(R.id.patient_creation_button_change_location)
     void onChangeLocationClick() {
         new AssignLocationDialog(
