@@ -173,8 +173,8 @@ public final class PatientChartActivity extends BaseActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        mController.showRelocatePatientDialog(
-                                PatientChartActivity.this, mLocationManager, App.getServer());
+                        mController.showAssignLocationDialog(
+                                PatientChartActivity.this, mLocationManager);
                         return true;
                     }
                 }

@@ -1,6 +1,4 @@
-package org.msf.records.updater.testing;
-
-// TODO(dxchen): Move all testing stuff into a separate module that doesn't build in release builds.
+package org.msf.records.updater;
 
 import android.os.Handler;
 import android.os.Looper;

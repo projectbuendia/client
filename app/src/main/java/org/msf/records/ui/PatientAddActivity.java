@@ -43,9 +43,12 @@ import static org.msf.records.net.Server.PATIENT_IMPORTANT_INFORMATION_KEY;
 import static org.msf.records.net.Server.PATIENT_MOVEMENT_KEY;
 import static org.msf.records.net.Server.PATIENT_STATUS_KEY;
 
+// TODO(dxchen): Remove this class!
+
 /**
  * Activity allowing the user to add a new patient.
  */
+@Deprecated // replaced by patientcreation.PatientCreationActivity
 public final class PatientAddActivity extends Activity
 		implements Response.ErrorListener, Response.Listener<Patient> {
 
@@ -198,7 +201,7 @@ public final class PatientAddActivity extends Activity
         map.put(PATIENT_STATUS_KEY, mPatientStatusSpinner.getSelectedItem().toString().toLowerCase().replaceAll(" ", "-"));
         map.put(PATIENT_IMPORTANT_INFORMATION_KEY, mPatientImportantInfomationTV.getText().toString());
 
-        App.getServer().addPatient(map, this, this, TAG);
+//        App.getServer().addPatient(map, this, this, TAG);
     }
 
     @Override
