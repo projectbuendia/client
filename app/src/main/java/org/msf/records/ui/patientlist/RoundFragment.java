@@ -1,4 +1,7 @@
-package org.msf.records.ui;
+package org.msf.records.ui.patientlist;
+
+import org.msf.records.ui.ExpandablePatientListAdapter;
+import org.msf.records.ui.SingleLocationPatientListAdapter;
 
 /**
  * A {@link PatientListFragment} that expects to only show results for a single location.

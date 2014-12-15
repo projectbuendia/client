@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.patientlist;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
@@ -11,6 +11,9 @@ import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.ui.MainScreenFragment;
+import org.msf.records.ui.OdkActivityLauncher;
+import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.odk.collect.android.tasks.DiskSyncTask;
 

@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.patientlist;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,6 @@ import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.net.Constants;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
 

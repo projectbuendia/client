@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.msf.records.R;
 import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.ui.PatientListActivity;
 import org.msf.records.ui.ProgressFragment;
+import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
