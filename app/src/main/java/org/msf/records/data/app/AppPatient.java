@@ -74,8 +74,8 @@ public final class AppPatient extends AppTypeBase<String> {
     		this.gender = gender;
     		return this;
     	}
-    	public Builder setAdmissiondateTime(DateTime admissiondateTime) {
-    		this.admissionDateTime = admissiondateTime;
+    	public Builder setAdmissionDateTime(DateTime admissionDateTime) {
+    		this.admissionDateTime = admissionDateTime;
     		return this;
     	}
     	public Builder setLocationUuid(String locationUuid) {

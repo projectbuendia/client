@@ -1,22 +1,28 @@
-package org.msf.records.net.model;
+package org.msf.records.data.app;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.msf.records.net.Server;
+import org.msf.records.net.model.Patient;
+import org.msf.records.sync.PatientProjection;
+import org.msf.records.sync.PatientProviderContract;
 
 /**
  * An object that represents the data to write to a new patient or the data to update on a patient.
  */
-public class PatientDelta {
+public class AppPatientDelta {
 
-    private static final String TAG = PatientDelta.class.getSimpleName();
+    private static final String TAG = AppPatientDelta.class.getSimpleName();
 
     private static final DateTimeFormatter BIRTHDATE_FORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -34,7 +40,7 @@ public class PatientDelta {
      *
      * @return whether serialization succeeded
      */
-    public boolean serializeToJson(JSONObject json) {
+    public boolean toJson(JSONObject json) {
         try {
             if (id.isPresent()) {
                 json.put(Server.PATIENT_ID_KEY, id.get());
@@ -64,6 +70,54 @@ public class PatientDelta {
 
             return false;
         }
+    }
+
+    /**
+     * Returns the {@link ContentValues} corresponding to the delta.
+     */
+    public ContentValues toContentValues() {
+        ContentValues contentValues = new ContentValues();
+
+        if (id.isPresent()) {
+            contentValues.put(
+                    PatientProviderContract.PatientColumns._ID,
+                    id.get());
+        }
+        if (givenName.isPresent()) {
+            contentValues.put(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
+                    givenName.get());
+        }
+        if (familyName.isPresent()) {
+            contentValues.put(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+                    familyName.get());
+        }
+        if (gender.isPresent()) {
+            contentValues.put(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
+                    gender.get() == Patient.GENDER_MALE ? "M" : "F");
+        }
+        if (birthdate.isPresent()) {
+            Period period = new Period(birthdate.get(), DateTime.now());
+            if (period.getYears() >= 2) {
+                contentValues.put(
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS,
+                        period.getYears()
+                );
+            } else {
+                contentValues.put(
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS,
+                        period.getYears() * 12 + period.getMonths());
+            }
+        }
+        if (assignedLocationUuid.isPresent()) {
+            contentValues.put(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
+                    assignedLocationUuid.get());
+        }
+
+        return contentValues;
     }
 
     private JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {

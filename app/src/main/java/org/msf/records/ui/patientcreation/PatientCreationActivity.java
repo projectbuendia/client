@@ -16,6 +16,7 @@ import org.msf.records.R;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.net.OpenMrsServer;
+import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
@@ -37,7 +38,7 @@ public final class PatientCreationActivity extends BaseActivity {
 	private PatientCreationController mController;
     private AlertDialog mAlertDialog;
 
-    @Inject OpenMrsServer mServer;
+    @Inject Server mServer;
     @Inject LocationManager mLocationManager;
 
     @InjectView(R.id.patient_creation_text_patient_id) EditText mId;
