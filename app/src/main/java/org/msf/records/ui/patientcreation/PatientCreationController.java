@@ -1,5 +1,7 @@
 package org.msf.records.ui.patientcreation;
 
+import android.util.Log;
+
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
@@ -7,6 +9,8 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.PatientAddFailedEvent;
+import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 
 /**
@@ -44,7 +48,7 @@ final class PatientCreationController {
         void clearValidationErrors();
 
         /** Invoked when the server RPC to create a patient fails. */
-        void onCreateFailed(Exception error);
+        void onCreateFailed(String error);
 
         /** Invoked when the server RPC to create a patient succeeds.
          * @param patient*/
@@ -154,6 +158,15 @@ final class PatientCreationController {
 
         public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
             mUi.onCreateSucceeded(event.item);
+        }
+
+        public void onEventMainThread(PatientAddFailedEvent event) {
+            mUi.onCreateFailed(event.exception == null ? "unknown" : event.exception.getMessage());
+            Log.e(TAG, "Patient add failed", event.exception);
+        }
+
+        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+            mUi.onCreateFailed(event.error);
         }
     }
 }

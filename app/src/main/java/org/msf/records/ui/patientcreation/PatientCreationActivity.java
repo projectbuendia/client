@@ -223,9 +223,9 @@ public final class PatientCreationActivity extends BaseActivity {
         }
 
         @Override
-        public void onCreateFailed(Exception error) {
+        public void onCreateFailed(String error) {
             BigToast.show(PatientCreationActivity.this,
-                    "Unable to add patient: " + error.getMessage());
+                    "Unable to add patient: %s", error);
         }
 
         @Override
