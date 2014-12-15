@@ -15,13 +15,13 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.Server;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;
@@ -363,5 +363,9 @@ final class PatientChartController {
 
     		updatePatientUI();
     	}
+
+        public void onEventMainThread(PatientUpdateFailedEvent event) {
+            mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+        }
     }
 }
