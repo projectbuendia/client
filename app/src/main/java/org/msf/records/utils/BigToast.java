@@ -14,4 +14,9 @@ public class BigToast {
         view.setTextSize(48);
         toast.show();
     }
+
+    public static void show(Context context, String message, Object... args) {
+        show(context,
+                String.format(context.getResources().getConfiguration().locale, message, args));
+    }
 }
