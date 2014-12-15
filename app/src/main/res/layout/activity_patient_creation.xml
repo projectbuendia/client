@@ -16,7 +16,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="24dp"
                 android:gravity="center_vertical"
-                android:text="ID" />
+                android:text="@string/patient_creation_id_label" />
 
             <EditText
                 android:id="@+id/patient_creation_text_patient_id"
@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="24dp"
                 android:gravity="center_vertical"
-                android:text="Given Name" />
+                android:text="@string/patient_creation_given_name_label" />
 
             <EditText
                 android:id="@+id/patient_creation_text_patient_given_name"
@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="24dp"
                 android:gravity="center_vertical"
-                android:text="Family Name" />
+                android:text="@string/patient_creation_family_name_label" />
 
             <EditText
                 android:id="@+id/patient_creation_text_patient_family_name"
@@ -70,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="24dp"
                 android:gravity="center_vertical"
-                android:text="Age" />
+                android:text="@string/patient_creation_age_label" />
 
             <LinearLayout
                 android:layout_height="match_parent"
@@ -98,13 +98,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:text="Years"/>
+                        android:text="@string/patient_creation_age_years"/>
 
                     <RadioButton
                         android:id="@+id/patient_creation_radiogroup_age_units_months"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Months"/>
+                        android:text="@string/patient_creation_age_months"/>
 
                 </RadioGroup>
 
@@ -119,7 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="24dp"
                 android:gravity="center_vertical"
-                android:text="Sex" />
+                android:text="@string/patient_creation_sex_label" />
 
             <RadioGroup
                 android:id="@+id/patient_creation_radiogroup_sex"
@@ -132,13 +132,13 @@
                     android:id="@+id/patient_creation_radiogroup_age_sex_male"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Male"/>
+                    android:text="@string/sex_male"/>
 
                 <RadioButton
                     android:id="@+id/patient_creation_radiogroup_age_sex_female"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Female"/>
+                    android:text="@string/sex_female"/>
 
             </RadioGroup>
 
@@ -151,7 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="24dp"
                 android:gravity="center_vertical"
-                android:text="Location" />
+                android:text="@string/patient_creation_location_label" />
 
             <LinearLayout
                 android:layout_height="match_parent"
@@ -176,7 +176,7 @@
                     android:layout_margin="5dp"
                     android:textColor="@color/white"
                     android:background="#DC3B05"
-                    android:text="Assign Location"/>
+                    android:text="@string/patient_creation_location_assign"/>
 
             </LinearLayout>
 
@@ -196,9 +196,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel"
+            android:text="@string/patient_creation_cancel"
             android:textColor="@android:color/white"
-            android:background="@drawable/bg_cancel_button"/>
+            android:background="@drawable/bg_cancel_button"
+            android:padding="@dimen/action_button_padding"/>
 
         <Button
             android:layout_margin="10dp"
@@ -206,9 +207,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Create"
+            android:text="@string/patient_creation_create"
             android:textColor="@android:color/white"
-            android:background="@drawable/bg_create_button"/>
+            android:background="@drawable/bg_create_button"
+            android:padding="@dimen/action_button_padding"/>
 
     </LinearLayout>
 

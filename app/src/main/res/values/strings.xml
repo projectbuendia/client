@@ -96,4 +96,17 @@
     <string name="unknown_tent_in_zone">%s (No Tent Assigned)</string>
     <string name="last_observation">"Last Observation: "</string>
     <string name="last_observation_none">No Observations</string>
+    <string name="sex_male">Male</string>
+    <string name="sex_female">Female</string>
+    <string name="patient_creation_id_label">ID</string>
+    <string name="patient_creation_given_name_label">Given Name</string>
+    <string name="patient_creation_family_name_label">Family Name</string>
+    <string name="patient_creation_age_label">Age</string>
+    <string name="patient_creation_age_years">Years</string>
+    <string name="patient_creation_age_months">Months</string>
+    <string name="patient_creation_sex_label">Sex</string>
+    <string name="patient_creation_location_label">Location</string>
+    <string name="patient_creation_location_assign">Assign Location</string>
+    <string name="patient_creation_create">Create</string>
+    <string name="patient_creation_cancel">Cancel</string>
 </resources>
