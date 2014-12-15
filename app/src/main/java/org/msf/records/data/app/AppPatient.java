@@ -80,7 +80,7 @@ public final class AppPatient extends AppTypeBase<String> {
                 PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
                 familyName);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+                PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
                 gender == Patient.GENDER_MALE ? "M" : "F");
         Period period = new Period(age, DateTime.now());
         if (period.getYears() >= 2) {
