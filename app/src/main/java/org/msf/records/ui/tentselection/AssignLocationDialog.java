@@ -93,14 +93,6 @@ public final class AssignLocationDialog
 
     private void setTents(LocationTree locationTree) {
         if (mGridView != null) {
-//            Optional<String> currentTentUuid = Optional.absent();
-//            if (mCurrentLocationUuid.isPresent()) {
-//                LocationSubtree currentTent =
-//                        locationTree.getTentForUuid(mCurrentLocationUuid.get());
-//                currentTentUuid = currentTent == null
-//                        ? Optional.<String>absent()
-//                        : Optional.of(currentTent.getLocation().uuid);
-//            }
             List<LocationSubtree> locations = locationTree.getTents();
             LocationSubtree dischargedZone = locationTree.getZoneForUuid(Zone.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
@@ -117,6 +109,8 @@ public final class AssignLocationDialog
         if (isCurrentTent(newTentUuid) || mTentSelectedCallback.onNewTentSelected(newTentUuid)) {
             dismiss();
         }
+
+        // TODO(kpy): Show a progress spinner somewhere on the dialog.
     }
 
     public void dismiss() {
