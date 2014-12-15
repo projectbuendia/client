@@ -27,13 +27,13 @@ public class AppPatientDelta {
     private static final DateTimeFormatter BIRTHDATE_FORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd");
 
-    public Optional<String> id;
-    public Optional<String> givenName;
-    public Optional<String> familyName;
-    public Optional<Integer> gender;
-    public Optional<DateTime> birthdate;
+    public Optional<String> id = Optional.absent();
+    public Optional<String> givenName = Optional.absent();
+    public Optional<String> familyName = Optional.absent();
+    public Optional<Integer> gender = Optional.absent();
+    public Optional<DateTime> birthdate = Optional.absent();
 
-    public Optional<String> assignedLocationUuid;
+    public Optional<String> assignedLocationUuid = Optional.absent();
 
     /**
      * Serializes the fields changed in the delta to a {@link JSONObject}.
