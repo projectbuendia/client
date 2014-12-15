@@ -199,7 +199,8 @@ final class PatientChartController {
     public void onAddObservationPressed(String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
-        fields.encounterTime = DateTime.now();
+        // TODO(dxchen): Re-enable this post v0.2.1.
+//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
