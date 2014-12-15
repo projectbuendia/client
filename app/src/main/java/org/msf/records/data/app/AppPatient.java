@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.google.common.base.Optional;
 
-import javax.annotation.concurrent.Immutable;
-
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Period;
@@ -17,6 +15,8 @@ import org.json.JSONObject;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.PatientProviderContract;
+
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Represents a patient in the app model.
@@ -80,7 +80,7 @@ public final class AppPatient extends AppTypeBase<String> {
                 PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
                 familyName);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+                PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
                 gender == Patient.GENDER_MALE ? "M" : "F");
         Period period = new Period(age, DateTime.now());
         if (period.getYears() >= 2) {

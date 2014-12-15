@@ -18,6 +18,11 @@ import de.greenrobot.event.EventBusBuilder;
 )
 public class EventsModule {
 
+    @Provides @Singleton
+    EventBus provideEventBus() {
+        return EventBus.getDefault();
+    }
+
     @Provides @Singleton @Qualifiers.CrudEventBusBuilder
     EventBusBuilder provideCrudEventBusBuilder() {
         return EventBus.builder();

@@ -39,11 +39,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

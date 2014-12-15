@@ -11,9 +11,32 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.inject.Qualifiers;
+import org.msf.records.location.LocationManager;
+import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
+import org.msf.records.mvcmodels.PatientModel;
+import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.prefs.BooleanPreference;
+import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.OdkActivityLauncher;
+import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
+import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.VitalView;
+import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -24,28 +47,10 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppPatient;
-import org.msf.records.events.CrudEventBus;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
-import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
-import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
-import org.msf.records.widget.DataGridView;
-import org.msf.records.widget.VitalView;
-import org.odk.collect.android.model.PrepopulatableFields;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 /**
  * Activity displaying a patient's vitals and charts.
@@ -64,10 +69,16 @@ public final class PatientChartActivity extends BaseActivity {
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
+    // TODO(dxchen): Refactor.
+    private boolean mIsFetchingXform = false;
+
     @Inject AppModel mModel;
+    @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
     @Inject LocationManager mLocationManager;
+    @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
+    @Inject SyncManager mSyncManager;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -90,6 +101,7 @@ public final class PatientChartActivity extends BaseActivity {
     @InjectView(R.id.patient_chart_age) TextView mPatientAgeView;
     @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
+    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
 
     public PatientChartController getController() {
     	return mController;
@@ -103,7 +115,8 @@ public final class PatientChartActivity extends BaseActivity {
         OdkResultSender odkResultSender = new OdkResultSender() {
 			@Override
 			public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-				OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid, resultCode, data);
+				OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
+                        mUpdateClientCache.get(), resultCode, data);
 			}
 		};
 
@@ -134,12 +147,14 @@ public final class PatientChartActivity extends BaseActivity {
         mController = new PatientChartController(
         		mModel,
         		new OpenMrsChartServer(App.getConnectionDetails()),
+                new EventBusWrapper(mEventBus),
         		mCrudEventBusProvider.get(),
         		mMyUi,
         		odkResultSender,
         		observationsProvider,
         		controllerState,
-        		mPatientModel);
+        		mPatientModel,
+                mSyncManager);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -193,6 +208,7 @@ public final class PatientChartActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mIsFetchingXform = false;
     	mController.onXFormResult(requestCode, resultCode, data);
     }
 
@@ -254,7 +270,14 @@ public final class PatientChartActivity extends BaseActivity {
 
 	        //dateFormatter.setTimeZone( calendar.getTimeZone() );
 
-	    	mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+            if (calendar.getTime().getTime() != 0) {
+                mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+                mLastObservationLabel.setVisibility(View.VISIBLE);
+            } else {
+                mLastObservationTimeView.setText(R.string.last_observation_none);
+                mLastObservationLabel.setVisibility(View.GONE);
+            }
+
 	    }
 
 	    @Override
@@ -267,7 +290,7 @@ public final class PatientChartActivity extends BaseActivity {
 
 			// Temperature
 			LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
-			if (observation != null) {
+			if (observation != null && observation.localizedValue != null) {
 			    double value = Double.parseDouble(observation.localizedValue);
 			    mTemperatureTextView.setText(String.format("%.1f°", value));
 
@@ -280,7 +303,7 @@ public final class PatientChartActivity extends BaseActivity {
 
 			// General Condition
 			observation = observations.get(Concept.GENERAL_CONDITION_UUID);
-			if (observation != null) {
+			if (observation != null && observation.localizedValue != null) {
 			    mGeneralCondition.setText(observation.localizedValue);
 			    mGeneralConditionContainer.setBackgroundResource(
 			            Concept.getColorResourceForGeneralCondition(observation.value));
@@ -290,12 +313,12 @@ public final class PatientChartActivity extends BaseActivity {
 			String specialText = new String();
 
 			observation = observations.get(Concept.PREGNANCY_UUID);
-			if (observation != null && observation.localizedValue.equals("Yes")) {
+			if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
 			    specialText = "Pregnant";
 			}
 
 			observation = observations.get(Concept.IV_UUID);
-			if (observation != null && observation.localizedValue.equals("Yes")) {
+			if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
 			    specialText += "\nIV";
 			}
 
@@ -376,7 +399,13 @@ public final class PatientChartActivity extends BaseActivity {
 	    		int requestCode,
 	    		org.odk.collect.android.model.Patient patient,
 	    		PrepopulatableFields fields) {
-	    	OdkActivityLauncher.fetchAndShowXform(PatientChartActivity.this, formUuid, requestCode, patient, fields);
+            if (mIsFetchingXform) {
+                return;
+            }
+            
+            mIsFetchingXform = true;
+	    	OdkActivityLauncher.fetchAndShowXform(
+                    PatientChartActivity.this, formUuid, requestCode, patient, fields);
 	    }
     }
 }

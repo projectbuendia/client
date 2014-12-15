@@ -9,26 +9,29 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.msf.records.App;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.Server;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
+import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -40,7 +43,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
 
@@ -98,6 +100,7 @@ final class PatientChartController {
     }
 
     private final OpenMrsChartServer mServer;
+    private final EventBusRegistrationInterface mDefaultEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
@@ -105,6 +108,7 @@ final class PatientChartController {
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final PatientModel mPatientModel;
+    private final SyncManager mSyncManager;
 
     private AssignLocationDialog mAssignLocationDialog;
 
@@ -126,14 +130,17 @@ final class PatientChartController {
     public PatientChartController(
     		AppModel appModel,
     		OpenMrsChartServer server,
+    		EventBusRegistrationInterface defaultEventBus,
     		CrudEventBus crudEventBus,
     		Ui ui,
     		OdkResultSender odkResultSender,
     		ObservationsProvider observationsProvider,
     		@Nullable Bundle savedState,
-    		PatientModel patientModel) {
+    		PatientModel patientModel,
+            SyncManager syncManager) {
     	mAppModel = appModel;
     	mServer = checkNotNull(server);
+        mDefaultEventBus = defaultEventBus;
     	mCrudEventBus = crudEventBus;
     	mUi = ui;
     	mOdkResultSender = odkResultSender;
@@ -144,6 +151,7 @@ final class PatientChartController {
     	} else {
     		mPatientUuids = new String[MAX_ODK_REQUESTS];
     	}
+        mSyncManager = syncManager;
     }
 
     /** Returns the state of the controller. This should be saved to preserve it over activity restarts. */
@@ -169,6 +177,7 @@ final class PatientChartController {
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
+        mDefaultEventBus.register(mEventBusSubscriber);
     	mCrudEventBus.register(mEventBusSubscriber);
     	prodServer();
     	mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
@@ -177,6 +186,7 @@ final class PatientChartController {
 	/** Releases any resources used by the controller. */
     public void suspend() {
     	mCrudEventBus.unregister(mEventBusSubscriber);
+        mDefaultEventBus.unregister(mEventBusSubscriber);
     }
 
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
@@ -199,7 +209,8 @@ final class PatientChartController {
     public void onAddObservationPressed(String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
-        fields.encounterTime = DateTime.now();
+        // TODO(dxchen): Re-enable this post v0.2.1.
+//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -352,6 +363,14 @@ final class PatientChartController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
+        public void onEventMainThread(CreatePatientSucceededEvent event) {
+            mSyncManager.forceSync();
+        }
+
+        public void onEventMainThread(SyncSucceededEvent event) {
+            updatePatientUI();
+        }
+
     	public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
     		mPatient = event.item;
     		mUi.setPatient(mPatient);
@@ -363,5 +382,9 @@ final class PatientChartController {
 
     		updatePatientUI();
     	}
+
+        public void onEventMainThread(PatientUpdateFailedEvent event) {
+            mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+        }
     }
 }

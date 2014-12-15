@@ -17,7 +17,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
-import org.msf.records.net.Server;
+import org.msf.records.model.Zone;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.BigToast;
@@ -49,7 +49,7 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_text_age) EditText mAge;
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
-    @InjectView(R.id.patient_creation_text_location) TextView mLocation;
+    @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
 
     private String mLocationUuid;
 
@@ -90,11 +90,27 @@ public final class PatientCreationActivity extends BaseActivity {
 
                 LocationTree.LocationSubtree location =
                         LocationTree.SINGLETON_INSTANCE.getLocationByUuid(newTentUuid);
-                mLocation.setText(location.toString());
+                mLocationText.setText(location.toString());
+                mLocationText.setBackgroundResource(
+                        Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
+                mLocationText.setTextColor(getResources().getColor(
+                        Zone.getForegroundColorResource(location.getLocation().parent_uuid)));
 
                 return true;
             }
         };
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mController.init();
+    }
+
+    @Override
+    protected void onStop() {
+        mController.suspend();
+        super.onStop();
     }
 
     @OnClick(R.id.patient_creation_button_change_location)
@@ -176,6 +192,16 @@ public final class PatientCreationActivity extends BaseActivity {
                 case PatientCreationController.Ui.FIELD_AGE:
                     mAge.setError(message);
                     break;
+                case PatientCreationController.Ui.FIELD_LOCATION:
+                    //TODO(mathewi) Using setError doesn't really work properly. Implement a better
+                    // UI
+                    // fallthrough
+                case PatientCreationController.Ui.FIELD_AGE_UNITS:
+                    //TODO(mathewi) implement errors for age unit
+                    // fallthrough
+                case PatientCreationController.Ui.FIELD_SEX:
+                    //TODO(mathewi) implement errors for sex
+                    // fallthrough
                 default:
                     // A stopgap.  We have to do something visible or nothing
                     // will happen at all when the Create button is pressed.
@@ -197,9 +223,9 @@ public final class PatientCreationActivity extends BaseActivity {
         }
 
         @Override
-        public void onCreateFailed(Exception error) {
+        public void onCreateFailed(String error) {
             BigToast.show(PatientCreationActivity.this,
-                    "Unable to add patient: " + error.getMessage());
+                    "Unable to add patient: %s", error);
         }
 
         @Override
