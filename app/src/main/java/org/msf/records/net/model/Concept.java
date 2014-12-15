@@ -35,7 +35,13 @@ public class Concept {
     public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     public String uuid;
+    /**
+     * The server side id. Prefer the UUID for sending to the server, but this is needed for some
+     * xforms tasks.
+     */
+    public Integer xform_id;
     public ConceptType type;
+
     /**
      * A map from locales to the name in that locale. Eg en->heart, fr->couer, ...
      */
