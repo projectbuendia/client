@@ -25,9 +25,9 @@ public class Patient implements Serializable {
     public LocalDate birthdate;
 
     // All timestamps are in seconds since 1970-01-01 00:00 UTC.
-    public Double admission_timestamp;
-    public Double created_timestamp;
-    public Double first_showed_symptoms_timestamp;
+    public Long admission_timestamp;
+    public Long created_timestamp;
+    public Long first_showed_symptoms_timestamp;
 
     public String origin_location;
     // Not yet ready.

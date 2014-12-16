@@ -239,7 +239,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String givenName, familyName, uuid, locationUuid;
         String gender;
         LocalDate birthdate;
-        Double admissionTimestamp;
+        Long admissionTimestamp;
 
         //iterate through the list of patients
         while (c.moveToNext()){
@@ -249,7 +249,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
             familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
             uuid = c.getString(PatientProjection.COLUMN_UUID);
-            admissionTimestamp = c.getDouble(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+            admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
             locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
             if (locationUuid == null) {
                 locationUuid = Zone.DEFAULT_LOCATION;
@@ -266,7 +266,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 //check if it needs updating
                 String patientAssignedLocationUuid =
-                    patient.assigned_location == null ? null : patient.assigned_location.uuid;
+                        patient.assigned_location == null ? null : patient.assigned_location.uuid;
                 if (!Objects.equals(patient.given_name, givenName) ||
                     !Objects.equals(patient.family_name, familyName) ||
                     !Objects.equals(patient.uuid, uuid) ||

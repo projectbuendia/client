@@ -29,7 +29,6 @@ import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
-import org.msf.records.net.model.PatientAge;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
@@ -44,12 +43,13 @@ import java.util.List;
 public class OpenMrsServer implements Server {
 
     private static final String TAG = "OpenMrsServer";
-    private final Gson gson;
+    private final Gson mGson;
     private final OpenMrsConnectionDetails mConnectionDetails;
 
     public OpenMrsServer(OpenMrsConnectionDetails connectionDetails) {
-        gson = new GsonBuilder().registerTypeAdapter(
-            LocalDate.class, new LocalDateSerializer()).create();
+        // TODO(kpy): Inject a Gson instance here.
+        mGson = new GsonBuilder().registerTypeAdapter(
+                LocalDate.class, new LocalDateSerializer()).create();
         mConnectionDetails = connectionDetails;
     }
 
@@ -269,7 +269,7 @@ public class OpenMrsServer implements Server {
     }
 
     private Patient patientFromJson(JSONObject object) throws JSONException {
-        Patient patient = gson.fromJson(object.toString(), Patient.class);
+        Patient patient = mGson.fromJson(object.toString(), Patient.class);
 
         // TODO(rjlothian): This shouldn't be done here.
         if (patient.assigned_location == null && LocationTree.SINGLETON_INSTANCE != null) {
@@ -336,7 +336,7 @@ public class OpenMrsServer implements Server {
                 throw new IllegalArgumentException(
                         "You must set a name in at least one locale for a new location");
             }
-            requestBody = new JSONObject(gson.toJson(location));
+            requestBody = new JSONObject(mGson.toJson(location));
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
             // So treat like NPE and rethrow.
@@ -369,7 +369,7 @@ public class OpenMrsServer implements Server {
         }
         JSONObject requestBody;
         try {
-            requestBody = new JSONObject(gson.toJson(location));
+            requestBody = new JSONObject(mGson.toJson(location));
         } catch (JSONException e) {
             String msg = "Failed to write patient changes to Gson: " + location.toString();
             Log.e(logTag, msg);
@@ -435,7 +435,7 @@ public class OpenMrsServer implements Server {
     }
 
     private Location parseLocationJson(JSONObject object) {
-        return gson.fromJson(object.toString(), Location.class);
+        return mGson.fromJson(object.toString(), Location.class);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP +
-                COLUMN_NAME_BIRTHDATE + TYPE_INTEGER + COMMA_SEP +
+                    COLUMN_NAME_BIRTHDATE + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_GENDER + TYPE_TEXT + ")";
 
     static final String CONCEPTS_TABLE_NAME = "concepts";

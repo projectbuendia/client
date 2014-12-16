@@ -370,36 +370,34 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
             mPatientIdView.setText(patient.id);
 
-            String genderText =
-                patient.gender == AppPatient.GENDER_MALE ? "M" : "F";
-            String ageText =
-                patient.birthdate == null ?
-                    "age unknown" : Utils.birthdateToAge(patient.birthdate);
-            mPatientGenderAgeView.setText(genderText + ", " + ageText);
+            String genderText = patient.gender == AppPatient.GENDER_MALE ? "M" : "F";
+            String ageText = patient.birthdate == null
+                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate);
+	        mPatientGenderAgeView.setText(genderText + ", " + ageText);
             mPatientLocationView.setText(locationText);
 
-            int days = Days
-                    .daysBetween(patient.admissionDateTime, DateTime.now())
-                    .getDays();
-            switch (days) {
-                case 0:
-                    mPatientAdmissionDateView.setText("Admitted today");
-                    break;
-                case 1:
-                    mPatientAdmissionDateView.setText("Admitted yesterday");
-                    break;
-                default:
-                    mPatientAdmissionDateView.setText("Admitted " + days + " days ago");
-                    break;
-            }
-        }
+	        int days = Days
+	                .daysBetween(patient.admissionDateTime, DateTime.now())
+	                .getDays();
+	        switch (days) {
+	            case 0:
+	            	mPatientAdmissionDateView.setText("Admitted today");
+	                break;
+	            case 1:
+	            	mPatientAdmissionDateView.setText("Admitted yesterday");
+	                break;
+	            default:
+	            	mPatientAdmissionDateView.setText("Admitted " + days + " days ago");
+	                break;
+	        }
+	    }
 
-        @Override
-        public void fetchAndShowXform(
-                String formUuid,
-                int requestCode,
-                org.odk.collect.android.model.Patient patient,
-                PrepopulatableFields fields) {
+	    @Override
+	    public void fetchAndShowXform(
+	    		String formUuid,
+	    		int requestCode,
+	    		org.odk.collect.android.model.Patient patient,
+	    		PrepopulatableFields fields) {
             if (mIsFetchingXform) {
                 return;
             }

@@ -24,14 +24,13 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
                 .setUuid(cursor.getString(PatientProjection.COLUMN_UUID))
                 .setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
                 .setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
-                .setBirthdate(
-                    Utils.stringToLocalDate(cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
-                .setGender(
-                    getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER)))
+                .setBirthdate(Utils.stringToLocalDate(
+                        cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
+                .setGender(getGenderFromString(
+                        cursor.getString(PatientProjection.COLUMN_GENDER)))
                 .setAdmissionDateTime(new DateTime(
-                    cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000))
-                .setLocationUuid(
-                    cursor.getString(PatientProjection.COLUMN_LOCATION_UUID))
+                        cursor.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP) * 1000))
+                .setLocationUuid(cursor.getString(PatientProjection.COLUMN_LOCATION_UUID))
                 .build();
     }
 

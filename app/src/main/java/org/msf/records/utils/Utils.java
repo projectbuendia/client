@@ -91,14 +91,18 @@ public class Utils {
         }
     }
 
-    /** Converts LocalDate or null safely to String or null. */
+    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
     public static String localDateToString(LocalDate date) {
         return date == null ? null : date.toString();
     }
 
-    /** Converts String or null safely to LocalDate or null. */
+    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
     public static LocalDate stringToLocalDate(String string) {
-        return string == null ? null : LocalDate.parse(string);
+        try {
+            return string == null ? null : LocalDate.parse(string);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /** Converts a birthdate to a string describing age in months or years. */

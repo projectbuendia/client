@@ -176,21 +176,21 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
         holder.mPatientId.setTextColor(
-            context.getResources().getColor(
-                Concept.getForegroundColorResourceForGeneralCondition(condition)));
+                context.getResources().getColor(
+                        Concept.getForegroundColorResourceForGeneralCondition(condition)));
         holder.mPatientId.setBackgroundResource(
                 Concept.getBackgroundColorResourceForGeneralCondition(condition));
 
         holder.mPatientAge.setText(
-            birthdate == null ? "" : Utils.birthdateToAge(birthdate));
+                birthdate == null ? "" : Utils.birthdateToAge(birthdate));
 
-        if (gender == null) {
-            holder.mPatientGender.setVisibility(View.GONE);
-        } else {
+        holder.mPatientGender.setVisibility(gender == null ? View.GONE : View.VISIBLE);
+
+        if (gender != null) {
             holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(
-                gender.equals("M") ? R.drawable.ic_gender_male :
-                    pregnant ? R.drawable.ic_gender_female_pregnant :
-                        R.drawable.ic_gender_female
+                    gender.equals("M") ? R.drawable.ic_gender_male
+                            : pregnant ? R.drawable.ic_gender_female_pregnant
+                                    : R.drawable.ic_gender_female
             ));
         }
 
