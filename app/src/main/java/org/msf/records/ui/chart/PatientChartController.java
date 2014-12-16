@@ -3,6 +3,8 @@ package org.msf.records.ui.chart;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -380,7 +382,13 @@ final class PatientChartController {
                 mAssignLocationDialog = null;
             }
 
-    		updatePatientUI();
+            // TODO(dxchen): This delays rendering of the UI--hopefully long enough for the first
+            // part of the UI to display
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override public void run() {
+                    updatePatientUI();
+                }
+            }, 100);
     	}
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
