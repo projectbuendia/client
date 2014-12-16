@@ -346,16 +346,22 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
 	    @Override
 		public void setPatient(AppPatient patient) {
-	        String zoneName = getString(R.string.unknown_zone);
-	        String tentName = getString(R.string.unknown_tent);
-
-	        // TODO: Don't use this singleton
+            String locationText = "Unknown Location";
+            // TODO: Don't use this singleton
 	        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
 	        if (patient.locationUuid != null) {
 	            LocationSubtree patientZone = locationTree.getZoneForUuid(patient.locationUuid);
 	            LocationSubtree patientTent = locationTree.getTentForUuid(patient.locationUuid);
-	            zoneName = (patientZone == null) ? zoneName : patientZone.toString();
-	            tentName = (patientTent == null) ? tentName : patientTent.toString();
+
+                if (patientZone == null && patientTent == null) {
+                    locationText = "Unknown Location";
+                } else if (patientZone == null) {
+                    locationText = "Unknown Zone/" + patientTent.toString();
+                } else if (patientTent == null) {
+                    locationText = patientZone.toString();
+                } else {
+                    locationText = patientZone.toString() + " / " + patientTent.toString();
+                }
 	        }
 
 	        mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
@@ -369,7 +375,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 	        }
 
 	        mPatientGenderView.setText(patient.gender == AppPatient.GENDER_MALE ? "Male" : "Female");
-	        mPatientLocationView.setText(zoneName + "/" + tentName);
+	        mPatientLocationView.setText(locationText);
 
 	        int days = Days
 	                .daysBetween(patient.admissionDateTime, DateTime.now())

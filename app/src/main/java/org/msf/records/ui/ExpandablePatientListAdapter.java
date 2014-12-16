@@ -123,7 +123,8 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String tentName = context.getResources().getString(R.string.unknown_tent);
         @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
         if (locationTree != null) {
-	        	LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
+            	LocationSubtree location =
+                        LocationTree.SINGLETON_INSTANCE.getLocationByUuid(locationUuid);
 	        if (location != null) {
 	            tentName = location.toString();
 	        }
