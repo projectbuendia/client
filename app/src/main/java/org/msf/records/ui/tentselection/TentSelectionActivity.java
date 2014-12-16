@@ -37,8 +37,8 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 	@Inject LocationManager mLocationManager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
         mController = new TentSelectionController(
         		mLocationManager,
@@ -63,13 +63,13 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     }
 
     @Override
-    protected void onStart() {
-    	super.onStart();
+    protected void onStartImpl() {
+    	super.onStartImpl();
     	mController.init();
     }
 
     @Override
-    protected void onStop() {
+    protected void onStopImpl() {
     	mController.suspend();
     	super.onStop();
     }

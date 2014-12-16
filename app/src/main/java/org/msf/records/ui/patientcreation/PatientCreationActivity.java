@@ -19,6 +19,7 @@ import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.BigToast;
 import org.msf.records.utils.EventBusWrapper;
@@ -34,7 +35,7 @@ import de.greenrobot.event.EventBus;
 /**
  * A {@link BaseActivity} that allows users to create a new patient.
  */
-public final class PatientCreationActivity extends BaseActivity {
+public final class PatientCreationActivity extends BaseLoggedInActivity {
 
 	private PatientCreationController mController;
     private AlertDialog mAlertDialog;
@@ -56,8 +57,8 @@ public final class PatientCreationActivity extends BaseActivity {
     private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
 
@@ -102,15 +103,15 @@ public final class PatientCreationActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onStartImpl() {
+        super.onStartImpl();
         mController.init();
     }
 
     @Override
-    protected void onStop() {
+    protected void onStopImpl() {
         mController.suspend();
-        super.onStop();
+        super.onStopImpl();
     }
 
     @OnClick(R.id.patient_creation_button_change_location)

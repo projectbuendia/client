@@ -34,8 +34,8 @@ public class PatientListActivity extends PatientSearchActivity {
     private boolean mTwoPane;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
 
         if (findViewById(R.id.patient_detail_container) != null) {

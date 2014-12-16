@@ -23,7 +23,7 @@ import javax.inject.Inject;
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
-public abstract class PatientSearchActivity extends BaseActivity
+public abstract class PatientSearchActivity extends BaseLoggedInActivity
         implements PatientListFragment.Callbacks {
 
     @Inject UpdateManager mUpdateManager;
@@ -39,8 +39,8 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
 
@@ -108,18 +108,18 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onResumeImpl() {
+        super.onResumeImpl();
 
         mUpdateManager.checkForUpdate();
     }
 
     @Override
-    protected void onPause() {
+    protected void onPauseImpl() {
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar.dismiss();
 
-        super.onPause();
+        super.onPauseImpl();
     }
 
     /**

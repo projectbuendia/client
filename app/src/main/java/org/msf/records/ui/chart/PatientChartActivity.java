@@ -29,7 +29,7 @@ import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
-import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
@@ -55,7 +55,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Activity displaying a patient's vitals and charts.
  */
-public final class PatientChartActivity extends BaseActivity {
+public final class PatientChartActivity extends BaseLoggedInActivity {
 
 	private static final String TAG = PatientChartActivity.class.getSimpleName();
 
@@ -108,8 +108,8 @@ public final class PatientChartActivity extends BaseActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
         OdkResultSender odkResultSender = new OdkResultSender() {
@@ -166,15 +166,15 @@ public final class PatientChartActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStart() {
-    	super.onStart();
+    protected void onStartImpl() {
+    	super.onStartImpl();
     	mController.init();
     }
 
     @Override
-    protected void onStop() {
+    protected void onStopImpl() {
     	mController.suspend();
-    	super.onStop();
+    	super.onStopImpl();
     }
 
     @Override
@@ -222,12 +222,6 @@ public final class PatientChartActivity extends BaseActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
     }
 
     @OnClick({
