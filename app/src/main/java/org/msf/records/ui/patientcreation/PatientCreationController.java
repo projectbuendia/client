@@ -14,8 +14,6 @@ import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.location.LocationManager;
-import org.msf.records.utils.EventBusWrapper;
 
 import de.greenrobot.event.EventBus;
 
@@ -48,17 +46,16 @@ final class PatientCreationController {
         static final int FIELD_LOCATION = 7;
 
         /** Adds a validation error message for a specific field. */
-        void onValidationError(int field, String message);
+        void showValidationError(int field, String message);
 
         /** Clears the validation error messages from all fields. */
         void clearValidationErrors();
 
         /** Invoked when the server RPC to create a patient fails. */
-        void onCreateFailed(String error);
+        void showErrorMessage(String error);
 
-        /** Invoked when the server RPC to create a patient succeeds.
-         * @param patient*/
-        void onCreateSucceeded(AppPatient patient);
+        /** Invoked when the server RPC to create a patient succeeds. */
+        void quitActivity();
     }
 
 	private final Ui mUi;
@@ -97,38 +94,38 @@ final class PatientCreationController {
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
         if (id == null || id.equals("")) {
-            mUi.onValidationError(Ui.FIELD_ID, "Please enter the new patient ID.");
+            mUi.showValidationError(Ui.FIELD_ID, "Please enter the new patient ID.");
             hasValidationErrors = true;
         }
         if (givenName == null || givenName.equals("")) {
-            mUi.onValidationError(Ui.FIELD_GIVEN_NAME, "Please enter the given name.");
+            mUi.showValidationError(Ui.FIELD_GIVEN_NAME, "Please enter the given name.");
             hasValidationErrors = true;
         }
         if (familyName == null || familyName.equals("")) {
-            mUi.onValidationError(Ui.FIELD_FAMILY_NAME, "Please enter the family name.");
+            mUi.showValidationError(Ui.FIELD_FAMILY_NAME, "Please enter the family name.");
             hasValidationErrors = true;
         }
         if (age == null || age.equals("")) {
-            mUi.onValidationError(Ui.FIELD_AGE, "Please enter the age.");
+            mUi.showValidationError(Ui.FIELD_AGE, "Please enter the age.");
             hasValidationErrors = true;
         }
         int ageInt = 0;
         try {
             ageInt = Integer.parseInt(age);
         } catch (NumberFormatException e) {
-            mUi.onValidationError(Ui.FIELD_AGE, "Age should be a whole number.");
+            mUi.showValidationError(Ui.FIELD_AGE, "Age should be a whole number.");
             hasValidationErrors = true;
         }
         if (ageInt < 0) {
-            mUi.onValidationError(Ui.FIELD_AGE, "Age should not be negative.");
+            mUi.showValidationError(Ui.FIELD_AGE, "Age should not be negative.");
             hasValidationErrors = true;
         }
         if (ageUnits != AGE_YEARS && ageUnits != AGE_MONTHS) {
-            mUi.onValidationError(Ui.FIELD_AGE_UNITS, "Please select Years or Months.");
+            mUi.showValidationError(Ui.FIELD_AGE_UNITS, "Please select Years or Months.");
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
-            mUi.onValidationError(Ui.FIELD_SEX, "Please select Male or Female.");
+            mUi.showValidationError(Ui.FIELD_SEX, "Please select Male or Female.");
             hasValidationErrors = true;
         }
 
@@ -174,16 +171,16 @@ final class PatientCreationController {
         public void onEventMainThread(LocationsLoadedEvent event) {
             // TODO(dxchen): This is a hack. Once we deprecate location tree, have this happen
             // immediately after the fetch finishes.
-            mUi.onCreateSucceeded(null /*patient*/);
+            mUi.quitActivity();
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {
-            mUi.onCreateFailed(event.exception == null ? "unknown" : event.exception.getMessage());
+            mUi.showErrorMessage(event.exception == null ? "unknown" : event.exception.getMessage());
             Log.e(TAG, "Patient add failed", event.exception);
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {
-            mUi.onCreateFailed(event.error);
+            mUi.showErrorMessage(event.error);
         }
     }
 }

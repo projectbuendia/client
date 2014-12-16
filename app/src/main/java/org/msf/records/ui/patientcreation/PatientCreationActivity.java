@@ -13,7 +13,6 @@ import com.google.common.base.Optional;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
@@ -179,7 +178,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     private final class MyUi implements PatientCreationController.Ui {
 
         @Override
-        public void onValidationError(int field, String message) {
+        public void showValidationError(int field, String message) {
             switch (field) {
                 case PatientCreationController.Ui.FIELD_ID:
                     mId.setError(message);
@@ -224,13 +223,13 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void onCreateFailed(String error) {
+        public void showErrorMessage(String error) {
             BigToast.show(PatientCreationActivity.this,
                     "Unable to add patient: %s", error);
         }
 
         @Override
-        public void onCreateSucceeded(AppPatient patient) {
+        public void quitActivity() {
             finish();
         }
     }
