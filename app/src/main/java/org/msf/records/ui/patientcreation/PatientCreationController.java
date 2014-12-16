@@ -8,10 +8,16 @@ import org.joda.time.DateTime;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.events.location.LocationsLoadedEvent;
+import org.msf.records.location.LocationManager;
+import org.msf.records.utils.EventBusWrapper;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -59,6 +65,7 @@ final class PatientCreationController {
     private final CrudEventBus mCrudEventBus;
     private AppModel mModel;
 
+    private final EventBus mEventBus;
     private final EventSubscriber mEventBusSubscriber;
 
 	public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
@@ -66,16 +73,20 @@ final class PatientCreationController {
         mCrudEventBus = crudEventBus;
         mModel = model;
 
+        // TODO(dxchen): Inject this.
+        mEventBus = EventBus.getDefault();
         mEventBusSubscriber = new EventSubscriber();
     }
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
+//        mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
+        mEventBus.unregister(mEventBusSubscriber);
         mCrudEventBus.unregister(mEventBusSubscriber);
     }
 
@@ -157,7 +168,17 @@ final class PatientCreationController {
     private final class EventSubscriber {
 
         public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-            mUi.onCreateSucceeded(event.item);
+            // TODO(dxchen): This is a hack to trigger a location refresh. Once we deprecate
+            // location tree, remove this.
+            mEventBus.register(this);
+            mEventBus.post(new CreatePatientSucceededEvent());
+
+        }
+
+        public void onEventMainThread(LocationsLoadedEvent event) {
+            // TODO(dxchen): This is a hack. Once we deprecate location tree, have this happen
+            // immediately after the fetch finishes.
+            mUi.onCreateSucceeded(null /*patient*/);
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {
