@@ -6,9 +6,6 @@ import android.util.Log;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Instant;
-import org.joda.time.Period;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -17,6 +14,7 @@ import org.json.JSONObject;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -89,7 +87,7 @@ public final class AppPatient extends AppTypeBase<String> {
                 gender == Patient.GENDER_MALE ? "M" : "F");
         contentValues.put(
                 PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
-                birthdate.toString());
+                Utils.localDateToString(birthdate));
         contentValues.put(
                 PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
                 admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
@@ -133,7 +131,7 @@ public final class AppPatient extends AppTypeBase<String> {
                 if (birthdate.isPresent()) {
                     json.put(
                             Server.PATIENT_BIRTHDATE_KEY,
-                            birthdate.get().toString());
+                            Utils.localDateToString(birthdate.get()));
                 }
                 if (assignedLocationUuid.isPresent()) {
                     json.put(
@@ -178,7 +176,7 @@ public final class AppPatient extends AppTypeBase<String> {
             if (birthdate.isPresent()) {
                 contentValues.put(
                         PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
-                        birthdate.get().toString());
+                        Utils.localDateToString(birthdate.get()));
             }
             if (assignedLocationUuid.isPresent()) {
                 contentValues.put(

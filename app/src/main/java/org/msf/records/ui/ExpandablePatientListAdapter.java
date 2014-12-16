@@ -26,6 +26,7 @@ import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
+import org.msf.records.utils.Utils;
 
 import java.util.Map;
 
@@ -152,8 +153,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String id = cursor.getString(PatientProjection.COLUMN_ID);
         String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
-        String birthdateString = cursor.getString(PatientProjection.COLUMN_BIRTHDATE);
-        LocalDate birthdate = birthdateString == null ? null : LocalDate.parse(birthdateString);
+        LocalDate birthdate = Utils.stringToLocalDate(cursor.getString(PatientProjection.COLUMN_BIRTHDATE));
 
         // Grab observations for this patient so we can determine condition and pregnant status.
         // TODO(akalachman): Get rid of this whole block as it's inefficient.
@@ -176,22 +176,13 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
         holder.mPatientId.setTextColor(
-                context.getResources().getColor(
-                        Concept.getForegroundColorResourceForGeneralCondition(condition)));
+            context.getResources().getColor(
+                Concept.getForegroundColorResourceForGeneralCondition(condition)));
         holder.mPatientId.setBackgroundResource(
                 Concept.getBackgroundColorResourceForGeneralCondition(condition));
 
-        String ageText = "";
-        if (birthdate != null) {
-            Period age = new Period(birthdate, LocalDate.now());
-            if (age.getYears() > 0) {
-                ageText += " " + age.getYears() + " y";
-            }
-            if (age.getYears() < 2 && age.getMonths() > 0) {
-                ageText += " " + age.getMonths() + " mo";
-            }
-        }
-        holder.mPatientAge.setText(ageText.trim());
+        holder.mPatientAge.setText(
+            birthdate == null ? "" : Utils.birthdateToAge(birthdate));
 
         if (gender == null) {
             holder.mPatientGender.setVisibility(View.GONE);

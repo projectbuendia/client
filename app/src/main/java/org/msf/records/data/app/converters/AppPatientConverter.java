@@ -8,6 +8,7 @@ import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
+import org.msf.records.utils.Utils;
 
 /**
  * A {@link AppTypeConverter} that converts {@link AppPatient}s.
@@ -24,7 +25,7 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
                 .setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
                 .setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
                 .setBirthdate(
-                    LocalDate.parse(cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
+                    Utils.stringToLocalDate(cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
                 .setGender(
                     getGenderFromString(cursor.getString(PatientProjection.COLUMN_GENDER)))
                 .setAdmissionDateTime(new DateTime(

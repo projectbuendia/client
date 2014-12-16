@@ -31,6 +31,7 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
+import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -253,8 +254,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (locationUuid == null) {
                 locationUuid = Zone.DEFAULT_LOCATION;
             }
-            String birthdateString = c.getString(PatientProjection.COLUMN_BIRTHDATE);
-            birthdate = birthdateString == null ? null : LocalDate.parse(birthdateString);
+            birthdate = Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
             gender = c.getString(PatientProjection.COLUMN_GENDER);
 
             Patient patient = patientsMap.get(id);
@@ -283,7 +283,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
-                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, birthdate.toString())
+                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, Utils.localDateToString(birthdate))
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
                             .withValue(PatientColumns._ID, id)
                             .build());
@@ -312,7 +312,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
                             .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
-                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, e.birthdate.toString())
+                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, Utils.localDateToString(e.birthdate))
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender);
 
             if (e.assigned_location == null) {

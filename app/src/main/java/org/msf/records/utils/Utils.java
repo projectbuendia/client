@@ -91,6 +91,26 @@ public class Utils {
         }
     }
 
+    /** Converts LocalDate or null safely to String or null. */
+    public static String localDateToString(LocalDate date) {
+        return date == null ? null : date.toString();
+    }
+
+    /** Converts String or null safely to LocalDate or null. */
+    public static LocalDate stringToLocalDate(String string) {
+        return string == null ? null : LocalDate.parse(string);
+    }
+
+    /** Converts a birthdate to a string describing age in months or years. */
+    public static String birthdateToAge(LocalDate birthdate) {
+        Period age = new Period(birthdate, LocalDate.now());
+        if (age.getYears() >= 2) {
+            return "" + age.getYears() + " y";
+        } else {
+            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
+        }
+    }
+
     private Utils() {
     	// Prevent instantiation.
     }

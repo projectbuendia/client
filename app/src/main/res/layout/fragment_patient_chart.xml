@@ -49,19 +49,9 @@
             android:textSize="25sp"
             android:gravity="left"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="@android:color/darker_gray"
-            android:id="@+id/patient_chart_age"
-            tools:text="88-year-old "/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="25sp"
-            android:gravity="left"
-            android:fontFamily="sans-serif-condensed"
-            android:id="@+id/patient_chart_gender"
-            android:textColor="@android:color/darker_gray"
-            tools:text="Male"/>
+            android:textColor="@android:color/black"
+            android:id="@+id/patient_chart_gender_age"
+            tools:text="M, 23 mo"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -71,7 +61,7 @@
             android:fontFamily="sans-serif-condensed"
             android:text="EMC Location/Tent#"
             android:id="@+id/patient_chart_location"
-            android:textColor="@android:color/darker_gray"/>
+            android:textColor="@android:color/black"/>
 
     </LinearLayout>
 
