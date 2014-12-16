@@ -7,6 +7,7 @@ import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Locale;
@@ -87,6 +88,22 @@ public class Utils {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError("UTF-8 should be supported in every JVM");
+        }
+    }
+
+    /**
+     * Returns the value for a system property. System properties need to start with "debug." and
+     * can be set using "adb shell setprop $propertyName $value".
+     */
+    public static String getSystemProperty(String key) {
+        // Accessing hidden APIs via reflection.
+        try {
+            final Class<?> systemProperties = Class.forName("android.os.SystemProperties");
+            final Method get = systemProperties.getMethod("get", String.class, String.class);
+            return (String) get.invoke(null, key, null);
+        } catch (Exception e) {
+            // This should never happen
+            return null;
         }
     }
 
