@@ -46,7 +46,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
+            android:textSize="30sp"
             android:gravity="left"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/black"
@@ -56,7 +56,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
+            android:textSize="30sp"
             android:gravity="right"
             android:fontFamily="sans-serif-condensed"
             android:text="EMC Location/Tent#"
@@ -75,7 +75,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
+            android:textSize="25sp"
             android:layout_alignParentStart="true"
             android:text="Admitted 4 Days Ago"
             android:id="@+id/patient_chart_days"
