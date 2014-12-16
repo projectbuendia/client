@@ -337,18 +337,27 @@ public final class PatientChartActivity extends BaseActivity {
 	    	if (mChartView != null) {
 	    		mRootView.removeView(mChartView);
 	    	}
-	    	mChartView = new DataGridView.Builder()
-	    	        .setDoubleWidthColumnHeaders(true)
-	    	        .setDataGridAdapter(
-	    	        		new LocalizedChartDataGridAdapter(
-	    	        				PatientChartActivity.this,
-	    	        				observations,
-	    	        				getLayoutInflater()))
-	    	        .build(PatientChartActivity.this);
+	    	mChartView = getChartView(observations);
+//            mChartView = getChartViewNew(observations);
 	    	mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 	    	mRootView.addView(mChartView);
 	    	mRootView.invalidate();
 	    }
+
+        private View getChartView(List<LocalizedObservation> observations) {
+            return new DataGridView.Builder()
+                    .setDoubleWidthColumnHeaders(true)
+                    .setDataGridAdapter(
+                            new LocalizedChartDataGridAdapter(
+                                    PatientChartActivity.this,
+                                    observations,
+                                    getLayoutInflater()))
+                    .build(PatientChartActivity.this);
+        }
+
+        private View getChartViewNew(List<LocalizedObservation> observations) {
+            return null;
+        }
 
 	    @Override
 		public void setPatient(AppPatient patient) {
