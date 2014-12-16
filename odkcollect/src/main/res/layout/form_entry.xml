@@ -77,6 +77,7 @@ the License.
             android:text="@string/form_entry_cancel"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_cancel_button"
+            android:drawableLeft="@drawable/ic_action_cancel"
             android:padding="@dimen/action_button_padding"/>
 
         <Button
@@ -88,6 +89,7 @@ the License.
             android:text="@string/form_entry_done"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_create_button"
+            android:drawableLeft="@drawable/ic_action_accept"
             android:padding="@dimen/action_button_padding"/>
 
     </LinearLayout>
