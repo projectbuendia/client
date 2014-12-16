@@ -12,6 +12,8 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -150,9 +152,8 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String id = cursor.getString(PatientProjection.COLUMN_ID);
         String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
-        int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
-        int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
-
+        String birthdateString = cursor.getString(PatientProjection.COLUMN_BIRTHDATE);
+        LocalDate birthdate = birthdateString == null ? null : LocalDate.parse(birthdateString);
 
         // Grab observations for this patient so we can determine condition and pregnant status.
         // TODO(akalachman): Get rid of this whole block as it's inefficient.
@@ -180,30 +181,26 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         holder.mPatientId.setBackgroundResource(
                 Concept.getBackgroundColorResourceForGeneralCondition(condition));
 
-        if (ageMonths > 0) {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_months, ageMonths));
-        } else if (ageYears > 0) {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_years, ageYears));
-        } else {
-            holder.mPatientAge.setText("");
-        }
-
-        if (gender != null && gender.equals("M")) {
-            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_male));
-        }
-
-        if (gender != null && gender.equals("F")) {
-            if (pregnant) {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female_pregnant));
-            } else {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female));
+        String ageText = "";
+        if (birthdate != null) {
+            Period age = new Period(birthdate, LocalDate.now());
+            if (age.getYears() > 0) {
+                ageText += " " + age.getYears() + " y";
+            }
+            if (age.getYears() < 2 && age.getMonths() > 0) {
+                ageText += " " + age.getMonths() + " mo";
             }
         }
+        holder.mPatientAge.setText(ageText.trim());
 
         if (gender == null) {
             holder.mPatientGender.setVisibility(View.GONE);
+        } else {
+            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(
+                gender.equals("M") ? R.drawable.ic_gender_male :
+                    pregnant ? R.drawable.ic_gender_female_pregnant :
+                        R.drawable.ic_gender_female
+            ));
         }
 
         // Add a bottom border and extra padding to the last item in each group.

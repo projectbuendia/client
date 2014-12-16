@@ -9,6 +9,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.Period;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
@@ -38,19 +39,19 @@ public final class AppPatient extends AppTypeBase<String> {
     public final String givenName;
     public final String familyName;
     public final int gender;
-    public final Duration age;
+    public final LocalDate birthdate;
     public final DateTime admissionDateTime;
     public final String locationUuid;
 
     private AppPatient(Builder builder) {
-    	this.id = builder.id;
-    	this.uuid = builder.uuid;
-    	this.givenName = builder.givenName;
-    	this.familyName = builder.familyName;
+        this.id = builder.id;
+        this.uuid = builder.uuid;
+        this.givenName = builder.givenName;
+        this.familyName = builder.familyName;
         this.gender = builder.gender;
-    	this.age = builder.age;
-    	this.admissionDateTime = builder.admissionDateTime;
-    	this.locationUuid = builder.locationUuid;
+        this.birthdate = builder.birthdate;
+        this.admissionDateTime = builder.admissionDateTime;
+        this.locationUuid = builder.locationUuid;
     }
 
     public static AppPatient fromNet(Patient patient) {
@@ -60,12 +61,11 @@ public final class AppPatient extends AppTypeBase<String> {
         builder.givenName = patient.given_name;
         builder.familyName = patient.family_name;
         builder.gender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
-        builder.age = patient.age == null ? null : patient.age.toDuration();
-        builder.admissionDateTime = new Instant(patient.admission_timestamp * 1000).toDateTime();
+        builder.birthdate = patient.birthdate;
+        builder.admissionDateTime = new DateTime(patient.admission_timestamp * 1000);
         if (patient.assigned_location != null && patient.assigned_location.uuid != null) {
             builder.locationUuid = patient.assigned_location.uuid;
         }
-
         return builder.build();
     }
 
@@ -87,16 +87,9 @@ public final class AppPatient extends AppTypeBase<String> {
         contentValues.put(
                 PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
                 gender == Patient.GENDER_MALE ? "M" : "F");
-        Period period = new Period(age, DateTime.now());
-        if (period.getYears() >= 2) {
-            contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS,
-                    period.getYears());
-        } else {
-            contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS,
-                    period.getYears() * 12 + period.getMonths());
-        }
+        contentValues.put(
+                PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
+                birthdate.toString());
         contentValues.put(
                 PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
                 admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
@@ -113,8 +106,7 @@ public final class AppPatient extends AppTypeBase<String> {
         public Optional<String> givenName = Optional.absent();
         public Optional<String> familyName = Optional.absent();
         public Optional<Integer> gender = Optional.absent();
-        public Optional<DateTime> birthdate = Optional.absent();
-
+        public Optional<LocalDate> birthdate = Optional.absent();
         public Optional<String> assignedLocationUuid = Optional.absent();
 
         /**
@@ -139,7 +131,9 @@ public final class AppPatient extends AppTypeBase<String> {
                             gender.get() == Patient.GENDER_MALE ? "M" : "F");
                 }
                 if (birthdate.isPresent()) {
-                    json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
+                    json.put(
+                            Server.PATIENT_BIRTHDATE_KEY,
+                            birthdate.get().toString());
                 }
                 if (assignedLocationUuid.isPresent()) {
                     json.put(
@@ -182,16 +176,9 @@ public final class AppPatient extends AppTypeBase<String> {
                         gender.get() == Patient.GENDER_MALE ? "M" : "F");
             }
             if (birthdate.isPresent()) {
-                Period period = new Period(birthdate.get(), DateTime.now());
-                if (period.getYears() >= 2) {
-                    contentValues.put(
-                            PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS,
-                            period.getYears());
-                } else {
-                    contentValues.put(
-                            PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS,
-                            period.getYears() * 12 + period.getMonths());
-                }
+                contentValues.put(
+                        PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
+                        birthdate.get().toString());
             }
             if (assignedLocationUuid.isPresent()) {
                 contentValues.put(
@@ -209,61 +196,57 @@ public final class AppPatient extends AppTypeBase<String> {
         return location;
     }
 
-    private static String getDateTimeString(DateTime dateTime) {
-        return BIRTHDATE_FORMATTER.print(dateTime);
-    }
-
     public static Builder builder() {
-    	return new Builder();
+        return new Builder();
     }
 
     public static final class Builder {
 
-    	private String id;
+        private String id;
         private String uuid;
         private String givenName;
         private String familyName;
         private int gender;
-        private Duration age;
+        private LocalDate birthdate;
         private DateTime admissionDateTime;
         private String locationUuid;
 
         private Builder() {}
 
         public Builder setId(String id) {
-        	this.id = id;
-        	return this;
+            this.id = id;
+            return this;
         }
-    	public Builder setUuid(String uuid) {
-    		this.uuid = uuid;
-    		return this;
-    	}
-    	public Builder setGivenName(String givenName) {
-    		this.givenName = givenName;
-    		return this;
-    	}
-    	public Builder setFamilyName(String familyName) {
-    		this.familyName = familyName;
-    		return this;
-    	}
+        public Builder setUuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+        public Builder setGivenName(String givenName) {
+            this.givenName = givenName;
+            return this;
+        }
+        public Builder setFamilyName(String familyName) {
+            this.familyName = familyName;
+            return this;
+        }
         public Builder setGender(int gender) {
             this.gender = gender;
             return this;
         }
-    	public Builder setAge(Duration age) {
-    		this.age = age;
-    		return this;
-    	}
-    	public Builder setAdmissionDateTime(DateTime admissionDateTime) {
-    		this.admissionDateTime = admissionDateTime;
-    		return this;
-    	}
-    	public Builder setLocationUuid(String locationUuid) {
-    		this.locationUuid = locationUuid;
-    		return this;
-    	}
-    	public AppPatient build() {
-    		return new AppPatient(this);
-    	}
+        public Builder setBirthdate(LocalDate birthdate) {
+            this.birthdate = birthdate;
+            return this;
+        }
+        public Builder setAdmissionDateTime(DateTime admissionDateTime) {
+            this.admissionDateTime = admissionDateTime;
+            return this;
+        }
+        public Builder setLocationUuid(String locationUuid) {
+            this.locationUuid = locationUuid;
+            return this;
+        }
+        public AppPatient build() {
+            return new AppPatient(this);
+        }
     }
 }

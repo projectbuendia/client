@@ -21,6 +21,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.model.Zone;
 import org.msf.records.net.OpenMrsChartServer;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -235,28 +237,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String id;
         String givenName, familyName, uuid, locationUuid;
         String gender;
-        int ageMonths = -1, ageYears = -1;
-        long admissionTimestamp;
+        LocalDate birthdate;
+        Double admissionTimestamp;
 
         //iterate through the list of patients
-        while(c.moveToNext()){
+        while (c.moveToNext()){
             syncResult.stats.numEntries++;
 
             id = c.getString(PatientProjection.COLUMN_ID);
             givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
             familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
             uuid = c.getString(PatientProjection.COLUMN_UUID);
-            admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+            admissionTimestamp = c.getDouble(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
             locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
             if (locationUuid == null) {
                 locationUuid = Zone.DEFAULT_LOCATION;
             }
-            if (!c.isNull(PatientProjection.COLUMN_AGE_MONTHS)) {
-                ageMonths = c.getInt(PatientProjection.COLUMN_AGE_MONTHS);
-            }
-            if (!c.isNull(PatientProjection.COLUMN_AGE_YEARS)) {
-                ageYears = c.getInt(PatientProjection.COLUMN_AGE_YEARS);
-            }
+            String birthdateString = c.getString(PatientProjection.COLUMN_BIRTHDATE);
+            birthdate = birthdateString == null ? null : LocalDate.parse(birthdateString);
             gender = c.getString(PatientProjection.COLUMN_GENDER);
 
             Patient patient = patientsMap.get(id);
@@ -267,18 +265,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Uri existingUri = PatientProviderContract.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
 
                 //check if it needs updating
-                if ((patient.given_name != null && !patient.given_name.equals(givenName)) ||
-                        (patient.family_name != null && !patient.family_name.equals(familyName)) ||
-                        (patient.uuid != null && !patient.uuid.equals(uuid)) ||
-                        (patient.admission_timestamp != null &&
-                                !patient.admission_timestamp.equals(admissionTimestamp)) ||
-                        (patient.assigned_location != null &&
-                                patient.assigned_location.uuid != null &&
-                                !patient.assigned_location.uuid.equals(locationUuid)) ||
-                        (patient.age.months != ageMonths) ||
-                        (patient.age.years != ageYears) ||
-                        (patient.gender != null && !patient.gender.equals(gender)) ||
-                        (patient.id != null && !patient.id.equals(id))) {
+                String patientAssignedLocationUuid =
+                    patient.assigned_location == null ? null : patient.assigned_location.uuid;
+                if (!Objects.equals(patient.given_name, givenName) ||
+                    !Objects.equals(patient.family_name, familyName) ||
+                    !Objects.equals(patient.uuid, uuid) ||
+                    !Objects.equals(patient.admission_timestamp, admissionTimestamp) ||
+                    !Objects.equals(patientAssignedLocationUuid, locationUuid) ||
+                    !Objects.equals(patient.birthdate, birthdate) ||
+                    !Objects.equals(patient.gender, gender) ||
+                    !Objects.equals(patient.id, id)) {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
@@ -287,8 +283,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
                             .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
-                            .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
-                            .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
+                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, birthdate.toString())
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
                             .withValue(PatientColumns._ID, id)
                             .build());
@@ -317,8 +312,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, e.family_name)
                             .withValue(PatientColumns.COLUMN_NAME_UUID, e.uuid)
                             .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, e.admission_timestamp)
-                            .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, e.age.months)
-                            .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, e.age.years)
+                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, e.birthdate.toString())
                             .withValue(PatientColumns.COLUMN_NAME_GENDER, e.gender);
 
             if (e.assigned_location == null) {

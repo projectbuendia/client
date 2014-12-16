@@ -1,12 +1,13 @@
 package org.msf.records.net.model;
 
+import org.joda.time.LocalDate;
+
 import java.io.Serializable;
 
 /**
  * Created by Gil on 03/10/2014.
  */
 public class Patient implements Serializable {
-
     public static final int GENDER_UNKNOWN = 0;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
@@ -20,21 +21,19 @@ public class Patient implements Serializable {
 
     public String important_information;
 
-    // Must be "M" or "F".
-    public String gender;
+    public String gender;  // must be "M" or "F"
+    public LocalDate birthdate;
 
-    public Long admission_timestamp;
-    public Long created_timestamp;
-    public Long first_showed_symptoms_timestamp;
-    // Birth date in seconds since epoch.
-    public Long dob_timestamp;
+    // All timestamps are in seconds since 1970-01-01 00:00 UTC.
+    public Double admission_timestamp;
+    public Double created_timestamp;
+    public Double first_showed_symptoms_timestamp;
 
     public String origin_location;
     // Not yet ready.
     public String next_of_kin;
 
     public Location assigned_location;
-    public PatientAge age;
 
     public Patient() {}
 
@@ -68,6 +67,9 @@ public class Patient implements Serializable {
         if (source.gender != null) {
             this.gender = source.gender;
         }
+        if (source.birthdate != null) {
+            this.birthdate = source.birthdate;
+        }
         if (source.admission_timestamp != null) {
             this.admission_timestamp = source.admission_timestamp;
         }
@@ -77,16 +79,9 @@ public class Patient implements Serializable {
         if (source.first_showed_symptoms_timestamp != null) {
             this.first_showed_symptoms_timestamp = source.first_showed_symptoms_timestamp;
         }
-        if (source.dob_timestamp != null) {
-            this.dob_timestamp = source.dob_timestamp;
-        }
         // Deliberately do not merge location recursively, as you should set it all at once.
         if (source.assigned_location != null) {
             this.assigned_location = source.assigned_location;
-        }
-        // Deliberately do not merge age recursively, as you should set it all at once.
-        if (source.age != null) {
-            this.age = source.age;
         }
     }
 }

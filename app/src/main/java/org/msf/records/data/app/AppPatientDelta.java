@@ -103,17 +103,9 @@ public class AppPatientDelta {
                     gender.get() == Patient.GENDER_MALE ? "M" : "F");
         }
         if (birthdate.isPresent()) {
-            Period period = new Period(birthdate.get(), DateTime.now());
-            if (period.getYears() >= 2) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS,
-                        period.getYears()
-                );
-            } else {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS,
-                        period.getYears() * 12 + period.getMonths());
-            }
+            contentValues.put(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
+                    birthdate.toString());
         }
         if (admissionDate.isPresent()) {
             contentValues.put(
@@ -125,7 +117,6 @@ public class AppPatientDelta {
                     PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
                     assignedLocationUuid.get());
         }
-
         return contentValues;
     }
 

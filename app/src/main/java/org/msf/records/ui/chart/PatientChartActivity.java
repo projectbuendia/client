@@ -13,6 +13,9 @@ import android.widget.TextView;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.Duration;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
@@ -356,7 +359,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 if (patientZone == null && patientTent == null) {
                     locationText = "Unknown Location";
                 } else if (patientZone == null) {
-                    locationText = "Unknown Zone/" + patientTent.toString();
+                    locationText = "Unknown Zone / " + patientTent.toString();
                 } else if (patientTent == null) {
                     locationText = patientZone.toString();
                 } else {
@@ -367,12 +370,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 	        mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
 	        mPatientIdView.setText(patient.id);
 
-	        if (patient.age.getStandardDays() >= 2 * 365) {
-	        	mPatientAgeView.setText(patient.age.getStandardDays() / 365 + "-year-old ");
-	        } else {
-	        	mPatientAgeView.setText(patient.age.getStandardDays() / 30 + "-month-old ");
-
-	        }
+            Period age = new Period(patient.birthdate, LocalDate.now());
+            if (age.getYears() >= 2) {
+                mPatientAgeView.setText(age.getYears() + "-year-old");
+            } else {
+	        	mPatientAgeView.setText(age.getMonths() + "-month-old");
+            }
 
 	        mPatientGenderView.setText(patient.gender == AppPatient.GENDER_MALE ? "Male" : "Female");
 	        mPatientLocationView.setText(locationText);
@@ -382,10 +385,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 	                .getDays();
 	        switch (days) {
 	            case 0:
-	            	mPatientAdmissionDateView.setText("Admitted Today");
+	            	mPatientAdmissionDateView.setText("Admitted today");
 	                break;
 	            case 1:
-	            	mPatientAdmissionDateView.setText("Admitted Yesterday");
+	            	mPatientAdmissionDateView.setText("Admitted yesterday");
 	                break;
 	            default:
 	            	mPatientAdmissionDateView.setText("Admitted " + days + " days ago");

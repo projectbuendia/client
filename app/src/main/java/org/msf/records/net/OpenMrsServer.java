@@ -7,11 +7,18 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
+import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +33,7 @@ import org.msf.records.net.model.PatientAge;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +44,13 @@ import java.util.List;
 public class OpenMrsServer implements Server {
 
     private static final String TAG = "OpenMrsServer";
-    private final Gson gson = new Gson();
+    private final Gson gson;
     private final OpenMrsConnectionDetails mConnectionDetails;
 
     public OpenMrsServer(OpenMrsConnectionDetails connectionDetails) {
-        this.mConnectionDetails = connectionDetails;
+        gson = new GsonBuilder().registerTypeAdapter(
+            LocalDate.class, new LocalDateSerializer()).create();
+        mConnectionDetails = connectionDetails;
     }
 
     /**
@@ -240,6 +250,24 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
+    class LocalDateSerializer implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
+        @Override
+        public JsonElement serialize(LocalDate date, Type type, JsonSerializationContext context) {
+            return new JsonPrimitive(date.toString());
+        }
+
+        @Override
+        public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+            throws JsonParseException {
+            String text = json.getAsString();
+            try {
+                return LocalDate.parse(text);
+            } catch (IllegalArgumentException e) {
+                throw new JsonParseException(e);
+            }
+        }
+    }
+
     private Patient patientFromJson(JSONObject object) throws JSONException {
         Patient patient = gson.fromJson(object.toString(), Patient.class);
 
@@ -252,21 +280,8 @@ public class OpenMrsServer implements Server {
             }
         }
 
-        if (patient.age == null) {
-            // TODO(akalachman): After the demo, replace with obvious sentinel to avoid confusion.
-            patient.age = new PatientAge();
-            patient.age.type = "years";
-            patient.age.years = -1;
-        }
-
-        patient.first_showed_symptoms_timestamp = 0L;
-        if (patient.created_timestamp != null) {
-            patient.created_timestamp /= 1000; // UI wants it in seconds, not millis
-        }
-
-        if (patient.gender == null) {
-            // If not sent by server (should never happen)
-            Log.e(TAG, "gender was not sent from server");
+        if (!"M".equals(patient.gender) && !"F".equals(patient.gender)) {
+            Log.e(TAG, "Invalid gender from server: " + patient.gender);
             patient.gender = "F";
         }
         return patient;
