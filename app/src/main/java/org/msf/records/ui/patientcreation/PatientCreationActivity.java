@@ -1,9 +1,14 @@
 package org.msf.records.ui.patientcreation;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -36,7 +41,7 @@ import de.greenrobot.event.EventBus;
  */
 public final class PatientCreationActivity extends BaseActivity {
 
-	private PatientCreationController mController;
+    private PatientCreationController mController;
     private AlertDialog mAlertDialog;
 
     @Inject AppModel mModel;
@@ -50,6 +55,8 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
     @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
+    @InjectView(R.id.patient_creation_button_create) Button mCreateButton;
+    @InjectView(R.id.patient_creation_button_cancel) Button mCancelButton;
 
     private String mLocationUuid;
 
@@ -123,6 +130,48 @@ public final class PatientCreationActivity extends BaseActivity {
                 mTentSelectedCallback).show();
     }
 
+    private void setUiEnabled(boolean enable) {
+        Log.d("PCA", "enableUi " + enable);
+        mId.setEnabled(enable);
+        mGivenName.setEnabled(enable);
+        mFamilyName.setEnabled(enable);
+        mAge.setEnabled(enable);
+        mAgeUnits.setEnabled(enable);
+        mSex.setEnabled(enable);
+        mLocationText.setEnabled(enable);
+        mCreateButton.setEnabled(enable);
+        mCancelButton.setEnabled(enable);
+        mCreateButton.setText(enable ? R.string.patient_creation_create
+                : R.string.patient_creation_create_busy);
+        setFocus(mId, mGivenName, mFamilyName, mAge);
+        showKeyboard(mId, mGivenName, mFamilyName, mAge);
+    }
+
+    /**
+     * Gives focus to the first of the given views that has an error.
+     */
+    private void setFocus(TextView... views) {
+        for (TextView v : views) {
+            if (v.getError() != null) {
+                v.requestFocus();
+                return;
+            }
+        }
+    }
+
+    private InputMethodManager getInputMethodManager() {
+        return (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    }
+
+    private void showKeyboard(View... forview) {
+        for (View v : forview) {
+            if (v.isFocused()) {
+                getInputMethodManager().showSoftInput(v, 0);
+                return;
+            }
+        }
+    }
+
     @OnClick(R.id.patient_creation_button_cancel)
     void onCancelClick() {
         mAlertDialog.show();
@@ -130,7 +179,7 @@ public final class PatientCreationActivity extends BaseActivity {
 
     @OnClick(R.id.patient_creation_button_create)
     void onCreateClick() {
-        mController.createPatient(
+        boolean adding = mController.createPatient(
                 mId.getText().toString(),
                 mGivenName.getText().toString(),
                 mFamilyName.getText().toString(),
@@ -138,6 +187,7 @@ public final class PatientCreationActivity extends BaseActivity {
                 getAgeUnits(),
                 getSex(),
                 mLocationUuid);
+        setUiEnabled(!adding);
     }
 
     @Override
@@ -224,12 +274,14 @@ public final class PatientCreationActivity extends BaseActivity {
 
         @Override
         public void onCreateFailed(String error) {
+            setUiEnabled(true);
             BigToast.show(PatientCreationActivity.this,
-                    "Unable to add patient: %s", error);
+                    "Unable to add patient");
         }
 
         @Override
         public void onCreateSucceeded(AppPatient patient) {
+            setUiEnabled(true);
             finish();
         }
     }
