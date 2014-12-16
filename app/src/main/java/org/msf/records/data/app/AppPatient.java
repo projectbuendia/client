@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -60,6 +61,10 @@ public final class AppPatient extends AppTypeBase<String> {
         builder.familyName = patient.family_name;
         builder.gender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
         builder.age = patient.age == null ? null : patient.age.toDuration();
+        builder.admissionDateTime = new Instant(patient.admission_timestamp * 1000).toDateTime();
+        if (patient.assigned_location != null && patient.assigned_location.uuid != null) {
+            builder.locationUuid = patient.assigned_location.uuid;
+        }
 
         return builder.build();
     }
@@ -94,7 +99,7 @@ public final class AppPatient extends AppTypeBase<String> {
         }
         contentValues.put(
                 PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
-                admissionDateTime == null ? null : admissionDateTime.getMillis());
+                admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
         contentValues.put(
                 PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
                 locationUuid);

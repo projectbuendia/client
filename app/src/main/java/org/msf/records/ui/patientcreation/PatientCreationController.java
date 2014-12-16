@@ -141,6 +141,7 @@ final class PatientCreationController {
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid =
                 locationUuid == null ? Optional.<String>absent() : Optional.of(locationUuid);
+        patientDelta.admissionDate = Optional.of(DateTime.now());
 
         mModel.addPatient(mCrudEventBus, patientDelta);
     }

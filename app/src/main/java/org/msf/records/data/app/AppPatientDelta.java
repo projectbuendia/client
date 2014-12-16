@@ -33,6 +33,7 @@ public class AppPatientDelta {
     public Optional<Integer> gender = Optional.absent();
     public Optional<DateTime> birthdate = Optional.absent();
 
+    public Optional<DateTime> admissionDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();
 
     /**
@@ -57,6 +58,9 @@ public class AppPatientDelta {
             }
             if (birthdate.isPresent()) {
                 json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
+            }
+            if (admissionDate.isPresent()) {
+                json.put(Server.PATIENT_ADMISSION_TIMESTAMP, getTimestamp(admissionDate.get()));
             }
             if (assignedLocationUuid.isPresent()) {
                 json.put(
@@ -111,6 +115,11 @@ public class AppPatientDelta {
                         period.getYears() * 12 + period.getMonths());
             }
         }
+        if (admissionDate.isPresent()) {
+            contentValues.put(
+                    PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
+                    getTimestamp(admissionDate.get()));
+        }
         if (assignedLocationUuid.isPresent()) {
             contentValues.put(
                     PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
@@ -128,5 +137,9 @@ public class AppPatientDelta {
 
     private static String getDateTimeString(DateTime dateTime) {
         return BIRTHDATE_FORMATTER.print(dateTime);
+    }
+
+    private static long getTimestamp(DateTime dateTime) {
+        return dateTime.toInstant().getMillis() / 1000;
     }
 }
