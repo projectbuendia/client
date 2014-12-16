@@ -4,7 +4,7 @@
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
 
         <!-- Action Bar -->
-        <item name="android:actionBarStyle" >@style/thick_ab_style</item>
+        <item name="android:actionBarStyle" >@style/Widget.Buendia.ActionBar</item>
         <item name="android:actionMenuTextAppearance">@style/MenuActionBar</item>
         <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
 
