@@ -3,13 +3,11 @@ package org.msf.records.ui.patientlist;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Filter;
 import android.widget.ListView;
@@ -36,7 +34,6 @@ import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.ExpandablePatientListAdapter;
-import org.msf.records.ui.ListDialogFragment;
 import org.msf.records.ui.ProgressFragment;
 
 import de.greenrobot.event.EventBus;
@@ -220,10 +217,6 @@ public class PatientListFragment extends ProgressFragment implements
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(this);
-
-        Button allLocationsButton = (Button) view.findViewById(R.id.patient_list_all_locations);
-        allLocationsButton.setOnClickListener(onClickListener);
-
         mFilter = FilterManager.getDefaultFilter();
         mPatientAdapter = getAdapterInstance();
         mListView.setAdapter(mPatientAdapter);
@@ -251,21 +244,6 @@ public class PatientListFragment extends ProgressFragment implements
         return new ExpandablePatientListAdapter(
                 null, getActivity(), mFilterQueryTerm, mFilter);
     }
-
-    private View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            switch(v.getId()){
-                case R.id.patient_list_all_locations:
-                    FragmentManager fm = getChildFragmentManager();
-                    ListDialogFragment dialogListFragment = new ListDialogFragment();
-                    Bundle bundle = new Bundle();
-                    dialogListFragment.setArguments(bundle);
-                    dialogListFragment.show(fm, null);
-                    break;
-            }
-        }
-    };
 
     @Override
     public void onAttach(Activity activity) {
