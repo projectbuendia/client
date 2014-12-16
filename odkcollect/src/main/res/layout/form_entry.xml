@@ -13,12 +13,11 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
 -->
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal"
     android:showDividers="middle"
     android:divider="?android:attr/dividerHorizontal"
     android:id="@+id/rl" >
@@ -28,8 +27,10 @@ the License.
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_above="@+id/button_bar"
+        android:layout_toLeftOf="@+id/button_down">
 
         <LinearLayout
             android:id="@+id/questionholder"
@@ -41,26 +42,54 @@ the License.
 
     </ScrollView>
 
-    <RelativeLayout
+    <ImageButton
+        android:id="@+id/button_down"
         android:layout_width="96dp"
-        android:layout_height="match_parent">
+        android:layout_height="96dp"
+        android:layout_above="@id/button_bar"
+        android:layout_alignParentRight="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@drawable/ic_down" />
 
-        <ImageButton
-            android:id="@+id/button_down"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_alignParentBottom="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_down" />
+    <ImageButton
+        android:id="@+id/button_up"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_alignParentRight="true"
+        android:layout_above="@id/button_down"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@drawable/ic_up" />
 
-        <ImageButton
-            android:id="@+id/button_up"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_above="@id/button_down"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_up" />
+    <LinearLayout
+        android:id="@+id/button_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@android:color/black">
 
-    </RelativeLayout>
+        <Button
+            android:layout_margin="10dp"
+            android:id="@+id/form_entry_button_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/form_entry_cancel"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_cancel_button"
+            android:padding="@dimen/action_button_padding"/>
 
-</LinearLayout>
+        <Button
+            android:layout_margin="10dp"
+            android:id="@+id/form_entry_button_done"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/form_entry_done"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_create_button"
+            android:padding="@dimen/action_button_padding"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
