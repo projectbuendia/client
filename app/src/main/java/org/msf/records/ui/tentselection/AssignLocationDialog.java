@@ -110,8 +110,7 @@ public final class AssignLocationDialog
             List<LocationSubtree> locations = locationTree.getTents();
             LocationSubtree dischargedZone = locationTree.getZoneForUuid(Zone.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
-            mAdapter = new TentListAdapter(
-                    mContext, locations, mCurrentLocationUuid, true /*shouldAbbreviate*/);
+            mAdapter = new TentListAdapter(mContext, locations, mCurrentLocationUuid);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
         }

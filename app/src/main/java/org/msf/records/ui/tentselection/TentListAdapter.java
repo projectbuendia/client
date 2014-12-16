@@ -27,18 +27,15 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
 
     private final Context context;
     private final Optional<String> selectedLocationUuid;
-    private final boolean mShouldAbbreviate;
     private View mSelectedView;
 
     public TentListAdapter(
             Context context,
             List<LocationSubtree> tents,
-            Optional<String> selectedTent,
-            boolean shouldAbbreviate) {
+            Optional<String> selectedTent) {
         super(context, R.layout.listview_cell_tent_selection, tents);
         this.context = context;
         this.selectedLocationUuid = Preconditions.checkNotNull(selectedTent);
-        mShouldAbbreviate = shouldAbbreviate;
     }
 
     public Optional<String> getSelectedLocationUuid() {
@@ -62,7 +59,7 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         }
 
         LocationSubtree tent = getItem(position);
-        holder.mButton.setTitle(abbreviateIfNeeded(tent.toString()));
+        holder.mButton.setTitle(tent.toString());
         holder.mButton.setSubtitle(
                 PatientCountDisplay.getPatientCountSubtitle(context, tent.getPatientCount()));
         holder.mButton.setBackgroundResource(
@@ -91,24 +88,6 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         {
             view.setBackgroundResource(R.color.zone_tent_selected_padding);
         }
-    }
-
-    private final String abbreviateIfNeeded(String tentString) {
-        if (!mShouldAbbreviate) {
-            return tentString;
-        }
-
-        String parts[] = tentString.split("\\s+");
-        StringBuilder abbreviatedTentString = new StringBuilder();
-        for (String part : parts) {
-            if (part.matches("^\\d+$")) {
-                abbreviatedTentString.append(part);
-            } else {
-                abbreviatedTentString.append(part.charAt(0));
-            }
-        }
-
-        return abbreviatedTentString.toString();
     }
 
     static class ViewHolder {
