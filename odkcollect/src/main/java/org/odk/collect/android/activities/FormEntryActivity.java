@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -162,8 +163,13 @@ public class FormEntryActivity
 
 	private static final int PROGRESS_DIALOG = 1;
 	private static final int SAVING_DIALOG = 2;
-	
-	private boolean mAutoSaved;
+
+    // Alert dialog styling.
+    private static final float ALERT_DIALOG_TEXT_SIZE = 24.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 32.0f;
+    private static final int ALERT_DIALOG_PADDING = 30;
+
+    private boolean mAutoSaved;
 
 	// Random ID
 	private static final int DELETE_REPEAT = 654321;
@@ -232,10 +238,10 @@ public class FormEntryActivity
 //        mBeenSwiped = false;
 		mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(getString(R.string.title_confirm_cancel))
-                .setMessage(R.string.are_you_sure)
+                .setTitle(getString(R.string.title_discard_observations))
+                .setMessage(R.string.observations_are_you_sure)
                 .setPositiveButton(
-                        R.string.yes,
+                        R.string.yes_discard_all,
                         new DialogInterface.OnClickListener() {
 
                             @Override
@@ -246,6 +252,7 @@ public class FormEntryActivity
                 )
                 .setNegativeButton(R.string.no, null)
                 .create();
+
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
@@ -277,7 +284,7 @@ public class FormEntryActivity
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAlertDialog.show();
+                showAlertDialog();
             }
         });
 
@@ -824,7 +831,7 @@ public class FormEntryActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK) {
-            mAlertDialog.show();
+            showAlertDialog();
             return true;
         }
         else {
@@ -915,7 +922,7 @@ public class FormEntryActivity
 ////			createLanguageDialog();
 ////			return true;
 //        case MENU_CANCEL:
-//            mAlertDialog.show();
+//            showAlertDialog();
 //            return true;
 //		case MENU_SAVE:
 //			Collect.getInstance()
@@ -1770,7 +1777,7 @@ public class FormEntryActivity
 //		}
 //		mAlertDialog.setCancelable(false);
 //		mBeenSwiped = false;
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -1810,7 +1817,7 @@ public class FormEntryActivity
 		};
 		mAlertDialog.setCancelable(false);
 		mAlertDialog.setButton(getString(R.string.ok), errorListener);
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 
 //	/**
@@ -1860,7 +1867,7 @@ public class FormEntryActivity
 //		mAlertDialog.setButton(getString(R.string.discard_group), quitListener);
 //		mAlertDialog.setButton2(getString(R.string.delete_repeat_no),
 //				quitListener);
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -1911,7 +1918,7 @@ public class FormEntryActivity
 
 		Collect.getInstance().getActivityLogger()
 				.logInstanceAction(this, "createQuitDialog", "show");
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 
 	/**
@@ -2028,7 +2035,7 @@ public class FormEntryActivity
 				.setButton(getString(R.string.discard_answer), quitListener);
 		mAlertDialog.setButton2(getString(R.string.clear_answer_no),
 				quitListener);
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 //
 //	/**
@@ -2103,7 +2110,7 @@ public class FormEntryActivity
 //												"cancel");
 //							}
 //						}).create();
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -2836,6 +2843,42 @@ public class FormEntryActivity
     public void onSavePointError(String errorMessage) {
         if (errorMessage != null && errorMessage.trim().length() > 0) {
             Toast.makeText(this, getString(R.string.save_point_error, errorMessage), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showAlertDialog() {
+        if (mAlertDialog == null) {
+            return;
+        }
+
+        mAlertDialog.show();
+
+        // Increase text sizes in dialog, which must be done after the alert is shown when not
+        // specifying a custom alert dialog theme or layout.
+        TextView[] views = {
+                (TextView) mAlertDialog.findViewById(android.R.id.message),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
+                mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+
+        };
+        for (TextView view : views) {
+            if (view != null) {
+                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
+                view.setPadding(
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+            }
+        }
+
+        // Title should be bigger than message and button text.
+        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
+        TextView title = (TextView)mAlertDialog.findViewById(alertTitleResource);
+        if (title != null) {
+            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
+            title.setPadding(
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
         }
     }
 }
