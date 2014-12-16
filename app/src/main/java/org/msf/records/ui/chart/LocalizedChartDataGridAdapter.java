@@ -178,7 +178,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         textView.setText(rows.get(row).mName);
 
         textView.setBackgroundResource(
-                (row % 2 == 0) ? R.color.chart_background_light : R.color.chart_background_dark);
+                (row % 2 == 0)
+                        ? R.drawable.chart_rowheader_background_light
+                        : R.drawable.chart_rowheader_background_dark);
     }
 
     @Override
