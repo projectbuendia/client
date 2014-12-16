@@ -132,11 +132,6 @@ final class PatientCreationController {
             hasValidationErrors = true;
         }
 
-        if (locationUuid == null) {
-            mUi.onValidationError(Ui.FIELD_LOCATION, "Please select a location");
-            hasValidationErrors = true;
-        }
-
         if (hasValidationErrors) {
             return;
         }
@@ -147,7 +142,8 @@ final class PatientCreationController {
         patientDelta.familyName = Optional.of(familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid = Optional.of(locationUuid);
+        patientDelta.assignedLocationUuid =
+                locationUuid == null ? Optional.<String>absent() : Optional.of(locationUuid);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
     }

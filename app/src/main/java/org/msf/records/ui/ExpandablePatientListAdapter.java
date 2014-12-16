@@ -183,9 +183,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             holder.mPatientAge.setText(
                     context.getResources().getString(R.string.age_years, ageYears));
         } else {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_years, 99));
-            holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
+            holder.mPatientAge.setText("");
         }
 
         if (gender != null && gender.equals("M")) {

@@ -71,7 +71,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     @Override
     protected void onStopImpl() {
     	mController.suspend();
-    	super.onStop();
+    	super.onStopImpl();
     }
 
     @Override
