@@ -19,8 +19,7 @@ import java.util.Iterator;
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
  * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedConvertedCursor<T extends AppTypeBase, U extends AppTypeConverter<T>>
-        extends TypedCursor<T> {
+class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCursor<T> {
 
     private final U mConverter;
     private final Cursor mCursor;
