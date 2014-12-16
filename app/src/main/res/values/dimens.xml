@@ -9,5 +9,6 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
 
     <dimen name="large_horizontal_margin">32dp</dimen>
+    <dimen name="chart_grid_padding">1px</dimen>
 
 </resources>
