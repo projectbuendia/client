@@ -165,9 +165,9 @@ public class FormEntryActivity
 	private static final int SAVING_DIALOG = 2;
 
     // Alert dialog styling.
-    private static final float ALERT_DIALOG_TEXT_SIZE = 24.0f;
-    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 32.0f;
-    private static final int ALERT_DIALOG_PADDING = 30;
+    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
+    private static final int ALERT_DIALOG_PADDING = 32;
 
     private boolean mAutoSaved;
 
@@ -239,9 +239,9 @@ public class FormEntryActivity
 		mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setTitle(getString(R.string.title_discard_observations))
-                .setMessage(R.string.observations_are_you_sure)
+                //.setMessage(R.string.observations_are_you_sure)
                 .setPositiveButton(
-                        R.string.yes_discard_all,
+                        R.string.yes,
                         new DialogInterface.OnClickListener() {
 
                             @Override
