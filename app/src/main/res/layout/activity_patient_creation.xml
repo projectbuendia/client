@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords" />
+                android:inputType="textCapCharacters|textNoSuggestions" />
 
         </TableRow>
 
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords" />
+                android:inputType="textCapWords|textPersonName" />
 
         </TableRow>
 
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords" />
+                android:inputType="textCapWords|textPersonName" />
 
         </TableRow>
 
