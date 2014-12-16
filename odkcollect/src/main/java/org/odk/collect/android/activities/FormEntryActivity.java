@@ -39,6 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -155,8 +156,8 @@ public class FormEntryActivity
 	
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
-    private static final int MENU_CANCEL = Menu.FIRST;
-	private static final int MENU_SAVE = MENU_CANCEL + 1;
+//    private static final int MENU_CANCEL = Menu.FIRST;
+//	private static final int MENU_SAVE = MENU_CANCEL + 1;
 //	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
 
 	private static final int PROGRESS_DIALOG = 1;
@@ -179,6 +180,9 @@ public class FormEntryActivity
 	private View mCurrentView;
     private ImageButton mUpButton;
     private ImageButton mDownButton;
+
+    private Button mCancelButton;
+    private Button mDoneButton;
 
 	private AlertDialog mAlertDialog;
 	private ProgressDialog mProgressDialog;
@@ -266,6 +270,31 @@ public class FormEntryActivity
             public void onClick(View view) {
                 int height = mScrollView.getMeasuredHeight();
                 mScrollView.smoothScrollBy(0, (int) (height * .8));
+            }
+        });
+
+        mCancelButton = (Button) findViewById(R.id.form_entry_button_cancel);
+        mCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.show();
+            }
+        });
+
+        mDoneButton = (Button) findViewById(R.id.form_entry_button_done);
+        mDoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Collect.getInstance()
+                        .getActivityLogger()
+                        .logInstanceAction(this, "onOptionsItemSelected",
+                                "MENU_SAVE");
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+
+                saveDataToDisk(EXIT, true /*complete*/, null);
             }
         });
 
@@ -809,13 +838,13 @@ public class FormEntryActivity
 				.logInstanceAction(this, "onCreateOptionsMenu", "show");
 		super.onCreateOptionsMenu(menu);
 
-        CompatibilityUtils.setShowAsAction(
-                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
-                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//        CompatibilityUtils.setShowAsAction(
+//                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
+//                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
-		CompatibilityUtils.setShowAsAction(
-				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
-				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//		CompatibilityUtils.setShowAsAction(
+//				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
+//				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
 //		CompatibilityUtils.setShowAsAction(
 //				menu.add(0, MENU_HIERARCHY_VIEW, 0, R.string.view_hierarchy)
@@ -885,21 +914,21 @@ public class FormEntryActivity
 ////							"MENU_LANGUAGES");
 ////			createLanguageDialog();
 ////			return true;
-        case MENU_CANCEL:
-            mAlertDialog.show();
-            return true;
-		case MENU_SAVE:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_SAVE");
+//        case MENU_CANCEL:
+//            mAlertDialog.show();
+//            return true;
+//		case MENU_SAVE:
+//			Collect.getInstance()
+//					.getActivityLogger()
+//					.logInstanceAction(this, "onOptionsItemSelected",
+//							"MENU_SAVE");
 
-            InputMethodManager imm = (InputMethodManager)getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
+//            InputMethodManager imm = (InputMethodManager)getSystemService(
+//                    Context.INPUT_METHOD_SERVICE);
+//            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
 
-			saveDataToDisk(EXIT, true /*complete*/, null);
-			return true;
+//			saveDataToDisk(EXIT, true /*complete*/, null);
+//			return true;
 //		case MENU_HIERARCHY_VIEW:
 //			Collect.getInstance()
 //					.getActivityLogger()

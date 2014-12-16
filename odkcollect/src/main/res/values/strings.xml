@@ -330,4 +330,6 @@
 <string name="select_maps_account">You have selected Google Maps Engine as your server, please select a corresponding Google Account in the General Settings before continuing</string>
 <string name="get_project_IDs">Getting Project IDs</string>
 <string name="title_loading_form">Loading Form</string>
+<string name="form_entry_done">Done</string>
+<string name="form_entry_cancel">Cancel</string>
 </resources>
