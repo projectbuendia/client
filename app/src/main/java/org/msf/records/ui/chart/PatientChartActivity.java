@@ -300,7 +300,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 			if (observation != null && observation.localizedValue != null) {
 			    mGeneralCondition.setText(observation.localizedValue);
 			    mGeneralConditionContainer.setBackgroundResource(
-			            Concept.getColorResourceForGeneralCondition(observation.value));
+			            Concept.getBackgroundColorResourceForGeneralCondition(observation.value));
 			}
 
 			// Special (Pregnancy and IV)

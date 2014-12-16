@@ -173,8 +173,11 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
+        holder.mPatientId.setTextColor(
+                context.getResources().getColor(
+                        Concept.getForegroundColorResourceForGeneralCondition(condition)));
         holder.mPatientId.setBackgroundResource(
-                Concept.getColorResourceForGeneralCondition(condition));
+                Concept.getBackgroundColorResourceForGeneralCondition(condition));
 
         if (ageMonths > 0) {
             holder.mPatientAge.setText(
