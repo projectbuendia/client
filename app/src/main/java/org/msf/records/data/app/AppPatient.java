@@ -12,6 +12,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.model.Zone;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.PatientProviderContract;
@@ -60,6 +61,9 @@ public final class AppPatient extends AppTypeBase<String> {
         builder.familyName = patient.family_name;
         builder.gender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
         builder.age = patient.age == null ? null : patient.age.toDuration();
+        builder.locationUuid = (patient.assigned_location == null) ?
+                Zone.DEFAULT_LOCATION :
+                patient.assigned_location.uuid;
 
         return builder.build();
     }
