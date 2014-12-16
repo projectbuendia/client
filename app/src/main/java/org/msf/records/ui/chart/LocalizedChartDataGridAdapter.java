@@ -178,7 +178,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         textView.setText(rows.get(row).mName);
 
         textView.setBackgroundResource(
-                (row % 2 == 0) ? R.color.chart_background_light : R.color.chart_background_dark);
+                (row % 2 == 0)
+                        ? R.drawable.chart_grid_background_light
+                        : R.drawable.chart_grid_background_dark);
     }
 
     @Override
@@ -212,19 +214,18 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         final Row rowData = rows.get(rowIndex);
         final String dateKey = columnHeaders.get(columnIndex);
 
-        View imageView = view.findViewById(R.id.data_grid_cell_chart_image);
+        TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
 
         if (Concept.TEMPERATURE_UUID.equals(rowData.mConceptUuid)) {
             String temperatureString = rowData.datesToValues.get(dateKey);
-            TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
             if (temperatureString != null) {
                 try {
                     double temperature = Double.parseDouble(temperatureString);
                     textView.setText(String.format("%.1f", temperature));
                     if (temperature <= 37.5) {
-                        imageView.setBackgroundResource(R.drawable.chart_cell_good);
+                        textView.setBackgroundResource(R.drawable.chart_cell_good);
                     } else {
-                        imageView.setBackgroundResource(R.drawable.chart_cell_bad);
+                        textView.setBackgroundResource(R.drawable.chart_cell_bad);
                     }
                 } catch (NumberFormatException e) {
                     Log.w(TAG, "Temperature format was invalid", e);
@@ -233,8 +234,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         } else if (Concept.NOTES_UUID.equals(rowData.mConceptUuid)) {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
-                imageView.setBackgroundResource(R.drawable.chart_cell_active_pressable);
-                imageView.setOnClickListener(new View.OnClickListener() {
+                textView.setBackgroundResource(R.drawable.chart_cell_active_pressable);
+                textView.setOnClickListener(new View.OnClickListener() {
 
                     @Override public void onClick(View view) {
                         new AlertDialog.Builder(mContext)
@@ -246,12 +247,13 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         } else {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
-                imageView.setBackgroundResource(R.drawable.chart_cell_active);
+                textView.setBackgroundResource(R.drawable.chart_cell_active);
             }
         }
 
-        ((ViewGroup) view).getChildAt(0)
-                .setBackgroundColor((rowIndex % 2 == 0) ? 0xffe1e1e1 : 0xffcccccc);
+        view.setBackgroundResource((rowIndex % 2 == 0)
+                ? R.drawable.chart_grid_background_light
+                : R.drawable.chart_grid_background_dark);
 
     }
 }
