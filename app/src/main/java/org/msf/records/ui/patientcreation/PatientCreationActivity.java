@@ -52,6 +52,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
 
     private String mLocationUuid;
+    private boolean mIsCreatePending = false;
 
     private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
 
@@ -130,7 +131,11 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_creation_button_create)
     void onCreateClick() {
-        mController.createPatient(
+        if (mIsCreatePending) {
+            return;
+        }
+
+        mIsCreatePending = mController.createPatient(
                 mId.getText().toString(),
                 mGivenName.getText().toString(),
                 mFamilyName.getText().toString(),
@@ -224,12 +229,13 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
         @Override
         public void showErrorMessage(String error) {
-            BigToast.show(PatientCreationActivity.this,
-                    "Unable to add patient: %s", error);
+            mIsCreatePending = false;
+            BigToast.show(PatientCreationActivity.this, "Unable to add patient: %s", error);
         }
 
         @Override
         public void quitActivity() {
+            mIsCreatePending = false;
             finish();
         }
     }

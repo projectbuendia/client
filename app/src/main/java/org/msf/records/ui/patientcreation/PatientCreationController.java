@@ -77,7 +77,6 @@ final class PatientCreationController {
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
-//        mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
     }
 
@@ -87,7 +86,7 @@ final class PatientCreationController {
         mCrudEventBus.unregister(mEventBusSubscriber);
     }
 
-    public void createPatient(
+    public boolean createPatient(
             String id, String givenName, String familyName, String age, int ageUnits, int sex,
             String locationUuid) {
         // Validate the input.
@@ -130,7 +129,7 @@ final class PatientCreationController {
         }
 
         if (hasValidationErrors) {
-            return;
+            return false;
         }
 
         AppPatientDelta patientDelta = new AppPatientDelta();
@@ -144,6 +143,8 @@ final class PatientCreationController {
         patientDelta.admissionDate = Optional.of(DateTime.now());
 
         mModel.addPatient(mCrudEventBus, patientDelta);
+
+        return true;
     }
 
     private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {
