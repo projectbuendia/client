@@ -164,7 +164,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mController.setPatient(patientUuid, patientName, patientId);
         if (patientName != null && patientId != null) {
-            setTitle(patientName + " (" + patientId + ")");
+            setTitle(patientId + ": " + patientName);
         }
     }
 
