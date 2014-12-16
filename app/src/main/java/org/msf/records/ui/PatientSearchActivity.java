@@ -111,7 +111,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
     protected void onResumeImpl() {
         super.onResumeImpl();
 
-        mUpdateManager.checkForUpdate();
+        // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
 
     @Override
