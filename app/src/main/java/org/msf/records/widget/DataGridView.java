@@ -12,6 +12,8 @@ import android.widget.TableRow;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import org.msf.records.R;
+
 import java.util.Set;
 
 /**
@@ -122,11 +124,11 @@ public class DataGridView extends RelativeLayout {
 
         // Create all the main layout components.
         mColumnHeadersLayout = new TableLayout(mContext);
-        mColumnHeadersLayout.setBackgroundColor(0xFF999999);
+        mColumnHeadersLayout.setBackgroundResource(R.color.chart_grid_lines);
         mRowHeadersLayout = new TableLayout(mContext);
-        mRowHeadersLayout.setBackgroundColor(0xFF999999);
+        mRowHeadersLayout.setBackgroundResource(R.color.chart_grid_lines);
         mDataLayout = new TableLayout(mContext);
-        mDataLayout.setBackgroundColor(0xFF999999);
+        mDataLayout.setBackgroundResource(R.color.chart_grid_lines);
 
         mHorizontalScrollViewLinkage = new Linkage<LinkableHorizontalScrollView>();
         mColumnHeadersHorizontalScrollView =
