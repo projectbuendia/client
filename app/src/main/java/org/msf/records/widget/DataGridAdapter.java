@@ -19,6 +19,12 @@ public interface DataGridAdapter {
     int getColumnCount();
 
     /**
+     * Fills {@code view} with the correct contents for the row header of given row. Can be
+     * reused in RecyclerView without inflating new views.ß
+     */
+    void fillRowHeader(int row, View view);
+
+    /**
      * Returns the row header view for a given row.
      */
     View getRowHeader(int row, View convertView, ViewGroup parent);
@@ -32,4 +38,10 @@ public interface DataGridAdapter {
      * Returns the cell view for a given row and column.
      */
     View getCell(int row, int column, View convertView, ViewGroup parent);
+
+    /**
+     * Fills {@code view} with the correct contents for the cell at given row and column. Can be
+     * reused in RecyclerView without inflating new views.
+     */
+    void fillCell(int row, int column, View view);
 }
