@@ -228,7 +228,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @OnClick({
-            R.id.patient_chart_general_condition_parent,
             R.id.patient_chart_temperature_parent})
     void onVitalsPressed(View v) {
         mController.onAddObservationPressed("Vital signs");
@@ -240,6 +239,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @OnClick({
+            R.id.patient_chart_general_condition_parent,
             R.id.vital_responsiveness,
             R.id.vital_mobility,
             R.id.vital_diet,
