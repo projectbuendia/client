@@ -134,6 +134,7 @@
 
             <include
                 layout="@layout/view_vital_special"
+                android:id="@+id/patient_chart_special_parent"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
                 android:layout_margin="4dp" />

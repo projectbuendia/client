@@ -64,7 +64,7 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         if (questionText.equals("pregnant")) {
             widget.forceSetAnswer(fields.pregnant);
         }
-        if (questionText.equals("iv fitted")) {
+        if (questionText.equals("iv access present")) {
             widget.forceSetAnswer(fields.ivFitted);
         }
 

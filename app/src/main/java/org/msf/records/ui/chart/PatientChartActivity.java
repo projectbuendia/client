@@ -228,10 +228,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @OnClick({
-        R.id.patient_chart_general_condition_parent,
-        R.id.patient_chart_temperature_parent}) void onVitalsPressed(View v) {
-
+            R.id.patient_chart_general_condition_parent,
+            R.id.patient_chart_temperature_parent})
+    void onVitalsPressed(View v) {
         mController.onAddObservationPressed("Vital signs");
+    }
+
+    @OnClick(R.id.patient_chart_special_parent)
+    void onSpecialPressed(View v) {
+        mController.onAddObservationPressed("Special Group");
     }
 
     @OnClick({
@@ -240,8 +245,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             R.id.vital_diet,
             R.id.vital_food_drink})
     void onSignsAndSymptomsPressed(View v) {
-
-           mController.onAddObservationPressed("Symptoms the patient reports (first set)");
+        mController.onAddObservationPressed("General health status of the patient");
     }
 
     /** Updates a {@link VitalView} to display a new observation value. */
