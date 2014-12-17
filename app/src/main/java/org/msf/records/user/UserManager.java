@@ -3,6 +3,7 @@ package org.msf.records.user;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -278,10 +279,15 @@ public class UserManager {
             User addedUser;
             try {
                 addedUser = mUserStore.addUser(mUser);
-            } catch (Exception e) {
-                // TODO(dxchen): Log. Figure out the type of exception to throw.
-                EventBus.getDefault()
-                        .post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
+            } catch (VolleyError e) {
+                if (e.getMessage() != null && e.getMessage().contains("already in use")) {
+                    EventBus.getDefault()
+                            .post(new UserAddFailedEvent(
+                                    mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
+                } else {
+                    EventBus.getDefault()
+                            .post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
+                }
 
                 return null;
             }
