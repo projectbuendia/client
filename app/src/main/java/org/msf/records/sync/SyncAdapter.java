@@ -278,14 +278,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // Update existing record
                     Log.i(TAG, "Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, givenName)
-                            .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
-                            .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
-                            .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
-                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
-                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, Utils.localDateToString(birthdate))
-                            .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
-                            .withValue(PatientColumns._ID, id)
+                            .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, patient.given_name)
+                            .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, patient.family_name)
+                            .withValue(PatientColumns.COLUMN_NAME_UUID, patient.uuid)
+                            .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, patient.admission_timestamp)
+                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, patientAssignedLocationUuid)
+                            .withValue(PatientColumns.COLUMN_NAME_BIRTHDATE, Utils.localDateToString(patient.birthdate))
+                            .withValue(PatientColumns.COLUMN_NAME_GENDER, patient.gender)
+                            .withValue(PatientColumns._ID, patient.id)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
