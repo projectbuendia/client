@@ -62,6 +62,11 @@ public final class PatientCreationActivity extends BaseActivity {
 
     private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
 
+    // Alert dialog styling.
+    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
+    private static final int ALERT_DIALOG_PADDING = 32;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,8 +77,7 @@ public final class PatientCreationActivity extends BaseActivity {
                 new PatientCreationController(new MyUi(), mCrudEventBusProvider.get(), mModel);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle("Discard Changes?")
-                .setMessage("This will discard all changes. Are you sure?")
+                .setTitle(R.string.title_add_patient_cancel)
                 .setPositiveButton(
                         "Yes",
                         new DialogInterface.OnClickListener() {
@@ -174,7 +178,7 @@ public final class PatientCreationActivity extends BaseActivity {
 
     @OnClick(R.id.patient_creation_button_cancel)
     void onCancelClick() {
-        mAlertDialog.show();
+        showAlertDialog();
     }
 
     @OnClick(R.id.patient_creation_button_create)
@@ -193,7 +197,7 @@ public final class PatientCreationActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK) {
-            mAlertDialog.show();
+            showAlertDialog();
             return true;
         }
         else {
@@ -222,6 +226,43 @@ public final class PatientCreationActivity extends BaseActivity {
                 return PatientCreationController.SEX_FEMALE;
             default:
                 return PatientCreationController.SEX_UNKNOWN;
+        }
+    }
+
+    // TODO(akalachman): This is very similar to FormEntryActivity. Some way to consolidate?
+    private void showAlertDialog() {
+        if (mAlertDialog == null) {
+            return;
+        }
+
+        mAlertDialog.show();
+
+        // Increase text sizes in dialog, which must be done after the alert is shown when not
+        // specifying a custom alert dialog theme or layout.
+        TextView[] views = {
+                (TextView) mAlertDialog.findViewById(android.R.id.message),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
+                mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+
+        };
+        for (TextView view : views) {
+            if (view != null) {
+                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
+                view.setPadding(
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+            }
+        }
+
+        // Title should be bigger than message and button text.
+        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
+        TextView title = (TextView)mAlertDialog.findViewById(alertTitleResource);
+        if (title != null) {
+            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
+            title.setPadding(
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
         }
     }
 
