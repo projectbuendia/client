@@ -410,5 +410,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             OdkActivityLauncher.fetchAndShowXform(
                     PatientChartActivity.this, formUuid, requestCode, patient, fields);
         }
+
+        @Override
+        public void reEnableFetch() {
+            mIsFetchingXform = false;
+        }
     }
 }

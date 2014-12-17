@@ -17,6 +17,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -99,6 +100,9 @@ final class PatientChartController {
 	    		int requestCode,
 	    		org.odk.collect.android.model.Patient patient,
 	    		PrepopulatableFields fields);
+
+        /** Re-enables fetching. */
+        void reEnableFetch();
     }
 
     private final OpenMrsChartServer mServer;
@@ -393,6 +397,10 @@ final class PatientChartController {
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+        }
+
+        public void onEventMainThread(FetchXformFailedEvent event) {
+            mUi.reEnableFetch();
         }
     }
 }
