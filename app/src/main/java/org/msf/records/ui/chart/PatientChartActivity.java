@@ -1,5 +1,7 @@
 package org.msf.records.ui.chart;
 
+import static org.msf.records.utils.Utils.getSystemProperty;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -337,18 +339,34 @@ public final class PatientChartActivity extends BaseActivity {
 	    	if (mChartView != null) {
 	    		mRootView.removeView(mChartView);
 	    	}
-	    	mChartView = new DataGridView.Builder()
-	    	        .setDoubleWidthColumnHeaders(true)
-	    	        .setDataGridAdapter(
-	    	        		new LocalizedChartDataGridAdapter(
-	    	        				PatientChartActivity.this,
-	    	        				observations,
-	    	        				getLayoutInflater()))
-	    	        .build(PatientChartActivity.this);
+            if (useRecyclerView()) {
+                mChartView = getChartViewNew(observations);
+            } else {
+                mChartView = getChartView(observations);
+            }
 	    	mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 	    	mRootView.addView(mChartView);
 	    	mRootView.invalidate();
 	    }
+
+        boolean useRecyclerView() {
+            return "1".equalsIgnoreCase(getSystemProperty("debug.rec"));
+        }
+
+        private View getChartView(List<LocalizedObservation> observations) {
+            return new DataGridView.Builder()
+                    .setDoubleWidthColumnHeaders(true)
+                    .setDataGridAdapter(
+                            new LocalizedChartDataGridAdapter(
+                                    PatientChartActivity.this,
+                                    observations,
+                                    getLayoutInflater()))
+                    .build(PatientChartActivity.this);
+        }
+
+        private View getChartViewNew(List<LocalizedObservation> observations) {
+            return null;
+        }
 
 	    @Override
 		public void setPatient(AppPatient patient) {

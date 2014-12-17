@@ -108,5 +108,7 @@
     <string name="patient_creation_location_label">Location</string>
     <string name="patient_creation_location_assign">Assign Location</string>
     <string name="patient_creation_create">Create</string>
+    <string name="patient_creation_create_busy">Working...</string>
     <string name="patient_creation_cancel">Cancel</string>
+    <string name="title_add_patient_cancel">Discard changes?</string>
 </resources>

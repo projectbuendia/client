@@ -1,9 +1,14 @@
 package org.msf.records.ui.patientcreation;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -36,7 +41,7 @@ import de.greenrobot.event.EventBus;
  */
 public final class PatientCreationActivity extends BaseActivity {
 
-	private PatientCreationController mController;
+    private PatientCreationController mController;
     private AlertDialog mAlertDialog;
 
     @Inject AppModel mModel;
@@ -50,10 +55,17 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
     @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
+    @InjectView(R.id.patient_creation_button_create) Button mCreateButton;
+    @InjectView(R.id.patient_creation_button_cancel) Button mCancelButton;
 
     private String mLocationUuid;
 
     private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
+
+    // Alert dialog styling.
+    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
+    private static final int ALERT_DIALOG_PADDING = 32;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +77,7 @@ public final class PatientCreationActivity extends BaseActivity {
                 new PatientCreationController(new MyUi(), mCrudEventBusProvider.get(), mModel);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle("Discard Changes?")
-                .setMessage("This will discard all changes. Are you sure?")
+                .setTitle(R.string.title_add_patient_cancel)
                 .setPositiveButton(
                         "Yes",
                         new DialogInterface.OnClickListener() {
@@ -123,14 +134,56 @@ public final class PatientCreationActivity extends BaseActivity {
                 mTentSelectedCallback).show();
     }
 
+    private void setUiEnabled(boolean enable) {
+        Log.d("PCA", "enableUi " + enable);
+        mId.setEnabled(enable);
+        mGivenName.setEnabled(enable);
+        mFamilyName.setEnabled(enable);
+        mAge.setEnabled(enable);
+        mAgeUnits.setEnabled(enable);
+        mSex.setEnabled(enable);
+        mLocationText.setEnabled(enable);
+        mCreateButton.setEnabled(enable);
+        mCancelButton.setEnabled(enable);
+        mCreateButton.setText(enable ? R.string.patient_creation_create
+                : R.string.patient_creation_create_busy);
+        setFocus(mId, mGivenName, mFamilyName, mAge);
+        showKeyboard(mId, mGivenName, mFamilyName, mAge);
+    }
+
+    /**
+     * Gives focus to the first of the given views that has an error.
+     */
+    private void setFocus(TextView... views) {
+        for (TextView v : views) {
+            if (v.getError() != null) {
+                v.requestFocus();
+                return;
+            }
+        }
+    }
+
+    private InputMethodManager getInputMethodManager() {
+        return (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    }
+
+    private void showKeyboard(View... forview) {
+        for (View v : forview) {
+            if (v.isFocused()) {
+                getInputMethodManager().showSoftInput(v, 0);
+                return;
+            }
+        }
+    }
+
     @OnClick(R.id.patient_creation_button_cancel)
     void onCancelClick() {
-        mAlertDialog.show();
+        showAlertDialog();
     }
 
     @OnClick(R.id.patient_creation_button_create)
     void onCreateClick() {
-        mController.createPatient(
+        boolean adding = mController.createPatient(
                 mId.getText().toString(),
                 mGivenName.getText().toString(),
                 mFamilyName.getText().toString(),
@@ -138,12 +191,13 @@ public final class PatientCreationActivity extends BaseActivity {
                 getAgeUnits(),
                 getSex(),
                 mLocationUuid);
+        setUiEnabled(!adding);
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK) {
-            mAlertDialog.show();
+            showAlertDialog();
             return true;
         }
         else {
@@ -172,6 +226,43 @@ public final class PatientCreationActivity extends BaseActivity {
                 return PatientCreationController.SEX_FEMALE;
             default:
                 return PatientCreationController.SEX_UNKNOWN;
+        }
+    }
+
+    // TODO(akalachman): This is very similar to FormEntryActivity. Some way to consolidate?
+    private void showAlertDialog() {
+        if (mAlertDialog == null) {
+            return;
+        }
+
+        mAlertDialog.show();
+
+        // Increase text sizes in dialog, which must be done after the alert is shown when not
+        // specifying a custom alert dialog theme or layout.
+        TextView[] views = {
+                (TextView) mAlertDialog.findViewById(android.R.id.message),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
+                mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+
+        };
+        for (TextView view : views) {
+            if (view != null) {
+                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
+                view.setPadding(
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+            }
+        }
+
+        // Title should be bigger than message and button text.
+        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
+        TextView title = (TextView)mAlertDialog.findViewById(alertTitleResource);
+        if (title != null) {
+            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
+            title.setPadding(
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
         }
     }
 
@@ -224,12 +315,14 @@ public final class PatientCreationActivity extends BaseActivity {
 
         @Override
         public void onCreateFailed(String error) {
+            setUiEnabled(true);
             BigToast.show(PatientCreationActivity.this,
-                    "Unable to add patient: %s", error);
+                    "Unable to add patient");
         }
 
         @Override
         public void onCreateSucceeded(AppPatient patient) {
+            setUiEnabled(true);
             finish();
         }
     }

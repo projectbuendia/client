@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -39,6 +40,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -155,14 +157,19 @@ public class FormEntryActivity
 	
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
-    private static final int MENU_CANCEL = Menu.FIRST;
-	private static final int MENU_SAVE = MENU_CANCEL + 1;
+//    private static final int MENU_CANCEL = Menu.FIRST;
+//	private static final int MENU_SAVE = MENU_CANCEL + 1;
 //	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
 
 	private static final int PROGRESS_DIALOG = 1;
 	private static final int SAVING_DIALOG = 2;
-	
-	private boolean mAutoSaved;
+
+    // Alert dialog styling.
+    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
+    private static final int ALERT_DIALOG_PADDING = 32;
+
+    private boolean mAutoSaved;
 
 	// Random ID
 	private static final int DELETE_REPEAT = 654321;
@@ -179,6 +186,9 @@ public class FormEntryActivity
 	private View mCurrentView;
     private ImageButton mUpButton;
     private ImageButton mDownButton;
+
+    private Button mCancelButton;
+    private Button mDoneButton;
 
 	private AlertDialog mAlertDialog;
 	private ProgressDialog mProgressDialog;
@@ -228,8 +238,8 @@ public class FormEntryActivity
 //        mBeenSwiped = false;
 		mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(getString(R.string.title_confirm_cancel))
-                .setMessage(R.string.are_you_sure)
+                .setTitle(getString(R.string.title_discard_observations))
+                //.setMessage(R.string.observations_are_you_sure)
                 .setPositiveButton(
                         R.string.yes,
                         new DialogInterface.OnClickListener() {
@@ -242,6 +252,7 @@ public class FormEntryActivity
                 )
                 .setNegativeButton(R.string.no, null)
                 .create();
+
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
@@ -266,6 +277,31 @@ public class FormEntryActivity
             public void onClick(View view) {
                 int height = mScrollView.getMeasuredHeight();
                 mScrollView.smoothScrollBy(0, (int) (height * .8));
+            }
+        });
+
+        mCancelButton = (Button) findViewById(R.id.form_entry_button_cancel);
+        mCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAlertDialog();
+            }
+        });
+
+        mDoneButton = (Button) findViewById(R.id.form_entry_button_done);
+        mDoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Collect.getInstance()
+                        .getActivityLogger()
+                        .logInstanceAction(this, "onOptionsItemSelected",
+                                "MENU_SAVE");
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+
+                saveDataToDisk(EXIT, true /*complete*/, null);
             }
         });
 
@@ -795,7 +831,7 @@ public class FormEntryActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK) {
-            mAlertDialog.show();
+            showAlertDialog();
             return true;
         }
         else {
@@ -809,13 +845,13 @@ public class FormEntryActivity
 				.logInstanceAction(this, "onCreateOptionsMenu", "show");
 		super.onCreateOptionsMenu(menu);
 
-        CompatibilityUtils.setShowAsAction(
-                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
-                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//        CompatibilityUtils.setShowAsAction(
+//                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
+//                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
-		CompatibilityUtils.setShowAsAction(
-				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
-				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//		CompatibilityUtils.setShowAsAction(
+//				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
+//				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
 //		CompatibilityUtils.setShowAsAction(
 //				menu.add(0, MENU_HIERARCHY_VIEW, 0, R.string.view_hierarchy)
@@ -885,21 +921,21 @@ public class FormEntryActivity
 ////							"MENU_LANGUAGES");
 ////			createLanguageDialog();
 ////			return true;
-        case MENU_CANCEL:
-            mAlertDialog.show();
-            return true;
-		case MENU_SAVE:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_SAVE");
+//        case MENU_CANCEL:
+//            showAlertDialog();
+//            return true;
+//		case MENU_SAVE:
+//			Collect.getInstance()
+//					.getActivityLogger()
+//					.logInstanceAction(this, "onOptionsItemSelected",
+//							"MENU_SAVE");
 
-            InputMethodManager imm = (InputMethodManager)getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
+//            InputMethodManager imm = (InputMethodManager)getSystemService(
+//                    Context.INPUT_METHOD_SERVICE);
+//            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
 
-			saveDataToDisk(EXIT, true /*complete*/, null);
-			return true;
+//			saveDataToDisk(EXIT, true /*complete*/, null);
+//			return true;
 //		case MENU_HIERARCHY_VIEW:
 //			Collect.getInstance()
 //					.getActivityLogger()
@@ -1741,7 +1777,7 @@ public class FormEntryActivity
 //		}
 //		mAlertDialog.setCancelable(false);
 //		mBeenSwiped = false;
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -1781,7 +1817,7 @@ public class FormEntryActivity
 		};
 		mAlertDialog.setCancelable(false);
 		mAlertDialog.setButton(getString(R.string.ok), errorListener);
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 
 //	/**
@@ -1831,7 +1867,7 @@ public class FormEntryActivity
 //		mAlertDialog.setButton(getString(R.string.discard_group), quitListener);
 //		mAlertDialog.setButton2(getString(R.string.delete_repeat_no),
 //				quitListener);
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -1882,7 +1918,7 @@ public class FormEntryActivity
 
 		Collect.getInstance().getActivityLogger()
 				.logInstanceAction(this, "createQuitDialog", "show");
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 
 	/**
@@ -1999,7 +2035,7 @@ public class FormEntryActivity
 				.setButton(getString(R.string.discard_answer), quitListener);
 		mAlertDialog.setButton2(getString(R.string.clear_answer_no),
 				quitListener);
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 //
 //	/**
@@ -2074,7 +2110,7 @@ public class FormEntryActivity
 //												"cancel");
 //							}
 //						}).create();
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -2807,6 +2843,42 @@ public class FormEntryActivity
     public void onSavePointError(String errorMessage) {
         if (errorMessage != null && errorMessage.trim().length() > 0) {
             Toast.makeText(this, getString(R.string.save_point_error, errorMessage), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showAlertDialog() {
+        if (mAlertDialog == null) {
+            return;
+        }
+
+        mAlertDialog.show();
+
+        // Increase text sizes in dialog, which must be done after the alert is shown when not
+        // specifying a custom alert dialog theme or layout.
+        TextView[] views = {
+                (TextView) mAlertDialog.findViewById(android.R.id.message),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
+                mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+
+        };
+        for (TextView view : views) {
+            if (view != null) {
+                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
+                view.setPadding(
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+            }
+        }
+
+        // Title should be bigger than message and button text.
+        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
+        TextView title = (TextView)mAlertDialog.findViewById(alertTitleResource);
+        if (title != null) {
+            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
+            title.setPadding(
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
         }
     }
 }

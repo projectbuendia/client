@@ -20,7 +20,7 @@ import org.msf.records.events.data.SingleItemFetchedEvent;
  */
 final class PatientCreationController {
 
-	private static final String TAG = PatientCreationController.class.getSimpleName();
+    private static final String TAG = PatientCreationController.class.getSimpleName();
 
     static final int AGE_UNKNOWN = 0;
     static final int AGE_YEARS = 1;
@@ -55,14 +55,14 @@ final class PatientCreationController {
         void onCreateSucceeded(AppPatient patient);
     }
 
-	private final Ui mUi;
+    private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
     private AppModel mModel;
 
     private final EventSubscriber mEventBusSubscriber;
 
-	public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
-		mUi = ui;
+    public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
+        mUi = ui;
         mCrudEventBus = crudEventBus;
         mModel = model;
 
@@ -79,7 +79,7 @@ final class PatientCreationController {
         mCrudEventBus.unregister(mEventBusSubscriber);
     }
 
-    public void createPatient(
+    public boolean createPatient(
             String id, String givenName, String familyName, String age, int ageUnits, int sex,
             String locationUuid) {
         // Validate the input.
@@ -127,7 +127,7 @@ final class PatientCreationController {
         }
 
         if (hasValidationErrors) {
-            return;
+            return false;
         }
 
         AppPatientDelta patientDelta = new AppPatientDelta();
@@ -139,6 +139,7 @@ final class PatientCreationController {
         patientDelta.assignedLocationUuid = Optional.of(locationUuid);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
+        return true;
     }
 
     private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {

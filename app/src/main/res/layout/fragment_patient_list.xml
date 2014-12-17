@@ -9,16 +9,6 @@
     android:dividerPadding="0dp">
 
     <Button
-        android:id="@+id/patient_list_all_locations"
-        style="?android:borderlessButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="left|center_vertical"
-        android:paddingLeft="16dp"
-        android:text="All locations"
-        android:visibility="gone"/>
-
-    <Button
         style="?android:borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

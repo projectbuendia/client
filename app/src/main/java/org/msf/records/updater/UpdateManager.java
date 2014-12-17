@@ -23,6 +23,7 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.utils.BigToast;
 
 import java.io.File;
 
@@ -251,6 +252,8 @@ public class UpdateManager {
                     "Server failed with " + failure + " while downloading update. Retry will "
                             + "occur shortly.",
                     error);
+            // assume no update is available
+            EventBus.getDefault().post(new UpdateNotAvailableEvent());
         }
     }
 

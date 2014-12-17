@@ -1,4 +1,4 @@
-package org.msf.records.ui;
+package org.msf.records.ui.patientlist;
 
 import android.app.ActionBar;
 import android.app.ProgressDialog;
@@ -11,6 +11,9 @@ import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.ui.MainScreenFragment;
+import org.msf.records.ui.OdkActivityLauncher;
+import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.odk.collect.android.tasks.DiskSyncTask;
 
@@ -22,16 +25,9 @@ public class PatientListActivity extends PatientSearchActivity {
 
     private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
-
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientListFragment mFragment;
-
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +35,6 @@ public class PatientListActivity extends PatientSearchActivity {
         setContentView(R.layout.activity_patient_list);
 
         if (findViewById(R.id.patient_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-large and
-            // res/values-sw600dp). If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-
             // Create a main screen shown when no patient is selected.
             MainScreenFragment mainScreenFragment = new MainScreenFragment();
 
@@ -68,7 +58,7 @@ public class PatientListActivity extends PatientSearchActivity {
         outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
     }
 
-    public synchronized void onEvent(LocationsLoadedEvent event) {
+    public void onEventMainThread(LocationsLoadedEvent event) {
         // Update filters when locations update, as zones may have changed.
         setupCustomActionBar(getActionBar().getSelectedNavigationIndex());
     }
