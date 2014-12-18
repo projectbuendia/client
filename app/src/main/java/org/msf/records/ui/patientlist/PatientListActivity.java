@@ -30,8 +30,8 @@ public class PatientListActivity extends PatientSearchActivity {
     private PatientListFragment mFragment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
 
         if (findViewById(R.id.patient_detail_container) != null) {

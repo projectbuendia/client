@@ -12,6 +12,8 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -24,6 +26,7 @@ import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
+import org.msf.records.utils.Utils;
 
 import java.util.Map;
 
@@ -125,7 +128,8 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String tentName = context.getResources().getString(R.string.unknown_tent);
         @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
         if (locationTree != null) {
-	        	LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
+            	LocationSubtree location =
+                        LocationTree.SINGLETON_INSTANCE.getLocationByUuid(locationUuid);
 	        if (location != null) {
 	            tentName = location.toString();
 	        }
@@ -151,9 +155,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String id = cursor.getString(PatientProjection.COLUMN_ID);
         String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
-        int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
-        int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
-
+        LocalDate birthdate = Utils.stringToLocalDate(cursor.getString(PatientProjection.COLUMN_BIRTHDATE));
 
         // Grab observations for this patient so we can determine condition and pregnant status.
         // TODO(akalachman): Get rid of this whole block as it's inefficient.
@@ -175,35 +177,23 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(id);
+        holder.mPatientId.setTextColor(
+                context.getResources().getColor(
+                        Concept.getForegroundColorResourceForGeneralCondition(condition)));
         holder.mPatientId.setBackgroundResource(
-                Concept.getColorResourceForGeneralCondition(condition));
+                Concept.getBackgroundColorResourceForGeneralCondition(condition));
 
-        if (ageMonths > 0) {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_months, ageMonths));
-        } else if (ageYears > 0) {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_years, ageYears));
-        } else {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_years, 99));
-            holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
-        }
+        holder.mPatientAge.setText(
+                birthdate == null ? "" : Utils.birthdateToAge(birthdate));
 
-        if (gender != null && gender.equals("M")) {
-            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_male));
-        }
+        holder.mPatientGender.setVisibility(gender == null ? View.GONE : View.VISIBLE);
 
-        if (gender != null && gender.equals("F")) {
-            if (pregnant) {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female_pregnant));
-            } else {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female));
-            }
-        }
-
-        if (gender == null) {
-            holder.mPatientGender.setVisibility(View.GONE);
+        if (gender != null) {
+            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(
+                    gender.equals("M") ? R.drawable.ic_gender_male
+                            : pregnant ? R.drawable.ic_gender_female_pregnant
+                                    : R.drawable.ic_gender_female
+            ));
         }
 
         // Add a bottom border and extra padding to the last item in each group.

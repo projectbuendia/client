@@ -3,6 +3,8 @@ package org.msf.records.ui.chart;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -14,6 +16,7 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
@@ -97,6 +100,9 @@ final class PatientChartController {
 	    		int requestCode,
 	    		org.odk.collect.android.model.Patient patient,
 	    		PrepopulatableFields fields);
+
+        /** Re-enables fetching. */
+        void reEnableFetch();
     }
 
     private final OpenMrsChartServer mServer;
@@ -380,11 +386,21 @@ final class PatientChartController {
                 mAssignLocationDialog = null;
             }
 
-    		updatePatientUI();
+            // TODO(dxchen): This delays rendering of the UI--hopefully long enough for the first
+            // part of the UI to display
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override public void run() {
+                    updatePatientUI();
+                }
+            }, 100);
     	}
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+        }
+
+        public void onEventMainThread(FetchXformFailedEvent event) {
+            mUi.reEnableFetch();
         }
     }
 }
