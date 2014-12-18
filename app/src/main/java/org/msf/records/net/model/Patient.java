@@ -39,7 +39,7 @@ public class Patient implements Serializable {
 
     /**
      * Overwrite the fields in this GSON object with everything non-null in the source.
-     * PatientAge and PatientLocation are overwritten completely (not merged)
+     * assigned_location is overwritten completely (not merged).
      *
      * @param source the source of changes
      */

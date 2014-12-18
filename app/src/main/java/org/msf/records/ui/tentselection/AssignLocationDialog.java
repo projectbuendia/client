@@ -119,8 +119,9 @@ public final class AssignLocationDialog
 
         String newTentUuid = mAdapter.getItem(position).getLocation().uuid;
         mAdapter.setSelectedLocationUuid(Optional.fromNullable(newTentUuid));
-        mProgressDialog = ProgressDialog.show(mContext, "Updating Patient",
-                "Please wait...", true);
+        mProgressDialog = ProgressDialog.show(mContext,
+                mContext.getResources().getString(R.string.title_updating_patient),
+                mContext.getResources().getString(R.string.please_wait), true);
         if (isCurrentTent(newTentUuid) || mTentSelectedCallback.onNewTentSelected(newTentUuid)) {
             dismiss();
         }

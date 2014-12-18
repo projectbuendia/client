@@ -320,7 +320,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             observation = observations.get(Concept.IV_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
-                specialText += "\nIV";
+                specialText += "\nIV fitted";
             }
 
             if (specialText.isEmpty()) {
