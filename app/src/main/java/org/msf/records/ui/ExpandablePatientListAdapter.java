@@ -118,9 +118,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
-        // This can leak a cursor, but is also not safe to just do a close :-(
-        // TODO(nfortescue): sort out cursor lifecycle
-        int patientCount = getChildrenCursor(cursor).getCount();
+        int patientCount = -1;
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
         @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
@@ -128,6 +126,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 	        	LocationSubtree location = LocationTree.SINGLETON_INSTANCE.getTentForUuid(locationUuid);
 	        if (location != null) {
 	            tentName = location.toString();
+                patientCount = location.getPatientCount();
 	        }
         }
 
