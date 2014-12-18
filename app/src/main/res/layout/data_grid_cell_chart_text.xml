@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
@@ -11,7 +11,7 @@
         android:id="@+id/data_grid_cell_chart_text"
         android:layout_width="40dp"
         android:layout_height="@dimen/chart_grid_textView_height"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:gravity="center"
         android:scaleType="fitXY"
         android:textSize="16sp"
@@ -20,4 +20,4 @@
         tools:background="@drawable/chart_cell_good"
         tools:text="37.5"/>
 
-</RelativeLayout>
+</FrameLayout>
