@@ -193,12 +193,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getColumnHeader(int column, View convertView, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(
+        TextView textView = (TextView) mLayoutInflater.inflate(
                 R.layout.data_grid_column_header_chart, null /*root*/);
-        TextView textView =
-                (TextView) view.findViewById(R.id.data_grid_header_text);
         textView.setText(columnHeaders.get(column));
-        return view;
+        return textView;
     }
 
     @Override
