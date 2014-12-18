@@ -75,10 +75,10 @@ public class AppModel {
         // TODO(dxchen): Asynchronously fetch users.
     }
 
-    // TODO(dxchen): Consider defining a special PatientUpdatedEvent.
     /**
-     * Asynchronously adds a patient, posting a {@link SingleItemFetchedEvent} with the newly-added
-     * patient on the specified event bus when complete.
+     * Asynchronously adds a patient, posting a
+     * {@link org.msf.records.events.data.SingleItemCreatedEvent} with the newly-added patient on
+     * the specified event bus when complete.
      */
     public void addPatient(CrudEventBus bus, AppPatientDelta patientDelta) {
         AppAddPatientAsyncTask task = mTaskFactory.newAddPatientAsyncTask(patientDelta, bus);

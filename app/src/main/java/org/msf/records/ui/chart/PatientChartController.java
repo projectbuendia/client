@@ -13,9 +13,9 @@ import org.msf.records.App;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
-import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.location.LocationManager;
@@ -363,7 +363,7 @@ final class PatientChartController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
-        public void onEventMainThread(CreatePatientSucceededEvent event) {
+        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             mSyncManager.forceSync();
         }
 

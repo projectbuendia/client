@@ -1,6 +1,7 @@
 package org.msf.records.mvcmodels;
 
-import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.mvcmodels.ModelUpdatedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.sync.SyncManager;
@@ -24,7 +25,7 @@ public class PatientChartModel {
         mEventBus.register(this);
     }
 
-    public void onEvent(CreatePatientSucceededEvent event) {
+    public void onEvent(SingleItemCreatedEvent<AppPatient> event) {
         // When a new patient is created, sync from the server to get the latest info for
         // everything.
         mSyncManager.forceSync();

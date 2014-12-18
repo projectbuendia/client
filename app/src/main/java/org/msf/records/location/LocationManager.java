@@ -9,7 +9,9 @@ import android.util.Log;
 
 import javax.annotation.Nullable;
 
-import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
@@ -39,6 +41,7 @@ public class LocationManager {
     private final EventBus mEventBus;
     private final Context mContext;
     private final SyncManager mSyncManager;
+    private final CrudEventBusSubscriber mCrudEventBusSubscriber = new CrudEventBusSubscriber();
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
 
     @Nullable private LocationTree mLocationTree;
@@ -51,6 +54,10 @@ public class LocationManager {
 
     public void init() {
         mEventBus.register(mEventBusSubscriber);
+    }
+
+    public void subscribe(CrudEventBus eventBus) {
+        eventBus.register(mCrudEventBusSubscriber);
     }
 
     /**
@@ -78,14 +85,34 @@ public class LocationManager {
         }
     }
 
+    @SuppressWarnings("unused") // Called by reflection from CrudEventBus.
+    private final class CrudEventBusSubscriber {
+
+        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
+            // If a patient was just created, we need to update the patient counts in the subtree
+            // corresponding with that patient.
+            AppPatient patient = event.item;
+            if (patient == null) {
+                return;
+            }
+
+            String locationUuid = patient.locationUuid;
+            if (locationUuid == null) {
+                return;
+            }
+
+            if (mLocationTree != null) {
+                mLocationTree.getLocationByUuid(locationUuid).incrementPatientCount();
+
+                // Treat any count update as a LocationsLoadedEvent for the purposes of updating
+                // any relevant UI.
+                mEventBus.post(new LocationsLoadedEvent(mLocationTree));
+            }
+        }
+    }
+
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventBusSubscriber {
-	    public void onEventMainThread(CreatePatientSucceededEvent event) {
-	        // If a patient was just created, we need to rebuild the location tree so that patient
-	        // counts remain up-to-date.
-	        // TODO(akalachman): If/when we can access the new patient here, only update counts.
-	    	new LoadLocationsTask().execute();
-	    }
 
 	    public void onEventMainThread(SyncSucceededEvent event) {
 	    	new LoadLocationsTask().execute();
@@ -94,7 +121,7 @@ public class LocationManager {
 	    public void onEventMainThread(SyncFailedEvent event) {
 	        Log.e(TAG, "Failed to retrieve location data from server");
 	        mEventBus.post(
-	                new LocationsLoadFailedEvent(LocationsLoadFailedEvent.REASON_SERVER_ERROR));
+                    new LocationsLoadFailedEvent(LocationsLoadFailedEvent.REASON_SERVER_ERROR));
 	    }
     }
 

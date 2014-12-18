@@ -57,7 +57,11 @@ public final class LocationTree {
 	        return patientCount;
 	    }
 
-	    public List<LocationSubtree> thisAndAllDescendents() {
+        public void incrementPatientCount() {
+            mPatientCount++;
+        }
+
+        public List<LocationSubtree> thisAndAllDescendents() {
 	    	List<LocationSubtree> result = new ArrayList<>();
 	    	addToCollectionRecursively(result);
 	    	return result;

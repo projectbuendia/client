@@ -73,8 +73,11 @@ public final class PatientCreationActivity extends BaseActivity {
 
         App.getInstance().inject(this);
 
+        CrudEventBus crudEventBus = mCrudEventBusProvider.get();
+        mLocationManager.subscribe(crudEventBus);
+
         mController =
-                new PatientCreationController(new MyUi(), mCrudEventBusProvider.get(), mModel);
+                new PatientCreationController(new MyUi(), crudEventBus, mModel);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setTitle(R.string.title_add_patient_cancel)
