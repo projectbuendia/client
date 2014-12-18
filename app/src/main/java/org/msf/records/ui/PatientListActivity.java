@@ -11,27 +11,12 @@ import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.net.Constants;
+import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.odk.collect.android.tasks.DiskSyncTask;
-
-import de.greenrobot.event.EventBus;
 
 
 /**
- * An activity representing a list of Patients. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link PatientDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
- * <p>
- * The activity makes heavy use of fragments. The list of items is a
- * {@link PatientListFragment} and the item details
- * (if present) is a {@link PatientDetailFragment}.
- * <p>
- * This activity also implements the required
- * {@link PatientListFragment.Callbacks} interface
- * to listen for item selections.
+ * An activity representing a list of Patients.
  */
 public class PatientListActivity extends PatientSearchActivity {
 
@@ -49,8 +34,8 @@ public class PatientListActivity extends PatientSearchActivity {
     private boolean mTwoPane;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
 
         if (findViewById(R.id.patient_detail_container) != null) {
@@ -89,7 +74,7 @@ public class PatientListActivity extends PatientSearchActivity {
     }
 
     private void setupCustomActionBar(int selectedFilter){
-        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay(this);
+        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay();
         SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<SimpleSelectionFilter>(
                 this,
                 R.layout.patient_list_spinner_dropdown_item,
@@ -125,10 +110,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        OdkActivityLauncher.fetchAndShowXform(
-                                PatientListActivity.this,
-                                Constants.ADD_PATIENT_UUID,
-                                ODK_ACTIVITY_REQUEST);
+                        startActivity(PatientCreationActivity.class);
 
                         return true;
                     }
@@ -165,8 +147,8 @@ public class PatientListActivity extends PatientSearchActivity {
         if (requestCode != ODK_ACTIVITY_REQUEST) {
             return;
         }
-        OdkActivityLauncher.sendOdkResultToServer(this, null /* create a new patient */, resultCode,
-                data);
+        OdkActivityLauncher.sendOdkResultToServer(this, null /* create a new patient */, false,
+                resultCode, data);
     }
 
     private void showFakeScanProgress() {

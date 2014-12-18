@@ -2,6 +2,7 @@ package org.msf.records.sync;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
@@ -15,8 +16,6 @@ import org.joda.time.DateTime;
 import org.msf.records.App;
 import org.msf.records.net.model.ChartGroup;
 import org.msf.records.net.model.ChartStructure;
-import org.msf.records.net.model.Concept;
-import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.PatientChart;
@@ -30,7 +29,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static org.msf.records.sync.ChartProviderContract.CHART_CONTENT_URI;
-import static org.msf.records.sync.ChartProviderContract.CONCEPT_NAMES_CONTENT_URI;
 import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 
 /**
@@ -40,44 +38,6 @@ import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 public class RpcToDb {
 
     private static final String TAG = "RpcToDb";
-
-    /**
-     * Convert a concept response into appropriate inserts in the concept and concept_name tables.
-     */
-    public static ArrayList<ContentProviderOperation> conceptRpcToDb(ConceptList response,
-                                                                     SyncResult syncResult) {
-        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-        for (Concept concept : response.results) {
-            // This is safe because we have implemented insert on the content provider
-            // with replace.
-            operations.add(ContentProviderOperation
-                    .newInsert(ChartProviderContract.CONCEPTS_CONTENT_URI)
-                    .withValue(ChartColumns._ID, concept.uuid)
-                    .withValue(ChartColumns.CONCEPT_TYPE, concept.type.name())
-                    .build());
-            syncResult.stats.numInserts++;
-            for (Map.Entry<String, String> entry : concept.names.entrySet()) {
-                String locale = entry.getKey();
-                if (locale == null) {
-                    Log.e(TAG, "null locale in concept name rpc for " + concept);
-                    continue;
-                }
-                String name = entry.getValue();
-                if (name == null) {
-                    Log.e(TAG, "null name in concept name rpc for " + concept);
-                    continue;
-                }
-                operations.add(ContentProviderOperation
-                        .newInsert(CONCEPT_NAMES_CONTENT_URI)
-                        .withValue(ChartColumns.CONCEPT_UUID, concept.uuid)
-                        .withValue(ChartColumns.LOCALE, locale)
-                        .withValue(ChartColumns.NAME, name)
-                        .build());
-                syncResult.stats.numInserts++;
-            }
-        }
-        return operations;
-    }
 
     /**
      * Convert a ChartStructure response into appropriate inserts in the chart table.
@@ -114,10 +74,9 @@ public class RpcToDb {
     /**
      * Convert a ChartStructure response into appropriate inserts in the chart table.
      */
-    public static ArrayList<ContentProviderOperation> observationsRpcToDb(
-            PatientChart response, SyncResult syncResult) {
+    public static void observationsRpcToDb(
+            PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
         final String patientUuid = response.uuid;
-        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
         for (Encounter encounter : response.encounters) {
             if (encounter.uuid == null) {
                 Log.e(TAG, "Encounter uuid was null for " + patientUuid);
@@ -130,20 +89,20 @@ public class RpcToDb {
                 continue;
             }
             final int encounterTime = (int) (timestamp.getMillis() / 1000); // seconds since epoch
+            ContentValues base = new ContentValues();
+            base.put(ChartColumns.PATIENT_UUID, patientUuid);
+            base.put(ChartColumns.ENCOUNTER_UUID, encounterUuid);
+            base.put(ChartColumns.ENCOUNTER_TIME, encounterTime);
+
             for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
                 final String conceptUuid = (String) entry.getKey();
-                operations.add(ContentProviderOperation
-                        .newInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI)
-                        .withValue(ChartColumns.PATIENT_UUID, patientUuid)
-                        .withValue(ChartColumns.ENCOUNTER_UUID, encounterUuid)
-                        .withValue(ChartColumns.ENCOUNTER_TIME, encounterTime)
-                        .withValue(ChartColumns.CONCEPT_UUID, conceptUuid)
-                        .withValue(ChartColumns.VALUE, entry.getValue().toString())
-                        .build());
+                ContentValues values = new ContentValues(base);
+                values.put(ChartColumns.CONCEPT_UUID, conceptUuid);
+                values.put(ChartColumns.VALUE, entry.getValue().toString());
+                result.add(values);
                 syncResult.stats.numInserts++;
             }
         }
-        return operations;
     }
 
     /**
@@ -295,27 +254,29 @@ public class RpcToDb {
         c.close();
 
 
-        for (Location e : locationsMap.values()) {
-            Log.i(TAG, "Scheduling insert: entry_id=" + e.uuid);
+        for (Location location : locationsMap.values()) {
+            Log.i(TAG, "Scheduling insert: entry_id=" + location.uuid);
             batch.add(ContentProviderOperation.newInsert(LocationProviderContract.LOCATIONS_CONTENT_URI)
-                    .withValue(LocationProviderContract.LocationColumns.LOCATION_UUID, e.uuid)
-                    .withValue(LocationProviderContract.LocationColumns.PARENT_UUID, e.parent_uuid)
+                    .withValue(LocationProviderContract.LocationColumns.LOCATION_UUID, location.uuid)
+                    .withValue(LocationProviderContract.LocationColumns.PARENT_UUID, location.parent_uuid)
                     .build());
             syncResult.stats.numInserts++;
 
-            for (String locale : e.names.keySet()) {
-                Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                        String.valueOf(e.uuid)).build();
-                batch.add(ContentProviderOperation.newInsert(existingNamesUri)
-                        .withValue(
-                                LocationProviderContract.LocationColumns.LOCATION_UUID, e.uuid)
-                        .withValue(
-                                LocationProviderContract.LocationColumns.LOCALE, locale)
-                        .withValue(
-                                LocationProviderContract.LocationColumns.NAME,
-                                e.names.get(locale))
-                        .build());
-                syncResult.stats.numInserts++;
+            if (location.names != null) {
+	            for (String locale : location.names.keySet()) {
+	                Uri existingNamesUri = namesUri.buildUpon().appendPath(
+	                        String.valueOf(location.uuid)).build();
+	                batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+	                        .withValue(
+	                                LocationProviderContract.LocationColumns.LOCATION_UUID, location.uuid)
+	                        .withValue(
+	                                LocationProviderContract.LocationColumns.LOCALE, locale)
+	                        .withValue(
+	                                LocationProviderContract.LocationColumns.NAME,
+	                                location.names.get(locale))
+	                        .build());
+	                syncResult.stats.numInserts++;
+	            }
             }
         }
 

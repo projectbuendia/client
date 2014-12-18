@@ -1,14 +1,12 @@
 package org.msf.records.filter;
 
-import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup.FilterType;
-import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
+import org.msf.records.location.LocationTree.LocationSubtree;
 
 import de.greenrobot.event.EventBus;
 
@@ -17,39 +15,41 @@ import de.greenrobot.event.EventBus;
  * user, categorized by filter type.
  */
 public class FilterManager {
-    private static final String TAG = "FilterManager";
+	
     private static LocationTree mRoot = null;
 
     // Id and name filters should always be applied.
-    private static final FilterGroup baseFilters = new FilterGroup(
+    private static final FilterGroup BASE_FILTERS = new FilterGroup(
             FilterType.OR, new IdFilter(), new NameFilter()).setName("All Patients");
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
-        new FilterGroup(baseFilters, new PregnantFilter()).setName("Pregnant"),
-        new FilterGroup(baseFilters, new AgeFilter(5)).setName("Children Under 5"),
-        new FilterGroup(baseFilters, new AgeFilter(2)).setName("Children Under 2")
+//        new FilterGroup(BASE_FILTERS, new PregnantFilter()).setName("Pregnant"),
+        new FilterGroup(BASE_FILTERS, new AgeFilter(5)).setName("Children Under 5"),
+        new FilterGroup(BASE_FILTERS, new AgeFilter(2)).setName("Children Under 2")
     };
 
+    @SuppressWarnings("unused") // Called by reflection from event bus.
     private static class LocationSyncSubscriber {
         public synchronized void onEvent(LocationsLoadedEvent event) {
-            mRoot = event.mLocationTree;
+            mRoot = event.locationTree;
         }
     }
 
+    // TODO(rjlothian): This is likely to cause problems for testability. Remove it.
     static {
         EventBus.getDefault().register(new LocationSyncSubscriber());
     }
 
     public static SimpleSelectionFilter getDefaultFilter() {
-        return baseFilters;
+        return BASE_FILTERS;
     }
 
-    public static SimpleSelectionFilter[] getZoneFilters(Context context) {
+    public static SimpleSelectionFilter[] getZoneFilters() {
         List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
         if (mRoot != null) {
-            for (LocationTree zone : mRoot.getLocationsForDepth(1)) {
+            for (LocationSubtree zone : mRoot.getLocationsForDepth(1)) {
                 filters.add(new FilterGroup(
-                        baseFilters,
-                        new LocationUuidFilter(zone.getLocation().uuid)).setName(zone.toString()));
+                        BASE_FILTERS,
+                        new LocationUuidFilter(zone)).setName(zone.toString()));
             }
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
@@ -61,10 +61,10 @@ public class FilterManager {
         return OTHER_FILTERS;
     }
 
-    public static SimpleSelectionFilter[] getFiltersForDisplay(Context context) {
+    public static SimpleSelectionFilter[] getFiltersForDisplay() {
         List<SimpleSelectionFilter> allFilters = new ArrayList<SimpleSelectionFilter>();
         allFilters.add(getDefaultFilter());
-        for (SimpleSelectionFilter filter : getZoneFilters(context)) {
+        for (SimpleSelectionFilter filter : getZoneFilters()) {
             allFilters.add(filter);
         }
         allFilters.add(null); // Section break

@@ -9,4 +9,8 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
 
     <dimen name="large_horizontal_margin">32dp</dimen>
+
+    <!-- Padding for 'Create' and 'Cancel' buttons in PatientCreationActivity, and similar buttons.
+    -->
+    <dimen name="action_button_padding">12dp</dimen>
 </resources>

@@ -1,7 +1,10 @@
 package org.msf.records.ui;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -12,15 +15,23 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 
+import org.javarosa.core.model.data.IAnswerData;
+import org.javarosa.core.model.instance.TreeElement;
+import org.javarosa.xform.parse.XFormParser;
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
 import org.msf.records.App;
 import org.msf.records.events.CreatePatientSucceededEvent;
-import org.msf.records.model.Patient;
+import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
+import org.msf.records.sync.ChartProviderContract;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.activities.FormHierarchyActivity;
 import org.odk.collect.android.application.Collect;
@@ -31,18 +42,26 @@ import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.provider.InstanceProviderAPI;
 import org.odk.collect.android.tasks.DeleteInstancesTask;
 import org.odk.collect.android.tasks.FormLoaderTask;
+import org.odk.collect.android.utilities.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
 
 import static android.provider.BaseColumns._ID;
+import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.JR_FORM_ID;
@@ -72,6 +91,7 @@ public class OdkActivityLauncher {
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
                             Log.i(TAG, "No forms found");
+                            EventBus.getDefault().post(new FetchXformFailedEvent());
                             return;
                         }
                         // Cache all the forms into the ODK form cache
@@ -87,8 +107,16 @@ public class OdkActivityLauncher {
                                         fields);
                             }
                         }).execute(findUuid(response, uuidToShow));
+
+                        EventBus.getDefault().post(new FetchXformSucceededEvent());
                     }
-                }, getErrorListenerForTag(TAG));
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        EventBus.getDefault().post(new FetchXformFailedEvent());
+                    }
+                });
     }
 
     public static void showOdkCollect(Activity callingActivity, int requestCode, long formId) {
@@ -117,14 +145,15 @@ public class OdkActivityLauncher {
     /**
      * Convenient shared code for handling an ODK activity result.
      *
-     * @param callingActivity the calling activity, used for getting content resolvers
      * @param patientUuid the patient to add an observation to, or null to create a new patient
      * @param resultCode the result code sent from Android activity transition
+     * @param updateClientCache true if we should update the client database with temporary observations
      * @param data the incoming intent
      */
     public static void sendOdkResultToServer(
-            Activity callingActivity,
+            Context context,
             @Nullable String patientUuid,
+            boolean updateClientCache,
             int resultCode,
             Intent data) {
 
@@ -140,7 +169,7 @@ public class OdkActivityLauncher {
 
         Uri uri = data.getData();
 
-        if (!callingActivity.getContentResolver().getType(uri).equals(
+        if (!context.getContentResolver().getType(uri).equals(
                 InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
             Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
             return;
@@ -148,7 +177,7 @@ public class OdkActivityLauncher {
 
         Cursor instanceCursor = null;
         try {
-            instanceCursor = callingActivity.getContentResolver().query(uri,
+            instanceCursor = context.getContentResolver().query(uri,
                     null, null, null, null);
             if (instanceCursor.getCount() != 1) {
                 Log.e(TAG, "The form that we tried to load did not exist: " + uri);
@@ -171,9 +200,20 @@ public class OdkActivityLauncher {
             final long idToDelete = instanceCursor.getLong(columnIndex);
 
             SharedPreferences preferences =
-                    PreferenceManager.getDefaultSharedPreferences(callingActivity.getApplicationContext());
+                    PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
             final boolean keepFormInstancesLocally =
                     preferences.getBoolean("keep_form_instances_locally", false);
+
+            // Temporary code for messing about with xform instance, reading values.
+            //
+            byte[] fileBytes = FileUtils.getFileAsBytes(new File(instancePath));
+
+            // get the root of the saved and template instances
+            TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
+
+            if (patientUuid != null && updateClientCache) { // Only locally cache new observations, not new patients
+                updateClientCache(patientUuid, savedRoot, context.getContentResolver());
+            }
 
             sendFormToServer(patientUuid, readFromPath(instancePath),
                     new Response.Listener<JSONObject>() {
@@ -200,6 +240,153 @@ public class OdkActivityLauncher {
             if (instanceCursor != null) {
                 instanceCursor.close();
             }
+        }
+    }
+
+    private static void updateClientCache(String patientUuid, TreeElement savedRoot,
+                                          ContentResolver resolver) {
+        // id, fill in auto
+        // patient uuid: context
+        // encounter uuid: make one up
+        // encounter time: <encounter><encounter.encounter_datetime>2014-12-15T13:33:00.000Z</encounter.encounter_datetime>
+        // concept uuid: <vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM"> <- 5088
+        // value: 	<vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
+        //              <value>36.0</value>
+        // temp_cache: true
+
+        // or for coded
+        // <symptoms_abinaryinvisible>
+        //   <weakness multiple="0" openmrs_concept="5226^WEAKNESS^99DCT" openmrs_datatype="CWE">
+        //      <value>1066^NO^99DCT</value>
+
+        ContentValues common = new ContentValues();
+        common.put(ChartColumns.PATIENT_UUID, patientUuid);
+
+        TreeElement encounter = savedRoot.getChild("encounter", 0);
+        if (encounter == null) {
+            Log.e(TAG, "No encounter found in instance");
+            return;
+        }
+
+        TreeElement encounterDatetime =
+                encounter.getChild("encounter.encounter_datetime", 0);
+        if (encounterDatetime == null) {
+            Log.e(TAG, "No encounter date time found in instance");
+            return;
+        }
+        IAnswerData dateTimeValue = encounterDatetime.getValue();
+        try {
+
+            DateTime encounterTime =
+                    ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
+            long secondsSinceEpoch = encounterTime.getMillis() / 1000L;
+            common.put(ChartColumns.ENCOUNTER_TIME, secondsSinceEpoch);
+            common.put(ChartColumns.ENCOUNTER_UUID, UUID.randomUUID().toString());
+            common.put(ChartColumns.TEMP_CACHE, 1);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Could not parse datetime" + dateTimeValue.getValue());
+            return;
+        }
+
+        ArrayList<ContentValues> toInsert = new ArrayList<>();
+        HashSet<Integer> xformConceptIds = new HashSet<>();
+        for (int i=0; i<savedRoot.getNumChildren(); i++) {
+            TreeElement group = savedRoot.getChildAt(i);
+            if (group.getNumChildren() == 0) {
+                continue;
+            }
+            for (int j=0; j< group.getNumChildren(); j++) {
+                TreeElement question = group.getChildAt(j);
+                TreeElement openmrsConcept = question.getAttribute(null, "openmrs_concept");
+                TreeElement openmrsDatatype = question.getAttribute(null, "openmrs_datatype");
+                if (openmrsConcept == null || openmrsDatatype == null) {
+                    continue;
+                }
+                // Get the concept for the question.
+                // eg "5088^Temperature (C)^99DCT"
+                String encodedConcept = (String) openmrsConcept.getValue().getValue();
+                Integer id = getConceptId(xformConceptIds, encodedConcept);
+                if (id == null) {
+                    continue;
+                }
+                // Also get for the answer if a coded question
+                String value;
+                TreeElement valueChild = question.getChild("value", 0);
+                IAnswerData answer = valueChild.getValue();
+                if (answer == null) {
+                    continue;
+                }
+                Object answerObject = answer.getValue();
+                if (answerObject == null) {
+                    continue;
+                }
+                if ("CWE".equals(openmrsDatatype.getValue().getValue())) {
+                    value = getConceptId(xformConceptIds, answerObject.toString()).toString();
+                } else {
+                    value = answerObject.toString();
+                }
+
+                ContentValues observation = new ContentValues(common);
+                // Set to the id for now, we'll replace with uuid later
+                observation.put(ChartColumns.CONCEPT_UUID, id.toString());
+                observation.put(ChartColumns.VALUE, value);
+                toInsert.add(observation);
+            }
+        }
+
+        String inClause = Joiner.on(",").join(xformConceptIds);
+        // Get a map from client ids to UUIDs from our local concept database.
+        Cursor cursor = resolver.query(ChartProviderContract.CONCEPTS_CONTENT_URI,
+                new String[]{ChartColumns._ID, ChartColumns.XFORM_ID},
+                ChartColumns.XFORM_ID + " IN (" + inClause + ")",
+                null, null);
+        HashMap<String, String> idToUuid = new HashMap<>();
+        while (cursor.moveToNext()) {
+            idToUuid.put(cursor.getString(cursor.getColumnIndex(ChartColumns.XFORM_ID)),
+                    cursor.getString(cursor.getColumnIndex(ChartColumns._ID)));
+        }
+
+        // Remap concept ids to uuids, skipping anything we can't remap.
+        for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext();) {
+            ContentValues values = i.next();
+            if (!mapIdToUuid(idToUuid, values, ChartColumns.CONCEPT_UUID)) {
+                i.remove();
+            }
+            mapIdToUuid(idToUuid, values, ChartColumns.VALUE);
+        }
+        resolver.bulkInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
+                toInsert.toArray(new ContentValues[toInsert.size()]));
+    }
+
+    private static boolean mapIdToUuid(HashMap<String, String> idToUuid, ContentValues values, String key) {
+        String id = (String) values.get(key);
+        String uuid = idToUuid.get(id);
+        if (uuid == null) {
+            return false;
+        }
+        values.put(key, uuid);
+        return true;
+    }
+
+    private static Integer getConceptId(Set<Integer> accumulator, String encodedConcept) {
+        Integer id = getConceptId(encodedConcept);
+        if (id != null) {
+            accumulator.add(id);
+        }
+        return id;
+    }
+
+    private static Integer getConceptId(String encodedConcept) {
+        int idEnd = encodedConcept.indexOf('^');
+        if (idEnd == -1) {
+            return null;
+        }
+        String idString = encodedConcept.substring(0, idEnd);
+        try {
+            return Integer.parseInt(idString);
+        } catch (NumberFormatException ex) {
+            Log.w(TAG, "Strangely formatted id String " + idString);
+            return null;
         }
     }
 

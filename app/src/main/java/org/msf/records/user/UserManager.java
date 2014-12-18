@@ -3,6 +3,7 @@ package org.msf.records.user;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -75,8 +76,8 @@ public class UserManager {
     private Set<User> mKnownUsers;
     private User mActiveUser;
 
-    public UserManager() {
-        mUserStore = new UserStore();
+    public UserManager(UserStore userStore) {
+        mUserStore = userStore;
     }
 
     /**
@@ -207,8 +208,17 @@ public class UserManager {
 
             synchronized (mKnownUsersLock) {
                 mKnownUsers = new HashSet<User>(newKnownUsers);
-                EventBus.getDefault()
-                        .post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(newKnownUsers)));
+
+                if (mKnownUsers.isEmpty()) {
+                    Log.e(TAG, "No users returned from db");
+                    mKnownUsers = null;
+                    EventBus.getDefault()
+                            .post(new KnownUsersLoadFailedEvent(
+                                    KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
+                } else {
+                    EventBus.getDefault()
+                            .post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(newKnownUsers)));
+                }
             }
 
             return null;
@@ -232,10 +242,12 @@ public class UserManager {
             }
 
             synchronized (mKnownUsersLock) {
+                Set<User> knownUsers = mKnownUsers == null ? ImmutableSet.<User>of() : mKnownUsers;
+
                 ImmutableSet<User> addedUsers =
-                        ImmutableSet.copyOf(Sets.difference(syncedKnownUsers, mKnownUsers));
+                        ImmutableSet.copyOf(Sets.difference(syncedKnownUsers, knownUsers));
                 ImmutableSet<User> deletedUsers =
-                        ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedKnownUsers));
+                        ImmutableSet.copyOf(Sets.difference(knownUsers, syncedKnownUsers));
 
                 mKnownUsers = syncedKnownUsers;
 
@@ -267,10 +279,15 @@ public class UserManager {
             User addedUser;
             try {
                 addedUser = mUserStore.addUser(mUser);
-            } catch (Exception e) {
-                // TODO(dxchen): Log. Figure out the type of exception to throw.
-                EventBus.getDefault()
-                        .post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
+            } catch (VolleyError e) {
+                if (e.getMessage() != null && e.getMessage().contains("already in use")) {
+                    EventBus.getDefault()
+                            .post(new UserAddFailedEvent(
+                                    mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
+                } else {
+                    EventBus.getDefault()
+                            .post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
+                }
 
                 return null;
             }

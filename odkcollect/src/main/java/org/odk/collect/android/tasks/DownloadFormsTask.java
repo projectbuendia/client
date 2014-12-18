@@ -151,7 +151,7 @@ public class DownloadFormsTask extends
                 } catch (IOException e) {
                     Log.e(t, e.getMessage());
 
-                    if (uriResult != null && uriResult.isNew() && fileResult.isNew())  {
+                    if (uriResult.isNew() && fileResult.isNew())  {
                         // this means we should delete the entire form together with the metadata
                         Uri uri = uriResult.getUri();
                         Log.w(t, "The form is new. We should delete the entire form.");

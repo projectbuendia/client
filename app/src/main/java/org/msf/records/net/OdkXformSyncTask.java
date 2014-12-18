@@ -1,5 +1,6 @@
 package org.msf.records.net;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -35,7 +36,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     private static final String TAG = "OdkXformSyncTask";
 
     @Nullable
-    private FormWrittenListener formWrittenListener;
+    private final FormWrittenListener formWrittenListener;
 
     public OdkXformSyncTask(@Nullable FormWrittenListener formWrittenListener) {
         this.formWrittenListener = formWrittenListener;
@@ -53,6 +54,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // Check if the uuid already exists in the database.
             Cursor cursor = null;
             boolean isNew;
+            final boolean isUpdate;
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[]{
                         FormsProviderAPI.FormsColumns.DATE
@@ -64,6 +66,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     cursor.moveToNext();
                     long existingTimestamp = cursor.getLong(0);
                     isNew = (existingTimestamp < formInfo.dateChanged);
+                    isUpdate = true;
 
                     if (isNew) {
                         Log.i(TAG, "Form " + formInfo.uuid + " requires an update." +
@@ -73,6 +76,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 } else {
                     Log.i(TAG, "Form " + formInfo.uuid + " not found in database.");
                     isNew = true;
+                    isUpdate = false;
                 }
             } finally {
                 if (cursor != null) {
@@ -82,7 +86,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             if (!isNew) {
                 Log.i(TAG, "Using form " + formInfo.uuid + " from local cache.");
-                formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                if (formWrittenListener != null) {
+                    formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                }
                 continue;
             }
 
@@ -93,7 +99,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onResponse(String response) {
                     Log.i(TAG, "adding form to db " + response);
-                    new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid)
+                    new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid, isUpdate)
                             .execute(new FormToWrite(response, proposedPath));
                 }
             }, new Response.ErrorListener() {
@@ -152,13 +158,16 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     private static class AddFormToDbAsyncTask extends AsyncTask<FormToWrite, Void, File> {
 
         private final FormWrittenListener formWrittenListener;
-        private String mPath;
-        private String mUuid;
+        private final String mUuid;
+        private final boolean mUpdate;
 
         private AddFormToDbAsyncTask(
-                @Nullable FormWrittenListener formWrittenListener, String uuid) {
+                @Nullable FormWrittenListener formWrittenListener,
+                String uuid,
+                boolean update) {
             this.formWrittenListener = formWrittenListener;
             mUuid = uuid;
+            mUpdate = update;
         }
 
         @Override
@@ -188,10 +197,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             // insert into content provider
             try {
-                // insert failures are OK and expected if multiple
-                // DiskSync scanners are active.
-                Collect.getInstance().getApplication().getContentResolver()
-                        .insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
+                ContentResolver contentResolver = Collect.getInstance().getApplication().getContentResolver();
+                if (mUpdate) {
+                    contentResolver.update(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues, null, null);
+                } else {
+                    contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
+                }
             } catch (SQLException e) {
                 Log.i(TAG, "failed to insert fetched file", e);
             }

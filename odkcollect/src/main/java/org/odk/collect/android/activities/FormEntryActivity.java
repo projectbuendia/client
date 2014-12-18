@@ -45,8 +45,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.debug.hv.ViewServer;
-
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.form.api.FormEntryCaption;
@@ -83,7 +81,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Objects;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -209,7 +206,6 @@ public class FormEntryActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        ViewServer.get(this).addWindow(this);
 
 		// must be at the beginning of any activity that can be called from an
 		// external intent
@@ -245,7 +241,7 @@ public class FormEntryActivity
                         }
                 )
                 .setNegativeButton(R.string.no, null)
-                .create();;
+                .create();
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
@@ -1300,15 +1296,10 @@ public class FormEntryActivity
 				FormEntryPrompt[] prompts = formController.getQuestionPrompts();
 				FormEntryCaption[] groups = formController
 						.getGroupsForCurrentIndex();
-				odkv = new ODKView(
-                        this,
-                        formController.getQuestionPrompts(),
-						groups,
-                        advancingPage,
-                        fields);
+				odkv = new ODKView(this, prompts, groups, advancingPage, fields);
                 if (fields != null
-                        && fields.mTargetGroup != null
-                        && fields.mTargetGroup.equals(groups[groups.length - 1].getLongText())) {
+                        && fields.targetGroup != null
+                        && fields.targetGroup.equals(groups[groups.length - 1].getLongText())) {
                     mTargetView = odkv;
                 }
 				Log.i(TAG,
@@ -2199,7 +2190,6 @@ public class FormEntryActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
-        ViewServer.get(this).setFocusedWindow(this);
 
         if (mErrorMessage != null) {
             if (mAlertDialog != null && !mAlertDialog.isShowing()) {
@@ -2315,7 +2305,6 @@ public class FormEntryActivity
 		}
 
 		super.onDestroy();
-        ViewServer.get(this).removeWindow(this);
 	}
 //
 //	private int mAnimationCompletionSet = 0;
@@ -2486,9 +2475,7 @@ public class FormEntryActivity
 
         Patient patient = getIntent().getParcelableExtra("patient");
         if (patient != null) {
-            setTitle(
-                    patient.getGivenName() + " " + patient.getFamilyName() + " (" + patient.getId()
-                            + ") - " + formController.getFormTitle());
+            setTitle(patient.id + ": " + patient.givenName + " " + patient.familyName);
         } else {
             setTitle(formController.getFormTitle());
         }
@@ -2519,13 +2506,13 @@ public class FormEntryActivity
         int saveStatus = saveResult.getSaveResult();
         switch (saveStatus) {
 		case SaveToDiskTask.SAVED:
-			Toast.makeText(this, getString(R.string.data_saved_ok),
-					Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, getString(R.string.data_saved_ok),
+//					Toast.LENGTH_SHORT).show();
 			sendSavedBroadcast();
 			break;
 		case SaveToDiskTask.SAVED_AND_EXIT:
-			Toast.makeText(this, getString(R.string.data_saved_ok),
-					Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, getString(R.string.data_saved_ok),
+//					Toast.LENGTH_SHORT).show();
 			sendSavedBroadcast();
 			finishReturnInstance();
 			break;

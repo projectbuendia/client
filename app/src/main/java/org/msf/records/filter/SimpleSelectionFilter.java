@@ -1,7 +1,5 @@
 package org.msf.records.filter;
 
-import android.widget.FilterQueryProvider;
-
 /**
  * SimpleSelectionFilter is a container for a filter string (part of an SQL WHERE
  * clause) and the arguments to insert into that filter string.

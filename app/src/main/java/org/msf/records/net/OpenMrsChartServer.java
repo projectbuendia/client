@@ -1,11 +1,13 @@
 package org.msf.records.net;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.CustomSerialization;
 import org.msf.records.net.model.PatientChart;
+import org.msf.records.net.model.PatientChartList;
 
 import java.util.HashMap;
 
@@ -33,34 +35,46 @@ public class OpenMrsChartServer {
                          Response.Listener<PatientChart> patientListener,
                          Response.ErrorListener errorListener) {
         GsonRequest<PatientChart> request = new GsonRequest<>(
-                mConnectionDetails.rootUrl + "/patientencounters/" + patientUuid,
+                mConnectionDetails.getRootUrl() + "/patientencounters/" + patientUuid,
                 PatientChart.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+    }
+
+    public void getAllCharts(Response.Listener<PatientChartList> patientListener,
+                             Response.ErrorListener errorListener) {
+        GsonRequest<PatientChartList> request = new GsonRequest<>(
+                mConnectionDetails.getRootUrl() + "/patientencounters",
+                PatientChartList.class, false,
+                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+                patientListener, errorListener);
+        CustomSerialization.registerTo(request.getGson());
+        request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
     public void getConcepts(Response.Listener<ConceptList> conceptListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<ConceptList> request = new GsonRequest<ConceptList>(
-                mConnectionDetails.rootUrl + "/concept",
+                mConnectionDetails.getRootUrl() + "/concept",
                 ConceptList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 
     public void getChartStructure(
             String uuid, Response.Listener<ChartStructure> chartListener,
             Response.ErrorListener errorListener) {
         GsonRequest<ChartStructure> request = new GsonRequest<ChartStructure>(
-                mConnectionDetails.rootUrl + "/chart/" + uuid + "?v=full",
+                mConnectionDetails.getRootUrl() + "/chart/" + uuid + "?v=full",
                 ChartStructure.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {
         };
-        mConnectionDetails.volley.addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
     }
 }

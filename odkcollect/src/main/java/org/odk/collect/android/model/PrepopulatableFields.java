@@ -16,22 +16,22 @@ public class PrepopulatableFields implements Parcelable {
     public static final int YES = 2;
     public static final int NO = 3;
 
-    public DateTime mEncounterTime;
-    public String mLocationName;
-    public String mClinicianName;
-    public int mPregnant = UNSPECIFIED;
-    public int mIvFitted = UNSPECIFIED;
-    public String mTargetGroup;
+    public DateTime encounterTime;
+    public String locationName;
+    public String clinicianName;
+    public int pregnant = UNSPECIFIED;
+    public int ivFitted = UNSPECIFIED;
+    public String targetGroup;
 
     public PrepopulatableFields() {}
 
     public PrepopulatableFields(Parcel in) {
-        mEncounterTime = Parcels.readNullableDateTime(in);
-        mLocationName = Parcels.readNullableString(in);
-        mClinicianName = Parcels.readNullableString(in);
-        mPregnant = in.readInt();
-        mIvFitted = in.readInt();
-        mTargetGroup = Parcels.readNullableString(in);
+        encounterTime = Parcels.readNullableDateTime(in);
+        locationName = Parcels.readNullableString(in);
+        clinicianName = Parcels.readNullableString(in);
+        pregnant = in.readInt();
+        ivFitted = in.readInt();
+        targetGroup = Parcels.readNullableString(in);
     }
 
     @Override
@@ -41,12 +41,12 @@ public class PrepopulatableFields implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        Parcels.writeNullableDateTime(dest, mEncounterTime);
-        Parcels.writeNullableString(dest, mLocationName);
-        Parcels.writeNullableString(dest, mClinicianName);
-        dest.writeInt(mPregnant);
-        dest.writeInt(mIvFitted);
-        Parcels.writeNullableString(dest, mTargetGroup);
+        Parcels.writeNullableDateTime(dest, encounterTime);
+        Parcels.writeNullableString(dest, locationName);
+        Parcels.writeNullableString(dest, clinicianName);
+        dest.writeInt(pregnant);
+        dest.writeInt(ivFitted);
+        Parcels.writeNullableString(dest, targetGroup);
     }
 
     @SuppressWarnings("unused")

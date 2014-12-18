@@ -8,15 +8,11 @@ import static android.provider.BaseColumns._ID;
 import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 import static org.msf.records.sync.LocationProviderContract.LocationColumns;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_MONTHS;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_AGE_YEARS;
+import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_TENT;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_ZONE;
-import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_STATUS;
 import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN_NAME_UUID;
 
 /**
@@ -27,7 +23,7 @@ import static org.msf.records.sync.PatientProviderContract.PatientColumns.COLUMN
 public class PatientDatabase extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 14;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patients.db";
 
@@ -51,14 +47,10 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
                     COLUMN_NAME_GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_STATUS + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_UUID + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_LOCATION_ZONE + TYPE_TEXT + COMMA_SEP +
-                    COLUMN_NAME_LOCATION_TENT + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP +
-                    COLUMN_NAME_AGE_YEARS + TYPE_INTEGER + COMMA_SEP +
-                    COLUMN_NAME_AGE_MONTHS + TYPE_INTEGER + COMMA_SEP +
+                    COLUMN_NAME_BIRTHDATE + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_GENDER + TYPE_TEXT + ")";
 
     static final String CONCEPTS_TABLE_NAME = "concepts";
@@ -66,6 +58,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_CONCEPTS =
             CREATE_TABLE + CONCEPTS_TABLE_NAME + " (" +
                     _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                    ChartColumns.XFORM_ID + TYPE_INTEGER + UNIQUE + NOTNULL + COMMA_SEP +
                     ChartColumns.CONCEPT_TYPE + TYPE_TEXT +
                     ")";
 
@@ -112,6 +105,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ChartColumns.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
                     ChartColumns.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
                     ChartColumns.VALUE + TYPE_INTEGER + COMMA_SEP +
+                    ChartColumns.TEMP_CACHE + TYPE_INTEGER + COMMA_SEP + //actually boolean
                     UNIQUE_INDEX + ChartColumns.PATIENT_UUID + COMMA_SEP +
                     ChartColumns.ENCOUNTER_UUID + COMMA_SEP + ChartColumns.CONCEPT_UUID + ")" +
                     ")";

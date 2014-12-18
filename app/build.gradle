@@ -2,17 +2,58 @@ buildscript {
     repositories {
         mavenCentral()
     }
-
-    dependencies {
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-    }
 }
+
 apply plugin: 'com.android.application'
-apply plugin: 'android-apt'
 
 def versionMajor = 0
 def versionMinor = 2
-def versionPatch = 0
+def versionPatch = 1
+
+def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
+
+def releaseRepoRoot = file('../../release/')
+
+dependencies {
+    // Build plugins
+    provided 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables
+    provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
+
+    // Local .jar dependencies
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Local project dependencies
+    compile project(':autofittextview')
+    compile project(':odkcollect')
+    compile project(':snackbar')
+    compile project(':ViewPagerIndicator')
+
+    // External dependencies
+    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:cardview-v7:+'
+    compile 'com.android.support:recyclerview-v7:+'
+    compile 'com.android.support:support-v4:20.0.0'
+    compile 'com.github.frankiesardo:auto-parcel:+' // Automatic Parcelables
+    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
+    compile 'com.google.code.gson:gson:2.3' // JSON parser
+    compile 'com.google.guava:guava:18.0' // Google common libraries
+    compile 'com.jakewharton:butterknife:5.1.2' // View injection
+    compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
+    compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
+    compile 'de.greenrobot:eventbus:2.4.0' // The event bus
+    compile 'joda-time:joda-time:2.5' // Better dates and times
+
+    // Testing
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.0'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestCompile('com.jakewharton.espresso:espresso:1.1-r3') {
+        exclude group: 'com.google.guava'
+        exclude group: 'com.squareup.dagger' // Provided by com.squareup.dagger
+        exclude group: 'javax.inject' // Provided by com.squareup.dagger
+    }
+    androidTestCompile 'org.mockito:mockito-core:1.9.5'
+}
 
 android {
     compileSdkVersion 21
@@ -25,64 +66,87 @@ android {
 
     defaultConfig {
         applicationId "org.msf.records"
+
         minSdkVersion 19
-        targetSdkVersion 20
+        targetSdkVersion 19
+
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+
+        testApplicationId 'org.msf.records.test'
+        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+
+        // Allow different sync adapters to be defined for debug and release builds.
+        resValue "string", "sync_authority", applicationId + '.provider.records'
+        resValue "string", "account_type", applicationId
+        buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}\""
+
+        buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            storeFile file(new File(releaseRepoRoot, 'keys/org.msf.records.jks'))
+            storePassword ''
+            keyAlias 'org.msf.records'
+            keyPassword ''
         }
     }
 
-    defaultConfig {
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
-    }
-
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES' // otherwise we get duplicates
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/services/javax.annotation.processing.Processor'
-        exclude 'META-INF/NOTICE' // otherwise we get duplicates
-        exclude 'META-INF/NOTICE.txt' // otherwise we get duplicates
-        exclude 'META-INF/LICENSE' // otherwise we get duplicates
-        exclude 'META-INF/LICENSE.txt' // otherwise we get duplicates
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
     }
 
     lintOptions {
         abortOnError false
     }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.dev'
+            versionNameSuffix '-dev'
+
+            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
+            resValue "string", "account_type", defaultConfig.applicationId + '.dev'
+            buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.release
+        }
+    }
 }
 
-dependencies {
-    // Build plugins
-    apt 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables
+gradle.taskGraph.whenReady {
+    taskGraph ->
+        if (taskGraph.hasTask(':app:assembleRelease')) {
+            def pass = ''
+            if (!android.signingConfigs.release.storeFile.exists()) {
+                throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
+            }
+            if (System.console() == null) {
+                throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.");
+            }
 
-    // Local .jar dependencies
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+            pass = System.console().readPassword("\nPlease enter key passphrase: ")
+            pass = new String(pass)
 
-    // Local project dependencies
-    compile project(':autofittextview')
-    compile project(':odkcollect')
-    compile project(':snackbar')
-    compile project(':ViewPagerIndicator')
-    compile project(':viewserver')
+            if (pass.size() <= 0) {
+                throw new IllegalArgumentException("You must enter a password to proceed.")
+            }
 
-    // External dependencies
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.android.support:cardview-v7:+'
-    compile 'com.android.support:recyclerview-v7:+'
-    compile 'com.android.support:support-v4:20.0.0'
-    compile 'com.github.frankiesardo:auto-parcel:+' // Easier Parcelables.
-    compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
-    compile 'com.google.code.gson:gson:2.3' // JSON parser
-    compile 'com.jakewharton:butterknife:5.1.2' // View injection
-    compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
-    compile 'de.greenrobot:eventbus:2.4.0' // The event bus
-    compile 'joda-time:joda-time:2.5' // Better dates and times
-
-    // Testing
-    androidTestCompile files('libs/espresso-1.1-bundled.jar')
+            android.signingConfigs.release.storePassword = pass
+            android.signingConfigs.release.keyPassword = pass
+        }
 }

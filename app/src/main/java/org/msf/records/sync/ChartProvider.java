@@ -6,6 +6,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 
 import java.util.List;
@@ -172,7 +173,8 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 //        String query = "SELECT obs.encounter_time, group_names." + ChartColumns.NAME + " AS group_name, obs.concept_uuid, names." +
         String query = "SELECT obs.encounter_time," +
                 "group_names." + ChartColumns.NAME + " AS group_name," +
-                "obs.concept_uuid,names." + ChartColumns.NAME + " AS concept_name," +
+                "chart." + ChartColumns.CONCEPT_UUID + "," +
+                "names." + ChartColumns.NAME + " AS concept_name," +
                 // Localized value for concept values
                 "obs." + ChartColumns.VALUE +
                 ",coalesce(value_names." + ChartColumns.NAME + ", obs." + ChartColumns.VALUE + ") " +
@@ -186,14 +188,16 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 "names." + ChartColumns.CONCEPT_UUID +
 
                 " INNER JOIN " +
-                PatientDatabase.OBSERVATIONS_TABLE_NAME +" obs " +
-                "ON obs." + ChartColumns.CONCEPT_UUID + "=" +
-                "names." + ChartColumns.CONCEPT_UUID +
-
-                " INNER JOIN " +
                 PatientDatabase.CONCEPT_NAMES_TABLE_NAME +" group_names " +
                 "ON chart." + ChartColumns.GROUP_UUID + "=" +
                 "group_names." + ChartColumns.CONCEPT_UUID +
+
+                " LEFT JOIN " +
+                PatientDatabase.OBSERVATIONS_TABLE_NAME +" obs " +
+                "ON chart." + ChartColumns.CONCEPT_UUID + "=" +
+                "obs." + ChartColumns.CONCEPT_UUID + " AND " +
+                "(obs." + ChartColumns.PATIENT_UUID + "=? OR " + // 2nd selection arg
+                "obs." + ChartColumns.PATIENT_UUID + " IS NULL)" +
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
@@ -203,15 +207,15 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
                 "value_names." + ChartColumns.CONCEPT_UUID +
                 " AND value_names." + ChartColumns.LOCALE + "=?" + // 1st selection arg
 
-//                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " + // 2nd selection arg
-                "WHERE obs." + ChartColumns.PATIENT_UUID + "=? AND " + // 3rd selection arg
-                "names." + ChartColumns.LOCALE + "=? AND " + // 4th selection arg
-                "group_names." + ChartColumns.LOCALE + "=?" + // 5th selection arg
+//                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " +
+                " WHERE " +
+                "names." + ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
+                "group_names." + ChartColumns.LOCALE + "=?" + // 4th selection arg
 
                 " ORDER BY chart." + ChartColumns.CHART_ROW + ", obs." + ChartColumns.ENCOUNTER_TIME
                 ;
 
-        return db.rawQuery(query, new String[]{locale, patientUuid, locale, locale});
+        return db.rawQuery(query, new String[]{patientUuid, locale, locale, locale});
     }
 
     private Cursor queryEmptyLocalizedChart(Uri uri, SQLiteDatabase db) {
@@ -370,6 +374,102 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         // Send broadcast to registered ContentObservers, to refresh UI.
         contentResolver.notifyChange(uri, null, false);
         return result;
+    }
+
+    @Override
+    public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+                          ContentValues[] allValues) {
+        if (allValues.length == 0) {
+            return 0;
+        }
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
+        assert db != null;
+        final int match = sUriMatcher.match(uri);
+        String tableName;
+        switch (match) {
+            case OBSERVATIONS:
+                tableName = PatientDatabase.OBSERVATIONS_TABLE_NAME;
+                break;
+            case CONCEPT_NAMES:
+                tableName = PatientDatabase.CONCEPT_NAMES_TABLE_NAME;
+                break;
+            case CONCEPTS:
+                tableName = PatientDatabase.CONCEPTS_TABLE_NAME;
+                break;
+            case CHART_STRUCTURE:
+                tableName = PatientDatabase.CHARTS_TABLE_NAME;
+                break;
+            case EMPTY_LOCALIZED_CHART:
+                throw new UnsupportedOperationException("Localized charts are query only");
+            case LOCALIZED_CHART:
+                throw new UnsupportedOperationException("Localized observations are query only");
+            case MOST_RECENT_CHART:
+                throw new UnsupportedOperationException("Most recent chart is query only");
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        int numValues = allValues.length;
+        ContentValues first = allValues[0];
+        String [] columns = first.keySet().toArray(new String[first.size()]);
+        SQLiteStatement statement = makeInsertStatement(db, tableName, columns);
+        db.beginTransaction();
+        Object [] bindings = new Object[first.size()];
+        for (ContentValues values : allValues) {
+            statement.clearBindings();
+            if (values.size() != first.size()) {
+                throw new AssertionError();
+            }
+            for (int i=0; i< bindings.length; i++) {
+                Object value = values.get(columns[i]);
+                // This isn't super safe, but is in our context.
+                int bindingIndex = i + 1;
+                if (value instanceof String) {
+                    statement.bindString(bindingIndex, (String) value);
+                } else if ((value instanceof Long) || value instanceof Integer) {
+                    statement.bindLong(bindingIndex, ((Number) value).longValue());
+                } else if ((value instanceof Double) || value instanceof Float) {
+                    statement.bindDouble(bindingIndex, ((Number) value).doubleValue());
+                }
+                bindings[i] = value;
+            }
+            statement.executeInsert();
+        }
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        // Send broadcast to registered ContentObservers, to refresh UI.
+        contentResolver.notifyChange(uri, null, false);
+        return numValues;
+    }
+
+    private SQLiteStatement makeInsertStatement(SQLiteDatabase db, String table,
+                                                String [] columns) {
+        // I kind of hoped this would be provided by SQLiteDatase or DatabaseHelper,
+        // But it doesn't seem to be. Innards copied from SQLiteDabase.insertWithOnConflict
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT OR REPLACE ");
+        sql.append(" INTO ");
+        sql.append(table);
+        sql.append('(');
+
+        int size = (columns != null && columns.length > 0) ? columns.length : 0;
+        if (size <= 0) {
+            throw new AssertionError();
+        }
+        int i = 0;
+        for (String colName : columns) {
+            sql.append((i > 0) ? "," : "");
+            sql.append(colName);
+            i++;
+        }
+        sql.append(')');
+        sql.append(" VALUES (");
+        for (i = 0; i < size; i++) {
+            sql.append((i > 0) ? ",?" : "?");
+        }
+        sql.append(')');
+
+        return db.compileStatement(sql.toString());
     }
 
     @Override

@@ -1,260 +1,417 @@
 package org.msf.records.location;
 
-import android.content.Context;
-import android.util.Log;
+import android.content.res.Resources;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.msf.records.events.CreatePatientSucceededEvent;
+import javax.annotation.Nullable;
+
+import org.msf.records.R;
 import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 
-import de.greenrobot.event.EventBus;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
  * locale.
- *
- * LocationTree should be used as a singleton.
  */
-public class LocationTree implements Comparable<LocationTree> {
-    private final String DEFAULT_LOCALE = "en";
+public final class LocationTree {
 
-    private LocationTree mParent;
-
-    // Keep an index of all children to make grabbing an arbitrary location straightforward.
-    private static HashMap<String, LocationTree> mAllChildren = new HashMap<String, LocationTree>();
-    private TreeMap<String, LocationTree> mChildren;
-    private Location mLocation;
-    private String mSortLocale = DEFAULT_LOCALE;
-    private int mPatientCount;
-
-    private static final String TAG = "LocationTree";
+	// TODO(rjlothian): Fix all code that depends on having a singleton and rRemove this.
+	@Nullable public static LocationTree SINGLETON_INSTANCE;
 
     public static final int FACILITY_DEPTH = 0;
     public static final int ZONE_DEPTH = 1;
     public static final int TENT_DEPTH = 2;
     public static final int BED_DEPTH = 3;
 
-    public static void clearTreeIndex() {
-        mAllChildren.clear();
+	public final class LocationSubtree {
+		private Location mLocation;
+	    private int mPatientCount;
+	    private TreeMap<String, LocationSubtree> mChildren = new TreeMap<>();
+
+	    public Location getLocation() {
+	    	return mLocation;
+	    }
+
+	    public int getPatientCount() {
+	        int patientCount = mPatientCount;
+	        for (LocationSubtree child : mChildren.values()) {
+	            patientCount += child.getPatientCount();
+	        }
+	        return patientCount;
+	    }
+
+	    public List<LocationSubtree> thisAndAllDescendents() {
+	    	List<LocationSubtree> result = new ArrayList<>();
+	    	addToCollectionRecursively(result);
+	    	return result;
+	    }
+
+	    private void addToCollectionRecursively(Collection<LocationSubtree> collection) {
+	    	collection.add(this);
+	    	for (LocationSubtree child : mChildren.values()) {
+	    		child.addToCollectionRecursively(collection);
+	    	}
+	    }
+
+	    @Override
+	    public String toString() {
+            String mLocale = DEFAULT_LOCALE;
+            if (mLocation == null
+	        		|| mLocation.names == null
+	        		|| mLocation.names.get(mLocale) == null) {
+	            // This location is null, try to recover.
+	            int depth = getDepthOfSubtree(this);
+	            switch (depth) {
+	                case ZONE_DEPTH:
+	                    return mResources.getString(R.string.unknown_zone);
+	                case TENT_DEPTH:
+	                	LocationSubtree parent = getParent(this);
+	                    if (parent == null) {
+	                        return mResources.getString(R.string.unknown_tent);
+	                    } else {
+	                        return mResources.getString(
+	                                R.string.unknown_tent_in_zone,
+	                                parent.toString());
+	                    }
+	                default:
+	                    return mResources.getString(R.string.unknown_location);
+	            }
+	        }
+
+	        return mLocation.names.get(mLocale);
+	    }
+	}
+
+    private static final String DEFAULT_LOCALE = "en";
+
+    private final Resources mResources;
+    private final Map<String, LocationSubtree> mUuidToSubtree = new HashMap<>();
+    private final LocationSubtree mTreeRoot;
+
+    /**
+     * @param patientCountByUuid gives the number of patients at each location, specified by UUID.
+     *        This excludes any patients contained with a smaller location within that location.
+     */
+    public LocationTree(
+    		Resources resources,
+    		Collection<Location> locations,
+    	    Map<String, Integer> patientCountByUuid) {
+
+    	mResources = resources;
+    	Location root = null;
+    	Multimap<String, Location> locationByParentUuid = ArrayListMultimap.create();
+    	for (Location location : locations) {
+    		if (location.parent_uuid == null) {
+    			Preconditions.checkArgument(root == null, "Should only have one root (parent_uuid null) element");
+    			root = location;
+    		}
+			locationByParentUuid.put(location.parent_uuid, location);
+    	}
+    	Preconditions.checkArgument(root != null, "Should have a root (parent_uuid null) element");
+
+    	mTreeRoot = new LocationSubtree();
+    	mTreeRoot.mLocation = root;
+    	mTreeRoot.mPatientCount = getOrZeroIfMissing(patientCountByUuid, root.uuid);
+
+
+        // Recursively add children to the tree.
+        addChildren(mTreeRoot, locationByParentUuid, patientCountByUuid);
+
+        populateMap(mTreeRoot, mUuidToSubtree);
     }
 
-    public static void putTreeIndex(String uuid, LocationTree locationTree) {
-        mAllChildren.put(uuid, locationTree);
+    public LocationSubtree getRoot() {
+    	return mTreeRoot;
     }
 
-    public static LocationTree getLocationForUuid(String uuid) {
-        return mAllChildren.get(uuid);
+    private static void populateMap(LocationSubtree subtree, Map<String, LocationSubtree> uuidToSubtree) {
+    	uuidToSubtree.put(subtree.mLocation.uuid, subtree);
+    	for (LocationSubtree child : subtree.mChildren.values()) {
+    		populateMap(child, uuidToSubtree);
+    	}
     }
 
-    public static LocationTree getZoneForUuid(String uuid) {
-        LocationTree locationTree = getLocationForUuid(uuid);
-        if (locationTree == null) {
+    @Nullable private LocationSubtree getParent(LocationSubtree subtree) {
+    	return mUuidToSubtree.get(subtree.mLocation.parent_uuid);
+    }
+
+    private void addChildren(
+    		LocationSubtree root,
+    		Multimap<String, Location> locationByParentUuid,
+    	    Map<String, Integer> patientCountByUuid) {
+        for (Location location : locationByParentUuid.get(root.mLocation.uuid)) {
+            LocationSubtree subtree = new LocationSubtree();
+            subtree.mLocation = location;
+            subtree.mPatientCount = getOrZeroIfMissing(patientCountByUuid, location.uuid);
+            root.mChildren.put(location.uuid, subtree);
+            addChildren(subtree, locationByParentUuid, patientCountByUuid);
+        }
+    }
+
+    @Nullable public LocationSubtree getLocationByUuid(String uuid) {
+    	return mUuidToSubtree.get(uuid);
+    }
+
+    /**
+     * Returns the zone containing the given location UUID, or null if no such zone exists.
+     */
+    @Nullable public LocationSubtree getZoneForUuid(String uuid) {
+        LocationSubtree locationSubtree = mUuidToSubtree.get(uuid);
+        if (locationSubtree == null) {
             return null;
         }
-
-        return locationTree.getAncestorOrThisWithDepth(ZONE_DEPTH);
+        return getAncestorOrThisWithDepth(locationSubtree, ZONE_DEPTH);
     }
 
-    public static LocationTree getTentForUuid(String uuid) {
-        LocationTree locationTree = getLocationForUuid(uuid);
-        if (locationTree == null) {
+    /**
+     * Returns the tent containing the given location UUID, or null if no such tent exists.
+     */
+    @Nullable public LocationSubtree getTentForUuid(String uuid) {
+    	LocationSubtree locationSubtree = mUuidToSubtree.get(uuid);
+        if (locationSubtree == null) {
             return null;
         }
-
-        return locationTree.getAncestorOrThisWithDepth(TENT_DEPTH);
+        return getAncestorOrThisWithDepth(locationSubtree, TENT_DEPTH);
     }
 
-    // Limit location tree construction to this package.
-    LocationTree(LocationTree parent, Location location, int patientCount) {
-        mParent = parent;
-        mLocation = location;
-        mChildren = new TreeMap<String, LocationTree>();
-        mPatientCount = patientCount;
-        EventBus.getDefault().register(this);
+    @Nullable private LocationSubtree getAncestorOrThisWithDepth(LocationSubtree startItem, int depth) {
+    	Deque<LocationSubtree> ancestorStack = new ArrayDeque<>();
+    	@Nullable LocationSubtree currentItem = startItem;
+    	while (currentItem != null) {
+    		ancestorStack.push(currentItem);
+    		currentItem = mUuidToSubtree.get(currentItem.mLocation.parent_uuid);
+    	}
+    	int currentDepth = 0;
+    	while (!ancestorStack.isEmpty()) {
+    		currentItem = ancestorStack.pop();
+    		if (currentDepth == depth) {
+    			return currentItem;
+    		}
+    		currentDepth++;
+    	}
+    	return null;
+	}
+
+    /**
+     * Returns the whole tree as a map from parent UUID to subtree.
+     */
+    public TreeMap<String, LocationSubtree> getChildren() {
+        TreeMap<String, LocationSubtree> result = new TreeMap<>();
+        result.putAll(mUuidToSubtree);
+        return result;
     }
 
-    public int getPatientCount() {
-        int patientCount = mPatientCount;
-        for (LocationTree child : mChildren.values()) {
-            patientCount += child.getPatientCount();
+    /**
+     * Returns a list of all locations with the given depth in the tree, ordered by the
+     * standard location ordering.
+     */
+    public List<LocationSubtree> getLocationsForDepth(int depth) {
+        ImmutableList<LocationSubtree> currentLevel = ImmutableList.of(mTreeRoot);
+        for (int currentDepth = 0; currentDepth < depth; currentDepth++) {
+        	ImmutableList.Builder<LocationSubtree> newLevel = ImmutableList.builder();
+        	for (LocationSubtree item : currentLevel) {
+        		newLevel.addAll(item.mChildren.values());
+        	}
+        	currentLevel = newLevel.build();
         }
-        return patientCount;
+        return Ordering.from(new SubtreeComparator()).sortedCopy(currentLevel);
     }
 
-    public LocationTree getAncestorOrThisWithDepth(int depth) {
-        int myDepth = getDepth();
-        int remainingDistance = myDepth - depth;
-
-        LocationTree ancestor = this;
-        while (remainingDistance > 0) {
-            ancestor = ancestor.getParent();
-            remainingDistance--;
-        }
-
-        return ancestor;
+    /**
+     * Returns a list of the tents in the tree, ordered by the standard location ordering.
+     */
+    public List<LocationSubtree> getTents() {
+        return getLocationsForDepth(TENT_DEPTH);
     }
 
-    private int getDepth() {
-        LocationTree tree = this;
-        int depth = 0;
-        while (tree.getParent() != null) {
-            tree = tree.getParent();
-            depth++;
-        }
-        return depth;
+    /**
+     * Returns a list of the zones in the tree, ordered by {@link Zone#compareTo(Location, Location)}.
+     */
+    public List<LocationSubtree> getZones() {
+        return getLocationsForDepth(ZONE_DEPTH);
     }
 
-    public LocationTree getParent() {
-        return mParent;
+    private int getDepthOfSubtree(LocationSubtree subtree) {
+    	int depth = 0;
+    	for (;;) {
+    		subtree = mUuidToSubtree.get(subtree.mLocation.parent_uuid);
+    		if (subtree == null) {
+    			return depth;
+    		}
+    		depth++;
+    	}
     }
 
-    public Location getLocation() {
-        return mLocation;
+//    @Override
+//    public String toString() {
+//        if (mLocation == null || mLocation.names == null ||
+//                !mLocation.names.containsKey(mSortLocale)) {
+//            Resources resources = App.getInstance().getResources();
+//
+//            // This location is null, try to recover.
+//            int depth = getDepth();
+//            switch (depth) {
+//                case ZONE_DEPTH:
+//                    return resources.getString(R.string.unknown_zone);
+//                case TENT_DEPTH:
+//                    LocationTree parent = getParent();
+//                    if (parent == null) {
+//                        return resources.getString(R.string.unknown_tent);
+//                    } else {
+//                        return resources.getString(
+//                                R.string.unknown_tent_in_zone, getParent().toString());
+//                    }
+//                default:
+//                    return resources.getString(R.string.unknown_location);
+//            }
+//        }
+//
+//        return mLocation.names.get(mSortLocale);
+//    }
+
+    private List<LocationSubtree> getAncestorsStartingFromRoot(LocationSubtree node) {
+		List<LocationSubtree> result = new ArrayList<>();
+		LocationSubtree current = node;
+		while (current != null) {
+			result.add(current);
+			current = mUuidToSubtree.get(current.mLocation.parent_uuid);
+		}
+		Collections.reverse(result);
+		return result;
     }
 
-    public void setSortLocale(String sortLocale) {
-        mSortLocale = sortLocale;
-    }
-
-    public TreeMap<String, LocationTree> getChildren() {
-        return mChildren;
-    }
-
-    public TreeSet<LocationTree> getLocationsForDepth(int depth) {
-        TreeSet<LocationTree> locations = new TreeSet<LocationTree>();
-        if (depth == 0) {
-            locations.add(this);
-            return locations;
-        }
-
-        for (LocationTree childLocation : mChildren.values()) {
-            locations.addAll(childLocation.getLocationsForDepth(depth - 1));
-        }
-
-        return locations;
-    }
-
-    public static LocationTree[] getTents(Context context, LocationTree root) {
-        return getLocationArrayForDepth(context, root, TENT_DEPTH);
-    }
-
-    public static LocationTree[] getZones(Context context, LocationTree root) {
-        return getLocationArrayForDepth(context, root, ZONE_DEPTH);
-    }
-
-    private static LocationTree[] getLocationArrayForDepth(
-            Context context, LocationTree root, int depth) {
-        TreeSet<LocationTree> locationTrees;
-        if (root == null) {
-            locationTrees = new TreeSet<LocationTree>();
-        } else {
-            locationTrees = root.getLocationsForDepth(depth);
-        }
-
-        LocationTree[] locationTreeArray = new LocationTree[locationTrees.size()];
-        locationTrees.toArray(locationTreeArray);
-        return locationTreeArray;
-    }
-
-    @Override
-    public String toString() {
-        if (!mLocation.names.containsKey(mSortLocale)) {
-            return "";
-        }
-
-        return mLocation.names.get(mSortLocale);
-    }
-
-    @Override
-    public int compareTo(LocationTree another) {
-        // Short-circuit -- if these two LocationTrees are the same object, we're done.
-        if (this == another) {
-            return 0;
-        }
-
-        // On the off-chance that the other location is at a different depth, prefer
-        // locations at a smaller depth (facility > zone > tent > bed).
-        Integer depth = getDepth();
-        Integer anotherDepth = another.getDepth();
-        int depthComparison = depth.compareTo(anotherDepth);
-        if (depthComparison != 0) {
-            return depthComparison;
-        }
-
-        // Zone order takes precedence, but a value of 0 means that one or both locations
-        // is not a zone.
-        int zoneComparison = Zone.compareTo(getLocation(), another.getLocation());
-        if (zoneComparison != 0) {
-            return zoneComparison;
-        }
-
-        // Parent order is the next precedent (e.g. tents should be sorted by zone).
-        if (getParent() != null && another.getParent() != null) {
-            int parentComparison = getParent().compareTo(another.getParent());
-            if (parentComparison != 0) {
-                return parentComparison;
+    private final class SubtreeComparator implements Comparator<LocationSubtree> {
+        /**
+         * Compares two objects that may each be Integer or String.  All Integers
+         * sort before all Strings; Integers compare according to their numeric
+         * value and Strings compare according to their string value.
+         */
+        private int compareObjects(Object a, Object b) {
+            if (a instanceof Integer && b instanceof String) return -1;
+            if (a instanceof String && b instanceof Integer) return 1;
+            if (a instanceof Integer && b instanceof Integer) {
+                return (Integer) a - (Integer) b;
             }
+            if (a instanceof String && b instanceof String) {
+                return ((String) a).compareTo((String) b);
+            }
+            throw new IllegalArgumentException("arguments must be Numbers or Strings");
         }
 
-        // If neither location is a zone and there is no name for one or both locations in this
-        // locale, return equal as we don't know how to compare them.
-        if (!mLocation.names.containsKey(mSortLocale) ||
-                !another.getLocation().names.containsKey(mSortLocale)) {
+        /**
+         * Compares two lists lexicographically by element, just like Python does.
+         */
+        private int compareLists(List<Object> a, List<Object> b) {
+            int i;
+            for (i = 0; i < a.size() && i < b.size(); i++) {
+                int compare = compareObjects(a.get(i), b.get(i));
+                if (compare != 0) return compare;
+            }
+            if (i < a.size()) return -1;
+            if (i < b.size()) return 1;
             return 0;
         }
 
-        // Compare using the current locale.
-        return mLocation.names.get(mSortLocale).compareTo(
-                another.getLocation().names.get(mSortLocale));
-    }
-
-    public LocationTree[] getSubtreeLocationArray() {
-        TreeMap<String, LocationTree> subtreeLocations = getAllSubtreeLocations();
-        LocationTree[] locationArray = new LocationTree[subtreeLocations.size()];
-        subtreeLocations.values().toArray(locationArray);
-        return locationArray;
-    }
-
-    public TreeMap<String, LocationTree> getAllSubtreeLocations() {
-        TreeMap<String, LocationTree> subtreeLocations = new TreeMap<String, LocationTree>();
-        subtreeLocations.put(getLocation().uuid, this);
-        for (LocationTree subtree : getChildren().values()) {
-            subtreeLocations.putAll(subtree.getAllSubtreeLocations());
+        /**
+         * Turns a string into an array of Numbers (from sequences of digits) and
+         * Strings (from sequences of letters).  Other characters are ignored.
+         */
+        private List<Object> getParts(String str) {
+            Pattern numberOrWord = Pattern.compile("[0-9]+|[a-zA-Z]+");
+            Matcher matcher = numberOrWord.matcher(str == null ? "" : str);
+            List<Object> parts = new ArrayList<Object>();
+            for (int pos = 0; matcher.find(pos); pos = matcher.end()) {
+                String part = matcher.group();
+                parts.add(part.matches("\\d.*") ? Integer.valueOf(part) : part);
+            }
+            return parts;
         }
-        return subtreeLocations;
-    }
 
-    public synchronized void onEvent(CreatePatientSucceededEvent event) {
-        // TODO(akalachman): Re-enable once this is async.
-        // rebuild();
+    	@Override
+    	public int compare(LocationSubtree lhs, LocationSubtree rhs) {
+    		if (lhs == rhs) return 0;
+
+    		List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
+    		List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
+    		for (int i = 0;; i++) {
+    			if (i >= pathA.size() && i >= pathB.size()) {
+    				return 0;
+    			} else if (i >= pathA.size()) {
+    				return -1;
+    			} else if (i >= pathB.size()) {
+    				return 1;
+    			} else {
+    				LocationSubtree subtreeA = pathA.get(i);
+    				LocationSubtree subtreeB = pathB.get(i);
+
+    				int compare;
+	    			if (i == ZONE_DEPTH) {
+	    				compare = Zone.compareTo(subtreeA.getLocation(), subtreeB.getLocation());
+	    			} else {
+                        String nameA = subtreeA.mLocation.names.get(DEFAULT_LOCALE);
+                        String nameB = subtreeB.mLocation.names.get(DEFAULT_LOCALE);
+                        compare = compareLists(getParts(nameA), getParts(nameB));
+	    			}
+	    			if (compare != 0) {
+	    				return compare;
+	    			}
+    			}
+    		}
+    	}
     }
 
     // TODO(akalachman): Cache this or get rid of it once data model is refactored.
-    public static String getLocationSortClause(final String fieldName) {
-        if (mAllChildren.size() == 0) {
+    public String getLocationSortClause(String fieldName) {
+    	if (mUuidToSubtree.isEmpty()) {
             return "";
         }
 
-        Collection<LocationTree> allLocations = mAllChildren.values();
-        TreeSet<LocationTree> sortedLocations = new TreeSet<LocationTree>();
+        Collection<LocationSubtree> allLocations = mUuidToSubtree.values();
+        // NOCOMMIT - check comparator
+        TreeSet<LocationSubtree> sortedLocations = new TreeSet<>(new SubtreeComparator());
         sortedLocations.addAll(allLocations);
 
         StringBuilder sb = new StringBuilder(" CASE ");
         sb.append(fieldName);
         int i = 0;
-        for (LocationTree tree : sortedLocations) {
+        for (LocationSubtree subtree : sortedLocations) {
             sb.append(" WHEN '");
-            sb.append(tree.getLocation().uuid);
+            sb.append(subtree.getLocation().uuid);
             sb.append("' THEN ");
             sb.append(i);
             i++;
         }
         sb.append(" END ");
         return sb.toString();
+    }
+
+    /**
+     * Returns {@code map.get(key)} or 0 if no entry for that key exists.
+     */
+    private static <T> int getOrZeroIfMissing(Map<T, Integer> map, T key) {
+    	if (map.containsKey(key)) {
+    		return map.get(key);
+    	} else {
+    		return 0;
+    	}
     }
 }

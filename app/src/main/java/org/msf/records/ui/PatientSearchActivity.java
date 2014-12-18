@@ -14,13 +14,20 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
+import org.msf.records.ui.chart.PatientChartActivity;
+import org.msf.records.updater.UpdateManager;
+
+import javax.inject.Inject;
 
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
-public abstract class PatientSearchActivity extends BaseActivity
+public abstract class PatientSearchActivity extends BaseLoggedInActivity
         implements PatientListFragment.Callbacks {
+
+    @Inject UpdateManager mUpdateManager;
+
     private SearchView mSearchView;
     private OnSearchListener mSearchListener;
     private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
@@ -32,8 +39,11 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
+
+        App.getInstance().inject(this);
+
         updateAvailableSnackbar = Snackbar.with(this)
                 .text(getString(R.string.snackbar_update_available))
                 .actionLabel(getString(R.string.snackbar_action_download))
@@ -98,18 +108,18 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onResumeImpl() {
+        super.onResumeImpl();
 
-        App.getUpdateManager().checkForUpdate();
+        // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
 
     @Override
-    protected void onPause() {
+    protected void onPauseImpl() {
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar.dismiss();
 
-        super.onPause();
+        super.onPauseImpl();
     }
 
     /**
@@ -122,7 +132,7 @@ public abstract class PatientSearchActivity extends BaseActivity
 
                     @Override
                     public void onActionClicked() {
-                        App.getUpdateManager().downloadUpdate(event.mUpdateInfo);
+                        mUpdateManager.downloadUpdate(event.updateInfo);
                     }
                 });
         if (updateAvailableSnackbar.isDismissed()) {
@@ -141,7 +151,7 @@ public abstract class PatientSearchActivity extends BaseActivity
 
                     @Override
                     public void onActionClicked() {
-                        App.getUpdateManager().installUpdate(event.mUpdateInfo);
+                        mUpdateManager.installUpdate(event.updateInfo);
                     }
                 });
         if (updateDownloadedSnackbar.isDismissed()) {

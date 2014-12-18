@@ -7,9 +7,9 @@ import org.msf.records.updater.AvailableUpdateInfo;
  */
 public final class UpdateAvailableEvent {
 
-    public final AvailableUpdateInfo mUpdateInfo;
+    public final AvailableUpdateInfo updateInfo;
 
     public UpdateAvailableEvent(AvailableUpdateInfo updateInfo) {
-        mUpdateInfo = updateInfo;
+        this.updateInfo = updateInfo;
     }
 }

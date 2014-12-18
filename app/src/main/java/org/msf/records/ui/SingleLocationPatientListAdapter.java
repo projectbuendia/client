@@ -5,12 +5,9 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Space;
-import android.widget.TextView;
 
 import org.msf.records.R;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.utils.PatientCountDisplay;
 
 /**
  * SingleLocationPatientListAdapter is an ExpandablePatientListAdapter that hides its group

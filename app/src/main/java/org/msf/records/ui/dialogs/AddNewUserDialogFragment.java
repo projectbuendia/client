@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -39,11 +40,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -51,23 +47,63 @@ public class AddNewUserDialogFragment extends DialogFragment {
         ButterKnife.inject(this, fragment);
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity())
+                .setCancelable(false) // Disable auto-cancel.
                 .setTitle(getResources().getString(R.string.title_add_new_user))
-                .setPositiveButton(
-                        getResources().getString(R.string.ok),
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                App.getUserManager().addUser(NewUser.create(
-                                        mUsername.getText().toString(),
-                                        mGivenName.getText().toString(),
-                                        mFamilyName.getText().toString()
-                                ));
-                            }
-                        })
+                .setPositiveButton(getResources().getString(R.string.ok), null)
                 .setNegativeButton(getResources().getString(R.string.cancel), null)
                 .setView(fragment);
 
-        return dialogBuilder.create();
+        final AlertDialog dialog = dialogBuilder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                        .setOnClickListener(
+                                new View.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(View view) {
+                                        // Validate the user.
+                                        if (mUsername.getText() == null
+                                                || mUsername.getText().toString().equals("")) {
+                                            Toast.makeText(
+                                                    getActivity(),
+                                                    "Username must not be null",
+                                                    Toast.LENGTH_LONG).show();
+                                            mUsername.invalidate();
+                                            return;
+                                        }
+                                        if (mGivenName.getText() == null
+                                                || mGivenName.getText().toString().equals("")) {
+                                            Toast.makeText(
+                                                    getActivity(),
+                                                    "Given name must not be null",
+                                                    Toast.LENGTH_LONG).show();
+                                            mGivenName.invalidate();
+                                            return;
+                                        }
+                                        if (mFamilyName.getText() == null
+                                                || mFamilyName.getText().toString().equals("")) {
+                                            Toast.makeText(
+                                                    getActivity(),
+                                                    "Family name must not be null",
+                                                    Toast.LENGTH_LONG).show();
+                                            mFamilyName.invalidate();
+                                            return;
+                                        }
+
+                                        App.getUserManager().addUser(NewUser.create(
+                                                mUsername.getText().toString(),
+                                                mGivenName.getText().toString(),
+                                                mFamilyName.getText().toString()
+                                        ));
+                                        dialog.dismiss();
+                                    }
+                                });
+            }
+        });
+
+        return dialog;
     }
 }

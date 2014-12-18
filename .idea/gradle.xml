@@ -3,9 +3,9 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="distributionType" value="WRAPPED" />
+        <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleHome" value="$APPLICATION_HOME_DIR$/plugins/gradle" />
+        <option name="gradleHome" value="$APPLICATION_HOME_DIR$/gradle/gradle-2.2.1" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
@@ -14,7 +14,6 @@
             <option value="$PROJECT_DIR$/autofittextview" />
             <option value="$PROJECT_DIR$/odkcollect" />
             <option value="$PROJECT_DIR$/snackbar" />
-            <option value="$PROJECT_DIR$/viewserver" />
           </set>
         </option>
       </GradleProjectSettings>

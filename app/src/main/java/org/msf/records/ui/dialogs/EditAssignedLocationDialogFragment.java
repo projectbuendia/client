@@ -12,7 +12,7 @@ import android.view.View;
 import org.msf.records.R;
 import org.msf.records.events.PatientLocationEditedEvent;
 import org.msf.records.model.Location2;
-import org.msf.records.view.InstantAutoCompleteTextView;
+import org.msf.records.widget.InstantAutoCompleteTextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -75,9 +75,9 @@ public class EditAssignedLocationDialogFragment extends DialogFragment {
         View fragment = mInflater.inflate(R.layout.dialog_fragment_edit_assigned_location, null);
         ButterKnife.inject(this, fragment);
 
-        mZone.setText(mLocation.getZone());
-        mTent.setText(mLocation.getTent());
-        mBed.setText(mLocation.getBed());
+        mZone.setText(mLocation.zone);;
+        mTent.setText(mLocation.tent);
+        mBed.setText(mLocation.bed);
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity())
                 .setTitle(getResources().getString(R.string.title_edit_patient_location))

@@ -7,7 +7,7 @@
     <EditTextPreference
         android:key="openmrs_root_url"
         android:title="@string/pref_title_openmrs_root_url"
-        android:defaultValue="http://104.155.15.141:8080/openmrs/ws/rest/v1/projectbuendia"
+        android:defaultValue="@string/openmrs_root_url_default"
         android:selectAllOnFocus="true"
         android:inputType="textCapWords"
         android:capitalize="words"
@@ -18,7 +18,7 @@
     <EditTextPreference
         android:key="openmrs_user"
         android:title="OpenMRS username"
-        android:defaultValue="admin"
+        android:defaultValue="@string/openmrs_user_default"
         android:selectAllOnFocus="true"
         android:inputType="textCapWords"
         android:capitalize="none"
@@ -29,7 +29,7 @@
     <EditTextPreference
         android:key="openmrs_password"
         android:title="OpenMRS password"
-        android:defaultValue="your-password-here"
+        android:defaultValue="@string/openmrs_password_default"
         android:selectAllOnFocus="true"
         android:inputType="textPassword"
         android:capitalize="none"
@@ -42,6 +42,13 @@
         android:key="keep_form_instances_locally"
         android:title="@string/pref_title_store_form_instances"
         android:summary="@string/pref_desc_store_form_instances"
-        android:defaultValue="false" />
+        android:defaultValue="@bool/keep_form_instances_locally_default" />
+
+    <!-- Whether to instantly update the local cache when an xform is submitted locally -->
+    <CheckBoxPreference
+        android:key="xform_update_client_cache"
+        android:title="@string/pref_title_xform_update_client_cache"
+        android:summary="@string/pref_desc_xform_update_client_cache"
+        android:defaultValue="@bool/xform_update_client_cache" />
 
 </PreferenceScreen>

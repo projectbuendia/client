@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
-import android.util.Log;
 import android.widget.FilterQueryProvider;
 
 import org.msf.records.sync.PatientProjection;
@@ -24,8 +23,10 @@ public class FilterQueryProviderFactory {
     private String mSortClause =
             PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc";
 
-    public FilterQueryProviderFactory() {
-        // Intentionally blank.
+    private final Context mContext;
+
+    public FilterQueryProviderFactory(Context context) {
+    	mContext = context.getApplicationContext();
     }
 
     public FilterQueryProviderFactory setUri(Uri uri) {
@@ -43,10 +44,9 @@ public class FilterQueryProviderFactory {
         return this;
     }
 
-    public CursorLoader getCursorLoader(
-            final Context context, final SimpleSelectionFilter filter, CharSequence constraint) {
+    public CursorLoader getCursorLoader(final SimpleSelectionFilter filter, CharSequence constraint) {
         return new CursorLoader(
-                context,
+        		mContext,
                 mUri,
                 mProjection,
                 filter.getSelectionString(),
@@ -54,13 +54,12 @@ public class FilterQueryProviderFactory {
                 mSortClause);
     }
 
-    public FilterQueryProvider getFilterQueryProvider(
-            final Context context, final SimpleSelectionFilter filter) {
+    public FilterQueryProvider getFilterQueryProvider(final SimpleSelectionFilter filter) {
         return new FilterQueryProvider() {
 
             @Override
             public Cursor runQuery(CharSequence constraint) {
-                return getCursorLoader(context, filter, constraint).loadInBackground();
+                return getCursorLoader(filter, constraint).loadInBackground();
             }
         };
     }

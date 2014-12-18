@@ -8,9 +8,9 @@ import org.msf.records.net.model.User;
  */
 public class UserDeletedEvent {
 
-    public final User mUser;
+    public final User user;
 
     public UserDeletedEvent(User user) {
-        mUser = user;
+        this.user = user;
     }
 }

@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Text appearance. -->
+    <!-- Text appearance -->
+
     <style name="TextAppearance.Buendia" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Tiny">
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Small">
@@ -18,16 +23,70 @@
         <item name="android:textSize">32sp</item>
     </style>
 
+    <style name="TextAppearance.Buendia.Huge">
+        <item name="android:textSize">40sp</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Tiny.Inverse">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Small.Inverse">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Medium.Inverse">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Large.Inverse">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearance.Buendia.Huge.Inverse">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <!-- Widgets -->
 
-    <style name="Widget.Buendia" parent="None">
+    <style name="Widget.Buendia" parent="None" />
+
+    <!-- ActionBar -->
+    <style name="Widget.Buendia.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:height">100dp</item>
+        <item name="android:titleTextStyle">@style/TextAppearance.Buendia.Medium.Inverse</item>
+    </style>
+
+    <!-- TextView -->
+    <style name="Widget.Buendia.TextView" parent="android:Widget.Holo.Light.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.Buendia.Large</item>
     </style>
 
     <!-- EditText -->
-    <style name="Widget.Buendia.EditText" parent="Widget.AppCompat.EditText">
+    <style name="Widget.Buendia.EditText" parent="android:Widget.Holo.Light.EditText">
         <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">true</item>
         <item name="android:clickable">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.Buendia.Large</item>
+    </style>
+
+    <!-- Button -->
+    <style name="Widget.Buendia.Button" parent="android:Widget.Holo.Light.Button">
+        <item name="android:textAppearance">@style/TextAppearance.Buendia.Large</item>
+    </style>
+
+    <style name="Widget.Buendia.Button.Colorful" parent="Widget.Buendia.Button">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <!-- Radio Button -->
+    <style
+        name="Widget.Buendia.CompoundButton.RadioButton"
+        parent="android:Widget.Holo.Light.CompoundButton.RadioButton">
+        <item name="android:padding">16dp</item>
+        <item name="android:button">@null</item>
+        <item name="android:background">@drawable/bg_radio_button</item>
+        <item name="android:textAppearance">@style/TextAppearance.Buendia.Large</item>
     </style>
 
     <!-- AutoCompleteTextView -->

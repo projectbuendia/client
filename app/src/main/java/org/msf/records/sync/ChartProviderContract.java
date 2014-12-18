@@ -155,6 +155,11 @@ public class ChartProviderContract {
         public static final String CONCEPT_UUID = "concept_uuid";
 
         /**
+         * The id used to represent the concept in xforms (for client side parsing).
+         * In reality this is the openmrs ID, but the client doesn't need to know that.
+         */
+        public static final String XFORM_ID = "xform_id";
+        /**
          * Type for a concept like numeric, coded, etc.
          */
         public static final String CONCEPT_TYPE = "concept_type";
@@ -195,5 +200,10 @@ public class ChartProviderContract {
          * UUID for a concept representing a group (section) in a chart.
          */
         public static final String GROUP_UUID = "group_uuid";
+        /**
+         * A boolean (0 or 1) column indicating 1 if this is an observation cached from an xform
+         * that has not yet been sent.
+         */
+        public static final String TEMP_CACHE = "temp_cache";
     }
 }

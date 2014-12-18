@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import org.msf.records.BuildConfig;
+
 /**
  * A collection of static variables used in the ContentProvider interface for Patients.
  */
@@ -29,7 +31,7 @@ public class PatientProviderContract {
     /**
      * Content provider authority.
      */
-    public static final String CONTENT_AUTHORITY = "org.msf.records";
+    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.records";
 
     /**
      * Base URI. (content://org.msf.records)
@@ -42,16 +44,6 @@ public class PatientProviderContract {
     static final String PATH_PATIENTS = "patients";
 
     /**
-     * Path component for "zones"-type resources.  Visible for re-use in MsfRecordsProvider.
-     */
-    static final String PATH_PATIENTS_ZONES = "zones";
-
-    /**
-     * Path component for "tents"-type resources. Visible for re-use in MsfRecordsProvider.
-     */
-    static final String PATH_PATIENTS_TENTS = "tents";
-
-    /**
      * Path component for counts of patients per tent. Visible for re-use in MsfRecordsProvider.
      */
     static final String PATH_TENT_PATIENT_COUNTS = "tentpatients";
@@ -62,69 +54,29 @@ public class PatientProviderContract {
     public static final Uri CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS).build();
 
-    public static final Uri CONTENT_URI_PATIENT_ZONES =
-            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_ZONES).build();
-
-    public static final Uri CONTENT_URI_PATIENT_TENTS =
-            BASE_CONTENT_URI.buildUpon().appendPath(PATH_PATIENTS_TENTS).build();
-
     public static final Uri CONTENT_URI_TENT_PATIENT_COUNTS =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_TENT_PATIENT_COUNTS).build();
 
-    /**
-     * Columns supported by "patients" records.
-     */
+    /** Columns supported by "patient" records. */
     public static class PatientColumns implements BaseColumns {
-
-        /**
-         * Patient admission timestamp
-         */
+        /** Patient admission timestamp */
         public static final String COLUMN_NAME_ADMISSION_TIMESTAMP = "admission_timestamp";
-        /**
-         * Patient family name
-         */
+        /** Patient family name */
         public static final String COLUMN_NAME_FAMILY_NAME = "family_name";
-        /**
-         * Patient admission timestamp
-         */
+        /** Patient admission timestamp */
         public static final String COLUMN_NAME_GIVEN_NAME = "given_name";
-        /**
-         * Patient Status
-         */
-        public static final String COLUMN_NAME_STATUS = "status";
-        /**
-         * Patient uuid
-         */
+        /*** Patient UUID */
         public static final String COLUMN_NAME_UUID = "uuid";
-        /**
-         * Patient zone
-         */
-        @Deprecated
-        public static final String COLUMN_NAME_LOCATION_ZONE = "location_zone";
-        /**
-         * Patient tent
-         */
-        @Deprecated
-        public static final String COLUMN_NAME_LOCATION_TENT = "location_tent";
-        /**
-         * Patient location uuid
-         */
+        /** Patient location UUID */
         public static final String COLUMN_NAME_LOCATION_UUID = "location_uuid";
-        /**
-         * Patient count per tent
-         */
-        public static final String COLUMN_NAME_TENT_PATIENT_COUNT = "tent_patient_count";
-        /**
-         * Patient age (years)
-         */
-        public static final String COLUMN_NAME_AGE_YEARS = "age_years";
-        /**
-         * Patient age (months)
-         */
-        public static final String COLUMN_NAME_AGE_MONTHS = "age_months";
-        /**
-         * Patient gender
-         */
+        /** Patient birthdate (yyyy-mm-dd) */
+        public static final String COLUMN_NAME_BIRTHDATE = "birthdate";
+        /** Patient gender */
         public static final String COLUMN_NAME_GENDER = "gender";
+
+        // TODO(kpy): The following column does not exist in the patients table;
+        // it is used to support queries to /tentpatients/.  Clean this up.
+        /** Patient count per tent */
+        public static final String COLUMN_NAME_TENT_PATIENT_COUNT = "tent_patient_count";
     }
 }

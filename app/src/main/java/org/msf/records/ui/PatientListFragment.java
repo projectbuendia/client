@@ -15,6 +15,8 @@ import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.CreatePatientSucceededEvent;
@@ -27,7 +29,6 @@ import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationManager;
-import org.msf.records.model.Location;
 import org.msf.records.location.LocationTree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
@@ -48,7 +49,6 @@ public class PatientListFragment extends ProgressFragment implements
         SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
-    private static final String ITEM_LIST_KEY = "ITEM_LIST_KEY";
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -60,6 +60,9 @@ public class PatientListFragment extends ProgressFragment implements
      * The id to identify which Cursor is returned
      */
     private static final int LOADER_LIST_ID = 0;
+
+    @Inject LocationManager mLocationManager;
+    @Inject SyncManager mSyncManager;
 
     /**
      * The fragment's current callback object, which is notified of list item
@@ -79,32 +82,26 @@ public class PatientListFragment extends ProgressFragment implements
     private SwipeRefreshLayout mSwipeToRefresh;
 
     // TODO(akalachman): Figure out how to break reliance on this cursor--we already have the info.
-    private FilterQueryProviderFactory mFactory =
-            new FilterQueryProviderFactory().setUri(
-                    PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS)
-            .setSortClause(LocationTree.getLocationSortClause(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
-
+    private FilterQueryProviderFactory mFactory;
 
     private boolean isRefreshing;
 
     String mFilterQueryTerm = "";
 
     SimpleSelectionFilter mFilter;
-    private static LocationTree mRoot = null;
+    private LocationTree mLocationTree;
 
     public void filterBy(SimpleSelectionFilter filter) {
         // Tack on a location filter to the filter to show only known locations.
-        if (mRoot == null || mRoot.getLocation() == null) {
+        if (mLocationTree == null || mLocationTree.getRoot().getLocation() == null) {
             mFilter = filter;
         } else {
             // Tack on a location filter to the filter to show only known locations.
-            mFilter = new FilterGroup(new LocationUuidFilter(mRoot.getLocation().uuid), filter);
+            mFilter = new FilterGroup(new LocationUuidFilter(mLocationTree.getRoot()), filter);
         }
 
         mPatientAdapter.setSelectionFilter(mFilter);
-        mPatientAdapter.setFilterQueryProvider(
-                mFactory.getFilterQueryProvider(getActivity(), filter));
+        mPatientAdapter.setFilterQueryProvider(mFactory.getFilterQueryProvider(filter));
         loadSearchResults();
     }
 
@@ -135,12 +132,22 @@ public class PatientListFragment extends ProgressFragment implements
      * fragment (e.g. upon screen orientation changes).
      */
     public PatientListFragment() {
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        App.getInstance().inject(this);
+        mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
+        		PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+		LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+		if (locationTree != null) {
+			mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
+		                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
+		} else {
+			Log.e(TAG, "Location tree does not exist yet");
+		}
         setContentView(R.layout.fragment_patient_list);
     }
 
@@ -149,7 +156,7 @@ public class PatientListFragment extends ProgressFragment implements
         super.onResume();
 
         EventBus.getDefault().register(this);
-        new LocationManager().loadLocations();
+        mLocationManager.loadLocations();
     }
 
     @Override
@@ -165,13 +172,13 @@ public class PatientListFragment extends ProgressFragment implements
             Log.d(TAG, "onRefresh");
 
             //triggers app wide data refresh
-            SyncManager.INSTANCE.forceSync();
+            mSyncManager.forceSync();
             isRefreshing = true;
         }
     }
 
     public synchronized void onEvent(LocationsLoadedEvent event) {
-        mRoot = event.mLocationTree;
+    	mLocationTree = event.locationTree;
     }
 
     public synchronized void onEvent(LocationsLoadFailedEvent event) {
@@ -250,7 +257,6 @@ public class PatientListFragment extends ProgressFragment implements
                     FragmentManager fm = getChildFragmentManager();
                     ListDialogFragment dialogListFragment = new ListDialogFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putParcelableArray(ITEM_LIST_KEY, Location.getLocation());
                     dialogListFragment.setArguments(bundle);
                     dialogListFragment.show(fm, null);
                     break;
@@ -321,7 +327,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return mFactory.getCursorLoader(getActivity(), mFilter, "");
+        return mFactory.getCursorLoader(mFilter, "");
     }
 
     @Override

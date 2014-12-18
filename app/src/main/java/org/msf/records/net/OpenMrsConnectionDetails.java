@@ -1,43 +1,53 @@
 package org.msf.records.net;
 
-import android.content.Context;
 import android.util.Base64;
+
+import org.msf.records.inject.Qualifiers;
+import org.msf.records.prefs.StringPreference;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 /**
- * A little bean to encapsulate the arguments for connecting to Open MRS, as they are shared
- * between various classes. This might be a sign that those classes should be combined.
+ * OpenMrsConnectionDetails provides up-to-date preferences for connecting to Open MRS, as they are
+ * shared between various classes. This might be a sign that those classes should be combined.
  */
 public class OpenMrsConnectionDetails {
-    public final String rootUrl;
-    public final String userName;
-    public final String password;
-    public final VolleySingleton volley;
 
-    public OpenMrsConnectionDetails(@Nullable String rootUrl,
-                                    @Nullable String userName,
-                                    @Nullable String password,
-                                    VolleySingleton volley) {
-        this.rootUrl = (rootUrl == null) ? Constants.API_URL : rootUrl;
-        this.userName = (userName == null) ? Constants.API_ADMIN_USERNAME : userName;
-        this.password = (password == null) ? Constants.API_ADMIN_PASSWORD : password;
-        this.volley = volley;
+    private final VolleySingleton mVolley;
+    private final StringPreference mOpenMrsRootUrl;
+    private final StringPreference mOpenMrsUser;
+    private final StringPreference mOpenMrsPassword;
+
+    public VolleySingleton getVolley() {
+        return mVolley;
     }
 
-    public OpenMrsConnectionDetails(@Nullable String rootUrl,
-                                    @Nullable String userName,
-                                    @Nullable String password,
-                                    Context context) {
-        this(rootUrl, userName, password,
-                VolleySingleton.getInstance(context.getApplicationContext()));
+    public String getRootUrl() {
+        return mOpenMrsRootUrl.get();
+    }
+
+    public String getUserName() {
+        return mOpenMrsUser.get();
+    }
+
+    public String getPassword() {
+        return mOpenMrsPassword.get();
+    }
+
+    public OpenMrsConnectionDetails(
+            VolleySingleton volley,
+            StringPreference openMrsRootUrl,
+            StringPreference openMrsUser,
+            StringPreference openMrsPassword) {
+        mVolley = volley;
+        mOpenMrsRootUrl = openMrsRootUrl;
+        mOpenMrsUser = openMrsUser;
+        mOpenMrsPassword = openMrsPassword;
     }
 
     public Map<String, String> addAuthHeader(HashMap<String, String> params) {
-        return addAuthHeader(userName, password, params);
+        return addAuthHeader(getUserName(), getPassword(), params);
     }
 
     public static String makeBasicAuth(String username, String password) {

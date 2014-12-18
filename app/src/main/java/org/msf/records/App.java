@@ -1,9 +1,8 @@
 package org.msf.records;
 
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
+import org.msf.records.events.DefaultCrudEventBus;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
@@ -11,16 +10,22 @@ import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
-import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
+import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
+import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by Gil on 08/10/2014.
+ * Created by Gil on 08/10/2014.\
  */
 public class App extends Application {
+
+    private ObjectGraph mObjectGraph;
 
     /**
      * The current instance of the application.
@@ -28,40 +33,47 @@ public class App extends Application {
     private static App sInstance;
 
     private static UserManager sUserManager;
-    private static UpdateManager sUpdateManager;
 
     private static Server mServer;
     private static OpenMrsXformsConnection mOpenMrsXformsConnection;
 
-    private static OpenMrsConnectionDetails mConnectionDetails;
+    private static OpenMrsConnectionDetails sConnectionDetails;
 
+    @Inject Application mApplication;
+    @Inject ActivityHierarchyServer mActivityHierarchyServer;
+    @Inject UserManager mUserManager;
+    @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
+    @Inject PatientChartModel mPatientChartModel;
 
     @Override
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
 
-        SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
+        buildObjectGraphAndInject();
+
+        registerActivityLifecycleCallbacks(mActivityHierarchyServer);
 
         synchronized (App.class) {
             sInstance = this;
 
-            sUserManager = new UserManager();
-            sUpdateManager = new UpdateManager();
+            sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
+            sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
 
-            mConnectionDetails =
-                    new OpenMrsConnectionDetails(
-                            preferences.getString("openmrs_root_url", null),
-                            preferences.getString("openmrs_user", null),
-                            preferences.getString("openmrs_password", null),
-                            getApplicationContext());
-            mServer = new OpenMrsServer(mConnectionDetails);
+            mServer = new OpenMrsServer(sConnectionDetails);
         }
 
         // TODO(dxchen): Refactor this into the model classes.
         EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
-        PatientChartModel.INSTANCE.init();
+    }
+
+    public void buildObjectGraphAndInject() {
+        mObjectGraph = ObjectGraph.create(Modules.list(this));
+        mObjectGraph.inject(this);
+    }
+
+    public void inject(Object o) {
+        mObjectGraph.inject(o);
     }
 
     public static synchronized App getInstance() {
@@ -72,15 +84,11 @@ public class App extends Application {
         return sUserManager;
     }
 
-    public static synchronized UpdateManager getUpdateManager() {
-        return sUpdateManager;
-    }
-
     public static synchronized Server getServer() {
         return mServer;
     }
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
-        return mConnectionDetails;
+        return sConnectionDetails;
     }
 }

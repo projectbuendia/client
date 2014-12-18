@@ -2,7 +2,6 @@ package org.msf.records.ui;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,20 +12,25 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.model.Concept;
 import org.msf.records.location.LocationTree;
-
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.PatientCountDisplay;
+import org.msf.records.utils.Utils;
 
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -38,7 +42,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
     private String mQueryFilterTerm;
     private SimpleSelectionFilter mFilter;
 
@@ -84,13 +88,19 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         sortBuilder.append(",");
         sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
 
+        // TODO: Don't use the singleton here.
+        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        @Nullable LocationSubtree tentSubtree = null;
+        if (locationTree != null) {
+        	 tentSubtree = locationTree.getLocationByUuid(tent);
+        }
+
         FilterQueryProvider queryProvider =
-                new FilterQueryProviderFactory()
+                new FilterQueryProviderFactory(mContext)
                         .setSortClause(sortBuilder.toString())
                         .getFilterQueryProvider(
-                                mContext,
                                 new FilterGroup(getSelectionFilter(),
-                                        new LocationUuidFilter(tent)));
+                                        new LocationUuidFilter(tentSubtree)));
 
         Cursor patientsCursor = null;
 
@@ -114,9 +124,13 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int patientCount = getChildrenCursor(cursor).getCount();
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
-        LocationTree location = LocationTree.getTentForUuid(locationUuid);
-        if (location != null) {
-            tentName = location.toString();
+        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        if (locationTree != null) {
+            	LocationSubtree location =
+                        LocationTree.SINGLETON_INSTANCE.getLocationByUuid(locationUuid);
+	        if (location != null) {
+	            tentName = location.toString();
+	        }
         }
 
         TextView item = (TextView) view.findViewById(R.id.patient_list_tent_tv);
@@ -133,23 +147,13 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindChildView(View convertView, Context context, Cursor cursor, boolean isLastChild) {
-        ViewHolder holder = null;
-        if (convertView != null) {
-            holder = (ViewHolder) convertView.getTag();
-        }
 
-        String patient_uuid = cursor.getString(PatientProjection.COLUMN_UUID);
         String givenName = cursor.getString(PatientProjection.COLUMN_GIVEN_NAME);
         String familyName = cursor.getString(PatientProjection.COLUMN_FAMILY_NAME);
         String id = cursor.getString(PatientProjection.COLUMN_ID);
         String uuid = cursor.getString(PatientProjection.COLUMN_UUID);
-        String status = cursor.getString(PatientProjection.COLUMN_STATUS);
         String gender = cursor.getString(PatientProjection.COLUMN_GENDER);
-        int ageMonths = cursor.getInt(PatientProjection.COLUMN_AGE_MONTHS);
-        int ageYears = cursor.getInt(PatientProjection.COLUMN_AGE_YEARS);
-
-        holder.mPatientName.setText(givenName + " " + familyName);
-        holder.mPatientId.setText(id);
+        LocalDate birthdate = Utils.stringToLocalDate(cursor.getString(PatientProjection.COLUMN_BIRTHDATE));
 
         // Grab observations for this patient so we can determine condition and pregnant status.
         // TODO(akalachman): Get rid of this whole block as it's inefficient.
@@ -165,47 +169,29 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
             }
         }
 
-        // TODO(akalachman): Extract colors into helper class + resources.
-        if (condition == null) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#D8D8D8"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_GOOD_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#4CAF50"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_FAIR_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#FFC927"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_POOR_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#FF2121"));
-        } else if (condition.equals(Concept.GENERAL_CONDITION_VERY_POOR_UUID)) {
-            holder.mPatientId.setBackgroundColor(Color.parseColor("#D0021B"));
-        } else {
-            holder.mPatientId.setBackgroundColor( Color.parseColor( "#D8D8D8" ) );
+        if (convertView == null) {
+            return;
         }
+        ViewHolder holder = (ViewHolder) convertView.getTag();
+        holder.mPatientName.setText(givenName + " " + familyName);
+        holder.mPatientId.setText(id);
+        holder.mPatientId.setTextColor(
+                context.getResources().getColor(
+                        Concept.getForegroundColorResourceForGeneralCondition(condition)));
+        holder.mPatientId.setBackgroundResource(
+                Concept.getBackgroundColorResourceForGeneralCondition(condition));
 
-        if (ageMonths > 0) {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_months, ageMonths));
-        } else if (ageYears > 0) {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_years, ageYears));
-        } else {
-            holder.mPatientAge.setText(
-                    context.getResources().getString(R.string.age_years, 99));
-            holder.mPatientAge.setTextColor(context.getResources().getColor(R.color.transparent));
-        }
+        holder.mPatientAge.setText(
+                birthdate == null ? "" : Utils.birthdateToAge(birthdate));
 
-        if (gender != null && gender.equals("M")) {
-            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_male));
-        }
+        holder.mPatientGender.setVisibility(gender == null ? View.GONE : View.VISIBLE);
 
-        if (gender != null && gender.equals("F")) {
-            if (pregnant) {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female_pregnant));
-            } else {
-                holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_gender_female));
-            }
-        }
-
-        if (gender == null) {
-            holder.mPatientGender.setVisibility(View.GONE);
+        if (gender != null) {
+            holder.mPatientGender.setImageDrawable(context.getResources().getDrawable(
+                    gender.equals("M") ? R.drawable.ic_gender_male
+                            : pregnant ? R.drawable.ic_gender_female_pregnant
+                                    : R.drawable.ic_gender_female
+            ));
         }
 
         // Add a bottom border and extra padding to the last item in each group.

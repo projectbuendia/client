@@ -62,10 +62,10 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         // TODO(dxchen): Remove this workaround.
         String questionText = prompt.getQuestionText().toLowerCase();
         if (questionText.equals("pregnant")) {
-            widget.forceSetAnswer(fields.mPregnant);
+            widget.forceSetAnswer(fields.pregnant);
         }
-        if (questionText.equals("iv fitted")) {
-            widget.forceSetAnswer(fields.mIvFitted);
+        if (questionText.equals("iv access present")) {
+            widget.forceSetAnswer(fields.ivFitted);
         }
 
         widget.setId(id);

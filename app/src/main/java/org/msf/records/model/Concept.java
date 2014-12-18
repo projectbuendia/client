@@ -1,5 +1,7 @@
 package org.msf.records.model;
 
+import org.msf.records.R;
+
 public class Concept {
     public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String FLUIDS_UUID = "e96f504e-229a-4933-84d1-358abbd687e3";
@@ -18,8 +20,41 @@ public class Concept {
             "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
     public static final String GENERAL_CONDITION_POOR_UUID =
             "162132AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_FAIR_UUID = "";
+    public static final String GENERAL_CONDITION_FAIR_UUID = "162133AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
 
+    public static int getForegroundColorResourceForGeneralCondition(String generalCondition) {
+        if (generalCondition == null) {
+            return android.R.color.black;
+        }
 
+        switch (generalCondition) {
+            case Concept.GENERAL_CONDITION_FAIR_UUID:
+                return android.R.color.black;
+            case Concept.GENERAL_CONDITION_GOOD_UUID:
+            case Concept.GENERAL_CONDITION_POOR_UUID:
+            case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
+            default:
+                return android.R.color.white;
+        }
+    }
+
+    public static int getBackgroundColorResourceForGeneralCondition(String generalCondition) {
+        if (generalCondition == null) {
+            return R.color.general_condition_unknown;
+        }
+
+        switch (generalCondition) {
+            case Concept.GENERAL_CONDITION_GOOD_UUID:
+                return R.color.general_condition_good;
+            case Concept.GENERAL_CONDITION_FAIR_UUID:
+                return R.color.general_condition_fair;
+            case Concept.GENERAL_CONDITION_POOR_UUID:
+                return R.color.general_condition_poor;
+            case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
+                return R.color.general_condition_very_poor;
+            default:
+                return R.color.general_condition_unknown;
+        }
+    }
 }
