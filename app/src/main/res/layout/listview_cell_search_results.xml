@@ -67,9 +67,9 @@
             android:layout_gravity="center_vertical|right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="60dp"
+            android:minWidth="64dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            tools:text="88"/>
+            tools:text="23 mo"/>
 
         </LinearLayout>
 

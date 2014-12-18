@@ -30,6 +30,7 @@ public interface Server {
     public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
     public static final String PATIENT_MOVEMENT_KEY = "movement";
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
+    public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
 
     /**
      * Adds a patient.

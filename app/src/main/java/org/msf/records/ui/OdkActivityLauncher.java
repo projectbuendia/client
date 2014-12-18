@@ -24,7 +24,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
 import org.msf.records.App;
-import org.msf.records.events.data.SingleItemCreatedEvent;
+import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
@@ -89,6 +90,7 @@ public class OdkActivityLauncher {
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
                             Log.i(TAG, "No forms found");
+                            EventBus.getDefault().post(new FetchXformFailedEvent());
                             return;
                         }
                         // Cache all the forms into the ODK form cache
@@ -104,8 +106,16 @@ public class OdkActivityLauncher {
                                         fields);
                             }
                         }).execute(findUuid(response, uuidToShow));
+
+                        EventBus.getDefault().post(new FetchXformSucceededEvent());
                     }
-                }, getErrorListenerForTag(TAG));
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        EventBus.getDefault().post(new FetchXformFailedEvent());
+                    }
+                });
     }
 
     public static void showOdkCollect(Activity callingActivity, int requestCode, long formId) {

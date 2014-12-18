@@ -3,6 +3,7 @@ package org.msf.records.utils;
 import android.text.format.DateFormat;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.PeriodType;
 
@@ -91,6 +92,30 @@ public class Utils {
         }
     }
 
+    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
+    public static String localDateToString(LocalDate date) {
+        return date == null ? null : date.toString();
+    }
+
+    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
+    public static LocalDate stringToLocalDate(String string) {
+        try {
+            return string == null ? null : LocalDate.parse(string);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /** Converts a birthdate to a string describing age in months or years. */
+    public static String birthdateToAge(LocalDate birthdate) {
+        Period age = new Period(birthdate, LocalDate.now());
+        if (age.getYears() >= 2) {
+            return "" + age.getYears() + " y";
+        } else {
+            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
+        }
+    }
+
     /**
      * Returns the value for a system property. System properties need to start with "debug." and
      * can be set using "adb shell setprop $propertyName $value".
@@ -106,7 +131,7 @@ public class Utils {
             return null;
         }
     }
-
+    
     private Utils() {
     	// Prevent instantiation.
     }

@@ -22,7 +22,7 @@ public class FilterManager {
     private static final FilterGroup BASE_FILTERS = new FilterGroup(
             FilterType.OR, new IdFilter(), new NameFilter()).setName("All Patients");
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
-        new FilterGroup(BASE_FILTERS, new PregnantFilter()).setName("Pregnant"),
+//        new FilterGroup(BASE_FILTERS, new PregnantFilter()).setName("Pregnant"),
         new FilterGroup(BASE_FILTERS, new AgeFilter(5)).setName("Children Under 5"),
         new FilterGroup(BASE_FILTERS, new AgeFilter(2)).setName("Children Under 2")
     };
