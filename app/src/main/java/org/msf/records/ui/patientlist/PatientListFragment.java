@@ -17,7 +17,8 @@ import javax.inject.Inject;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
@@ -292,7 +293,7 @@ public class PatientListFragment extends ProgressFragment implements
         return true;
     }
 
-    public void onEvent(CreatePatientSucceededEvent event) {
+    public void onEvent(SingleItemCreatedEvent<AppPatient> event) {
         onRefresh();
     }
 

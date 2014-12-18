@@ -24,7 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
 import org.msf.records.App;
-import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
@@ -217,9 +217,6 @@ public class OdkActivityLauncher {
                                 dit.setContentResolver(
                                         Collect.getInstance().getApplication().getContentResolver());
                                 dit.execute(idToDelete);
-
-                                // TODO(dxchen): Change this to a proper event type.
-                                EventBus.getDefault().post(new CreatePatientSucceededEvent());
                             }
                         }
                     });

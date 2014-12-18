@@ -10,8 +10,8 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.PatientAddFailedEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
-import org.msf.records.events.data.SingleItemFetchedEvent;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -157,7 +157,7 @@ final class PatientCreationController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
-        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
+        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             mUi.onCreateSucceeded(event.item);
         }
 
