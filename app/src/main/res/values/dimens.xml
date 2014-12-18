@@ -10,5 +10,6 @@
 
     <dimen name="large_horizontal_margin">32dp</dimen>
     <dimen name="chart_grid_padding">1px</dimen>
+    <dimen name="chart_grid_textView_height">40dp</dimen>
 
 </resources>
