@@ -4,9 +4,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+
+import net.sqlcipher.database.SQLiteDatabase;
 
 import static org.msf.records.sync.LocationProviderContract.LocationColumns;
 import static org.msf.records.sync.LocationProviderContract.PATH_LOCATIONS;
@@ -75,7 +75,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public Cursor query(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public Cursor query(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                         String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -130,7 +130,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public Uri insert(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                       ContentValues values) {
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         assert db != null;
@@ -173,7 +173,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
 
 
     @Override
-    public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public int bulkInsert(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                           ContentValues[] values) {
         // TODO(nfortescue): optimise this.
         int numValues = values.length;
@@ -184,7 +184,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public int delete(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                       String selection, String[] selectionArgs) {
         SelectionBuilder builder = new SelectionBuilder();
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -221,7 +221,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public int update(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public int update(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                       ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         SelectionBuilder builder = new SelectionBuilder();

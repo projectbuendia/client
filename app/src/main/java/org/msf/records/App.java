@@ -2,7 +2,8 @@ package org.msf.records;
 
 import android.app.Application;
 
-import org.msf.records.events.DefaultCrudEventBus;
+import net.sqlcipher.database.SQLiteDatabase;
+
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
@@ -15,7 +16,6 @@ import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
@@ -49,6 +49,7 @@ public class App extends Application {
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+        InitializeSQLCipher();
 
         buildObjectGraphAndInject();
 
@@ -65,6 +66,10 @@ public class App extends Application {
 
         // TODO(dxchen): Refactor this into the model classes.
         EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
+    }
+
+    private void InitializeSQLCipher() {
+        SQLiteDatabase.loadLibs(this);
     }
 
     public void buildObjectGraphAndInject() {

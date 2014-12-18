@@ -1,9 +1,10 @@
 package org.msf.records.location;
 
-import java.util.HashMap;
-import java.util.Map;
+import android.content.Context;
+import android.database.Cursor;
 
-import javax.annotation.Nullable;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import org.msf.records.App;
 import org.msf.records.filter.AllFilter;
@@ -16,11 +17,10 @@ import org.msf.records.sync.LocationProviderContract;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 
-import android.content.Context;
-import android.database.Cursor;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import javax.annotation.Nullable;
 
 /**
  * Constructs a {@link LocationTree} using a database Cursor and listens for changes
@@ -72,17 +72,17 @@ public class LocationTreeFactory {
         buildPatientCounts(patientCountsCursor);
         patientCountsCursor.close();
 
-        Cursor locationCursor =
+        try (Cursor locationCursor =
                 mLocationQueryFactory.getFilterQueryProvider(mLocationFilter)
-                        .runQuery("");
-        buildLocationMap(locationCursor);
-        locationCursor.close();
+                        .runQuery("")) {
+            buildLocationMap(locationCursor);
+        }
 
-        Cursor locationNamesCursor =
-                mLocationNamesQueryFactory.getFilterQueryProvider(mLocationNameFilter)
-                        .runQuery("");
-        buildLocationNamesMap(locationNamesCursor);
-
+        try (Cursor locationNamesCursor = mLocationNamesQueryFactory
+                .getFilterQueryProvider(mLocationNameFilter)
+                .runQuery("")) {
+            buildLocationNamesMap(locationNamesCursor);
+        }
         return buildTree();
     }
 

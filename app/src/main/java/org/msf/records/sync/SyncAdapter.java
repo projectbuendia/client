@@ -226,86 +226,86 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Get list of all items
         Log.i(TAG, "Fetching local entries for merge");
         Uri uri = PatientProviderContract.CONTENT_URI; // Get all entries
-        Cursor c = contentResolver.query(uri, projection, null, null, null);
-        assert c != null;
-        Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
-        Log.i(TAG, "Found " + patients.size() + " external entries. Computing merge solution...");
+        try (Cursor c = contentResolver.query(uri, projection, null, null, null)) {
+            assert c != null;
+            Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
+            Log.i(TAG, "Found " + patients.size() + " external entries. Computing merge solution...");
 
 
-        String id;
-        String givenName, familyName, uuid, locationUuid;
-        String gender;
-        int ageMonths = -1, ageYears = -1;
-        long admissionTimestamp;
+            String id;
+            String givenName, familyName, uuid, locationUuid;
+            String gender;
+            int ageMonths = -1, ageYears = -1;
+            long admissionTimestamp;
 
-        //iterate through the list of patients
-        while(c.moveToNext()){
-            syncResult.stats.numEntries++;
+            //iterate through the list of patients
+            while (c.moveToNext()) {
+                syncResult.stats.numEntries++;
 
-            id = c.getString(PatientProjection.COLUMN_ID);
-            givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
-            familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
-            uuid = c.getString(PatientProjection.COLUMN_UUID);
-            admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
-            locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
-            if (locationUuid == null) {
-                locationUuid = Zone.DEFAULT_LOCATION;
-            }
-            if (!c.isNull(PatientProjection.COLUMN_AGE_MONTHS)) {
-                ageMonths = c.getInt(PatientProjection.COLUMN_AGE_MONTHS);
-            }
-            if (!c.isNull(PatientProjection.COLUMN_AGE_YEARS)) {
-                ageYears = c.getInt(PatientProjection.COLUMN_AGE_YEARS);
-            }
-            gender = c.getString(PatientProjection.COLUMN_GENDER);
-
-            Patient patient = patientsMap.get(id);
-            if (patient != null) {
-                // Entry exists. Remove from entry map to prevent insert later.
-                patientsMap.remove(id);
-                // Check to see if the entry needs to be updated
-                Uri existingUri = PatientProviderContract.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
-
-                //check if it needs updating
-                if ((patient.given_name != null && !patient.given_name.equals(givenName)) ||
-                        (patient.family_name != null && !patient.family_name.equals(familyName)) ||
-                        (patient.uuid != null && !patient.uuid.equals(uuid)) ||
-                        (patient.admission_timestamp != null &&
-                                !patient.admission_timestamp.equals(admissionTimestamp)) ||
-                        (patient.assigned_location != null &&
-                                patient.assigned_location.uuid != null &&
-                                !patient.assigned_location.uuid.equals(locationUuid)) ||
-                        (patient.age.months != ageMonths) ||
-                        (patient.age.years != ageYears) ||
-                        (patient.gender != null && !patient.gender.equals(gender)) ||
-                        (patient.id != null && !patient.id.equals(id))) {
-                    // Update existing record
-                    Log.i(TAG, "Scheduling update: " + existingUri);
-                    batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, givenName)
-                            .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
-                            .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
-                            .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
-                            .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
-                            .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
-                            .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
-                            .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
-                            .withValue(PatientColumns._ID, id)
-                            .build());
-                    syncResult.stats.numUpdates++;
-                } else {
-                    Log.i(TAG, "No action required for " + existingUri);
+                id = c.getString(PatientProjection.COLUMN_ID);
+                givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
+                familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
+                uuid = c.getString(PatientProjection.COLUMN_UUID);
+                admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+                locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
+                if (locationUuid == null) {
+                    locationUuid = Zone.DEFAULT_LOCATION;
                 }
-            } else {
-                // Entry doesn't exist. Remove it from the database.
-                Uri deleteUri = PatientProviderContract.CONTENT_URI.buildUpon()
-                        .appendPath(id).build();
-                Log.i(TAG, "Scheduling delete: " + deleteUri);
-                batch.add(ContentProviderOperation.newDelete(deleteUri).build());
-                syncResult.stats.numDeletes++;
+                if (!c.isNull(PatientProjection.COLUMN_AGE_MONTHS)) {
+                    ageMonths = c.getInt(PatientProjection.COLUMN_AGE_MONTHS);
+                }
+                if (!c.isNull(PatientProjection.COLUMN_AGE_YEARS)) {
+                    ageYears = c.getInt(PatientProjection.COLUMN_AGE_YEARS);
+                }
+                gender = c.getString(PatientProjection.COLUMN_GENDER);
+
+                Patient patient = patientsMap.get(id);
+                if (patient != null) {
+                    // Entry exists. Remove from entry map to prevent insert later.
+                    patientsMap.remove(id);
+                    // Check to see if the entry needs to be updated
+                    Uri existingUri = PatientProviderContract.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+
+                    //check if it needs updating
+                    if ((patient.given_name != null && !patient.given_name.equals(givenName)) ||
+                            (patient.family_name != null && !patient.family_name.equals(familyName)) ||
+                            (patient.uuid != null && !patient.uuid.equals(uuid)) ||
+                            (patient.admission_timestamp != null &&
+                                    !patient.admission_timestamp.equals(admissionTimestamp)) ||
+                            (patient.assigned_location != null &&
+                                    patient.assigned_location.uuid != null &&
+                                    !patient.assigned_location.uuid.equals(locationUuid)) ||
+                            (patient.age.months != ageMonths) ||
+                            (patient.age.years != ageYears) ||
+                            (patient.gender != null && !patient.gender.equals(gender)) ||
+                            (patient.id != null && !patient.id.equals(id))) {
+                        // Update existing record
+                        Log.i(TAG, "Scheduling update: " + existingUri);
+                        batch.add(ContentProviderOperation.newUpdate(existingUri)
+                                .withValue(PatientColumns.COLUMN_NAME_GIVEN_NAME, givenName)
+                                .withValue(PatientColumns.COLUMN_NAME_FAMILY_NAME, familyName)
+                                .withValue(PatientColumns.COLUMN_NAME_UUID, uuid)
+                                .withValue(PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP, admissionTimestamp)
+                                .withValue(PatientColumns.COLUMN_NAME_LOCATION_UUID, locationUuid)
+                                .withValue(PatientColumns.COLUMN_NAME_AGE_MONTHS, ageMonths)
+                                .withValue(PatientColumns.COLUMN_NAME_AGE_YEARS, ageYears)
+                                .withValue(PatientColumns.COLUMN_NAME_GENDER, gender)
+                                .withValue(PatientColumns._ID, id)
+                                .build());
+                        syncResult.stats.numUpdates++;
+                    } else {
+                        Log.i(TAG, "No action required for " + existingUri);
+                    }
+                } else {
+                    // Entry doesn't exist. Remove it from the database.
+                    Uri deleteUri = PatientProviderContract.CONTENT_URI.buildUpon()
+                            .appendPath(id).build();
+                    Log.i(TAG, "Scheduling delete: " + deleteUri);
+                    batch.add(ContentProviderOperation.newDelete(deleteUri).build());
+                    syncResult.stats.numDeletes++;
+                }
             }
         }
-        c.close();
 
 
         for (Patient e : patientsMap.values()) {

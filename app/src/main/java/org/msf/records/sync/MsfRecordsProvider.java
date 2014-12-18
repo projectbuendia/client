@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
 import static org.msf.records.sync.PatientProviderContract.CONTENT_AUTHORITY;
@@ -34,7 +33,7 @@ public class MsfRecordsProvider extends ContentProvider {
         /**
          * @see android.content.ContentProvider#query(android.net.Uri, String[], String, String[], String)
          */
-        public Cursor query(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+        public Cursor query(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                             String[] projection,
                             String selection, String[] selectionArgs,
                             String sortOrder);
@@ -42,22 +41,22 @@ public class MsfRecordsProvider extends ContentProvider {
         /**
          * @see android.content.ContentProvider#insert(android.net.Uri, android.content.ContentValues)
          */
-        public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+        public Uri insert(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                           ContentValues values);
 
-        public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+        public int bulkInsert(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                               ContentValues[] values);
 
             /**
              * @see android.content.ContentProvider#delete(android.net.Uri, String, String[])
              */
-        public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+        public int delete(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                           String selection, String[] selectionArgs);
 
         /**
          * @see android.content.ContentProvider#update(android.net.Uri, android.content.ContentValues, String, String[])
          */
-        public int update(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+        public int update(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                           ContentValues values, String selection, String[] selectionArgs);
     }
 
@@ -91,6 +90,11 @@ public class MsfRecordsProvider extends ContentProvider {
     public boolean onCreate() {
         mDatabaseHelper = new PatientDatabase(getContext());
         return true;
+    }
+
+    @Override
+    public void shutdown() {
+        super.shutdown();
     }
 
     @Override

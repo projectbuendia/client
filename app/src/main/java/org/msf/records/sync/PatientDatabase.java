@@ -1,8 +1,9 @@
 package org.msf.records.sync;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteOpenHelper;
 
 import static android.provider.BaseColumns._ID;
 import static org.msf.records.sync.ChartProviderContract.ChartColumns;
@@ -26,7 +27,16 @@ public class PatientDatabase extends SQLiteOpenHelper {
     /** Schema version. */
     public static final int DATABASE_VERSION = 13;
     /** Filename for SQLite file. */
-    public static final String DATABASE_NAME = "patients.db";
+    public static final String DATABASE_NAME = "patientscipher.db";
+    /**
+     * Having this hardcoded into the app is NOT secure. However, it does prevent idle browsing
+     * from someone who has just stolen the tablet, and isn't willing to look at source code.
+     *
+     * TODO(nfortescue): add something better. At the very minimum a server call and local storage
+     * with expiry so that it has to sync to the server every so often. Even better some sort of
+     * public key based scheme to only deliver the key on login with registered user on good device.
+     */
+    private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
 
     private static final String CREATE_TABLE = "CREATE TABLE ";
     private static final String PRIMARY_KEY = " PRIMARY KEY";
@@ -166,5 +176,13 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(makeDropTable(LOCATION_NAMES_TABLE_NAME));
         db.execSQL(makeDropTable(USERS_TABLE_NAME));
         onCreate(db);
+    }
+
+    public SQLiteDatabase getReadableDatabase() {
+        return super.getReadableDatabase(ENCRYPTION_PASSWORD);
+    }
+
+    public SQLiteDatabase getWritableDatabase() {
+        return super.getWritableDatabase(ENCRYPTION_PASSWORD);
     }
 }

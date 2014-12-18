@@ -4,10 +4,10 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
+
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteStatement;
 
 import java.util.List;
 
@@ -122,7 +122,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public Cursor query(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public Cursor query(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                         String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -335,7 +335,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public Uri insert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public Uri insert(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                       ContentValues values) {
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         assert db != null;
@@ -377,7 +377,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public int bulkInsert(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public int bulkInsert(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                           ContentValues[] allValues) {
         if (allValues.length == 0) {
             return 0;
@@ -411,16 +411,16 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 
         int numValues = allValues.length;
         ContentValues first = allValues[0];
-        String [] columns = first.keySet().toArray(new String[first.size()]);
+        String[] columns = first.keySet().toArray(new String[first.size()]);
         SQLiteStatement statement = makeInsertStatement(db, tableName, columns);
         db.beginTransaction();
-        Object [] bindings = new Object[first.size()];
+        Object[] bindings = new Object[first.size()];
         for (ContentValues values : allValues) {
             statement.clearBindings();
             if (values.size() != first.size()) {
                 throw new AssertionError();
             }
-            for (int i=0; i< bindings.length; i++) {
+            for (int i = 0; i < bindings.length; i++) {
                 Object value = values.get(columns[i]);
                 // This isn't super safe, but is in our context.
                 int bindingIndex = i + 1;
@@ -473,7 +473,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public int delete(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public int delete(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                       String selection, String[] selectionArgs) {
         SelectionBuilder builder = new SelectionBuilder();
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -510,7 +510,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     }
 
     @Override
-    public int update(SQLiteOpenHelper dbHelper, ContentResolver contentResolver, Uri uri,
+    public int update(PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
                       ContentValues values, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
