@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.os.AsyncTask;
 
 import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.data.app.AppTypeBase;
 import org.msf.records.data.app.converters.AppPatientConverter;
@@ -37,9 +38,9 @@ public class AppAsyncTaskFactory {
     }
 
     public AppUpdatePatientAsyncTask newUpdatePatientAsyncTask(
-            String uuid, AppPatientDelta patientDelta, CrudEventBus bus) {
+            AppPatient originalPatient, AppPatientDelta patientDelta, CrudEventBus bus) {
         return new AppUpdatePatientAsyncTask(
-                this, mConverters, mServer, mContentResolver, uuid, patientDelta, bus);
+                this, mConverters, mServer, mContentResolver, originalPatient, patientDelta, bus);
     }
 
     public <T extends AppTypeBase<?>> FetchSingleAsyncTask<T> newFetchSingleAsyncTask(

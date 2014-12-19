@@ -7,6 +7,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.msf.records.R;
+import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterManager;
 import org.msf.records.filter.LocationUuidFilter;
@@ -15,6 +16,8 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
+
+import de.greenrobot.event.EventBus;
 
 // TODO(akalachman): Split RoundActivity from Triage and Discharged, which may behave differently.
 public class RoundActivity extends PatientSearchActivity {
@@ -25,6 +28,8 @@ public class RoundActivity extends PatientSearchActivity {
 
     private RoundFragment mFragment;
     private SimpleSelectionFilter mFilter;
+
+    private final LocationEventSubscriber mSubscriber = new LocationEventSubscriber();
 
     public static final String LOCATION_NAME_KEY = "location_name";
     public static final String LOCATION_PATIENT_COUNT_KEY = "location_patient_count";
@@ -72,5 +77,27 @@ public class RoundActivity extends PatientSearchActivity {
                 });
 
         super.onExtendOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onResumeImpl() {
+        super.onResumeImpl();
+        EventBus.getDefault().register(mSubscriber);
+    }
+
+    @Override
+    protected void onPauseImpl() {
+        super.onPauseImpl();
+        EventBus.getDefault().unregister(mSubscriber);
+    }
+
+    private class LocationEventSubscriber {
+        // Keep title up-to-date with any location changes.
+        public void onEventMainThread(LocationsLoadedEvent event) {
+            LocationSubtree subtree = event.locationTree.getLocationByUuid(mLocationUuid);
+            mLocationPatientCount = subtree.getPatientCount();
+            setTitle(PatientCountDisplay.getPatientCountTitle(
+                    RoundActivity.this, mLocationPatientCount, mLocationName));
+        }
     }
 }
