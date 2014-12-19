@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemCreatedEvent;
+import org.msf.records.events.data.SingleItemUpdatedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
@@ -87,6 +88,41 @@ public class LocationManager {
 
     @SuppressWarnings("unused") // Called by reflection from CrudEventBus.
     private final class CrudEventBusSubscriber {
+        public void onEventMainThread(SingleItemUpdatedEvent<AppPatient> event) {
+            LocationTree.LocationSubtree oldLocation = null;
+            LocationTree.LocationSubtree newLocation = null;
+
+            // We don't know how to proceed if data is uninitialized, so don't bother.
+            AppPatient oldPatient = event.originalItem;
+            AppPatient newPatient = event.newItem;
+            if (oldPatient == null || newPatient == null || mLocationTree == null) {
+                return;
+            }
+
+            // Determine locations from any specified location UUID's.
+            if (oldPatient.locationUuid != null) {
+                oldLocation = mLocationTree.getLocationByUuid(oldPatient.locationUuid);
+            }
+            if (newPatient.locationUuid != null) {
+                newLocation = mLocationTree.getLocationByUuid(newPatient.locationUuid);
+            }
+
+            if (oldLocation == newLocation) {
+                // Nothing to do, location didn't change.
+                return;
+            }
+
+            // "Move" the patient from one subtree to another.
+            if (oldLocation != null) {
+                oldLocation.decrementPatientCount();
+            }
+            if (newLocation != null) {
+                newLocation.incrementPatientCount();
+            }
+
+            // Finally post the update to the event bus.
+            mEventBus.post(new LocationsLoadedEvent(mLocationTree));
+        }
 
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             // If a patient was just created, we need to update the patient counts in the subtree

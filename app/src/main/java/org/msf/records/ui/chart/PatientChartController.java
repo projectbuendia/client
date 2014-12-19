@@ -330,7 +330,7 @@ final class PatientChartController {
 
     public void showAssignLocationDialog(
             Context context,
-            LocationManager locationManager) {
+            final LocationManager locationManager) {
         TentSelectedCallback callback =
                 new TentSelectedCallback() {
 
@@ -339,7 +339,8 @@ final class PatientChartController {
                         AppPatientDelta patientDelta = new AppPatientDelta();
                         patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
-                        mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, patientDelta);
+                        locationManager.subscribe(mCrudEventBus);
+                        mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
                         return false;
                     }
                 };

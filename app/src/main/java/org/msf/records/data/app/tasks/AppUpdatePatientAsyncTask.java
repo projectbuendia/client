@@ -10,7 +10,12 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
+import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.events.data.SingleItemUpdatedEvent;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
@@ -33,6 +38,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mUuid;
+    private final AppPatient mOriginalPatient;
     private final AppPatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
@@ -41,14 +47,15 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
             AppTypeConverters converters,
             Server server,
             ContentResolver contentResolver,
-            String uuid,
+            AppPatient originalPatient,
             AppPatientDelta patientDelta,
             CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mConverters = converters;
         mServer = server;
         mContentResolver = contentResolver;
-        mUuid = uuid;
+        mUuid = (originalPatient == null) ? null : originalPatient.uuid;
+        mOriginalPatient = originalPatient;
         mPatientDelta = patientDelta;
         mBus = bus;
     }
@@ -95,8 +102,26 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
         }
 
         // Otherwise, start a fetch task to fetch the patient from the database.
+        mBus.register(new UpdateEventSubscriber());
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 new UuidFilter(), mUuid, mConverters.patient, mBus);
         task.execute();
+    }
+
+    // After updating a patient, we fetch the patient from the database. The result of the fetch
+    // determines if updating a patient was truly successful and propagates a new event to report
+    // success/failure.
+    @SuppressWarnings("unused") // Called by reflection from EventBus.
+    private final class UpdateEventSubscriber {
+        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
+            mBus.post(new SingleItemUpdatedEvent<>(mOriginalPatient, event.item));
+            mBus.unregister(this);
+        }
+
+        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+            mBus.post(new PatientUpdateFailedEvent(
+                    PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
+            mBus.unregister(this);
+        }
     }
 }

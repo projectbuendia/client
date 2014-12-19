@@ -63,6 +63,10 @@ public final class LocationTree {
             mPatientCount++;
         }
 
+        public void decrementPatientCount() {
+            mPatientCount--;
+        }
+
         public List<LocationSubtree> thisAndAllDescendents() {
 	    	List<LocationSubtree> result = new ArrayList<>();
 	    	addToCollectionRecursively(result);
@@ -103,7 +107,7 @@ public final class LocationTree {
 
 	        return mLocation.names.get(mLocale);
 	    }
-	}
+    }
 
     private static final String DEFAULT_LOCALE = "en";
 
