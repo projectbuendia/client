@@ -31,8 +31,8 @@ public class RoundActivity extends PatientSearchActivity {
     public static final String LOCATION_UUID_KEY = "location_uuid";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
 
         mLocationName = getIntent().getStringExtra(LOCATION_NAME_KEY);
         mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);

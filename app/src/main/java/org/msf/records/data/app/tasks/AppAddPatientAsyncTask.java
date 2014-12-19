@@ -49,7 +49,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
             ContentResolver contentResolver,
             AppPatientDelta patientDelta,
             CrudEventBus bus) {
-        mTaskFactory = taskFactory;
+        mTaskFactory = taskFactory; 
         mConverters = converters;
         mServer = server;
         mContentResolver = contentResolver;

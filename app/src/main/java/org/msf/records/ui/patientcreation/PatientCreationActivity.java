@@ -24,6 +24,7 @@ import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.BigToast;
 import org.msf.records.utils.EventBusWrapper;
@@ -39,7 +40,7 @@ import de.greenrobot.event.EventBus;
 /**
  * A {@link BaseActivity} that allows users to create a new patient.
  */
-public final class PatientCreationActivity extends BaseActivity {
+public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
@@ -59,6 +60,7 @@ public final class PatientCreationActivity extends BaseActivity {
     @InjectView(R.id.patient_creation_button_cancel) Button mCancelButton;
 
     private String mLocationUuid;
+    private boolean mIsCreatePending = false;
 
     private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
 
@@ -68,8 +70,8 @@ public final class PatientCreationActivity extends BaseActivity {
     private static final int ALERT_DIALOG_PADDING = 32;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
 
@@ -116,15 +118,15 @@ public final class PatientCreationActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onStartImpl() {
+        super.onStartImpl();
         mController.init();
     }
 
     @Override
-    protected void onStop() {
+    protected void onStopImpl() {
         mController.suspend();
-        super.onStop();
+        super.onStopImpl();
     }
 
     @OnClick(R.id.patient_creation_button_change_location)
@@ -186,7 +188,11 @@ public final class PatientCreationActivity extends BaseActivity {
 
     @OnClick(R.id.patient_creation_button_create)
     void onCreateClick() {
-        boolean adding = mController.createPatient(
+        if (mIsCreatePending) {
+            return;
+        }
+
+        mIsCreatePending = mController.createPatient(
                 mId.getText().toString(),
                 mGivenName.getText().toString(),
                 mFamilyName.getText().toString(),
@@ -194,7 +200,7 @@ public final class PatientCreationActivity extends BaseActivity {
                 getAgeUnits(),
                 getSex(),
                 mLocationUuid);
-        setUiEnabled(!adding);
+        setUiEnabled(!mIsCreatePending);
     }
 
     @Override
@@ -272,7 +278,7 @@ public final class PatientCreationActivity extends BaseActivity {
     private final class MyUi implements PatientCreationController.Ui {
 
         @Override
-        public void onValidationError(int field, String message) {
+        public void showValidationError(int field, String message) {
             switch (field) {
                 case PatientCreationController.Ui.FIELD_ID:
                     mId.setError(message);
@@ -317,14 +323,15 @@ public final class PatientCreationActivity extends BaseActivity {
         }
 
         @Override
-        public void onCreateFailed(String error) {
+        public void showErrorMessage(String error) {
+            mIsCreatePending = false;
             setUiEnabled(true);
-            BigToast.show(PatientCreationActivity.this,
-                    "Unable to add patient");
+            BigToast.show(PatientCreationActivity.this, "Unable to add patient: %s", error);
         }
 
         @Override
-        public void onCreateSucceeded(AppPatient patient) {
+        public void quitActivity() {
+            mIsCreatePending = false;
             setUiEnabled(true);
             finish();
         }

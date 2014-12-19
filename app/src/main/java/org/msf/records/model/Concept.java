@@ -23,7 +23,23 @@ public class Concept {
     public static final String GENERAL_CONDITION_FAIR_UUID = "162133AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
 
-    public static int getColorResourceForGeneralCondition(String generalCondition) {
+    public static int getForegroundColorResourceForGeneralCondition(String generalCondition) {
+        if (generalCondition == null) {
+            return android.R.color.black;
+        }
+
+        switch (generalCondition) {
+            case Concept.GENERAL_CONDITION_FAIR_UUID:
+                return android.R.color.black;
+            case Concept.GENERAL_CONDITION_GOOD_UUID:
+            case Concept.GENERAL_CONDITION_POOR_UUID:
+            case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
+            default:
+                return android.R.color.white;
+        }
+    }
+
+    public static int getBackgroundColorResourceForGeneralCondition(String generalCondition) {
         if (generalCondition == null) {
             return R.color.general_condition_unknown;
         }
