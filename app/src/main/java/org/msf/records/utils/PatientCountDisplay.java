@@ -20,6 +20,11 @@ public class PatientCountDisplay {
     }
 
     public static String getPatientCountTitle(Context context, int patientCount, String prefix) {
+        // If no patient count is available, only show the location name.
+        if (patientCount == -1) {
+            return prefix;
+        }
+
         return context.getResources().getString(
                 R.string.string_with_paren, prefix, getPatientCountSubtitle(context, patientCount));
     }
