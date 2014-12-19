@@ -90,13 +90,13 @@
             android:label="@string/title_patient_chart"
             android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
             android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow" >
+            android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.PatientListActivity" />
+                android:value="org.msf.records.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
             android:name="org.msf.records.ui.SettingsActivity"
@@ -105,7 +105,7 @@
             android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.PatientListActivity" />
+                android:value="org.msf.records.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
             android:name="org.msf.records.ui.PatientAddActivity"

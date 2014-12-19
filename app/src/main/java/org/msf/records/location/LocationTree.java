@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -302,6 +304,52 @@ public final class LocationTree {
     }
 
     private final class SubtreeComparator implements Comparator<LocationSubtree> {
+        /**
+         * Compares two objects that may each be Integer or String.  All Integers
+         * sort before all Strings; Integers compare according to their numeric
+         * value and Strings compare according to their string value.
+         */
+        private int compareObjects(Object a, Object b) {
+            if (a instanceof Integer && b instanceof String) return -1;
+            if (a instanceof String && b instanceof Integer) return 1;
+            if (a instanceof Integer && b instanceof Integer) {
+                return (Integer) a - (Integer) b;
+            }
+            if (a instanceof String && b instanceof String) {
+                return ((String) a).compareTo((String) b);
+            }
+            throw new IllegalArgumentException("arguments must be Numbers or Strings");
+        }
+
+        /**
+         * Compares two lists lexicographically by element, just like Python does.
+         */
+        private int compareLists(List<Object> a, List<Object> b) {
+            int i;
+            for (i = 0; i < a.size() && i < b.size(); i++) {
+                int compare = compareObjects(a.get(i), b.get(i));
+                if (compare != 0) return compare;
+            }
+            if (i < a.size()) return -1;
+            if (i < b.size()) return 1;
+            return 0;
+        }
+
+        /**
+         * Turns a string into an array of Numbers (from sequences of digits) and
+         * Strings (from sequences of letters).  Other characters are ignored.
+         */
+        private List<Object> getParts(String str) {
+            Pattern numberOrWord = Pattern.compile("[0-9]+|[a-zA-Z]+");
+            Matcher matcher = numberOrWord.matcher(str == null ? "" : str);
+            List<Object> parts = new ArrayList<Object>();
+            for (int pos = 0; matcher.find(pos); pos = matcher.end()) {
+                String part = matcher.group();
+                parts.add(part.matches("\\d.*") ? Integer.valueOf(part) : part);
+            }
+            return parts;
+        }
+
     	@Override
     	public int compare(LocationSubtree lhs, LocationSubtree rhs) {
     		if (lhs == rhs) return 0;
@@ -323,19 +371,9 @@ public final class LocationTree {
 	    			if (i == ZONE_DEPTH) {
 	    				compare = Zone.compareTo(subtreeA.getLocation(), subtreeB.getLocation());
 	    			} else {
-	    				// TODO: Tents are usually called something like "Probable 5". The normal
-	    				// string comparison works fine when the number is < 10, but it puts
-	    				// "Probable 10" before "Probable 5". Let's modify this to handle larger
-	    				// tent numbers correctly.
-	    				String nameA = subtreeA.mLocation.names.get(DEFAULT_LOCALE);
-	    				if (nameA == null) {
-	    					nameA = "";
-	    				}
-	    				String nameB = subtreeB.mLocation.names.get(DEFAULT_LOCALE);
-	    				if (nameB == null) {
-	    					nameB = "";
-	    				}
-	    				compare = nameA.compareTo(nameB);
+                        String nameA = subtreeA.mLocation.names.get(DEFAULT_LOCALE);
+                        String nameB = subtreeB.mLocation.names.get(DEFAULT_LOCALE);
+                        compare = compareLists(getParts(nameA), getParts(nameB));
 	    			}
 	    			if (compare != 0) {
 	    				return compare;

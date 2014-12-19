@@ -75,7 +75,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 row = new Row(ob.conceptUuid, ob.conceptName);
                 rows.add(row);
                 if (Concept.DIARRHEA_UUID.equals(ob.conceptUuid)
-                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)) {
+                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)
+                        || Concept.PAIN_UUID.equals(ob.conceptUuid)) {
                     // TODO(nfortescue): this should really look up the localized values from the concept database
                     // otherwise the strings could be inconsistent with the form
                     severeRow = new Row(null, ob.conceptName + " (" + context.getResources().getString(R.string.severe_symptom) + ")");
@@ -133,7 +134,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             }
         }
 
-        rows.addAll(extraRows);
+        rows.addAll(rows.size() - 1, extraRows);
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {

@@ -2511,9 +2511,7 @@ public class FormEntryActivity
 
         Patient patient = getIntent().getParcelableExtra("patient");
         if (patient != null) {
-            setTitle(
-                    patient.givenName + " " + patient.familyName + " (" + patient.id
-                            + ") - " + formController.getFormTitle());
+            setTitle(patient.id + ": " + patient.givenName + " " + patient.familyName);
         } else {
             setTitle(formController.getFormTitle());
         }
@@ -2544,13 +2542,13 @@ public class FormEntryActivity
         int saveStatus = saveResult.getSaveResult();
         switch (saveStatus) {
 		case SaveToDiskTask.SAVED:
-			Toast.makeText(this, getString(R.string.data_saved_ok),
-					Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, getString(R.string.data_saved_ok),
+//					Toast.LENGTH_SHORT).show();
 			sendSavedBroadcast();
 			break;
 		case SaveToDiskTask.SAVED_AND_EXIT:
-			Toast.makeText(this, getString(R.string.data_saved_ok),
-					Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, getString(R.string.data_saved_ok),
+//					Toast.LENGTH_SHORT).show();
 			sendSavedBroadcast();
 			finishReturnInstance();
 			break;

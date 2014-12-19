@@ -2,6 +2,9 @@ package org.msf.records.utils;
 
 import org.msf.records.AppModule;
 
+import java.io.IOError;
+import java.io.IOException;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -19,6 +22,12 @@ import dagger.Provides;
 public final class DebugUtilsModule {
 
     @Provides @Singleton ActivityHierarchyServer provideActivityHierarchyServer() {
-        return new SocketActivityHierarchyServer();
+        SocketActivityHierarchyServer server = new SocketActivityHierarchyServer();
+        try {
+            server.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return server;
     }
 }

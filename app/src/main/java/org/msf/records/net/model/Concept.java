@@ -22,6 +22,10 @@ public class Concept {
      */
     public static final String VOMITING_UUID = "122983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     /**
+     * UUID for the (question) concept for pain.
+     */
+    public static final String PAIN_UUID = "f75da5de-404c-42d0-b484-b69a4896e093";
+    /**
      * UUID for the (question) concept for the notes field.
      */
     public static final String NOTES_UUID = "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

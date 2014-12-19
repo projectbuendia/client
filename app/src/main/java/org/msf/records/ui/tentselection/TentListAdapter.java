@@ -26,19 +26,16 @@ import butterknife.InjectView;
 final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
 
     private final Context context;
-    private final Optional<String> selectedLocationUuid;
-    private final boolean mShouldAbbreviate;
+    private Optional<String> selectedLocationUuid;
     private View mSelectedView;
 
     public TentListAdapter(
             Context context,
             List<LocationSubtree> tents,
-            Optional<String> selectedTent,
-            boolean shouldAbbreviate) {
+            Optional<String> selectedTent) {
         super(context, R.layout.listview_cell_tent_selection, tents);
         this.context = context;
         this.selectedLocationUuid = Preconditions.checkNotNull(selectedTent);
-        mShouldAbbreviate = shouldAbbreviate;
     }
 
     public Optional<String> getSelectedLocationUuid() {
@@ -61,58 +58,33 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
             view.setTag(holder);
         }
 
-        LocationSubtree tent = getItem(position);
-        holder.mButton.setTitle(abbreviateIfNeeded(tent.toString()));
+        LocationSubtree location = getItem(position);
+        holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle(
-                PatientCountDisplay.getPatientCountSubtitle(context, tent.getPatientCount()));
+                PatientCountDisplay.getPatientCountSubtitle(context, location.getPatientCount()));
         holder.mButton.setBackgroundResource(
-                Zone.getBackgroundColorResource(tent.getLocation().parent_uuid));
+                Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
         holder.mButton.setTextColor(
-                Zone.getForegroundColorResource(tent.getLocation().parent_uuid));
+                Zone.getForegroundColorResource(location.getLocation().parent_uuid));
 
         if (selectedLocationUuid.isPresent() &&
-                selectedLocationUuid.get().equals(tent.getLocation().uuid)) {
-            setSelectedView( view );
+                selectedLocationUuid.get().equals(location.getLocation().uuid)) {
+            view.setBackgroundResource(R.color.zone_tent_selected_padding);
+        } else {
+            view.setBackgroundResource(R.drawable.tent_selector);
         }
 
         return view;
     }
 
-    public View getSelectedView() { return mSelectedView; }
-    public void setSelectedView( View view )
-    {
-        if ( mSelectedView != null ) {
-            mSelectedView.setBackgroundResource(R.drawable.tent_selector);
-        }
+    public void setSelectedLocationUuid(Optional<String> locationUuid) {
+        selectedLocationUuid = locationUuid;
 
-        mSelectedView = view;
-
-        if ( view != null )
-        {
-            view.setBackgroundResource(R.color.zone_tent_selected_padding);
-        }
-    }
-
-    private final String abbreviateIfNeeded(String tentString) {
-        if (!mShouldAbbreviate) {
-            return tentString;
-        }
-
-        String parts[] = tentString.split("\\s+");
-        StringBuilder abbreviatedTentString = new StringBuilder();
-        for (String part : parts) {
-            if (part.matches("^\\d+$")) {
-                abbreviatedTentString.append(part);
-            } else {
-                abbreviatedTentString.append(part.charAt(0));
-            }
-        }
-
-        return abbreviatedTentString.toString();
+        notifyDataSetChanged();
     }
 
     static class ViewHolder {
-        
+
         @InjectView(R.id.tent_selection_tent) SubtitledButtonView mButton;
 
         public ViewHolder(View view) {
