@@ -235,3 +235,4 @@ public class BaseLoggedInActivity extends BaseActivity {
         }
     }
 }
+
