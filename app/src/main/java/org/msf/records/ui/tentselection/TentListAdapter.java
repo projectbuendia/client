@@ -83,22 +83,6 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         notifyDataSetChanged();
     }
 
-//
-//    public View getSelectedView() { return mSelectedView; }
-//    public void setSelectedView( View view )
-//    {
-//        if ( mSelectedView != null ) {
-//            mSelectedView.setBackgroundResource(R.drawable.tent_selector);
-//        }
-//
-//        mSelectedView = view;
-//
-//        if ( view != null )
-//        {
-//            view.setBackgroundResource(R.color.zone_tent_selected_padding);
-//        }
-//    }
-
     static class ViewHolder {
 
         @InjectView(R.id.tent_selection_tent) SubtitledButtonView mButton;
