@@ -85,7 +85,6 @@ public class AppModel {
         task.execute();
     }
 
-    // TODO(dxchen): Consider listening for new SingleItemUpdatedEvent<AppPatient> event.
     /**
      * Asynchronously updates a patient, posting a
      * {@link org.msf.records.events.data.SingleItemUpdatedEvent} with the updated
