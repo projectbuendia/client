@@ -13,8 +13,6 @@ import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 
-import de.greenrobot.event.EventBus;
-
 /**
  * Controller for {@link PatientCreationActivity}.
  *
