@@ -247,6 +247,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("General health status of the patient");
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
+    }
+
     /** Updates a {@link VitalView} to display a new observation value. */
     private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
         if (observation != null) {
@@ -418,7 +424,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (mIsFetchingXform) {
                 return;
             }
-            
+
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
                     PatientChartActivity.this, formUuid, requestCode, patient, fields);
