@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationTree;
@@ -50,7 +50,7 @@ public class RoundActivity extends PatientSearchActivity {
         // TODO: Don't use this singleton.
         LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
         LocationSubtree subtree = locationTree.getLocationByUuid(mLocationUuid);
-        mFilter = new FilterGroup(FilterManager.getDefaultFilter(), new LocationUuidFilter(subtree));
+        mFilter = new FilterGroup(PatientFilters.getDefaultFilter(), new LocationUuidFilter(subtree));
     }
 
     @Override

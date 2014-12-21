@@ -4,10 +4,10 @@ import org.joda.time.LocalDate;
 import org.msf.records.sync.PatientProviderContract;
 
 /**
- * AgeFilter returns only patients below a specified age in years, i.e.
- * whose birthdates were later than the specified number of years ago.
+ * Returns only patients below a specified age in years, i.e.
+ * whose birth dates were later than the specified number of years ago.
  */
-public class AgeFilter implements SimpleSelectionFilter {
+final class AgeFilter implements SimpleSelectionFilter {
     private final int mYears;
 
     public AgeFilter(int years) {

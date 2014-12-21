@@ -3,14 +3,13 @@ package org.msf.records.filter;
 import org.msf.records.sync.PatientProviderContract;
 
 /**
- * NameFilter is a SimpleSelectionFilter that filters by name.
+ * A {@link SimpleSelectionFilter} that filters by name.
+ *
+ * <p>Selects patients for whom the parameter string prefix-matches any of the
+ * words in the given name or family name.
  */
-public class NameFilter implements SimpleSelectionFilter {
-    /**
-     * Selects patients for whom the parameter string prefix-matches any of the
-     * words in the given name or family name.
-     * @return String
-     */
+final class NameFilter implements SimpleSelectionFilter {
+
     @Override
     public String getSelectionString() {
         // To match the beginning of any word in the given or family name,
@@ -22,10 +21,7 @@ public class NameFilter implements SimpleSelectionFilter {
     }
 
     /**
-     * Selects any patient whose given name or family name contains a word starting
-     * with the given prefix string.
-     * @param constraint The name prefix.
-     * @return
+     * @param constraint the name prefix.
      */
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
