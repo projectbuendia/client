@@ -1,5 +1,6 @@
 package org.msf.records.user;
 
+import org.msf.records.utils.AsyncTaskRunner;
 import org.msf.records.utils.EventBusInterface;
 
 import dagger.Module;
@@ -22,7 +23,8 @@ public class UserModule {
 
     @Provides @Singleton UserManager provideUserManage(
             UserStore userStore,
-            EventBusInterface eventBus) {
-        return new UserManager(userStore, eventBus);
+            EventBusInterface eventBus,
+            AsyncTaskRunner asyncTaskRunner) {
+        return new UserManager(userStore, eventBus, asyncTaskRunner);
     }
 }
