@@ -1,9 +1,11 @@
 package org.msf.records.user;
 
-import javax.inject.Singleton;
+import org.msf.records.utils.EventBusInterface;
 
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Singleton;
 
 /**
  * A Dagger module that provides bindings for user-related classes.
@@ -18,7 +20,9 @@ public class UserModule {
         return new UserStore();
     }
 
-    @Provides @Singleton UserManager provideUserManage(UserStore userStore) {
-        return new UserManager(userStore);
+    @Provides @Singleton UserManager provideUserManage(
+            UserStore userStore,
+            EventBusInterface eventBus) {
+        return new UserManager(userStore, eventBus);
     }
 }
