@@ -45,14 +45,18 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     private final Context mContext;
     private String mQueryFilterTerm;
     private SimpleSelectionFilter mFilter;
+    private final LocalizedChartHelper mLocalizedChartHelper;
 
     public ExpandablePatientListAdapter(
-            Cursor cursor, Context context, String queryFilterTerm,
+            Cursor cursor,
+            Context context,
+            String queryFilterTerm,
             SimpleSelectionFilter filter) {
         super(cursor, context);
         mContext = context;
         mQueryFilterTerm = queryFilterTerm;
         mFilter = filter;
+        mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
     }
 
     public SimpleSelectionFilter getSelectionFilter() {
@@ -161,7 +165,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         boolean pregnant = false;
         String condition = null;
         Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
-                LocalizedChartHelper.getMostRecentObservations(mContext.getContentResolver(), uuid);
+                mLocalizedChartHelper.getMostRecentObservations(uuid);
         if (observationMap != null) {
             pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID) &&
                     observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);

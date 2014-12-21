@@ -82,6 +82,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject LocationManager mLocationManager;
     @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
     @Inject SyncManager mSyncManager;
+    @Inject LocalizedChartHelper mLocalizedChartHelper;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -122,11 +123,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             @Override
             public Map<String, LocalizedObservation> getMostRecentObservations(
                     String patientUuid) {
-                return LocalizedChartHelper.getMostRecentObservations(getContentResolver(), patientUuid);
+                return mLocalizedChartHelper.getMostRecentObservations(patientUuid);
             }
             @Override
             public List<LocalizedObservation> getObservations(String patientUuid) {
-                return LocalizedChartHelper.getObservations(getContentResolver(), patientUuid);
+                return mLocalizedChartHelper.getObservations(patientUuid);
             }
         };
 

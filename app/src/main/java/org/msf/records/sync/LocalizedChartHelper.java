@@ -105,26 +105,30 @@ public class LocalizedChartHelper {
         }
     }
 
+    private final ContentResolver mContentResolver;
+
+    public LocalizedChartHelper(
+            ContentResolver contentResolver) {
+        mContentResolver = checkNotNull(contentResolver);
+    }
     /**
      * Get all observations for a given patient from the local cache, localized to English.
      */
-    public static List<LocalizedObservation> getObservations(
-            ContentResolver contentResolver,
+    public List<LocalizedObservation> getObservations(
             String patientUuid) {
-        return getObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
+        return getObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /**
      * Get all observations for a given patient.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static List<LocalizedObservation> getObservations(
-            ContentResolver contentResolver,
+    public List<LocalizedObservation> getObservations(
             String patientUuid,
             String locale) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(
+            cursor = mContentResolver.query(
                     ChartProviderContract.makeLocalizedChartUri(
                             KNOWN_CHART_UUID, patientUuid, locale),
                     null, null, null, null);
@@ -154,10 +158,9 @@ public class LocalizedChartHelper {
      * localized to English. Ordering will be by concept uuid, and there are not groups or other
      * chart based configurations.
      */
-    public static Map<String, LocalizedObservation> getMostRecentObservations(
-            ContentResolver contentResolver,
+    public Map<String, LocalizedObservation> getMostRecentObservations(
             String patientUuid) {
-        return getMostRecentObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
+        return getMostRecentObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /**
@@ -165,11 +168,12 @@ public class LocalizedChartHelper {
      * Ordering will be by concept uuid, and there are not groups or other chart based configurations.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
-            ContentResolver contentResolver, String patientUuid, String locale) {
+    public Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
+            String patientUuid,
+            String locale) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(ChartProviderContract.makeMostRecentChartUri(
+            cursor = mContentResolver.query(ChartProviderContract.makeMostRecentChartUri(
                     patientUuid, locale), null, null, null, null);
 
             Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newLinkedHashMap();
@@ -198,12 +202,11 @@ public class LocalizedChartHelper {
      * Get all observations for a given patient.
      * @param locale the locale to return the results in, to match the server String
      */
-    public static List<LocalizedObservation> getEmptyChart(
-            ContentResolver contentResolver,
+    public List<LocalizedObservation> getEmptyChart(
             String locale) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(
+            cursor = mContentResolver.query(
                     ChartProviderContract.makeEmptyLocalizedChartUri(KNOWN_CHART_UUID, locale),
                     null, null, null, null);
 

@@ -4,8 +4,6 @@ import android.app.Application;
 import android.content.ContentResolver;
 import android.content.res.Resources;
 
-import javax.inject.Singleton;
-
 import org.msf.records.data.app.AppModelModule;
 import org.msf.records.events.EventsModule;
 import org.msf.records.location.LocationManager;
@@ -13,6 +11,7 @@ import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.NetModule;
 import org.msf.records.prefs.PrefsModule;
+import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.chart.PatientChartActivity;
@@ -30,6 +29,8 @@ import org.msf.records.utils.UtilsModule;
 import dagger.Module;
 import dagger.Provides;
 import de.greenrobot.event.EventBus;
+
+import javax.inject.Singleton;
 
 /**
  * A Dagger module that provides the top-level bindings for the app.
@@ -101,5 +102,10 @@ public final class AppModule {
     			syncManager);
     	locationManager.init();
     	return locationManager;
+    }
+
+    @Provides @Singleton LocalizedChartHelper provideLocalizedChartHelper(
+            ContentResolver contentResolver) {
+        return new LocalizedChartHelper(contentResolver);
     }
 }
