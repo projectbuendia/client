@@ -110,7 +110,7 @@ final class PatientChartController {
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
-    private final ObservationsProvider mObservationsProvider;
+    private final LocalizedChartHelper mObservationsProvider;
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final PatientModel mPatientModel;
@@ -126,13 +126,6 @@ final class PatientChartController {
                 Intent data);
     }
 
-    public interface ObservationsProvider {
-        /** Get all observations for a given patient from the local cache, localized to English.  */
-        List<LocalizedObservation> getObservations(String patientUuid);
-    	Map<String, LocalizedChartHelper.LocalizedObservation>
-    			getMostRecentObservations(String patientUuid);
-    }
-
     public PatientChartController(
     		AppModel appModel,
     		OpenMrsChartServer server,
@@ -140,7 +133,7 @@ final class PatientChartController {
     		CrudEventBus crudEventBus,
     		Ui ui,
     		OdkResultSender odkResultSender,
-    		ObservationsProvider observationsProvider,
+    		LocalizedChartHelper observationsProvider,
     		@Nullable Bundle savedState,
     		PatientModel patientModel,
             SyncManager syncManager) {

@@ -33,7 +33,6 @@ import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Utils;
@@ -119,18 +118,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         };
 
-        ObservationsProvider observationsProvider = new ObservationsProvider() {
-            @Override
-            public Map<String, LocalizedObservation> getMostRecentObservations(
-                    String patientUuid) {
-                return mLocalizedChartHelper.getMostRecentObservations(patientUuid);
-            }
-            @Override
-            public List<LocalizedObservation> getObservations(String patientUuid) {
-                return mLocalizedChartHelper.getObservations(patientUuid);
-            }
-        };
-
         String patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
         String patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
         String patientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
@@ -150,7 +137,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mCrudEventBusProvider.get(),
                 mMyUi,
                 odkResultSender,
-                observationsProvider,
+                mLocalizedChartHelper,
                 controllerState,
                 mPatientModel,
                 mSyncManager);
@@ -283,7 +270,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-
             showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
             showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
             showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
