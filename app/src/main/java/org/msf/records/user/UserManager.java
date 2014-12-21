@@ -1,5 +1,7 @@
 package org.msf.records.user;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -15,10 +17,10 @@ import org.msf.records.events.user.UserDeleteFailedEvent;
 import org.msf.records.events.user.UserDeletedEvent;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
+import org.msf.records.utils.AsyncTaskRunner;
 import org.msf.records.utils.EventBusInterface;
 
 import com.android.volley.VolleyError;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -63,16 +65,19 @@ public class UserManager {
 
     private final UserStore mUserStore;
     private final EventBusInterface mEventBus;
-    private final Set<User> mKnownUsers = new HashSet<User>();
+    private final AsyncTaskRunner mAsyncTaskRunner;
 
+    private final Set<User> mKnownUsers = new HashSet<User>();
     private boolean mSynced = false;
     @Nullable private User mActiveUser;
 
     public UserManager(
             UserStore userStore,
-            EventBusInterface eventBus) {
-        mEventBus = Preconditions.checkNotNull(eventBus);
-        mUserStore = userStore;
+            EventBusInterface eventBus,
+            AsyncTaskRunner asyncTaskRunner) {
+        mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
+        mEventBus = checkNotNull(eventBus);
+        mUserStore = checkNotNull(userStore);
     }
 
     /**
@@ -85,7 +90,7 @@ public class UserManager {
      */
     public void loadKnownUsers() {
         if (!mSynced) {
-            new LoadKnownUsersTask().execute();
+            mAsyncTaskRunner.runTask(new LoadKnownUsersTask());
         } else {
             mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
         }
@@ -102,7 +107,7 @@ public class UserManager {
      * user was deleted on the server, this method will post a {@link ActiveUserUnsetEvent}.
      */
     public void syncKnownUsers() {
-        new SyncKnownUsersTask().execute();
+        mAsyncTaskRunner.runTask(new SyncKnownUsersTask());
     }
 
     /**
@@ -148,9 +153,9 @@ public class UserManager {
      * {@link UserAddFailedEvent} otherwise.
      */
     public void addUser(NewUser user) {
-        Preconditions.checkNotNull(user);
+        checkNotNull(user);
         // TODO(dxchen): Validate user.
-        new AddUserTask(user).execute();
+        mAsyncTaskRunner.runTask(new AddUserTask(user));
     }
 
     /**
@@ -160,12 +165,16 @@ public class UserManager {
      * a {@link UserDeleteFailedEvent} otherwise.
      */
     public void deleteUser(User user) {
-        Preconditions.checkNotNull(user);
+        checkNotNull(user);
         // TODO(dxchen): Validate user.
-        new DeleteUserTask(user).execute();
+        mAsyncTaskRunner.runTask(new DeleteUserTask(user));
     }
 
-    /** Loads known users from the database into memory. */
+    /**
+     * Loads known users from the database into memory.
+     *
+     * <p>Forces a network sync if the database has not been downloaded yet.
+     */
     private class LoadKnownUsersTask extends AsyncTask<Void, Void, Set<User>> {
         @Override
         protected Set<User> doInBackground(Void... voids) {
@@ -241,7 +250,7 @@ public class UserManager {
         private boolean mAlreadyExists;
 
         public AddUserTask(NewUser user) {
-            mUser = Preconditions.checkNotNull(user);
+            mUser = checkNotNull(user);
         }
 
         @Override
@@ -276,7 +285,7 @@ public class UserManager {
         private final User mUser;
 
         public DeleteUserTask(User user) {
-            mUser = Preconditions.checkNotNull(user);
+            mUser = checkNotNull(user);
         }
 
         @Override
