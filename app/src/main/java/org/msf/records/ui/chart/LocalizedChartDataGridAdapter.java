@@ -138,7 +138,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {
-            ArrayList<LocalizedObservation> emptyChart = LocalizedChartHelper.getEmptyChart(
+            List<LocalizedObservation> emptyChart = LocalizedChartHelper.getEmptyChart(
                     context.getContentResolver(),
                     LocalizedChartHelper.ENGLISH_LOCALE);
             for (LocalizedObservation ob : emptyChart) {
