@@ -17,7 +17,6 @@ import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
-import org.msf.records.utils.BigToast;
 import org.msf.records.utils.Colorizer;
 
 import javax.inject.Inject;
