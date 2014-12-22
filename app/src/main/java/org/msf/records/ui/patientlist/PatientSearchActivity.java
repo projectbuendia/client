@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.joanzapata.android.iconify.IconDrawable;
+import com.joanzapata.android.iconify.Iconify;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 
@@ -84,7 +87,20 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        MenuItem search = menu.findItem(R.id.action_search);
+        search.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_search)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+
+        MenuItem addPatient = menu.findItem(R.id.action_add);
+        addPatient.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_plus)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+
+        mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
 
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);

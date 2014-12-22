@@ -15,6 +15,9 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
+import com.joanzapata.android.iconify.IconDrawable;
+import com.joanzapata.android.iconify.Iconify;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -181,7 +184,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.overview, menu);
 
-        menu.findItem(R.id.action_relocate_patient).setOnMenuItemClickListener(
+        MenuItem assignLocation = menu.findItem(R.id.action_relocate_patient);
+        assignLocation.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_map_marker)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+        assignLocation.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
 
                     @Override
@@ -193,7 +201,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
         );
 
-        menu.findItem(R.id.action_update_chart).setOnMenuItemClickListener(
+        MenuItem updateChart = menu.findItem(R.id.action_update_chart);
+        updateChart.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_pencil_square_o)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+        updateChart.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
 
                     @Override
