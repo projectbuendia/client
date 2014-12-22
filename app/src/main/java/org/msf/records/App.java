@@ -8,7 +8,6 @@ import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.net.OpenMrsConnectionDetails;
-import org.msf.records.net.OpenMrsServer;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.user.UserManager;
@@ -34,8 +33,7 @@ public class App extends Application {
 
     private static UserManager sUserManager;
 
-    private static Server mServer;
-    private static OpenMrsXformsConnection mOpenMrsXformsConnection;
+    private static Server sServer;
 
     private static OpenMrsConnectionDetails sConnectionDetails;
 
@@ -44,6 +42,7 @@ public class App extends Application {
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject PatientChartModel mPatientChartModel;
+    @Inject Server mServer;
 
     @Override
     public void onCreate() {
@@ -58,10 +57,9 @@ public class App extends Application {
         synchronized (App.class) {
             sInstance = this;
 
-            sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
+            sUserManager = mUserManager; // TODO(dxchen): Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
-
-            mServer = new OpenMrsServer(sConnectionDetails);
+            sServer = mServer; // TODO(dxchen): Remove when Daggered.
         }
 
         // TODO(dxchen): Refactor this into the model classes.
@@ -90,7 +88,7 @@ public class App extends Application {
     }
 
     public static synchronized Server getServer() {
-        return mServer;
+        return sServer;
     }
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {

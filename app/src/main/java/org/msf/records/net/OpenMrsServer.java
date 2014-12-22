@@ -3,22 +3,16 @@ package org.msf.records.net;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
-import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +26,6 @@ import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.Utils;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,14 +36,18 @@ import java.util.List;
 public class OpenMrsServer implements Server {
 
     private static final String TAG = "OpenMrsServer";
-    private final Gson mGson;
     private final OpenMrsConnectionDetails mConnectionDetails;
+    private final RequestFactory mRequestFactory;
+    private final Gson mGson;
 
-    public OpenMrsServer(OpenMrsConnectionDetails connectionDetails) {
-        // TODO(kpy): Inject a Gson instance here.
-        mGson = new GsonBuilder().registerTypeAdapter(
-                LocalDate.class, new LocalDateSerializer()).create();
+    public OpenMrsServer(
+            OpenMrsConnectionDetails connectionDetails,
+            RequestFactory requestFactory,
+            Gson gson) {
         mConnectionDetails = connectionDetails;
+        mRequestFactory = requestFactory;
+        // TODO(kpy): Inject a Gson instance here.
+        mGson = gson;
     }
 
     /**
@@ -103,7 +100,9 @@ public class OpenMrsServer implements Server {
             throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/patient",
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/patient",
                 json,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -133,7 +132,8 @@ public class OpenMrsServer implements Server {
             throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
                 "/patient/" + patientUuid,
                 json,
                 new Response.Listener<JSONObject>() {
@@ -172,7 +172,9 @@ public class OpenMrsServer implements Server {
             throw new RuntimeException(e);
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/user",
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/user",
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -188,6 +190,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
     }
 
@@ -196,7 +199,8 @@ public class OpenMrsServer implements Server {
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener,
                            final String logTag) {
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
                 "/patient/" + patientId,
                 null,
                 new Response.Listener<JSONObject>() {
@@ -227,7 +231,8 @@ public class OpenMrsServer implements Server {
                              final Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener, final String logTag) {
         String query = filterQueryTerm != null ? filterQueryTerm : "";
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
                 "/patient?q=" + Utils.urlEncode(query),
                 null,
                 new Response.Listener<JSONObject>() {
@@ -248,24 +253,6 @@ public class OpenMrsServer implements Server {
                 wrapErrorListener(errorListener)
         );
         mConnectionDetails.getVolley().addToRequestQueue(request, logTag);
-    }
-
-    class LocalDateSerializer implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
-        @Override
-        public JsonElement serialize(LocalDate date, Type type, JsonSerializationContext context) {
-            return new JsonPrimitive(date.toString());
-        }
-
-        @Override
-        public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext context)
-            throws JsonParseException {
-            String text = json.getAsString();
-            try {
-                return LocalDate.parse(text);
-            } catch (IllegalArgumentException e) {
-                throw new JsonParseException(e);
-            }
-        }
     }
 
     private Patient patientFromJson(JSONObject object) throws JSONException {
@@ -293,8 +280,9 @@ public class OpenMrsServer implements Server {
                           Response.ErrorListener errorListener,
                           final String logTag) {
         String query = filterQueryTerm != null ? filterQueryTerm : "";
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-                mConnectionDetails, "/user?q=" + Utils.urlEncode(query),
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/user?q=" + Utils.urlEncode(query),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -343,7 +331,9 @@ public class OpenMrsServer implements Server {
             throw new RuntimeException(e);
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails, "/location",
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/location",
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -377,8 +367,9 @@ public class OpenMrsServer implements Server {
             return;
         }
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
-                "/location/"+location.uuid,
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/location/" + location.uuid,
                 requestBody,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -394,7 +385,8 @@ public class OpenMrsServer implements Server {
     public void deleteLocation(String locationUuid,
                                final Response.ErrorListener errorListener,
                                final String logTag) {
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(mConnectionDetails,
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
                 Request.Method.DELETE, "/location/" + locationUuid,
                 null,
                 null,
@@ -409,7 +401,7 @@ public class OpenMrsServer implements Server {
                               final String logTag) {
 
 
-        OpenMrsJsonRequest request = new OpenMrsJsonRequest(
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails, "/location",
                 null,
                 new Response.Listener<JSONObject>() {
