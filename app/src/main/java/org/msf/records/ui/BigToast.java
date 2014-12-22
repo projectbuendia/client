@@ -20,6 +20,14 @@ public final class BigToast {
                 String.format(context.getResources().getConfiguration().locale, message, args));
     }
 
+    public static void show(Context context, int messageResource) {
+        show(context, context.getResources().getString(messageResource));
+    }
+
+    public static void show(Context context, int messageResource, Object... args) {
+        show(context, context.getResources().getString(messageResource), args);
+    }
+
     private BigToast() {
         // Prevent instantiation.
     }

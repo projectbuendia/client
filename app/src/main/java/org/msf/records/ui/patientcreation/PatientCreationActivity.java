@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
@@ -326,13 +325,14 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         public void showErrorMessage(String error) {
             mIsCreatePending = false;
             setUiEnabled(true);
-            BigToast.show(PatientCreationActivity.this, "Unable to add patient: %s", error);
+            BigToast.show(PatientCreationActivity.this, R.string.patient_creation_error, error);
         }
 
         @Override
         public void quitActivity() {
             mIsCreatePending = false;
             setUiEnabled(true);
+            BigToast.show(PatientCreationActivity.this, R.string.patient_creation_success);
             finish();
         }
     }
