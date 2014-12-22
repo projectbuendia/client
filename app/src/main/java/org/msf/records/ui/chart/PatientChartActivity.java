@@ -2,9 +2,11 @@ package org.msf.records.ui.chart;
 
 import static org.msf.records.utils.Utils.getSystemProperty;
 
+import org.msf.records.R;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,10 +15,13 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.msf.records.App;
-import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
@@ -33,12 +38,15 @@ import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.OdkActivityLauncher;
+import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.PrepopulatableFields;
+
+import de.greenrobot.event.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -48,11 +56,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 
 /**
  * Activity displaying a patient's vitals and charts.
@@ -130,6 +133,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         ButterKnife.inject(this);
         App.getInstance().inject(this);
 
+        MinimalHandler minimalHandler = new MinimalHandler() {
+            private final Handler mHandler = new Handler();
+            @Override
+            public void post(Runnable runnable) {
+                mHandler.post(runnable);
+            }
+        };
+
         mController = new PatientChartController(
                 mModel,
                 new OpenMrsChartServer(App.getConnectionDetails()),
@@ -140,7 +151,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mLocalizedChartHelper,
                 controllerState,
                 mPatientModel,
-                mSyncManager);
+                mSyncManager,
+                minimalHandler);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -319,20 +331,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mVitalPcr.setText("Not\nImplemented");
         }
 
-	    @Override
-	    public void setObservationHistory(List<LocalizedObservation> observations) {
-	    	if (mChartView != null) {
-	    		mRootView.removeView(mChartView);
-	    	}
+        @Override
+        public void setObservationHistory(List<LocalizedObservation> observations) {
+            if (mChartView != null) {
+                mRootView.removeView(mChartView);
+            }
             if (useRecyclerView()) {
                 mChartView = getChartViewNew(observations);
             } else {
                 mChartView = getChartView(observations);
             }
-	    	mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-	    	mRootView.addView(mChartView);
-	    	mRootView.invalidate();
-	    }
+            mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            mRootView.addView(mChartView);
+            mRootView.invalidate();
+        }
 
         boolean useRecyclerView() {
             return "1".equalsIgnoreCase(getSystemProperty("debug.rec"));
