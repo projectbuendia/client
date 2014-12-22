@@ -12,14 +12,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Optional;
 
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
