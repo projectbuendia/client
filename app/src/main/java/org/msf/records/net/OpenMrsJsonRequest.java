@@ -17,7 +17,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
     private String mUsername;
     private String mPassword;
 
-    public OpenMrsJsonRequest(String username, String password, String url, JSONObject jsonRequest,
+    private OpenMrsJsonRequest(String username, String password, String url, JSONObject jsonRequest,
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
         super(url, jsonRequest, listener, errorListener);
