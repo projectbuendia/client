@@ -33,7 +33,6 @@ import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.OdkActivityLauncher;
-import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Utils;
@@ -82,6 +81,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject LocationManager mLocationManager;
     @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
     @Inject SyncManager mSyncManager;
+    @Inject LocalizedChartHelper mLocalizedChartHelper;
 
     @Nullable private View mChartView;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
@@ -105,10 +105,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
     @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
 
-    public PatientChartController getController() {
-        return mController;
-    }
-
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
@@ -119,18 +115,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
                 OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
                         mUpdateClientCache.get(), resultCode, data);
-            }
-        };
-
-        ObservationsProvider observationsProvider = new ObservationsProvider() {
-            @Override
-            public Map<String, LocalizedObservation> getMostRecentObservations(
-                    String patientUuid) {
-                return LocalizedChartHelper.getMostRecentObservations(getContentResolver(), patientUuid);
-            }
-            @Override
-            public List<LocalizedObservation> getObservations(String patientUuid) {
-                return LocalizedChartHelper.getObservations(getContentResolver(), patientUuid);
             }
         };
 
@@ -153,7 +137,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mCrudEventBusProvider.get(),
                 mMyUi,
                 odkResultSender,
-                observationsProvider,
+                mLocalizedChartHelper,
                 controllerState,
                 mPatientModel,
                 mSyncManager);
@@ -247,6 +231,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("General health status of the patient");
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
+    }
+
     /** Updates a {@link VitalView} to display a new observation value. */
     private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
         if (observation != null) {
@@ -280,7 +270,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-
             showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
             showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
             showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
@@ -418,7 +407,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (mIsFetchingXform) {
                 return;
             }
-            
+
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
                     PatientChartActivity.this, formUuid, requestCode, patient, fields);

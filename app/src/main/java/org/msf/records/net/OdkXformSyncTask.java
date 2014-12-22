@@ -61,7 +61,10 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 });
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
-                    Preconditions.checkArgument(cursor.getCount() == 1);
+                    if (cursor.getCount() != 1) {
+                        throw new IllegalArgumentException("Saw " + cursor.getCount()
+                                + " rows for " + proposedPath.getPath());
+                    }
                     Preconditions.checkArgument(cursor.getColumnCount() == 1);
                     cursor.moveToNext();
                     long existingTimestamp = cursor.getLong(0);

@@ -21,6 +21,10 @@ import dagger.Provides;
 )
 public class UtilsModule {
 
+    @Provides @Singleton AsyncTaskRunner provideAsyncTaskRunner() {
+        return AsyncTaskRunner.DEFAULT;
+    }
+
     @Provides @Singleton ActivityHierarchyServer provideActivityHierarchyServer() {
         return ActivityHierarchyServer.NONE;
     }

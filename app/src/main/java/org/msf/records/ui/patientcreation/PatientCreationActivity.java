@@ -25,8 +25,8 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.BaseLoggedInActivity;
+import org.msf.records.ui.BigToast;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
-import org.msf.records.utils.BigToast;
 import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;

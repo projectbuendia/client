@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 
 import de.greenrobot.event.EventBus;
 
-public final class EventBusWrapper implements EventBusRegistrationInterface {
+public final class EventBusWrapper implements EventBusInterface {
 	private final EventBus mEventBus;
 
 	public EventBusWrapper(EventBus eventBus) {
@@ -19,5 +19,10 @@ public final class EventBusWrapper implements EventBusRegistrationInterface {
 	@Override
 	public void unregister(Object receiver) {
 		mEventBus.unregister(receiver);
+	}
+
+	@Override
+    public void post(Object value) {
+	    mEventBus.post(value);
 	}
 }

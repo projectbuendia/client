@@ -45,14 +45,18 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
     private final Context mContext;
     private String mQueryFilterTerm;
     private SimpleSelectionFilter mFilter;
+    private final LocalizedChartHelper mLocalizedChartHelper;
 
     public ExpandablePatientListAdapter(
-            Cursor cursor, Context context, String queryFilterTerm,
+            Cursor cursor,
+            Context context,
+            String queryFilterTerm,
             SimpleSelectionFilter filter) {
         super(cursor, context);
         mContext = context;
         mQueryFilterTerm = queryFilterTerm;
         mFilter = filter;
+        mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
     }
 
     public SimpleSelectionFilter getSelectionFilter() {
@@ -121,9 +125,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
     @Override
     protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
-        // This can leak a cursor, but is also not safe to just do a close :-(
-        // TODO(nfortescue): sort out cursor lifecycle
-        int patientCount = getChildrenCursor(cursor).getCount();
+        int patientCount = -1;
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
         @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
@@ -132,6 +134,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
                         LocationTree.SINGLETON_INSTANCE.getLocationByUuid(locationUuid);
 	        if (location != null) {
 	            tentName = location.toString();
+                patientCount = location.getPatientCount();
 	        }
         }
 
@@ -162,7 +165,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         boolean pregnant = false;
         String condition = null;
         Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
-                LocalizedChartHelper.getMostRecentObservations(mContext.getContentResolver(), uuid);
+                mLocalizedChartHelper.getMostRecentObservations(uuid);
         if (observationMap != null) {
             pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID) &&
                     observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);

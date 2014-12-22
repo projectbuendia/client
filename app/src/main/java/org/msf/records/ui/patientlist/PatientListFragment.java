@@ -23,7 +23,7 @@ import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
@@ -218,7 +218,7 @@ public class PatientListFragment extends ProgressFragment implements
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(this);
-        mFilter = FilterManager.getDefaultFilter();
+        mFilter = PatientFilters.getDefaultFilter();
         mPatientAdapter = getAdapterInstance();
         mListView.setAdapter(mPatientAdapter);
         filterBy(mFilter);

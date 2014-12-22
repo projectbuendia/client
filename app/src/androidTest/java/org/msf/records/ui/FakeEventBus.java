@@ -1,30 +1,38 @@
 package org.msf.records.ui;
 
+import static junit.framework.Assert.fail;
+
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.utils.EventBusInterface;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+
+import de.greenrobot.event.EventBus;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.msf.records.events.CrudEventBus;
-import org.msf.records.utils.EventBusRegistrationInterface;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
-
-import de.greenrobot.event.EventBus;
+import junit.framework.Assert;
 
 /**
  * Fake event bus implementation. The real {@link EventBus} is not suitable for unit tests
  * because it calls methods on a separate thread to the test thread. This is because the
  * 'main thread' is not the same as the test thread.
  */
-public final class FakeEventBus implements EventBusRegistrationInterface, CrudEventBus {
+public final class FakeEventBus implements EventBusInterface, CrudEventBus {
 
 	private static final String METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD = "onEventMainThread";
 	private static final Set<String> IGNORED_METHOD_NAMES = ImmutableSet.of(
 			"equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait");
 
 	private final Set<Object> mRegisteredReceivers = new HashSet<Object>();
+	private final List<Object> mEventLog = Lists.newArrayList();
 
 	@Override
 	public void register(Object receiver) {
@@ -55,8 +63,19 @@ public final class FakeEventBus implements EventBusRegistrationInterface, CrudEv
 		return mRegisteredReceivers.size();
 	}
 
+	public void assertEventLogContains(Object event) {
+	    if (!mEventLog.contains(event)) {
+	        fail("Expected event not present. Actual events: " + mEventLog);
+	    }
+	}
+
+	public List<Object> getEventLog() {
+	    return ImmutableList.copyOf(mEventLog);
+	}
+
 	@Override
 	public void post(Object event) {
+	    mEventLog.add(event);
 		for (Object receiver : mRegisteredReceivers) {
 			for (Method method : receiver.getClass().getMethods()) {
 				if (method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD)) {

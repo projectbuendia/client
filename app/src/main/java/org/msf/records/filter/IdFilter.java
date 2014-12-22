@@ -5,7 +5,7 @@ import org.msf.records.sync.PatientProviderContract;
 /**
  * IdFilter is a SimpleSelectionFilter that filters by user-specified id.
  */
-public class IdFilter implements SimpleSelectionFilter {
+final class IdFilter implements SimpleSelectionFilter {
     @Override
     public String getSelectionString() {
         return PatientProviderContract.PatientColumns._ID + " LIKE ?";

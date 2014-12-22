@@ -1,5 +1,7 @@
 package org.msf.records.filter;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,11 +9,11 @@ import java.util.List;
  * A FilterGroup is a filter that acts as a container for multiple filters or filter groups, with
  * an optional name used for string representations.
  */
-public class FilterGroup implements SimpleSelectionFilter {
+public final class FilterGroup implements SimpleSelectionFilter {
     private static final String DEFAULT_FILTER_NAME = "";
 
     private final FilterType mFilterType;
-    private final List<SimpleSelectionFilter> mFilters;
+    private final ImmutableList<SimpleSelectionFilter> mFilters;
     private String mName = DEFAULT_FILTER_NAME;
 
     /**
@@ -23,21 +25,18 @@ public class FilterGroup implements SimpleSelectionFilter {
         AND
     }
 
-    // Assume AND by default.
+    /** Assume AND by default. */
     public FilterGroup(SimpleSelectionFilter... filters) {
         this(FilterType.AND, filters);
     }
 
     public FilterGroup(FilterType filterType, SimpleSelectionFilter... filters) {
-        mFilters = new ArrayList<SimpleSelectionFilter>();
-        for (SimpleSelectionFilter filter : filters) {
-            mFilters.add(filter);
-        }
+        mFilters = ImmutableList.copyOf(filters);
         mFilterType = filterType;
     }
 
     public FilterGroup(FilterType filterType, List<SimpleSelectionFilter> filters) {
-        mFilters = filters;
+        mFilters = ImmutableList.copyOf(filters);
         mFilterType = filterType;
     }
 

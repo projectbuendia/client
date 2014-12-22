@@ -48,12 +48,14 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
     private final List<String> columnHeaders = new ArrayList<>();
+    private final LocalizedChartHelper mLocalizedChartHelper;
 
     public LocalizedChartDataGridAdapter(Context context,
                                          List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         mContext = context;
-        this.mLayoutInflater = layoutInflater;
+        mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
+        mLayoutInflater = layoutInflater;
         Row row = null;
         TreeSet<LocalDate> days = new TreeSet<>();
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
@@ -138,9 +140,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {
-            ArrayList<LocalizedObservation> emptyChart = LocalizedChartHelper.getEmptyChart(
-                    context.getContentResolver(),
-                    LocalizedChartHelper.ENGLISH_LOCALE);
+            List<LocalizedObservation> emptyChart =
+                    mLocalizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
             for (LocalizedObservation ob : emptyChart) {
                 rows.add(new Row(ob.conceptUuid, ob.conceptName));
             }

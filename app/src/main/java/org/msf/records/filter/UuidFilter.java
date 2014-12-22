@@ -3,9 +3,9 @@ package org.msf.records.filter;
 import org.msf.records.sync.PatientProviderContract;
 
 /**
- * Created by shanee on 12/3/14.
+ * Returns only the patient with the given UUID.
  */
-public class UuidFilter implements SimpleSelectionFilter {
+public final class UuidFilter implements SimpleSelectionFilter {
 
     @Override
     public String getSelectionString() {

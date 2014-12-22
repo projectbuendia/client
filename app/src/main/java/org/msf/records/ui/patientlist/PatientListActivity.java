@@ -9,14 +9,13 @@ import android.view.MenuItem;
 
 import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.ui.MainScreenFragment;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.odk.collect.android.tasks.DiskSyncTask;
-
 
 /**
  * An activity representing a list of Patients.
@@ -63,9 +62,9 @@ public class PatientListActivity extends PatientSearchActivity {
         setupCustomActionBar(getActionBar().getSelectedNavigationIndex());
     }
 
-    private void setupCustomActionBar(int selectedFilter){
-        final SimpleSelectionFilter[] filters = FilterManager.getFiltersForDisplay();
-        SectionedSpinnerAdapter adapter = new SectionedSpinnerAdapter<SimpleSelectionFilter>(
+    private void setupCustomActionBar(int selectedFilter) {
+        final SimpleSelectionFilter[] filters = PatientFilters.getFiltersForDisplay();
+        SectionedSpinnerAdapter<SimpleSelectionFilter> adapter = new SectionedSpinnerAdapter<>(
                 this,
                 R.layout.patient_list_spinner_dropdown_item,
                 R.layout.patient_list_spinner_expanded_dropdown_item,

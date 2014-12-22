@@ -5,9 +5,6 @@ import static org.mockito.Mockito.when;
 
 import android.test.AndroidTestCase;
 
-import java.util.List;
-import java.util.Map;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.data.app.AppModel;
@@ -18,11 +15,13 @@ import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
-import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for {@link PatientChartController}.
@@ -42,7 +41,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private OpenMrsChartServer mMockServer;
 	@Mock private PatientChartController.Ui mMockUi;
 	@Mock private OdkResultSender mMockOdkResultSender;
-	@Mock private ObservationsProvider mMockObservationsProvider;
+	@Mock private LocalizedChartHelper mMockObservationsProvider;
 	@Mock private PatientModel mMockPatientModel;
 	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
