@@ -114,4 +114,6 @@
     <string name="patient_creation_create_busy">Working...</string>
     <string name="patient_creation_cancel">Cancel</string>
     <string name="title_add_patient_cancel">Discard changes?</string>
+    <string name="patient_creation_success">New patient has been added.</string>
+    <string name="patient_creation_error">Unable to add patient: %s</string>
 </resources>
