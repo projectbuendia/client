@@ -9,8 +9,8 @@
 
     <TextView
         android:id="@+id/data_grid_cell_chart_text"
-        android:layout_width="40dp"
-        android:layout_height="@dimen/chart_grid_textView_height"
+        android:layout_width="@dimen/chart_grid_cell_textview_width"
+        android:layout_height="@dimen/chart_grid_cell_textview_height"
         android:layout_gravity="center"
         android:gravity="center"
         android:scaleType="fitXY"
