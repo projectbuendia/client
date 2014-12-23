@@ -31,8 +31,17 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private static final String TAG = "LocalizedChartDataGridAdapter";
 
-    private static class Row {
+    private static final String EMPTY_STRING = "";
+    private static final View.OnClickListener notesOnClickListener =
+            new View.OnClickListener() {
+                @Override public void onClick(View view) {
+                    new AlertDialog.Builder(view.getContext())
+                            .setMessage((String)view.getTag())
+                            .show();
+                }
+            };
 
+    private static class Row {
         private final String mConceptUuid;
         private final String mName;
         private final HashMap<String, String> datesToValues = new HashMap<>();
@@ -174,22 +183,20 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     }
 
     @Override
-    public void fillRowHeader(int row, View view) {
-        TextView textView =
-                (TextView) view.findViewById(R.id.data_grid_header_text);
+    public void fillRowHeader(int row, View view, TextView textView) {
         textView.setText(rows.get(row).mName);
-
-        textView.setBackgroundResource(
-                (row % 2 == 0)
-                        ? R.drawable.chart_grid_background_light
-                        : R.drawable.chart_grid_background_dark);
     }
 
     @Override
     public View getRowHeader(int row, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_row_header_chart, null /*root*/);
-        fillRowHeader(row, view);
+        TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
+        textView.setBackgroundResource(
+                (row % 2 == 0)
+                        ? R.drawable.chart_grid_background_light
+                        : R.drawable.chart_grid_background_dark);
+        fillRowHeader(row, view, textView);
         return view;
     }
 
@@ -197,35 +204,45 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     public View getColumnHeader(int column, View convertView, ViewGroup parent) {
         TextView textView = (TextView) mLayoutInflater.inflate(
                 R.layout.data_grid_column_header_chart, null /*root*/);
-        textView.setText(columnHeaders.get(column));
+        fillColumnHeader(column, textView);
         return textView;
+    }
+
+    @Override
+    public void fillColumnHeader(int column, TextView textView) {
+        textView.setText(columnHeaders.get(column));
     }
 
     @Override
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_cell_chart_text, null /*root*/);
-        fillCell(rowIndex, columnIndex, view);
+        view.setBackgroundResource((rowIndex % 2 == 0)
+                ? R.drawable.chart_grid_background_light
+                : R.drawable.chart_grid_background_dark);
+        TextView textView = (TextView) view.findViewById(R.id.data_grid_cell_chart_text);
+        fillCell(rowIndex, columnIndex, view, textView);
         return view;
     }
 
     @Override
-    public void fillCell(int rowIndex, int columnIndex, View view) {
+    public void fillCell(int rowIndex, int columnIndex, View view, TextView textView) {
         final Row rowData = rows.get(rowIndex);
         final String dateKey = columnHeaders.get(columnIndex);
-
-        TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
+        String text = EMPTY_STRING;
+        int backgroundResource = 0;
+        View.OnClickListener onClickListener = null;
 
         if (Concept.TEMPERATURE_UUID.equals(rowData.mConceptUuid)) {
             String temperatureString = rowData.datesToValues.get(dateKey);
             if (temperatureString != null) {
                 try {
                     double temperature = Double.parseDouble(temperatureString);
-                    textView.setText(String.format("%.1f", temperature));
+                    text = String.format("%.1f", temperature);
                     if (temperature <= 37.5) {
-                        textView.setBackgroundResource(R.drawable.chart_cell_good);
+                        backgroundResource = R.drawable.chart_cell_good;
                     } else {
-                        textView.setBackgroundResource(R.drawable.chart_cell_bad);
+                        backgroundResource = R.drawable.chart_cell_bad;
                     }
                 } catch (NumberFormatException e) {
                     Log.w(TAG, "Temperature format was invalid", e);
@@ -234,26 +251,19 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         } else if (Concept.NOTES_UUID.equals(rowData.mConceptUuid)) {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
-                textView.setBackgroundResource(R.drawable.chart_cell_active_pressable);
-                textView.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        new AlertDialog.Builder(mContext)
-                                .setMessage(rowData.datesToValues.get(dateKey))
-                                .show();
-                    }
-                });
+                backgroundResource = R.drawable.chart_cell_active_pressable;
+                // If the onClickListener is updated, it doesn't matter if the tag is stale.
+                textView.setTag(rowData.datesToValues.get(dateKey));
+                onClickListener = notesOnClickListener;
             }
         } else {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
-                textView.setBackgroundResource(R.drawable.chart_cell_active);
+                backgroundResource = R.drawable.chart_cell_active;
             }
         }
-
-        view.setBackgroundResource((rowIndex % 2 == 0)
-                ? R.drawable.chart_grid_background_light
-                : R.drawable.chart_grid_background_dark);
-
+        textView.setText(text);
+        textView.setBackgroundResource(backgroundResource);
+        textView.setOnClickListener(onClickListener);
     }
 }
