@@ -46,6 +46,7 @@ import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -375,7 +376,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         private View getChartViewNew(List<LocalizedObservation> observations) {
-            return null;
+            LocalizedChartDataGridAdapter dataGridAdapter =
+                    new LocalizedChartDataGridAdapter(
+                            PatientChartActivity.this,
+                            observations,
+                            getLayoutInflater());
+            FastDataGridView dataGridView = new FastDataGridView(
+                    PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
+            return dataGridView.createView();
         }
 
         @Override
