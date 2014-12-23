@@ -2,6 +2,8 @@ package org.msf.records.ui.chart;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +42,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                             .show();
                 }
             };
+    private final Drawable backgroundLight;
+    private final Drawable backgroundDark;
 
     private static class Row {
         private final String mConceptUuid;
@@ -65,6 +69,11 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         mContext = context;
         mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
+        Resources resources = context.getResources();
+        this.backgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
+        this.backgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
+
+
         Row row = null;
         TreeSet<LocalDate> days = new TreeSet<>();
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
@@ -192,12 +201,14 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_row_header_chart, null /*root*/);
         TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
-        textView.setBackgroundResource(
-                (row % 2 == 0)
-                        ? R.drawable.chart_grid_background_light
-                        : R.drawable.chart_grid_background_dark);
+        setCellBackgroundForViewType(textView, row % 2);
         fillRowHeader(row, view, textView);
         return view;
+    }
+
+    @Override
+    public void setCellBackgroundForViewType(View view, int viewType) {
+        view.setBackground(viewType == 0 ? backgroundLight : backgroundDark);
     }
 
     @Override
@@ -217,9 +228,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_cell_chart_text, null /*root*/);
-        view.setBackgroundResource((rowIndex % 2 == 0)
-                ? R.drawable.chart_grid_background_light
-                : R.drawable.chart_grid_background_dark);
+        setCellBackgroundForViewType(view, rowIndex % 2);
         TextView textView = (TextView) view.findViewById(R.id.data_grid_cell_chart_text);
         fillCell(rowIndex, columnIndex, view, textView);
         return view;
