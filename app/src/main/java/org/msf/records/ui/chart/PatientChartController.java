@@ -390,13 +390,10 @@ final class PatientChartController {
 
             // TODO(dxchen): Displaying the observations part of the UI takes a lot of
             // main-thread time. This delays rendering of the rest of UI.
-            // To allow the rest of the UI to be dislayed before we attempt to populate
+            // To allow the rest of the UI to be displayed before we attempt to populate
             // the observations, we delay the observation update slightly.
-            // We need this hack for two reasons:
-            // - We create all the observation views up front, and instantiating them all
-            //   takes a lot of time. We should change this to use view recycling.
-            // - We load observations on the main thread. We should change this to use a background
-            //   thread. Either an async task or using CrudEventBus events.
+            // We need this hack because we load observations on the main thread. We should change
+            // this to use a background thread. Either an async task or using CrudEventBus events.
 
             mMainThreadHandler.post(new Runnable() {
                 @Override

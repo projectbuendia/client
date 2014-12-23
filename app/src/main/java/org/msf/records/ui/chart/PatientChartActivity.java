@@ -353,6 +353,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (useRecyclerView()) {
                 mChartView = getChartViewNew(observations);
             } else {
+                // TODO(sdoerner): Remove this old implementation once the new chart grid has got
+                //                 some testing and feedback.
                 mChartView = getChartView(observations);
             }
             mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -361,7 +363,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         boolean useRecyclerView() {
-            return "1".equalsIgnoreCase(getSystemProperty("debug.rec"));
+            return !"1".equalsIgnoreCase(getSystemProperty("debug.useOldChartGrid"));
         }
 
         private View getChartView(List<LocalizedObservation> observations) {
