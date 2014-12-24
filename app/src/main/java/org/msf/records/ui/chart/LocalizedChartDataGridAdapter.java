@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.TextView;
 
 import org.joda.time.DateTime;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+
+import javax.annotation.Nullable;
 
 /**
  * Attach the local cache of chart data into the necessary view for the chart history.
@@ -229,16 +232,22 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_cell_chart_text, null /*root*/);
         setCellBackgroundForViewType(view, rowIndex % 2);
-        TextView textView = (TextView) view.findViewById(R.id.data_grid_cell_chart_text);
-        fillCell(rowIndex, columnIndex, view, textView);
+        ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
+        fillCell(rowIndex, columnIndex, view, viewStub, null);
         return view;
     }
 
     @Override
-    public void fillCell(int rowIndex, int columnIndex, View view, TextView textView) {
+    public @Nullable TextView fillCell(
+            int rowIndex, int columnIndex, View view,
+            @Nullable ViewStub viewStub, @Nullable TextView textView) {
+        if (viewStub == null && textView == null) {
+            throw new IllegalArgumentException("Either viewStub or textView have to be set.");
+        }
         final Row rowData = rows.get(rowIndex);
         final String dateKey = columnHeaders.get(columnIndex);
         String text = EMPTY_STRING;
+        String textViewTag = null;
         int backgroundResource = 0;
         View.OnClickListener onClickListener = null;
 
@@ -261,8 +270,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
                 backgroundResource = R.drawable.chart_cell_active_pressable;
-                // If the onClickListener is updated, it doesn't matter if the tag is stale.
-                textView.setTag(rowData.datesToValues.get(dateKey));
+                textViewTag = rowData.datesToValues.get(dateKey);
                 onClickListener = notesOnClickListener;
             }
         } else {
@@ -271,8 +279,17 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 backgroundResource = R.drawable.chart_cell_active;
             }
         }
-        textView.setText(text);
-        textView.setBackgroundResource(backgroundResource);
-        textView.setOnClickListener(onClickListener);
+
+        if (textView == null && backgroundResource != 0) {
+            // We need the textView, so inflate it.
+            textView = (TextView) viewStub.inflate();
+        }
+        if (textView != null) {
+            textView.setText(text);
+            textView.setTag(textViewTag);
+            textView.setBackgroundResource(backgroundResource);
+            textView.setOnClickListener(onClickListener);
+        }
+        return textView;
     }
 }

@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -111,6 +112,16 @@ public class FastDataGridView {
         }
     }
 
+    private static final class CellViewHolder extends RecyclerView.ViewHolder {
+        public TextView textView = null;
+        public ViewStub viewStub;
+        public CellViewHolder(View itemView, ViewStub viewStub) {
+            super(itemView);
+            this.viewStub = viewStub;
+        }
+    }
+
+
     private static final class CellAdapter extends RecyclerView.Adapter {
         private final DataGridAdapter mDataGridAdapter;
         private final LayoutInflater mLayoutInflater;
@@ -134,17 +145,23 @@ public class FastDataGridView {
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mLayoutInflater.inflate(
                     R.layout.data_grid_cell_chart_text, parent, false /* attachToRoot */);
-            TextView textView = (TextView) view.findViewById(R.id.data_grid_cell_chart_text);
+            ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
             mDataGridAdapter.setCellBackgroundForViewType(view, viewType);
-            return new ViewHolder(view, textView);
+            return new CellViewHolder(view, viewStub);
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             int columnIndex = position / mDataGridAdapter.getRowCount();
             int rowIndex = position % mDataGridAdapter.getRowCount();
-            mDataGridAdapter.fillCell(
-                    rowIndex, columnIndex, holder.itemView, ((ViewHolder)holder).textView);
+            CellViewHolder viewHolder = (CellViewHolder) holder;
+            viewHolder.textView = mDataGridAdapter.fillCell(rowIndex, columnIndex,
+                    viewHolder.itemView, viewHolder.viewStub, viewHolder.textView);
+            if (viewHolder.textView != null) {
+                // After inflation, the viewStub is no longer part of the view hierarchy, so let it
+                // be garbage collected.
+                viewHolder.viewStub = null;
+            }
         }
 
         @Override
