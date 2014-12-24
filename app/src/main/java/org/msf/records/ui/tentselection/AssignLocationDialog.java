@@ -42,6 +42,7 @@ public final class AssignLocationDialog
     @Nullable private TentListAdapter mAdapter;
 
     private final Context mContext;
+    private final Runnable mOnDismiss;
     private final LocationManager mLocationManager;
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
@@ -64,11 +65,12 @@ public final class AssignLocationDialog
 
     public AssignLocationDialog(
             Context context,
-            LocationManager locationManager,
+            Runnable onDismiss, LocationManager locationManager,
             EventBusRegistrationInterface eventBus,
             Optional<String> currentLocationUuid,
             TentSelectedCallback tentSelectedCallback) {
         mContext = checkNotNull(context);
+        this.mOnDismiss = checkNotNull(onDismiss);
         mLocationManager = checkNotNull(locationManager);
         mEventBus = checkNotNull(eventBus);
         mCurrentLocationUuid = currentLocationUuid;
@@ -144,6 +146,7 @@ public final class AssignLocationDialog
     @Override
     public void onDismiss(DialogInterface dialog) {
         mEventBus.unregister(mEventBusSubscriber);
+        mOnDismiss.run();
     }
 
     private final class EventBusSubscriber {

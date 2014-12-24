@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.MenuItem;
 
 import org.msf.records.App;
 import org.msf.records.data.app.AppModel;
@@ -331,6 +332,7 @@ final class PatientChartController {
 
     public void showAssignLocationDialog(
             Context context,
+            final MenuItem menuItem,
             final LocationManager locationManager) {
         TentSelectedCallback callback =
                 new TentSelectedCallback() {
@@ -346,13 +348,21 @@ final class PatientChartController {
                     }
                 };
 
+        Runnable reEnableButton = new Runnable() {
+            @Override
+            public void run() {
+                menuItem.setEnabled(true);
+            }
+        };
         mAssignLocationDialog = new AssignLocationDialog(
                 context,
+                reEnableButton,
                 locationManager,
                 new EventBusWrapper(EventBus.getDefault()),
                 Optional.of(mPatient.locationUuid),
                 callback);
 
+        menuItem.setEnabled(false);
         mAssignLocationDialog.show();
     }
 

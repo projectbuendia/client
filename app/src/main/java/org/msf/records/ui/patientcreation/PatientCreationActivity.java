@@ -130,9 +130,17 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_creation_button_change_location)
     void onChangeLocationClick() {
+        final View button = findViewById(R.id.patient_creation_button_change_location);
+        button.setEnabled(false);
+        Runnable reEnableButton = new Runnable() {
+            @Override
+            public void run() {
+                button.setEnabled(true);
+            }
+        };
         new AssignLocationDialog(
                 this,
-                mLocationManager,
+                reEnableButton, mLocationManager,
                 new EventBusWrapper(EventBus.getDefault()),
                 mLocationUuid == null ? Optional.<String>absent() : Optional.of(mLocationUuid),
                 mTentSelectedCallback).show();

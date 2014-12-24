@@ -185,7 +185,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.overview, menu);
 
-        MenuItem assignLocation = menu.findItem(R.id.action_relocate_patient);
+        final MenuItem assignLocation = menu.findItem(R.id.action_relocate_patient);
         assignLocation.setIcon(
                 new IconDrawable(this, Iconify.IconValue.fa_map_marker)
                         .color(0xCCFFFFFF)
@@ -196,7 +196,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         mController.showAssignLocationDialog(
-                                PatientChartActivity.this, mLocationManager);
+                                PatientChartActivity.this, assignLocation,  mLocationManager);
                         return true;
                     }
                 }
