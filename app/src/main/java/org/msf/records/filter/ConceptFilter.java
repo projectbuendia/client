@@ -5,10 +5,10 @@ import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.PatientProviderContract;
 
 /**
- * ConceptFilter returns only patients with a concept present and matching the given value for the
+ * Returns only patients with a concept present and matching the given value for the
  * most recent observation.
  */
-public class ConceptFilter implements SimpleSelectionFilter {
+public final class ConceptFilter implements SimpleSelectionFilter {
     // WHERE subclause returning only patients that had the concept with the given value in
     // the latest observation.
     private static final String CONCEPT_SUBQUERY =

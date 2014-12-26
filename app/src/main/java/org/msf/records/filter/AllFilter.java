@@ -1,9 +1,9 @@
 package org.msf.records.filter;
 
 /**
- * AllFilter is a pass-through filter that returns all results.
+ * A pass-through filter that returns all results.
  */
-public class AllFilter implements SimpleSelectionFilter {
+public final class AllFilter implements SimpleSelectionFilter {
     @Override
     public String getSelectionString() {
         return "";

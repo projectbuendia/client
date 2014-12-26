@@ -1,21 +1,20 @@
 package org.msf.records.filter;
 
+import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.sync.PatientProviderContract;
+
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.sync.PatientProviderContract;
-
 /**
  * LocationUuidFilter returns all patients who reside in the specified subtree of locations.
- * 
+ *
  * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to that
  * zone, tents within that zone, beds within those tents, etc.
  */
 public final class LocationUuidFilter implements SimpleSelectionFilter {
-	
+
     private final String mTentSelectionString;
     private final String[] mTentSelectionArgs;
 
@@ -28,7 +27,7 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
             return;
         }
         List<LocationSubtree> allPossibleLocations = subtree.thisAndAllDescendents();
-        
+
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.
         StringBuilder sb = new StringBuilder()

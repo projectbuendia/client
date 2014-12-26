@@ -5,10 +5,7 @@ import static org.mockito.Mockito.when;
 
 import android.test.AndroidTestCase;
 
-import java.util.List;
-import java.util.Map;
-
-import org.mockito.Mock;
+  import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -18,11 +15,15 @@ import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
-import org.msf.records.ui.chart.PatientChartController.ObservationsProvider;
+import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for {@link PatientChartController}.
@@ -42,12 +43,13 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private OpenMrsChartServer mMockServer;
 	@Mock private PatientChartController.Ui mMockUi;
 	@Mock private OdkResultSender mMockOdkResultSender;
-	@Mock private ObservationsProvider mMockObservationsProvider;
+	@Mock private LocalizedChartHelper mMockObservationsProvider;
 	@Mock private PatientModel mMockPatientModel;
 	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
 	private FakeEventBus mFakeEventBus;
-
+	private FakeHandler mFakeHandler;
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -55,6 +57,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
 		mFakeCrudEventBus = new FakeEventBus();
 		mFakeEventBus = new FakeEventBus();
+		mFakeHandler = new FakeHandler();
 		mController = new PatientChartController(
 				mMockAppModel,
 				mMockServer,
@@ -65,7 +68,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 				mMockObservationsProvider,
 				null,
 				mMockPatientModel,
-				mMockSyncManager);
+				mMockSyncManager,
+				mFakeHandler);
 	}
 
 	public void testSuspend_UnregistersFromEventBus() {
@@ -103,6 +107,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// WHEN that patient's details are loaded
 		AppPatient patient = AppPatient.builder().build();
 		mFakeCrudEventBus.post(new SingleItemFetchedEvent<AppPatient>(patient));
+		// TODO(rjlothian): When the handler UI updating hack in PatientChartController is
+		// removed, this can also be removed.
+	    mFakeHandler.runUntilEmpty();
 		// THEN the controller puts observations on the UI
 		verify(mMockUi).setObservationHistory(allObservations);
 		verify(mMockUi).updatePatientVitalsUI(recentObservations);
@@ -117,5 +124,21 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mFakeCrudEventBus.post(new SingleItemFetchedEvent<AppPatient>(patient));
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
+	}
+
+	private final class FakeHandler implements MinimalHandler {
+	    private final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
+
+	    @Override
+	    public void post(Runnable runnable) {
+	        mTasks.add(runnable);
+	    }
+
+	    public void runUntilEmpty() {
+	        while (!mTasks.isEmpty()) {
+	            Runnable runnable = mTasks.pop();
+	            runnable.run();
+	        }
+	    }
 	}
 }

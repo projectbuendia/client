@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/chart_grid_cell_textview_width"
+    android:layout_height="@dimen/chart_grid_cell_textview_height"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:scaleType="fitXY"
+    android:textSize="16sp"
+    android:textStyle="bold"
+    android:textColor="#ffffff"
+    tools:background="@drawable/chart_cell_good"
+    tools:text="37.5"/>

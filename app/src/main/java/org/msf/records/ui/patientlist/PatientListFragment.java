@@ -17,12 +17,13 @@ import javax.inject.Inject;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.CreatePatientSucceededEvent;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.FilterManager;
+import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
@@ -217,7 +218,7 @@ public class PatientListFragment extends ProgressFragment implements
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(this);
-        mFilter = FilterManager.getDefaultFilter();
+        mFilter = PatientFilters.getDefaultFilter();
         mPatientAdapter = getAdapterInstance();
         mListView.setAdapter(mPatientAdapter);
         filterBy(mFilter);
@@ -292,7 +293,7 @@ public class PatientListFragment extends ProgressFragment implements
         return true;
     }
 
-    public void onEvent(CreatePatientSucceededEvent event) {
+    public void onEvent(SingleItemCreatedEvent<AppPatient> event) {
         onRefresh();
     }
 

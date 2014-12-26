@@ -1,6 +1,8 @@
 package org.msf.records.events;
 
 import org.msf.records.inject.Qualifiers;
+import org.msf.records.utils.EventBusInterface;
+import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Singleton;
 
@@ -21,6 +23,11 @@ public class EventsModule {
     @Provides @Singleton
     EventBus provideEventBus() {
         return EventBus.getDefault();
+    }
+
+    @Provides @Singleton
+    EventBusInterface provideEventBusInterface(EventBus eventBus) {
+        return new EventBusWrapper(eventBus);
     }
 
     @Provides @Singleton @Qualifiers.CrudEventBusBuilder

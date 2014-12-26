@@ -10,6 +10,10 @@
 
     <dimen name="large_horizontal_margin">32dp</dimen>
     <dimen name="chart_grid_padding">1px</dimen>
-    <dimen name="chart_grid_textView_height">40dp</dimen>
+    <dimen name="chart_grid_row_height">72dp</dimen>
+    <dimen name="chart_grid_column_width">72dp</dimen>
+    <dimen name="chart_grid_cell_textview_height">40dp</dimen>
+    <dimen name="chart_grid_cell_textview_width">40dp</dimen>
+    <dimen name="chart_grid_column_header_width">144dp</dimen>
 
 </resources>

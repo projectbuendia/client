@@ -20,7 +20,7 @@ public class GenericAccountService extends Service {
     private static final String TAG = GenericAccountService.class.getSimpleName();
     private static final String ACCOUNT_TYPE = BuildConfig.ACCOUNT_TYPE;
     public static final String ACCOUNT_NAME = "sync";
-    private static final long SYNC_FREQUENCY = 60 * 60;  // 1 minute (in seconds)
+    private static final long SYNC_FREQUENCY = 10 * 60;  // 10 minutes (in seconds)
     private static final String CONTENT_AUTHORITY = PatientProviderContract.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
     private Authenticator mAuthenticator;

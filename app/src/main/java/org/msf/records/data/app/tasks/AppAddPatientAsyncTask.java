@@ -13,6 +13,9 @@ import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.PatientAddFailedEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
+import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
@@ -46,7 +49,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
             ContentResolver contentResolver,
             AppPatientDelta patientDelta,
             CrudEventBus bus) {
-        mTaskFactory = taskFactory;
+        mTaskFactory = taskFactory; 
         mConverters = converters;
         mServer = server;
         mContentResolver = contentResolver;
@@ -115,8 +118,26 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         }
 
         // Otherwise, start a fetch task to fetch the patient from the database.
+        mBus.register(new CreationEventSubscriber());
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 new UuidFilter(), mUuid, mConverters.patient, mBus);
         task.execute();
+    }
+
+    // After updating a patient, we fetch the patient from the database. The result of the fetch
+    // determines if adding a patient was truly successful and propagates a new event to report
+    // success/failure.
+    @SuppressWarnings("unused") // Called by reflection from EventBus.
+    private final class CreationEventSubscriber {
+        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
+            mBus.post(new SingleItemCreatedEvent<>(event.item));
+            mBus.unregister(this);
+        }
+
+        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+            mBus.post(new PatientAddFailedEvent(
+                    PatientAddFailedEvent.REASON_CLIENT, new Exception(event.error)));
+            mBus.unregister(this);
+        }
     }
 }

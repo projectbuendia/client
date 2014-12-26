@@ -75,24 +75,25 @@ public class AppModel {
         // TODO(dxchen): Asynchronously fetch users.
     }
 
-    // TODO(dxchen): Consider defining a special PatientUpdatedEvent.
     /**
-     * Asynchronously adds a patient, posting a {@link SingleItemFetchedEvent} with the newly-added
-     * patient on the specified event bus when complete.
+     * Asynchronously adds a patient, posting a
+     * {@link org.msf.records.events.data.SingleItemCreatedEvent} with the newly-added patient on
+     * the specified event bus when complete.
      */
     public void addPatient(CrudEventBus bus, AppPatientDelta patientDelta) {
         AppAddPatientAsyncTask task = mTaskFactory.newAddPatientAsyncTask(patientDelta, bus);
         task.execute();
     }
 
-    // TODO(dxchen): Consider defining a special PatientUpdatedEvent.
     /**
-     * Asynchronously updates a patient, posting a {@link SingleItemFetchedEvent} with the updated
+     * Asynchronously updates a patient, posting a
+     * {@link org.msf.records.events.data.SingleItemUpdatedEvent} with the updated
      * {@link AppPatient} on the specified event bus when complete.
      */
-    public void updatePatient(CrudEventBus bus, String uuid, AppPatientDelta patientDelta) {
+    public void updatePatient(
+            CrudEventBus bus, AppPatient originalPatient, AppPatientDelta patientDelta) {
         AppUpdatePatientAsyncTask task =
-                mTaskFactory.newUpdatePatientAsyncTask(uuid, patientDelta, bus);
+                mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
         task.execute();
     }
 

@@ -1,5 +1,6 @@
 package org.msf.records.net;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -53,17 +54,22 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // Check if the uuid already exists in the database.
             Cursor cursor = null;
             boolean isNew;
+            final boolean isUpdate;
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[]{
                         FormsProviderAPI.FormsColumns.DATE
                 });
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
-                    Preconditions.checkArgument(cursor.getCount() == 1);
+                    if (cursor.getCount() != 1) {
+                        throw new IllegalArgumentException("Saw " + cursor.getCount()
+                                + " rows for " + proposedPath.getPath());
+                    }
                     Preconditions.checkArgument(cursor.getColumnCount() == 1);
                     cursor.moveToNext();
                     long existingTimestamp = cursor.getLong(0);
                     isNew = (existingTimestamp < formInfo.dateChanged);
+                    isUpdate = true;
 
                     if (isNew) {
                         Log.i(TAG, "Form " + formInfo.uuid + " requires an update." +
@@ -73,6 +79,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 } else {
                     Log.i(TAG, "Form " + formInfo.uuid + " not found in database.");
                     isNew = true;
+                    isUpdate = false;
                 }
             } finally {
                 if (cursor != null) {
@@ -95,7 +102,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onResponse(String response) {
                     Log.i(TAG, "adding form to db " + response);
-                    new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid)
+                    new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid, isUpdate)
                             .execute(new FormToWrite(response, proposedPath));
                 }
             }, new Response.ErrorListener() {
@@ -154,13 +161,16 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
     private static class AddFormToDbAsyncTask extends AsyncTask<FormToWrite, Void, File> {
 
         private final FormWrittenListener formWrittenListener;
-        private String mPath;
-        private String mUuid;
+        private final String mUuid;
+        private final boolean mUpdate;
 
         private AddFormToDbAsyncTask(
-                @Nullable FormWrittenListener formWrittenListener, String uuid) {
+                @Nullable FormWrittenListener formWrittenListener,
+                String uuid,
+                boolean update) {
             this.formWrittenListener = formWrittenListener;
             mUuid = uuid;
+            mUpdate = update;
         }
 
         @Override
@@ -190,10 +200,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             // insert into content provider
             try {
-                // insert failures are OK and expected if multiple
-                // DiskSync scanners are active.
-                Collect.getInstance().getApplication().getContentResolver()
-                        .insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
+                ContentResolver contentResolver = Collect.getInstance().getApplication().getContentResolver();
+                if (mUpdate) {
+                    contentResolver.update(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues, null, null);
+                } else {
+                    contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
+                }
             } catch (SQLException e) {
                 Log.i(TAG, "failed to insert fetched file", e);
             }

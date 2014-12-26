@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
+import com.joanzapata.android.iconify.IconDrawable;
+import com.joanzapata.android.iconify.Iconify;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 
@@ -15,6 +18,7 @@ import org.msf.records.R;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
 
@@ -24,7 +28,7 @@ import javax.inject.Inject;
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
-public abstract class PatientSearchActivity extends BaseActivity
+public abstract class PatientSearchActivity extends BaseLoggedInActivity
         implements PatientListFragment.Callbacks {
 
     @Inject UpdateManager mUpdateManager;
@@ -40,8 +44,8 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
 
@@ -83,7 +87,20 @@ public abstract class PatientSearchActivity extends BaseActivity
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        MenuItem search = menu.findItem(R.id.action_search);
+        search.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_search)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+
+        MenuItem addPatient = menu.findItem(R.id.action_add);
+        addPatient.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_plus)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+
+        mSearchView = (SearchView) search.getActionView();
         mSearchView.setIconifiedByDefault(false);
 
         InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -109,18 +126,18 @@ public abstract class PatientSearchActivity extends BaseActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onResumeImpl() {
+        super.onResumeImpl();
 
-        mUpdateManager.checkForUpdate();
+        // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
 
     @Override
-    protected void onPause() {
+    protected void onPauseImpl() {
         updateAvailableSnackbar.dismiss();
         updateDownloadedSnackbar.dismiss();
 
-        super.onPause();
+        super.onPauseImpl();
     }
 
     /**

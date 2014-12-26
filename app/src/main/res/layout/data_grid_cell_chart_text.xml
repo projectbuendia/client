@@ -2,22 +2,15 @@
 
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="@dimen/chart_grid_column_width"
+    android:layout_height="@dimen/chart_grid_row_height"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/data_grid_cell_chart_text"
-        android:layout_width="40dp"
-        android:layout_height="@dimen/chart_grid_textView_height"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:scaleType="fitXY"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#ffffff"
-        tools:background="@drawable/chart_cell_good"
-        tools:text="37.5"/>
+    <ViewStub
+        android:id="@+id/data_grid_cell_chart_viewstub"
+        android:layout_width="@dimen/chart_grid_cell_textview_width"
+        android:layout_height="@dimen/chart_grid_cell_textview_height"
+        android:layout="@layout/data_grid_cell_chart_textview"
+        />
 
 </FrameLayout>

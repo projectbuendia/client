@@ -2,10 +2,13 @@ package org.msf.records.ui.chart;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.TextView;
 
 import org.joda.time.DateTime;
@@ -24,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
+import javax.annotation.Nullable;
+
 /**
  * Attach the local cache of chart data into the necessary view for the chart history.
  */
@@ -31,8 +36,19 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private static final String TAG = "LocalizedChartDataGridAdapter";
 
-    private static class Row {
+    private static final String EMPTY_STRING = "";
+    private static final View.OnClickListener notesOnClickListener =
+            new View.OnClickListener() {
+                @Override public void onClick(View view) {
+                    new AlertDialog.Builder(view.getContext())
+                            .setMessage((String)view.getTag())
+                            .show();
+                }
+            };
+    private final Drawable backgroundLight;
+    private final Drawable backgroundDark;
 
+    private static class Row {
         private final String mConceptUuid;
         private final String mName;
         private final HashMap<String, String> datesToValues = new HashMap<>();
@@ -48,12 +64,19 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
     private final List<String> columnHeaders = new ArrayList<>();
+    private final LocalizedChartHelper mLocalizedChartHelper;
 
     public LocalizedChartDataGridAdapter(Context context,
                                          List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         mContext = context;
-        this.mLayoutInflater = layoutInflater;
+        mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
+        mLayoutInflater = layoutInflater;
+        Resources resources = context.getResources();
+        this.backgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
+        this.backgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
+
+
         Row row = null;
         TreeSet<LocalDate> days = new TreeSet<>();
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
@@ -75,7 +98,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 row = new Row(ob.conceptUuid, ob.conceptName);
                 rows.add(row);
                 if (Concept.DIARRHEA_UUID.equals(ob.conceptUuid)
-                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)) {
+                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)
+                        || Concept.PAIN_UUID.equals(ob.conceptUuid)) {
                     // TODO(nfortescue): this should really look up the localized values from the concept database
                     // otherwise the strings could be inconsistent with the form
                     severeRow = new Row(null, ob.conceptName + " (" + context.getResources().getString(R.string.severe_symptom) + ")");
@@ -133,13 +157,12 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             }
         }
 
-        rows.addAll(extraRows);
+        rows.addAll(rows.size() - 1, extraRows);
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {
-            ArrayList<LocalizedObservation> emptyChart = LocalizedChartHelper.getEmptyChart(
-                    context.getContentResolver(),
-                    LocalizedChartHelper.ENGLISH_LOCALE);
+            List<LocalizedObservation> emptyChart =
+                    mLocalizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
             for (LocalizedObservation ob : emptyChart) {
                 rows.add(new Row(ob.conceptUuid, ob.conceptName));
             }
@@ -172,58 +195,72 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     }
 
     @Override
-    public void fillRowHeader(int row, View view) {
-        TextView textView =
-                (TextView) view.findViewById(R.id.data_grid_header_text);
+    public void fillRowHeader(int row, View view, TextView textView) {
         textView.setText(rows.get(row).mName);
-
-        textView.setBackgroundResource(
-                (row % 2 == 0)
-                        ? R.drawable.chart_grid_background_light
-                        : R.drawable.chart_grid_background_dark);
     }
 
     @Override
     public View getRowHeader(int row, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_row_header_chart, null /*root*/);
-        fillRowHeader(row, view);
+        TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
+        setCellBackgroundForViewType(textView, row % 2);
+        fillRowHeader(row, view, textView);
         return view;
+    }
+
+    @Override
+    public void setCellBackgroundForViewType(View view, int viewType) {
+        view.setBackground(viewType == 0 ? backgroundLight : backgroundDark);
     }
 
     @Override
     public View getColumnHeader(int column, View convertView, ViewGroup parent) {
         TextView textView = (TextView) mLayoutInflater.inflate(
                 R.layout.data_grid_column_header_chart, null /*root*/);
-        textView.setText(columnHeaders.get(column));
+        fillColumnHeader(column, textView);
         return textView;
+    }
+
+    @Override
+    public void fillColumnHeader(int column, TextView textView) {
+        textView.setText(columnHeaders.get(column));
     }
 
     @Override
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
         View view = mLayoutInflater.inflate(
                 R.layout.data_grid_cell_chart_text, null /*root*/);
-        fillCell(rowIndex, columnIndex, view);
+        setCellBackgroundForViewType(view, rowIndex % 2);
+        ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
+        fillCell(rowIndex, columnIndex, view, viewStub, null);
         return view;
     }
 
     @Override
-    public void fillCell(int rowIndex, int columnIndex, View view) {
+    public @Nullable TextView fillCell(
+            int rowIndex, int columnIndex, View view,
+            @Nullable ViewStub viewStub, @Nullable TextView textView) {
+        if (viewStub == null && textView == null) {
+            throw new IllegalArgumentException("Either viewStub or textView have to be set.");
+        }
         final Row rowData = rows.get(rowIndex);
         final String dateKey = columnHeaders.get(columnIndex);
-
-        TextView textView = ((TextView) view.findViewById(R.id.data_grid_cell_chart_text));
+        String text = EMPTY_STRING;
+        String textViewTag = null;
+        int backgroundResource = 0;
+        View.OnClickListener onClickListener = null;
 
         if (Concept.TEMPERATURE_UUID.equals(rowData.mConceptUuid)) {
             String temperatureString = rowData.datesToValues.get(dateKey);
             if (temperatureString != null) {
                 try {
                     double temperature = Double.parseDouble(temperatureString);
-                    textView.setText(String.format("%.1f", temperature));
+                    text = String.format("%.1f", temperature);
                     if (temperature <= 37.5) {
-                        textView.setBackgroundResource(R.drawable.chart_cell_good);
+                        backgroundResource = R.drawable.chart_cell_good;
                     } else {
-                        textView.setBackgroundResource(R.drawable.chart_cell_bad);
+                        backgroundResource = R.drawable.chart_cell_bad;
                     }
                 } catch (NumberFormatException e) {
                     Log.w(TAG, "Temperature format was invalid", e);
@@ -232,26 +269,27 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         } else if (Concept.NOTES_UUID.equals(rowData.mConceptUuid)) {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
-                textView.setBackgroundResource(R.drawable.chart_cell_active_pressable);
-                textView.setOnClickListener(new View.OnClickListener() {
-
-                    @Override public void onClick(View view) {
-                        new AlertDialog.Builder(mContext)
-                                .setMessage(rowData.datesToValues.get(dateKey))
-                                .show();
-                    }
-                });
+                backgroundResource = R.drawable.chart_cell_active_pressable;
+                textViewTag = rowData.datesToValues.get(dateKey);
+                onClickListener = notesOnClickListener;
             }
         } else {
             boolean isActive = rowData.datesToValues.containsKey(dateKey);
             if (isActive) {
-                textView.setBackgroundResource(R.drawable.chart_cell_active);
+                backgroundResource = R.drawable.chart_cell_active;
             }
         }
 
-        view.setBackgroundResource((rowIndex % 2 == 0)
-                ? R.drawable.chart_grid_background_light
-                : R.drawable.chart_grid_background_dark);
-
+        if (textView == null && backgroundResource != 0) {
+            // We need the textView, so inflate it.
+            textView = (TextView) viewStub.inflate();
+        }
+        if (textView != null) {
+            textView.setText(text);
+            textView.setTag(textViewTag);
+            textView.setBackgroundResource(backgroundResource);
+            textView.setOnClickListener(onClickListener);
+        }
+        return textView;
     }
 }

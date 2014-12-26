@@ -42,13 +42,13 @@ public final class AssignLocationDialog
     @Nullable private TentListAdapter mAdapter;
 
     private final Context mContext;
+    private final Runnable mOnDismiss;
     private final LocationManager mLocationManager;
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final Optional<String> mCurrentLocationUuid;
     private final TentSelectedCallback mTentSelectedCallback;
     private ProgressDialog mProgressDialog;
-    private View mPreviousView;
 
     // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
@@ -65,11 +65,12 @@ public final class AssignLocationDialog
 
     public AssignLocationDialog(
             Context context,
-            LocationManager locationManager,
+            Runnable onDismiss, LocationManager locationManager,
             EventBusRegistrationInterface eventBus,
             Optional<String> currentLocationUuid,
             TentSelectedCallback tentSelectedCallback) {
         mContext = checkNotNull(context);
+        this.mOnDismiss = checkNotNull(onDismiss);
         mLocationManager = checkNotNull(locationManager);
         mEventBus = checkNotNull(eventBus);
         mCurrentLocationUuid = currentLocationUuid;
@@ -83,21 +84,19 @@ public final class AssignLocationDialog
         startListeningForLocations();
 
         mDialog = new AlertDialog.Builder(mContext)
-            .setTitle(R.string.action_assign_location)
-            .setView(frameLayout)
-            .setOnDismissListener(this)
-            .create();
+                .setTitle(R.string.action_assign_location)
+                .setView(frameLayout)
+                .setOnDismissListener(this)
+                .create();
         mDialog.show();
     }
 
     public void onPatientUpdateFailed( int reason )
     {
-        mAdapter.setSelectedView( mPreviousView );
-        mPreviousView = null;
+        mAdapter.setSelectedLocationUuid(mCurrentLocationUuid);
 
         Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ), Toast.LENGTH_SHORT ).show();
         mProgressDialog.dismiss();
-        //dismiss();
     }
 
     private void startListeningForLocations() {
@@ -110,20 +109,21 @@ public final class AssignLocationDialog
             List<LocationSubtree> locations = locationTree.getTents();
             LocationSubtree dischargedZone = locationTree.getZoneForUuid(Zone.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
-            mAdapter = new TentListAdapter(
-                    mContext, locations, mCurrentLocationUuid, true /*shouldAbbreviate*/);
+            mAdapter = new TentListAdapter(mContext, locations, mCurrentLocationUuid);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
+            mGridView.setSelection(1);
         }
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
         String newTentUuid = mAdapter.getItem(position).getLocation().uuid;
-        mPreviousView = mAdapter.getSelectedView();
-        mAdapter.setSelectedView( view );
-        mProgressDialog = ProgressDialog.show(mContext, "Updating Patient",
-                "Please wait...", true);
+        mAdapter.setSelectedLocationUuid(Optional.fromNullable(newTentUuid));
+        mProgressDialog = ProgressDialog.show(mContext,
+                mContext.getResources().getString(R.string.title_updating_patient),
+                mContext.getResources().getString(R.string.please_wait), true);
         if (isCurrentTent(newTentUuid) || mTentSelectedCallback.onNewTentSelected(newTentUuid)) {
             dismiss();
         }
@@ -140,14 +140,13 @@ public final class AssignLocationDialog
     // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentTent(String newTentUuid) {
-        Optional<String> selectedTentUuid = mAdapter.getSelectedLocationUuid();
-        return selectedTentUuid.isPresent() &&
-                newTentUuid.equals(selectedTentUuid.get());
+        return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());
     }
 
     @Override
     public void onDismiss(DialogInterface dialog) {
         mEventBus.unregister(mEventBusSubscriber);
+        mOnDismiss.run();
     }
 
     private final class EventBusSubscriber {

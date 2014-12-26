@@ -23,8 +23,6 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
-import org.msf.records.utils.BigToast;
-
 import java.io.File;
 
 import de.greenrobot.event.EventBus;

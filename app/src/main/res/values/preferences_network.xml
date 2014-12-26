@@ -25,6 +25,6 @@
     <bool name="keep_form_instances_locally_default">false</bool>
 
     <!-- The default value for whether Xform submission should update the client cache -->
-    <bool name="xform_update_client_cache">false</bool>
+    <bool name="xform_update_client_cache">true</bool>
 
 </resources>
