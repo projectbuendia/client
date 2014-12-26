@@ -1,7 +1,7 @@
-android-client
+client
 ==============
 
-This contains the buendia client
+The Android client app for Buendia.
 
 
 Copyright 2014 Pim de Witte
