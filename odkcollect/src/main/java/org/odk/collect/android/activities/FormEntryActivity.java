@@ -587,33 +587,41 @@ public class FormEntryActivity
         }
     }
 
-    /** Determines the vertical positions that the up/down buttons will jump to. */
+    /**
+     * Determines the vertical positions that the up/down buttons will jump to.
+     * These scroll points are selected so that each scroll point is up to
+     * MAX_SCROLL_FRACTION of the ScrollView's height away from its neighbouring
+     * scroll points, and (if possible) each scroll point places the top edge of
+     * a group or question at the top of the ScrollView.
+     */
     private void determineScrollPoints() {
-        // Gather a list of the top edges of all the question groups and widgets.
-        mScrollPoints.clear();
+        // Gather a list of the top edges of the question groups and widgets.
+        List<Integer> edges = new ArrayList<>();
         for (int i = 0; i < mQuestionHolder.getChildCount(); i++) {
             View child = mQuestionHolder.getChildAt(i);
-            mScrollPoints.add(child.getTop());
+            edges.add(child.getTop());
             if (child instanceof ODKView) {
                 List<QuestionWidget> widgets = ((ODKView) child).getWidgets();
                 // Skip the first widget: it's better to land above the group title
                 // than between the group title and the first question widget.
                 for (int j = 1; j < widgets.size(); j++) {
-                    mScrollPoints.add(child.getTop() + widgets.get(j).getTop());
+                    edges.add(child.getTop() + widgets.get(j).getTop());
                 }
             }
         }
 
         // Add just enough padding so that when the form is scrolled all the
-        // way to the end, a preferred boundary lands at the top of the ScrollView.
-        final int MIN_PADDING = 100;
+        // way to the end, an edge lands at the top of the ScrollView.
+        final int MIN_PADDING = 80;
         int scrollHeight = mScrollView.getMeasuredHeight();
         int minBottom = mBottomPaddingView.getTop() + MIN_PADDING;
 
         ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
-        for (int y : mScrollPoints) {
+        int lastScrollPoint = -1;
+        for (int y : edges) {
             int bottom = y + scrollHeight;
-            if (bottom >= minBottom) {  // this will be the last scroll point
+            if (bottom >= minBottom) {
+                lastScrollPoint = y;
                 int paddingHeight = bottom - mBottomPaddingView.getTop();
                 if (params.height != paddingHeight) {
                     // To avoid triggering an infinite loop, only invoke
@@ -624,32 +632,50 @@ public class FormEntryActivity
                 break;
             }
         }
+
+        // Select scroll points that are up to the maximum leap size apart.
+        final double MAX_SCROLL_FRACTION = 0.9;
+        int maxLeap = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
+        mScrollPoints.clear();
+        mScrollPoints.add(0);
+        int prevPoint = 0;
+        int nextPoint = prevPoint + maxLeap;
+        for (int y : edges) {
+            if (y == lastScrollPoint) {  // all done
+                mScrollPoints.add(y);
+                break;
+            }
+            while (y > prevPoint + maxLeap) {
+                mScrollPoints.add(nextPoint);
+                prevPoint = nextPoint;
+                // In most cases the initial value of nextPoint will be overwritten
+                // by a value from edges (nextPoint = y below); this initial value
+                // is just a fallback in case the nearest edge is too far away.
+                nextPoint = prevPoint + maxLeap;
+            }
+            if (y > prevPoint) {
+                nextPoint = y;
+            }
+        }
     }
 
     /**
-     * Scrolls the form up (dir &lt; 0) or down (dir > 0), scrolling by just a
-     * bit less than one page (to help the user stay oriented), and choosing a
-     * scroll amount such that a scroll point lands just at the top edge of
-     * the scroll region if possible.
+     * Scrolls the form up (dir &lt; 0) or down (dir > 0) to the next scroll point.
+     * To help the user stay oriented, we always go to the nearest scroll point,
+     * even if it is close by -- thus the user sees the same set of "pages" when
+     * paging down or paging up.
      */
     private void scrollStep(int dir) {
-        int maxLeap = (int) (mScrollView.getMeasuredHeight() * 0.9);
         dir = dir > 0 ? 1 : -1;
-
         int y = mScrollView.getScrollY();
-        int newY = y + dir * maxLeap;  // in case there is no scroll point in range
         int n = mScrollPoints.size();
-
-        // Find the scroll point that leaps furthest in the desired direction,
-        // as long as it doesn't exceed the maximum leap size.
         for (int i = (dir > 0) ? 0 : n - 1; i >= 0 && i < n; i += dir) {
             int deltaY = mScrollPoints.get(i) - y;
-            if (dir * deltaY > 0 && Math.abs(deltaY) <= maxLeap) {
-                newY = y + deltaY;
+            if (dir * deltaY > 0) {
+                mScrollView.smoothScrollTo(0, y + deltaY);
+                break;
             }
         }
-
-        mScrollView.smoothScrollTo(0, newY);
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
