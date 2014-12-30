@@ -1,9 +1,10 @@
 package org.msf.records.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.PersistableBundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,9 @@ import butterknife.OnClick;
 /**
  * An activity that requires that there currently be a logged-in user.
  */
-public class BaseLoggedInActivity extends BaseActivity {
+public abstract class BaseLoggedInActivity extends BaseActivity {
+
+    private static final String TAG = BaseLoggedInActivity.class.getSimpleName();
 
     @Inject Colorizer mUserColorizer;
 
@@ -163,7 +166,8 @@ public class BaseLoggedInActivity extends BaseActivity {
         User user = App.getUserManager().getActiveUser();
 
         if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            // TODO(dxchen): Handle a user switch.
+            Log.w(TAG, "The user has switched. I don't know how to deal with that right now");
+            // TODO(dxchen): Handle.
         }
         mLastActiveUser = user;
 
@@ -188,7 +192,7 @@ public class BaseLoggedInActivity extends BaseActivity {
         @InjectView(R.id.button_settings) ImageButton mSettings;
         @InjectView(R.id.button_log_out) ImageButton mLogOut;
 
-        public MenuPopupWindow() {
+        @SuppressLint("InflateParams") public MenuPopupWindow() {
             super();
 
             mLayout = (LinearLayout) getLayoutInflater()

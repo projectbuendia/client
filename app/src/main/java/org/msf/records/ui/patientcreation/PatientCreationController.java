@@ -56,7 +56,7 @@ final class PatientCreationController {
 
     private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
-    private AppModel mModel;
+    private final AppModel mModel;
 
     private final EventSubscriber mEventBusSubscriber;
 

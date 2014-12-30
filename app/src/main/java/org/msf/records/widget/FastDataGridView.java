@@ -244,11 +244,12 @@ public class FastDataGridView {
         void onInternalScrollBy(int dx, int dy);
     }
 
-    private static OnInternalScrollListener DO_NOTHING_LISTENER = new OnInternalScrollListener() {
-        @Override
-        public void onInternalScrollBy(int dx, int dy) {
-        }
-    };
+    private static final OnInternalScrollListener DO_NOTHING_LISTENER =
+            new OnInternalScrollListener() {
+
+                @Override
+                public void onInternalScrollBy(int dx, int dy) {}
+            };
 
     /**
      * A {@link android.widget.ScrollView} whose scrolling can be linked to other instances of this class.

@@ -9,11 +9,11 @@ import org.msf.records.net.model.User;
  */
 public class KnownUsersChangedEvent {
 
-    private final ImmutableSet<User> mAddedUsers;
-    private final ImmutableSet<User> mDeletedUsers;
+    public final ImmutableSet<User> addedUsers;
+    public final ImmutableSet<User> deletedUsers;
 
     public KnownUsersChangedEvent(ImmutableSet<User> addedUsers, ImmutableSet<User> deletedUsers) {
-        mAddedUsers = addedUsers;
-        mDeletedUsers = deletedUsers;
+        this.addedUsers = addedUsers;
+        this.deletedUsers = deletedUsers;
     }
 }

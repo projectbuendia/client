@@ -36,7 +36,10 @@ public class AppModel {
     private final AppTypeConverters mConverters;
     private final AppAsyncTaskFactory mTaskFactory;
 
-    AppModel(ContentResolver contentResolver, AppTypeConverters converters, AppAsyncTaskFactory taskFactory) {
+    AppModel(
+            ContentResolver contentResolver,
+            AppTypeConverters converters,
+            AppAsyncTaskFactory taskFactory) {
     	mContentResolver = contentResolver;
         mConverters = converters;
         mTaskFactory = taskFactory;
@@ -49,7 +52,7 @@ public class AppModel {
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.register(new CrudEventBusErrorSubscriber(bus));
 
-        FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<AppPatient>(
+        FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<>(
                 mContentResolver, filter, constraint, mConverters.patient, bus);
         task.execute();
     }
@@ -170,7 +173,7 @@ public class AppModel {
 
 		@Override
 		protected void onPostExecute(TypedCursor<T> result) {
-		    mBus.post(new TypedCursorFetchedEvent<T>(result));
+		    mBus.post(new TypedCursorFetchedEvent<>(result));
 		}
 	}
 }

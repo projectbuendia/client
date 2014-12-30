@@ -5,7 +5,7 @@ import org.joda.time.LocalDate;
 import java.io.Serializable;
 
 /**
- * Created by Gil on 03/10/2014.
+ * An object that represents a patient.
  */
 public class Patient implements Serializable {
     public static final int GENDER_UNKNOWN = 0;

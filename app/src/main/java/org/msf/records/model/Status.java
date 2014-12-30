@@ -10,11 +10,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- * Created by danieljulio on 08/10/2014.
+ * An object that represents patient status.
  */
-public class Status implements Parcelable, ListItem {
+public class Status implements Parcelable {
 
-    private static HashMap<String, Status> STATUSES;
+    private static final HashMap<String, Status> STATUSES;
 
     public final String key;
     public final int nameId;
@@ -67,26 +67,6 @@ public class Status implements Parcelable, ListItem {
             return STATUSES.get("SUSPECTED_CASE");
         }
         return status;
-    }
-
-    @Override
-    public int getObjectId() {
-        return 0;
-    }
-
-    @Override
-    public int getTitleId() {
-        return nameId;
-    }
-
-    @Override
-    public int getIconId() {
-        return squareIconId;
-    }
-
-    @Override
-    public int getFurtherDialogId() {
-        return 0;
     }
 
     @Override

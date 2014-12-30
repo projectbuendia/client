@@ -59,18 +59,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
-    private final Context mContext;
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
     private final List<String> columnHeaders = new ArrayList<>();
-    private final LocalizedChartHelper mLocalizedChartHelper;
 
     public LocalizedChartDataGridAdapter(Context context,
                                          List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
-        mContext = context;
-        mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
+        Context context1 = context;
+        LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
         Resources resources = context.getResources();
         this.backgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
@@ -162,7 +160,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // displayed.
         if (rows.isEmpty()) {
             List<LocalizedObservation> emptyChart =
-                    mLocalizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
+                    localizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
             for (LocalizedObservation ob : emptyChart) {
                 rows.add(new Row(ob.conceptUuid, ob.conceptName));
             }
@@ -251,32 +249,39 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         int backgroundResource = 0;
         View.OnClickListener onClickListener = null;
 
-        if (Concept.TEMPERATURE_UUID.equals(rowData.mConceptUuid)) {
-            String temperatureString = rowData.datesToValues.get(dateKey);
-            if (temperatureString != null) {
-                try {
-                    double temperature = Double.parseDouble(temperatureString);
-                    text = String.format("%.1f", temperature);
-                    if (temperature <= 37.5) {
-                        backgroundResource = R.drawable.chart_cell_good;
-                    } else {
-                        backgroundResource = R.drawable.chart_cell_bad;
+        String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
+        switch (conceptUuid) {
+            case Concept.TEMPERATURE_UUID:
+                String temperatureString = rowData.datesToValues.get(dateKey);
+                if (temperatureString != null) {
+                    try {
+                        double temperature = Double.parseDouble(temperatureString);
+                        text = String.format("%.1f", temperature);
+                        if (temperature <= 37.5) {
+                            backgroundResource = R.drawable.chart_cell_good;
+                        } else {
+                            backgroundResource = R.drawable.chart_cell_bad;
+                        }
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Temperature format was invalid", e);
                     }
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "Temperature format was invalid", e);
                 }
+                break;
+            case Concept.NOTES_UUID: {
+                boolean isActive = rowData.datesToValues.containsKey(dateKey);
+                if (isActive) {
+                    backgroundResource = R.drawable.chart_cell_active_pressable;
+                    textViewTag = rowData.datesToValues.get(dateKey);
+                    onClickListener = notesOnClickListener;
+                }
+                break;
             }
-        } else if (Concept.NOTES_UUID.equals(rowData.mConceptUuid)) {
-            boolean isActive = rowData.datesToValues.containsKey(dateKey);
-            if (isActive) {
-                backgroundResource = R.drawable.chart_cell_active_pressable;
-                textViewTag = rowData.datesToValues.get(dateKey);
-                onClickListener = notesOnClickListener;
-            }
-        } else {
-            boolean isActive = rowData.datesToValues.containsKey(dateKey);
-            if (isActive) {
-                backgroundResource = R.drawable.chart_cell_active;
+            default: {
+                boolean isActive = rowData.datesToValues.containsKey(dateKey);
+                if (isActive) {
+                    backgroundResource = R.drawable.chart_cell_active;
+                }
+                break;
             }
         }
 

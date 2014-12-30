@@ -55,7 +55,7 @@ public class UserStore {
             // Initiate users from database data and return the result.
             int fullNameColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.FULL_NAME);
             int uuidColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.UUID);
-            Set<User> result = new HashSet<User>();
+            Set<User> result = new HashSet<>();
             while (cursor.moveToNext()) {
                 User user =
                         User.create(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
@@ -78,7 +78,7 @@ public class UserStore {
         // Make an async call to the server and use a CountDownLatch to block until the result is
         // returned.
         final CountDownLatch latch = new CountDownLatch(1);
-        final Set<User> users = new HashSet<User>();
+        final Set<User> users = new HashSet<>();
         App.getServer().listUsers(
                 null,
                 new Response.Listener<List<User>>() {
@@ -107,9 +107,7 @@ public class UserStore {
                         UserProviderContract.USERS_CONTENT_URI);
         try {
             client.applyBatch(RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to update database", e);
-        } catch (OperationApplicationException e) {
+        } catch (RemoteException | OperationApplicationException e) {
             Log.e(TAG, "Failed to update database", e);
         } finally {
             client.release();

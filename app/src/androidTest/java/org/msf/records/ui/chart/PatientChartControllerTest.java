@@ -47,8 +47,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private PatientModel mMockPatientModel;
 	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
-	private FakeEventBus mFakeEventBus;
-	private FakeHandler mFakeHandler;
+    private FakeHandler mFakeHandler;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -56,12 +55,12 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		MockitoAnnotations.initMocks(this);
 
 		mFakeCrudEventBus = new FakeEventBus();
-		mFakeEventBus = new FakeEventBus();
+        FakeEventBus fakeEventBus = new FakeEventBus();
 		mFakeHandler = new FakeHandler();
 		mController = new PatientChartController(
 				mMockAppModel,
 				mMockServer,
-				mFakeEventBus,
+                fakeEventBus,
 				mFakeCrudEventBus,
 				mMockUi,
 				mMockOdkResultSender,
@@ -106,7 +105,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mController.init();
 		// WHEN that patient's details are loaded
 		AppPatient patient = AppPatient.builder().build();
-		mFakeCrudEventBus.post(new SingleItemFetchedEvent<AppPatient>(patient));
+		mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
 		// TODO(rjlothian): When the handler UI updating hack in PatientChartController is
 		// removed, this can also be removed.
 	    mFakeHandler.runUntilEmpty();
@@ -121,7 +120,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mController.init();
 		// WHEN that patient's details are loaded
 		AppPatient patient = AppPatient.builder().build();
-		mFakeCrudEventBus.post(new SingleItemFetchedEvent<AppPatient>(patient));
+		mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
 	}

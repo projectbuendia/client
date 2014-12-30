@@ -108,7 +108,7 @@
 
     <style name="button_large">
         <item name="android:minWidth">400dp</item>
-        <item name="android:textSize">30dp</item>
+        <item name="android:textSize">30sp</item>
         <item name="android:layout_gravity">center_horizontal|top</item>
         <item name="android:background">@drawable/button_selector</item>
         <item name="android:textColor">@drawable/white</item>

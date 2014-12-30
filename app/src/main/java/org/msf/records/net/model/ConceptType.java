@@ -3,7 +3,7 @@ package org.msf.records.net.model;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by nfortescue on 11/25/14.
+ * An enumeration of concept types.
  */
 public enum ConceptType {
 

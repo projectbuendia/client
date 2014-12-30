@@ -19,7 +19,7 @@ public class DownloadedUpdateInfo {
 
     public final boolean isValid;
     private final Version currentVersion;
-    public Version downloadedVersion;
+    public final Version downloadedVersion;
     public final String path;
 
     public static DownloadedUpdateInfo getInvalid(Version currentVersion) {

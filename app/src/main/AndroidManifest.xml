@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.msf.records" >
+    package="org.msf.records">
 
     <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -19,14 +20,14 @@
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <!-- Required because we're manually creating a new account. -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-sdk android:minSdkVersion="14"/>
 
     <application
         android:name="org.msf.records.App"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
 
         <!-- Content Provider for ODK forms. -->
         <provider
@@ -108,11 +109,6 @@
                 android:value="org.msf.records.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
-            android:name="org.msf.records.ui.PatientAddActivity"
-            android:label="@string/title_activity_patient_add"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
             android:name="org.msf.records.ui.patientcreation.PatientCreationActivity"
             android:label="@string/title_activity_patient_add"
             android:screenOrientation="portrait"
@@ -130,7 +126,7 @@
 
         <service
             android:name="org.msf.records.sync.SyncService"
-            android:exported="true" >
+            android:exported="false">
 
             <!--
             This intent filter is required. It allows the system to launch our sync service
@@ -144,7 +140,9 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-        <service android:name="org.msf.records.sync.GenericAccountService" >
+        <service
+            android:name="org.msf.records.sync.GenericAccountService"
+            android:exported="false">
 
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>

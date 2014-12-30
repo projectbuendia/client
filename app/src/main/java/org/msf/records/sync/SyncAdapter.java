@@ -238,7 +238,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String id;
         String givenName, familyName, uuid, locationUuid;
         String gender;
-        int ageMonths = -1, ageYears = -1;
         LocalDate birthdate;
         Long admissionTimestamp;
 
@@ -340,8 +339,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
-            throws InterruptedException, ExecutionException, RemoteException,
-            OperationApplicationException {
+            throws InterruptedException, ExecutionException, RemoteException {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<ConceptList> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
@@ -409,8 +407,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult)
-            throws InterruptedException, ExecutionException, RemoteException,
-            OperationApplicationException {
+            throws RemoteException {
 
         // Get call patients from the cache.
         Uri uri = PatientProviderContract.CONTENT_URI; // Get all entries

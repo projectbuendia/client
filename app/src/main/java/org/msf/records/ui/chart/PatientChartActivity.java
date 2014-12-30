@@ -55,6 +55,7 @@ import de.greenrobot.event.EventBus;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -282,7 +283,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setLatestEncounter(long encounterTimeMilli) {
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTimeInMillis(encounterTimeMilli);
-            SimpleDateFormat dateFormatter = new SimpleDateFormat( "dd MMM yyyy HH:mm");
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US);
 
             if (calendar.getTime().getTime() != 0) {
                 mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
@@ -323,7 +324,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             // Special (Pregnancy and IV)
-            String specialText = new String();
+            String specialText = "";
 
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {

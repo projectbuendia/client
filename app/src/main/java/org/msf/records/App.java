@@ -8,7 +8,6 @@ import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.net.OpenMrsConnectionDetails;
-import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.ActivityHierarchyServer;

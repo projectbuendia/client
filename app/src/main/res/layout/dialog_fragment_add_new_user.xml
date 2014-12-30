@@ -21,7 +21,6 @@
         <TableRow>
             <TextView
                 android:layout_marginEnd="50dp"
-                android:layout_marginRight="50dp"
                 android:gravity="center_vertical"
                 android:text="@string/username"
                 android:layout_column="0"

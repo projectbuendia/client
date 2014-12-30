@@ -9,7 +9,6 @@ import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -34,7 +33,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     @InjectView(R.id.tent_selection_discharged) SubtitledButtonView mDischargedButton;
 
     private TentSelectionController mController;
-    private MyUi mMyUi = new MyUi();
+    private final MyUi mMyUi = new MyUi();
     private TentListAdapter mAdapter;
 
     public TentSelectionFragment() {

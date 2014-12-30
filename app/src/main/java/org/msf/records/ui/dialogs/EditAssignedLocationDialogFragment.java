@@ -64,18 +64,13 @@ public class EditAssignedLocationDialogFragment extends DialogFragment {
 //        return fragment;
 //    }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.dialog_fragment_edit_assigned_location, null);
         ButterKnife.inject(this, fragment);
 
-        mZone.setText(mLocation.zone);;
+        mZone.setText(mLocation.zone);
         mTent.setText(mLocation.tent);
         mBed.setText(mLocation.bed);
 

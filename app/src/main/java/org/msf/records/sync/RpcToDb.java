@@ -169,7 +169,7 @@ public class RpcToDb {
 
         // Build map of location names from the database.
         HashMap<String, HashMap<String, String>> dbLocationNames =
-                new HashMap<String, HashMap<String, String>>();
+                new HashMap<>();
         while (namesCur.moveToNext()) {
             String locationId = namesCur.getString(
                     LocationProjection.LOCATION_NAME_LOCATION_UUID_COLUMN);

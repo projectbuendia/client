@@ -10,15 +10,11 @@ import android.widget.Toast;
 import javax.inject.Inject;
 
 import org.msf.records.App;
-import org.msf.records.AppModule;
 import org.msf.records.R;
-import org.msf.records.data.app.AppModel;
-import org.msf.records.data.app.AppModelModule;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
-import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;

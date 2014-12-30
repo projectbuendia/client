@@ -6,9 +6,7 @@ import android.util.Log;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
@@ -102,12 +100,12 @@ public final class AppPatient extends AppTypeBase<String> {
 
     public static class Delta {
 
-        public Optional<String> id = Optional.absent();
-        public Optional<String> givenName = Optional.absent();
-        public Optional<String> familyName = Optional.absent();
-        public Optional<Integer> gender = Optional.absent();
-        public Optional<LocalDate> birthdate = Optional.absent();
-        public Optional<String> assignedLocationUuid = Optional.absent();
+        public final Optional<String> id = Optional.absent();
+        public final Optional<String> givenName = Optional.absent();
+        public final Optional<String> familyName = Optional.absent();
+        public final Optional<Integer> gender = Optional.absent();
+        public final Optional<LocalDate> birthdate = Optional.absent();
+        public final Optional<String> assignedLocationUuid = Optional.absent();
 
         /**
          * Serializes the fields changed in the delta to a {@link JSONObject}.

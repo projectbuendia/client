@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:textSize="36sp"
-            android:gravity="left"
+            android:gravity="start"
             android:id="@+id/patient_chart_fullname"
             android:text="FirstName LastName"/>
 
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:textSize="36sp"
-            android:gravity="right"
+            android:gravity="end"
             android:id="@+id/patient_chart_id"
             android:text="PatientID#"/>
 
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="30sp"
-            android:gravity="left"
+            android:gravity="start"
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/black"
             android:id="@+id/patient_chart_gender_age"
@@ -57,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="30sp"
-            android:gravity="right"
+            android:gravity="end"
             android:fontFamily="sans-serif-condensed"
             android:text="EMC Location/Tent#"
             android:id="@+id/patient_chart_location"
@@ -97,7 +97,8 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="30sp"
             android:text="@string/last_observation"
-            android:id="@+id/patient_chart_last_observation_label"/>
+            android:id="@+id/patient_chart_last_observation_label"
+            tools:ignore="RelativeOverlap"/>
 
     </RelativeLayout>
 

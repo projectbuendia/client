@@ -56,7 +56,7 @@ public class WrappingViewPager extends ViewPager {
 
         }
 
-        int fragmentHeight = 0;
+        int fragmentHeight;
         fragmentHeight = measureFragment(
                 ((Fragment) getAdapter().instantiateItem(this, getCurrentItem())).getView());
 

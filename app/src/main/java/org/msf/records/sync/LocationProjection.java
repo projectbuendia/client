@@ -1,9 +1,10 @@
 package org.msf.records.sync;
 
 /**
- * Created by akalachman on 12/3/14.
+ * Contains database projections for locations and location names.
  */
 public class LocationProjection {
+
     private static final String[] LOCATION_PROJECTION = {
             LocationProviderContract.LocationColumns.LOCATION_UUID,
             LocationProviderContract.LocationColumns.PARENT_UUID
@@ -26,4 +27,6 @@ public class LocationProjection {
 
     public static String[] getLocationProjection() { return LOCATION_PROJECTION; }
     public static String[] getLocationNamesProjection() { return LOCATION_NAMES_PROJECTION; }
+
+    private LocationProjection() {}
 }

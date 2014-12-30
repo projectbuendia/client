@@ -38,7 +38,7 @@ final class UserLoginController {
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
     private final UserManager mUserManager;
-    private final List<User> mUsersSortedByName = new ArrayList<User>();
+    private final List<User> mUsersSortedByName = new ArrayList<>();
 	private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
 
     public UserLoginController(

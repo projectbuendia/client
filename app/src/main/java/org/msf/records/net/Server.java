@@ -152,7 +152,6 @@ public interface Server {
 
     /**
      * Cancel all requests associated with the given tag.
-     * @param logTag
      */
     public void cancelPendingRequests(String logTag);
 }

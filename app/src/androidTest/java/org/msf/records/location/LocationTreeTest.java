@@ -18,7 +18,7 @@ public final class LocationTreeTest extends AndroidTestCase {
 		ImmutableMap<String, Integer> patientCountByUuid = ImmutableMap.of(
 				Zone.PROBABLE_ZONE_UUID, 3);
 		// THEN it should succeed
-		LocationTree tree = new LocationTree(
+		new LocationTree(
 				getContext().getResources(),
 				locations,
 				patientCountByUuid);

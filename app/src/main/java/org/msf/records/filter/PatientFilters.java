@@ -8,6 +8,7 @@ import org.msf.records.location.LocationTree.LocationSubtree;
 import de.greenrobot.event.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ public final class PatientFilters {
     }
 
     public static SimpleSelectionFilter[] getZoneFilters() {
-        List<SimpleSelectionFilter> filters = new ArrayList<SimpleSelectionFilter>();
+        List<SimpleSelectionFilter> filters = new ArrayList<>();
         if (sRoot != null) {
             for (LocationSubtree zone : sRoot.getLocationsForDepth(1)) {
                 filters.add(new FilterGroup(
@@ -54,15 +55,11 @@ public final class PatientFilters {
     }
 
     public static SimpleSelectionFilter[] getFiltersForDisplay() {
-        List<SimpleSelectionFilter> allFilters = new ArrayList<SimpleSelectionFilter>();
+        List<SimpleSelectionFilter> allFilters = new ArrayList<>();
         allFilters.add(getDefaultFilter());
-        for (SimpleSelectionFilter filter : getZoneFilters()) {
-            allFilters.add(filter);
-        }
+        Collections.addAll(allFilters, getZoneFilters());
         allFilters.add(null); // Section break
-        for (SimpleSelectionFilter filter : getOtherFilters()) {
-            allFilters.add(filter);
-        }
+        Collections.addAll(allFilters, getOtherFilters());
 
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[allFilters.size()];
         allFilters.toArray(filterArray);

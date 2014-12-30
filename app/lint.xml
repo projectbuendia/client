@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress ALL -->
+<lint>
+    <issue id="BooleanMethodIsAlwaysInverted" severity="ignore" />
+    <issue id="SpellCheckingInspection" severity="ignore" />
+    <issue id="ConstantConditions" severity="warning" />
+    <issue id="UnusedDeclaration" severity="warning" />
+    <issue id="AndroidLintOldTargetApi" severity="warning" />
+    <issue id="AndroidLintAlwaysShowAction" severity="warning" />
+    <issue id="AndroidLintAppCompatResource" severity="warning" />
+</lint>

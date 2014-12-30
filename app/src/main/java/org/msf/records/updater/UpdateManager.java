@@ -57,7 +57,6 @@ public class UpdateManager {
 
     private final Object mLock = new Object();
 
-    private final Application mApplication;
     private final UpdateServer mServer;
     private final PackageManager mPackageManager;
     private final Version mCurrentVersion;
@@ -75,12 +74,11 @@ public class UpdateManager {
     private long mDownloadId = -1;
 
     public UpdateManager(Application application, UpdateServer updateServer) {
-        mApplication = application;
         mServer = updateServer;
 
-        mPackageManager = mApplication.getPackageManager();
+        mPackageManager = application.getPackageManager();
         mDownloadManager =
-                (DownloadManager) mApplication.getSystemService(Context.DOWNLOAD_SERVICE);
+                (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
 
         mCurrentVersion = getCurrentVersion();
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
@@ -321,7 +319,6 @@ public class UpdateManager {
                         cursor.close();
                     }
                 }
-                Uri uri;
                 try {
                     Uri.parse(uriString);
                 } catch (IllegalArgumentException e) {

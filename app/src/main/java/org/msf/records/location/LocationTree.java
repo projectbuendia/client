@@ -45,7 +45,7 @@ public final class LocationTree {
 	public final class LocationSubtree {
 		private Location mLocation;
 	    private int mPatientCount;
-	    private TreeMap<String, LocationSubtree> mChildren = new TreeMap<>();
+	    private final TreeMap<String, LocationSubtree> mChildren = new TreeMap<>();
 
 	    public Location getLocation() {
 	    	return mLocation;
@@ -346,7 +346,7 @@ public final class LocationTree {
         private List<Object> getParts(String str) {
             Pattern numberOrWord = Pattern.compile("[0-9]+|[a-zA-Z]+");
             Matcher matcher = numberOrWord.matcher(str == null ? "" : str);
-            List<Object> parts = new ArrayList<Object>();
+            List<Object> parts = new ArrayList<>();
             for (int pos = 0; matcher.find(pos); pos = matcher.end()) {
                 String part = matcher.group();
                 parts.add(part.matches("\\d.*") ? Integer.valueOf(part) : part);

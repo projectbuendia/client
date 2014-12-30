@@ -7,12 +7,10 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.data.app.AppTypeBase;
-import org.msf.records.data.app.converters.AppPatientConverter;
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
 
 /**

@@ -166,6 +166,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         }
         String patientUuid = pathSegments.get(pathSegments.size() - 1);
         String locale = pathSegments.get(pathSegments.size() - 2);
+        @SuppressWarnings("UnusedAssignment") // May be used in the future.
         String chartUuid = pathSegments.get(pathSegments.size() - 3);
 
         // This scary SQL statement joins the observations with appropriate concept names to give
