@@ -111,6 +111,8 @@ android {
 
     lintOptions {
         lintConfig file('lint.xml')
+
+        htmlReport false
     }
 
     buildTypes {
