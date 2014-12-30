@@ -18,8 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Assert;
-
 /**
  * Fake event bus implementation. The real {@link EventBus} is not suitable for unit tests
  * because it calls methods on a separate thread to the test thread. This is because the
@@ -31,7 +29,7 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
 	private static final Set<String> IGNORED_METHOD_NAMES = ImmutableSet.of(
 			"equals", "hashCode", "toString", "getClass", "notify", "notifyAll", "wait");
 
-	private final Set<Object> mRegisteredReceivers = new HashSet<Object>();
+	private final Set<Object> mRegisteredReceivers = new HashSet<>();
 	private final List<Object> mEventLog = Lists.newArrayList();
 
 	@Override

@@ -93,11 +93,6 @@ public class MsfRecordsProvider extends ContentProvider {
     }
 
     @Override
-    public void shutdown() {
-        super.shutdown();
-    }
-
-    @Override
     public String getType(Uri uri) {
         return getSubProvider(uri).getType(uri);
     }

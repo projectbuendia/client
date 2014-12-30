@@ -10,9 +10,9 @@ public class LocationsLoadFailedEvent {
     public static final int REASON_DB_ERROR = 2;
     public static final int REASON_SERVER_ERROR = 3;
 
-    private final int mReason;
+    public final int reason;
 
     public LocationsLoadFailedEvent(int reason) {
-        mReason = reason;
+        this.reason = reason;
     }
 }

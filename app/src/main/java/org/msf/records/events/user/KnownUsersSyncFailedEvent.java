@@ -7,9 +7,9 @@ public class KnownUsersSyncFailedEvent {
 
     public static final int REASON_UNKNOWN = 0;
 
-    private final int mReason;
+    public final int reason;
 
     public KnownUsersSyncFailedEvent(int reason) {
-        mReason = reason;
+        this.reason = reason;
     }
 }

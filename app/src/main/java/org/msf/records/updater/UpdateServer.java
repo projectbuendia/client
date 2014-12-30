@@ -36,7 +36,7 @@ public class UpdateServer {
             Response.ErrorListener errorListener,
             @Nullable String tag) {
         mVolley.addToRequestQueue(
-                new GsonRequest<UpdateInfo>(
+                new GsonRequest<>(
                         mRootUrl + "androidclient/version.json",
                         UpdateInfo.class,
                         false /*array*/,

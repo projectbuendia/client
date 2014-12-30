@@ -16,7 +16,7 @@
         android:padding="16dp"
         android:gravity="start|center_vertical"
         android:textColor="#757575"
-        android:textSize="24dp"
+        android:textSize="24sp"
         tools:text="David Chen" />
 
     <View
@@ -37,7 +37,8 @@
             android:layout_weight="1"
             android:padding="8dp"
             android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_settings" />
+            android:src="@drawable/ic_settings"
+            android:contentDescription="Settings" />
 
         <View
             android:id="@+id/vr"
@@ -52,7 +53,8 @@
             android:layout_weight="1"
             android:padding="8dp"
             android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_logout"/>
+            android:src="@drawable/ic_logout"
+            android:contentDescription="Log Out" />
 
     </LinearLayout>
 

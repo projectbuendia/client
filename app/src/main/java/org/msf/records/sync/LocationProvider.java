@@ -177,8 +177,8 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
                           ContentValues[] values) {
         // TODO(nfortescue): optimise this.
         int numValues = values.length;
-        for (int i = 0; i < numValues; i++) {
-            insert(dbHelper, contentResolver, uri, values[i]);
+        for (ContentValues value : values) {
+            insert(dbHelper, contentResolver, uri, value);
         }
         return numValues;
     }

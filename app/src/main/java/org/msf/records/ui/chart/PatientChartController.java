@@ -5,8 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 

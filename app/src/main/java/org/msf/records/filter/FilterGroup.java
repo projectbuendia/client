@@ -3,6 +3,7 @@ package org.msf.records.filter;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +48,6 @@ public final class FilterGroup implements SimpleSelectionFilter {
     /**
      * Dynamically build the selection string by combining the selection strings
      * of the filters in this group.
-     * @return
      */
     @Override
     public String getSelectionString() {
@@ -77,15 +77,12 @@ public final class FilterGroup implements SimpleSelectionFilter {
      * Merges all of the selection arguments from filters in this group into a
      * single array.
      * @param constraint the constraint passed into the top-level filter
-     * @return
      */
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
-        List<String> allArgs = new ArrayList<String>();
+        List<String> allArgs = new ArrayList<>();
         for (SimpleSelectionFilter filter : mFilters) {
-            for (String arg : filter.getSelectionArgs(constraint)) {
-                allArgs.add(arg);
-            }
+            Collections.addAll(allArgs, filter.getSelectionArgs(constraint));
         }
 
         String[] allArgsArray = new String[allArgs.size()];

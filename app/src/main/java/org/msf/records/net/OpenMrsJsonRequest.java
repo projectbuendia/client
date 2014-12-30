@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public class OpenMrsJsonRequest extends JsonObjectRequest {
 
-    private String mUsername;
-    private String mPassword;
+    private final String mUsername;
+    private final String mPassword;
 
     private OpenMrsJsonRequest(String username, String password, String url, JSONObject jsonRequest,
                               Response.Listener<JSONObject> listener,

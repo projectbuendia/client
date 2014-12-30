@@ -13,7 +13,7 @@ def versionPatch = 1
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
 dependencies {
     // Build plugins
-    provided 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables
+    provided 'com.github.frankiesardo:auto-parcel-processor:0.2' // Automatic Parcelables
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
 
     // Local .jar dependencies
@@ -26,11 +26,11 @@ dependencies {
     compile project(':ViewPagerIndicator')
 
     // External dependencies
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.android.support:cardview-v7:+'
-    compile 'com.android.support:recyclerview-v7:+'
-    compile 'com.android.support:support-v4:20.0.0'
-    compile 'com.github.frankiesardo:auto-parcel:+' // Automatic Parcelables
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'com.android.support:support-v4:21.0.0'
+    compile 'com.github.frankiesardo:auto-parcel:0.2' // Automatic Parcelables
     compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
     compile 'com.google.code.gson:gson:2.3' // JSON parser
     compile 'com.google.guava:guava:18.0' // Google common libraries
@@ -110,7 +110,8 @@ android {
     }
 
     lintOptions {
-        abortOnError false
+        abortOnError true
+        lintConfig file('lint.xml')
     }
 
     buildTypes {
@@ -128,6 +129,7 @@ android {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
+            //noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.release
         }
     }
@@ -136,7 +138,7 @@ android {
 gradle.taskGraph.whenReady {
     taskGraph ->
         if (taskGraph.hasTask(':app:assembleRelease')) {
-            def pass = ''
+            def pass
             if (!android.signingConfigs.release.storeFile.exists()) {
                 throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
             }

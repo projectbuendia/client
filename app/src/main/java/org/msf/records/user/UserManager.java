@@ -67,7 +67,7 @@ public class UserManager {
     private final EventBusInterface mEventBus;
     private final AsyncTaskRunner mAsyncTaskRunner;
 
-    private final Set<User> mKnownUsers = new HashSet<User>();
+    private final Set<User> mKnownUsers = new HashSet<>();
     private boolean mSynced = false;
     @Nullable private User mActiveUser;
 
@@ -256,8 +256,7 @@ public class UserManager {
         @Override
         protected User doInBackground(Void... voids) {
             try {
-                User addedUser = mUserStore.addUser(mUser);
-                return addedUser;
+                return mUserStore.addUser(mUser);
             } catch (VolleyError e) {
                 if (e.getMessage() != null && e.getMessage().contains("already in use")) {
                     mAlreadyExists = true;

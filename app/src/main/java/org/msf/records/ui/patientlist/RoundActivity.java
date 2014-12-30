@@ -26,7 +26,6 @@ public class RoundActivity extends PatientSearchActivity {
 
     private int mLocationPatientCount;
 
-    private RoundFragment mFragment;
     private SimpleSelectionFilter mFilter;
 
     private final LocationEventSubscriber mSubscriber = new LocationEventSubscriber();
@@ -60,9 +59,9 @@ public class RoundActivity extends PatientSearchActivity {
         inflater.inflate(R.menu.main, menu);
 
         // TODO(akalachman): Move this back to onCreate when I figure out why it needs to be here.
-        mFragment = (RoundFragment)getSupportFragmentManager()
+        RoundFragment fragment = (RoundFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.round_patient_list);
-        mFragment.filterBy(mFilter);
+        fragment.filterBy(mFilter);
 
         menu.findItem(R.id.action_add).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {

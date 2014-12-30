@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- Resources related to the network configuration. -->
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedResources">
 
     <!-- The root URLs for OpenMRS on each of our three different configurations: GCE, Edison on
          LAN, and localhost emulator. It would have been nice to separate the host and path

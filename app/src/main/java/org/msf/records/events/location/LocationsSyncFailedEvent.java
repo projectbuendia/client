@@ -9,9 +9,9 @@ public class LocationsSyncFailedEvent {
     public static final int REASON_TREE_CONSTRUCTION_ERROR = 1;
     public static final int REASON_SERVER_ERROR = 2;
 
-    private final int mReason;
+    public final int reason;
 
     public LocationsSyncFailedEvent(int reason) {
-        mReason = reason;
+        this.reason = reason;
     }
 }

@@ -24,22 +24,19 @@ public class Utils {
      * <p>The resulting strings will have two characters per byte.
      */
     public static String bytesToHex(byte[] data) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < data.length; i++) {
-            buf.append(byteToHex(data[i]).toUpperCase(Locale.US));
-            buf.append(" ");
+        StringBuilder hex = new StringBuilder();
+        for (byte aData : data) {
+            hex.append(byteToHex(aData).toUpperCase(Locale.US));
+            hex.append(" ");
         }
-        return (buf.toString());
+        return (hex.toString());
     }
 
     /**
      * Converts a byte to a two-character hex string.
      */
     public static String byteToHex(byte data) {
-        StringBuffer buf = new StringBuffer();
-        buf.append(toHexChar((data >>> 4) & 0x0F));
-        buf.append(toHexChar(data & 0x0F));
-        return buf.toString();
+        return String.valueOf(toHexChar((data >>> 4) & 0x0F)) + toHexChar(data & 0x0F);
     }
 
     /**

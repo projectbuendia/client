@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.msf.records.R;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.FilterQueryProviderFactory;
@@ -36,7 +35,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Created by Gil on 24/11/14.
+ * A {@link CursorTreeAdapter} for an expandable list of patients.
  */
 public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
@@ -84,14 +83,6 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
         String tent = itemCursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
 
-        StringBuilder sortBuilder = new StringBuilder();
-
-        sortBuilder.append(PatientProviderContract.PatientColumns._ID);
-        sortBuilder.append(",");
-        sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME);
-        sortBuilder.append(",");
-        sortBuilder.append(PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME);
-
         // TODO: Don't use the singleton here.
         @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
         @Nullable LocationSubtree tentSubtree = null;
@@ -99,9 +90,14 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         	 tentSubtree = locationTree.getLocationByUuid(tent);
         }
 
+        String sortClause =
+                PatientProviderContract.PatientColumns._ID + ","
+                        + PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + ","
+                        + PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
+
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory(mContext)
-                        .setSortClause(sortBuilder.toString())
+                        .setSortClause(sortClause)
                         .getFilterQueryProvider(
                                 new FilterGroup(getSelectionFilter(),
                                         new LocationUuidFilter(tentSubtree)));

@@ -1,9 +1,5 @@
 package org.msf.records.data.app.converters;
 
-import android.app.Application;
-
-import org.msf.records.data.app.AppModel;
-
 import javax.inject.Singleton;
 
 import dagger.Module;

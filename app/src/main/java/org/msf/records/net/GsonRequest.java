@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
- * Created by Gil on 08/10/2014.
+ * A {@link Request} with a JSON response parsed by {@link Gson}.
  */
 public class GsonRequest<T> extends Request<T> {
 
@@ -41,14 +41,14 @@ public class GsonRequest<T> extends Request<T> {
      * @param clazz Relevant class object, for Gson's reflection
      * @param headers Map of request headers
      */
-    public GsonRequest(String url, Class clazz, boolean array, Map<String, String> headers,
+    public GsonRequest(String url, Class<T> clazz, boolean array, Map<String, String> headers,
                        Response.Listener<T> listener, Response.ErrorListener errorListener) {
         this(Method.GET, null, url, clazz, array, headers, listener, errorListener);
     }
 
     public GsonRequest(int method,
                        @Nullable Map<String, String> body,
-                       String url, Class clazz, boolean array, Map<String, String> headers,
+                       String url, Class<T> clazz, boolean array, Map<String, String> headers,
                        Response.Listener<T> listener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         this.body = body;
@@ -84,7 +84,7 @@ public class GsonRequest<T> extends Request<T> {
             if(array){
                 JsonParser parser = new JsonParser();
                 JsonArray array = (JsonArray) parser.parse(json);
-                ArrayList elements = new ArrayList();
+                ArrayList<T> elements = new ArrayList<>();
                 for (int i = 0; i < array.size(); i++) {
                     elements.add(gsonParser.fromJson(array.get(i).toString(), clazz));
                 }

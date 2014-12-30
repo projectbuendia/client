@@ -28,21 +28,21 @@ import javax.annotation.Nullable;
  */
 public class LocationTreeFactory {
 
-    private FilterQueryProviderFactory mLocationQueryFactory;
-    private FilterQueryProviderFactory mLocationNamesQueryFactory;
-    private FilterQueryProviderFactory mPatientCountsQueryFactory;
+    private final FilterQueryProviderFactory mLocationQueryFactory;
+    private final FilterQueryProviderFactory mLocationNamesQueryFactory;
+    private final FilterQueryProviderFactory mPatientCountsQueryFactory;
 
     private SimpleSelectionFilter mLocationFilter = new AllFilter();
     private SimpleSelectionFilter mLocationNameFilter = new AllFilter();
-    private SimpleSelectionFilter mPatientCountsFilter = new AllFilter();
+    private final SimpleSelectionFilter mPatientCountsFilter = new AllFilter();
 
-    private Multimap<String, Location> mLocationsByParentUuid;
-    private Map<String, LocalizedString.Builder> mLocationNamesByUuid;
+    private final Multimap<String, Location> mLocationsByParentUuid;
+    private final Map<String, LocalizedString.Builder> mLocationNamesByUuid;
     /**
      * Map from location UUID to number of patients at that location. This excludes any patients contained with
      * a smaller location within that location.
      */
-    private Map<String, Integer> mPatientCountsMap;
+    private final Map<String, Integer> mPatientCountsMap;
 
     LocationTreeFactory(Context context) {
         mLocationQueryFactory = new FilterQueryProviderFactory(context);

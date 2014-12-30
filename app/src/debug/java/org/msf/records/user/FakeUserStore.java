@@ -13,9 +13,8 @@ import java.util.Set;
  */
 public class FakeUserStore extends UserStore {
 
-    private Set<User> mServerKnownUsers;
+    private final Set<User> mServerKnownUsers;
     private Set<User> mLocalKnownUsers;
-    private int mNextId;
 
     public FakeUserStore() {
         User akalachman = User.create("akalachman", "Adam Kalachman");
@@ -51,7 +50,8 @@ public class FakeUserStore extends UserStore {
         mLocalKnownUsers = Sets.newHashSet(allKnownUsers);
         mLocalKnownUsers.remove(kpy);
 
-        mNextId = 1;
+        //noinspection UnusedAssignment
+        int nextId = 1;
     }
 
     @Override

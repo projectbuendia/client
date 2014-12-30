@@ -23,8 +23,7 @@ import butterknife.InjectView;
  */
 public class AddNewUserDialogFragment extends DialogFragment {
     public static AddNewUserDialogFragment newInstance() {
-        AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
-        return fragment;
+        return new AddNewUserDialogFragment();
     }
 
     @InjectView(R.id.add_user_username_tv) EditText mUsername;

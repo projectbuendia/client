@@ -11,7 +11,6 @@ import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.ui.MainScreenFragment;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
@@ -32,15 +31,6 @@ public class PatientListActivity extends PatientSearchActivity {
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
-
-        if (findViewById(R.id.patient_detail_container) != null) {
-            // Create a main screen shown when no patient is selected.
-            MainScreenFragment mainScreenFragment = new MainScreenFragment();
-
-            // Add the fragment to the container.
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.patient_detail_container, mainScreenFragment).commit();
-        }
 
         int selectedFilter = 0;  // Default filter == all patients
         if (savedInstanceState != null) {

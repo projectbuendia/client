@@ -2,7 +2,6 @@ package org.msf.records.net;
 
 import android.util.Base64;
 
-import org.msf.records.inject.Qualifiers;
 import org.msf.records.prefs.StringPreference;
 
 import java.util.HashMap;

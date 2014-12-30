@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="add_patient_gender">
-        <item>Male</item>
-        <item>Female</item>
-    </string-array>
-    <string-array name="add_patient_patient_status">
-        <item>Infected</item>
-        <item>Probable</item>
-        <item>Suspect</item>
-    </string-array>
-    <string-array name="add_patient_movement">
-        <item>Independent</item>
-        <item>Partially dependent</item>
-        <item>Fully dependent</item>
-    </string-array>
-
-
-    <string-array name="add_patient_locations">
-        <item>Triage</item>
-        <item>Suspect zone</item>
-        <item>Probable zone</item>
-        <item>Confirmed zone</item>
-        <item>Mortuary</item>
-        <item>Outside</item>
-    </string-array>
 
     <string-array name="add_patient_age_type">
         <item>Years</item>
@@ -40,8 +16,5 @@
         <item>First Name</item>
         <item>Given Name</item>
     </string-array>
-
-
-
 
 </resources>
