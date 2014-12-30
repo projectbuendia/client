@@ -110,7 +110,6 @@ android {
     }
 
     lintOptions {
-        abortOnError true
         lintConfig file('lint.xml')
     }
 
