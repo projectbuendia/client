@@ -2,13 +2,10 @@
 <resources>
 
     <string name="app_name">MSF Medical Records</string>
-    <string name="title_user_login">Login</string>
     <string name="title_patient_list">Patients</string>
     <string name="title_patient_chart">Patient Chart</string>
-    <string name="title_patient_detail">Patient Detail</string>
     <string name="title_activity_patient_add">New Patient</string>
     <string name="cancel">Cancel</string>
-    <string name="done">Done</string>
     <string name="status_suspect">Suspect</string>
     <string name="status_probable">Probable</string>
     <string name="status_confirmed">Confirmed</string>
@@ -18,7 +15,6 @@
     <string name="status_discharged">Discharged</string>
     <string name="status_unconfirmed_death">Unconfirmed death</string>
     <string name="status_confirmed_death">Confirmed death</string>
-    <string name="action_edit_details">Edit details</string>
     <string name="action_new_patient">+ Create new patient</string>
     <string name="action_view_xform">+ View first saved xform</string>
     <string name="action_new_round">New round</string>
@@ -29,12 +25,6 @@
     <string name="snackbar_update_downloaded">Application update downloaded</string>
     <string name="snackbar_action_download">Download</string>
     <string name="snackbar_action_install">Install</string>
-    <string name="age_years">%d</string>
-    <string name="day_n">%d</string>
-    <string name="overview_age">Age</string>
-    <string name="overview_days_since_admission">days since admission</string>
-    <string name="overview_gender">Gender</string>
-    <string name="overview_assigned_location">Assigned location</string>
     <string name="title_edit_patient_location">Edit patient location</string>
     <string name="add_user_example_username">jsmith</string>
     <string name="given_name">Given name</string>
