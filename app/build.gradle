@@ -110,8 +110,9 @@ android {
     }
 
     lintOptions {
-        abortOnError true
         lintConfig file('lint.xml')
+
+        htmlReport false
     }
 
     buildTypes {
