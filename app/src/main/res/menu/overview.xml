@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:showAsAction="always|collapseActionView"
+    <item android:showAsAction="ifRoom|collapseActionView"
         android:id="@+id/action_relocate_patient"
         android:title="@string/action_assign_location"/>
-    <item android:showAsAction="always"
+    <item android:showAsAction="ifRoom"
         android:id="@+id/action_update_chart"
         android:title="@string/action_update_chart"/>
 </menu>

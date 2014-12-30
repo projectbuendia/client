@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/user"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title=""
         android:actionLayout="@layout/action_view_user" />
 

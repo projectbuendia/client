@@ -25,6 +25,7 @@ import org.msf.records.widget.DataGridAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.TreeSet;
 
 import javax.annotation.Nullable;
@@ -256,7 +257,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 if (temperatureString != null) {
                     try {
                         double temperature = Double.parseDouble(temperatureString);
-                        text = String.format("%.1f", temperature);
+                        text = String.format(Locale.US, "%.1f", temperature);
                         if (temperature <= 37.5) {
                             backgroundResource = R.drawable.chart_cell_good;
                         } else {
