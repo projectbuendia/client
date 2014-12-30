@@ -1,3 +1,3 @@
 [submodule "client-libs"]
 	path = client-libs
-	url = git@github.com:projectbuendia/client-libs
+	url = ../client-libs
