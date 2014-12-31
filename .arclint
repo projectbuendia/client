@@ -1,0 +1,10 @@
+{
+  "linters" : {
+    "java_style" : {
+      "type" : "checkstyle",
+      "include" : "(\\.java$)",
+      "checkstyle.jar_path" : "tools/arc/lint/lib/checkstyle-6.2-all.jar",
+      "checkstyle.checks_path" : "tools/arc/lint/lib/client-style.xml"
+    }
+  }
+}
