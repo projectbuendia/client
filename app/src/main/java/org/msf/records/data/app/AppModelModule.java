@@ -20,11 +20,12 @@ import javax.inject.Singleton;
                 AppAsyncTaskModule.class
         },
         complete = false,
-        library = true
-)
+        library = true)
 public class AppModelModule {
 
-    @Provides @Singleton AppModel provideAppModel(
+    @Provides
+    @Singleton
+    AppModel provideAppModel(
             AppTypeConverters converters,
             AppAsyncTaskFactory taskFactory) {
         return new AppModel(App.getInstance().getContentResolver(), converters, taskFactory);

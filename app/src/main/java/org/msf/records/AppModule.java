@@ -59,8 +59,7 @@ import javax.inject.Singleton;
                 TentSelectionActivity.class,
                 PatientListFragment.class,
                 RoundFragment.class
-        }
-)
+        })
 public final class AppModule {
 
     private final App mApp;
@@ -69,43 +68,59 @@ public final class AppModule {
         mApp = app;
     }
 
-    @Provides @Singleton Application provideApplication() {
+    @Provides
+    @Singleton
+    Application provideApplication() {
         return mApp;
     }
 
-    @Provides @Singleton ContentResolver provideContentResolver(Application app) {
+    @Provides
+    @Singleton
+    ContentResolver provideContentResolver(Application app) {
         return app.getContentResolver();
     }
 
-    @Provides @Singleton Resources provideResources(Application app) {
+    @Provides
+    @Singleton
+    Resources provideResources(Application app) {
         return app.getResources();
     }
 
-    @Provides @Singleton SyncManager provideSyncManager() {
-    	return new SyncManager();
+    @Provides
+    @Singleton
+    SyncManager provideSyncManager() {
+        return new SyncManager();
     }
 
-    @Provides @Singleton PatientChartModel providePatientChartModel(SyncManager syncManager) {
-    	PatientChartModel patientChartModel = new PatientChartModel(EventBus.getDefault(), syncManager);
-    	patientChartModel.init();
-    	return patientChartModel;
+    @Provides
+    @Singleton
+    PatientChartModel providePatientChartModel(SyncManager syncManager) {
+        PatientChartModel patientChartModel =
+                new PatientChartModel(EventBus.getDefault(), syncManager);
+        patientChartModel.init();
+        return patientChartModel;
     }
 
-    @Provides @Singleton PatientModel providePatientModel() {
-    	return new PatientModel();
+    @Provides
+    @Singleton
+    PatientModel providePatientModel() {
+        return new PatientModel();
     }
 
-    @Provides @Singleton LocationManager provideLocationManager(SyncManager syncManager) {
-    	LocationManager locationManager = new LocationManager(
-    			EventBus.getDefault(),
-    			App.getInstance(),
-    			syncManager);
-    	locationManager.init();
-    	return locationManager;
+    @Provides
+    @Singleton
+    LocationManager provideLocationManager(SyncManager syncManager) {
+        LocationManager locationManager = new LocationManager(
+                EventBus.getDefault(),
+                App.getInstance(),
+                syncManager);
+        locationManager.init();
+        return locationManager;
     }
 
-    @Provides @Singleton LocalizedChartHelper provideLocalizedChartHelper(
-            ContentResolver contentResolver) {
+    @Provides
+    @Singleton
+    LocalizedChartHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
         return new LocalizedChartHelper(contentResolver);
     }
 }

@@ -42,31 +42,38 @@ public final class AppPatient extends AppTypeBase<String> {
     public final String locationUuid;
 
     private AppPatient(Builder builder) {
-    	this.id = builder.id;
-    	this.uuid = builder.uuid;
-    	this.givenName = builder.givenName;
-    	this.familyName = builder.familyName;
-        this.gender = builder.gender;
-        this.birthdate = builder.birthdate;
-    	this.admissionDateTime = builder.admissionDateTime;
-    	this.locationUuid = builder.locationUuid;
+        this.id = builder.mId;
+        this.uuid = builder.mUuid;
+        this.givenName = builder.mGivenName;
+        this.familyName = builder.mFamilyName;
+        this.gender = builder.mGender;
+        this.birthdate = builder.mBirthdate;
+        this.admissionDateTime = builder.mAdmissionDateTime;
+        this.locationUuid = builder.mLocationUuid;
     }
 
+    /**
+     * Creates an instance of {@link AppPatient} from a network {@link Patient} object.
+     */
     public static AppPatient fromNet(Patient patient) {
         AppPatient.Builder builder = AppPatient.builder();
-        builder.id = patient.id;
-        builder.uuid = patient.uuid;
-        builder.givenName = patient.given_name;
-        builder.familyName = patient.family_name;
-        builder.gender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
-        builder.birthdate = patient.birthdate;
-        builder.admissionDateTime = new DateTime(patient.admission_timestamp * 1000);
+        builder.mId = patient.id;
+        builder.mUuid = patient.uuid;
+        builder.mGivenName = patient.given_name;
+        builder.mFamilyName = patient.family_name;
+        builder.mGender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
+        builder.mBirthdate = patient.birthdate;
+        builder.mAdmissionDateTime = new DateTime(patient.admission_timestamp * 1000);
         if (patient.assigned_location != null && patient.assigned_location.uuid != null) {
-            builder.locationUuid = patient.assigned_location.uuid;
+            builder.mLocationUuid = patient.assigned_location.uuid;
         }
         return builder.build();
     }
 
+    /**
+     * Converts this instance of {@link AppPatient} to a {@link ContentValues} object for insertion
+     * into a database or content provider.
+     */
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
 
@@ -98,151 +105,63 @@ public final class AppPatient extends AppTypeBase<String> {
         return contentValues;
     }
 
-    public static class Delta {
-
-        public final Optional<String> id = Optional.absent();
-        public final Optional<String> givenName = Optional.absent();
-        public final Optional<String> familyName = Optional.absent();
-        public final Optional<Integer> gender = Optional.absent();
-        public final Optional<LocalDate> birthdate = Optional.absent();
-        public final Optional<String> assignedLocationUuid = Optional.absent();
-
-        /**
-         * Serializes the fields changed in the delta to a {@link JSONObject}.
-         *
-         * @return whether serialization succeeded
-         */
-        public boolean toJson(JSONObject json) {
-            try {
-                if (id.isPresent()) {
-                    json.put(Server.PATIENT_ID_KEY, id.get());
-                }
-                if (givenName.isPresent()) {
-                    json.put(Server.PATIENT_GIVEN_NAME_KEY, givenName.get());
-                }
-                if (familyName.isPresent()) {
-                    json.put(Server.PATIENT_FAMILY_NAME_KEY, familyName.get());
-                }
-                if (gender.isPresent()) {
-                    json.put(
-                            Server.PATIENT_GENDER_KEY,
-                            gender.get() == Patient.GENDER_MALE ? "M" : "F");
-                }
-                if (birthdate.isPresent()) {
-                    json.put(
-                            Server.PATIENT_BIRTHDATE_KEY,
-                            Utils.localDateToString(birthdate.get()));
-                }
-                if (assignedLocationUuid.isPresent()) {
-                    json.put(
-                            Server.PATIENT_ASSIGNED_LOCATION,
-                            getLocationObject(assignedLocationUuid.get()));
-                }
-
-                return true;
-            } catch (JSONException e) {
-                Log.w(TAG, "Unable to serialize a patient delta to JSON.", e);
-
-                return false;
-            }
-        }
-
-        /**
-         * Returns the {@link ContentValues} corresponding to the delta.
-         */
-        public ContentValues toContentValues() {
-            ContentValues contentValues = new ContentValues();
-
-            if (id.isPresent()) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns._ID,
-                        id.get());
-            }
-            if (givenName.isPresent()) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
-                        givenName.get());
-            }
-            if (familyName.isPresent()) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
-                        familyName.get());
-            }
-            if (gender.isPresent()) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
-                        gender.get() == Patient.GENDER_MALE ? "M" : "F");
-            }
-            if (birthdate.isPresent()) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
-                        Utils.localDateToString(birthdate.get()));
-            }
-            if (assignedLocationUuid.isPresent()) {
-                contentValues.put(
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
-                        assignedLocationUuid.get());
-            }
-
-            return contentValues;
-        }
-    }
-
-    private static JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {
-        JSONObject location = new JSONObject();
-        location.put("uuid", assignedLocationUuid);
-        return location;
-    }
-
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
 
-        private String id;
-        private String uuid;
-        private String givenName;
-        private String familyName;
-        private int gender;
-        private LocalDate birthdate;
-        private DateTime admissionDateTime;
-        private String locationUuid;
+        private String mId;
+        private String mUuid;
+        private String mGivenName;
+        private String mFamilyName;
+        private int mGender;
+        private LocalDate mBirthdate;
+        private DateTime mAdmissionDateTime;
+        private String mLocationUuid;
 
         private Builder() {}
 
         public Builder setId(String id) {
-            this.id = id;
+            this.mId = id;
             return this;
         }
+
         public Builder setUuid(String uuid) {
-            this.uuid = uuid;
+            this.mUuid = uuid;
             return this;
         }
+
         public Builder setGivenName(String givenName) {
-            this.givenName = givenName;
+            this.mGivenName = givenName;
             return this;
         }
+
         public Builder setFamilyName(String familyName) {
-            this.familyName = familyName;
+            this.mFamilyName = familyName;
             return this;
         }
+
         public Builder setGender(int gender) {
-            this.gender = gender;
+            this.mGender = gender;
             return this;
         }
+
         public Builder setBirthdate(LocalDate birthdate) {
-            this.birthdate = birthdate;
+            this.mBirthdate = birthdate;
             return this;
         }
+
         public Builder setAdmissionDateTime(DateTime admissionDateTime) {
-            this.admissionDateTime = admissionDateTime;
+            this.mAdmissionDateTime = admissionDateTime;
             return this;
         }
+
         public Builder setLocationUuid(String locationUuid) {
-            this.locationUuid = locationUuid;
+            this.mLocationUuid = locationUuid;
             return this;
         }
+
         public AppPatient build() {
             return new AppPatient(this);
         }

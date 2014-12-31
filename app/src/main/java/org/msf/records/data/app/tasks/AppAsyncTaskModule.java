@@ -16,11 +16,12 @@ import dagger.Provides;
  */
 @Module(
         complete = false,
-        library = true
-)
+        library = true)
 public class AppAsyncTaskModule {
 
-    @Provides @Singleton AppAsyncTaskFactory provideAppAsyncTaskFactory(
+    @Provides
+    @Singleton
+    AppAsyncTaskFactory provideAppAsyncTaskFactory(
             Server server,
             ContentResolver contentResolver,
             AppTypeConverters converters) {

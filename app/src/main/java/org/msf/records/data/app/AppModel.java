@@ -40,7 +40,7 @@ public class AppModel {
             ContentResolver contentResolver,
             AppTypeConverters converters,
             AppAsyncTaskFactory taskFactory) {
-    	mContentResolver = contentResolver;
+        mContentResolver = contentResolver;
         mConverters = converters;
         mTaskFactory = taskFactory;
     }
@@ -106,8 +106,8 @@ public class AppModel {
     @SuppressWarnings("unused") // Called by reflection from event bus.
     private static class CrudEventBusErrorSubscriber {
 
-    	// TODO(rjlothian): This memory freeing strategy feels error prone.
-    	// We don't unregister from the bus if delivery succeeds...
+        // TODO(rjlothian): This memory freeing strategy feels error prone.
+        // We don't unregister from the bus if delivery succeeds...
         private final CrudEventBus mBus;
 
         public CrudEventBusErrorSubscriber(CrudEventBus bus) {
@@ -129,51 +129,51 @@ public class AppModel {
     }
 
     private static class FetchTypedCursorAsyncTask<T>
-    		extends AsyncTask<Void, Void, TypedCursor<T>> {
+            extends AsyncTask<Void, Void, TypedCursor<T>> {
 
-		private final ContentResolver mContentResolver;
-		private final SimpleSelectionFilter mFilter;
-		private final String mConstraint;
-		private final AppTypeConverter<T> mConverter;
-		private final CrudEventBus mBus;
+        private final ContentResolver mContentResolver;
+        private final SimpleSelectionFilter mFilter;
+        private final String mConstraint;
+        private final AppTypeConverter<T> mConverter;
+        private final CrudEventBus mBus;
 
-		public FetchTypedCursorAsyncTask(
-		        ContentResolver contentResolver,
-		        SimpleSelectionFilter filter,
-		        String constraint,
-		        AppTypeConverter<T> converter,
-		        CrudEventBus bus) {
-		    mContentResolver = contentResolver;
-		    mFilter = filter;
-		    mConstraint = constraint;
-		    mConverter = converter;
-		    mBus = bus;
-		}
+        public FetchTypedCursorAsyncTask(
+                ContentResolver contentResolver,
+                SimpleSelectionFilter filter,
+                String constraint,
+                AppTypeConverter<T> converter,
+                CrudEventBus bus) {
+            mContentResolver = contentResolver;
+            mFilter = filter;
+            mConstraint = constraint;
+            mConverter = converter;
+            mBus = bus;
+        }
 
-		@Override
-		protected  TypedCursor<T> doInBackground(Void... voids) {
-		    // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
-		    // different types of queries.
-		    Cursor cursor = null;
-		    try {
-		        cursor = mContentResolver.query(
-		                PatientProviderContract.CONTENT_URI,
-		                PatientProjection.getProjectionColumns(),
-		                mFilter.getSelectionString(),
-		                mFilter.getSelectionArgs(mConstraint),
-		                null);
+        @Override
+        protected TypedCursor<T> doInBackground(Void... voids) {
+            // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
+            // different types of queries.
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(
+                        PatientProviderContract.CONTENT_URI,
+                        PatientProjection.getProjectionColumns(),
+                        mFilter.getSelectionString(),
+                        mFilter.getSelectionArgs(mConstraint),
+                        null);
 
-		        return new TypedConvertedCursor<>(mConverter, cursor);
-		    } finally {
-		        if (cursor != null) {
-		            cursor.close();
-		        }
-		    }
-		}
+                return new TypedConvertedCursor<>(mConverter, cursor);
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
 
-		@Override
-		protected void onPostExecute(TypedCursor<T> result) {
-		    mBus.post(new TypedCursorFetchedEvent<>(result));
-		}
-	}
+        @Override
+        protected void onPostExecute(TypedCursor<T> result) {
+            mBus.post(new TypedCursorFetchedEvent<>(result));
+        }
+    }
 }

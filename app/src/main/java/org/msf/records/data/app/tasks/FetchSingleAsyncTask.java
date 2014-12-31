@@ -25,7 +25,7 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
     private final AppTypeConverter<T> mConverter;
     private final CrudEventBus mBus;
 
-    public FetchSingleAsyncTask(
+    FetchSingleAsyncTask(
             ContentResolver contentResolver,
             SimpleSelectionFilter filter,
             String constraint,

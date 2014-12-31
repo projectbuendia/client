@@ -40,7 +40,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
     private final AppPatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
-    public AppUpdatePatientAsyncTask(
+    AppUpdatePatientAsyncTask(
             AppAsyncTaskFactory taskFactory,
             AppTypeConverters converters,
             Server server,
