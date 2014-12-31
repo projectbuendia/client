@@ -42,6 +42,9 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
     private String mUuid;
 
+    /**
+     * Creates a new {@link AppAddPatientAsyncTask}.
+     */
     public AppAddPatientAsyncTask(
             AppAsyncTaskFactory taskFactory,
             AppTypeConverters converters,

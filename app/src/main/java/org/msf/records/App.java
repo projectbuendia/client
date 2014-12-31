@@ -19,7 +19,7 @@ import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by Gil on 08/10/2014.\
+ * An {@link Application} the represents the Android Client.
  */
 public class App extends Application {
 
@@ -47,7 +47,7 @@ public class App extends Application {
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
-        InitializeSQLCipher();
+        initializeSqlCipher();
 
         buildObjectGraphAndInject();
 
@@ -65,7 +65,7 @@ public class App extends Application {
         EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
     }
 
-    private void InitializeSQLCipher() {
+    private void initializeSqlCipher() {
         SQLiteDatabase.loadLibs(this);
     }
 
@@ -74,8 +74,8 @@ public class App extends Application {
         mObjectGraph.inject(this);
     }
 
-    public void inject(Object o) {
-        mObjectGraph.inject(o);
+    public void inject(Object obj) {
+        mObjectGraph.inject(obj);
     }
 
     public static synchronized App getInstance() {

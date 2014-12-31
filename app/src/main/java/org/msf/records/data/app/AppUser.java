@@ -11,33 +11,40 @@ public final class AppUser extends AppTypeBase<Integer> {
     public final String fullName;
 
     private AppUser(Builder builder) {
-    	this.id = builder.id;
-    	this.uuid = builder.uuid;
-    	this.fullName = builder.fullName;
+        this.id = builder.mId;
+        this.uuid = builder.mUuid;
+        this.fullName = builder.mFullName;
     }
 
     public static Builder builder() {
-    	return new Builder();
+        return new Builder();
     }
 
     public static final class Builder {
-    	private int id = 0;
-    	private String uuid = "";
-    	private String fullName = "";
 
-    	private Builder() {}
+        private int mId = 0;
+        private String mUuid = "";
+        private String mFullName = "";
 
-    	public Builder setId(int id) {
-    		this.id = id;
-    		return this;
-    	}
-    	public Builder setUuid(String uuid) {
-    		this.uuid = Preconditions.checkNotNull(uuid);
-    		return this;
-    	}
-    	public Builder setFullName(String fullName) {
-    		this.fullName = Preconditions.checkNotNull(fullName);
-    		return this;
-    	}
+        private Builder() {}
+
+        public Builder setId(int id) {
+            this.mId = id;
+            return this;
+        }
+
+        public Builder setUuid(String uuid) {
+            this.mUuid = Preconditions.checkNotNull(uuid);
+            return this;
+        }
+
+        public Builder setFullName(String fullName) {
+            this.mFullName = Preconditions.checkNotNull(fullName);
+            return this;
+        }
+
+        public AppUser build() {
+            return new AppUser(this);
+        }
     }
 }

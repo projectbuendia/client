@@ -10,11 +10,12 @@ import dagger.Provides;
  */
 @Module(
         complete = false,
-        library = true
-)
+        library = true)
 public class AppTypeConverterModule {
 
-    @Provides @Singleton AppTypeConverters provideAppTypeConverters() {
+    @Provides
+    @Singleton
+    AppTypeConverters provideAppTypeConverters() {
         return new AppTypeConverters(
                 new AppPatientConverter());
     }
