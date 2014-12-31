@@ -393,7 +393,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setPatient(AppPatient patient) {
             String locationText = "Unknown Location";
             // TODO: Don't use this singleton
-            LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+            LocationTree locationTree = LocationTree.singletonInstance;
             if (patient.locationUuid != null) {
                 LocationSubtree patientZone = locationTree.getZoneForUuid(patient.locationUuid);
                 LocationSubtree patientTent = locationTree.getTentForUuid(patient.locationUuid);

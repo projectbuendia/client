@@ -104,7 +104,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 mLocationUuid = newTentUuid;
 
                 LocationTree.LocationSubtree location =
-                        LocationTree.SINGLETON_INSTANCE.getLocationByUuid(newTentUuid);
+                        LocationTree.singletonInstance.getLocationByUuid(newTentUuid);
                 mLocationText.setText(location.toString());
                 mLocationText.setBackgroundResource(
                         Zone.getBackgroundColorResource(location.getLocation().parent_uuid));

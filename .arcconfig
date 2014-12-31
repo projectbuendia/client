@@ -5,5 +5,7 @@
   "phabricator.uri" : "http://p.projectbuendia.org/",
   "arc.land.onto.default" : "dev",
   "history.immutable" : true,
-  "lint.engine" : "ClientLintEngine"
+  "lint.engine" : "ClientLintEngine",
+  "lint.checkstyle.jar_path" : "tools/arc/lint/lib/checkstyle-6.2-all.jar",
+  "lint.checkstyle.checks_path" : "tools/arc/lint/lib/client-style.xml"
 }

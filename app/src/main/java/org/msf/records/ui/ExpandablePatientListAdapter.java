@@ -84,7 +84,7 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         String tent = itemCursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
 
         // TODO: Don't use the singleton here.
-        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        @Nullable LocationTree locationTree = LocationTree.singletonInstance;
         @Nullable LocationSubtree tentSubtree = null;
         if (locationTree != null) {
         	 tentSubtree = locationTree.getLocationByUuid(tent);
@@ -124,10 +124,10 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         int patientCount = -1;
         String locationUuid = cursor.getString(PatientProjection.COUNTS_COLUMN_LOCATION_UUID);
         String tentName = context.getResources().getString(R.string.unknown_tent);
-        @Nullable LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        @Nullable LocationTree locationTree = LocationTree.singletonInstance;
         if (locationTree != null) {
             	LocationSubtree location =
-                        LocationTree.SINGLETON_INSTANCE.getLocationByUuid(locationUuid);
+                        LocationTree.singletonInstance.getLocationByUuid(locationUuid);
 	        if (location != null) {
 	            tentName = location.toString();
                 patientCount = location.getPatientCount();

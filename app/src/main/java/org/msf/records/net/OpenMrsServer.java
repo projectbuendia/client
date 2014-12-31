@@ -259,9 +259,9 @@ public class OpenMrsServer implements Server {
         Patient patient = mGson.fromJson(object.toString(), Patient.class);
 
         // TODO(rjlothian): This shouldn't be done here.
-        if (patient.assigned_location == null && LocationTree.SINGLETON_INSTANCE != null) {
+        if (patient.assigned_location == null && LocationTree.singletonInstance != null) {
             LocationSubtree subtree =
-                    LocationTree.SINGLETON_INSTANCE.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
+                    LocationTree.singletonInstance.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
             if (subtree != null) {
                 patient.assigned_location = subtree.getLocation();
             }
