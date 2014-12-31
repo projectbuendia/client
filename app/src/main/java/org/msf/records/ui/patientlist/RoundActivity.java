@@ -47,7 +47,7 @@ public class RoundActivity extends PatientSearchActivity {
         setContentView(R.layout.activity_round);
 
         // TODO: Don't use this singleton.
-        LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        LocationTree locationTree = LocationTree.singletonInstance;
         LocationSubtree subtree = locationTree.getLocationByUuid(mLocationUuid);
         mFilter = new FilterGroup(PatientFilters.getDefaultFilter(), new LocationUuidFilter(subtree));
     }

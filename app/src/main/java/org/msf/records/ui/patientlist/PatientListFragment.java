@@ -142,9 +142,9 @@ public class PatientListFragment extends ProgressFragment implements
         App.getInstance().inject(this);
         mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
         		PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
-		LocationTree locationTree = LocationTree.SINGLETON_INSTANCE;
+        LocationTree locationTree = LocationTree.singletonInstance;
 		if (locationTree != null) {
-			mFactory.setSortClause(LocationTree.SINGLETON_INSTANCE.getLocationSortClause(
+            mFactory.setSortClause(LocationTree.singletonInstance.getLocationSortClause(
 		                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
 		} else {
 			Log.e(TAG, "Location tree does not exist yet");

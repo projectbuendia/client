@@ -193,9 +193,9 @@ public class LocationManager {
         @Override
         protected void onPostExecute(LocationTree result) {
         	if (result != null) {
-        		mLocationTree = result;
-        		LocationTree.SINGLETON_INSTANCE = result;
-        		mEventBus.post(new LocationsLoadedEvent(result));
+                mLocationTree = result;
+                LocationTree.singletonInstance = result;
+                mEventBus.post(new LocationsLoadedEvent(result));
         	}
         }
     }

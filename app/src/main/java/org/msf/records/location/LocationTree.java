@@ -34,8 +34,8 @@ import com.google.common.collect.Ordering;
  */
 public final class LocationTree {
 
-	// TODO(rjlothian): Fix all code that depends on having a singleton and rRemove this.
-	@Nullable public static LocationTree SINGLETON_INSTANCE;
+    // TODO(rjlothian): Fix all code that depends on having a singleton and rRemove this.
+    @Nullable public static LocationTree singletonInstance;
 
     public static final int FACILITY_DEPTH = 0;
     public static final int ZONE_DEPTH = 1;
