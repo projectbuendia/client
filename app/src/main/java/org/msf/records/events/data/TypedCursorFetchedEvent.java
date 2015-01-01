@@ -14,9 +14,9 @@ import org.msf.records.events.DefaultCrudEventBus;
 // each type T that we use.
 public class TypedCursorFetchedEvent<T> {
 
-    public final TypedCursor<T> mCursor;
+    public final TypedCursor<T> cursor;
 
     public TypedCursorFetchedEvent(TypedCursor<T> cursor) {
-        mCursor = cursor;
+        this.cursor = cursor;
     }
 }

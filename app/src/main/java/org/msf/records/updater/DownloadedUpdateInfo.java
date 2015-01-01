@@ -18,15 +18,21 @@ public class DownloadedUpdateInfo {
     private static final String TAG = DownloadedUpdateInfo.class.getName();
 
     public final boolean isValid;
-    private final Version currentVersion;
+    public final Version currentVersion;
     public final Version downloadedVersion;
     public final String path;
 
+    /**
+     * Creates an instance of {@link DownloadedUpdateInfo} for an invalid update.
+     */
     public static DownloadedUpdateInfo getInvalid(Version currentVersion) {
         return new DownloadedUpdateInfo(
                 false /*isValid*/, currentVersion, UpdateManager.INVALID_VERSION, null /*path*/);
     }
 
+    /**
+     * Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk.
+     */
     public static DownloadedUpdateInfo fromPath(Version currentVersion, String path) {
         if (path == null || path.equals("")) {
             Log.w(TAG, "Path was not specified.");

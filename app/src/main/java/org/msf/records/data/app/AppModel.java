@@ -121,7 +121,7 @@ public class AppModel {
             if (event.originalEvent instanceof TypedCursorFetchedEvent<?>) {
                 // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
                 // the event won't be managed by anyone else; therefore, we close it ourselves.
-                ((TypedCursorFetchedEvent<?>) event.originalEvent).mCursor.close();
+                ((TypedCursorFetchedEvent<?>) event.originalEvent).cursor.close();
             }
 
             mBus.unregister(this);
