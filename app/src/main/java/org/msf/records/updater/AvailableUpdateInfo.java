@@ -19,6 +19,9 @@ public class AvailableUpdateInfo {
     public final Version availableVersion;
     public final Uri updateUri;
 
+    /**
+     * Creates an instance of {@link AvailableUpdateInfo} for an invalid update.
+     */
     public static AvailableUpdateInfo getInvalid(Version currentVersion) {
         return new AvailableUpdateInfo(
                 false /*isValid*/,
@@ -27,6 +30,9 @@ public class AvailableUpdateInfo {
                 null /*updateUri*/);
     }
 
+    /**
+     * Creates an instance of {@link AvailableUpdateInfo} from a server response.
+     */
     public static AvailableUpdateInfo fromResponse(Version currentVersion, UpdateInfo response) {
         if (response == null) {
             Log.w(TAG, "The update info is null.");

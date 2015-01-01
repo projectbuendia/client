@@ -10,22 +10,32 @@ public class Qualifiers {
 
     // .events
 
-    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface CrudEventBusBuilder {}
 
 
     // .net
 
-    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface OpenMrsRootUrl {}
 
-    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface OpenMrsUser {}
 
-    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface OpenMrsPassword {}
 
-    @Qualifier @Documented @Retention(RetentionPolicy.RUNTIME)
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface XformUpdateClientCache {}
 
     private Qualifiers() {}

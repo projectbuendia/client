@@ -29,6 +29,9 @@ public class UserStore {
 
     private static final String TAG = UserStore.class.getName();
 
+    /**
+     * Loads the known users from local store.
+     */
     public Set<User> loadKnownUsers() {
         Cursor cursor = null;
         ContentProviderClient client = null;
@@ -73,6 +76,9 @@ public class UserStore {
         }
     }
 
+    /**
+     * Syncs known users with the server.
+     */
     public Set<User> syncKnownUsers() {
         Log.i(TAG, "Getting user list from server");
         // Make an async call to the server and use a CountDownLatch to block until the result is
@@ -116,12 +122,16 @@ public class UserStore {
         return users;
     }
 
+    /**
+     * Adds a new user, both locally and on the server.
+     */
     public User addUser(NewUser user) throws VolleyError {
         // Define a container for the results.
         class Result {
             public User user = null;
             public VolleyError error = null;
         }
+
         final Result result = new Result();
 
         // Make an async call to the server and use a CountDownLatch to block until the result is
@@ -173,6 +183,9 @@ public class UserStore {
         return result.user;
     }
 
+    /**
+     * Deletes a user, both locally and on the server.
+     */
     public User deleteUser(User user) {
         throw new UnsupportedOperationException();
     }

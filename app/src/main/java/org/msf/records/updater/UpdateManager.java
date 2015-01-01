@@ -73,7 +73,7 @@ public class UpdateManager {
     private boolean mIsDownloadInProgress = false;
     private long mDownloadId = -1;
 
-    public UpdateManager(Application application, UpdateServer updateServer) {
+    UpdateManager(Application application, UpdateServer updateServer) {
         mServer = updateServer;
 
         mPackageManager = application.getPackageManager();
@@ -295,20 +295,23 @@ public class UpdateManager {
                     cursor = mDownloadManager.query(
                             new DownloadManager.Query().setFilterById(receivedDownloadId));
                     if (!cursor.moveToFirst()) {
-                        Log.w(TAG, "Received download ID " + receivedDownloadId + " does not exist.");
+                        Log.w(
+                                TAG,
+                                "Received download ID " + receivedDownloadId + " does not exist.");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
 
-                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    int status = cursor.getInt(
+                            cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
                     if (status != DownloadManager.STATUS_SUCCESSFUL) {
                         Log.w(TAG, "Update download failed with status " + status + ".");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
 
-                    uriString =
-                            cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                    uriString = cursor.getString(
+                            cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
                     if (uriString == null) {
                         Log.w(TAG, "No path for a downloaded file exists.");
                         // TODO(dxchen): Consider firing an event.

@@ -13,15 +13,18 @@ import javax.inject.Singleton;
  */
 @Module(
         complete = false,
-        library = true
-)
+        library = true)
 public class UserModule {
 
-    @Provides @Singleton UserStore provideUserStore() {
+    @Provides
+    @Singleton
+    UserStore provideUserStore() {
         return new UserStore();
     }
 
-    @Provides @Singleton UserManager provideUserManage(
+    @Provides
+    @Singleton
+    UserManager provideUserManage(
             UserStore userStore,
             EventBusInterface eventBus,
             AsyncTaskRunner asyncTaskRunner) {

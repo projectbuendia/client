@@ -19,16 +19,18 @@ import dagger.Provides;
                 PatientSearchActivity.class
         },
         complete = false,
-        library = true
-)
+        library = true)
 public class UpdateModule {
 
-    @Provides @Singleton UpdateServer provideUpdateServer() {
+    @Provides
+    @Singleton
+    UpdateServer provideUpdateServer() {
         return new UpdateServer(VolleySingleton.getInstance(App.getInstance()), null /*rootUrl*/);
     }
 
-    @Provides @Singleton UpdateManager provideUpdateManager(
-            Application application, UpdateServer updateServer) {
+    @Provides
+    @Singleton
+    UpdateManager provideUpdateManager(Application application, UpdateServer updateServer) {
         return new UpdateManager(application, updateServer);
     }
 }

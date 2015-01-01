@@ -71,7 +71,7 @@ public class UserManager {
     private boolean mSynced = false;
     @Nullable private User mActiveUser;
 
-    public UserManager(
+    UserManager(
             UserStore userStore,
             EventBusInterface eventBus,
             AsyncTaskRunner asyncTaskRunner) {
@@ -207,10 +207,11 @@ public class UserManager {
 
     /** Syncs the user list with the server. */
     private final class SyncKnownUsersTask extends AsyncTask<Void, Void, Set<User>> {
+
         @Override
         protected Set<User> doInBackground(Void... voids) {
             try {
-               return mUserStore.syncKnownUsers();
+                return mUserStore.syncKnownUsers();
             } catch (Exception e) {
                 // TODO(dxchen): Figure out the type of exception to throw.
                 Log.e(TAG, "User sync failed", e);
@@ -305,8 +306,8 @@ public class UserManager {
                 mKnownUsers.remove(mUser);
                 mEventBus.post(new UserDeletedEvent(mUser));
             } else {
-                mEventBus.post(new UserDeleteFailedEvent(
-                    mUser, UserDeleteFailedEvent.REASON_UNKNOWN));
+                mEventBus.post(
+                        new UserDeleteFailedEvent(mUser, UserDeleteFailedEvent.REASON_UNKNOWN));
             }
         }
     }

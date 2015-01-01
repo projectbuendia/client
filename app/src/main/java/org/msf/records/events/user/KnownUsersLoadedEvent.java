@@ -9,21 +9,24 @@ import org.msf.records.net.model.User;
  */
 public final class KnownUsersLoadedEvent {
 
-    public final ImmutableSet<User> mKnownUsers;
+    public final ImmutableSet<User> knownUsers;
 
     public KnownUsersLoadedEvent(ImmutableSet<User> knownUsers) {
-        mKnownUsers = knownUsers;
+        this.knownUsers = knownUsers;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof KnownUsersLoadedEvent)) return false;
-        KnownUsersLoadedEvent other = (KnownUsersLoadedEvent) o;
-        return mKnownUsers.equals(other.mKnownUsers);
+    public boolean equals(Object obj) {
+        if (!(obj instanceof KnownUsersLoadedEvent)) {
+            return false;
+        }
+
+        KnownUsersLoadedEvent other = (KnownUsersLoadedEvent) obj;
+        return knownUsers.equals(other.knownUsers);
     }
 
     @Override
     public int hashCode() {
-        return mKnownUsers.hashCode();
+        return knownUsers.hashCode();
     }
 }

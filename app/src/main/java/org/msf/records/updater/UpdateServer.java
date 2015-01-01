@@ -24,7 +24,7 @@ public class UpdateServer {
     }
 
     /**
-     * Asynchronously issues a request to get the Android update info
+     * Asynchronously issues a request to get the Android update info.
      *
      * @param listener the callback to be invoked if the request succeeds
      * @param errorListener the callback to be invoked if the request fails

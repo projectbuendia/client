@@ -17,17 +17,17 @@ public final class DefaultCrudEventBus implements CrudEventBus {
     }
 
     @Override
-	public void register(Object subscriber) {
+    public void register(Object subscriber) {
         mWrapped.register(subscriber);
     }
 
     @Override
-	public void unregister(Object subscriber) {
+    public void unregister(Object subscriber) {
         mWrapped.unregister(subscriber);
     }
 
     @Override
-	public void post(Object event) {
+    public void post(Object event) {
         mWrapped.post(event);
     }
 }
