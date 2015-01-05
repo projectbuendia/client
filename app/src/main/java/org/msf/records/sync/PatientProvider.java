@@ -63,6 +63,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(PatientProviderContract.PatientColumns._ID + "=?", id);
+                // fall-through
             case UriCodes.PATIENTS:
                 // Return all known entries.
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
@@ -72,7 +73,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 // register ContentObservers.
                 c.setNotificationUri(contentResolver, uri);
                 return c;
-            case UriCodes.TENT_PATIENT_COUNTS: // Build a cursor manually since we can't use GROUP BY
+            case UriCodes.TENT_PATIENT_COUNTS: // Build cursor manually since we can't use GROUP BY
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs)
                         .where(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID +

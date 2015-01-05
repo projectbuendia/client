@@ -35,17 +35,28 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
 
 
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_OBSERVATIONS, UriCodes.OBSERVATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_OBSERVATIONS), UriCodes.OBSERVATION_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPTS, UriCodes.CONCEPTS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPTS), UriCodes.CONCEPT_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPT_NAMES, UriCodes.CONCEPT_NAMES);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPT_NAMES), UriCodes.CONCEPT_NAME_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHARTS, UriCodes.CHART_STRUCTURE);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CHARTS), UriCodes.CHART_STRUCTURE_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCALIZED_CHART, UriCodes.LOCALIZED_CHART);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_EMPTY_LOCALIZED_CHART, UriCodes.EMPTY_LOCALIZED_CHART);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOST_RECENT_CHART, UriCodes.MOST_RECENT_CHART);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_OBSERVATIONS, UriCodes.OBSERVATIONS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_OBSERVATIONS), UriCodes.OBSERVATION_ITEMS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_CONCEPTS, UriCodes.CONCEPTS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_CONCEPTS), UriCodes.CONCEPT_ITEMS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_CONCEPT_NAMES, UriCodes.CONCEPT_NAMES);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_CONCEPT_NAMES), UriCodes.CONCEPT_NAME_ITEMS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_CHARTS, UriCodes.CHART_STRUCTURE);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_CHARTS), UriCodes.CHART_STRUCTURE_ITEMS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_LOCALIZED_CHART, UriCodes.LOCALIZED_CHART);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_EMPTY_LOCALIZED_CHART, UriCodes.EMPTY_LOCALIZED_CHART);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_MOST_RECENT_CHART, UriCodes.MOST_RECENT_CHART);
     }
 
     private static final String[] PATHS = new String[]{

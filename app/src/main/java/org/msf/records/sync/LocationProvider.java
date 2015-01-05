@@ -27,11 +27,16 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCATIONS, UriCodes.LOCATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_LOCATIONS), UriCodes.LOCATION);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_SUBLOCATIONS), UriCodes.SUBLOCATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCATION_NAMES, UriCodes.LOCATION_NAMES);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_LOCATION_NAMES), UriCodes.LOCATION_NAMES_ID);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_LOCATIONS, UriCodes.LOCATIONS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_LOCATIONS), UriCodes.LOCATION);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_SUBLOCATIONS), UriCodes.SUBLOCATIONS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_LOCATION_NAMES, UriCodes.LOCATION_NAMES);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_LOCATION_NAMES), UriCodes.LOCATION_NAMES_ID);
     }
 
     private static final String[] PATHS = new String[]{
@@ -62,11 +67,13 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
                 // Return entries with the given parent id.
                 String parentId = uri.getLastPathSegment();
                 builder.where(LocationColumns.PARENT_UUID + "=?", parentId);
+                break;
             case UriCodes.LOCATION:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", id);
+                break;
             case UriCodes.LOCATIONS:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 break;
@@ -78,6 +85,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
                 // Return a single entry, by ID.
                 String locationId = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", locationId);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
