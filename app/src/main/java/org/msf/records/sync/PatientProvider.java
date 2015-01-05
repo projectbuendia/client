@@ -23,9 +23,12 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, UriCodes.PATIENTS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", UriCodes.PATIENTS_ID);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_TENT_PATIENT_COUNTS, UriCodes.TENT_PATIENT_COUNTS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_PATIENTS, UriCodes.PATIENTS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_PATIENTS + "/*", UriCodes.PATIENTS_ID);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_TENT_PATIENT_COUNTS, UriCodes.TENT_PATIENT_COUNTS);
     }
 
     @Override
@@ -58,17 +61,21 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
         int uriMatch = sUriMatcher.match(uri);
+        Cursor c;
         switch (uriMatch) {
             case UriCodes.PATIENTS_ID:
+                builder.table(PatientDatabase.PATIENTS_TABLE_NAME);
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(PatientProviderContract.PatientColumns._ID + "=?", id);
-                // fall-through
+                c = builder.query(db, projection, sortOrder);
+                c.setNotificationUri(contentResolver, uri);
+                return c;
             case UriCodes.PATIENTS:
                 // Return all known entries.
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
-                Cursor c = builder.query(db, projection, sortOrder);
+                c = builder.query(db, projection, sortOrder);
                 // Note: Notification URI must be manually set here for loaders to correctly
                 // register ContentObservers.
                 c.setNotificationUri(contentResolver, uri);

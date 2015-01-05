@@ -214,6 +214,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", id);
+                break;
             case UriCodes.LOCATIONS:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 break;
@@ -225,6 +226,7 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
                 // Return a single entry, by ID.
                 String locationId = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", locationId);
+                break;
             case UriCodes.SUBLOCATIONS:
                 throw new UnsupportedOperationException("Sublocations are query only");
             default:
