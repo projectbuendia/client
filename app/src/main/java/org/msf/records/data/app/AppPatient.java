@@ -1,17 +1,11 @@
 package org.msf.records.data.app;
 
 import android.content.ContentValues;
-import android.util.Log;
-
-import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.utils.Utils;
@@ -19,7 +13,7 @@ import org.msf.records.utils.Utils;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * Represents a patient in the app model.
+ * A patient in the app model.
  */
 @Immutable
 public final class AppPatient extends AppTypeBase<String> {

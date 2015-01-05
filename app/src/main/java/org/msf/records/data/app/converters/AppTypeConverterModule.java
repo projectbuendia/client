@@ -17,6 +17,7 @@ public class AppTypeConverterModule {
     @Singleton
     AppTypeConverters provideAppTypeConverters() {
         return new AppTypeConverters(
-                new AppPatientConverter());
+                new AppPatientConverter(),
+                new AppLocationConverter());
     }
 }
