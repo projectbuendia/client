@@ -18,18 +18,12 @@ public class UserProvider implements MsfRecordsProvider.SubContentProvider {
     private static final String TAG = "UserProvider";
 
     /**
-     * URI ID for route: /users
-     */
-    public static final int USERS = 20;
-
-    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, UserProviderContract.PATH_USERS, USERS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, UserProviderContract.PATH_USERS, UriCodes.USERS);
     }
 
     private static final String[] PATHS = new String[] {
@@ -50,7 +44,7 @@ public class UserProvider implements MsfRecordsProvider.SubContentProvider {
         int uriMatch = sUriMatcher.match(uri);
         Cursor c;
         switch (uriMatch) {
-            case USERS:
+            case UriCodes.USERS:
                 builder.table(PatientDatabase.USERS_TABLE_NAME);
                 break;
             default:
@@ -66,7 +60,7 @@ public class UserProvider implements MsfRecordsProvider.SubContentProvider {
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case USERS:
+            case UriCodes.USERS:
                 return UserProviderContract.USER_CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -83,7 +77,7 @@ public class UserProvider implements MsfRecordsProvider.SubContentProvider {
         String tableName;
         Uri preIdUri;
         switch (match) {
-            case USERS:
+            case UriCodes.USERS:
                 tableName = PatientDatabase.USERS_TABLE_NAME;
                 preIdUri = UserProviderContract.USERS_CONTENT_URI;
                 break;
@@ -116,7 +110,7 @@ public class UserProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
-            case USERS:
+            case UriCodes.USERS:
                 tableName = PatientDatabase.USERS_TABLE_NAME;
                 break;
             default:
@@ -137,7 +131,7 @@ public class UserProvider implements MsfRecordsProvider.SubContentProvider {
         SelectionBuilder builder = new SelectionBuilder();
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case USERS:
+            case UriCodes.USERS:
                 builder.table(PatientDatabase.USERS_TABLE_NAME);
                 break;
             default:

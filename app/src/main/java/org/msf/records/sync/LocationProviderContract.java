@@ -57,8 +57,6 @@ public class LocationProviderContract {
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION_NAMES).build();
     public static final Uri LOCATIONS_CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATIONS).build();
-
-    // TODO(dxchen): Implement localized location fetching.
     public static final Uri LOCALIZED_LOCATIONS_CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCALIZED_LOCATIONS).build();
 

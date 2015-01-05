@@ -18,29 +18,14 @@ import static org.msf.records.sync.PatientProviderContract.PATH_TENT_PATIENT_COU
 public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
 
     /**
-     * URI ID for route: /patients
-     */
-    public static final int ROUTE_PATIENTS = 1;
-
-    /**
-     * URI ID for route: /patients/{ID}
-     */
-    public static final int ROUTE_PATIENTS_ID = 2;
-
-    /**
-     * URI ID for route: /tentpatients/
-     */
-    public static final int ROUTE_TENT_PATIENT_COUNTS = 3;
-
-    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, ROUTE_PATIENTS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", ROUTE_PATIENTS_ID);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_TENT_PATIENT_COUNTS, ROUTE_TENT_PATIENT_COUNTS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS, UriCodes.PATIENTS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_PATIENTS + "/*", UriCodes.PATIENTS_ID);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_TENT_PATIENT_COUNTS, UriCodes.TENT_PATIENT_COUNTS);
     }
 
     @Override
@@ -56,10 +41,10 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case ROUTE_PATIENTS:
-            case ROUTE_TENT_PATIENT_COUNTS:
+            case UriCodes.PATIENTS:
+            case UriCodes.TENT_PATIENT_COUNTS:
                 return PatientProviderContract.CONTENT_TYPE;
-            case ROUTE_PATIENTS_ID:
+            case UriCodes.PATIENTS_ID:
                 return PatientProviderContract.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -74,11 +59,11 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
         SelectionBuilder builder = new SelectionBuilder();
         int uriMatch = sUriMatcher.match(uri);
         switch (uriMatch) {
-            case ROUTE_PATIENTS_ID:
+            case UriCodes.PATIENTS_ID:
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(PatientProviderContract.PatientColumns._ID + "=?", id);
-            case ROUTE_PATIENTS:
+            case UriCodes.PATIENTS:
                 // Return all known entries.
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs);
@@ -87,7 +72,7 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
                 // register ContentObservers.
                 c.setNotificationUri(contentResolver, uri);
                 return c;
-            case ROUTE_TENT_PATIENT_COUNTS: // Build a cursor manually since we can't use GROUP BY
+            case UriCodes.TENT_PATIENT_COUNTS: // Build a cursor manually since we can't use GROUP BY
                 builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs)
                         .where(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID +
@@ -115,12 +100,12 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         Uri result;
         switch (match) {
-            case ROUTE_PATIENTS:
+            case UriCodes.PATIENTS:
                 long id = db.insertOrThrow(PatientDatabase.PATIENTS_TABLE_NAME, null, values);
                 result = Uri.parse(PatientProviderContract.CONTENT_URI + "/" + id);
                 break;
-            case ROUTE_PATIENTS_ID:
-            case ROUTE_TENT_PATIENT_COUNTS:
+            case UriCodes.PATIENTS_ID:
+            case UriCodes.TENT_PATIENT_COUNTS:
                 throw new UnsupportedOperationException("Insert not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -149,19 +134,19 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         int count;
         switch (match) {
-            case ROUTE_PATIENTS:
+            case UriCodes.PATIENTS:
                 count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
-            case ROUTE_PATIENTS_ID:
+            case UriCodes.PATIENTS_ID:
                 String id = uri.getLastPathSegment();
                 count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(PatientProviderContract.PatientColumns._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .delete(db);
                 break;
-            case ROUTE_TENT_PATIENT_COUNTS:
+            case UriCodes.TENT_PATIENT_COUNTS:
                 throw new UnsupportedOperationException("Delete not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -179,19 +164,19 @@ public class PatientProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         int count;
         switch (match) {
-            case ROUTE_PATIENTS:
+            case UriCodes.PATIENTS:
                 count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
-            case ROUTE_PATIENTS_ID:
+            case UriCodes.PATIENTS_ID:
                 String id = uri.getLastPathSegment();
                 count = builder.table(PatientDatabase.PATIENTS_TABLE_NAME)
                         .where(PatientProviderContract.PatientColumns._ID + "=?", id)
                         .where(selection, selectionArgs)
                         .update(db, values);
                 break;
-            case ROUTE_TENT_PATIENT_COUNTS:
+            case UriCodes.TENT_PATIENT_COUNTS:
                 throw new UnsupportedOperationException("Update not supported on URI: " + uri);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

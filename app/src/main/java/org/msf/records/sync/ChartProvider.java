@@ -29,77 +29,23 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     private static final String TAG = "ChartProvider";
 
     /**
-     * URI ID for route: /observations
-     */
-    public static final int OBSERVATIONS = 4;
-    /**
-     * URI ID for route: /observations/{id}
-     */
-    public static final int OBSERVATION_ITEMS = 5;
-
-    /**
-     * URI ID for route: /concepts
-     */
-    public static final int CONCEPTS = 6;
-
-    /**
-     * URI ID for route: /concepts/{id}
-     */
-    public static final int CONCEPT_ITEMS = 7;
-
-    /**
-     * URI ID for route: /concept_names
-     */
-    public static final int CONCEPT_NAMES = 8;
-
-    /**
-     * URI ID for route: /concept_names/{id}
-     */
-    public static final int CONCEPT_NAME_ITEMS = 9;
-
-    /**
-     * URI ID for route: /charts
-     */
-    public static final int CHART_STRUCTURE = 10;
-
-    /**
-     * URI ID for route: /charts/{id}
-     */
-    public static final int CHART_STRUCTURE_ITEMS = 11;
-
-    /**
-     * URI ID for route: /localizedchart/{locale}
-     */
-    public static final int EMPTY_LOCALIZED_CHART = 12;
-
-    /**
-     * URI ID for route: /localizedchart/...
-     */
-    public static final int LOCALIZED_CHART = 13;
-
-    /**
-     * URI ID for route: /localizedchart/...
-     */
-    public static final int MOST_RECENT_CHART = 14;
-
-    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
 
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_OBSERVATIONS, OBSERVATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_OBSERVATIONS), OBSERVATION_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPTS, CONCEPTS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPTS), CONCEPT_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPT_NAMES, CONCEPT_NAMES);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPT_NAMES), CONCEPT_NAME_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHARTS, CHART_STRUCTURE);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CHARTS), CHART_STRUCTURE_ITEMS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCALIZED_CHART, LOCALIZED_CHART);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_EMPTY_LOCALIZED_CHART, EMPTY_LOCALIZED_CHART);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOST_RECENT_CHART, MOST_RECENT_CHART);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_OBSERVATIONS, UriCodes.OBSERVATIONS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_OBSERVATIONS), UriCodes.OBSERVATION_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPTS, UriCodes.CONCEPTS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPTS), UriCodes.CONCEPT_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CONCEPT_NAMES, UriCodes.CONCEPT_NAMES);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CONCEPT_NAMES), UriCodes.CONCEPT_NAME_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHARTS, UriCodes.CHART_STRUCTURE);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_CHARTS), UriCodes.CHART_STRUCTURE_ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCALIZED_CHART, UriCodes.LOCALIZED_CHART);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_EMPTY_LOCALIZED_CHART, UriCodes.EMPTY_LOCALIZED_CHART);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOST_RECENT_CHART, UriCodes.MOST_RECENT_CHART);
     }
 
     private static final String[] PATHS = new String[]{
@@ -130,23 +76,23 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         int uriMatch = sUriMatcher.match(uri);
         Cursor c;
         switch (uriMatch) {
-            case OBSERVATIONS:
+            case UriCodes.OBSERVATIONS:
                 builder.table(PatientDatabase.OBSERVATIONS_TABLE_NAME);
                 break;
-            case CONCEPTS:
+            case UriCodes.CONCEPTS:
                 builder.table(PatientDatabase.CONCEPTS_TABLE_NAME);
                 break;
-            case CONCEPT_NAMES:
+            case UriCodes.CONCEPT_NAMES:
                 builder.table(PatientDatabase.CONCEPT_NAMES_TABLE_NAME);
                 break;
-            case CHART_STRUCTURE:
+            case UriCodes.CHART_STRUCTURE:
                 builder.table(PatientDatabase.CHARTS_TABLE_NAME);
                 break;
-            case EMPTY_LOCALIZED_CHART:
+            case UriCodes.EMPTY_LOCALIZED_CHART:
                 return queryEmptyLocalizedChart(uri, db);
-            case LOCALIZED_CHART:
+            case UriCodes.LOCALIZED_CHART:
                 return queryLocalizedChart(uri, db);
-            case MOST_RECENT_CHART:
+            case UriCodes.MOST_RECENT_CHART:
                 return queryMostRecentChart(uri, db);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -316,19 +262,19 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case OBSERVATIONS:
+            case UriCodes.OBSERVATIONS:
                 return ChartProviderContract.OBSERVATION_CONTENT_TYPE;
-            case CONCEPT_NAMES:
+            case UriCodes.CONCEPT_NAMES:
                 return ChartProviderContract.CONCEPT_NAME_CONTENT_TYPE;
-            case CONCEPTS:
+            case UriCodes.CONCEPTS:
                 return ChartProviderContract.CONCEPT_CONTENT_TYPE;
-            case CHART_STRUCTURE:
+            case UriCodes.CHART_STRUCTURE:
                 return ChartProviderContract.CHART_CONTENT_TYPE;
-            case EMPTY_LOCALIZED_CHART:
+            case UriCodes.EMPTY_LOCALIZED_CHART:
                 return ChartProviderContract.LOCALIZED_OBSERVATION_CONTENT_TYPE;
-            case LOCALIZED_CHART:
+            case UriCodes.LOCALIZED_CHART:
                 return ChartProviderContract.LOCALIZED_OBSERVATION_CONTENT_TYPE;
-            case MOST_RECENT_CHART:
+            case UriCodes.MOST_RECENT_CHART:
                 return ChartProviderContract.LOCALIZED_OBSERVATION_CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -345,27 +291,27 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         String tableName;
         Uri preIdUri;
         switch (match) {
-            case OBSERVATIONS:
+            case UriCodes.OBSERVATIONS:
                 tableName = PatientDatabase.OBSERVATIONS_TABLE_NAME;
                 preIdUri = ChartProviderContract.OBSERVATIONS_CONTENT_URI;
                 break;
-            case CONCEPT_NAMES:
+            case UriCodes.CONCEPT_NAMES:
                 tableName = PatientDatabase.CONCEPT_NAMES_TABLE_NAME;
                 preIdUri = ChartProviderContract.CONCEPT_NAMES_CONTENT_URI;
                 break;
-            case CONCEPTS:
+            case UriCodes.CONCEPTS:
                 tableName = PatientDatabase.CONCEPTS_TABLE_NAME;
                 preIdUri = ChartProviderContract.CONCEPTS_CONTENT_URI;
                 break;
-            case CHART_STRUCTURE:
+            case UriCodes.CHART_STRUCTURE:
                 tableName = PatientDatabase.CHARTS_TABLE_NAME;
                 preIdUri = ChartProviderContract.CHART_CONTENT_URI;
                 break;
-            case EMPTY_LOCALIZED_CHART:
+            case UriCodes.EMPTY_LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized charts are query only");
-            case LOCALIZED_CHART:
+            case UriCodes.LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
-            case MOST_RECENT_CHART:
+            case UriCodes.MOST_RECENT_CHART:
                 throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -388,23 +334,23 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
-            case OBSERVATIONS:
+            case UriCodes.OBSERVATIONS:
                 tableName = PatientDatabase.OBSERVATIONS_TABLE_NAME;
                 break;
-            case CONCEPT_NAMES:
+            case UriCodes.CONCEPT_NAMES:
                 tableName = PatientDatabase.CONCEPT_NAMES_TABLE_NAME;
                 break;
-            case CONCEPTS:
+            case UriCodes.CONCEPTS:
                 tableName = PatientDatabase.CONCEPTS_TABLE_NAME;
                 break;
-            case CHART_STRUCTURE:
+            case UriCodes.CHART_STRUCTURE:
                 tableName = PatientDatabase.CHARTS_TABLE_NAME;
                 break;
-            case EMPTY_LOCALIZED_CHART:
+            case UriCodes.EMPTY_LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized charts are query only");
-            case LOCALIZED_CHART:
+            case UriCodes.LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
-            case MOST_RECENT_CHART:
+            case UriCodes.MOST_RECENT_CHART:
                 throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -481,23 +427,23 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
-            case OBSERVATIONS:
+            case UriCodes.OBSERVATIONS:
                 tableName = PatientDatabase.OBSERVATIONS_TABLE_NAME;
                 break;
-            case CONCEPT_NAMES:
+            case UriCodes.CONCEPT_NAMES:
                 tableName = PatientDatabase.CONCEPT_NAMES_TABLE_NAME;
                 break;
-            case CONCEPTS:
+            case UriCodes.CONCEPTS:
                 tableName = PatientDatabase.CONCEPTS_TABLE_NAME;
                 break;
-            case CHART_STRUCTURE:
+            case UriCodes.CHART_STRUCTURE:
                 tableName = PatientDatabase.CHARTS_TABLE_NAME;
                 break;
-            case EMPTY_LOCALIZED_CHART:
+            case UriCodes.EMPTY_LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized charts are query only");
-            case LOCALIZED_CHART:
+            case UriCodes.LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
-            case MOST_RECENT_CHART:
+            case UriCodes.MOST_RECENT_CHART:
                 throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -518,23 +464,23 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
-            case OBSERVATIONS:
+            case UriCodes.OBSERVATIONS:
                 tableName = PatientDatabase.OBSERVATIONS_TABLE_NAME;
                 break;
-            case CONCEPT_NAMES:
+            case UriCodes.CONCEPT_NAMES:
                 tableName = PatientDatabase.CONCEPT_NAMES_TABLE_NAME;
                 break;
-            case CONCEPTS:
+            case UriCodes.CONCEPTS:
                 tableName = PatientDatabase.CONCEPTS_TABLE_NAME;
                 break;
-            case CHART_STRUCTURE:
+            case UriCodes.CHART_STRUCTURE:
                 tableName = PatientDatabase.CHARTS_TABLE_NAME;
                 break;
-            case EMPTY_LOCALIZED_CHART:
+            case UriCodes.EMPTY_LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized charts are query only");
-            case LOCALIZED_CHART:
+            case UriCodes.LOCALIZED_CHART:
                 throw new UnsupportedOperationException("Localized observations are query only");
-            case MOST_RECENT_CHART:
+            case UriCodes.MOST_RECENT_CHART:
                 throw new UnsupportedOperationException("Most recent chart is query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
