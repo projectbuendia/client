@@ -22,42 +22,21 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     private static final String TAG = "LocationProvider";
 
     /**
-     * URI ID for route: /locations
-     */
-    public static final int LOCATIONS = 15;
-
-    /**
-     * URI ID for route: /location/{id}
-     */
-    public static final int LOCATION = 16;
-
-    /**
-     * URI ID for route: /sublocations/{parent}
-     */
-    public static final int SUBLOCATIONS = 17;
-
-    /**
-     * URI ID for route: /locationnames
-     */
-    public static final int LOCATION_NAMES = 18;
-
-    /**
-     * URI ID for route: /locationnames/{id}
-     */
-    public static final int LOCATION_NAMES_ID = 19;
-
-    /**
      * UriMatcher, used to decode incoming URIs.
      */
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-
     static {
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCATIONS, LOCATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_LOCATIONS), LOCATION);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_SUBLOCATIONS), SUBLOCATIONS);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_LOCATION_NAMES, LOCATION_NAMES);
-        sUriMatcher.addURI(CONTENT_AUTHORITY, subDirs(PATH_LOCATION_NAMES), LOCATION_NAMES_ID);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_LOCATIONS, UriCodes.LOCATIONS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_LOCATIONS), UriCodes.LOCATION);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_SUBLOCATIONS), UriCodes.SUBLOCATIONS);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, PATH_LOCATION_NAMES, UriCodes.LOCATION_NAMES);
+        sUriMatcher.addURI(
+                CONTENT_AUTHORITY, subDirs(PATH_LOCATION_NAMES), UriCodes.LOCATION_NAMES_ID);
     }
 
     private static final String[] PATHS = new String[]{
@@ -83,27 +62,30 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
         int uriMatch = sUriMatcher.match(uri);
         Cursor c;
         switch (uriMatch) {
-            case SUBLOCATIONS:
+            case UriCodes.SUBLOCATIONS:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 // Return entries with the given parent id.
                 String parentId = uri.getLastPathSegment();
                 builder.where(LocationColumns.PARENT_UUID + "=?", parentId);
-            case LOCATION:
+                break;
+            case UriCodes.LOCATION:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", id);
-            case LOCATIONS:
+                break;
+            case UriCodes.LOCATIONS:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 break;
-            case LOCATION_NAMES:
+            case UriCodes.LOCATION_NAMES:
                 builder.table(PatientDatabase.LOCATION_NAMES_TABLE_NAME);
                 break;
-            case LOCATION_NAMES_ID:
+            case UriCodes.LOCATION_NAMES_ID:
                 builder.table(PatientDatabase.LOCATION_NAMES_TABLE_NAME);
                 // Return a single entry, by ID.
                 String locationId = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", locationId);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -117,12 +99,12 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case LOCATION:
-            case LOCATIONS:
-            case SUBLOCATIONS:
+            case UriCodes.LOCATION:
+            case UriCodes.LOCATIONS:
+            case UriCodes.SUBLOCATIONS:
                 return LocationProviderContract.LOCATION_CONTENT_TYPE;
-            case LOCATION_NAMES:
-            case LOCATION_NAMES_ID:
+            case UriCodes.LOCATION_NAMES:
+            case UriCodes.LOCATION_NAMES_ID:
                 return LocationProviderContract.LOCATION_NAME_CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -139,27 +121,27 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
         String tableName;
         Uri preIdUri;
         switch (match) {
-            case LOCATION:
+            case UriCodes.LOCATION:
                 String id = uri.getLastPathSegment();
                 tableName = PatientDatabase.LOCATIONS_TABLE_NAME;
                 preIdUri = LocationProviderContract.LOCATIONS_CONTENT_URI;
                 values.put(LocationColumns.LOCATION_UUID, id);
                 break;
-            case LOCATIONS:
+            case UriCodes.LOCATIONS:
                 tableName = PatientDatabase.LOCATIONS_TABLE_NAME;
                 preIdUri = LocationProviderContract.LOCATIONS_CONTENT_URI;
                 break;
-            case LOCATION_NAMES_ID:
+            case UriCodes.LOCATION_NAMES_ID:
                 String locationId = uri.getLastPathSegment();
                 tableName = PatientDatabase.LOCATION_NAMES_TABLE_NAME;
                 preIdUri = LocationProviderContract.LOCATION_NAMES_CONTENT_URI;
                 values.put(LocationColumns.LOCATION_UUID, locationId);
                 break;
-            case LOCATION_NAMES:
+            case UriCodes.LOCATION_NAMES:
                 tableName = PatientDatabase.LOCATION_NAMES_TABLE_NAME;
                 preIdUri = LocationProviderContract.LOCATION_NAMES_CONTENT_URI;
                 break;
-            case SUBLOCATIONS:
+            case UriCodes.SUBLOCATIONS:
                 throw new UnsupportedOperationException("Sublocations are query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -191,23 +173,23 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
         final int match = sUriMatcher.match(uri);
         String tableName;
         switch (match) {
-            case LOCATIONS:
+            case UriCodes.LOCATIONS:
                 tableName = PatientDatabase.LOCATIONS_TABLE_NAME;
                 break;
-            case LOCATION_NAMES:
+            case UriCodes.LOCATION_NAMES:
                 tableName = PatientDatabase.LOCATION_NAMES_TABLE_NAME;
                 break;
-            case LOCATION:
+            case UriCodes.LOCATION:
                 String id = uri.getLastPathSegment();
                 builder.where(LocationColumns._ID + "=?", id);
                 tableName = PatientDatabase.LOCATIONS_TABLE_NAME;
                 break;
-            case LOCATION_NAMES_ID:
+            case UriCodes.LOCATION_NAMES_ID:
                 String locationId = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", locationId);
                 tableName = PatientDatabase.LOCATION_NAMES_TABLE_NAME;
                 break;
-            case SUBLOCATIONS:
+            case UriCodes.SUBLOCATIONS:
                 throw new UnsupportedOperationException("Sublocations are query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -227,23 +209,25 @@ public class LocationProvider implements MsfRecordsProvider.SubContentProvider {
         SelectionBuilder builder = new SelectionBuilder();
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case LOCATION:
+            case UriCodes.LOCATION:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 // Return a single entry, by ID.
                 String id = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", id);
-            case LOCATIONS:
+                break;
+            case UriCodes.LOCATIONS:
                 builder.table(PatientDatabase.LOCATIONS_TABLE_NAME);
                 break;
-            case LOCATION_NAMES:
+            case UriCodes.LOCATION_NAMES:
                 builder.table(PatientDatabase.LOCATION_NAMES_TABLE_NAME);
                 break;
-            case LOCATION_NAMES_ID:
+            case UriCodes.LOCATION_NAMES_ID:
                 builder.table(PatientDatabase.LOCATION_NAMES_TABLE_NAME);
                 // Return a single entry, by ID.
                 String locationId = uri.getLastPathSegment();
                 builder.where(LocationColumns.LOCATION_UUID + "=?", locationId);
-            case SUBLOCATIONS:
+                break;
+            case UriCodes.SUBLOCATIONS:
                 throw new UnsupportedOperationException("Sublocations are query only");
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
