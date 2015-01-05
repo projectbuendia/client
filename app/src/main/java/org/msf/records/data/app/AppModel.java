@@ -14,6 +14,7 @@ import org.msf.records.events.CleanupSubscriber;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
+import org.msf.records.events.data.TypedCursorFetchedEventFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
@@ -53,8 +54,14 @@ public class AppModel {
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
-        FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<>(
-                mContentResolver, filter, constraint, mConverters.patient, bus);
+        FetchTypedCursorAsyncTask<AppPatient> task =
+                new FetchTypedCursorAsyncTask<>(
+                        AppPatient.class,
+                        mContentResolver,
+                        filter,
+                        constraint,
+                        mConverters.patient,
+                        bus);
         task.execute();
     }
 
@@ -133,6 +140,7 @@ public class AppModel {
     private static class FetchTypedCursorAsyncTask<T>
             extends AsyncTask<Void, Void, TypedCursor<T>> {
 
+        private final Class<T> mClazz;
         private final ContentResolver mContentResolver;
         private final SimpleSelectionFilter mFilter;
         private final String mConstraint;
@@ -140,11 +148,13 @@ public class AppModel {
         private final CrudEventBus mBus;
 
         public FetchTypedCursorAsyncTask(
+                Class<T> clazz,
                 ContentResolver contentResolver,
                 SimpleSelectionFilter filter,
                 String constraint,
                 AppTypeConverter<T> converter,
                 CrudEventBus bus) {
+            mClazz = clazz;
             mContentResolver = contentResolver;
             mFilter = filter;
             mConstraint = constraint;
@@ -175,7 +185,7 @@ public class AppModel {
 
         @Override
         protected void onPostExecute(TypedCursor<T> result) {
-            mBus.post(new TypedCursorFetchedEvent<>(result));
+            mBus.post(TypedCursorFetchedEventFactory.createEvent(mClazz, result));
         }
     }
 }
