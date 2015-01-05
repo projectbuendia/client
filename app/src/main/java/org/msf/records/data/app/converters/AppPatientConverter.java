@@ -7,9 +7,12 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.utils.Utils;
 
+import javax.annotation.concurrent.Immutable;
+
 /**
  * A {@link AppTypeConverter} that converts {@link AppPatient}s.
  */
+@Immutable
 public class AppPatientConverter implements AppTypeConverter<AppPatient> {
 
     private static final String TAG = AppPatientConverter.class.getSimpleName();

@@ -11,8 +11,9 @@ import java.util.Iterator;
 /**
  * A {@link TypedCursor} that's backed by a {@link AppTypeConverter} and a {@link Cursor}.
  *
- * <p>This data structure is NOT thread-safe. It should only be accessed from one thread, generally
- * the main thread. Furthermore, only one {@link Iterator} should be created on it at a time.
+ * <p>This data structure is NOT thread-safe. It should only be accessed from one thread at a time,
+ * generally the main thread. Furthermore, only one {@link Iterator} should be created on it at a
+ * time.
  *
  * <p>This data structure does NOT notify anyone when the data set changes (i.e., it does not
  * provide a mechanism to access {@link Cursor#registerDataSetObserver}). This is because the

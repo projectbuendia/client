@@ -12,12 +12,15 @@ import org.msf.records.data.app.tasks.AppUpdatePatientAsyncTask;
 import org.msf.records.data.app.tasks.FetchSingleAsyncTask;
 import org.msf.records.events.CleanupSubscriber;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
+import org.msf.records.sync.LocationProjection;
+import org.msf.records.sync.LocationProviderContract;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.PatientProviderContract;
 
@@ -48,20 +51,33 @@ public class AppModel {
     }
 
     /**
+     * Asynchronously fetches all locations as a tree, posting a {@link AppLocationTreeFetchedEvent}
+     */
+    public void fetchLocationTree(CrudEventBus bus, String locale) {
+        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
+
+        FetchLocationTreeAsyncTask task = new FetchLocationTreeAsyncTask(
+                mContentResolver,
+                locale,
+                mConverters.location,
+                bus);
+        task.execute();
+    }
+
+    /**
      * Asynchronously fetches patients, posting a {@link TypedCursorFetchedEvent} with
      * {@link AppPatient}s on the specified event bus when complete.
      */
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
-        FetchTypedCursorAsyncTask<AppPatient> task =
-                new FetchTypedCursorAsyncTask<>(
-                        AppPatient.class,
-                        mContentResolver,
-                        filter,
-                        constraint,
-                        mConverters.patient,
-                        bus);
+        FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<>(
+                AppPatient.class,
+                mContentResolver,
+                filter,
+                constraint,
+                mConverters.patient,
+                bus);
         task.execute();
     }
 
@@ -137,6 +153,52 @@ public class AppModel {
         }
     }
 
+    private static class FetchLocationTreeAsyncTask extends AsyncTask<Void, Void, AppLocationTree> {
+
+        private final ContentResolver mContentResolver;
+        private final String mLocale;
+        private final AppTypeConverter<AppLocation> mConverter;
+        private final CrudEventBus mBus;
+
+        public FetchLocationTreeAsyncTask(
+                ContentResolver contentResolver,
+                String locale,
+                AppTypeConverter<AppLocation> converter,
+                CrudEventBus bus) {
+            mContentResolver = contentResolver;
+            mLocale = locale;
+            mConverter = converter;
+            mBus = bus;
+        }
+
+        @Override
+        protected AppLocationTree doInBackground(Void... voids) {
+            Cursor cursor = null;
+            try {
+                cursor = mContentResolver.query(
+                        LocationProviderContract.LOCALIZED_LOCATIONS_CONTENT_URI,
+                        LocationProjection.getLocationProjection(),
+                        null,
+                        null,
+                        null);
+
+                return AppLocationTree
+                        .fromTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
+            } catch (Exception e) {
+                if (cursor != null) {
+                    cursor.close();
+                }
+
+                throw e;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(AppLocationTree result) {
+            mBus.post(new AppLocationTreeFetchedEvent(result));
+        }
+    }
+
     private static class FetchTypedCursorAsyncTask<T>
             extends AsyncTask<Void, Void, TypedCursor<T>> {
 
@@ -176,10 +238,12 @@ public class AppModel {
                         null);
 
                 return new TypedConvertedCursor<>(mConverter, cursor);
-            } finally {
+            } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();
                 }
+
+                throw e;
             }
         }
 

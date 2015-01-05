@@ -37,10 +37,17 @@ public class LocationProviderContract {
      * Path component for a locations subtree rooted at a specific location.
      */
     static final String PATH_SUBLOCATIONS = "sublocations";
+
     /**
      * Path component for the locations table.
      */
     static final String PATH_LOCATIONS = "locations";
+
+    /**
+     * Path component for localized locations.
+     */
+    static final String PATH_LOCALIZED_LOCATIONS = "localizedlocations";
+
     /**
      * Path component for the location names table.
      */
@@ -50,6 +57,10 @@ public class LocationProviderContract {
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION_NAMES).build();
     public static final Uri LOCATIONS_CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATIONS).build();
+
+    // TODO(dxchen): Implement localized location fetching.
+    public static final Uri LOCALIZED_LOCATIONS_CONTENT_URI =
+            BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCALIZED_LOCATIONS).build();
 
     /**
      * Columns supported by the various location URIs.
