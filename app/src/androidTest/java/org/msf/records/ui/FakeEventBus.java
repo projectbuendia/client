@@ -2,6 +2,7 @@ package org.msf.records.ui;
 
 import static junit.framework.Assert.fail;
 
+import org.msf.records.events.CleanupSubscriber;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.utils.EventBusInterface;
 
@@ -91,4 +92,10 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
 			}
 		}
 	}
+
+    @Override
+    public void registerCleanupSubscriber(CleanupSubscriber subscriber) {}
+
+    @Override
+    public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {}
 }

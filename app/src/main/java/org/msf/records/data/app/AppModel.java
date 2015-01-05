@@ -10,6 +10,7 @@ import org.msf.records.data.app.tasks.AppAddPatientAsyncTask;
 import org.msf.records.data.app.tasks.AppAsyncTaskFactory;
 import org.msf.records.data.app.tasks.AppUpdatePatientAsyncTask;
 import org.msf.records.data.app.tasks.FetchSingleAsyncTask;
+import org.msf.records.events.CleanupSubscriber;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
@@ -50,7 +51,7 @@ public class AppModel {
      * {@link AppPatient}s on the specified event bus when complete.
      */
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
-        bus.register(new CrudEventBusErrorSubscriber(bus));
+        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
         FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<>(
                 mContentResolver, filter, constraint, mConverters.patient, bus);
@@ -73,7 +74,7 @@ public class AppModel {
      */
     public void fetchUsers(CrudEventBus bus) {
         // Register for error events so that we can close cursors if we need to.
-        bus.register(new CrudEventBusErrorSubscriber(bus));
+        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
         // TODO(dxchen): Asynchronously fetch users.
     }
@@ -103,20 +104,16 @@ public class AppModel {
     /**
      * A subscriber that handles error events posted to {@link CrudEventBus}es.
      */
-    @SuppressWarnings("unused") // Called by reflection from event bus.
-    private static class CrudEventBusErrorSubscriber {
+    private static class CrudEventBusCleanupSubscriber implements CleanupSubscriber {
 
-        // TODO(rjlothian): This memory freeing strategy feels error prone.
-        // We don't unregister from the bus if delivery succeeds...
         private final CrudEventBus mBus;
 
-        public CrudEventBusErrorSubscriber(CrudEventBus bus) {
+        public CrudEventBusCleanupSubscriber(CrudEventBus bus) {
             mBus = bus;
         }
 
-        /**
-         * Handles {@link NoSubscriberEvent}s.
-         */
+        @Override
+        @SuppressWarnings("unused") // Called by reflection from event bus.
         public void onEvent(NoSubscriberEvent event) {
             if (event.originalEvent instanceof TypedCursorFetchedEvent<?>) {
                 // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
@@ -124,7 +121,12 @@ public class AppModel {
                 ((TypedCursorFetchedEvent<?>) event.originalEvent).cursor.close();
             }
 
-            mBus.unregister(this);
+            mBus.unregisterCleanupSubscriber(this);
+        }
+
+        @Override
+        public void onAllUnregistered() {
+            mBus.unregisterCleanupSubscriber(this);
         }
     }
 
