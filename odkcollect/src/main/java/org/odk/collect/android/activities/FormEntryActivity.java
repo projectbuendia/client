@@ -207,6 +207,9 @@ public class FormEntryActivity
 
     private String stepMessage = "";
     private ODKView mTargetView;
+
+    private static final int MIN_BOTTOM_PADDING = 80; // at bottom of form
+    private static final double MAX_SCROLL_FRACTION = 0.9; // fraction of page height
     private View mBottomPaddingView;
 
     // ScrollY values that we try to scroll to when paging up and down.
@@ -612,9 +615,8 @@ public class FormEntryActivity
 
         // Add just enough padding so that when the form is scrolled all the
         // way to the end, an edge lands at the top of the ScrollView.
-        final int MIN_PADDING = 80;
         int scrollHeight = mScrollView.getMeasuredHeight();
-        int minBottom = mBottomPaddingView.getTop() + MIN_PADDING;
+        int minBottom = mBottomPaddingView.getTop() + MIN_BOTTOM_PADDING;
 
         ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
         int lastScrollPoint = -1;
@@ -634,7 +636,6 @@ public class FormEntryActivity
         }
 
         // Select scroll points that are up to the maximum leap size apart.
-        final double MAX_SCROLL_FRACTION = 0.9;
         int maxLeap = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
         mScrollPoints.clear();
         mScrollPoints.add(0);
