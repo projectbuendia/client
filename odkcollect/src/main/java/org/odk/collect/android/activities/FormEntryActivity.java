@@ -593,8 +593,8 @@ public class FormEntryActivity
     /**
      * Determines the vertical positions that the up/down buttons will jump to.
      * These scroll points are selected so that each scroll point is up to
-     * MAX_SCROLL_FRACTION of the ScrollView's height away from its neighbouring
-     * scroll points, and (if possible) each scroll point places the top edge of
+     * MAX_SCROLL_FRACTION of the ScrollView's height below its preceding
+     * scroll point, and (if possible) each scroll point places the top edge of
      * a group or question at the top of the ScrollView.
      */
     private void determineScrollPoints() {
@@ -617,7 +617,6 @@ public class FormEntryActivity
         // way to the end, an edge lands at the top of the ScrollView.
         int scrollHeight = mScrollView.getMeasuredHeight();
         int minBottom = mBottomPaddingView.getTop() + MIN_BOTTOM_PADDING;
-
         ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
         int lastScrollPoint = -1;
         for (int y : edges) {
@@ -635,7 +634,13 @@ public class FormEntryActivity
             }
         }
 
-        // Select scroll points that are up to the maximum leap size apart.
+        // Rather than allowing all edges to be scroll points, select a subset
+        // of the edges that are spaced up to the maximum leap size apart, like
+        // page breaks.  Dividing the form into fixed pages ensures that each
+        // question appears at a fixed vertical position on the screen within
+        // its page, which helps keep the user oriented.  (The only way in
+        // which these are unlike page breaks in a document is that the very
+        // last page is allowed to overlap the second-last page.)
         int maxLeap = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
         mScrollPoints.clear();
         mScrollPoints.add(0);
