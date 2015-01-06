@@ -208,12 +208,11 @@ public class FormEntryActivity
     private String stepMessage = "";
     private ODKView mTargetView;
 
-    private static final int MIN_BOTTOM_PADDING = 80; // at bottom of form
-    private static final double MAX_SCROLL_FRACTION = 0.9; // fraction of page height
+    private static final double MAX_SCROLL_FRACTION = 0.9; // fraction of mScrollView height
     private View mBottomPaddingView;
 
     // ScrollY values that we try to scroll to when paging up and down.
-    private List<Integer> mScrollPoints = new ArrayList<>();
+    private List<Integer> mPageBreaks = new ArrayList<>();
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
@@ -272,13 +271,13 @@ public class FormEntryActivity
         findViewById(R.id.button_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scrollStep(-1);
+                scrollPage(-1);
             }
         });
         findViewById(R.id.button_down).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scrollStep(1);
+                scrollPage(1);
             }
         });
 
@@ -575,7 +574,7 @@ public class FormEntryActivity
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        FormEntryActivity.this.determineScrollPoints();
+                        FormEntryActivity.this.paginate();
                     }
                 }
         );
@@ -592,12 +591,11 @@ public class FormEntryActivity
 
     /**
      * Determines the vertical positions that the up/down buttons will jump to.
-     * These scroll points are selected so that each scroll point is up to
-     * MAX_SCROLL_FRACTION of the ScrollView's height below its preceding
-     * scroll point, and (if possible) each scroll point places the top edge of
-     * a group or question at the top of the ScrollView.
+     * These positions are selected so that the height of each page is up to
+     * MAX_SCROLL_FRACTION of the ScrollView's height, and (if possible) each
+     * page break is at the top edge of a group or question.
      */
-    private void determineScrollPoints() {
+    private void paginate() {
         // Gather a list of the top edges of the question groups and widgets.
         List<Integer> edges = new ArrayList<>();
         for (int i = 0; i < mQuestionHolder.getChildCount(); i++) {
@@ -613,70 +611,57 @@ public class FormEntryActivity
             }
         }
 
-        // Add just enough padding so that when the form is scrolled all the
-        // way to the end, an edge lands at the top of the ScrollView.
-        int scrollHeight = mScrollView.getMeasuredHeight();
-        int minBottom = mBottomPaddingView.getTop() + MIN_BOTTOM_PADDING;
-        ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
-        int lastScrollPoint = -1;
+        // Select a subset of these edges to be the page breaks.  Dividing the
+        // form into fixed pages ensures that each question appears at a fixed
+        // vertical position on the screen within its page, which helps keep
+        // the user oriented.
+        int maxPageHeight = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
+        mPageBreaks.clear();
+        mPageBreaks.add(0);
+        int prevBreak = 0;
+        int nextBreak = prevBreak + maxPageHeight;
         for (int y : edges) {
-            int bottom = y + scrollHeight;
-            if (bottom >= minBottom) {
-                lastScrollPoint = y;
-                int paddingHeight = bottom - mBottomPaddingView.getTop();
-                if (params.height != paddingHeight) {
-                    // To avoid triggering an infinite loop, only invoke
-                    // requestLayout() when the height actually changes.
-                    params.height = paddingHeight;
-                    mBottomPaddingView.requestLayout();
-                }
-                break;
+            while (y > prevBreak + maxPageHeight) { // next edge won't land on this page
+                mPageBreaks.add(nextBreak);
+                prevBreak = nextBreak;
+                // Usually this initial value of nextBreak will be overwritten
+                // by a value from edges (nextBreak = y below); this value is
+                // just a fallback in case the nearest edge is too far away.
+                nextBreak = prevBreak + maxPageHeight;
+            }
+            if (y > prevBreak) {
+                nextBreak = y;
             }
         }
 
-        // Rather than allowing all edges to be scroll points, select a subset
-        // of the edges that are spaced up to the maximum leap size apart, like
-        // page breaks.  Dividing the form into fixed pages ensures that each
-        // question appears at a fixed vertical position on the screen within
-        // its page, which helps keep the user oriented.  (The only way in
-        // which these are unlike page breaks in a document is that the very
-        // last page is allowed to overlap the second-last page.)
-        int maxLeap = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
-        mScrollPoints.clear();
-        mScrollPoints.add(0);
-        int prevPoint = 0;
-        int nextPoint = prevPoint + maxLeap;
-        for (int y : edges) {
-            if (y == lastScrollPoint) {  // all done
-                mScrollPoints.add(y);
-                break;
-            }
-            while (y > prevPoint + maxLeap) {
-                mScrollPoints.add(nextPoint);
-                prevPoint = nextPoint;
-                // In most cases the initial value of nextPoint will be overwritten
-                // by a value from edges (nextPoint = y below); this initial value
-                // is just a fallback in case the nearest edge is too far away.
-                nextPoint = prevPoint + maxLeap;
-            }
-            if (y > prevPoint) {
-                nextPoint = y;
-            }
+        // Add enough padding so that when the form is scrolled all the way to
+        // the end, the last page break lands at the top of the ScrollView.
+        // This can sometimes be a lot of padding (e.g. most of a page), but
+        // we think the benefit of having a consistent n:1 relationship between
+        // questions and pages is worth the occasionally large wasted space.
+        int bottom = prevBreak + mScrollView.getMeasuredHeight();
+        int paddingHeight = bottom - mBottomPaddingView.getTop();
+        ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
+        if (params.height != paddingHeight) {
+            // To avoid triggering an infinite loop, only invoke
+            // requestLayout() when the height actually changes.
+            params.height = paddingHeight;
+            mBottomPaddingView.requestLayout();
         }
     }
 
     /**
-     * Scrolls the form up (dir &lt; 0) or down (dir > 0) to the next scroll point.
-     * To help the user stay oriented, we always go to the nearest scroll point,
-     * even if it is close by -- thus the user sees the same set of "pages" when
-     * paging down or paging up.
+     * Scrolls the form up (dir &lt; 0) or down (dir > 0) to the next page break.
+     * To help the user stay oriented, we always go to the nearest page break,
+     * even if it is close by -- thus the user gets a consistent set of pages
+     * with a consistent layout on each page.
      */
-    private void scrollStep(int dir) {
+    private void scrollPage(int dir) {
         dir = dir > 0 ? 1 : -1;
         int y = mScrollView.getScrollY();
-        int n = mScrollPoints.size();
+        int n = mPageBreaks.size();
         for (int i = (dir > 0) ? 0 : n - 1; i >= 0 && i < n; i += dir) {
-            int deltaY = mScrollPoints.get(i) - y;
+            int deltaY = mPageBreaks.get(i) - y;
             if (dir * deltaY > 0) {
                 mScrollView.smoothScrollTo(0, y + deltaY);
                 break;
