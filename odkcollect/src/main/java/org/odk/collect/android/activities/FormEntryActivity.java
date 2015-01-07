@@ -213,7 +213,8 @@ public class FormEntryActivity
 
     // ScrollY values that we try to scroll to when paging up and down.
     private List<Integer> mPageBreaks = new ArrayList<>();
-    private enum ScrollDirection {UP, DOWN};
+
+    private enum ScrollDirection {UP, DOWN}
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
