@@ -395,6 +395,7 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         }
         db.setTransactionSuccessful();
         db.endTransaction();
+        statement.close();
         // Send broadcast to registered ContentObservers, to refresh UI.
         contentResolver.notifyChange(uri, null, false);
         return numValues;

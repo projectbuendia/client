@@ -412,8 +412,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Get call patients from the cache.
         Uri uri = PatientProviderContract.CONTENT_URI; // Get all entries
         Cursor c = provider.query(
-                uri, new String[]{PatientColumns.COLUMN_NAME_UUID}, null, null, null);
-        if (c.getCount() < 1) {
+                uri, new String[] {PatientColumns.COLUMN_NAME_UUID}, null, null, null);
+        int count = c.getCount();
+        c.close();
+        if (count < 1) {
             return;
         }
 

@@ -341,6 +341,7 @@ public class OdkActivityLauncher {
             idToUuid.put(cursor.getString(cursor.getColumnIndex(ChartColumns.XFORM_ID)),
                     cursor.getString(cursor.getColumnIndex(ChartColumns._ID)));
         }
+        cursor.close();
 
         // Remap concept ids to uuids, skipping anything we can't remap.
         for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext();) {
