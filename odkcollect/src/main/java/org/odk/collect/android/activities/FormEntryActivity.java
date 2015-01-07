@@ -156,7 +156,7 @@ public class FormEntryActivity
 
 	// Tracks whether we are autosaving
 	public static final String KEY_AUTO_SAVED = "autosaved";
-	
+
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
 //    private static final int MENU_CANCEL = Menu.FIRST;
@@ -213,6 +213,7 @@ public class FormEntryActivity
 
     // ScrollY values that we try to scroll to when paging up and down.
     private List<Integer> mPageBreaks = new ArrayList<>();
+    private enum ScrollDirection { UP, DOWN };
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
@@ -271,13 +272,13 @@ public class FormEntryActivity
         findViewById(R.id.button_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scrollPage(-1);
+                scrollPage(ScrollDirection.UP);
             }
         });
         findViewById(R.id.button_down).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scrollPage(1);
+                scrollPage(ScrollDirection.DOWN);
             }
         });
 
@@ -574,7 +575,7 @@ public class FormEntryActivity
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        FormEntryActivity.this.paginate();
+                        paginate();
                     }
                 }
         );
@@ -651,18 +652,17 @@ public class FormEntryActivity
     }
 
     /**
-     * Scrolls the form up (dir &lt; 0) or down (dir > 0) to the next page break.
-     * To help the user stay oriented, we always go to the nearest page break,
-     * even if it is close by -- thus the user gets a consistent set of pages
-     * with a consistent layout on each page.
+     * Scrolls the form up or down to the next page break.  To keep the user
+     * oriented, we always go to the nearest page break (even if it is nearby),
+     * giving a consistent set of pages with a consistent layout on each page.
      */
-    private void scrollPage(int dir) {
-        dir = dir > 0 ? 1 : -1;
+    private void scrollPage(ScrollDirection direction) {
+        int inc = direction == ScrollDirection.DOWN ? 1 : -1;
         int y = mScrollView.getScrollY();
         int n = mPageBreaks.size();
-        for (int i = (dir > 0) ? 0 : n - 1; i >= 0 && i < n; i += dir) {
+        for (int i = (inc > 0) ? 0 : n - 1; i >= 0 && i < n; i += inc) {
             int deltaY = mPageBreaks.get(i) - y;
-            if (dir * deltaY > 0) {
+            if (inc * deltaY > 0) {
                 mScrollView.smoothScrollTo(0, y + deltaY);
                 break;
             }
