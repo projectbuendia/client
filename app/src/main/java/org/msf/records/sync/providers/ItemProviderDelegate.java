@@ -12,7 +12,7 @@ import org.msf.records.sync.SelectionBuilder;
  * A {@link ProviderDelegate} that provides query, delete, and update access to a single item
  * provided directly from the database.
  */
-public class SingleProviderDelegate implements ProviderDelegate<PatientDatabase> {
+public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     protected final String mName;
     protected final String mTableName;
@@ -20,9 +20,9 @@ public class SingleProviderDelegate implements ProviderDelegate<PatientDatabase>
     protected final String mIdColumn;
 
     /**
-     * Creates an instance of {@link SingleProviderDelegate}.
+     * Creates an instance of {@link ItemProviderDelegate}.
      */
-    public SingleProviderDelegate(String name, String tableName, String idColumn) {
+    public ItemProviderDelegate(String name, String tableName, String idColumn) {
         mName = name;
         mTableName = tableName;
         mIdColumn = idColumn;

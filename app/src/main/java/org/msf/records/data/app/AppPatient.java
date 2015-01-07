@@ -7,7 +7,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.net.model.Patient;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
@@ -72,28 +72,28 @@ public final class AppPatient extends AppTypeBase<String> {
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(
-                PatientProviderContract.PatientColumns._ID,
+                Contracts.Patients._ID,
                 id);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
+                Contracts.Patients.UUID,
                 uuid);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
+                Contracts.Patients.GIVEN_NAME,
                 givenName);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+                Contracts.Patients.FAMILY_NAME,
                 familyName);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
+                Contracts.Patients.GENDER,
                 gender == Patient.GENDER_MALE ? "M" : "F");
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
+                Contracts.Patients.BIRTHDATE,
                 Utils.localDateToString(birthdate));
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
+                Contracts.Patients.ADMISSION_TIMESTAMP,
                 admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
         contentValues.put(
-                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
+                Contracts.Patients.LOCATION_UUID,
                 locationUuid);
 
         return contentValues;

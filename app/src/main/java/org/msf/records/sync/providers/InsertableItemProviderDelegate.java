@@ -9,11 +9,11 @@ import org.msf.records.sync.PatientDatabase;
 import java.util.List;
 
 /**
- * A {@link SingleProviderDelegate} that supports insertion.
+ * A {@link ItemProviderDelegate} that supports insertion.
  */
-public class InsertableSingleProviderDelegate extends SingleProviderDelegate {
+public class InsertableItemProviderDelegate extends ItemProviderDelegate {
 
-    public InsertableSingleProviderDelegate(String name, String tableName, String idColumn) {
+    public InsertableItemProviderDelegate(String name, String tableName, String idColumn) {
         super(name, tableName, idColumn);
     }
 

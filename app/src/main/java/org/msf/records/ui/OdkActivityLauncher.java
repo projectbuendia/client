@@ -30,7 +30,7 @@ import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
-import org.msf.records.sync.ChartProviderContract;
+import org.msf.records.sync.providers.Contracts;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.activities.FormHierarchyActivity;
 import org.odk.collect.android.application.Collect;
@@ -60,7 +60,6 @@ import javax.annotation.Nullable;
 import de.greenrobot.event.EventBus;
 
 import static android.provider.BaseColumns._ID;
-import static org.msf.records.sync.ChartProviderContract.ChartColumns;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.JR_FORM_ID;
@@ -256,7 +255,7 @@ public class OdkActivityLauncher {
         //      <value>1066^NO^99DCT</value>
 
         ContentValues common = new ContentValues();
-        common.put(ChartColumns.PATIENT_UUID, patientUuid);
+        common.put(Contracts.Observations.PATIENT_UUID, patientUuid);
 
         TreeElement encounter = savedRoot.getChild("encounter", 0);
         if (encounter == null) {
@@ -276,9 +275,9 @@ public class OdkActivityLauncher {
             DateTime encounterTime =
                     ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
             long secondsSinceEpoch = encounterTime.getMillis() / 1000L;
-            common.put(ChartColumns.ENCOUNTER_TIME, secondsSinceEpoch);
-            common.put(ChartColumns.ENCOUNTER_UUID, UUID.randomUUID().toString());
-            common.put(ChartColumns.TEMP_CACHE, 1);
+            common.put(Contracts.Observations.ENCOUNTER_TIME, secondsSinceEpoch);
+            common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
+            common.put(Contracts.Observations.TEMP_CACHE, 1);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Could not parse datetime" + dateTimeValue.getValue());
             return;
@@ -324,33 +323,33 @@ public class OdkActivityLauncher {
 
                 ContentValues observation = new ContentValues(common);
                 // Set to the id for now, we'll replace with uuid later
-                observation.put(ChartColumns.CONCEPT_UUID, id.toString());
-                observation.put(ChartColumns.VALUE, value);
+                observation.put(Contracts.Observations.CONCEPT_UUID, id.toString());
+                observation.put(Contracts.Observations.VALUE, value);
                 toInsert.add(observation);
             }
         }
 
         String inClause = Joiner.on(",").join(xformConceptIds);
         // Get a map from client ids to UUIDs from our local concept database.
-        Cursor cursor = resolver.query(ChartProviderContract.CONCEPTS_CONTENT_URI,
-                new String[]{ChartColumns._ID, ChartColumns.XFORM_ID},
-                ChartColumns.XFORM_ID + " IN (" + inClause + ")",
+        Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
+                new String[]{Contracts.Concepts._ID, Contracts.Concepts.XFORM_ID},
+                Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
                 null, null);
         HashMap<String, String> idToUuid = new HashMap<>();
         while (cursor.moveToNext()) {
-            idToUuid.put(cursor.getString(cursor.getColumnIndex(ChartColumns.XFORM_ID)),
-                    cursor.getString(cursor.getColumnIndex(ChartColumns._ID)));
+            idToUuid.put(cursor.getString(cursor.getColumnIndex(Contracts.Concepts.XFORM_ID)),
+                    cursor.getString(cursor.getColumnIndex(Contracts.Concepts._ID)));
         }
 
         // Remap concept ids to uuids, skipping anything we can't remap.
         for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext();) {
             ContentValues values = i.next();
-            if (!mapIdToUuid(idToUuid, values, ChartColumns.CONCEPT_UUID)) {
+            if (!mapIdToUuid(idToUuid, values, Contracts.Observations.CONCEPT_UUID)) {
                 i.remove();
             }
-            mapIdToUuid(idToUuid, values, ChartColumns.VALUE);
+            mapIdToUuid(idToUuid, values, Contracts.Observations.VALUE);
         }
-        resolver.bulkInsert(ChartProviderContract.OBSERVATIONS_CONTENT_URI,
+        resolver.bulkInsert(Contracts.Observations.CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
     }
 

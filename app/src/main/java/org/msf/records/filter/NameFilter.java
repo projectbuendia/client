@@ -1,6 +1,6 @@
 package org.msf.records.filter;
 
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 /**
  * A {@link SimpleSelectionFilter} that filters by name.
@@ -16,8 +16,8 @@ final class NameFilter implements SimpleSelectionFilter {
         // insert a space in front of each word and then look for a
         // space followed by the search key.
         return String.format("replace(' ' || %s || ' ' || %s, '-', ' ') LIKE ?",
-                PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
-                PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME);
+                Contracts.Patients.GIVEN_NAME,
+                Contracts.Patients.FAMILY_NAME);
     }
 
     /**

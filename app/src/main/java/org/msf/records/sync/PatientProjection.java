@@ -1,5 +1,7 @@
 package org.msf.records.sync;
 
+import org.msf.records.sync.providers.Contracts;
+
 /**
  * Provides a standard patient projection with all known fields.
  * Since most projections require most fields, using this projection
@@ -7,20 +9,20 @@ package org.msf.records.sync;
  */
 public class PatientProjection {
     private static final String[] PROJECTION = new String[] {
-            PatientProviderContract.PatientColumns._ID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_UUID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID
+            Contracts.Patients._ID,
+            Contracts.Patients.GIVEN_NAME,
+            Contracts.Patients.FAMILY_NAME,
+            Contracts.Patients.UUID,
+            Contracts.Patients.ADMISSION_TIMESTAMP,
+            Contracts.Patients.BIRTHDATE,
+            Contracts.Patients.GENDER,
+            Contracts.Patients.LOCATION_UUID
     };
 
     private static final String[] PATIENT_COUNTS_PROJECTION = new String[] {
-            LocationProviderContract.LocationColumns._ID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
-            PatientProviderContract.PatientColumns.COLUMN_NAME_TENT_PATIENT_COUNT
+            Contracts.Locations._ID,
+            Contracts.PatientCounts.LOCATION_UUID,
+            Contracts.PatientCounts.TENT_PATIENT_COUNT
     };
 
     public static final int COLUMN_ID = 0;

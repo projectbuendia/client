@@ -11,7 +11,7 @@ import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 /**
  * An {@link AsyncTask} that fetches a single item from the data store.
@@ -45,7 +45,7 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                    PatientProviderContract.CONTENT_URI,
+                    Contracts.Patients.CONTENT_URI,
                     PatientProjection.getProjectionColumns(),
                     mFilter.getSelectionString(),
                     mFilter.getSelectionArgs(mConstraint),

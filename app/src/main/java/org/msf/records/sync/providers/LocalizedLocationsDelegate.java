@@ -12,14 +12,9 @@ import org.msf.records.sync.PatientDatabase;
  */
 public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatabase> {
 
-    public static final String NAME = "localized-location";
-
-    public static final String TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + NAME;
-
     @Override
     public String getType() {
-        return TYPE;
+        return Contracts.LocalizedLocations.GROUP_CONTENT_TYPE;
     }
 
     @Override

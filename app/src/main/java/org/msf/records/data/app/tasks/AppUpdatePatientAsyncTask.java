@@ -18,7 +18,7 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
 
@@ -74,7 +74,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
         }
 
         int count = mContentResolver.update(
-                PatientProviderContract.CONTENT_URI,
+                Contracts.Patients.CONTENT_URI,
                 mPatientDelta.toContentValues(),
                 FILTER.getSelectionString(),
                 FILTER.getSelectionArgs(mUuid));

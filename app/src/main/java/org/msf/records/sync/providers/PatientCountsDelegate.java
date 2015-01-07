@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import org.msf.records.sync.PatientDatabase;
-import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.sync.SelectionBuilder;
 
 /**
@@ -14,14 +13,9 @@ import org.msf.records.sync.SelectionBuilder;
  */
 public class PatientCountsDelegate implements ProviderDelegate<PatientDatabase> {
 
-    public static final String NAME = "patient-count";
-
-    public static final String TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + NAME;
-
     @Override
     public String getType() {
-        return TYPE;
+        return Contracts.PatientCounts.GROUP_CONTENT_TYPE;
     }
 
     @Override
@@ -30,16 +24,16 @@ public class PatientCountsDelegate implements ProviderDelegate<PatientDatabase> 
             String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = new SelectionBuilder().table(PatientDatabase.PATIENTS_TABLE_NAME)
                 .where(selection, selectionArgs)
-                .where(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID +
+                .where(Contracts.Patients.LOCATION_UUID +
                         " IS NOT NULL")
                 .query(
                         dbHelper.getReadableDatabase(),
                         new String[] {
-                                PatientProviderContract.PatientColumns._ID,
-                                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
-                                "COUNT(*) AS " + PatientProviderContract.PatientColumns._COUNT,
+                                Contracts.Patients._ID,
+                                Contracts.Patients.LOCATION_UUID,
+                                "COUNT(*) AS " + Contracts.Patients._COUNT,
                         },  // Projection
-                        PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID, // Group
+                        Contracts.Patients.LOCATION_UUID, // Group
                         "",
                         sortOrder,
                         "");
