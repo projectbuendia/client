@@ -37,7 +37,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 		mFakeEventBus = new FakeEventBus();
 		mController = new TentSelectionController(
 				mMockLocationManager,
-				mMockUi,
+                null, mCrudEventBusProvider.get(), mMockUi,
 				mFakeEventBus);
 	}
 

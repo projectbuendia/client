@@ -7,6 +7,11 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.location.LocationManager;
@@ -17,6 +22,8 @@ import org.msf.records.utils.EventBusRegistrationInterface;
 
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Controller for {@link TentSelectionActivity}.
@@ -44,7 +51,9 @@ final class TentSelectionController {
 	}
 
 	private final LocationManager mLocationManager;
-	private final Ui mUi;
+    private final AppModel mAppModel;
+    private final CrudEventBus mCrudEventBus;
+    private final Ui mUi;
 	private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
 	private final EventBusRegistrationInterface mEventBus;
 	private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
@@ -55,20 +64,33 @@ final class TentSelectionController {
 	@Nullable private LocationSubtree mTriageZone;
 	@Nullable private LocationSubtree mDischargedZone;
 
+    @Nullable private AppLocationTree mAppLocationTree;
+    @Nullable private AppLocation mAppTriageZone;
+    @Nullable private AppLocation mAppDischargedZone;
+
 	public TentSelectionController(
-			LocationManager locationManager,
-			Ui ui,
-			EventBusRegistrationInterface eventBus) {
+            LocationManager locationManager,
+            AppModel appModel,
+            CrudEventBus crudEventBus,
+            Ui ui,
+            EventBusRegistrationInterface eventBus) {
 		mLocationManager = locationManager;
-		mUi = ui;
+        mAppModel = appModel;
+        mCrudEventBus = crudEventBus;
+        mUi = ui;
 		mEventBus = eventBus;
 	}
 
 	public void init() {
 		mEventBus.register(mEventBusSubscriber);
+        mCrudEventBus.register(mEventBusSubscriber);
+
 		if (DEBUG) {
 			Log.d(TAG, "Controller inited. Loaded tree: " + mLoadedLocationTree + ". Tree: " + mLocationTree);
 		}
+
+        mAppModel.fetchLocationTree(mCrudEventBus, "en");
+
 		if (!mLoadedLocationTree) {
 			mLoadRequestTimeMs = SystemClock.elapsedRealtime();
 			mLocationManager.loadLocations();
@@ -139,6 +161,28 @@ final class TentSelectionController {
 
 	@SuppressWarnings("unused") // Called by reflection from EventBus
 	private final class EventBusSubscriber {
+
+        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            mAppLocationTree = event.tree;
+            ImmutableSet<AppLocation> zones =
+                    mAppLocationTree.getChildren(mAppLocationTree.getRoot());
+            for (AppLocation zone : zones) {
+                switch (zone.uuid) {
+                    case Zone.TRIAGE_ZONE_UUID:
+                        mAppTriageZone = zone;
+                        break;
+                    // TODO(akalachman): Revisit if discharged should be treated differently.
+                    case Zone.DISCHARGED_ZONE_UUID:
+                        mAppDischargedZone = zone;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // TODO(dxchen): Switch fragment population to use the new trees.
+        }
+
 	    public void onEventMainThread(LocationsLoadFailedEvent event) {
 	    	if (DEBUG) {
 	    		Log.d(TAG, "Error loading location tree");

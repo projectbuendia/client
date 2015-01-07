@@ -6,11 +6,20 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.RawQueryManager;
+
+import java.util.List;
 
 /**
  * A {@link ProviderDelegate} that provides query access to all localized locations.
  */
 public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatabase> {
+
+    private final RawQueryManager mRawQueryManager;
+
+    public LocalizedLocationsDelegate(RawQueryManager rawQueryManager) {
+        mRawQueryManager = rawQueryManager;
+    }
 
     @Override
     public String getType() {
@@ -21,7 +30,16 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
     public Cursor query(
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+        // URI expected to be of form ../localized-locations/{locale}.
+        List<String> pathSegments = uri.getPathSegments();
+        if (pathSegments.size() != 2) {
+            throw new UnsupportedOperationException("URI '" + uri + "' is malformed.");
+        }
+
+        String locale = pathSegments.get(1);
+        String query = mRawQueryManager.getRawQuery(RawQueryManager.Name.LOCALIZED_LOCATIONS);
+
+        return dbHelper.getReadableDatabase().rawQuery(query, new String[] { locale });
     }
 
     @Override

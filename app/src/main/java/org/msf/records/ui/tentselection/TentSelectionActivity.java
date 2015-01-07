@@ -8,9 +8,12 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
@@ -31,6 +34,8 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 	private TentSelectionController mController;
 
 	@Inject LocationManager mLocationManager;
+    @Inject AppModel mAppModel;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -38,6 +43,8 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         App.getInstance().inject(this);
         mController = new TentSelectionController(
         		mLocationManager,
+                mAppModel,
+                mCrudEventBusProvider.get(),
         		new MyUi(),
         		new EventBusWrapper(EventBus.getDefault()));
 
