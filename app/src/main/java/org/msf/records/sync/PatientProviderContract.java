@@ -18,17 +18,6 @@ public class PatientProviderContract {
     }
 
     /**
-     * MIME type for lists of patients.
-     */
-    public static final String CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.patients";
-    /**
-     * MIME type for individual patients.
-     */
-    public static final String CONTENT_ITEM_TYPE =
-            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.records.patient";
-
-    /**
      * Content provider authority.
      */
     public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.records";
@@ -46,7 +35,7 @@ public class PatientProviderContract {
     /**
      * Path component for counts of patients per tent. Visible for re-use in MsfRecordsProvider.
      */
-    static final String PATH_TENT_PATIENT_COUNTS = "tentpatients";
+    static final String PATH_TENT_PATIENT_COUNTS = "patient-counts";
 
     /**
      * Fully qualified URI for "patient" resources.

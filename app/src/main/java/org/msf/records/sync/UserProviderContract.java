@@ -16,12 +16,6 @@ public class UserProviderContract {
     }
 
     /**
-     * MIME type for lists of users
-     */
-    public static final String USER_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.user";
-
-    /**
      * Base URI. (content://org.msf.records)
      */
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" +

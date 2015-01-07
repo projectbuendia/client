@@ -49,7 +49,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
     /**
      * Table name where records are stored for "patient" resources.
      */
-    static final String PATIENTS_TABLE_NAME = "patients";
+    public static final String PATIENTS_TABLE_NAME = "patients";
 
     /** SQL statement to create "patient" table. */
     private static final String SQL_CREATE_ENTRIES =
@@ -63,7 +63,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     COLUMN_NAME_BIRTHDATE + TYPE_TEXT + COMMA_SEP +
                     COLUMN_NAME_GENDER + TYPE_TEXT + ")";
 
-    static final String CONCEPTS_TABLE_NAME = "concepts";
+    public static final String CONCEPTS_TABLE_NAME = "concepts";
 
     private static final String SQL_CREATE_CONCEPTS =
             CREATE_TABLE + CONCEPTS_TABLE_NAME + " (" +
@@ -84,7 +84,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ")" +
                     ")";
 
-    static final String LOCATIONS_TABLE_NAME = "locations";
+    public static final String LOCATIONS_TABLE_NAME = "locations";
 
     private static final String SQL_CREATE_LOCATIONS =
             CREATE_TABLE + LOCATIONS_TABLE_NAME + " (" +
@@ -93,7 +93,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                 LocationColumns.PARENT_UUID + TYPE_TEXT +
                 ")";
 
-    static final String LOCATION_NAMES_TABLE_NAME = "location_names";
+    public static final String LOCATION_NAMES_TABLE_NAME = "location_names";
 
     private static final String SQL_CREATE_LOCATION_NAMES =
             CREATE_TABLE + LOCATION_NAMES_TABLE_NAME + " (" +
@@ -133,7 +133,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     ")" +
                     ")";
 
-    static final String USERS_TABLE_NAME = "users";
+    public static final String USERS_TABLE_NAME = "users";
 
     private static final String SQL_CREATE_USERS =
             CREATE_TABLE + USERS_TABLE_NAME + " (" +
