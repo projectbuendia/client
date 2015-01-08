@@ -135,7 +135,6 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
         for (int i = 0; i < columns.length; i++) {
             sql.append((i > 0) ? "," : "");
             sql.append(columns[i]);
-            i++;
         }
         sql.append(')');
         sql.append(" VALUES (");
