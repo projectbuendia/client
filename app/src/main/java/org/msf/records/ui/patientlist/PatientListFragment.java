@@ -140,8 +140,8 @@ public class PatientListFragment extends ProgressFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-        mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
-        		Contracts.Patients.CONTENT_URI);
+        mFactory = new FilterQueryProviderFactory(
+                getActivity()).setUri(Contracts.PatientCounts.CONTENT_URI);
         LocationTree locationTree = LocationTree.singletonInstance;
 		if (locationTree != null) {
             mFactory.setSortClause(LocationTree.singletonInstance.getLocationSortClause(
