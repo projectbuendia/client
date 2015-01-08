@@ -45,9 +45,7 @@ public class VolleySingleton {
      * A convenience method for adding a request to the Volley request queue getting all singleton
      * handling and contexts correct.
      */
-    public <T> void addToRequestQueue(Request<T> req, String tag) {
-        // set the default tag if tag is empty
-        req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+    public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
     }
 

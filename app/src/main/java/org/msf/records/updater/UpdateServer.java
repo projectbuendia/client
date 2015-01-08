@@ -28,13 +28,10 @@ public class UpdateServer {
      *
      * @param listener the callback to be invoked if the request succeeds
      * @param errorListener the callback to be invoked if the request fails
-     * @param tag a string that can be used to cancel this request or {@code null} to use the
-     *            default tag
      */
     public void getAndroidUpdateInfo(
             Response.Listener<UpdateInfo> listener,
-            Response.ErrorListener errorListener,
-            @Nullable String tag) {
+            Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
                 new GsonRequest<>(
                         mRootUrl + "androidclient/version.json",
@@ -43,8 +40,6 @@ public class UpdateServer {
                         null /*headers*/,
                         listener,
                         errorListener
-                ),
-                tag
-        );
+                ));
     }
 }

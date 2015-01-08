@@ -19,6 +19,7 @@ import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Colorizer;
+import org.msf.records.utils.Logger;
 
 import javax.inject.Inject;
 
@@ -31,7 +32,7 @@ import butterknife.OnClick;
  */
 public abstract class BaseLoggedInActivity extends BaseActivity {
 
-    private static final String TAG = BaseLoggedInActivity.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
 
@@ -166,7 +167,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         User user = App.getUserManager().getActiveUser();
 
         if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            Log.w(TAG, "The user has switched. I don't know how to deal with that right now");
+            LOG.w("The user has switched. I don't know how to deal with that right now");
             // TODO(dxchen): Handle.
         }
         mLastActiveUser = user;

@@ -1,5 +1,9 @@
 {
   "linters" : {
+    "nolint" : {
+      "type" : "nolint",
+      "include" : "(.*)"
+    },
     "spelling": {
       "type": "spelling"
     },

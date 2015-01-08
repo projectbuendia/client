@@ -24,6 +24,7 @@ import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.utils.Utils;
 
@@ -39,7 +40,7 @@ import butterknife.InjectView;
  */
 public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
-    private static final String TAG = ExpandablePatientListAdapter.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     private final Context mContext;
     private String mQueryFilterTerm;
@@ -106,9 +107,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
 
         try {
             patientsCursor = queryProvider.runQuery(mQueryFilterTerm);
-            Log.d(TAG, "childCursor " + patientsCursor.getCount());
+            LOG.d("childCursor " + patientsCursor.getCount());
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            LOG.e(e.getMessage());
         }
 
         return patientsCursor;

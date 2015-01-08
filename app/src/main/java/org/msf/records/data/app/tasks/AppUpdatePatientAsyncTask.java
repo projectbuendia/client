@@ -62,7 +62,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
     protected PatientUpdateFailedEvent doInBackground(Void... params) {
         RequestFuture<Patient> patientFuture = RequestFuture.newFuture();
 
-        mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture, TAG);
+        mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture);
         try {
             patientFuture.get();
         } catch (InterruptedException e) {

@@ -64,7 +64,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
     protected PatientAddFailedEvent doInBackground(Void... params) {
         RequestFuture<Patient> patientFuture = RequestFuture.newFuture();
 
-        mServer.addPatient(mPatientDelta, patientFuture, patientFuture, TAG);
+        mServer.addPatient(mPatientDelta, patientFuture, patientFuture);
         Patient patient;
         try {
             patient = patientFuture.get();

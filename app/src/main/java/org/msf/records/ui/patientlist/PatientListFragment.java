@@ -36,6 +36,7 @@ import org.msf.records.sync.SyncManager;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.ExpandablePatientListAdapter;
 import org.msf.records.ui.ProgressFragment;
+import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
 
@@ -49,7 +50,7 @@ public class PatientListFragment extends ProgressFragment implements
         ExpandableListView.OnChildClickListener, LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener {
 
-    private static final String TAG = PatientListFragment.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -147,7 +148,7 @@ public class PatientListFragment extends ProgressFragment implements
             mFactory.setSortClause(LocationTree.singletonInstance.getLocationSortClause(
 		                Contracts.Patients.LOCATION_UUID));
 		} else {
-			Log.e(TAG, "Location tree does not exist yet");
+			LOG.e("Location tree does not exist yet");
 		}
         setContentView(R.layout.fragment_patient_list);
     }
@@ -170,7 +171,7 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onRefresh() {
         if(!isRefreshing){
-            Log.d(TAG, "onRefresh");
+            LOG.d("onRefresh");
 
             //triggers app wide data refresh
             mSyncManager.forceSync();
@@ -317,7 +318,7 @@ public class PatientListFragment extends ProgressFragment implements
         // Swap the new cursor in.
         int id = cursorLoader.getId();
 
-        Log.d(TAG, "onLoadFinished id: " + id);
+        LOG.d("onLoadFinished id: " + id);
         if (id == LOADER_LIST_ID) {
             mPatientAdapter.setGroupCursor(cursor);
             changeState(State.LOADED);
@@ -335,7 +336,7 @@ public class PatientListFragment extends ProgressFragment implements
             try {
                 mPatientAdapter.setChildrenCursor(id, null);
             } catch (NullPointerException e) {
-                Log.w(TAG, "Adapter expired, try again on the next query: " + e.getMessage());
+                LOG.w("Adapter expired, try again on the next query: " + e.getMessage());
             }
         } else {
             mPatientAdapter.setGroupCursor(null);

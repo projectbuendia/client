@@ -40,7 +40,7 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     public void getAllCharts(Response.Listener<PatientChartList> patientListener,
@@ -52,7 +52,7 @@ public class OpenMrsChartServer {
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
         request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     public void getConcepts(Response.Listener<ConceptList> conceptListener,
@@ -63,7 +63,7 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     public void getChartStructure(
@@ -75,6 +75,6 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {
         };
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 }
