@@ -1,40 +1,37 @@
 package org.msf.records.ui.patientlist;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.FilterCompletedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.PatientFilters;
-import org.msf.records.filter.FilterQueryProviderFactory;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
-import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.SyncManager;
-import org.msf.records.sync.providers.Contracts;
-import org.msf.records.ui.ExpandablePatientListAdapter;
+import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
 
 import de.greenrobot.event.EventBus;
@@ -46,7 +43,7 @@ import de.greenrobot.event.EventBus;
  * interface.
  */
 public class PatientListFragment extends ProgressFragment implements
-        ExpandableListView.OnChildClickListener, LoaderManager.LoaderCallbacks<Cursor>,
+        ExpandableListView.OnChildClickListener,
         SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = PatientListFragment.class.getSimpleName();
@@ -57,12 +54,9 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
-    /**
-     * The id to identify which Cursor is returned
-     */
-    private static final int LOADER_LIST_ID = 0;
-
+    @Inject AppModel mAppModel;
     @Inject LocationManager mLocationManager;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
 
     /**
@@ -76,14 +70,11 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
-    private ExpandablePatientListAdapter mPatientAdapter;
+    private PatientListTypedCursorAdapter mPatientAdapter;
 
     private ExpandableListView mListView;
 
     private SwipeRefreshLayout mSwipeToRefresh;
-
-    // TODO(akalachman): Figure out how to break reliance on this cursor--we already have the info.
-    private FilterQueryProviderFactory mFactory;
 
     private boolean isRefreshing;
 
@@ -101,8 +92,6 @@ public class PatientListFragment extends ProgressFragment implements
             mFilter = new FilterGroup(new LocationUuidFilter(mLocationTree.getRoot()), filter);
         }
 
-        mPatientAdapter.setSelectionFilter(mFilter);
-        mPatientAdapter.setFilterQueryProvider(mFactory.getFilterQueryProvider(filter));
         loadSearchResults();
     }
 
@@ -140,15 +129,6 @@ public class PatientListFragment extends ProgressFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-        mFactory = new FilterQueryProviderFactory(
-                getActivity()).setUri(Contracts.PatientCounts.CONTENT_URI);
-        LocationTree locationTree = LocationTree.singletonInstance;
-		if (locationTree != null) {
-            mFactory.setSortClause(LocationTree.singletonInstance.getLocationSortClause(
-		                Contracts.Patients.LOCATION_UUID));
-		} else {
-			Log.e(TAG, "Location tree does not exist yet");
-		}
         setContentView(R.layout.fragment_patient_list);
     }
 
@@ -156,6 +136,7 @@ public class PatientListFragment extends ProgressFragment implements
     public void onResume() {
         super.onResume();
 
+        changeState(State.LOADING);
         EventBus.getDefault().register(this);
         mLocationManager.loadLocations();
     }
@@ -180,10 +161,14 @@ public class PatientListFragment extends ProgressFragment implements
 
     public synchronized void onEvent(LocationsLoadedEvent event) {
     	mLocationTree = event.locationTree;
+        mPatientAdapter.notifyDataSetChanged();
+        changeState(State.LOADED);
     }
 
     public synchronized void onEvent(LocationsLoadFailedEvent event) {
         Toast.makeText(getActivity(), R.string.location_load_error, Toast.LENGTH_SHORT).show();
+        mPatientAdapter.notifyDataSetChanged();
+        changeState(State.LOADED);
     }
 
     public synchronized void onEvent(SyncFinishedEvent event) {
@@ -198,15 +183,17 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private void loadSearchResults(){
+        // TODO(akalachman): Sub-filter on query term rather than re-filtering with each keypress.
         changeState(State.LOADING);
-        mPatientAdapter.filter(mFilterQueryTerm, new Filter.FilterListener() {
-            @Override
-            public void onFilterComplete(int count) {
-                mPatientAdapter.notifyDataSetChanged();
-                changeState(State.LOADED);
-                // TODO(akalachman): Investigate "Cursor finalized without prior close()"
-            }
-        });
+        mPatientAdapter.filter(mFilter, mFilterQueryTerm);
+        mPatientAdapter.getEventBus().register(new FilterSubscriber());
+    }
+
+    private final class FilterSubscriber {
+        public void onEventMainThread(FilterCompletedEvent event) {
+            changeState(State.LOADED);
+            mPatientAdapter.getEventBus().unregister(this);
+        }
     }
 
     @Override
@@ -233,17 +220,15 @@ public class PatientListFragment extends ProgressFragment implements
             @Override
             public void setQuerySubmitted(String q) {
                 App.getServer().cancelPendingRequests(TAG);
-                // isRefreshing = false;
                 mFilterQueryTerm = q;
-                changeState(State.LOADING);
                 loadSearchResults();
             }
         });
     }
 
-    public ExpandablePatientListAdapter getAdapterInstance() {
-        return new ExpandablePatientListAdapter(
-                null, getActivity(), mFilterQueryTerm, mFilter);
+    public PatientListTypedCursorAdapter getAdapterInstance() {
+        return new PatientListTypedCursorAdapter(
+                mAppModel, getActivity(), mCrudEventBusProvider.get());
     }
 
     @Override
@@ -283,13 +268,9 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-        Cursor childCursor = mPatientAdapter.getChild(groupPosition, childPosition);
+        AppPatient patient = (AppPatient)mPatientAdapter.getChild(groupPosition, childPosition);
+        mCallbacks.onItemSelected(patient.uuid, patient.givenName, patient.familyName, patient.id);
 
-        mCallbacks.onItemSelected(
-                childCursor.getString(PatientProjection.COLUMN_UUID),
-                childCursor.getString(PatientProjection.COLUMN_GIVEN_NAME),
-                childCursor.getString(PatientProjection.COLUMN_FAMILY_NAME),
-                childCursor.getString(PatientProjection.COLUMN_ID));
         return true;
     }
 
@@ -305,40 +286,5 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return mFactory.getCursorLoader(mFilter, "");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        // Swap the new cursor in.
-        int id = cursorLoader.getId();
-
-        Log.d(TAG, "onLoadFinished id: " + id);
-        if (id == LOADER_LIST_ID) {
-            mPatientAdapter.setGroupCursor(cursor);
-            changeState(State.LOADED);
-            // stopRefreshing();
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        // This is called when the last Cursor provided to onLoadFinished()
-        // is about to be closed.
-        int id = cursorLoader.getId();
-        if (id != LOADER_LIST_ID) {
-            // child cursor
-            try {
-                mPatientAdapter.setChildrenCursor(id, null);
-            } catch (NullPointerException e) {
-                Log.w(TAG, "Adapter expired, try again on the next query: " + e.getMessage());
-            }
-        } else {
-            mPatientAdapter.setGroupCursor(null);
-        }
     }
 }
