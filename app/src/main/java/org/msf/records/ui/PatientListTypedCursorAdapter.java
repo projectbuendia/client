@@ -60,6 +60,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     /**
      * Creates a {@link org.msf.records.ui.PatientListTypedCursorAdapter}.
+     *
      * @param appModel the data model used to populate adapter contents
      * @param context the context
      * @param eventBus the event bus where filter events will be posted
