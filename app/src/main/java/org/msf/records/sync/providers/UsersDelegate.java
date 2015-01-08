@@ -7,7 +7,6 @@ import android.net.Uri;
 
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.SelectionBuilder;
-import org.msf.records.sync.providers.ProviderDelegate;
 
 /**
  * A {@link ProviderDelegate} that provides read-write access to users.

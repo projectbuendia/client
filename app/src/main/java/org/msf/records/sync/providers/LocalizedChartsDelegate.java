@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.msf.records.sync.ChartProviderContract;
 import org.msf.records.sync.PatientDatabase;
 
 import java.util.List;
@@ -15,14 +14,9 @@ import java.util.List;
  */
 public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase> {
 
-    public static final String NAME = "localized-charts";
-
-    public static final String TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + NAME;
-
     @Override
     public String getType() {
-        return TYPE;
+        return Contracts.LocalizedCharts.GROUP_CONTENT_TYPE;
     }
 
     @Override
@@ -43,47 +37,47 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
         String query = "SELECT obs.encounter_time," +
-                "group_names." + ChartProviderContract.ChartColumns.NAME + " AS group_name," +
-                "chart." + ChartProviderContract.ChartColumns.CONCEPT_UUID + "," +
-                "names." + ChartProviderContract.ChartColumns.NAME + " AS concept_name," +
+                "group_names." + Contracts.ConceptNames.LOCALIZED_NAME + " AS group_name," +
+                "chart." + Contracts.Observations.CONCEPT_UUID + "," +
+                "names." + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name," +
                 // Localized value for concept values
-                "obs." + ChartProviderContract.ChartColumns.VALUE +
-                ",coalesce(value_names." + ChartProviderContract.ChartColumns.NAME + ", obs." + ChartProviderContract.ChartColumns.VALUE + ") " +
+                "obs." + Contracts.Observations.VALUE +
+                ",coalesce(value_names." + Contracts.ConceptNames.LOCALIZED_NAME + ", obs." + Contracts.Observations.VALUE + ") " +
                 "AS localized_value" +
 
                 " FROM " +
                 PatientDatabase.CHARTS_TABLE_NAME + " chart " +
 
                 " INNER JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names " +
-                "ON chart." + ChartProviderContract.ChartColumns.CONCEPT_UUID + "=" +
-                "names." + ChartProviderContract.ChartColumns.CONCEPT_UUID +
+                "ON chart." + Contracts.Charts.CONCEPT_UUID + "=" +
+                "names." + Contracts.Charts.CONCEPT_UUID +
 
                 " INNER JOIN " +
                 PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " group_names " +
-                "ON chart." + ChartProviderContract.ChartColumns.GROUP_UUID + "=" +
-                "group_names." + ChartProviderContract.ChartColumns.CONCEPT_UUID +
+                "ON chart." + Contracts.Charts.GROUP_UUID + "=" +
+                "group_names." + Contracts.Charts.CONCEPT_UUID +
 
                 " LEFT JOIN " +
                 PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs " +
-                "ON chart." + ChartProviderContract.ChartColumns.CONCEPT_UUID + "=" +
-                "obs." + ChartProviderContract.ChartColumns.CONCEPT_UUID + " AND " +
-                "(obs." + ChartProviderContract.ChartColumns.PATIENT_UUID + "=? OR " + // 2nd selection arg
-                "obs." + ChartProviderContract.ChartColumns.PATIENT_UUID + " IS NULL)" +
+                "ON chart." + Contracts.Charts.CONCEPT_UUID + "=" +
+                "obs." + Contracts.Observations.CONCEPT_UUID + " AND " +
+                "(obs." + Contracts.Observations.PATIENT_UUID + "=? OR " + // 2nd selection arg
+                "obs." + Contracts.Observations.PATIENT_UUID + " IS NULL)" +
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
                 // To cope we will do a left join on the value and the name
                 " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names " +
-                "ON obs." + ChartProviderContract.ChartColumns.VALUE + "= " +
-                "value_names." + ChartProviderContract.ChartColumns.CONCEPT_UUID +
-                " AND value_names." + ChartProviderContract.ChartColumns.LOCALE + "=?" + // 1st selection arg
+                "ON obs." + Contracts.Observations.VALUE + "= " +
+                "value_names." + Contracts.Charts.CONCEPT_UUID +
+                " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" + // 1st selection arg
 
 //                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " +
                 " WHERE " +
-                "names." + ChartProviderContract.ChartColumns.LOCALE + "=? AND " + // 3rd selection arg
-                "group_names." + ChartProviderContract.ChartColumns.LOCALE + "=?" + // 4th selection arg
+                "names." + Contracts.ConceptNames.LOCALE + "=? AND " + // 3rd selection arg
+                "group_names." + Contracts.ConceptNames.LOCALE + "=?" + // 4th selection arg
 
-                " ORDER BY chart." + ChartProviderContract.ChartColumns.CHART_ROW + ", obs." + ChartProviderContract.ChartColumns.ENCOUNTER_TIME
+                " ORDER BY chart." + Contracts.Charts.CHART_ROW + ", obs." + Contracts.Observations.ENCOUNTER_TIME
                 ;
 
         return dbHelper.getReadableDatabase()

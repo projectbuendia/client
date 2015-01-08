@@ -23,7 +23,7 @@ import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.utils.Utils;
 
@@ -91,9 +91,9 @@ public class ExpandablePatientListAdapter extends CursorTreeAdapter {
         }
 
         String sortClause =
-                PatientProviderContract.PatientColumns._ID + ","
-                        + PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME + ","
-                        + PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME;
+                Contracts.Patients._ID + ","
+                        + Contracts.Patients.FAMILY_NAME + ","
+                        + Contracts.Patients.GIVEN_NAME;
 
         FilterQueryProvider queryProvider =
                 new FilterQueryProviderFactory(mContext)

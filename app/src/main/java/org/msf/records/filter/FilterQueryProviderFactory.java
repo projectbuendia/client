@@ -7,7 +7,7 @@ import android.support.v4.content.CursorLoader;
 import android.widget.FilterQueryProvider;
 
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 /**
  * FilterQueryProviderFactory constructs a FilterQueryProvider based on a specified filter.
@@ -18,10 +18,10 @@ public class FilterQueryProviderFactory {
      */
     private static final String[] PROJECTION = PatientProjection.getProjectionColumns();
 
-    private Uri mUri = PatientProviderContract.CONTENT_URI;
+    private Uri mUri = Contracts.Patients.CONTENT_URI;
     private String[] mProjection = PROJECTION;
     private String mSortClause =
-            PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP + " desc";
+            Contracts.Patients.ADMISSION_TIMESTAMP + " desc";
 
     private final Context mContext;
 

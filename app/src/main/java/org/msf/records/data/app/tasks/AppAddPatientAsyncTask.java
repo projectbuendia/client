@@ -20,7 +20,7 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
 
@@ -88,7 +88,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
         AppPatient appPatient = AppPatient.fromNet(patient);
         Uri uri = mContentResolver.insert(
-                PatientProviderContract.CONTENT_URI, appPatient.toContentValues());
+                Contracts.Patients.CONTENT_URI, appPatient.toContentValues());
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(

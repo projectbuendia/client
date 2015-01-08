@@ -1,20 +1,22 @@
 package org.msf.records.sync;
 
+import org.msf.records.sync.providers.Contracts;
+
 /**
- * Contains database projections for locations and location names.
- */
+* Contains database projections for locations and location names.
+*/
 public class LocationProjection {
 
     private static final String[] LOCATION_PROJECTION = {
-            LocationProviderContract.LocationColumns.LOCATION_UUID,
-            LocationProviderContract.LocationColumns.PARENT_UUID
+            Contracts.Locations.LOCATION_UUID,
+            Contracts.Locations.PARENT_UUID
     };
 
     private static final String[] LOCATION_NAMES_PROJECTION = {
-            LocationProviderContract.LocationColumns._ID,
-            LocationProviderContract.LocationColumns.LOCATION_UUID,
-            LocationProviderContract.LocationColumns.LOCALE,
-            LocationProviderContract.LocationColumns.NAME
+            Contracts.LocationNames._ID,
+            Contracts.LocationNames.LOCATION_UUID,
+            Contracts.LocationNames.LOCALE,
+            Contracts.LocationNames.LOCALIZED_NAME
     };
 
     public static final int LOCATION_LOCATION_UUID_COLUMN = 0;

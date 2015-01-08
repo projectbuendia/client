@@ -12,7 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 /**
  * An object that represents the data to write to a new patient or the data to update on a patient.
@@ -81,37 +81,37 @@ public class AppPatientDelta {
 
         if (id.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns._ID,
+                    Contracts.Patients._ID,
                     id.get());
         }
         if (givenName.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_GIVEN_NAME,
+                    Contracts.Patients.GIVEN_NAME,
                     givenName.get());
         }
         if (familyName.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_FAMILY_NAME,
+                    Contracts.Patients.FAMILY_NAME,
                     familyName.get());
         }
         if (gender.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_GENDER,
+                    Contracts.Patients.GENDER,
                     gender.get() == Patient.GENDER_MALE ? "M" : "F");
         }
         if (birthdate.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE,
+                    Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
         if (admissionDate.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_ADMISSION_TIMESTAMP,
+                    Contracts.Patients.ADMISSION_TIMESTAMP,
                     getTimestamp(admissionDate.get()));
         }
         if (assignedLocationUuid.isPresent()) {
             contentValues.put(
-                    PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID,
+                    Contracts.Patients.LOCATION_UUID,
                     assignedLocationUuid.get());
         }
         return contentValues;

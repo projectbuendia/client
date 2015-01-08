@@ -9,6 +9,7 @@ import android.util.Log;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
+import org.msf.records.sync.providers.Contracts;
 
 import de.greenrobot.event.EventBus;
 
@@ -38,10 +39,10 @@ public class SyncManager {
         return
                 ContentResolver.isSyncActive(
                         GenericAccountService.getAccount(),
-                        PatientProviderContract.CONTENT_AUTHORITY)
+                        Contracts.CONTENT_AUTHORITY)
                 || ContentResolver.isSyncPending(
                         GenericAccountService.getAccount(),
-                        PatientProviderContract.CONTENT_AUTHORITY);
+                        Contracts.CONTENT_AUTHORITY);
     }
 
     /**

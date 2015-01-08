@@ -20,9 +20,8 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.sync.LocationProjection;
-import org.msf.records.sync.LocationProviderContract;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
@@ -176,7 +175,7 @@ public class AppModel {
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(
-                        LocationProviderContract.LOCALIZED_LOCATIONS_CONTENT_URI,
+                        Contracts.LocalizedLocations.CONTENT_URI,
                         LocationProjection.getLocationProjection(),
                         null,
                         null,
@@ -231,7 +230,7 @@ public class AppModel {
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(
-                        PatientProviderContract.CONTENT_URI,
+                        Contracts.Patients.CONTENT_URI,
                         PatientProjection.getProjectionColumns(),
                         mFilter.getSelectionString(),
                         mFilter.getSelectionArgs(mConstraint),

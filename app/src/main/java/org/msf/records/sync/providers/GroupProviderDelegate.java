@@ -17,14 +17,12 @@ import org.msf.records.sync.SelectionBuilder;
  */
 class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
-    private final String mName;
-    private final String mTableName;
     private final String mType;
+    private final String mTableName;
 
-    public GroupProviderDelegate(String name, String tableName) {
-        mName = name;
+    public GroupProviderDelegate(String type, String tableName) {
+        mType = type;
         mTableName = tableName;
-        mType = ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + mName;
     }
 
     @Override

@@ -15,7 +15,7 @@ import org.msf.records.App;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.RpcToDb;
-import org.msf.records.sync.UserProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 import java.util.HashSet;
 import java.util.List;
@@ -38,12 +38,12 @@ public class UserStore {
         try {
             Log.i(TAG, "Retrieving users from db");
             client = App.getInstance().getContentResolver()
-                            .acquireContentProviderClient(UserProviderContract.USERS_CONTENT_URI);
+                            .acquireContentProviderClient(Contracts.Users.CONTENT_URI);
 
             // Request users from database.
             try {
-                cursor = client.query(UserProviderContract.USERS_CONTENT_URI, null, null, null,
-                            UserProviderContract.UserColumns.FULL_NAME);
+                cursor = client.query(Contracts.Users.CONTENT_URI, null, null, null,
+                        Contracts.Users.FULL_NAME);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error accessing db", e);
             }
@@ -56,8 +56,8 @@ public class UserStore {
             Log.i(TAG, "Found " + cursor.getCount() + " users in db");
 
             // Initiate users from database data and return the result.
-            int fullNameColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.FULL_NAME);
-            int uuidColumn = cursor.getColumnIndex(UserProviderContract.UserColumns.UUID);
+            int fullNameColumn = cursor.getColumnIndex(Contracts.Users.FULL_NAME);
+            int uuidColumn = cursor.getColumnIndex(Contracts.Users.UUID);
             Set<User> result = new HashSet<>();
             while (cursor.moveToNext()) {
                 User user =
@@ -110,7 +110,7 @@ public class UserStore {
         Log.i(TAG, "Updating user db with retrieved users");
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
-                        UserProviderContract.USERS_CONTENT_URI);
+                        Contracts.Users.CONTENT_URI);
         try {
             client.applyBatch(RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
         } catch (RemoteException | OperationApplicationException e) {
@@ -168,12 +168,12 @@ public class UserStore {
         Log.i(TAG, "Updating user db with new user");
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
-                        UserProviderContract.USERS_CONTENT_URI);
+                        Contracts.Users.CONTENT_URI);
         try {
             ContentValues values = new ContentValues();
-            values.put(UserProviderContract.UserColumns.UUID, result.user.getId());
-            values.put(UserProviderContract.UserColumns.FULL_NAME, result.user.getFullName());
-            client.insert(UserProviderContract.USERS_CONTENT_URI, values);
+            values.put(Contracts.Users.UUID, result.user.getId());
+            values.put(Contracts.Users.FULL_NAME, result.user.getFullName());
+            client.insert(Contracts.Users.CONTENT_URI, values);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to update database", e);
         } finally {

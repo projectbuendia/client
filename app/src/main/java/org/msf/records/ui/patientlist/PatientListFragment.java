@@ -32,8 +32,8 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.ExpandablePatientListAdapter;
 import org.msf.records.ui.ProgressFragment;
 
@@ -140,12 +140,12 @@ public class PatientListFragment extends ProgressFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-        mFactory = new FilterQueryProviderFactory(getActivity()).setUri(
-        		PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+        mFactory = new FilterQueryProviderFactory(
+                getActivity()).setUri(Contracts.PatientCounts.CONTENT_URI);
         LocationTree locationTree = LocationTree.singletonInstance;
 		if (locationTree != null) {
             mFactory.setSortClause(LocationTree.singletonInstance.getLocationSortClause(
-		                PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID));
+		                Contracts.Patients.LOCATION_UUID));
 		} else {
 			Log.e(TAG, "Location tree does not exist yet");
 		}

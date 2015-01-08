@@ -1,9 +1,6 @@
 package org.msf.records.sync.providers;
 
-import org.msf.records.sync.LocationProviderContract;
 import org.msf.records.sync.PatientDatabase;
-import org.msf.records.sync.PatientProviderContract;
-import org.msf.records.sync.UserProviderContract;
 
 /**
  * A {@link DelegatingProvider} for MSF record info such as patients and locations.
@@ -21,76 +18,84 @@ public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
 
         // Providers for groups of things (e.g., all charts).
         registry.registerDelegate(
-                "charts",
+                Contracts.Charts.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "chart", PatientDatabase.CHARTS_TABLE_NAME));
+                        Contracts.Charts.GROUP_CONTENT_TYPE,
+                        PatientDatabase.CHARTS_TABLE_NAME));
         registry.registerDelegate(
-                "concepts",
+                Contracts.Concepts.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "concept", PatientDatabase.CONCEPTS_TABLE_NAME));
+                        Contracts.Concepts.GROUP_CONTENT_TYPE,
+                        PatientDatabase.CONCEPTS_TABLE_NAME));
         registry.registerDelegate(
-                "concept-names",
+                Contracts.ConceptNames.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "concept-name", PatientDatabase.CONCEPT_NAMES_TABLE_NAME));
+                        Contracts.ConceptNames.GROUP_CONTENT_TYPE,
+                        PatientDatabase.CONCEPT_NAMES_TABLE_NAME));
         registry.registerDelegate(
-                "locations",
+                Contracts.Locations.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "location", PatientDatabase.LOCATIONS_TABLE_NAME));
+                        Contracts.Locations.GROUP_CONTENT_TYPE,
+                        PatientDatabase.LOCATIONS_TABLE_NAME));
         registry.registerDelegate(
-                "location-names",
+                Contracts.LocationNames.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "location-name", PatientDatabase.LOCATION_NAMES_TABLE_NAME));
+                        Contracts.LocationNames.GROUP_CONTENT_TYPE,
+                        PatientDatabase.LOCATION_NAMES_TABLE_NAME));
         registry.registerDelegate(
-                "observations",
+                Contracts.Observations.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "observation", PatientDatabase.OBSERVATIONS_TABLE_NAME));
+                        Contracts.Observations.GROUP_CONTENT_TYPE,
+                        PatientDatabase.OBSERVATIONS_TABLE_NAME));
         registry.registerDelegate(
-                "patients",
+                Contracts.Patients.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "patient", PatientDatabase.PATIENTS_TABLE_NAME));
+                        Contracts.Patients.GROUP_CONTENT_TYPE,
+                        PatientDatabase.PATIENTS_TABLE_NAME));
         registry.registerDelegate(
-                "users",
+                Contracts.Users.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
-                        "user", PatientDatabase.USERS_TABLE_NAME));
+                        Contracts.Users.GROUP_CONTENT_TYPE,
+                        PatientDatabase.USERS_TABLE_NAME));
 
         // Providers for individual things (e.g., user with a specific ID).
         registry.registerDelegate(
-                "locations/*",
-                new SingleProviderDelegate(
-                        "location",
+                Contracts.Locations.CONTENT_URI.getPath() + "/*",
+                new ItemProviderDelegate(
+                        Contracts.Locations.ITEM_CONTENT_TYPE,
                         PatientDatabase.LOCATIONS_TABLE_NAME,
-                        LocationProviderContract.LocationColumns.LOCATION_UUID));
+                        Contracts.Locations.LOCATION_UUID));
         registry.registerDelegate(
-                "location-names/*",
-                new InsertableSingleProviderDelegate(
-                        "location-name",
+                Contracts.LocationNames.CONTENT_URI.getPath() + "/*",
+                new InsertableItemProviderDelegate(
+                        Contracts.LocationNames.ITEM_CONTENT_TYPE,
                         PatientDatabase.LOCATION_NAMES_TABLE_NAME,
-                        LocationProviderContract.LocationColumns.LOCATION_UUID));
+                        Contracts.Locations.LOCATION_UUID));
         registry.registerDelegate(
-                "patients/*",
-                new SingleProviderDelegate(
-                        "patient",
+                Contracts.Patients.CONTENT_URI.getPath() + "/*",
+                new ItemProviderDelegate(
+                        Contracts.Patients.ITEM_CONTENT_TYPE,
                         PatientDatabase.PATIENTS_TABLE_NAME,
-                        PatientProviderContract.PatientColumns._ID));
+                        Contracts.Patients._ID));
         registry.registerDelegate(
-                "users/*",
-                new SingleProviderDelegate(
-                        "user",
+                Contracts.Users.CONTENT_URI.getPath() + "/*",
+                new ItemProviderDelegate(
+                        Contracts.Users.ITEM_CONTENT_TYPE,
                         PatientDatabase.USERS_TABLE_NAME,
-                        UserProviderContract.UserColumns._ID));
+                        Contracts.Users._ID));
 
         // Custom providers, usually with special logic.
         registry.registerDelegate(
-                "patient-counts",
+                Contracts.PatientCounts.CONTENT_URI.getPath(),
                 new PatientCountsDelegate());
         registry.registerDelegate(
-                "localized-charts/*/*/*",
+                Contracts.LocalizedCharts.CONTENT_URI.getPath() + "/*/*/*",
                 new LocalizedChartsDelegate());
         registry.registerDelegate(
-                "localized-locations/*/*",
+                Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*/*",
                 new LocalizedLocationsDelegate());
         registry.registerDelegate(
-                "most-recent-localized-charts/*/*",
+                Contracts.MostRecentLocalizedCharts.CONTENT_URI.getPath() + "/*/*",
                 new MostRecentLocalizedChartsDelegate());
 
         return registry;

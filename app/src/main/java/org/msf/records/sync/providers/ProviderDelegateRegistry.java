@@ -6,16 +6,12 @@ import android.util.SparseArray;
 
 import net.sqlcipher.database.SQLiteOpenHelper;
 
-import org.msf.records.BuildConfig;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A registry for {@link ProviderDelegate}s.
  */
 class ProviderDelegateRegistry<T extends SQLiteOpenHelper> {
-
-    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.records";
 
     private final UriMatcher mUriMatcher;
     private final AtomicInteger mCodeGenerator;
@@ -35,15 +31,15 @@ class ProviderDelegateRegistry<T extends SQLiteOpenHelper> {
      *                               delegate
      */
     void registerDelegate(String path, ProviderDelegate<T> delegate) {
-        int existingCode =
-                mUriMatcher.match(Uri.parse("content://" + CONTENT_AUTHORITY + "/" + path));
+        int existingCode = mUriMatcher.match(
+                Uri.parse("content://" + Contracts.CONTENT_AUTHORITY + "/" + path));
         if (existingCode != UriMatcher.NO_MATCH) {
             throw new IllegalStateException(
                     "Path '" + path + "' is already registered to be handled by '"
                     + mDelegates.get(existingCode).toString() + "'.");
         }
         int code = mCodeGenerator.getAndIncrement();
-        mUriMatcher.addURI(CONTENT_AUTHORITY, path, code);
+        mUriMatcher.addURI(Contracts.CONTENT_AUTHORITY, path, code);
         mDelegates.put(code, delegate);
     }
 
