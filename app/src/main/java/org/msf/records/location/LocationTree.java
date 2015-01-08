@@ -42,7 +42,7 @@ public final class LocationTree {
     public static final int TENT_DEPTH = 2;
     public static final int BED_DEPTH = 3;
 
-	public final class LocationSubtree implements Comparable<LocationSubtree> {
+    public final class LocationSubtree implements Comparable<LocationSubtree> {
 		private Location mLocation;
 	    private int mPatientCount;
 	    private final TreeMap<String, LocationSubtree> mChildren = new TreeMap<>();

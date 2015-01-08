@@ -58,7 +58,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     // Contains the current subscriber for filtering. If null, no filter operation is occurring.
     private PatientsFetchedEventSubscriber mSubscriber;
 
-
+    /**
+     * Creates a {@link org.msf.records.ui.PatientListTypedCursorAdapter}.
+     * @param appModel the data model used to populate adapter contents
+     * @param context the context
+     * @param eventBus the event bus where filter events will be posted
+     */
     public PatientListTypedCursorAdapter(
             AppModel appModel, Context context, CrudEventBus eventBus) {
         App.getInstance().inject(this);
@@ -79,6 +84,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return mEventBus;
     }
 
+    /**
+     * Applies the given filter and constraint, reloading patient data accordingly. Any previous
+     * filter operation will continue but the results of these operations will be superseded by this
+     * one.
+     * @param filter the {@link org.msf.records.filter.SimpleSelectionFilter} to apply
+     * @param constraint the search term being applied with the filter
+     */
     public void filter(SimpleSelectionFilter filter, String constraint) {
         // Start by canceling any existing filtering operation, to avoid a race condition and
         // IllegalStateException with duplicate CleanupSubscribers.
@@ -173,8 +185,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
                 mLocalizedChartHelper.getMostRecentObservations(patient.uuid);
         if (observationMap != null) {
-            pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID) &&
-                    observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);
+            pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID)
+                    && observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);
             if (observationMap.containsKey(Concept.GENERAL_CONDITION_UUID)) {
                 condition = observationMap.get(Concept.GENERAL_CONDITION_UUID).value;
             }
