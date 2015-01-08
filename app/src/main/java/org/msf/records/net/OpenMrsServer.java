@@ -426,7 +426,9 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void cancelPendingRequests(String logTag) {
-        mConnectionDetails.getVolley().cancelPendingRequests(logTag);
+    public void cancelPendingRequests() {
+        // TODO(dxchen): Implement or deprecate. The way this was implemented before, where a string
+        // was the tag, is not safe. Only the class that initiated a request (and its delegates)
+        // should be able to cancel that request.
     }
 }

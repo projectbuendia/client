@@ -26,8 +26,6 @@ import org.msf.records.App;
  */
 public abstract class ProgressFragment extends Fragment implements  Response.ErrorListener {
 
-    public final String TAG = ((Object) this).getClass().getSimpleName();
-
     public enum State {
         LOADING,
         LOADED,
@@ -62,7 +60,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     @Override
     public void onDestroy() {
         super.onDestroy();
-        App.getServer().cancelPendingRequests(TAG);
+        App.getServer().cancelPendingRequests();
     }
 
     @Override

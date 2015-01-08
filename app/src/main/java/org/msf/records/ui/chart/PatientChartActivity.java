@@ -67,8 +67,6 @@ import javax.inject.Provider;
  */
 public final class PatientChartActivity extends BaseLoggedInActivity {
 
-    private static final String TAG = PatientChartActivity.class.getSimpleName();
-
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
 

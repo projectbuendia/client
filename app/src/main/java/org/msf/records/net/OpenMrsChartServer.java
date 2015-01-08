@@ -24,7 +24,6 @@ import java.util.HashMap;
  */
 public class OpenMrsChartServer {
 
-    private static final String TAG = "OpenMrsChartServer";
     private final OpenMrsConnectionDetails mConnectionDetails;
 
     public OpenMrsChartServer(OpenMrsConnectionDetails connectionDetails) {

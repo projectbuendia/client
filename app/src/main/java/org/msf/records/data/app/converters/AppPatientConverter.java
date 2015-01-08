@@ -15,8 +15,6 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class AppPatientConverter implements AppTypeConverter<AppPatient> {
 
-    private static final String TAG = AppPatientConverter.class.getSimpleName();
-
     @Override
     public AppPatient fromCursor(Cursor cursor) {
         return AppPatient.builder()

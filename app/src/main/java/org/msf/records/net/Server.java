@@ -133,7 +133,7 @@ public interface Server {
                               Response.ErrorListener errorListener);
 
     /**
-     * Cancel all requests associated with the given tag.
+     * Cancel all pending requests.
      */
-    public void cancelPendingRequests(String logTag);
+    public void cancelPendingRequests();
 }

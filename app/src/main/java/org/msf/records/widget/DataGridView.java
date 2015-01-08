@@ -86,8 +86,6 @@ public class DataGridView extends RelativeLayout {
         }
     }
 
-    private static final String TAG = DataGridView.class.getName();
-
     private final Context mContext;
     private final DataGridAdapter mDataGridAdapter;
     private final boolean mHasDoubleWidthColumnHeaders;

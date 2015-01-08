@@ -233,7 +233,7 @@ public class PatientListFragment extends ProgressFragment implements
         ((PatientSearchActivity)getActivity()).setOnSearchListener(new PatientSearchActivity.OnSearchListener() {
             @Override
             public void setQuerySubmitted(String q) {
-                App.getServer().cancelPendingRequests(TAG);
+                App.getServer().cancelPendingRequests();
                 // isRefreshing = false;
                 mFilterQueryTerm = q;
                 changeState(State.LOADING);

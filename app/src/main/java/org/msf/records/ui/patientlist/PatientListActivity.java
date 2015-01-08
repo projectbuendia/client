@@ -21,7 +21,6 @@ import org.odk.collect.android.tasks.DiskSyncTask;
  */
 public class PatientListActivity extends PatientSearchActivity {
 
-    private static final String TAG = PatientListActivity.class.getSimpleName();
     private static final int ODK_ACTIVITY_REQUEST = 1;
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 

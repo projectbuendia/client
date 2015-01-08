@@ -12,8 +12,6 @@ import com.android.volley.toolbox.Volley;
  */
 public class VolleySingleton {
 
-    private static final String TAG = VolleySingleton.class.getSimpleName();
-
     private static VolleySingleton mInstance;
     private final RequestQueue mRequestQueue;
 
@@ -47,11 +45,5 @@ public class VolleySingleton {
      */
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
-    }
-
-    public void cancelPendingRequests(Object tag) {
-        if (mRequestQueue != null) {
-            mRequestQueue.cancelAll(tag);
-        }
     }
 }

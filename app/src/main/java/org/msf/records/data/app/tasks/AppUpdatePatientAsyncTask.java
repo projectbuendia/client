@@ -27,8 +27,6 @@ import java.util.concurrent.ExecutionException;
  */
 public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
 
-    private static final String TAG = AppUpdatePatientAsyncTask.class.getSimpleName();
-
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final AppAsyncTaskFactory mTaskFactory;

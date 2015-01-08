@@ -21,6 +21,7 @@ import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFailedEvent> {
 
-    private static final String TAG = AppAddPatientAsyncTask.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
@@ -77,8 +78,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         }
 
         if (patient.uuid == null) {
-            Log.e(
-                    TAG,
+            LOG.e(
                     "Although the server reported a patient successfully added, it did not return "
                             + "a UUID for that patient. This indicates a server error.");
 
@@ -110,8 +110,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
         // If the UUID was not set, a programming error occurred. Log and post an error event.
         if (mUuid == null) {
-            Log.wtf(
-                    TAG,
+            LOG.e(
                     "Although a patient add ostensibly succeeded, no UUID was set for the newly-"
                             + "added patient. This indicates a programming error.");
 

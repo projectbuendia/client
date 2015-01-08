@@ -18,11 +18,6 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class AppPatient extends AppTypeBase<String> {
 
-    private static final String TAG = AppPatient.class.getSimpleName();
-
-    private static final DateTimeFormatter BIRTHDATE_FORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd");
-
     public static final int GENDER_UNKNOWN = 0;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
