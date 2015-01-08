@@ -185,7 +185,6 @@ final class PatientChartController {
     public void init() {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
-        prodServer();
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
     }
 
@@ -244,51 +243,6 @@ final class PatientChartController {
                 savePatientUuidForRequestCode(mPatientUuid),
                 mPatientModel.getOdkPatient(mPatientUuid),
                 fields);
-    }
-
-    private void prodServer() {
-        // TODO(dxchen): This doesn't properly handle configuration changes. We should pass this
-        // into the fragment arguments.
-        // TODO(nfortescue): get proper caching, and the dictionary working.
-        // TODO: Document what this does!
-        mServer.getChart(mPatientUuid, new Response.Listener<PatientChart>() {
-            @Override
-            public void onResponse(PatientChart response) {
-                Log.i(TAG, response.uuid + " " + Arrays.asList(response.encounters));
-            }
-        },
-        new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Unexpected error on fetching chart", error);
-            }
-        });
-        mServer.getConcepts(
-                new Response.Listener<ConceptList>() {
-                    @Override
-                    public void onResponse(ConceptList response) {
-                        Log.i(TAG, "Response: " + Integer.toString(response.results.length));
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Unexpected error fetching concepts", error);
-                    }
-                });
-        mServer.getChartStructure("ea43f213-66fb-4af6-8a49-70fd6b9ce5d4",
-                new Response.Listener<ChartStructure>() {
-                    @Override
-                    public void onResponse(ChartStructure response) {
-                        Log.i(TAG, "Response: " + Arrays.asList(response.groups).toString());
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Unexpected error fetching concepts", error);
-                    }
-                });
     }
 
     /** Gets the latest observation values and displays them on the UI. */
