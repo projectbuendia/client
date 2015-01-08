@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 
 import org.msf.records.net.model.Concept;
+import org.msf.records.sync.providers.Contracts;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -22,10 +23,7 @@ import javax.annotation.Nullable;
 public class LocalizedChartHelper {
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
-    public static final String KNOWN_PATIENT_UUID = "1802f573-6437-11e4-badf-42010af0dc15";
     public static final String ENGLISH_LOCALE = "en";
-
-    public static final String PULSE_UUID = "";
 
     /**
      * A uuid representing when a clinician fills in "Unknown".
@@ -129,7 +127,7 @@ public class LocalizedChartHelper {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                    ChartProviderContract.makeLocalizedChartUri(
+                    Contracts.LocalizedCharts.getLocalizedChartUri(
                             KNOWN_CHART_UUID, patientUuid, locale),
                     null, null, null, null);
 
@@ -165,7 +163,8 @@ public class LocalizedChartHelper {
 
     /**
      * Get the most recent observations for each concept for a given patient from the local cache,
-     * Ordering will be by concept uuid, and there are not groups or other chart based configurations.
+     * Ordering will be by concept uuid, and there are not groups or other chart-based
+     * configurations.
      * @param locale the locale to return the results in, to match the server String
      */
     public Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
@@ -173,8 +172,12 @@ public class LocalizedChartHelper {
             String locale) {
         Cursor cursor = null;
         try {
-            cursor = mContentResolver.query(ChartProviderContract.makeMostRecentChartUri(
-                    patientUuid, locale), null, null, null, null);
+            cursor = mContentResolver.query(
+                    Contracts.MostRecentLocalizedCharts.getMostRecentChartUri(patientUuid, locale),
+                    null,
+                    null,
+                    null,
+                    null);
 
             Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newLinkedHashMap();
             while (cursor.moveToNext()) {
@@ -207,7 +210,7 @@ public class LocalizedChartHelper {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                    ChartProviderContract.makeEmptyLocalizedChartUri(KNOWN_CHART_UUID, locale),
+                    Contracts.LocalizedCharts.getEmptyLocalizedChartUri(KNOWN_CHART_UUID, locale),
                     null, null, null, null);
 
             List<LocalizedObservation> result = new ArrayList<>();

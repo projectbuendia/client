@@ -1,7 +1,7 @@
 package org.msf.records.filter;
 
 import org.joda.time.LocalDate;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 /**
  * Returns only patients below a specified age in years, i.e.
@@ -16,7 +16,7 @@ final class AgeFilter implements SimpleSelectionFilter {
 
     @Override
     public String getSelectionString() {
-        return PatientProviderContract.PatientColumns.COLUMN_NAME_BIRTHDATE + " > ?";
+        return Contracts.Patients.BIRTHDATE + " > ?";
     }
 
     @Override

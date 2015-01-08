@@ -1,7 +1,7 @@
 package org.msf.records.filter;
 
 import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.
         StringBuilder sb = new StringBuilder()
-        		.append(PatientProviderContract.PatientColumns.COLUMN_NAME_LOCATION_UUID)
+        		.append(Contracts.Patients.LOCATION_UUID)
         		.append(" IN (");
         String prefix = "";
         for (int i = 0; i < allPossibleLocations.size(); i++) {

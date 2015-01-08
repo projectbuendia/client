@@ -1,6 +1,6 @@
 package org.msf.records.filter;
 
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 /**
  * IdFilter is a SimpleSelectionFilter that filters by user-specified id.
@@ -8,7 +8,7 @@ import org.msf.records.sync.PatientProviderContract;
 final class IdFilter implements SimpleSelectionFilter {
     @Override
     public String getSelectionString() {
-        return PatientProviderContract.PatientColumns._ID + " LIKE ?";
+        return Contracts.Patients._ID + " LIKE ?";
     }
 
     @Override

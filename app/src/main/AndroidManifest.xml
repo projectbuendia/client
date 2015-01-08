@@ -45,7 +45,7 @@
 
         <!-- Content Provider for medical records. -->
         <provider
-            android:name="org.msf.records.sync.MsfRecordsProvider"
+            android:name=".sync.providers.MsfRecordsProvider"
             android:authorities="${applicationId}.provider.records"
             android:exported="false" />
 

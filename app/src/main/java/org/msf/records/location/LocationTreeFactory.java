@@ -13,9 +13,8 @@ import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.LocalizedString;
 import org.msf.records.net.model.Location;
 import org.msf.records.sync.LocationProjection;
-import org.msf.records.sync.LocationProviderContract;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.sync.PatientProviderContract;
+import org.msf.records.sync.providers.Contracts;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,17 +45,17 @@ public class LocationTreeFactory {
 
     LocationTreeFactory(Context context) {
         mLocationQueryFactory = new FilterQueryProviderFactory(context);
-        mLocationQueryFactory.setUri(LocationProviderContract.LOCATIONS_CONTENT_URI);
+        mLocationQueryFactory.setUri(Contracts.Locations.CONTENT_URI);
         mLocationQueryFactory.setSortClause(null);
         mLocationQueryFactory.setProjection(LocationProjection.getLocationProjection());
 
         mLocationNamesQueryFactory = new FilterQueryProviderFactory(context);
-        mLocationNamesQueryFactory.setUri(LocationProviderContract.LOCATION_NAMES_CONTENT_URI);
+        mLocationNamesQueryFactory.setUri(Contracts.LocationNames.CONTENT_URI);
         mLocationNamesQueryFactory.setSortClause(null);
         mLocationNamesQueryFactory.setProjection(LocationProjection.getLocationNamesProjection());
 
         mPatientCountsQueryFactory = new FilterQueryProviderFactory(context);
-        mPatientCountsQueryFactory.setUri(PatientProviderContract.CONTENT_URI_TENT_PATIENT_COUNTS);
+        mPatientCountsQueryFactory.setUri(Contracts.PatientCounts.CONTENT_URI);
         mPatientCountsQueryFactory.setSortClause(null);
         mPatientCountsQueryFactory.setProjection(PatientProjection.getPatientCountsProjection());
 
