@@ -42,10 +42,11 @@ public final class LocationTree {
     public static final int TENT_DEPTH = 2;
     public static final int BED_DEPTH = 3;
 
-	public final class LocationSubtree {
+	public final class LocationSubtree implements Comparable<LocationSubtree> {
 		private Location mLocation;
 	    private int mPatientCount;
 	    private final TreeMap<String, LocationSubtree> mChildren = new TreeMap<>();
+        private Comparator<LocationSubtree> mComparator = new SubtreeComparator();
 
 	    public Location getLocation() {
 	    	return mLocation;
@@ -107,6 +108,11 @@ public final class LocationTree {
 
 	        return mLocation.names.get(mLocale);
 	    }
+
+        @Override
+        public int compareTo(LocationSubtree another) {
+            return mComparator.compare(this, another);
+        }
     }
 
     private static final String DEFAULT_LOCALE = "en";
@@ -307,7 +313,7 @@ public final class LocationTree {
 		return result;
     }
 
-    private final class SubtreeComparator implements Comparator<LocationSubtree> {
+    public final class SubtreeComparator implements Comparator<LocationSubtree> {
         /**
          * Compares two objects that may each be Integer or String.  All Integers
          * sort before all Strings; Integers compare according to their numeric

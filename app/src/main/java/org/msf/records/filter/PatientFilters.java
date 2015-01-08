@@ -4,6 +4,7 @@ import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup.FilterType;
 import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.model.Concept;
 
 import de.greenrobot.event.EventBus;
 
@@ -27,7 +28,9 @@ public final class PatientFilters {
                     new NameFilter()).setName("All Patients");
 
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
-//        new FilterGroup(BASE_FILTERS, new ConceptFilter(Concept.PREGNANCY_UUID, Concept.YES_UUID)),
+        // TODO(akalachman): Localize filter names.
+        new FilterGroup(BASE_FILTERS, new ConceptFilter(Concept.PREGNANCY_UUID, Concept.YES_UUID))
+                .setName("Pregnant"),
         new FilterGroup(BASE_FILTERS, new AgeFilter(5)).setName("Children Under 5"),
         new FilterGroup(BASE_FILTERS, new AgeFilter(2)).setName("Children Under 2")
     };
