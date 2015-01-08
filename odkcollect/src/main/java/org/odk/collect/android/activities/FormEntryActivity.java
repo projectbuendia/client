@@ -31,7 +31,6 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -39,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -80,8 +80,10 @@ import org.odk.collect.android.widgets.QuestionWidget;
 import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 
 //import android.view.GestureDetector;
@@ -154,7 +156,7 @@ public class FormEntryActivity
 
 	// Tracks whether we are autosaving
 	public static final String KEY_AUTO_SAVED = "autosaved";
-	
+
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
 //    private static final int MENU_CANCEL = Menu.FIRST;
@@ -205,6 +207,14 @@ public class FormEntryActivity
 
     private String stepMessage = "";
     private ODKView mTargetView;
+
+    private static final double MAX_SCROLL_FRACTION = 0.9; // fraction of mScrollView height
+    private View mBottomPaddingView;
+
+    // ScrollY values that we try to scroll to when paging up and down.
+    private List<Integer> mPageBreaks = new ArrayList<>();
+
+    private enum ScrollDirection {UP, DOWN}
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
@@ -260,23 +270,16 @@ public class FormEntryActivity
         mScrollView = (ScrollView) findViewById(R.id.question_holder_scroller);
 		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
-        mUpButton = (ImageButton) findViewById(R.id.button_up);
-        mUpButton.setOnClickListener(new View.OnClickListener() {
-
+        findViewById(R.id.button_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int height = mScrollView.getMeasuredHeight();
-                mScrollView.smoothScrollBy(0, (int) (-height * .8));
+                scrollPage(ScrollDirection.UP);
             }
         });
-
-        mDownButton = (ImageButton) findViewById(R.id.button_down);
-        mDownButton.setOnClickListener(new View.OnClickListener() {
-
+        findViewById(R.id.button_down).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int height = mScrollView.getMeasuredHeight();
-                mScrollView.smoothScrollBy(0, (int) (height * .8));
+                scrollPage(ScrollDirection.DOWN);
             }
         });
 
@@ -562,15 +565,24 @@ public class FormEntryActivity
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
-        View bottomPaddingView = new View(this);
-        bottomPaddingView.setLayoutParams(
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 60));
+        mBottomPaddingView = new View(this);
+        mBottomPaddingView.setLayoutParams(
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+        mQuestionHolder.addView(mBottomPaddingView);
 
-        mQuestionHolder.addView(bottomPaddingView);
+        // After the form elements have all been sized and laid out, figure out
+        // where (vertically) the up/down buttons should jump to.
+        mScrollView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        paginate();
+                    }
+                }
+        );
 
         if (mTargetView != null) {
             (new Handler(Looper.getMainLooper())).post(new Runnable() {
-
                 @Override
                 public void run() {
                     mScrollView.scrollTo(0, mTargetView.getTop());
@@ -579,8 +591,86 @@ public class FormEntryActivity
         }
     }
 
-    private class QuestionHolderFormVisitor implements FormVisitor {
+    /**
+     * Determines the vertical positions that the up/down buttons will jump to.
+     * These positions are selected so that the height of each page is up to
+     * MAX_SCROLL_FRACTION of the ScrollView's height, and (if possible) each
+     * page break is at the top edge of a group or question.
+     */
+    private void paginate() {
+        // Gather a list of the top edges of the question groups and widgets.
+        List<Integer> edges = new ArrayList<>();
+        for (int i = 0; i < mQuestionHolder.getChildCount(); i++) {
+            View child = mQuestionHolder.getChildAt(i);
+            edges.add(child.getTop());
+            if (child instanceof ODKView) {
+                List<QuestionWidget> widgets = ((ODKView) child).getWidgets();
+                // Skip the first widget: it's better to land above the group title
+                // than between the group title and the first question widget.
+                for (int j = 1; j < widgets.size(); j++) {
+                    edges.add(child.getTop() + widgets.get(j).getTop());
+                }
+            }
+        }
 
+        // Select a subset of these edges to be the page breaks.  Dividing the
+        // form into fixed pages ensures that each question appears at a fixed
+        // vertical position on the screen within its page, which helps keep
+        // the user oriented.
+        int maxPageHeight = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
+        mPageBreaks.clear();
+        mPageBreaks.add(0);
+        int prevBreak = 0;
+        int nextBreak = prevBreak + maxPageHeight;
+        for (int y : edges) {
+            while (y > prevBreak + maxPageHeight) { // next edge won't land on this page
+                mPageBreaks.add(nextBreak);
+                prevBreak = nextBreak;
+                // Usually this initial value of nextBreak will be overwritten
+                // by a value from edges (nextBreak = y below); this value is
+                // just a fallback in case the nearest edge is too far away.
+                nextBreak = prevBreak + maxPageHeight;
+            }
+            if (y > prevBreak) {
+                nextBreak = y;
+            }
+        }
+
+        // Add enough padding so that when the form is scrolled all the way to
+        // the end, the last page break lands at the top of the ScrollView.
+        // This can sometimes be a lot of padding (e.g. most of a page), but
+        // we think the benefit of having a consistent n:1 relationship between
+        // questions and pages is worth the occasionally large wasted space.
+        int bottom = prevBreak + mScrollView.getMeasuredHeight();
+        int paddingHeight = bottom - mBottomPaddingView.getTop();
+        ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
+        if (params.height != paddingHeight) {
+            // To avoid triggering an infinite loop, only invoke
+            // requestLayout() when the height actually changes.
+            params.height = paddingHeight;
+            mBottomPaddingView.requestLayout();
+        }
+    }
+
+    /**
+     * Scrolls the form up or down to the next page break.  To keep the user
+     * oriented, we always go to the nearest page break (even if it is nearby),
+     * giving a consistent set of pages with a consistent layout on each page.
+     */
+    private void scrollPage(ScrollDirection direction) {
+        int inc = direction == ScrollDirection.DOWN ? 1 : -1;
+        int y = mScrollView.getScrollY();
+        int n = mPageBreaks.size();
+        for (int i = (inc > 0) ? 0 : n - 1; i >= 0 && i < n; i += inc) {
+            int deltaY = mPageBreaks.get(i) - y;
+            if (inc * deltaY > 0) {
+                mScrollView.smoothScrollTo(0, y + deltaY);
+                break;
+            }
+        }
+    }
+
+    private class QuestionHolderFormVisitor implements FormVisitor {
         private final PrepopulatableFields mFields;
 
         public QuestionHolderFormVisitor(PrepopulatableFields fields) {
