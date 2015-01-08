@@ -92,7 +92,7 @@ public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
                 Contracts.LocalizedCharts.CONTENT_URI.getPath() + "/*/*/*",
                 new LocalizedChartsDelegate());
         registry.registerDelegate(
-                Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*/*",
+                Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*",
                 new LocalizedLocationsDelegate());
         registry.registerDelegate(
                 Contracts.MostRecentLocalizedCharts.CONTENT_URI.getPath() + "/*/*",

@@ -390,6 +390,15 @@ public class Contracts {
         public static final String ITEM_CONTENT_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-location";
 
+        /**
+         * Returns the content URL for the localized locations for a given locale.
+         */
+        public static Uri getUri(String locale) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(locale)
+                    .build();
+        }
+
         private LocalizedLocations() {}
     }
 
