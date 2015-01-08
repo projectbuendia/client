@@ -1,7 +1,6 @@
 package org.msf.records.sync.providers;
 
 import org.msf.records.sync.PatientDatabase;
-import org.msf.records.sync.RawQueryManager;
 
 /**
  * A {@link DelegatingProvider} for MSF record info such as patients and locations.
@@ -15,8 +14,6 @@ public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
 
     @Override
     protected ProviderDelegateRegistry<PatientDatabase> getRegistry() {
-        RawQueryManager rawQueryManager = new RawQueryManager(getContext());
-
         ProviderDelegateRegistry<PatientDatabase> registry = new ProviderDelegateRegistry<>();
 
         // Providers for groups of things (e.g., all charts).
@@ -95,8 +92,8 @@ public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
                 Contracts.LocalizedCharts.CONTENT_URI.getPath() + "/*/*/*",
                 new LocalizedChartsDelegate());
         registry.registerDelegate(
-                Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*/*",
-                new LocalizedLocationsDelegate(rawQueryManager));
+                Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*",
+                new LocalizedLocationsDelegate());
         registry.registerDelegate(
                 Contracts.MostRecentLocalizedCharts.CONTENT_URI.getPath() + "/*/*",
                 new MostRecentLocalizedChartsDelegate());

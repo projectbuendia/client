@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import org.msf.records.sync.PatientDatabase;
-import org.msf.records.sync.RawQueryManager;
 
 import java.util.List;
 
@@ -15,11 +14,31 @@ import java.util.List;
  */
 public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatabase> {
 
-    private final RawQueryManager mRawQueryManager;
-
-    public LocalizedLocationsDelegate(RawQueryManager rawQueryManager) {
-        mRawQueryManager = rawQueryManager;
-    }
+    /**
+     * Query that fetches localized location information for a given locale.
+     *
+     * <p>Parameters:
+     * <ul>
+     *     <li>string, the locale in which the location information should be returned</li>
+     * </ul>
+     *
+     * <p>Result Columns:
+     * <ul>
+     *     <li>string location_uuid, the UUID of a location</li>
+     *     <li>string parent_uuid, the UUID of the location's parent</li>
+     *     <li>string name, the localized name of the location</li>
+     * </ul>
+     */
+    private static final String QUERY = ""
+            + "SELECT\n"
+            + "  locations.location_uuid as location_uuid,\n"
+            + "  locations.parent_uuid as parent_uuid,\n"
+            + "  location_names.name as name\n"
+            + "FROM locations\n"
+            + "  INNER JOIN location_names\n"
+            + "    ON locations.location_uuid = location_names.location_uuid\n"
+            + "WHERE\n"
+            + "  location_names.locale = ?\n";
 
     @Override
     public String getType() {
@@ -37,9 +56,7 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
         }
 
         String locale = pathSegments.get(1);
-        String query = mRawQueryManager.getRawQuery(RawQueryManager.Name.LOCALIZED_LOCATIONS);
-
-        return dbHelper.getReadableDatabase().rawQuery(query, new String[] { locale });
+        return dbHelper.getReadableDatabase().rawQuery(QUERY, new String[] { locale });
     }
 
     @Override

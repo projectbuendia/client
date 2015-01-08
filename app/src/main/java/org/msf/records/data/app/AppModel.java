@@ -50,7 +50,7 @@ public class AppModel {
     }
 
     /**
-     * Asynchronously fetches all locations as a tree, posting a
+     * Asynchronously fetches all locations as a tree, posting an
      * {@link AppLocationTreeFetchedEvent} on the specified event bus when complete.
      */
     public void fetchLocationTree(CrudEventBus bus, String locale) {

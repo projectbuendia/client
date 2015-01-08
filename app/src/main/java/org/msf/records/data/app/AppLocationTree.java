@@ -19,6 +19,11 @@ public class AppLocationTree {
 
     private static final String TAG = AppLocationTree.class.getSimpleName();
 
+    public static final int ABSOLUTE_DEPTH_ROOT = 0;
+    public static final int ABSOLUTE_DEPTH_ZONE = 1;
+    public static final int ABSOLUTE_DEPTH_TENT = 2;
+    public static final int ABSOLUTE_DEPTH_BED = 3;
+
     /**
      * Creates a {@link AppLocationTree} from a {@link TypedCursor} of {@link AppLocation}s.
      *
@@ -32,8 +37,8 @@ public class AppLocationTree {
         AppLocation root = null;
         Map<String, AppLocation> uuidsToLocations = new HashMap<>();
         Map<String, AppLocation> uuidsToParents = new HashMap<>();
-        ImmutableSetMultimap.Builder<String, AppLocation> uuidsToChildrenBuilder
-                = ImmutableSetMultimap.builder();
+        ImmutableSetMultimap.Builder<String, AppLocation> uuidsToChildrenBuilder =
+                ImmutableSetMultimap.builder();
 
         try {
             // First, create mappings from location UUIDs to the locations themselves and to their
@@ -113,13 +118,53 @@ public class AppLocationTree {
         return mUuidsToParents.get(location.uuid);
     }
 
-    @Nullable
     public ImmutableSet<AppLocation> getChildren(AppLocation location) {
-        return mUuidsToChildren.get(location.uuid);
+        ImmutableSet<AppLocation> children = mUuidsToChildren.get(location.uuid);
+        return children == null ? ImmutableSet.<AppLocation>of() : children;
+    }
+
+    /**
+     * Returns the descendants of the root location at the specified absolute depth.
+     *
+     * <p>The named values {@link #ABSOLUTE_DEPTH_ROOT}, {@link #ABSOLUTE_DEPTH_ZONE},
+     * {@link #ABSOLUTE_DEPTH_TENT}, and {@link #ABSOLUTE_DEPTH_BED} can be used for the
+     * {@code level} parameter.
+     */
+    public ImmutableSet<AppLocation> getDescendantsAtDepth(int absoluteDepth) {
+        return getDescendantsAtDepth(mRoot, absoluteDepth);
+    }
+
+    /**
+     * Returns the descendants of the specified location at the specified depth relative to that
+     * location.
+     */
+    public ImmutableSet<AppLocation> getDescendantsAtDepth(
+            AppLocation location, int relativeDepth) {
+        if (relativeDepth == 0) {
+            return ImmutableSet.of(location);
+        }
+
+        ImmutableSet.Builder<AppLocation> descendants = ImmutableSet.builder();
+        for (AppLocation child : getChildren(location)) {
+            descendants.addAll(getDescendantsAtDepth(child, relativeDepth - 1));
+        }
+
+        return descendants.build();
     }
 
     @Nullable
     public AppLocation findByUuid(String uuid) {
         return mUuidsToLocations.get(uuid);
+    }
+
+    /**
+     * Returns the total number of patients in this location and its descendant locations.
+     */
+    public int getTotalPatientCount(AppLocation location) {
+        int count = location.patientCount;
+        for (AppLocation child : getChildren(location)) {
+            count += getTotalPatientCount(child);
+        }
+        return count;
     }
 }

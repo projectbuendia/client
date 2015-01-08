@@ -36,9 +36,11 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 		// unregistered its event handler.
 		mFakeEventBus = new FakeEventBus();
 		mController = new TentSelectionController(
-				mMockLocationManager,
-                null, mCrudEventBusProvider.get(), mMockUi,
-				mFakeEventBus);
+                mMockLocationManager,
+                null,
+                null,
+                mMockUi,
+                mFakeEventBus);
 	}
 
 	public void testInit_RequestsLoadLocations() {

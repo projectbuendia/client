@@ -120,6 +120,8 @@ final class TentSelectionController {
 		if (DEBUG) {
 			Log.d(TAG, "Controller suspended.");
 		}
+
+        mCrudEventBus.unregister(mEventBusSubscriber);
 		mEventBus.unregister(mEventBusSubscriber);
 	}
 
@@ -156,6 +158,12 @@ final class TentSelectionController {
 	        fragmentUi.setDischargedPatientCount(mDischargedZone == null ? 0 : mDischargedZone.getPatientCount());
 	    	fragmentUi.setTriagePatientCount(mTriageZone == null ? 0 : mTriageZone.getPatientCount());
 		}
+        if (mAppLocationTree != null) {
+            mAppLocationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT);
+            mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot());
+            mAppLocationTree.getTotalPatientCount(mAppTriageZone);
+            mAppLocationTree.getTotalPatientCount(mAppDischargedZone);
+        }
 	}
 
 
@@ -180,7 +188,9 @@ final class TentSelectionController {
                 }
             }
 
-            // TODO(dxchen): Switch fragment population to use the new trees.
+            for (TentFragmentUi fragmentUi : mFragmentUis) {
+                populateFragmentUi(fragmentUi);
+            }
         }
 
 	    public void onEventMainThread(LocationsLoadFailedEvent event) {
