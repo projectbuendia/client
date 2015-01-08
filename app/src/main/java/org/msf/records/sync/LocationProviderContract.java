@@ -12,31 +12,13 @@ public class LocationProviderContract {
     /**
      * Collection of static Strings so should not be instantiated.
      */
-    private LocationProviderContract(){
-    }
-
-    /**
-     * MIME type for lists of locations
-     */
-    public static final String LOCATION_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.location";
-
-    /**
-     * MIME type for lists of location names.
-     */
-    public static final String LOCATION_NAME_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.locationname";
+    private LocationProviderContract() {}
 
     /**
      * Base URI. (content://org.msf.records)
      */
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" +
             PatientProviderContract.CONTENT_AUTHORITY);
-
-    /**
-     * Path component for a locations subtree rooted at a specific location.
-     */
-    static final String PATH_SUBLOCATIONS = "sublocations";
 
     /**
      * Path component for the locations table.
@@ -46,12 +28,12 @@ public class LocationProviderContract {
     /**
      * Path component for localized locations.
      */
-    static final String PATH_LOCALIZED_LOCATIONS = "localizedlocations";
+    static final String PATH_LOCALIZED_LOCATIONS = "localized-locations";
 
     /**
      * Path component for the location names table.
      */
-    static final String PATH_LOCATION_NAMES = "location_names";
+    static final String PATH_LOCATION_NAMES = "location-names";
 
     public static final Uri LOCATION_NAMES_CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION_NAMES).build();

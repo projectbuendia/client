@@ -22,10 +22,7 @@ import javax.annotation.Nullable;
 public class LocalizedChartHelper {
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
-    public static final String KNOWN_PATIENT_UUID = "1802f573-6437-11e4-badf-42010af0dc15";
     public static final String ENGLISH_LOCALE = "en";
-
-    public static final String PULSE_UUID = "";
 
     /**
      * A uuid representing when a clinician fills in "Unknown".

@@ -13,44 +13,13 @@ public class ChartProviderContract {
     /**
      * Collection of static Strings so should not be instantiated.
      */
-    private ChartProviderContract(){
-    }
-
-    /**
-     * MIME type for lists of observations.
-     */
-    public static final String OBSERVATION_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.observation";
-
-    /**
-     * MIME type for lists of concept names.
-     */
-    public static final String CONCEPT_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.concept";
-
-    /**
-     * MIME type for lists of concept names.
-     */
-    public static final String CONCEPT_NAME_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.conceptname";
-
-    /**
-     * MIME type for lists of concept names.
-     */
-    public static final String CHART_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.chart";
-
-    /**
-     * MIME type for lists of localized observations.
-     */
-    public static final String LOCALIZED_OBSERVATION_CONTENT_TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.records.observation.localized";
+    private ChartProviderContract() {}
 
     /**
      * Base URI. (content://org.msf.records)
      */
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" +
-            PatientProviderContract.CONTENT_AUTHORITY);
+    public static final Uri BASE_CONTENT_URI =
+            Uri.parse("content://" + PatientProviderContract.CONTENT_AUTHORITY);
 
     /**
      * Path component for the concepts table.
@@ -59,7 +28,7 @@ public class ChartProviderContract {
     /**
      * Path component for the concepts table.
      */
-    static final String PATH_CONCEPT_NAMES = "concept_names";
+    static final String PATH_CONCEPT_NAMES = "concept-names";
     /**
      * Path component for the concepts table.
      */
@@ -78,22 +47,7 @@ public class ChartProviderContract {
     public static final Uri CHART_CONTENT_URI =
             BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHARTS).build();
 
-    private static final String LOCALIZED_CHART_PREFIX = "localizedchart";
-
-    /**
-     * A path segment for a special URI that will be used most often in the user interface.
-     * Get data for a given patient in a given language for a given chart.
-     *
-     * content://org.msf.records/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
-     */
-    static final String PATH_LOCALIZED_CHART = LOCALIZED_CHART_PREFIX + "/*/*/*";
-
-    /**
-     * A path segment for a special URI that will give an empty chart for a given local.
-     *
-     * content://org.msf.records/localizedchart/{chart_uuid}/{locale}
-     */
-    static final String PATH_EMPTY_LOCALIZED_CHART = LOCALIZED_CHART_PREFIX + "/*/*";
+    private static final String LOCALIZED_CHARTS_PREFIX = "localized-charts";
 
     /**
      * Make a special URI that will be used most often in the user interface.
@@ -102,7 +56,7 @@ public class ChartProviderContract {
      * content://org.msf.records/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
      */
     public static Uri makeLocalizedChartUri(String chartUuid, String patientUuid, String locale) {
-        return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHART_PREFIX)
+        return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHARTS_PREFIX)
                 .appendPath(chartUuid)
                 .appendPath(locale)
                 .appendPath(patientUuid)
@@ -116,20 +70,13 @@ public class ChartProviderContract {
      * content://org.msf.records/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
      */
     public static Uri makeEmptyLocalizedChartUri(String chartUuid, String locale) {
-        return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHART_PREFIX)
+        return BASE_CONTENT_URI.buildUpon().appendPath(LOCALIZED_CHARTS_PREFIX)
                 .appendPath(chartUuid)
                 .appendPath(locale)
                 .build();
     }
 
-    private static final String MOST_RECENT_CHART_PREFIX = "mostrecent";
-    /**
-     * A path segment for a special URI that will be used most often in the user interface.
-     * Get all the most recent data for a given patient in a given language.
-     *
-     * content://org.msf.records/mostrecent/{patient_uuid}/{locale}
-     */
-    static final String PATH_MOST_RECENT_CHART = MOST_RECENT_CHART_PREFIX + "/*/*";
+    private static final String MOST_RECENT_CHARTS_PREFIX = "most-recent-localized-charts";
 
     /**
      * Make a special URI that will be used most often in the user interface.
@@ -138,7 +85,7 @@ public class ChartProviderContract {
      * content://org.msf.records/localizedchart/{chart_uuid}/{patient_uuid}/{locale}
      */
     public static Uri makeMostRecentChartUri(String patientUuid, String locale) {
-        return BASE_CONTENT_URI.buildUpon().appendPath(MOST_RECENT_CHART_PREFIX)
+        return BASE_CONTENT_URI.buildUpon().appendPath(MOST_RECENT_CHARTS_PREFIX)
                 .appendPath(patientUuid)
                 .appendPath(locale)
                 .build();
