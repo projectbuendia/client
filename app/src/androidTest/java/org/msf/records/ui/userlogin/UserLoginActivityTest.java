@@ -27,6 +27,7 @@ public class UserLoginActivityTest extends
         getActivity();
     }
 
+    /** Adds a new user, logs in, and logs out. */
     public void testAddUser() {
         String id = "" + new Date().getTime() % 1000;
         String username = "user" + id;
