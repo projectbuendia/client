@@ -82,7 +82,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // TODO(dxchen): Refactor.
     private boolean mIsFetchingXform = false;
 
-    @Inject AppModel mModel;
+    @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
@@ -147,7 +147,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         };
 
         mController = new PatientChartController(
-                mModel,
+                mAppModel,
                 new OpenMrsChartServer(App.getConnectionDetails()),
                 new EventBusWrapper(mEventBus),
                 mCrudEventBusProvider.get(),

@@ -19,6 +19,9 @@ import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.SyncManager;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -42,15 +45,16 @@ public class LocationManager {
     private final EventBus mEventBus;
     private final Context mContext;
     private final SyncManager mSyncManager;
+    private Set<CrudEventBus> mSubscribedCrudEventBus = new HashSet<>();
     private final CrudEventBusSubscriber mCrudEventBusSubscriber = new CrudEventBusSubscriber();
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
 
     @Nullable private LocationTree mLocationTree;
 
     public LocationManager(EventBus eventBus, Context context, SyncManager syncManager) {
-    	mEventBus = checkNotNull(eventBus);
-    	mContext = checkNotNull(context);
-    	mSyncManager = checkNotNull(syncManager);
+        mEventBus = checkNotNull(eventBus);
+        mContext = checkNotNull(context);
+        mSyncManager = checkNotNull(syncManager);
     }
 
     public void init() {
@@ -58,7 +62,10 @@ public class LocationManager {
     }
 
     public void subscribe(CrudEventBus eventBus) {
-        eventBus.register(mCrudEventBusSubscriber);
+        if (!mSubscribedCrudEventBus.contains(eventBus)) {
+            eventBus.register(mCrudEventBusSubscriber);
+            mSubscribedCrudEventBus.add(eventBus);
+        }
     }
 
     /**
@@ -72,16 +79,16 @@ public class LocationManager {
      */
     public void loadLocations() {
         if (mLocationTree != null) {
-        	if (DEBUG) {
-        		Log.d(TAG, "Location tree already in memory");
-        	}
-        	// Already loaded.
-        	mEventBus.post(new LocationsLoadedEvent(mLocationTree));
+            if (DEBUG) {
+                Log.d(TAG, "Location tree already in memory");
+            }
+            // Already loaded.
+            mEventBus.post(new LocationsLoadedEvent(mLocationTree));
         } else {
-        	if (DEBUG) {
-        		Log.d(TAG, "Location tree not in memory. Attempting to load from cache.");
-        	}
-        	// Need to load from disk cache, or possible from the network.
+            if (DEBUG) {
+                Log.d(TAG, "Location tree not in memory. Attempting to load from cache.");
+            }
+            // Need to load from disk cache, or possible from the network.
             new LoadLocationsTask().execute();
         }
     }
@@ -150,53 +157,53 @@ public class LocationManager {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventBusSubscriber {
 
-	    public void onEventMainThread(SyncSucceededEvent event) {
-	    	new LoadLocationsTask().execute();
-	    }
+        public void onEventMainThread(SyncSucceededEvent event) {
+            new LoadLocationsTask().execute();
+        }
 
-	    public void onEventMainThread(SyncFailedEvent event) {
-	        Log.e(TAG, "Failed to retrieve location data from server");
-	        mEventBus.post(
+        public void onEventMainThread(SyncFailedEvent event) {
+            Log.e(TAG, "Failed to retrieve location data from server");
+            mEventBus.post(
                     new LocationsLoadFailedEvent(LocationsLoadFailedEvent.REASON_SERVER_ERROR));
-	    }
+        }
     }
 
     /** Loads locations from disk cache. If not found, triggers loading from network. */
     private final class LoadLocationsTask extends AsyncTask<Void, Void, LocationTree> {
         @Override
         protected LocationTree doInBackground(Void... voids) {
-        	// Note: It's not possible to construct a CursorLoader on a background thread
-        	// without calling this.
-        	// TODO(rjlothian): Investigate and see if we can avoid this.
-        	if (Looper.myLooper() == null) {
-        		Looper.prepare();
-        	}
+            // Note: It's not possible to construct a CursorLoader on a background thread
+            // without calling this.
+            // TODO(rjlothian): Investigate and see if we can avoid this.
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
 
-        	LocationTree loadedFromDiskCache = new LocationTreeFactory(mContext).build();
-        	if (loadedFromDiskCache != null) {
-        		if (DEBUG) {
-            		Log.d(TAG, "Location tree successfully loaded from cache.");
-            	}
-        		return loadedFromDiskCache;
-        	}
-        	if (DEBUG) {
-        		Log.d(TAG, "Location tree not in cache. Attempting to load from network.");
-        	}
+            LocationTree loadedFromDiskCache = new LocationTreeFactory(mContext).build();
+            if (loadedFromDiskCache != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Location tree successfully loaded from cache.");
+                }
+                return loadedFromDiskCache;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Location tree not in cache. Attempting to load from network.");
+            }
             if (!mSyncManager.isSyncing()) {
                 mSyncManager.forceSync();
             } else {
-            	Log.d(TAG, "Already syncing");
+                Log.d(TAG, "Already syncing");
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(LocationTree result) {
-        	if (result != null) {
+            if (result != null) {
                 mLocationTree = result;
                 LocationTree.singletonInstance = result;
                 mEventBus.post(new LocationsLoadedEvent(result));
-        	}
+            }
         }
     }
 }

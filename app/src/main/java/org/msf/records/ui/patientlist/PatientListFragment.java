@@ -10,7 +10,9 @@ import android.widget.ListView;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.location.LocationManager;
@@ -19,6 +21,7 @@ import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
+import org.msf.records.ui.tentselection.TentSelectionActivity;
 
 import javax.inject.Inject;
 
@@ -35,6 +38,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     private PatientSearchController mController;
     private PatientListTypedCursorAdapter mPatientAdapter;
+    private FragmentUi mFragmentUi;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -61,7 +65,7 @@ public class PatientListFragment extends ProgressFragment implements
      * fragment (e.g. upon screen orientation changes).
      */
     public PatientListFragment() {
-
+        mFragmentUi = new FragmentUi();
     }
 
     @Override
@@ -75,7 +79,8 @@ public class PatientListFragment extends ProgressFragment implements
     public void onResume() {
         super.onResume();
 
-        changeState(State.LOADING);
+        // TODO(akalachman): Deal with this.
+        // changeState(State.LOADING);
         EventBus.getDefault().register(this);
         mLocationManager.loadLocations();
     }
@@ -91,6 +96,7 @@ public class PatientListFragment extends ProgressFragment implements
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         mController = ((PatientSearchActivity) getActivity()).getSearchController();
+        mController.attachFragmentUi(mFragmentUi);
     }
 
     @Override
@@ -133,13 +139,6 @@ public class PatientListFragment extends ProgressFragment implements
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
-
-        ((PatientSearchActivity)getActivity()).setOnSearchListener(new PatientSearchActivity.OnSearchListener() {
-            @Override
-            public void setQuerySubmitted(String q) {
-                mController.onQuerySubmitted(q);
-            }
-        });
     }
 
     public PatientListTypedCursorAdapter getAdapterInstance() {
@@ -192,5 +191,38 @@ public class PatientListFragment extends ProgressFragment implements
         }
 
         mActivatedPosition = position;
+    }
+
+    @Override
+    public void onDestroyView() {
+        mController.detachFragmentUi(mFragmentUi);
+        super.onDestroyView();
+    }
+
+    private class FragmentUi implements PatientSearchController.FragmentUi {
+        @Override
+        public void notifyDataSetChanged() {
+            mPatientAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void setLocations(AppLocationTree locationTree) {
+            // TODO(akalachman): Implement.
+        }
+
+        @Override
+        public void setPatients(TypedCursor<AppPatient> patients) {
+            mPatientAdapter.setPatients(patients);
+        }
+
+        @Override
+        public void showSpinner(boolean show) {
+            changeState(show ? State.LOADING : State.LOADED);
+        }
+
+        @Override
+        public void showRefreshIndicator(boolean show) {
+            // TODO(akalachman): Implement.
+        }
     }
 }

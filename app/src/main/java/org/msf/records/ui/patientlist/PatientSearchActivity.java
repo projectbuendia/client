@@ -42,7 +42,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
-    private OnSearchListener mSearchListener;
     private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
 
     // TODO(akalachman): Populate properly.
@@ -50,10 +49,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     public PatientSearchController getSearchController() {
         return mSearchController;
-    }
-
-    public SearchView getSearchView() {
-        return mSearchView;
     }
 
     @Override
@@ -81,14 +76,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
     }
 
-    public interface OnSearchListener {
-        void setQuerySubmitted(String q);
-    }
-
-    public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListener = onSearchListener;
-    }
-
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
@@ -114,7 +101,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
                 InputMethodManager mgr = (InputMethodManager) getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
@@ -123,8 +109,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (mSearchListener != null)
-                    mSearchListener.setQuerySubmitted(newText);
+                mSearchController.onQuerySubmitted(newText);
                 return true;
             }
         });
@@ -194,31 +179,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
                     PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
             detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
             startActivity(detailIntent);
-        }
-
-        @Override
-        public void notifyDataSetChanged() {
-            // TODO(akalachman): Implement.
-        }
-
-        @Override
-        public void setLocations(AppLocationTree locationTree) {
-            // TODO(akalachman): Implement.
-        }
-
-        @Override
-        public void setPatients(TypedCursor<AppPatient> patients) {
-            // TODO(akalachman): Implement.
-        }
-
-        @Override
-        public void showSpinner(boolean show) {
-            // TODO(akalachman): Implement.
-        }
-
-        @Override
-        public void showRefreshIndicator(boolean show) {
-            // TODO(akalachman): Implement.
         }
 
         @Override

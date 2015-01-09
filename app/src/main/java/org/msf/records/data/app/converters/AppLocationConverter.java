@@ -21,7 +21,8 @@ public class AppLocationConverter implements AppTypeConverter<AppLocation> {
         return new AppLocation(
                 cursor.getString(LocationProjection.LOCATION_LOCATION_UUID_COLUMN),
                 cursor.getString(LocationProjection.LOCATION_PARENT_UUID_COLUMN),
-                "name"
+                // TODO(dxchen): Get rid of this magic number.
+                cursor.getString(2)
         );
     }
 }
