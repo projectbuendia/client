@@ -3,14 +3,10 @@ package org.msf.records.ui.patientlist;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -23,8 +19,8 @@ import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.LocationUuidFilter;
+import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
@@ -33,6 +29,10 @@ import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
+import org.msf.records.utils.Logger;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 import de.greenrobot.event.EventBus;
 
@@ -46,7 +46,7 @@ public class PatientListFragment extends ProgressFragment implements
         ExpandableListView.OnChildClickListener,
         SwipeRefreshLayout.OnRefreshListener {
 
-    private static final String TAG = PatientListFragment.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -151,7 +151,7 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onRefresh() {
         if(!isRefreshing){
-            Log.d(TAG, "onRefresh");
+            LOG.d("onRefresh");
 
             //triggers app wide data refresh
             mSyncManager.forceSync();
@@ -219,7 +219,7 @@ public class PatientListFragment extends ProgressFragment implements
         ((PatientSearchActivity)getActivity()).setOnSearchListener(new PatientSearchActivity.OnSearchListener() {
             @Override
             public void setQuerySubmitted(String q) {
-                App.getServer().cancelPendingRequests(TAG);
+                App.getServer().cancelPendingRequests();
                 mFilterQueryTerm = q;
                 loadSearchResults();
             }

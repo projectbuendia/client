@@ -7,4 +7,7 @@
     <dimen name="chart_grid_cell_textview_width">40dp</dimen>
     <dimen name="chart_grid_column_header_width">144dp</dimen>
 
+    <dimen name="action_bar_height">100dp</dimen>
+    <dimen name="action_bar_height_and_a_half">150dp</dimen>
+
 </resources>

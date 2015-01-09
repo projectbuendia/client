@@ -20,6 +20,7 @@ import org.msf.records.R;
 import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
+import org.msf.records.utils.Logger;
 import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
  */
 final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
-    private static final String TAG = "LocalizedChartDataGridAdapter";
+    private static final Logger LOG = Logger.create();
 
     private static final String EMPTY_STRING = "";
     private static final View.OnClickListener notesOnClickListener =
@@ -264,7 +265,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                             backgroundResource = R.drawable.chart_cell_bad;
                         }
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Temperature format was invalid", e);
+                        LOG.w(e, "Temperature format was invalid");
                     }
                 }
                 break;

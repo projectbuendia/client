@@ -6,6 +6,8 @@ import android.util.Log;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 
+import org.msf.records.utils.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +19,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class AppLocationTree {
 
-    private static final String TAG = AppLocationTree.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     private static final AppLocationTree EMPTY = new AppLocationTree(
             null,
@@ -52,8 +54,7 @@ public class AppLocationTree {
             for (AppLocation location : cursor) {
                 if (location.parentUuid == null) {
                     if (root != null) {
-                        Log.w(
-                                TAG,
+                        LOG.w(
                                 "Creating location tree with multiple root nodes. Both location '"
                                         + root.name + "' (UUID '" + root.uuid + "') and location '"
                                         + location.name + "' (UUID '" + location.uuid + "') have "
@@ -70,9 +71,7 @@ public class AppLocationTree {
             }
 
             if (root == null) {
-                Log.w(
-                        TAG,
-                        "Creating a location tree with no root node. This tree will have no data.");
+                LOG.w("Creating a location tree with no root node. This tree will have no data.");
 
                 return AppLocationTree.EMPTY;
             }

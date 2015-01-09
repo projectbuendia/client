@@ -13,6 +13,7 @@ import com.android.volley.VolleyError;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
+import org.msf.records.utils.Logger;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
 import org.odk.collect.android.tasks.DiskSyncTask;
@@ -33,7 +34,7 @@ import java.io.IOException;
  */
 public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Void> {
 
-    private static final String TAG = "OdkXformSyncTask";
+    private static final Logger LOG = Logger.create();
 
     @Nullable
     private final FormWrittenListener formWrittenListener;
@@ -72,12 +73,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     isUpdate = true;
 
                     if (isNew) {
-                        Log.i(TAG, "Form " + formInfo.uuid + " requires an update." +
+                        LOG.i("Form " + formInfo.uuid + " requires an update." +
                                 " (Local creation date: " + existingTimestamp +
                                 ", (Latest version: " + formInfo.dateChanged + ")");
                     }
                 } else {
-                    Log.i(TAG, "Form " + formInfo.uuid + " not found in database.");
+                    LOG.i("Form " + formInfo.uuid + " not found in database.");
                     isNew = true;
                     isUpdate = false;
                 }
@@ -88,20 +89,20 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }
 
             if (!isNew) {
-                Log.i(TAG, "Using form " + formInfo.uuid + " from local cache.");
+                LOG.i("Using form " + formInfo.uuid + " from local cache.");
                 if (formWrittenListener != null) {
                     formWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
                 continue;
             }
 
-            Log.i(TAG, "fetching " + formInfo.uuid);
+            LOG.i("fetching " + formInfo.uuid);
             // Doesn't exist, so insert it
             // Fetch the file from OpenMRS
             openMrsXformsConnection.getXform(formInfo.uuid, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    Log.i(TAG, "adding form to db " + response);
+                    LOG.i("adding form to db " + response);
                     new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid, isUpdate)
                             .execute(new FormToWrite(response, proposedPath));
                 }
@@ -109,7 +110,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     // TODO(nfortescue): design error handling properly
-                    Log.e(TAG, "failed to fetch file");
+                    LOG.e("failed to fetch file");
                 }
             });
         }
@@ -135,14 +136,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             writer.write(response);
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "failed to write downloaded xform to ODK forms directory", e);
+            LOG.e(e, "failed to write downloaded xform to ODK forms directory");
             return false;
         } finally {
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "failed to close writer into ODK directory", e);
+                    LOG.e(e, "failed to close writer into ODK directory");
                 }
             }
         }
@@ -193,8 +194,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             ContentValues contentValues;
             try {
                 contentValues = DiskSyncTask.buildContentValues(proposedPath);
-            } catch (IllegalArgumentException ex) { // yuck, but this is what it throws on a bad parse
-                Log.e(TAG, "Failed to parse: " + proposedPath, ex);
+            } catch (IllegalArgumentException e) { // yuck, but this is what it throws on a bad parse
+                LOG.e(e, "Failed to parse: " + proposedPath);
                 return null;
             }
 
@@ -207,7 +208,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
                 }
             } catch (SQLException e) {
-                Log.i(TAG, "failed to insert fetched file", e);
+                LOG.i(e, "failed to insert fetched file");
             }
             return proposedPath;
         }

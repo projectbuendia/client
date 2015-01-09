@@ -21,6 +21,7 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.Logger;
 
 import java.util.List;
 
@@ -34,8 +35,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class AssignLocationDialog
         implements DialogInterface.OnDismissListener, AdapterView.OnItemClickListener {
 
+    private static final Logger LOG = Logger.create();
+
     public static final boolean DEBUG = true;
-    public static final String TAG = AssignLocationDialog.class.getSimpleName();
 
     @Nullable private AlertDialog mDialog;
     @Nullable private GridView mGridView;
@@ -153,7 +155,7 @@ public final class AssignLocationDialog
 
         public void onEventMainThread(LocationsLoadFailedEvent event) {
             if (DEBUG) {
-                Log.d(TAG, "Error loading location tree");
+                LOG.d("Error loading location tree");
             }
         }
 

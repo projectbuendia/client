@@ -27,8 +27,6 @@ import java.util.concurrent.ExecutionException;
  */
 public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
 
-    private static final String TAG = AppUpdatePatientAsyncTask.class.getSimpleName();
-
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final AppAsyncTaskFactory mTaskFactory;
@@ -62,7 +60,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
     protected PatientUpdateFailedEvent doInBackground(Void... params) {
         RequestFuture<Patient> patientFuture = RequestFuture.newFuture();
 
-        mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture, TAG);
+        mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture);
         try {
             patientFuture.get();
         } catch (InterruptedException e) {

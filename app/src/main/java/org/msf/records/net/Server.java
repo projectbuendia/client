@@ -38,8 +38,7 @@ public interface Server {
     void addPatient(
             AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Updates a patient.
@@ -48,20 +47,17 @@ public interface Server {
             String patientId,
             AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Creates a new user.
      *
      * @param user the NewUser to add
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void addUser(
             NewUser user,
             Response.Listener<User> userListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Get the patient record for an existing patient. Currently we are just using a String-String
@@ -69,13 +65,11 @@ public interface Server {
      * so it will probably need to be generalized in future.
      *
      * @param patientId the unique patient id representing the patients
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void getPatient(
             String patientId,
             Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Update the location of a patient
@@ -87,23 +81,19 @@ public interface Server {
 
     /**
      * List all existing patients.
-     *
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void listPatients(@Nullable String filterState,
                              @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
-                             Response.ErrorListener errorListener, String logTag);
+                             Response.ErrorListener errorListener);
 
     /**
      * List all existing users.
-     *
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void listUsers(@Nullable String filterQueryTerm,
                           Response.Listener<List<User>> userListener,
-                          Response.ErrorListener errorListener, String logTag);
+                          Response.ErrorListener errorListener);
 
     /**
      * Add a new location to the server.
@@ -112,12 +102,10 @@ public interface Server {
      *                 name for at least one locale.
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void addLocation(Location location,
                             final Response.Listener<Location> locationListener,
-                            final Response.ErrorListener errorListener,
-                            final String logTag);
+                            final Response.ErrorListener errorListener);
 
     /**
      * Update the names for a location on the server.
@@ -126,32 +114,26 @@ public interface Server {
      *                 but ideally the other arguments should be correct
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void updateLocation(Location location,
                                final Response.Listener<Location> locationListener,
-                               final Response.ErrorListener errorListener,
-                               final String logTag);
+                               final Response.ErrorListener errorListener);
 
     /**
      * Delete a given location from the server. The location should not be the EMC location or
      * one of the zones - just a client added location, tent or bed.
      */
     public void deleteLocation(String locationUuid,
-                               final Response.ErrorListener errorListener,
-                               final String logTag);
+                               final Response.ErrorListener errorListener);
 
     /**
      * List all locations.
-     *
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void listLocations(Response.Listener<List<Location>> locationListener,
-                              Response.ErrorListener errorListener,
-                              String logTag);
+                              Response.ErrorListener errorListener);
 
     /**
-     * Cancel all requests associated with the given tag.
+     * Cancel all pending requests.
      */
-    public void cancelPendingRequests(String logTag);
+    public void cancelPendingRequests();
 }

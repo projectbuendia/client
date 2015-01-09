@@ -19,16 +19,21 @@
         <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
     </style>
 
-    <style name="thick_ab_style" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:height">100dp</item>
+    <!-- Use if the activity has text buttons for the action bar -->
+    <style name="AppThemeTextButtonActionBar" parent="AppTheme">
+        <item name="android:actionButtonStyle">@style/ActionTextButtonStyle</item>
     </style>
+
     <style name="MenuActionBar" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
         <item name="android:textSize">20sp</item>
     </style>
 
     <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
-        <item name="android:paddingLeft">28dip</item>
-        <item name="android:paddingRight">28dip</item>
+        <item name="android:minWidth">@dimen/action_bar_height</item>
+    </style>
+
+    <style name="ActionTextButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+        <item name="android:minWidth">@dimen/action_bar_height_and_a_half</item>
     </style>
 
     <style name="row">
