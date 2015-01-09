@@ -19,7 +19,6 @@ import org.msf.records.events.data.TypedCursorFetchedEventFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
-import org.msf.records.sync.LocationProjection;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 
@@ -33,8 +32,6 @@ import de.greenrobot.event.NoSubscriberEvent;
  *
  * <p>Updates done through this model are written through to a backing {@link Server}; callers do
  * not need to worry about the implementation details of this.
- *
- * <p>You can use
  */
 public class AppModel {
 
@@ -185,7 +182,7 @@ public class AppModel {
                         null);
 
                 return AppLocationTree
-                        .fromTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
+                        .forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
             } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();

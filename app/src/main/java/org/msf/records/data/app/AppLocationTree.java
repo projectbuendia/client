@@ -31,7 +31,7 @@ public class AppLocationTree implements AppModelObservable {
      *                                  the location tree has no root node or if the location tree
      *                                  contains any nodes whose parents are missing
      */
-    static AppLocationTree fromTypedCursor(TypedCursor<AppLocation> cursor) {
+    static AppLocationTree forTypedCursor(TypedCursor<AppLocation> cursor) {
         AppLocation root = null;
         Map<String, AppLocation> uuidsToLocations = new HashMap<>();
         Map<String, AppLocation> uuidsToParents = new HashMap<>();
