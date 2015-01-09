@@ -14,6 +14,8 @@ import org.msf.records.prefs.PrefsModule;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.PatientListTypedCursorAdapter;
+import org.msf.records.ui.SingleLocationPatientListAdapter;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListActivity;
@@ -54,8 +56,10 @@ import javax.inject.Singleton;
                 BaseActivity.class,
                 PatientChartActivity.class,
                 PatientListActivity.class,
+                PatientListTypedCursorAdapter.class,
                 PatientSearchActivity.class,
                 RoundActivity.class,
+                SingleLocationPatientListAdapter.class,
                 TentSelectionActivity.class,
                 PatientListFragment.class,
                 RoundFragment.class

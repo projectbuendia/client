@@ -16,7 +16,7 @@ import javax.annotation.concurrent.Immutable;
  * A patient in the app model.
  */
 @Immutable
-public final class AppPatient extends AppTypeBase<String> {
+public final class AppPatient extends AppTypeBase<String> implements Comparable<AppPatient> {
 
     public static final int GENDER_UNKNOWN = 0;
     public static final int GENDER_MALE = 1;
@@ -92,6 +92,28 @@ public final class AppPatient extends AppTypeBase<String> {
                 locationUuid);
 
         return contentValues;
+    }
+
+    @Override
+    public int compareTo(AppPatient another) {
+        // TODO(akalachman): Smarter sorting on id (as is done in SubtreeComparator).
+
+        int idCompareTo = id.compareTo(another.id);
+        if (idCompareTo != 0) {
+            return idCompareTo;
+        }
+
+        int familyNameCompareTo = familyName.compareTo(another.familyName);
+        if (familyNameCompareTo != 0) {
+            return familyNameCompareTo;
+        }
+
+        int givenNameCompareTo = givenName.compareTo(another.givenName);
+        if (givenNameCompareTo != 0) {
+            return givenNameCompareTo;
+        }
+
+        return 0;
     }
 
     public static Builder builder() {

@@ -1,6 +1,6 @@
 package org.msf.records.ui.patientlist;
 
-import org.msf.records.ui.ExpandablePatientListAdapter;
+import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.SingleLocationPatientListAdapter;
 
 /**
@@ -14,8 +14,8 @@ public class RoundFragment extends PatientListFragment {
     }
 
     @Override
-    public ExpandablePatientListAdapter getAdapterInstance() {
+    public PatientListTypedCursorAdapter getAdapterInstance() {
         return new SingleLocationPatientListAdapter(
-                null, getActivity(), mFilterQueryTerm, mFilter);
+                mAppModel, getActivity(), mCrudEventBusProvider.get());
     }
 }

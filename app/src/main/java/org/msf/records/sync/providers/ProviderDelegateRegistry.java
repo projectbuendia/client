@@ -52,7 +52,7 @@ class ProviderDelegateRegistry<T extends SQLiteOpenHelper> {
         int code = mUriMatcher.match(uri);
         if (code == UriMatcher.NO_MATCH) {
             throw new IllegalArgumentException(
-                    "No SubContentProvider registered for URI '" + uri.toString() + "'.");
+                    "No ProviderDelegate registered for URI '" + uri.toString() + "'.");
         }
 
         return mDelegates.get(code);

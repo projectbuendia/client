@@ -32,6 +32,7 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
     public TypedConvertedCursor(U converter, Cursor cursor) {
         mConverter = converter;
         mCursor = cursor;
+        mIsClosed = mCursor.isClosed();
 
         mConvertedItems = new SparseArray<>();
     }
