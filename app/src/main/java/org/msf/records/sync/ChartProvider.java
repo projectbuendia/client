@@ -371,31 +371,34 @@ public class ChartProvider implements MsfRecordsProvider.SubContentProvider {
         ContentValues first = allValues[0];
         String[] columns = first.keySet().toArray(new String[first.size()]);
         SQLiteStatement statement = makeInsertStatement(db, tableName, columns);
-        db.beginTransaction();
-        Object[] bindings = new Object[first.size()];
-        for (ContentValues values : allValues) {
-            statement.clearBindings();
-            if (values.size() != first.size()) {
-                throw new AssertionError();
-            }
-            for (int i = 0; i < bindings.length; i++) {
-                Object value = values.get(columns[i]);
-                // This isn't super safe, but is in our context.
-                int bindingIndex = i + 1;
-                if (value instanceof String) {
-                    statement.bindString(bindingIndex, (String) value);
-                } else if ((value instanceof Long) || value instanceof Integer) {
-                    statement.bindLong(bindingIndex, ((Number) value).longValue());
-                } else if ((value instanceof Double) || value instanceof Float) {
-                    statement.bindDouble(bindingIndex, ((Number) value).doubleValue());
+        try {
+            db.beginTransaction();
+            Object[] bindings = new Object[first.size()];
+            for (ContentValues values : allValues) {
+                statement.clearBindings();
+                if (values.size() != first.size()) {
+                    throw new AssertionError();
                 }
-                bindings[i] = value;
+                for (int i = 0; i < bindings.length; i++) {
+                    Object value = values.get(columns[i]);
+                    // This isn't super safe, but is in our context.
+                    int bindingIndex = i + 1;
+                    if (value instanceof String) {
+                        statement.bindString(bindingIndex, (String) value);
+                    } else if ((value instanceof Long) || value instanceof Integer) {
+                        statement.bindLong(bindingIndex, ((Number) value).longValue());
+                    } else if ((value instanceof Double) || value instanceof Float) {
+                        statement.bindDouble(bindingIndex, ((Number) value).doubleValue());
+                    }
+                    bindings[i] = value;
+                }
+                statement.executeInsert();
             }
-            statement.executeInsert();
+            db.setTransactionSuccessful();
+            db.endTransaction();
+        } finally {
+            statement.close();
         }
-        db.setTransactionSuccessful();
-        db.endTransaction();
-        statement.close();
         // Send broadcast to registered ContentObservers, to refresh UI.
         contentResolver.notifyChange(uri, null, false);
         return numValues;

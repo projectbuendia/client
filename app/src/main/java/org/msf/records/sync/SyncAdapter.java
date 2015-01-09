@@ -413,10 +413,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Uri uri = PatientProviderContract.CONTENT_URI; // Get all entries
         Cursor c = provider.query(
                 uri, new String[] {PatientColumns.COLUMN_NAME_UUID}, null, null, null);
-        int count = c.getCount();
-        c.close();
-        if (count < 1) {
-            return;
+        try {
+            if (c.getCount() < 1) {
+                return;
+            }
+        } finally {
+            c.close();
         }
 
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());

@@ -332,16 +332,19 @@ public class OdkActivityLauncher {
 
         String inClause = Joiner.on(",").join(xformConceptIds);
         // Get a map from client ids to UUIDs from our local concept database.
+        HashMap<String, String> idToUuid = new HashMap<>();
         Cursor cursor = resolver.query(ChartProviderContract.CONCEPTS_CONTENT_URI,
                 new String[]{ChartColumns._ID, ChartColumns.XFORM_ID},
                 ChartColumns.XFORM_ID + " IN (" + inClause + ")",
                 null, null);
-        HashMap<String, String> idToUuid = new HashMap<>();
-        while (cursor.moveToNext()) {
-            idToUuid.put(cursor.getString(cursor.getColumnIndex(ChartColumns.XFORM_ID)),
-                    cursor.getString(cursor.getColumnIndex(ChartColumns._ID)));
+        try {
+            while (cursor.moveToNext()) {
+                idToUuid.put(cursor.getString(cursor.getColumnIndex(ChartColumns.XFORM_ID)),
+                        cursor.getString(cursor.getColumnIndex(ChartColumns._ID)));
+            }
+        } finally {
+            cursor.close();
         }
-        cursor.close();
 
         // Remap concept ids to uuids, skipping anything we can't remap.
         for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext();) {
