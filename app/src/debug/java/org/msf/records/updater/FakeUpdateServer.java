@@ -39,8 +39,7 @@ public class FakeUpdateServer extends UpdateServer {
     @Override
     public void getAndroidUpdateInfo(
             final Response.Listener<UpdateInfo> listener,
-            final Response.ErrorListener errorListener,
-            @Nullable String tag) {
+            final Response.ErrorListener errorListener) {
         mHandler.post(new Runnable() {
 
             @Override

@@ -19,6 +19,7 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.Logger;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -32,7 +33,8 @@ import com.google.common.collect.ImmutableSet;
  */
 final class TentSelectionController {
 
-	private static final String TAG = TentSelectionController.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
+
 	private static final boolean DEBUG = true;
 
 	public interface Ui {
@@ -85,9 +87,7 @@ final class TentSelectionController {
 		mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
 
-		if (DEBUG) {
-			Log.d(TAG, "Controller inited. Loaded tree: " + mLoadedLocationTree + ". Tree: " + mLocationTree);
-		}
+        LOG.d("Controller inited. Loaded tree: " + mLoadedLocationTree + ". Tree: " + mLocationTree);
 
         mAppModel.fetchLocationTree(mCrudEventBus, "en");
 
@@ -101,25 +101,19 @@ final class TentSelectionController {
 	}
 
 	public void attachFragmentUi(TentFragmentUi fragmentUi) {
-		if (DEBUG) {
-			Log.d(TAG, "Attached new fragment UI: " + fragmentUi);
-		}
+        LOG.d("Attached new fragment UI: " + fragmentUi);
 		mFragmentUis.add(fragmentUi);
 		populateFragmentUi(fragmentUi);
 	}
 
 	public void detachFragmentUi(TentFragmentUi fragmentUi) {
-		if (DEBUG) {
-			Log.d(TAG, "Detached fragment UI: " + fragmentUi);
-		}
+        LOG.d("Detached fragment UI: " + fragmentUi);
 		mFragmentUis.remove(fragmentUi);
 	}
 
 	/** Frees any resources used by the controller. */
 	public void suspend() {
-		if (DEBUG) {
-			Log.d(TAG, "Controller suspended.");
-		}
+        LOG.d("Controller suspended.");
 
         mCrudEventBus.unregister(mEventBusSubscriber);
 		mEventBus.unregister(mEventBusSubscriber);
@@ -194,9 +188,7 @@ final class TentSelectionController {
         }
 
 	    public void onEventMainThread(LocationsLoadFailedEvent event) {
-	    	if (DEBUG) {
-	    		Log.d(TAG, "Error loading location tree");
-	    	}
+            LOG.d("Error loading location tree");
 	        mUi.showErrorMessage(R.string.location_load_error);
 	        mLoadedLocationTree = true;
 	        for (TentFragmentUi fragmentUi : mFragmentUis) {
@@ -205,10 +197,8 @@ final class TentSelectionController {
 	    }
 
 	    public void onEventMainThread(LocationsLoadedEvent event) {
-	    	if (DEBUG) {
-	    		Log.d(TAG, "Loaded location tree: " + event.locationTree + " after "
-	    				+ (SystemClock.elapsedRealtime() - mLoadRequestTimeMs) + "ms");
-	    	}
+            LOG.d("Loaded location tree: " + event.locationTree + " after "
+                    + (SystemClock.elapsedRealtime() - mLoadRequestTimeMs) + "ms");
 	    	mLocationTree = event.locationTree;
 	        for (LocationSubtree zone : mLocationTree.getZones()) {
 	            switch (zone.getLocation().uuid) {

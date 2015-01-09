@@ -8,6 +8,7 @@ import com.github.zafarkhaja.semver.ParseException;
 import com.github.zafarkhaja.semver.Version;
 
 import org.msf.records.App;
+import org.msf.records.utils.Logger;
 
 /**
  * An object containing information about an update that has been downloaded and is ready to be
@@ -15,7 +16,7 @@ import org.msf.records.App;
  */
 public class DownloadedUpdateInfo {
 
-    private static final String TAG = DownloadedUpdateInfo.class.getName();
+    private static final Logger LOG = Logger.create();
 
     public final boolean isValid;
     public final Version currentVersion;
@@ -35,14 +36,14 @@ public class DownloadedUpdateInfo {
      */
     public static DownloadedUpdateInfo fromPath(Version currentVersion, String path) {
         if (path == null || path.equals("")) {
-            Log.w(TAG, "Path was not specified.");
+            LOG.w("Path was not specified.");
             return getInvalid(currentVersion);
         }
 
         PackageManager packageManager = App.getInstance().getPackageManager();
         PackageInfo packageInfo = packageManager.getPackageArchiveInfo(path, 0 /*flags*/);
         if (packageInfo == null) {
-            Log.w(TAG, path + " is not a valid APK.");
+            LOG.w(path + " is not a valid APK.");
             return getInvalid(currentVersion);
         }
 
@@ -50,7 +51,7 @@ public class DownloadedUpdateInfo {
         try {
             downloadedVersion = Version.valueOf(packageInfo.versionName);
         } catch (ParseException e) {
-            Log.w(TAG, path + " has an invalid semantic version: " + packageInfo.versionName + ".");
+            LOG.w(path + " has an invalid semantic version: " + packageInfo.versionName + ".");
             return getInvalid(currentVersion);
         }
 

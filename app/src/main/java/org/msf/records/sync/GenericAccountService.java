@@ -16,9 +16,12 @@ import android.util.Log;
 
 import org.msf.records.BuildConfig;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 public class GenericAccountService extends Service {
-    private static final String TAG = GenericAccountService.class.getSimpleName();
+
+    private static final Logger LOG = Logger.create();
+
     private static final String ACCOUNT_TYPE = BuildConfig.ACCOUNT_TYPE;
     public static final String ACCOUNT_NAME = "sync";
     private static final long SYNC_FREQUENCY = 10 * 60;  // 10 minutes (in seconds)
@@ -110,13 +113,13 @@ public class GenericAccountService extends Service {
 
     @Override
     public void onCreate() {
-        Log.i(TAG, "Service created");
+        LOG.i("Service created");
         mAuthenticator = new Authenticator(this);
     }
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "Service destroyed");
+        LOG.i("Service destroyed");
     }
 
     @Override

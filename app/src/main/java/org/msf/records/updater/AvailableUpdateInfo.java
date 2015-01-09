@@ -6,13 +6,14 @@ import android.util.Log;
 import com.github.zafarkhaja.semver.Version;
 
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.utils.Logger;
 
 /**
  * An object containing information about an available application update.
  */
 public class AvailableUpdateInfo {
 
-    private static final String TAG = AvailableUpdateInfo.class.getName();
+    private static final Logger LOG = Logger.create();
 
     public final boolean isValid;
     public final Version currentVersion;
@@ -35,33 +36,31 @@ public class AvailableUpdateInfo {
      */
     public static AvailableUpdateInfo fromResponse(Version currentVersion, UpdateInfo response) {
         if (response == null) {
-            Log.w(TAG, "The update info is null.");
+            LOG.w("The update info is null.");
             return getInvalid(currentVersion);
         }
 
         if (response.androidClient == null) {
-            Log.w(TAG, "The update info response is missing the androidclient field.");
+            LOG.w("The update info response is missing the androidclient field.");
             return getInvalid(currentVersion);
         }
 
         Version version = response.androidClient.getLatestVersion();
         if (version == null) {
-            Log.w(
-                    TAG,
+            LOG.w(
                     "The androidclient update info response is missing the version field or its "
-                            + "version field is not a valid semantic version."
-            );
+                            + "version field is not a valid semantic version.");
             return getInvalid(currentVersion);
         }
 
         if (response.androidClient.run == null || response.androidClient.run.size() < 1) {
-            Log.w(TAG, "The androidclient update info response does not have a run entry.");
+            LOG.w("The androidclient update info response does not have a run entry.");
             return getInvalid(currentVersion);
         }
 
         String runEntry = response.androidClient.run.get(0);
         if (runEntry == null) {
-            Log.w(TAG, "The androidclient update info response's run entry is null.");
+            LOG.w("The androidclient update info response's run entry is null.");
             return getInvalid(currentVersion);
         }
 
@@ -69,12 +68,10 @@ public class AvailableUpdateInfo {
         try {
             updateUri = Uri.parse(UpdateServer.ROOT_URL + runEntry);
         } catch (IllegalArgumentException e) {
-            Log.w(
-                    TAG,
+            LOG.w(
+                    e,
                     "The androidclient update info response's run entry is not a valid URI path "
-                            + "segment.",
-                    e
-            );
+                            + "segment.");
             return getInvalid(currentVersion);
         }
 
