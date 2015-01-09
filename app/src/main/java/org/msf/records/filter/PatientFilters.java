@@ -1,5 +1,7 @@
 package org.msf.records.filter;
 
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup.FilterType;
 import org.msf.records.location.LocationTree;
@@ -16,9 +18,6 @@ import java.util.List;
  * All available patient filters available to the user, categorized by filter type.
  */
 public final class PatientFilters {
-
-    // TODO(rjlothian): Remove this. Static mutable state is a common source of bugs.
-    private static LocationTree sRoot = null;
 
     // Id and name filters should always be applied.
     private static final FilterGroup BASE_FILTERS =
@@ -39,14 +38,13 @@ public final class PatientFilters {
         return BASE_FILTERS;
     }
 
-    public static SimpleSelectionFilter[] getZoneFilters() {
+    public static SimpleSelectionFilter[] getZoneFilters(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
-        if (sRoot != null) {
-            for (LocationSubtree zone : sRoot.getLocationsForDepth(1)) {
-                filters.add(new FilterGroup(
-                        BASE_FILTERS,
-                        new LocationUuidFilter(zone)).setName(zone.toString()));
-            }
+
+        for (AppLocation zone : locationTree.getChildren(locationTree.getRoot())) {
+            filters.add(new FilterGroup(
+                    BASE_FILTERS,
+                    new LocationUuidFilter(locationTree, zone)).setName(zone.toString()));
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
         filters.toArray(filterArray);
@@ -57,27 +55,15 @@ public final class PatientFilters {
         return OTHER_FILTERS;
     }
 
-    public static SimpleSelectionFilter[] getFiltersForDisplay() {
+    public static SimpleSelectionFilter[] getFiltersForDisplay(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> allFilters = new ArrayList<>();
         allFilters.add(getDefaultFilter());
-        Collections.addAll(allFilters, getZoneFilters());
+        Collections.addAll(allFilters, getZoneFilters(locationTree));
         allFilters.add(null); // Section break
         Collections.addAll(allFilters, getOtherFilters());
 
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[allFilters.size()];
         allFilters.toArray(filterArray);
         return filterArray;
-    }
-
-    @SuppressWarnings("unused") // Called by reflection from event bus.
-    private static class LocationSyncSubscriber {
-        public synchronized void onEvent(LocationsLoadedEvent event) {
-            sRoot = event.locationTree;
-        }
-    }
-
-    // TODO(rjlothian): This is likely to cause problems for testability. Remove it.
-    static {
-        EventBus.getDefault().register(new LocationSyncSubscriber());
     }
 }

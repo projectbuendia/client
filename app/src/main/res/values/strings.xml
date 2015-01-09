@@ -81,4 +81,5 @@
     <string name="title_add_patient_cancel">Discard changes?</string>
     <string name="patient_creation_success">New patient has been added.</string>
     <string name="patient_creation_error">Unable to add patient: %s</string>
+    <string name="patient_sync_failed">Patient sync event failed</string>
 </resources>

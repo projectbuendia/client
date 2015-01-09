@@ -15,7 +15,6 @@ public class RoundFragment extends PatientListFragment {
 
     @Override
     public PatientListTypedCursorAdapter getAdapterInstance() {
-        return new SingleLocationPatientListAdapter(
-                mAppModel, getActivity(), mCrudEventBusProvider.get());
+        return new SingleLocationPatientListAdapter(getActivity());
     }
 }

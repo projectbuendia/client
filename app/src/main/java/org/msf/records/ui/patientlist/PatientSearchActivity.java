@@ -15,28 +15,42 @@ import com.nispok.snackbar.listeners.ActionClickListener;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocationTree;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.TypedCursor;
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.ui.BaseLoggedInActivity;
+import org.msf.records.ui.BigToast;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
-public abstract class PatientSearchActivity extends BaseLoggedInActivity
-        implements PatientListFragment.Callbacks {
+public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     @Inject UpdateManager mUpdateManager;
+    @Inject AppModel mAppModel;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
 
+    private PatientSearchController mSearchController;
     private SearchView mSearchView;
     private OnSearchListener mSearchListener;
     private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
 
-    protected static final int ODK_ACTIVITY_REQUEST = 1;
+    // TODO(akalachman): Populate properly.
+    protected final String mLocale = "en";
+
+    public PatientSearchController getSearchController() {
+        return mSearchController;
+    }
 
     public SearchView getSearchView() {
         return mSearchView;
@@ -47,6 +61,11 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
         super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
+        mSearchController = new PatientSearchController(
+                new SearchUi(),
+                mCrudEventBusProvider.get(),
+                mAppModel,
+                mLocale);
 
         updateAvailableSnackbar = Snackbar.with(this)
                 .text(getString(R.string.snackbar_update_available))
@@ -60,19 +79,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
                 .swipeToDismiss(true)
                 .animation(false)
                 .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
-    }
-
-    /**
-     * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given uuid/name/id was selected.
-     */
-    @Override
-    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
-        Intent detailIntent = new Intent(this, PatientChartActivity.class);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
-        startActivity(detailIntent);
     }
 
     public interface OnSearchListener {
@@ -173,6 +179,56 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
                 });
         if (updateDownloadedSnackbar.isDismissed()) {
             updateDownloadedSnackbar.show(this);
+        }
+    }
+
+    private final class SearchUi implements PatientSearchController.Ui {
+
+        @Override
+        public void launchChartActivity(
+                String uuid, String givenName, String familyName, String id) {
+            Intent detailIntent = new Intent(
+                    PatientSearchActivity.this, PatientChartActivity.class);
+            detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
+            detailIntent.putExtra(
+                    PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
+            detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
+            startActivity(detailIntent);
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            // TODO(akalachman): Implement.
+        }
+
+        @Override
+        public void setLocations(AppLocationTree locationTree) {
+            // TODO(akalachman): Implement.
+        }
+
+        @Override
+        public void setPatients(TypedCursor<AppPatient> patients) {
+            // TODO(akalachman): Implement.
+        }
+
+        @Override
+        public void showSpinner(boolean show) {
+            // TODO(akalachman): Implement.
+        }
+
+        @Override
+        public void showRefreshIndicator(boolean show) {
+            // TODO(akalachman): Implement.
+        }
+
+        @Override
+        public void showErrorMessage(int resource) {
+            BigToast.show(PatientSearchActivity.this, resource);
+        }
+
+        @Override
+        public void showErrorMessage(String message) {
+            BigToast.show(PatientSearchActivity.this, message);
         }
     }
 }

@@ -6,7 +6,10 @@ import android.util.Log;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.concurrent.Immutable;
@@ -121,5 +124,23 @@ public class AppLocationTree {
     @Nullable
     public AppLocation findByUuid(String uuid) {
         return mUuidsToLocations.get(uuid);
+    }
+
+    public List<AppLocation> thisAndAllDescendents() {
+        return locationsInSubtree(mRoot);
+    }
+
+    public List<AppLocation> locationsInSubtree(AppLocation subroot) {
+        List<AppLocation> result = new ArrayList<>();
+        result.add(subroot);
+        addChildren(result, subroot);
+        return result;
+    }
+
+    private void addChildren(Collection<AppLocation> collection, AppLocation root) {
+        for (AppLocation child : getChildren(root)) {
+            collection.add(child);
+            addChildren(getChildren(child), root);
+        }
     }
 }

@@ -8,11 +8,7 @@ import android.view.MenuItem;
 
 import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.PatientFilters;
-import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
@@ -46,10 +42,7 @@ public class RoundActivity extends PatientSearchActivity {
                 this, mLocationPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
 
-        // TODO: Don't use this singleton.
-        LocationTree locationTree = LocationTree.singletonInstance;
-        LocationSubtree subtree = locationTree.getLocationByUuid(mLocationUuid);
-        mFilter = new FilterGroup(PatientFilters.getDefaultFilter(), new LocationUuidFilter(subtree));
+        getSearchController().setRootLocationUuid(mLocationUuid);
     }
 
     @Override
@@ -57,11 +50,6 @@ public class RoundActivity extends PatientSearchActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
-
-        // TODO(akalachman): Move this back to onCreate when I figure out why it needs to be here.
-        RoundFragment fragment = (RoundFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.round_patient_list);
-        fragment.filterBy(mFilter);
 
         menu.findItem(R.id.action_add).setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
