@@ -13,6 +13,7 @@ public final class AppLocation extends AppTypeBase<String> {
     public final String uuid;
     public final String parentUuid;
     public final String name;
+    public final int patientCount;
 
     /**
      * Creates an instance of {@link AppLocation}.
@@ -21,5 +22,8 @@ public final class AppLocation extends AppTypeBase<String> {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
         this.name = name;
+
+        // TODO(dxchen): Implement.
+        this.patientCount = 0;
     }
 }

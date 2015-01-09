@@ -33,6 +33,8 @@ import de.greenrobot.event.NoSubscriberEvent;
  *
  * <p>Updates done through this model are written through to a backing {@link Server}; callers do
  * not need to worry about the implementation details of this.
+ *
+ * <p>You can use
  */
 public class AppModel {
 
@@ -50,7 +52,8 @@ public class AppModel {
     }
 
     /**
-     * Asynchronously fetches all locations as a tree, posting a {@link AppLocationTreeFetchedEvent}
+     * Asynchronously fetches all locations as a tree, posting an
+     * {@link AppLocationTreeFetchedEvent} on the specified event bus when complete.
      */
     public void fetchLocationTree(CrudEventBus bus, String locale) {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
@@ -175,8 +178,8 @@ public class AppModel {
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(
-                        Contracts.LocalizedLocations.CONTENT_URI,
-                        LocationProjection.getLocationProjection(),
+                        Contracts.LocalizedLocations.getUri(mLocale),
+                        null,
                         null,
                         null,
                         null);

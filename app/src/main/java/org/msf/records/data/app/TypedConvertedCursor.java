@@ -2,6 +2,7 @@ package org.msf.records.data.app;
 
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.SparseArray;
 
 import org.msf.records.data.app.converters.AppTypeConverter;
@@ -32,9 +33,10 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
     public TypedConvertedCursor(U converter, Cursor cursor) {
         mConverter = converter;
         mCursor = cursor;
-        mIsClosed = mCursor.isClosed();
 
         mConvertedItems = new SparseArray<>();
+
+        mIsClosed = mCursor.isClosed();
     }
 
     /**
@@ -73,6 +75,11 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
         }
 
         return convertedItem;
+    }
+
+    @Override
+    public Uri getNotificationUri() {
+        return mIsClosed ? null : mCursor.getNotificationUri();
     }
 
     @Override
