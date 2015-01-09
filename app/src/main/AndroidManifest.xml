@@ -52,6 +52,7 @@
         <activity
             android:name="org.msf.records.ui.userlogin.UserLoginActivity"
             android:label="@string/app_name"
+            android:theme="@style/AppThemeTextButtonActionBar"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
