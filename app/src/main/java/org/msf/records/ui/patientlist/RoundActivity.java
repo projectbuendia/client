@@ -22,8 +22,6 @@ public class RoundActivity extends PatientSearchActivity {
 
     private int mLocationPatientCount;
 
-    private SimpleSelectionFilter mFilter;
-
     private final LocationEventSubscriber mSubscriber = new LocationEventSubscriber();
 
     public static final String LOCATION_NAME_KEY = "location_name";
@@ -43,6 +41,7 @@ public class RoundActivity extends PatientSearchActivity {
         setContentView(R.layout.activity_round);
 
         getSearchController().setRootLocationUuid(mLocationUuid);
+        getSearchController().loadSearchResults();
     }
 
     @Override

@@ -98,7 +98,7 @@ public class PatientListActivity extends PatientSearchActivity {
             ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
                 @Override
                 public boolean onNavigationItemSelected(int position, long id) {
-                    getSearchController().setFilter(filters[position]);
+                    getSearchController().applyFilter(filters[position]);
                     return true;
                 }
             };
@@ -110,7 +110,7 @@ public class PatientListActivity extends PatientSearchActivity {
             actionBar.setListNavigationCallbacks(adapter, callback);
             actionBar.setSelectedNavigationItem(selectedFilter);
 
-            getSearchController().setFilter(filters[selectedFilter]);
+            getSearchController().applyFilter(filters[selectedFilter]);
         }
     }
 }

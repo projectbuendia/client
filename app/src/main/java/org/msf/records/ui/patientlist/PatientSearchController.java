@@ -131,7 +131,7 @@ public class PatientSearchController {
         mRootLocationUuid = locationUuid;
     }
 
-    public void setFilter(SimpleSelectionFilter filter) {
+    public void applyFilter(SimpleSelectionFilter filter) {
         // Tack on a location filter to the filter to show only known locations.
         if (mLocationTree == null || mLocationTree.getRoot() == null) {
             mFilter = filter;
@@ -149,7 +149,7 @@ public class PatientSearchController {
         loadSearchResults();
     }
 
-    private void loadSearchResults() {
+    public void loadSearchResults() {
         // TODO(akalachman): Sub-filter on query term rather than re-filtering with each keypress.
         for (FragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.showSpinner(true);
@@ -194,4 +194,4 @@ public class PatientSearchController {
             Log.e(TAG, "Sync event failed");
         }
     }
-}    
+}

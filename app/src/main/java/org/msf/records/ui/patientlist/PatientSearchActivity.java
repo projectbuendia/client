@@ -77,6 +77,18 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     }
 
     @Override
+    protected void onStartImpl() {
+        super.onStartImpl();
+        getSearchController().init();
+    }
+
+    @Override
+    protected void onStopImpl() {
+        getSearchController().suspend();
+        super.onStopImpl();
+    }
+
+    @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 
