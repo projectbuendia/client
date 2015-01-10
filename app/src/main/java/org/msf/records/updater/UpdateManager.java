@@ -23,6 +23,8 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.utils.Logger;
+
 import java.io.File;
 
 import de.greenrobot.event.EventBus;
@@ -34,7 +36,7 @@ import de.greenrobot.event.EventBus;
  */
 public class UpdateManager {
 
-    private static final String TAG = UpdateManager.class.getName();
+    private static final Logger LOG = Logger.create();
 
     /**
      * The frequency with which to check for updates, in hours.
@@ -121,7 +123,7 @@ public class UpdateManager {
         mLastCheckForUpdateTime = now;
 
         CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener();
-        mServer.getAndroidUpdateInfo(listener, listener, null /*tag*/);
+        mServer.getAndroidUpdateInfo(listener, listener);
     }
 
     /**
@@ -185,22 +187,20 @@ public class UpdateManager {
             packageInfo =
                     mPackageManager.getPackageInfo(App.getInstance().getPackageName(), 0 /*flags*/);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.wtf(
-                    TAG,
+            LOG.e(
+                    e,
                     "No package found with the name " + App.getInstance().getPackageName() + ". "
-                            + "This should never happen.",
-                    e);
+                            + "This should never happen.");
             return INVALID_VERSION;
         }
 
         try {
             return Version.valueOf(packageInfo.versionName);
         } catch (ParseException e) {
-            Log.e(
-                    TAG,
+            LOG.e(
+                    e,
                     "Application has an invalid semantic version: " + packageInfo.versionName + ". "
-                            + "Please fix in build.gradle.",
-                    e);
+                            + "Please fix in build.gradle.");
             return INVALID_VERSION;
         }
     }
@@ -243,11 +243,10 @@ public class UpdateManager {
                 failure = String.valueOf(error.networkResponse.statusCode);
             }
 
-            Log.w(
-                    TAG,
+            LOG.w(
+                    error,
                     "Server failed with " + failure + " while downloading update. Retry will "
-                            + "occur shortly.",
-                    error);
+                            + "occur shortly.");
             // assume no update is available
             EventBus.getDefault().post(new UpdateNotAvailableEvent());
         }
@@ -263,8 +262,7 @@ public class UpdateManager {
         public void onReceive(Context context, Intent intent) {
             synchronized (mDownloadLock) {
                 if (!mIsDownloadInProgress) {
-                    Log.wtf(
-                            TAG,
+                    LOG.e(
                             "Received an ACTION_DOWNLOAD_COMPLETED intent when no download was in "
                                     + "progress. This indicates that this receiver was registered "
                                     + "incorrectly. Unregistering receiver.");
@@ -275,8 +273,7 @@ public class UpdateManager {
                 long receivedDownloadId =
                         intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (mDownloadId != receivedDownloadId) {
-                    Log.d(
-                            TAG,
+                    LOG.d(
                             "Received an ACTION_DOWNLOAD_COMPLETED intent with download ID "
                                     + receivedDownloadId + " when the expected download ID is "
                                     + mDownloadId + ". Download was probably initiated by another "
@@ -295,8 +292,7 @@ public class UpdateManager {
                     cursor = mDownloadManager.query(
                             new DownloadManager.Query().setFilterById(receivedDownloadId));
                     if (!cursor.moveToFirst()) {
-                        Log.w(
-                                TAG,
+                        LOG.w(
                                 "Received download ID " + receivedDownloadId + " does not exist.");
                         // TODO(dxchen): Consider firing an event.
                         return;
@@ -305,7 +301,7 @@ public class UpdateManager {
                     int status = cursor.getInt(
                             cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
                     if (status != DownloadManager.STATUS_SUCCESSFUL) {
-                        Log.w(TAG, "Update download failed with status " + status + ".");
+                        LOG.w("Update download failed with status " + status + ".");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
@@ -313,7 +309,7 @@ public class UpdateManager {
                     uriString = cursor.getString(
                             cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
                     if (uriString == null) {
-                        Log.w(TAG, "No path for a downloaded file exists.");
+                        LOG.w("No path for a downloaded file exists.");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
@@ -325,7 +321,7 @@ public class UpdateManager {
                 try {
                     Uri.parse(uriString);
                 } catch (IllegalArgumentException e) {
-                    Log.w(TAG, "Path for downloaded file is invalid: " + uriString + ".", e);
+                    LOG.w(e, "Path for downloaded file is invalid: " + uriString + ".");
                     // TODO(dxchen): Consider firing an event.
                     return;
                 }

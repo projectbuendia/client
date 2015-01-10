@@ -1,13 +1,8 @@
 package org.msf.records.location;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Looper;
-import android.util.Log;
-
-import javax.annotation.Nullable;
 
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
@@ -18,11 +13,16 @@ import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import de.greenrobot.event.EventBus;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Loads the {@link LocationTree} from disk cache or from the network.
@@ -39,7 +39,8 @@ import de.greenrobot.event.EventBus;
  */
 public class LocationManager {
 
-    private static final String TAG = "LocationManager";
+    private static final Logger LOG = Logger.create();
+
     private static final boolean DEBUG = true;
 
     private final EventBus mEventBus;
@@ -79,15 +80,11 @@ public class LocationManager {
      */
     public void loadLocations() {
         if (mLocationTree != null) {
-            if (DEBUG) {
-                Log.d(TAG, "Location tree already in memory");
-            }
+            LOG.d("Location tree already in memory");
             // Already loaded.
             mEventBus.post(new LocationsLoadedEvent(mLocationTree));
         } else {
-            if (DEBUG) {
-                Log.d(TAG, "Location tree not in memory. Attempting to load from cache.");
-            }
+            LOG.d("Location tree not in memory. Attempting to load from cache.");
             // Need to load from disk cache, or possible from the network.
             new LoadLocationsTask().execute();
         }
@@ -162,7 +159,7 @@ public class LocationManager {
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
-            Log.e(TAG, "Failed to retrieve location data from server");
+            LOG.e("Failed to retrieve location data from server");
             mEventBus.post(
                     new LocationsLoadFailedEvent(LocationsLoadFailedEvent.REASON_SERVER_ERROR));
         }
@@ -182,17 +179,17 @@ public class LocationManager {
             LocationTree loadedFromDiskCache = new LocationTreeFactory(mContext).build();
             if (loadedFromDiskCache != null) {
                 if (DEBUG) {
-                    Log.d(TAG, "Location tree successfully loaded from cache.");
+                    LOG.d("Location tree successfully loaded from cache.");
                 }
                 return loadedFromDiskCache;
             }
             if (DEBUG) {
-                Log.d(TAG, "Location tree not in cache. Attempting to load from network.");
+                LOG.d("Location tree not in cache. Attempting to load from network.");
             }
             if (!mSyncManager.isSyncing()) {
                 mSyncManager.forceSync();
             } else {
-                Log.d(TAG, "Already syncing");
+                LOG.d("Already syncing");
             }
             return null;
         }

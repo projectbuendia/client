@@ -12,6 +12,7 @@ import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.Logger;
 
 import android.util.Log;
 
@@ -24,7 +25,8 @@ import com.google.common.collect.Ordering;
  */
 final class UserLoginController {
 
-    private static final String TAG = UserLoginController.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
+
     private static final boolean DEBUG = true;
 
     public interface Ui {
@@ -85,9 +87,7 @@ final class UserLoginController {
 
         /** Updates the UI when the list of users is loaded. */
         public void onEventMainThread(KnownUsersLoadedEvent event) {
-            if (DEBUG) {
-                Log.d(TAG, "Loaded list of " + event.knownUsers.size() + " users");
-            }
+            LOG.d("Loaded list of " + event.knownUsers.size() + " users");
             mUsersSortedByName.clear();
             mUsersSortedByName
                     .addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
@@ -95,22 +95,18 @@ final class UserLoginController {
         }
 
         public void onEventMainThread(KnownUsersLoadFailedEvent event) {
-            Log.e(TAG, "Failed to load list of users");
+            LOG.e("Failed to load list of users");
             mUi.showErrorToast(R.string.error_occured);
         }
 
         public void onEventMainThread(UserAddedEvent event) {
-            if (DEBUG) {
-                Log.d(TAG, "User added");
-            }
+            LOG.d("User added");
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
             mUi.showUsers(mUsersSortedByName);
         }
 
         public void onEventMainThread(UserAddFailedEvent event) {
-            if (DEBUG) {
-                Log.d(TAG, "Failed to add user");
-            }
+            LOG.d("Failed to add user");
             mUi.showErrorToast(errorToStringId(event));
         }
     }

@@ -21,6 +21,7 @@ import org.msf.records.net.model.Location;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class RpcToDb {
 
-    private static final String TAG = "RpcToDb";
+    private static final Logger LOG = Logger.create();
 
     /**
      * Convert a ChartStructure response into appropriate inserts in the chart table.
@@ -45,14 +46,14 @@ public class RpcToDb {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();
         String chartUuid = response.uuid;
         if (chartUuid == null) {
-            Log.e(TAG, "null chart uuid when fetching chart structure");
+            LOG.e("null chart uuid when fetching chart structure");
         }
         int chartRow = 0;
         String groupUuid;
         for (ChartGroup group : response.groups) {
             groupUuid = group.uuid;
             if (groupUuid == null) {
-                Log.e(TAG, "null group uuid for chart " + chartUuid);
+                LOG.e("null group uuid for chart " + chartUuid);
                 continue;
             }
             for (String conceptUuid : group.concepts) {
@@ -77,13 +78,13 @@ public class RpcToDb {
         final String patientUuid = response.uuid;
         for (Encounter encounter : response.encounters) {
             if (encounter.uuid == null) {
-                Log.e(TAG, "Encounter uuid was null for " + patientUuid);
+                LOG.e("Encounter uuid was null for " + patientUuid);
                 continue;
             }
             final String encounterUuid = encounter.uuid;
             DateTime timestamp = encounter.timestamp;
             if (timestamp == null) {
-                Log.e(TAG, "Encounter timestamp was null for " + encounterUuid);
+                LOG.e("Encounter timestamp was null for " + encounterUuid);
                 continue;
             }
             final int encounterTime = (int) (timestamp.getMillis() / 1000); // seconds since epoch
@@ -131,19 +132,19 @@ public class RpcToDb {
         final String[] projection = LocationProjection.getLocationProjection();
         final String[] namesProjection = LocationProjection.getLocationNamesProjection();
 
-        Log.d(TAG, "Before network call");
+        LOG.d("Before network call");
         RequestFuture<List<Location>> future = RequestFuture.newFuture();
         App.getServer().listLocations(future, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
+                LOG.d(error.toString());
             }
-        }, TAG);
+        });
 
         // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
         // background thread
         List<Location> locations = future.get();
-        Log.d(TAG, "After network call");
+        LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
 
@@ -153,15 +154,15 @@ public class RpcToDb {
         }
 
         // Get list of all items
-        Log.i(TAG, "Fetching local entries for merge");
+        LOG.i("Fetching local entries for merge");
         Uri uri = Contracts.Locations.CONTENT_URI; // Location tree
         Uri namesUri = Contracts.LocationNames.CONTENT_URI; // Location names
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
         Cursor namesCur = contentResolver.query(namesUri, namesProjection, null, null, null);
         assert namesCur != null;
-        Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
-        Log.i(TAG, "Found " + locations.size() + " external entries. Computing merge solution...");
+        LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
+        LOG.i("Found " + locations.size() + " external entries. Computing merge solution...");
 
         String id, parentId;
 
@@ -205,14 +206,14 @@ public class RpcToDb {
 
                 if (location.parent_uuid != null && !location.parent_uuid.equals(parentId)) {
                     // Update existing record
-                    Log.i(TAG, "Scheduling update: " + existingUri);
+                    LOG.i("Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
                             .withValue(Contracts.Locations.LOCATION_UUID, id)
                             .withValue(Contracts.Locations.PARENT_UUID, parentId)
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
-                    Log.i(TAG, "No action required for " + existingUri);
+                    LOG.i("No action required for " + existingUri);
                 }
 
                 if (location.names != null &&
@@ -221,7 +222,7 @@ public class RpcToDb {
                             String.valueOf(id)).build();
                     // Update location names by deleting any existing location names and
                     // repopulating.
-                    Log.i(TAG, "Scheduling location names update: " + existingNamesUri);
+                    LOG.i("Scheduling location names update: " + existingNamesUri);
                     batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
                     syncResult.stats.numDeletes++;
                     for (String locale : location.names.keySet()) {
@@ -241,10 +242,10 @@ public class RpcToDb {
                 // Entry doesn't exist. Remove it from the database.
                 Uri deleteUri = uri.buildUpon().appendPath(id).build();
                 Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
-                Log.i(TAG, "Scheduling delete: " + deleteUri);
+                LOG.i("Scheduling delete: " + deleteUri);
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
-                Log.i(TAG, "Scheduling delete: " + namesDeleteUri);
+                LOG.i("Scheduling delete: " + namesDeleteUri);
                 batch.add(ContentProviderOperation.newDelete(namesDeleteUri).build());
                 syncResult.stats.numDeletes++;
             }
@@ -253,7 +254,7 @@ public class RpcToDb {
 
 
         for (Location location : locationsMap.values()) {
-            Log.i(TAG, "Scheduling insert: entry_id=" + location.uuid);
+            LOG.i("Scheduling insert: entry_id=" + location.uuid);
             batch.add(ContentProviderOperation.newInsert(Contracts.Locations.CONTENT_URI)
                     .withValue(Contracts.Locations.LOCATION_UUID, location.uuid)
                     .withValue(Contracts.Locations.PARENT_UUID, location.parent_uuid)

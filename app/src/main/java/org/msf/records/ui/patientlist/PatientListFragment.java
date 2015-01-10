@@ -3,7 +3,6 @@ package org.msf.records.ui.patientlist;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
@@ -21,7 +20,7 @@ import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
-import org.msf.records.ui.tentselection.TentSelectionActivity;
+import org.msf.records.utils.Logger;
 
 import javax.inject.Inject;
 
@@ -34,7 +33,7 @@ public class PatientListFragment extends ProgressFragment implements
         ExpandableListView.OnChildClickListener,
         SwipeRefreshLayout.OnRefreshListener {
 
-    private static final String TAG = PatientListFragment.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     private PatientSearchController mController;
     private PatientListTypedCursorAdapter mPatientAdapter;
@@ -102,7 +101,7 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onRefresh() {
         if(!isRefreshing){
-            Log.d(TAG, "onRefresh");
+            LOG.d("onRefresh");
 
             //triggers app wide data refresh
             mSyncManager.forceSync();

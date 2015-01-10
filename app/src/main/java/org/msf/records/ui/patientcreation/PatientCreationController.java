@@ -12,6 +12,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.utils.Logger;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -20,7 +21,7 @@ import org.msf.records.events.data.SingleItemFetchFailedEvent;
  */
 final class PatientCreationController {
 
-    private static final String TAG = PatientCreationController.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     static final int AGE_UNKNOWN = 0;
     static final int AGE_YEARS = 1;
@@ -166,7 +167,7 @@ final class PatientCreationController {
 
         public void onEventMainThread(PatientAddFailedEvent event) {
             mUi.showErrorMessage(event.exception == null ? "unknown" : event.exception.getMessage());
-            Log.e(TAG, "Patient add failed", event.exception);
+            LOG.e("Patient add failed", event.exception);
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {

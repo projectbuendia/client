@@ -16,6 +16,7 @@ import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.RpcToDb;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class UserStore {
 
-    private static final String TAG = UserStore.class.getName();
+    private static final Logger LOG = Logger.create();
 
     /**
      * Loads the known users from local store.
@@ -36,7 +37,7 @@ public class UserStore {
         Cursor cursor = null;
         ContentProviderClient client = null;
         try {
-            Log.i(TAG, "Retrieving users from db");
+            LOG.i("Retrieving users from db");
             client = App.getInstance().getContentResolver()
                             .acquireContentProviderClient(Contracts.Users.CONTENT_URI);
 
@@ -45,15 +46,15 @@ public class UserStore {
                 cursor = client.query(Contracts.Users.CONTENT_URI, null, null, null,
                         Contracts.Users.FULL_NAME);
             } catch (RemoteException e) {
-                Log.e(TAG, "Error accessing db", e);
+                LOG.e(e, "Error accessing db");
             }
 
             // If no data was retrieved from database, force a sync from server.
             if (cursor == null || cursor.getCount() == 0) {
-                Log.i(TAG, "No users found in db -- refreshing");
+                LOG.i("No users found in db -- refreshing");
                 return syncKnownUsers();
             }
-            Log.i(TAG, "Found " + cursor.getCount() + " users in db");
+            LOG.i("Found " + cursor.getCount() + " users in db");
 
             // Initiate users from database data and return the result.
             int fullNameColumn = cursor.getColumnIndex(Contracts.Users.FULL_NAME);
@@ -80,7 +81,7 @@ public class UserStore {
      * Syncs known users with the server.
      */
     public Set<User> syncKnownUsers() {
-        Log.i(TAG, "Getting user list from server");
+        LOG.i("Getting user list from server");
         // Make an async call to the server and use a CountDownLatch to block until the result is
         // returned.
         final CountDownLatch latch = new CountDownLatch(1);
@@ -97,24 +98,24 @@ public class UserStore {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Unexpected error loading user list", error);
+                        LOG.e("Unexpected error loading user list", error);
                         latch.countDown();
                     }
-                }, TAG);
+                });
         try {
             latch.await();
         } catch (InterruptedException e) {
-            Log.e(TAG, "Interrupted while loading user list", e);
+            LOG.e(e, "Interrupted while loading user list");
         }
 
-        Log.i(TAG, "Updating user db with retrieved users");
+        LOG.i("Updating user db with retrieved users");
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
                         Contracts.Users.CONTENT_URI);
         try {
             client.applyBatch(RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
         } catch (RemoteException | OperationApplicationException e) {
-            Log.e(TAG, "Failed to update database", e);
+            LOG.e(e, "Failed to update database");
         } finally {
             client.release();
         }
@@ -149,15 +150,15 @@ public class UserStore {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Unexpected error adding user", error);
+                        LOG.e(error, "Unexpected error adding user");
                         result.error = error;
                         latch.countDown();
                     }
-                }, TAG);
+                });
         try {
             latch.await();
         } catch (InterruptedException e) {
-            Log.e(TAG, "Interrupted while loading user list", e);
+            LOG.e(e, "Interrupted while loading user list");
         }
 
         if (result.error != null) {
@@ -165,7 +166,7 @@ public class UserStore {
         }
 
         // Write the resulting user to the database.
-        Log.i(TAG, "Updating user db with new user");
+        LOG.i("Updating user db with new user");
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
                         Contracts.Users.CONTENT_URI);
@@ -175,7 +176,7 @@ public class UserStore {
             values.put(Contracts.Users.FULL_NAME, result.user.getFullName());
             client.insert(Contracts.Users.CONTENT_URI, values);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to update database", e);
+            LOG.e(e, "Failed to update database");
         } finally {
             client.release();
         }

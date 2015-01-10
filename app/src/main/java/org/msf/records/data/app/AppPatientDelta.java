@@ -13,13 +13,14 @@ import org.json.JSONObject;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 /**
  * An object that represents the data to write to a new patient or the data to update on a patient.
  */
 public class AppPatientDelta {
 
-    private static final String TAG = AppPatientDelta.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     private static final DateTimeFormatter BIRTHDATE_FORMATTER =
             DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -67,7 +68,7 @@ public class AppPatientDelta {
 
             return true;
         } catch (JSONException e) {
-            Log.w(TAG, "Unable to serialize a patient delta to JSON.", e);
+            LOG.w(e, "Unable to serialize a patient delta to JSON.");
 
             return false;
         }

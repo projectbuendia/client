@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import org.msf.records.utils.Logger;
+
 /** Service to handle sync requests.
  *
  * <p>This service is invoked in response to Intents with action android.content.SyncAdapter, and
@@ -17,7 +19,8 @@ import android.util.Log;
  * OS on request.
  */
 public class SyncService extends Service {
-    private static final String TAG = SyncService.class.getSimpleName();
+
+    private static final Logger LOG = Logger.create();
 
     private static final Object sSyncAdapterLock = new Object();
     private static SyncAdapter sSyncAdapter = null;
@@ -28,7 +31,7 @@ public class SyncService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "Service created");
+        LOG.i("Service created");
         synchronized (sSyncAdapterLock) {
             if (sSyncAdapter == null) {
                 sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
@@ -42,7 +45,7 @@ public class SyncService extends Service {
      */
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "Service destroyed");
+        LOG.i("Service destroyed");
     }
 
     /**
