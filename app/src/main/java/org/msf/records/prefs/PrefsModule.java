@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
-import org.msf.records.BuildConfig;
 import org.msf.records.R;
 import org.msf.records.inject.Qualifiers;
 
