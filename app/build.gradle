@@ -80,9 +80,16 @@ android {
 
         testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
-        buildConfigField "String", "OPENMRS_ROOT_URL", project.hasProperty('openmrsRootUrl') ? "\"${openmrsRootUrl}\"" : "null"
-        buildConfigField "String", "OPENMRS_USER", project.hasProperty('openmrsUser') ? "\"${openmrsUser}\"" : "null"
-        buildConfigField "String", "OPENMRS_PASSWORD", project.hasProperty('openmrsPassword') ? "\"${openmrsPassword}\"" : "null"
+
+        if (project.hasProperty('openmrsRootUrl')) {
+            resValue "String", "openmrs_root_url", "${openmrsRootUrl}"
+        }
+        if (project.hasProperty('openmrsUser')) {
+            resValue "String", "openmrs_user", "${openmrsUser}"
+        }
+        if (project.hasProperty('openmrsPassword')) {
+            resValue "String", "openmrs_password", "${openmrsPassword}"
+        }
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue "string", "sync_authority", applicationId + '.provider.records'

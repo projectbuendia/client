@@ -30,34 +30,28 @@ public class PrefsModule {
     @Provides @Singleton @Qualifiers.OpenMrsRootUrl
     StringPreference provideOpenMrsRootUrlStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
-        String fromBuildConfig = BuildConfig.OPENMRS_ROOT_URL;
-        String fromResources = resources.getString(R.string.openmrs_root_url_default);
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_root_url",
-                (fromBuildConfig != null) ? fromBuildConfig : fromResources);
+                resources.getString(R.string.openmrs_root_url_default));
     }
 
     @Provides @Singleton @Qualifiers.OpenMrsUser
     StringPreference provideOpenMrsUserStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
-        String fromBuildConfig = BuildConfig.OPENMRS_USER;
-        String fromResources = resources.getString(R.string.openmrs_user_default);
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_user",
-                (fromBuildConfig != null) ? fromBuildConfig : fromResources);
+                resources.getString(R.string.openmrs_user_default));
     }
 
     @Provides @Singleton @Qualifiers.OpenMrsPassword
     StringPreference provideOpenMrsPasswordStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
-        String fromBuildConfig = BuildConfig.OPENMRS_PASSWORD;
-        String fromResources = resources.getString(R.string.openmrs_password_default);
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_password",
-                (fromBuildConfig != null) ? fromBuildConfig : fromResources);
+                resources.getString(R.string.openmrs_password_default));
     }
 
     @Provides @Singleton @Qualifiers.XformUpdateClientCache
