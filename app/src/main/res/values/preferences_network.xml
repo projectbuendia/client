@@ -5,11 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="UnusedResources">
 
-    <!-- The root URLs for OpenMRS on each of our three different configurations: GCE, Edison on
+    <!-- The root URLs for OpenMRS on each of our different configurations: GCE, Edison on
          LAN, and localhost emulator. It would have been nice to separate the host and path
          components but you cannot concatenate string resources in XML. -->
     <string name="openmrs_root_url_gce">
         http://104.155.15.141:8080/openmrs/ws/rest/v1/projectbuendia
+    </string>
+    <string name="openmrs_root_url_test">
+        http://23.251.140.223:8080/openmrs/ws/rest/v1/projectbuendia
     </string>
     <string name="openmrs_root_url_edison">
         http://10.0.0.198:8080/openmrs/ws/rest/v1/projectbuendia

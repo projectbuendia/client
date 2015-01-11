@@ -29,10 +29,12 @@ public class PrefsModule {
     @Provides @Singleton @Qualifiers.OpenMrsRootUrl
     StringPreference provideOpenMrsRootUrlStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
+        boolean testMode = true;
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_root_url",
-                resources.getString(R.string.openmrs_root_url_default));
+                resources.getString(
+                        testMode ? R.string.openmrs_root_url_test : R.string.openmrs_root_url_default));
     }
 
     @Provides @Singleton @Qualifiers.OpenMrsUser
