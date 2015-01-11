@@ -39,5 +39,4 @@ proguard/
 .idea/vcs.xml
 
 # User-specific configurations
-*.iml
 *.apk
