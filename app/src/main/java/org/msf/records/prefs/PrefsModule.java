@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
+import org.msf.records.BuildConfig;
 import org.msf.records.R;
 import org.msf.records.inject.Qualifiers;
 
@@ -29,28 +30,34 @@ public class PrefsModule {
     @Provides @Singleton @Qualifiers.OpenMrsRootUrl
     StringPreference provideOpenMrsRootUrlStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
+        String fromBuildConfig = BuildConfig.OPENMRS_ROOT_URL;
+        String fromResources = resources.getString(R.string.openmrs_root_url_default);
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_root_url",
-                resources.getString(R.string.openmrs_root_url_default));
+                (fromBuildConfig != null) ? fromBuildConfig : fromResources);
     }
 
     @Provides @Singleton @Qualifiers.OpenMrsUser
     StringPreference provideOpenMrsUserStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
+        String fromBuildConfig = BuildConfig.OPENMRS_USER;
+        String fromResources = resources.getString(R.string.openmrs_user_default);
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_user",
-                resources.getString(R.string.openmrs_user_default));
+                (fromBuildConfig != null) ? fromBuildConfig : fromResources);
     }
 
     @Provides @Singleton @Qualifiers.OpenMrsPassword
     StringPreference provideOpenMrsPasswordStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
+        String fromBuildConfig = BuildConfig.OPENMRS_PASSWORD;
+        String fromResources = resources.getString(R.string.openmrs_password_default);
         return new StringPreference(
                 sharedPreferences,
                 "openmrs_password",
-                resources.getString(R.string.openmrs_password_default));
+                (fromBuildConfig != null) ? fromBuildConfig : fromResources);
     }
 
     @Provides @Singleton @Qualifiers.XformUpdateClientCache

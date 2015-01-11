@@ -22,8 +22,8 @@ public class OpenMrsConnectionDetails {
         return mVolley;
     }
 
-    public String getRootUrl() {
-        return mOpenMrsRootUrl.get();
+    public String getBuendiaApiUrl() {
+        return mOpenMrsRootUrl.get() + "/ws/rest/v1/projectbuendia";
     }
 
     public String getUserName() {
