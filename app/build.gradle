@@ -82,13 +82,13 @@ android {
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
 
         if (project.hasProperty('openmrsRootUrl')) {
-            resValue "string", "openmrs_root_url", "${openmrsRootUrl}"
+            resValue "string", "openmrs_root_url_default", "${openmrsRootUrl}"
         }
         if (project.hasProperty('openmrsUser')) {
-            resValue "string", "openmrs_user", "${openmrsUser}"
+            resValue "string", "openmrs_user_default", "${openmrsUser}"
         }
         if (project.hasProperty('openmrsPassword')) {
-            resValue "string", "openmrs_password", "${openmrsPassword}"
+            resValue "string", "openmrs_password_default", "${openmrsPassword}"
         }
 
         // Allow different sync adapters to be defined for debug and release builds.
