@@ -56,6 +56,15 @@ dependencies {
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 def releaseRepoRoot = file('../../release/')
 
+def openmrsRootUrlGce = "http://104.155.15.141:8080/openmrs";
+def openmrsRootUrlTest = "http://23.251.140.223:8080/openmrs";
+def openmrsRootUrlEdison = "http://10.0.0.50:8080/openmrs";
+def openmrsRootUrlLocalhost = "http://10.0.2.2:8080/openmrs";
+
+def openmrsRootUrlDefault = openmrsRootUrlGce;
+def openmrsUserDefault = "android";
+def openmrsPasswordDefault = "Android123";
+
 android {
     compileSdkVersion 21
     buildToolsVersion "19.1.0"
@@ -81,15 +90,9 @@ android {
         testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
 
-        if (project.hasProperty('openmrsRootUrl')) {
-            resValue "string", "openmrs_root_url_default", "${openmrsRootUrl}"
-        }
-        if (project.hasProperty('openmrsUser')) {
-            resValue "string", "openmrs_user_default", "${openmrsUser}"
-        }
-        if (project.hasProperty('openmrsPassword')) {
-            resValue "string", "openmrs_password_default", "${openmrsPassword}"
-        }
+        resValue "string", "openmrs_root_url_default", project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
+        resValue "string", "openmrs_user_default", project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
+        resValue "string", "openmrs_password_default", project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue "string", "sync_authority", applicationId + '.provider.records'
