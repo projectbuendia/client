@@ -6,6 +6,7 @@ import android.test.AndroidTestCase;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.msf.records.data.app.AppModel;
 import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
@@ -23,6 +24,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 
 	private TentSelectionController mController;
 	private FakeEventBus mFakeEventBus;
+    @Mock private AppModel mMockAppModel;
 	@Mock private LocationManager mMockLocationManager;
 	@Mock private TentSelectionController.Ui mMockUi;
 	@Mock private TentSelectionController.TentFragmentUi mMockFragmentUi;
@@ -37,8 +39,8 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 		mFakeEventBus = new FakeEventBus();
 		mController = new TentSelectionController(
                 mMockLocationManager,
-                null,
-                null,
+                mMockAppModel,
+                mFakeEventBus,
                 mMockUi,
                 mFakeEventBus);
 	}
@@ -48,7 +50,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 		// WHEN the controller is initialized
 		mController.init();
 		// THEN the controller asks the location manager to provide the location tree
-		verify(mMockLocationManager).loadLocations();
+		verify(mMockAppModel).fetchLocationTree(mFakeEventBus, "en");
     }
 
 	public void testSuspend_UnregistersFromEventBus() {

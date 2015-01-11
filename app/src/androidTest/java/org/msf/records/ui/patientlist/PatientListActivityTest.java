@@ -1,39 +1,44 @@
 package org.msf.records.ui.patientlist;
 
-import android.test.ActivityInstrumentationTestCase2;
-
 import org.msf.records.R;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.ui.FunctionalTestCase;
+import org.msf.records.ui.userlogin.UserLoginActivity;
 
-import java.util.Date;
-
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.is;
+import static org.msf.records.ui.matchers.StringMatchers.matchesRegex;
 
-public class PatientListActivityTest extends
-        ActivityInstrumentationTestCase2<PatientListActivity> {
+public class PatientListActivityTest extends FunctionalTestCase {
 
-    public PatientListActivityTest() {
-        super(PatientListActivity.class);
-    }
-
-    @Override
     public void setUp() throws Exception {
         super.setUp();
-        getActivity();
+        onView(withText("Guest User")).perform(click());
+        onView(withText("ALL PATIENTS")).perform(click());
     }
 
-    /** Looks for the filter menu and the first zone heading. */
-    public void testBasicDisplay() {
-        onView(allOf(isDisplayed(), withText("All Patients")));
-        onView(allOf(isDisplayed(), withText(
-                allOf(startsWith("Triage ("), endsWith("patients)")))));
+    /** Looks for the filter menu. */
+    public void testFilterMenu() {
+        onView(withText("All Patients")).perform(click());
+        onView(withText("Triage")).check(matches(isDisplayed()));
+        onView(withText("Pregnant")).check(matches(isDisplayed()));
+    }
+
+    /** Looks for a zone heading and at least one patient. */
+    public void testZoneAndPatientDisplayed() {
+        onView(withText(matchesRegex("(Triage|S1) \\((No|[0-9]+) patients?\\)")))
+                .check(matches(isDisplayed()));
+
+        // Click the first patient
+        onData(is(AppPatient.class))
+                .inAdapterView(withId(R.id.fragment_patient_list))
+                .atPosition(0)
+                .perform(click());
     }
 }
