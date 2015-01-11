@@ -409,9 +409,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Get call patients from the cache.
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
         Cursor c = provider.query(
-                uri, new String[]{Contracts.Patients.UUID}, null, null, null);
-        if (c.getCount() < 1) {
-            return;
+                uri, new String[] {Contracts.Patients.UUID}, null, null, null);
+        try {
+            if (c.getCount() < 1) {
+                return;
+            }
+        } finally {
+            c.close();
         }
 
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
