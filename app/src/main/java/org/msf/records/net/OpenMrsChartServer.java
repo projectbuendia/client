@@ -34,7 +34,7 @@ public class OpenMrsChartServer {
                          Response.Listener<PatientChart> patientListener,
                          Response.ErrorListener errorListener) {
         GsonRequest<PatientChart> request = new GsonRequest<>(
-                mConnectionDetails.getRootUrl() + "/patientencounters/" + patientUuid,
+                mConnectionDetails.getBuendiaApiUrl() + "/patientencounters/" + patientUuid,
                 PatientChart.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
@@ -45,7 +45,7 @@ public class OpenMrsChartServer {
     public void getAllCharts(Response.Listener<PatientChartList> patientListener,
                              Response.ErrorListener errorListener) {
         GsonRequest<PatientChartList> request = new GsonRequest<>(
-                mConnectionDetails.getRootUrl() + "/patientencounters",
+                mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
                 PatientChartList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
@@ -57,7 +57,7 @@ public class OpenMrsChartServer {
     public void getConcepts(Response.Listener<ConceptList> conceptListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<ConceptList> request = new GsonRequest<ConceptList>(
-                mConnectionDetails.getRootUrl() + "/concept",
+                mConnectionDetails.getBuendiaApiUrl() + "/concept",
                 ConceptList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
@@ -69,7 +69,7 @@ public class OpenMrsChartServer {
             String uuid, Response.Listener<ChartStructure> chartListener,
             Response.ErrorListener errorListener) {
         GsonRequest<ChartStructure> request = new GsonRequest<ChartStructure>(
-                mConnectionDetails.getRootUrl() + "/chart/" + uuid + "?v=full",
+                mConnectionDetails.getBuendiaApiUrl() + "/chart/" + uuid + "?v=full",
                 ChartStructure.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {

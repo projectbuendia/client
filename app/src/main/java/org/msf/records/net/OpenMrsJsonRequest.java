@@ -31,7 +31,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
         this(connectionDetails.getUserName(), connectionDetails.getPassword(),
-                connectionDetails.getRootUrl() + urlSuffix,
+                connectionDetails.getBuendiaApiUrl() + urlSuffix,
                 jsonRequest, listener, errorListener);
     }
 
