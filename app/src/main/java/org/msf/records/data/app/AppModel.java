@@ -19,7 +19,6 @@ import org.msf.records.events.data.TypedCursorFetchedEventFactory;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.filter.UuidFilter;
 import org.msf.records.net.Server;
-import org.msf.records.sync.LocationProjection;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 
@@ -142,6 +141,8 @@ public class AppModel {
                 // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
                 // the event won't be managed by anyone else; therefore, we close it ourselves.
                 ((TypedCursorFetchedEvent<?>) event.originalEvent).cursor.close();
+            } else if (event.originalEvent instanceof AppLocationTreeFetchedEvent) {
+                ((AppLocationTreeFetchedEvent) event.originalEvent).tree.close();
             }
 
             mBus.unregisterCleanupSubscriber(this);
@@ -183,7 +184,7 @@ public class AppModel {
                         null);
 
                 return AppLocationTree
-                        .fromTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
+                        .forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
             } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();
