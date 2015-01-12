@@ -14,8 +14,6 @@ import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
 
-import android.util.Log;
-
 import com.google.common.collect.Ordering;
 
 /**
@@ -122,8 +120,8 @@ final class UserLoginController {
                 return R.string.add_user_user_exists_locally;
             case UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER:
                 return R.string.add_user_user_exists_on_server;
-            case UserAddFailedEvent.REASON_SERVER_ERROR:
-                return R.string.add_user_server_error;
+            case UserAddFailedEvent.REASON_CONNECTION_ERROR:
+                return R.string.add_user_connection_error;
             default:
                 return R.string.add_user_unknown_error;
         }

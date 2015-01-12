@@ -51,7 +51,7 @@
     <string name="add_user_invalid_user">Invalid user</string>
     <string name="add_user_user_exists_locally">User already exists on tablet</string>
     <string name="add_user_user_exists_on_server">Username already exists on server</string>
-    <string name="add_user_server_error">Server error</string>
+    <string name="add_user_connection_error">Error connecting to server</string>
     <string name="title_activity_round">RoundActivity</string>
 
     <string name="no_patients">No patients</string>
