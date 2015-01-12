@@ -56,14 +56,17 @@ dependencies {
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 def releaseRepoRoot = file('../../release/')
 
-def openmrsRootUrlGce = "http://104.155.15.141:8080/openmrs";
-def openmrsRootUrlTest = "http://23.251.140.223:8080/openmrs";
-def openmrsRootUrlEdison = "http://10.0.0.50:8080/openmrs";
-def openmrsRootUrlLocalhost = "http://10.0.2.2:8080/openmrs";
+// Commonly used OpenMRS root URLs for convenience.
+def openmrsRootUrlGce = 'http://104.155.15.141:8080/openmrs';
+def openmrsRootUrlTest = 'http://23.251.140.223:8080/openmrs';
+def openmrsRootUrlEdison = 'http://10.0.0.50:8080/openmrs';
+def openmrsRootUrlLocalhost = 'http://10.0.2.2:8080/openmrs';
 
+// Just for development.  In all production builds these should be overridden
+// using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
 def openmrsRootUrlDefault = openmrsRootUrlGce;
-def openmrsUserDefault = "android";
-def openmrsPasswordDefault = "Android123";
+def openmrsUserDefault = 'android';
+def openmrsPasswordDefault = 'Android123';
 
 android {
     compileSdkVersion 21
