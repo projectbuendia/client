@@ -64,8 +64,7 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (mUsername.getText() == null
-                                                || mUsername.getText().toString().equals("")) {
+                                        if (isNullOrWhitespace(mUsername)) {
                                             Toast.makeText(
                                                     getActivity(),
                                                     "Username must not be null",
@@ -73,8 +72,7 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                             mUsername.invalidate();
                                             return;
                                         }
-                                        if (mGivenName.getText() == null
-                                                || mGivenName.getText().toString().equals("")) {
+                                        if (isNullOrWhitespace(mGivenName)) {
                                             Toast.makeText(
                                                     getActivity(),
                                                     "Given name must not be null",
@@ -82,8 +80,7 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                             mGivenName.invalidate();
                                             return;
                                         }
-                                        if (mFamilyName.getText() == null
-                                                || mFamilyName.getText().toString().equals("")) {
+                                        if (isNullOrWhitespace(mFamilyName)) {
                                             Toast.makeText(
                                                     getActivity(),
                                                     "Family name must not be null",
@@ -93,9 +90,9 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                         }
 
                                         App.getUserManager().addUser(NewUser.create(
-                                                mUsername.getText().toString(),
-                                                mGivenName.getText().toString(),
-                                                mFamilyName.getText().toString()
+                                                mUsername.getText().toString().trim(),
+                                                mGivenName.getText().toString().trim(),
+                                                mFamilyName.getText().toString().trim()
                                         ));
                                         dialog.dismiss();
                                     }
@@ -104,5 +101,9 @@ public class AddNewUserDialogFragment extends DialogFragment {
         });
 
         return dialog;
+    }
+
+    private boolean isNullOrWhitespace(EditText field) {
+        return field.getText() == null || field.getText().toString().trim().isEmpty();
     }
 }
