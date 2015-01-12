@@ -1,6 +1,6 @@
 package org.msf.records.model;
 
-import org.msf.records.R;
+import org.msf.records.data.res.ResStatus;
 
 public class Concept {
     public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -23,38 +23,27 @@ public class Concept {
     public static final String GENERAL_CONDITION_FAIR_UUID = "162133AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
 
-    public static int getForegroundColorResourceForGeneralCondition(String generalCondition) {
-        if (generalCondition == null) {
-            return android.R.color.black;
+    /**
+     * Returns the {@link ResStatus} for the specified condition UUID.
+     */
+    public static ResStatus getResStatus(String condition) {
+        if (condition == null) {
+            return ResStatus.UNKNOWN;
         }
 
-        switch (generalCondition) {
-            case Concept.GENERAL_CONDITION_FAIR_UUID:
-                return android.R.color.black;
+        switch (condition) {
             case Concept.GENERAL_CONDITION_GOOD_UUID:
+                return ResStatus.GOOD;
+            case Concept.GENERAL_CONDITION_FAIR_UUID:
+                return ResStatus.FAIR;
             case Concept.GENERAL_CONDITION_POOR_UUID:
+                return ResStatus.POOR;
             case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
+                return ResStatus.VERY_POOR;
             default:
-                return android.R.color.white;
+                return ResStatus.UNKNOWN;
         }
     }
 
-    public static int getBackgroundColorResourceForGeneralCondition(String generalCondition) {
-        if (generalCondition == null) {
-            return R.color.general_condition_unknown;
-        }
-
-        switch (generalCondition) {
-            case Concept.GENERAL_CONDITION_GOOD_UUID:
-                return R.color.general_condition_good;
-            case Concept.GENERAL_CONDITION_FAIR_UUID:
-                return R.color.general_condition_fair;
-            case Concept.GENERAL_CONDITION_POOR_UUID:
-                return R.color.general_condition_poor;
-            case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
-                return R.color.general_condition_very_poor;
-            default:
-                return R.color.general_condition_unknown;
-        }
-    }
+    private Concept() {}
 }

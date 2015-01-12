@@ -10,6 +10,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.R;
+import org.msf.records.data.res.ResZone;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
@@ -59,13 +60,14 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         }
 
         LocationSubtree location = getItem(position);
+        ResZone.Resolved zone = Zone.getResZone(
+                location.getLocation().parent_uuid).resolve(context.getResources());
+
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle(
                 PatientCountDisplay.getPatientCountSubtitle(context, location.getPatientCount()));
-        holder.mButton.setBackgroundResource(
-                Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
-        holder.mButton.setTextColor(
-                Zone.getForegroundColorResource(location.getLocation().parent_uuid));
+        holder.mButton.setBackgroundColor(zone.getBackgroundColor());
+        holder.mButton.setTextColor(zone.getForegroundColor());
 
         if (selectedLocationUuid.isPresent() &&
                 selectedLocationUuid.get().equals(location.getLocation().uuid)) {

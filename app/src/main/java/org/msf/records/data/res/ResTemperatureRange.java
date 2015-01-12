@@ -7,7 +7,7 @@ import org.msf.records.R;
 /**
  * An enumeration of temperature ranges and the resources associated with them.
  */
-public enum TemperatureRange implements Resolvable<TemperatureRange.Resolved> {
+public enum ResTemperatureRange implements Resolvable<ResTemperatureRange.Resolved> {
 
     UNKNOWN(R.color.vital_unknown, R.color.vital_fg_dark),
     NORMAL(R.color.temperature_normal, R.color.vital_fg_light),
@@ -16,22 +16,22 @@ public enum TemperatureRange implements Resolvable<TemperatureRange.Resolved> {
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    TemperatureRange(int backgroundColorId, int foregroundColorId) {
+    ResTemperatureRange(int backgroundColorId, int foregroundColorId) {
         this.backgroundColorId = backgroundColorId;
         this.foregroundColorId = foregroundColorId;
     }
 
     @Override
     public Resolved resolve(Resources resources) {
-        return Resolver.resolve(this, resources, TemperatureRange.Resolved.class);
+        return Resolver.resolve(this, resources, ResTemperatureRange.Resolved.class);
     }
 
     public static class Resolved {
 
-        private final TemperatureRange mTemperatureRange;
+        private final ResTemperatureRange mTemperatureRange;
         private final Resources mResources;
 
-        public Resolved(TemperatureRange temperatureRange, Resources resources) {
+        public Resolved(ResTemperatureRange temperatureRange, Resources resources) {
             mTemperatureRange = temperatureRange;
             mResources = resources;
         }
