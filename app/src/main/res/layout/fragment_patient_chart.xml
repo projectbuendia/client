@@ -129,6 +129,7 @@
 
             <include
                 layout="@layout/view_vital_pcr"
+                android:id="@+id/patient_chart_pcr_parent"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
                 android:layout_margin="4dp" />
@@ -150,7 +151,8 @@
                 android:layout_width="0dp"
                 android:layout_height="128dp"
                 android:layout_margin="4dp"
-                android:background="#01579b"
+                android:background="@color/vital_unknown"
+                app:textColor="@color/vital_fg_dark"
                 app:vitalName="Conscious State"
                 app:vitalValue="-"/>
 
@@ -159,7 +161,8 @@
                 android:layout_width="0dp"
                 android:layout_height="128dp"
                 android:layout_margin="4dp"
-                android:background="#01579b"
+                android:background="@color/vital_unknown"
+                app:textColor="@color/vital_fg_dark"
                 app:vitalName="Mobility"
                 app:vitalValue="-"/>
 
@@ -168,7 +171,8 @@
                 android:layout_width="0dp"
                 android:layout_height="128dp"
                 android:layout_margin="4dp"
-                android:background="#01579b"
+                android:background="@color/vital_unknown"
+                app:textColor="@color/vital_fg_dark"
                 app:vitalName="Diet"
                 app:vitalValue="-"/>
 
@@ -177,7 +181,8 @@
                 android:layout_width="0dp"
                 android:layout_height="128dp"
                 android:layout_margin="4dp"
-                android:background="#01579b"
+                android:background="@color/vital_unknown"
+                app:textColor="@color/vital_fg_dark"
                 app:vitalName="Hydration"
                 app:vitalValue="-"/>
 

@@ -1,6 +1,6 @@
 package org.msf.records.model;
 
-import org.msf.records.R;
+import org.msf.records.data.res.ResZone;
 import org.msf.records.net.model.Location;
 
 import java.util.Arrays;
@@ -52,36 +52,22 @@ public class Zone {
         return firstIndex.compareTo(secondIndex);
     }
 
-    public static int getBackgroundColorResource(String uuid) {
+    /**
+     * Returns the {@link ResZone} for the specified zone UUID.
+     */
+    public static ResZone getResZone(String uuid) {
         switch (uuid) {
-            case CONFIRMED_ZONE_UUID:
-                return R.color.status_confirmed;
-            case MORGUE_ZONE_UUID:
-                return R.color.status_confirmed_death;
-            case OUTSIDE_ZONE_UUID:
-                return R.color.zone_outside;
-            case PROBABLE_ZONE_UUID:
-                return R.color.status_probable;
             case SUSPECT_ZONE_UUID:
-                return R.color.status_suspect;
-            case TRIAGE_ZONE_UUID:
-                return R.color.zone_triage;
-            default:
-                return R.color.white;
-        }
-    }
-
-    public static int getForegroundColorResource(String uuid) {
-        switch (uuid) {
-            case CONFIRMED_ZONE_UUID:
-            case MORGUE_ZONE_UUID:
-                return R.color.white;
-            case OUTSIDE_ZONE_UUID:
+                return ResZone.SUSPECT;
             case PROBABLE_ZONE_UUID:
-            case SUSPECT_ZONE_UUID:
+                return ResZone.PROBABLE;
+            case CONFIRMED_ZONE_UUID:
+                return ResZone.CONFIRMED;
+            case MORGUE_ZONE_UUID:
+            case OUTSIDE_ZONE_UUID:
             case TRIAGE_ZONE_UUID:
             default:
-                return android.R.color.black;
+                return ResZone.UNKNOWN;
         }
     }
 }

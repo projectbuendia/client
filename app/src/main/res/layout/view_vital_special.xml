@@ -5,15 +5,13 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7A7A7A">
+    android:background="@color/vital_unknown">
 
     <RelativeLayout
-        android:id="@+id/patient_chart_vital_special_parent"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="4dp"
-        android:background="#7A7A7A">
+        android:background="?android:attr/selectableItemBackground">
 
         <TextView
             android:id="@+id/vital_name_special"
@@ -23,21 +21,21 @@
             android:padding="8dp"
             android:gravity="center"
             android:textAllCaps="true"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
             android:textSize="16sp"
             android:text="Special" />
 
         <me.grantland.widget.AutofitTextView
+            android:id="@+id/patient_chart_vital_special"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/vital_name_special"
             android:padding="8dp"
             android:gravity="center"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/vital_fg_dark"
             android:textSize="36sp"
             android:maxLines="2"
-            android:id="@+id/patient_chart_vital_special"
             tools:text="-"/>
 
     </RelativeLayout>

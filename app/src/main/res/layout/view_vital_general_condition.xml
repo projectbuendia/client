@@ -4,13 +4,13 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7A7A7A">
+    android:background="@color/vital_unknown">
 
     <RelativeLayout
+        android:id="@+id/patient_chart_vital_general_parent"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/patient_chart_vital_general_parent"
         android:background="?android:attr/selectableItemBackground">
 
         <TextView
@@ -21,7 +21,7 @@
             android:padding="8dp"
             android:gravity="center"
             android:textAllCaps="true"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
             android:textSize="16sp"
             android:text="Condition" />
@@ -32,7 +32,7 @@
             android:layout_above="@id/vital_name_general_condition"
             android:padding="8dp"
             android:gravity="center"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/vital_fg_dark"
             android:textSize="72sp"
             android:singleLine="true"
             android:id="@+id/patient_chart_vital_general_condition"
