@@ -55,15 +55,15 @@ public class Zone {
     public static int getBackgroundColorResource(String uuid) {
         switch (uuid) {
             case CONFIRMED_ZONE_UUID:
-                return R.color.status_confirmed;
+                return R.color.status_confirmed_old;
             case MORGUE_ZONE_UUID:
-                return R.color.status_confirmed_death;
+                return R.color.status_confirmed_death_old;
             case OUTSIDE_ZONE_UUID:
                 return R.color.zone_outside;
             case PROBABLE_ZONE_UUID:
-                return R.color.status_probable;
+                return R.color.status_probable_old;
             case SUSPECT_ZONE_UUID:
-                return R.color.status_suspect;
+                return R.color.status_suspect_old;
             case TRIAGE_ZONE_UUID:
                 return R.color.zone_triage;
             default:

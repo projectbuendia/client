@@ -41,15 +41,15 @@ public class Status implements Parcelable {
     static {
         STATUSES = new HashMap<>();
         for (Status status : new Status[]{
-                new Status("SUSPECTED_CASE", R.string.status_suspect, R.drawable.square_suspect, R.drawable.round_suspect, R.color.status_suspect),
-                new Status("PROBABLE_CASE", R.string.status_probable, R.drawable.square_probable, R.drawable.round_probable, R.color.status_probable),
-                new Status("CONFIRMED_CASE", R.string.status_confirmed, R.drawable.square_confirmed, R.drawable.round_confirmed, R.color.status_confirmed),
-                new Status("NON_CASE", R.string.status_non_case, R.drawable.square_non_case, R.drawable.round_non_case, R.color.status_non_case),
-                new Status("CONVALESCENT", R.string.status_convalescence, R.drawable.square_convalescence, R.drawable.round_convalescent, R.color.status_convalescent),
-                new Status("READY_FOR_DISCHARGE", R.string.status_can_be_discharged, R.drawable.square_can_be_discharged, R.drawable.round_can_be_discharged, R.color.status_can_be_discharged),
-                new Status("DISCHARGED", R.string.status_discharged, R.drawable.square_discharged, R.drawable.round_discharged, R.color.status_discharged),
-                new Status("SUSPECTED_DEATH", R.string.status_unconfirmed_death, R.drawable.square_unconfirmed_death, R.drawable.round_deceased_unconfirmed, R.color.status_unconfirmed_death),
-                new Status("CONFIRMED_DEATH", R.string.status_confirmed_death, R.drawable.square_confirmed_death, R.drawable.round_deceased_confirmed, R.color.status_confirmed_death)
+                new Status("SUSPECTED_CASE", R.string.status_suspect, R.drawable.square_suspect, R.drawable.round_suspect, R.color.status_suspect_old),
+                new Status("PROBABLE_CASE", R.string.status_probable, R.drawable.square_probable, R.drawable.round_probable, R.color.status_probable_old),
+                new Status("CONFIRMED_CASE", R.string.status_confirmed, R.drawable.square_confirmed, R.drawable.round_confirmed, R.color.status_confirmed_old),
+                new Status("NON_CASE", R.string.status_non_case, R.drawable.square_non_case, R.drawable.round_non_case, R.color.status_non_case_old),
+                new Status("CONVALESCENT", R.string.status_convalescence, R.drawable.square_convalescence, R.drawable.round_convalescent, R.color.status_convalescent_old),
+                new Status("READY_FOR_DISCHARGE", R.string.status_can_be_discharged, R.drawable.square_can_be_discharged, R.drawable.round_can_be_discharged, R.color.status_can_be_discharged_old),
+                new Status("DISCHARGED", R.string.status_discharged_old, R.drawable.square_discharged, R.drawable.round_discharged, R.color.status_discharged_old),
+                new Status("SUSPECTED_DEATH", R.string.status_unconfirmed_death, R.drawable.square_unconfirmed_death, R.drawable.round_deceased_unconfirmed, R.color.status_unconfirmed_death_old),
+                new Status("CONFIRMED_DEATH", R.string.status_confirmed_death, R.drawable.square_confirmed_death, R.drawable.round_deceased_confirmed, R.color.status_confirmed_death_old)
         }) {
             STATUSES.put(status.key, status);
         }

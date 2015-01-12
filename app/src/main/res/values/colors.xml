@@ -3,6 +3,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="UnusedResources">
 
+    <!-- Vitals -->
+    <color name="vital_fg_light">#ffffff</color>
+    <color name="vital_fg_dark">#757575</color>
+
+    <color name="vital_unknown">#b2cce1</color>
+    <color name="vital_known">#01579b</color>
+
+    <!-- Statuses -->
+    <color name="status_good">#417505</color>
+    <color name="status_fair">#f5cd23</color>
+    <color name="status_poor">#d05802</color>
+    <color name="status_very_poor">#d0021b</color>
+    <color name="status_suspected_dead">#807e7e</color>
+    <color name="status_confirmed_dead">#000000</color>
+    <color name="status_discharged_non_case">#5eae00</color>
+    <color name="status_cured">#5eae00</color>
+
+    <!-- Temperature Ranges -->
+    <color name="temperature_normal">#009245</color>
+    <color name="temperature_high">#d0021b</color>
+
+    <!-- Zones -->
+    <color name="zone_suspect">#bad3cf</color>
+    <color name="zone_probable">#5ba197</color>
+    <color name="zone_confirmed">#095c51</color>
+
     <color name="white">#FFFFFF</color>
     <color name="yellow">#FFFFB0</color>
     <color name="green">#008000</color>
@@ -12,15 +38,15 @@
     <color name="gray_400">#BDBDBD</color>
     <color name="gray_600">#757575</color>
 
-    <color name="status_probable">#fbb03b</color>
-    <color name="status_suspect">#ffff00</color>
-    <color name="status_confirmed">#ff0000</color>
-    <color name="status_non_case">#39b54a</color>
-    <color name="status_convalescent">#009245</color>
-    <color name="status_unconfirmed_death">#666666</color>
-    <color name="status_confirmed_death">#000000</color>
-    <color name="status_can_be_discharged">#d9e021</color>
-    <color name="status_discharged">#b3b3b3</color>
+    <color name="status_probable_old">#fbb03b</color>
+    <color name="status_suspect_old">#ffff00</color>
+    <color name="status_confirmed_old">#ff0000</color>
+    <color name="status_non_case_old">#39b54a</color>
+    <color name="status_convalescent_old">#009245</color>
+    <color name="status_unconfirmed_death_old">#666666</color>
+    <color name="status_confirmed_death_old">#000000</color>
+    <color name="status_can_be_discharged_old">#d9e021</color>
+    <color name="status_discharged_old">#b3b3b3</color>
     <color name="zone_outside">#FFFFFF</color>
     <color name="zone_triage">#FFFFFF</color>
     <color name="chart_background_light">#e1e1e1</color>
@@ -32,6 +58,5 @@
     <color name="general_condition_poor">#FF2121</color>
     <color name="general_condition_very_poor">#D0021B</color>
     <color name="general_condition_unknown">#D8D8D8</color>
-
 
 </resources>
