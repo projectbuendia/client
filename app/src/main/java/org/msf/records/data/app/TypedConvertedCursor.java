@@ -116,10 +116,13 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
             if (!mCursor.moveToNext()) {
                 throw new IllegalStateException("Cannot move cursor past its last entry.");
             }
+
             int position = mCursor.getPosition();
+
             T convertedItem = mConvertedItems.get(position);
             if (convertedItem == null) {
                 convertedItem = mConverter.fromCursor(mCursor);
+                mConvertedItems.put(position, convertedItem);
             }
 
             return convertedItem;

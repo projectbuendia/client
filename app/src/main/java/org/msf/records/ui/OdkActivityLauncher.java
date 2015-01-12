@@ -31,6 +31,7 @@ import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
 import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 import org.odk.collect.android.activities.FormEntryActivity;
 import org.odk.collect.android.activities.FormHierarchyActivity;
 import org.odk.collect.android.application.Collect;
@@ -69,7 +70,7 @@ import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColum
  */
 public class OdkActivityLauncher {
 
-    private static final String TAG = "OdkActivityLauncher";
+    private static final Logger LOG = Logger.create();
 
     public static void fetchAndShowXform(final Activity callingActivity, final String uuidToShow,
                                          final int requestCode) {
@@ -88,7 +89,7 @@ public class OdkActivityLauncher {
                     @Override
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
-                            Log.i(TAG, "No forms found");
+                            LOG.i("No forms found");
                             EventBus.getDefault().post(new FetchXformFailedEvent());
                             return;
                         }
@@ -96,7 +97,7 @@ public class OdkActivityLauncher {
                         new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
                             @Override
                             public void formWritten(File path, String uuid) {
-                                Log.i(TAG, "wrote form " + path);
+                                LOG.i("wrote form " + path);
                                 showOdkCollect(
                                         callingActivity,
                                         requestCode,
@@ -161,7 +162,7 @@ public class OdkActivityLauncher {
 
         if (data == null || data.getData() == null) {
             // Cancelled.
-            Log.i(TAG, "No data for form result, probably cancelled.");
+            LOG.i("No data for form result, probably cancelled.");
             return;
         }
 
@@ -169,7 +170,7 @@ public class OdkActivityLauncher {
 
         if (!context.getContentResolver().getType(uri).equals(
                 InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
-            Log.e(TAG, "Tried to load a content URI of the wrong type: " + uri);
+            LOG.e("Tried to load a content URI of the wrong type: " + uri);
             return;
         }
 
@@ -178,21 +179,21 @@ public class OdkActivityLauncher {
             instanceCursor = context.getContentResolver().query(uri,
                     null, null, null, null);
             if (instanceCursor.getCount() != 1) {
-                Log.e(TAG, "The form that we tried to load did not exist: " + uri);
+                LOG.e("The form that we tried to load did not exist: " + uri);
                 return;
             }
             instanceCursor.moveToFirst();
             String instancePath = instanceCursor.getString(
                     instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
             if (instancePath == null) {
-                Log.e(TAG, "No file path for form instance: " + uri);
+                LOG.e("No file path for form instance: " + uri);
                 return;
 
             }
             int columnIndex = instanceCursor
                     .getColumnIndex(_ID);
             if (columnIndex == -1) {
-                Log.e(TAG, "No id to delete for after upload: " + uri);
+                LOG.e("No id to delete for after upload: " + uri);
                 return;
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
@@ -217,7 +218,7 @@ public class OdkActivityLauncher {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            Log.i(TAG, "Created new patient successfully on server"
+                            LOG.i("Created new patient successfully on server"
                                     + response.toString());
 
                             if (!keepFormInstancesLocally) {
@@ -230,7 +231,7 @@ public class OdkActivityLauncher {
                         }
                     });
         } catch (IOException e) {
-            Log.e(TAG, "Failed to read xml form into a String " + uri, e);
+            LOG.e(e, "Failed to read xml form into a String " + uri);
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -259,14 +260,14 @@ public class OdkActivityLauncher {
 
         TreeElement encounter = savedRoot.getChild("encounter", 0);
         if (encounter == null) {
-            Log.e(TAG, "No encounter found in instance");
+            LOG.e("No encounter found in instance");
             return;
         }
 
         TreeElement encounterDatetime =
                 encounter.getChild("encounter.encounter_datetime", 0);
         if (encounterDatetime == null) {
-            Log.e(TAG, "No encounter date time found in instance");
+            LOG.e("No encounter date time found in instance");
             return;
         }
         IAnswerData dateTimeValue = encounterDatetime.getValue();
@@ -279,7 +280,7 @@ public class OdkActivityLauncher {
             common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
             common.put(Contracts.Observations.TEMP_CACHE, 1);
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Could not parse datetime" + dateTimeValue.getValue());
+            LOG.e("Could not parse datetime" + dateTimeValue.getValue());
             return;
         }
 
@@ -331,14 +332,18 @@ public class OdkActivityLauncher {
 
         String inClause = Joiner.on(",").join(xformConceptIds);
         // Get a map from client ids to UUIDs from our local concept database.
+        HashMap<String, String> idToUuid = new HashMap<>();
         Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
                 new String[]{Contracts.Concepts._ID, Contracts.Concepts.XFORM_ID},
                 Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
                 null, null);
-        HashMap<String, String> idToUuid = new HashMap<>();
-        while (cursor.moveToNext()) {
-            idToUuid.put(cursor.getString(cursor.getColumnIndex(Contracts.Concepts.XFORM_ID)),
-                    cursor.getString(cursor.getColumnIndex(Contracts.Concepts._ID)));
+        try {
+            while (cursor.moveToNext()) {
+                idToUuid.put(cursor.getString(cursor.getColumnIndex(Contracts.Concepts.XFORM_ID)),
+                        cursor.getString(cursor.getColumnIndex(Contracts.Concepts._ID)));
+            }
+        } finally {
+            cursor.close();
         }
 
         // Remap concept ids to uuids, skipping anything we can't remap.
@@ -380,7 +385,7 @@ public class OdkActivityLauncher {
         try {
             return Integer.parseInt(idString);
         } catch (NumberFormatException ex) {
-            Log.w(TAG, "Strangely formatted id String " + idString);
+            LOG.w("Strangely formatted id String " + idString);
             return null;
         }
     }
@@ -394,12 +399,12 @@ public class OdkActivityLauncher {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e(TAG, "Did not submit form to server successfully", error);
+                        LOG.e("Did not submit form to server successfully", error);
                         if (error.networkResponse != null
                                 && error.networkResponse.statusCode == 500) {
-                            Log.e(TAG, "Internal error stack trace:\n");
+                            LOG.e("Internal error stack trace:\n");
                             // TODO(dxchen): This could throw an NPE!
-                            Log.e(TAG, new String(error.networkResponse.data, Charsets.UTF_8));
+                            LOG.e(new String(error.networkResponse.data, Charsets.UTF_8));
                         }
                     }
                 });
@@ -430,7 +435,7 @@ public class OdkActivityLauncher {
         return new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(tag, error.toString());
+                LOG.e(error.toString());
             }
         };
     }
@@ -489,11 +494,11 @@ public class OdkActivityLauncher {
                     FormsProviderAPI.FormsColumns.JR_FORM_ID + " = ?",
                     new String[]{jrFormId}, null);
             if (formCursor.getCount() == 0) {
-                Log.e(TAG, "Loading forms for displaying " + jrFormId + " and got no forms,");
+                LOG.e("Loading forms for displaying " + jrFormId + " and got no forms,");
                 return;
             }
             if (formCursor.getCount() != 1) {
-                Log.e(TAG, "Loading forms for displaying instance, expected only 1. Got multiple so using first.");
+                LOG.e("Loading forms for displaying instance, expected only 1. Got multiple so using first.");
             }
             formCursor.moveToFirst();
             formPath = formCursor.getString(

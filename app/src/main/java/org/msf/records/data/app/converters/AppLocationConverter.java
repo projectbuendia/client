@@ -14,8 +14,6 @@ import org.msf.records.utils.Utils;
  */
 public class AppLocationConverter implements AppTypeConverter<AppLocation> {
 
-    private static final String TAG = AppLocationConverter.class.getSimpleName();
-
     @Override
     public AppLocation fromCursor(Cursor cursor) {
         return new AppLocation(

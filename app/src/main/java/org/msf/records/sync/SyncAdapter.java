@@ -32,6 +32,7 @@ import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
-    private static final String TAG = SyncAdapter.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
@@ -110,8 +111,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
-        Log.i(TAG, "Beginning network synchronization");
-        TimingLogger timings = new TimingLogger(TAG, "onPerformSync");
+        LOG.i("Beginning network synchronization");
+        TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
         try {
             boolean specific = false;
             if (extras.getBoolean(SYNC_PATIENTS)) {
@@ -162,33 +163,33 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 timings.addSplit("update all (users)");
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in RPC", e);
+            LOG.e(e, "Error in RPC");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (OperationApplicationException e) {
-            Log.e(TAG, "Error updating database", e);
+            LOG.e(e, "Error updating database");
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (InterruptedException e){
-            Log.e(TAG, "Error interruption", e);
+            LOG.e(e, "Error interruption");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (ExecutionException e){
-            Log.e(TAG, "Error failed to execute", e);
+            LOG.e(e, "Error failed to execute");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (Exception e){
-            Log.e(TAG, "Error reading from network", e);
+            LOG.e(e, "Error reading from network");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         }
         timings.dumpToLog();
-        Log.i(TAG, "Network synchronization complete");
+        LOG.i("Network synchronization complete");
 
         // Fire a broadcast indicating that sync has completed.
         Intent syncCompletedIntent =
@@ -202,18 +203,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         final String[] projection = PatientProjection.getProjectionColumns();
 
-        Log.d(TAG, "Before network call");
+        LOG.d("Before network call");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
+                LOG.d(error.toString());
             }
-        }, TAG);
+        });
 
         //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
         List<Patient> patients = future.get();
-        Log.d(TAG, "After network call");
+        LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
 
@@ -223,12 +224,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         // Get list of all items
-        Log.i(TAG, "Fetching local entries for merge");
+        LOG.i("Fetching local entries for merge");
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
-        Log.i(TAG, "Found " + c.getCount() + " local entries. Computing merge solution...");
-        Log.i(TAG, "Found " + patients.size() + " external entries. Computing merge solution...");
+        LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
+        LOG.i("Found " + patients.size() + " external entries. Computing merge solution...");
 
 
         String id;
@@ -272,7 +273,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         !Objects.equals(patient.gender, gender) ||
                         !Objects.equals(patient.id, id)) {
                     // Update existing record
-                    Log.i(TAG, "Scheduling update: " + existingUri);
+                    LOG.i("Scheduling update: " + existingUri);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
                             .withValue(Contracts.Patients.GIVEN_NAME, patient.given_name)
                             .withValue(Contracts.Patients.FAMILY_NAME, patient.family_name)
@@ -285,13 +286,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .build());
                     syncResult.stats.numUpdates++;
                 } else {
-                    Log.i(TAG, "No action required for " + existingUri);
+                    LOG.i("No action required for " + existingUri);
                 }
             } else {
                 // Entry doesn't exist. Remove it from the database.
                 Uri deleteUri = Contracts.Patients.CONTENT_URI.buildUpon()
                         .appendPath(id).build();
-                Log.i(TAG, "Scheduling delete: " + deleteUri);
+                LOG.i("Scheduling delete: " + deleteUri);
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
             }
@@ -300,7 +301,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         for (Patient e : patientsMap.values()) {
-            Log.i(TAG, "Scheduling insert: entry_id=" + e.id);
+            LOG.i("Scheduling insert: entry_id=" + e.id);
             ContentProviderOperation.Builder builder =
                     ContentProviderOperation.newInsert(Contracts.Patients.CONTENT_URI)
                             .withValue(Contracts.Patients._ID, e.id)
@@ -323,11 +324,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             syncResult.stats.numInserts++;
         }
-        Log.i(TAG, "Merge solution ready. Applying batch update");
+        LOG.i("Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
-        Log.i(TAG, "batch apply done");
+        LOG.i("batch apply done");
         mContentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
-        Log.i(TAG, "change notified");
+        LOG.i("change notified");
 
 
 
@@ -354,12 +355,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
                 String locale = entry.getKey();
                 if (locale == null) {
-                    Log.e(TAG, "null locale in concept name rpc for " + concept);
+                    LOG.e("null locale in concept name rpc for " + concept);
                     continue;
                 }
                 String name = entry.getValue();
                 if (name == null) {
-                    Log.e(TAG, "null name in concept name rpc for " + concept);
+                    LOG.e("null name in concept name rpc for " + concept);
                     continue;
                 }
                 ContentValues conceptNameInsert = new ContentValues();
@@ -380,7 +381,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> batch = RpcToDb.locationsRpcToDb(syncResult);
-        Log.i(TAG, "locations Merge solution ready. Applying batch update");
+        LOG.i("locations Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
         mContentResolver.notifyChange(
@@ -408,30 +409,34 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Get call patients from the cache.
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
         Cursor c = provider.query(
-                uri, new String[]{Contracts.Patients.UUID}, null, null, null);
-        if (c.getCount() < 1) {
-            return;
+                uri, new String[] {Contracts.Patients.UUID}, null, null, null);
+        try {
+            if (c.getCount() < 1) {
+                return;
+            }
+        } finally {
+            c.close();
         }
 
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
         RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
 
-        Log.d(TAG, "requesting all charts");
+        LOG.d("requesting all charts");
         chartServer.getAllCharts(listFuture, listFuture);
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
-        TimingLogger timingLogger = new TimingLogger(TAG, "obs update");
+        TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         try {
-            Log.d(TAG, "awaiting parsed response");
+            LOG.d("awaiting parsed response");
             PatientChartList patientChartList = listFuture.get(100, TimeUnit.SECONDS);
-            Log.d(TAG, "got response ");
+            LOG.d("got response ");
             timingLogger.addSplit("Get all charts RPC");
             for (PatientChart patientChart : patientChartList.results) {
                 // As we are doing multiple request in parallel, deal with exceptions in the loop.
                 timingLogger.addSplit("awaiting future");
                 if (patientChart.uuid == null) {
-                    Log.e(TAG, "null patient id in observation response");
+                    LOG.e("null patient id in observation response");
                     continue;
                 }
                 // Delete all existing observations for the patient.
@@ -442,15 +447,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 timingLogger.addSplit("added obs to list");
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "Error interruption: ", e);
+            LOG.e(e, "Error interruption: ");
             syncResult.stats.numIoExceptions++;
             return;
         } catch (ExecutionException e){
-            Log.e(TAG, "Error failed to execute: ", e);
+            LOG.e(e, "Error failed to execute: ");
             syncResult.stats.numIoExceptions++;
             return;
         } catch (Exception e){
-            Log.e(TAG, "Error reading from network: ", e);
+            LOG.e(e, "Error reading from network: ");
             syncResult.stats.numIoExceptions++;
             return;
         }

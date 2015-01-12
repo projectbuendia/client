@@ -12,6 +12,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,8 @@ import javax.annotation.Nullable;
  * @author nfortescue@google.com
  */
 public class OpenMrsXformsConnection {
-    private static final String TAG = "OpenMrsXformsConnection";
+
+    private static final Logger LOG = Logger.create();
 
     private final OpenMrsConnectionDetails mConnectionDetails;
 
@@ -54,12 +56,12 @@ public class OpenMrsXformsConnection {
                         } catch (JSONException e) {
                             // The result was not in the expected format. Just log, and return
                             // results so far.
-                            Log.e(TAG, "response was in bad format: " + response, e);
+                            LOG.e(e, "response was in bad format: " + response);
                         }
                     }
                 }, errorListener
         );
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     /**
@@ -74,7 +76,7 @@ public class OpenMrsXformsConnection {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.i(TAG, "got forms: " + response);
+                        LOG.i("got forms: " + response);
                         ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
                         try {
                             // This seems quite code heavy (parsing manually), but is reasonably
@@ -102,15 +104,15 @@ public class OpenMrsXformsConnection {
                         } catch (JSONException e) {
                             // The result was not in the expected format. Just log, and return
                             // results so far.
-                            Log.e(TAG, "response was in bad format: " + response, e);
+                            LOG.e(e, "response was in bad format: " + response);
                         }
-                        Log.i(TAG, "returning response: " + response);
+                        LOG.i("returning response: " + response);
                         listener.onResponse(result);
                     }
                 },
                 errorListener
         );
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     /**
@@ -146,7 +148,7 @@ public class OpenMrsXformsConnection {
         try {
             postBody = new JSONObject(post.toString());
         } catch (JSONException e) {
-            Log.e(TAG, "This should never happen converting one JSON object to another. " + post, e);
+            LOG.e(e, "This should never happen converting one JSON object to another. " + post);
             errorListener.onErrorResponse(new VolleyError("failed to convert to JSON", e));
         }
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
@@ -159,7 +161,7 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
 }

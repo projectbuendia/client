@@ -10,6 +10,7 @@ import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
 
@@ -18,7 +19,7 @@ import de.greenrobot.event.EventBus;
  */
 public class SyncManager {
 
-    private static final String TAG = SyncManager.class.getName();
+    private static final Logger LOG = Logger.create();
 
     static final String SYNC_STATUS = "sync-status";
     static final int STARTED = 1;
@@ -65,15 +66,11 @@ public class SyncManager {
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case -1:
-
-                    Log.i(
-                            TAG,
-                            "Sync status broadcast intent received without a status code.");
+                    LOG.i("Sync status broadcast intent received without a status code.");
                 default:
-                    Log.i(
-                            TAG,
-                            "Sync status broadcast intent received with unknown status "
-                                    + syncStatus + ".");
+                    LOG.i(
+                            "Sync status broadcast intent received with unknown status %1$d.",
+                            syncStatus);
             }
         }
     }

@@ -34,6 +34,7 @@ import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Logger;
 import org.odk.collect.android.model.PrepopulatableFields;
 
 import com.android.volley.Response;
@@ -56,7 +57,8 @@ import javax.annotation.Nullable;
  */
 final class PatientChartController {
 
-    private static final String TAG = PatientChartController.class.getName();
+    private static final Logger LOG = Logger.create();
+
     private static final boolean DEBUG = true;
 
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
@@ -197,7 +199,7 @@ final class PatientChartController {
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
         String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
         if (patientUuid == null) {
-            Log.e(TAG, "Received unknown request code: " + requestCode);
+            LOG.e("Received unknown request code: " + requestCode);
             return;
         }
 
@@ -263,7 +265,7 @@ final class PatientChartController {
         }
 
         if (DEBUG) {
-            Log.d(TAG, "Showing " + observations.size() + " observations, and "
+            LOG.d("Showing " + observations.size() + " observations, and "
                     + conceptsToLatestObservations.size() + " latest observations");
         }
 

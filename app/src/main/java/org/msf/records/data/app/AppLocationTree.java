@@ -2,10 +2,11 @@ package org.msf.records.data.app;
 
 import android.database.ContentObserver;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+
+import org.msf.records.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 public class AppLocationTree implements AppModelObservable {
 
-    private static final String TAG = AppLocationTree.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     public static final int ABSOLUTE_DEPTH_ROOT = 0;
     public static final int ABSOLUTE_DEPTH_ZONE = 1;
@@ -25,7 +26,7 @@ public class AppLocationTree implements AppModelObservable {
     /**
      * Creates a {@link AppLocationTree} from a {@link TypedCursor} of {@link AppLocation}s.
      *
-     * <p>This method DOES NOT the cursor once it finishes constructing a tree.
+     * <p>This method closes the cursor once it finishes constructing a tree.
      *
      * @throws IllegalArgumentException if the location tree contains multiple root nodes or if the
      *                                  the location tree has no root node or if the location tree
@@ -43,8 +44,7 @@ public class AppLocationTree implements AppModelObservable {
         for (AppLocation location : cursor) {
             if (location.parentUuid == null) {
                 if (root != null) {
-                    Log.w(
-                            TAG,
+                    LOG.w(
                             "Creating location tree with multiple root nodes. Both location '"
                                     + root.name + "' (UUID '" + root.uuid + "') and location '"
                                     + location.name + "' (UUID '" + location.uuid + "') have "
@@ -61,9 +61,7 @@ public class AppLocationTree implements AppModelObservable {
         }
 
         if (root == null) {
-            Log.w(
-                    TAG,
-                    "Creating a location tree with no root node. This tree has no data.");
+            LOG.w("Creating a location tree with no root node. This tree has no data.");
 
             return new AppLocationTree(
                     cursor, null, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());

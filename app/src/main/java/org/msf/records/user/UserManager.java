@@ -19,6 +19,7 @@ import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
 import org.msf.records.utils.AsyncTaskRunner;
 import org.msf.records.utils.EventBusInterface;
+import org.msf.records.utils.Logger;
 
 import com.android.volley.VolleyError;
 import com.google.common.collect.ImmutableSet;
@@ -61,7 +62,7 @@ import javax.annotation.Nullable;
  */
 public class UserManager {
 
-    private static final String TAG = UserManager.class.getName();
+    private static final Logger LOG = Logger.create();
 
     private final UserStore mUserStore;
     private final EventBusInterface mEventBus;
@@ -137,7 +138,7 @@ public class UserManager {
         }
 
         if (!mKnownUsers.contains(activeUser)) {
-            Log.e(TAG, "Couldn't switch user -- new user is not known");
+            LOG.e("Couldn't switch user -- new user is not known");
             return false;
         }
 
@@ -182,7 +183,7 @@ public class UserManager {
                 return mUserStore.loadKnownUsers();
             } catch (Exception e) {
                 // TODO(dxchen): Figure out type of exception to throw.
-                Log.e(TAG, "Load users task failed", e);
+                LOG.e(e, "Load users task failed");
                 mEventBus.post(
                         new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
                 return null;
@@ -195,7 +196,7 @@ public class UserManager {
             mKnownUsers.addAll(knownUsers);
 
             if (mKnownUsers.isEmpty()) {
-                Log.e(TAG, "No users returned from db");
+                LOG.e("No users returned from db");
                 mEventBus.post(new KnownUsersLoadFailedEvent(
                                 KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
             } else {
@@ -214,7 +215,7 @@ public class UserManager {
                 return mUserStore.syncKnownUsers();
             } catch (Exception e) {
                 // TODO(dxchen): Figure out the type of exception to throw.
-                Log.e(TAG, "User sync failed", e);
+                LOG.e(e, "User sync failed");
                 return null;
             }
         }
@@ -294,7 +295,7 @@ public class UserManager {
                 mUserStore.deleteUser(mUser);
             } catch (Exception e) {
                 // TODO(dxchen): Figure out the type of exception to throw.
-                Log.e(TAG, "Failed to delete user", e);
+                LOG.e(e, "Failed to delete user");
                 return false;
             }
             return true;
