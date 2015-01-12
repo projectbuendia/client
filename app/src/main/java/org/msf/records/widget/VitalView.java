@@ -66,4 +66,14 @@ public class VitalView extends LinearLayout {
 
         return this;
     }
+
+    /**
+     * Sets the text color of both the name and the value.
+     */
+    public VitalView setTextColor(int color) {
+        mNameView.setTextColor(color);
+        mValueView.setTextColor(color);
+
+        return this;
+    }
 }
