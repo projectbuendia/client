@@ -55,7 +55,7 @@ public class EditAssignedLocationDialogFragment extends DialogFragment {
 //        View fragment = inflater.inflate(R.layout.dialog_fragment_edit_assigned_location, null);
 //        ButterKnife.inject(this, fragment);
 //
-//        mZone.setText(mLocation.getResZone());
+//        mZone.setText(mLocation.getZone());
 //        mTent.setText(mLocation.getTent());
 //        mBed.setText(mLocation.getBed());
 //

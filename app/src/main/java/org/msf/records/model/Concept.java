@@ -26,12 +26,12 @@ public class Concept {
     /**
      * Returns the {@link ResStatus} for the specified condition UUID.
      */
-    public static ResStatus getResStatus(String condition) {
-        if (condition == null) {
+    public static ResStatus getResStatus(String conditionUuid) {
+        if (conditionUuid == null) {
             return ResStatus.UNKNOWN;
         }
 
-        switch (condition) {
+        switch (conditionUuid) {
             case Concept.GENERAL_CONDITION_GOOD_UUID:
                 return ResStatus.GOOD;
             case Concept.GENERAL_CONDITION_FAIR_UUID:
