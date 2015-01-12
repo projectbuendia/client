@@ -28,15 +28,11 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
 
     private final SparseArray<T> mConvertedItems;
 
-    private boolean mIsClosed;
-
     public TypedConvertedCursor(U converter, Cursor cursor) {
         mConverter = converter;
         mCursor = cursor;
 
         mConvertedItems = new SparseArray<>();
-
-        mIsClosed = mCursor.isClosed();
     }
 
     /**
@@ -47,7 +43,7 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
      */
     @Override
     public int getCount() {
-        if (mIsClosed) {
+        if (mCursor.isClosed()) {
             return 0;
         }
 
@@ -56,7 +52,7 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
 
     @Override
     public T get(int position) {
-        if (mIsClosed) {
+        if (mCursor.isClosed()) {
             return null;
         }
 
@@ -79,7 +75,7 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
 
     @Override
     public Uri getNotificationUri() {
-        return mIsClosed ? null : mCursor.getNotificationUri();
+        return mCursor.isClosed() ? null : mCursor.getNotificationUri();
     }
 
     @Override
@@ -90,8 +86,6 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
     @Override
     public void close() {
         mCursor.close();
-
-        mIsClosed = true;
     }
 
     @Override

@@ -26,7 +26,7 @@ public class AppLocationTree implements AppModelObservable {
     /**
      * Creates a {@link AppLocationTree} from a {@link TypedCursor} of {@link AppLocation}s.
      *
-     * <p>This method closes the cursor once it finishes constructing a tree.
+     * <p>Callers must call {@link #close} when done with an instance of this class.
      *
      * @throws IllegalArgumentException if the location tree contains multiple root nodes or if the
      *                                  the location tree has no root node or if the location tree
