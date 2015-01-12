@@ -3,6 +3,7 @@ package org.msf.records.net;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
+import org.joda.time.Instant;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.CustomSerialization;
@@ -44,8 +45,25 @@ public class OpenMrsChartServer {
 
     public void getAllCharts(Response.Listener<PatientChartList> patientListener,
                              Response.ErrorListener errorListener) {
+        doEncountersRequest(mConnectionDetails.getRootUrl() + "/patientencounters", patientListener,
+                errorListener);
+    }
+
+    public void getIncrementalCharts(
+            Instant lastDate,
+            Response.Listener<PatientChartList> patientListener,
+            Response.ErrorListener errorListener) {
+        doEncountersRequest(
+                mConnectionDetails.getRootUrl() + "/patientencounters?sm=" + lastDate.getMillis(),
+                patientListener, errorListener);
+    }
+
+    private void doEncountersRequest(
+            String url,
+            Response.Listener<PatientChartList> patientListener,
+            Response.ErrorListener errorListener) {
         GsonRequest<PatientChartList> request = new GsonRequest<>(
-                mConnectionDetails.getRootUrl() + "/patientencounters",
+                url,
                 PatientChartList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
