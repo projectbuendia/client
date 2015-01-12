@@ -1,6 +1,5 @@
 package org.msf.records.data.res;
 
-import android.content.Context;
 import android.content.res.Resources;
 
 import org.msf.records.R;
@@ -8,9 +7,9 @@ import org.msf.records.R;
 /**
  * An enumeration of patient statuses and the resources associated with them.
  */
-public enum Status implements Resolvable<Status.Resolved> {
+public enum ResStatus implements Resolvable<ResStatus.Resolved> {
 
-    UNKNOWN(R.string.status_unknown, R.color.vital_unknown, R.color.vital_fg_dark),
+    UNKNOWN(R.string.status_unknown, R.color.white, R.color.vital_fg_dark),
     GOOD(R.string.status_good, R.color.status_good, R.color.vital_fg_light),
     FAIR(R.string.status_fair, R.color.status_fair, R.color.vital_fg_dark),
     POOR(R.string.status_poor, R.color.status_poor, R.color.vital_fg_light),
@@ -28,7 +27,7 @@ public enum Status implements Resolvable<Status.Resolved> {
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    Status(int messageId, int backgroundColorId, int foregroundColorId) {
+    ResStatus(int messageId, int backgroundColorId, int foregroundColorId) {
         this.messageId = messageId;
         this.backgroundColorId = backgroundColorId;
         this.foregroundColorId = foregroundColorId;
@@ -36,15 +35,15 @@ public enum Status implements Resolvable<Status.Resolved> {
 
     @Override
     public Resolved resolve(Resources resources) {
-        return Resolver.resolve(this, resources, Status.Resolved.class);
+        return Resolver.resolve(this, resources, ResStatus.Resolved.class);
     }
 
     public static class Resolved {
 
-        private final Status mStatus;
+        private final ResStatus mStatus;
         private final Resources mResources;
 
-        public Resolved(Status status, Resources resources) {
+        public Resolved(ResStatus status, Resources resources) {
             mStatus = status;
             mResources = resources;
         }
