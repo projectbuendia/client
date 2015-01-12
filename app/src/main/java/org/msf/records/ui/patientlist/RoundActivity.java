@@ -8,7 +8,6 @@ import android.view.MenuItem;
 
 import org.msf.records.R;
 import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
@@ -39,9 +38,6 @@ public class RoundActivity extends PatientSearchActivity {
         setTitle(PatientCountDisplay.getPatientCountTitle(
                 this, mLocationPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
-
-        getSearchController().setRootLocationUuid(mLocationUuid);
-        getSearchController().loadSearchResults();
     }
 
     @Override
@@ -62,6 +58,9 @@ public class RoundActivity extends PatientSearchActivity {
                     }
                 });
 
+        // TODO(akalachman): Still figure out why this needs to be here.
+        getSearchController().applyLocationFilter(mLocationUuid);
+
         super.onExtendOptionsMenu(menu);
     }
 
@@ -77,6 +76,7 @@ public class RoundActivity extends PatientSearchActivity {
         EventBus.getDefault().unregister(mSubscriber);
     }
 
+    // TODO(akalachman): Move to controller.
     private class LocationEventSubscriber {
         // Keep title up-to-date with any location changes.
         public void onEventMainThread(LocationsLoadedEvent event) {

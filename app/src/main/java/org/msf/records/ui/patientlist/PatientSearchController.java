@@ -58,6 +58,8 @@ public class PatientSearchController {
 
     private SimpleSelectionFilter mFilter;
     private String mFilterQueryTerm = "";
+    private FilterSubscriber mFilterSubscriber;
+    private final Object mFilterSubscriberLock = new Object();
 
     public PatientSearchController(
             Ui ui, CrudEventBus crudEventBus, AppModel model, String locale) {
@@ -77,10 +79,14 @@ public class PatientSearchController {
 
     private class LocationTreeUpdatedSubscriber {
         public synchronized void onEvent(AppLocationTreeFetchedEvent event) {
-            mCrudEventBus.unregister(this);
+            synchronized(mFilterSubscriberLock) {
+                mCrudEventBus.unregister(this);
+                mFilterSubscriber = null;
+            }
             mLocationTree = event.tree;
             for (FragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.setLocations(mLocationTree);
+                loadSearchResults();
                 fragmentUi.showSpinner(false);
             }
         }
@@ -122,52 +128,68 @@ public class PatientSearchController {
     }
 
     public void onQuerySubmitted(String constraint) {
-        App.getServer().cancelPendingRequests(TAG);
+        App.getServer().cancelPendingRequests();
         mFilterQueryTerm = constraint;
         loadSearchResults();
     }
 
-    public void setRootLocationUuid(String locationUuid) {
+    public void applyLocationFilter(String locationUuid) {
         mRootLocationUuid = locationUuid;
+        loadSearchResults();
     }
 
     public void applyFilter(SimpleSelectionFilter filter) {
+        mFilter = filter;
+        loadSearchResults();
+    }
+
+    private SimpleSelectionFilter getLocationSubfilter() {
+        SimpleSelectionFilter filter;
+
         // Tack on a location filter to the filter to show only known locations.
         if (mLocationTree == null || mLocationTree.getRoot() == null) {
-            mFilter = filter;
+            filter = mFilter;
         } else {
             // Tack on a location filter to the filter to show only known locations in the subtree
             // of the current root.
             if (mRootLocationUuid == null) {
-                mFilter = new FilterGroup(new LocationUuidFilter(mLocationTree), filter);
+                filter = new FilterGroup(new LocationUuidFilter(mLocationTree), mFilter);
             } else {
-                mFilter = new FilterGroup(new LocationUuidFilter(
-                        mLocationTree, mLocationTree.findByUuid(mRootLocationUuid)), filter);
+                filter = new FilterGroup(new LocationUuidFilter(
+                        mLocationTree, mLocationTree.findByUuid(mRootLocationUuid)), mFilter);
             }
         }
 
-        loadSearchResults();
+        return filter;
     }
 
-    public void loadSearchResults() {
+    private void loadSearchResults() {
+        // Ensure only one subscriber is listening to filter events.
+        synchronized (mFilterSubscriberLock) {
+            if (mFilterSubscriber != null) {
+                mCrudEventBus.unregister(mFilterSubscriber);
+            }
+        }
+        mFilterSubscriber = new FilterSubscriber();
+
         // TODO(akalachman): Sub-filter on query term rather than re-filtering with each keypress.
         for (FragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.showSpinner(true);
         }
-        // TODO(akalachman): Need specific filter event bus?
-        mCrudEventBus.register(new FilterSubscriber());
-        mModel.fetchPatients(mCrudEventBus, mFilter, mFilterQueryTerm);
+        mCrudEventBus.register(mFilterSubscriber);
+        mModel.fetchPatients(mCrudEventBus, getLocationSubfilter(), mFilterQueryTerm);
     }
 
     private final class FilterSubscriber {
         public void onEventMainThread(TypedCursorFetchedEvent<AppPatient> event) {
+            mCrudEventBus.unregister(this);
             for (FragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.setPatients(event.cursor);
-                fragmentUi.showSpinner(false);
+                if (mLocationTree != null) {
+                    fragmentUi.showSpinner(false);
+                }
             }
             event.cursor.close();
-
-            mCrudEventBus.unregister(this);
         }
     }
 

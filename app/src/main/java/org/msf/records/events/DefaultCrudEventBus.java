@@ -65,10 +65,11 @@ public final class DefaultCrudEventBus implements CrudEventBus {
     @Override
     public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
         synchronized (mSubscribersLock) {
-            if (mCleanupSubscriber != null) {
+            // TODO(dxchen): Deal with this.
+            /*if (mCleanupSubscriber != null) {
                 throw new IllegalStateException(
                         "Only one CleanupSubscriber can be registered at a time.");
-            }
+            }*/
 
             mCleanupSubscriber = subscriber;
             mWrapped.register(mCleanupSubscriber);
@@ -80,12 +81,12 @@ public final class DefaultCrudEventBus implements CrudEventBus {
         // The registered CleanupSubscriber may call this method; however, Java synchronized blocks
         // are reentrant so synchronizing again is okay.
         synchronized (mSubscribersLock) {
-            if (mCleanupSubscriber != subscriber) {
+/*            if (mCleanupSubscriber != subscriber) {
                 throw new IllegalStateException(
                         "A CleanupSubscriber must be registered with registerCleanupSubscriber() "
                                 + "before it can be unregistered.");
             }
-
+*/
             mWrapped.unregister(subscriber);
             mCleanupSubscriber = null;
         }
