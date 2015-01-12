@@ -3,6 +3,8 @@ package org.msf.records.ui.chart;
 import static org.msf.records.utils.Utils.getSystemProperty;
 
 import org.msf.records.R;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -48,6 +50,7 @@ import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.VitalView;
+import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
 import de.greenrobot.event.EventBus;
@@ -66,6 +69,45 @@ import javax.inject.Provider;
  * Activity displaying a patient's vitals and charts.
  */
 public final class PatientChartActivity extends BaseLoggedInActivity {
+
+    /**
+     * An enumeration of the XForms that can be launched from this activity.
+     */
+    enum XForm {
+        ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
+        ADD_TEST_RESULTS("TBD", 1);
+
+        public final String uuid;
+        public final int formIndex;
+
+        XForm(String uuid, int formIndex) {
+            this.uuid = uuid;
+            this.formIndex = formIndex;
+        }
+    }
+
+    /**
+     * An object that encapsulates a {@link Activity#startActivityForResult} request code.
+     */
+    static class RequestCode {
+
+        public final XForm form;
+        public final int requestIndex;
+
+        public RequestCode(XForm form, int requestIndex) {
+            this.form = form;
+            this.requestIndex = requestIndex;
+        }
+
+        public RequestCode(int code) {
+            this.form = XForm.values()[(code >> 8) & 0xFF];
+            this.requestIndex = code & 0xFF;
+        }
+
+        public int getCode() {
+            return ((form.formIndex & 0xFF) << 8) | (requestIndex & 0xFF);
+        }
+    }
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
@@ -146,7 +188,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mController = new PatientChartController(
                 mAppModel,
-                new OpenMrsChartServer(App.getConnectionDetails()),
                 new EventBusWrapper(mEventBus),
                 mCrudEventBusProvider.get(),
                 mMyUi,
@@ -434,9 +475,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void fetchAndShowXform(
-                String formUuid,
-                int requestCode,
-                org.odk.collect.android.model.Patient patient,
+                XForm form,
+                int code,
+                Patient patient,
                 PrepopulatableFields fields) {
             if (mIsFetchingXform) {
                 return;
@@ -444,7 +485,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                    PatientChartActivity.this, formUuid, requestCode, patient, fields);
+                    PatientChartActivity.this, form.uuid, code, patient, fields);
         }
 
         @Override
