@@ -21,7 +21,7 @@
     <color name="status_cured">#5eae00</color>
 
     <!-- Temperature Ranges -->
-    <color name="temperature_normal">#009245</color>
+    <color name="temperature_normal">#417505</color>
     <color name="temperature_high">#d0021b</color>
 
     <!-- Zones -->

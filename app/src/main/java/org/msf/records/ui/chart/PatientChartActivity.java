@@ -110,7 +110,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
     @InjectView(R.id.vital_name_pcr) TextView mPcrName;
 
-    @InjectView(R.id.patient_chart_special_parent) ViewGroup mSpecialParent;
+    @InjectView(R.id.patient_chart_pain_parent) ViewGroup mSpecialParent;
     @InjectView(R.id.patient_chart_vital_special) TextView mSpecial;
     @InjectView(R.id.vital_name_special) TextView mSpecialName;
 
@@ -260,7 +260,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("Vital signs");
     }
 
-    @OnClick(R.id.patient_chart_special_parent)
+    @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
         mController.onAddObservationPressed("Special Group");
     }
