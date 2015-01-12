@@ -93,4 +93,8 @@
     <string name="title_add_patient_cancel">Discard changes?</string>
     <string name="patient_creation_success">New patient has been added.</string>
     <string name="patient_creation_error">Unable to add patient: %s</string>
+    <string name="username_cannot_be_null">\"Username must not be null\"</string>
+    <string name="given_name_cannot_be_null">Given name must not be null</string>
+    <string name="family_name_cannot_be_null">Family name must not be null</string>
+    <string name="invalid_username">Username must be between 2 and 50 characters. Only letters, digits, ".", "-", and "_" are allowed.</string>
 </resources>

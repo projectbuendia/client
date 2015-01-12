@@ -9,7 +9,6 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -65,27 +64,24 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     public void onClick(View view) {
                                         // Validate the user.
                                         if (isNullOrWhitespace(mUsername)) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Username must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mUsername.invalidate();
+                                            setError(mUsername, R.string.username_cannot_be_null);
+                                            return;
+                                        } else if (!isUsernameValid()) {
+                                            setError(
+                                                    mUsername,
+                                                    R.string.invalid_username);
                                             return;
                                         }
                                         if (isNullOrWhitespace(mGivenName)) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Given name must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mGivenName.invalidate();
+                                            setError(
+                                                    mGivenName,
+                                                    R.string.given_name_cannot_be_null);
                                             return;
                                         }
                                         if (isNullOrWhitespace(mFamilyName)) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Family name must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mFamilyName.invalidate();
+                                            setError(
+                                                    mFamilyName,
+                                                    R.string.family_name_cannot_be_null);
                                             return;
                                         }
 
@@ -105,5 +101,28 @@ public class AddNewUserDialogFragment extends DialogFragment {
 
     private boolean isNullOrWhitespace(EditText field) {
         return field.getText() == null || field.getText().toString().trim().isEmpty();
+    }
+
+    private boolean isUsernameValid() {
+        if (isNullOrWhitespace(mUsername)) {
+            return false;
+        }
+
+        String username = mUsername.getText().toString().trim();
+        if (username.length() < 2 || username.length() > 50) {
+            return false;
+        }
+
+        if (!username.matches("[A-Za-z0-9\\.-_]*")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void setError(EditText field, int resourceId) {
+        field.setError(getResources().getString(resourceId));
+        field.invalidate();
+        field.requestFocus();
     }
 }
