@@ -187,6 +187,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(makeDropTable(LOCATIONS_TABLE_NAME));
         db.execSQL(makeDropTable(LOCATION_NAMES_TABLE_NAME));
         db.execSQL(makeDropTable(USERS_TABLE_NAME));
+        db.execSQL(makeDropTable(MISC_TABLE_NAME));
         onCreate(db);
     }
 
