@@ -3029,7 +3029,8 @@ public class FormEntryActivity
      * @param data the field
      * @return the displayed text, or null if the data is null
      */
-    private @Nullable String getDisplayText(@Nullable IAnswerData data) {
+    @Nullable
+    private String getDisplayText(@Nullable IAnswerData data) {
         if (data == null) {
             return null;
         }
