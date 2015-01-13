@@ -218,6 +218,11 @@ public class Contracts {
         private Charts() {}
     }
 
+    interface MiscColumns {
+
+        String OBS_SYNC_TIME = "obs_sync_time";
+    }
+
     public static class ConceptNames implements BaseConceptColumns, LocaleColumns, BaseColumns {
 
         public static final Uri CONTENT_URI =
@@ -414,6 +419,17 @@ public class Contracts {
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "user";
 
         private Users() {}
+    }
+
+    public static class Misc implements MiscColumns, BaseColumns {
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
+
+        public static final String ITEM_CONTENT_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "misc";
+
+        private Misc() {}
     }
 
     private Contracts() {}

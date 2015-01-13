@@ -61,4 +61,13 @@ public class PrefsModule {
                 "xform_update_client_cache",
                 resources.getBoolean(R.bool.xform_update_client_cache));
     }
+
+    @Provides @Singleton @Qualifiers.IncrementalObservationUpdate
+    BooleanPreference provideIncrementalObservationUpdate(
+            SharedPreferences sharedPreferences, Resources resources) {
+        return new BooleanPreference(
+                sharedPreferences,
+                "incremental_observation_update",
+                resources.getBoolean(R.bool.xform_update_client_cache));
+    }
 }

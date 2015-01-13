@@ -434,7 +434,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         try {
-            Instant lastSyncTime = getLastSyncTime();
+            Instant lastSyncTime = getLastSyncTime(provider);
             Instant newSyncTime;
             if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
                 newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
@@ -443,7 +443,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
                         timingLogger);
             }
-            storeLastSyncTime(newSyncTime);
+            // This is completely unsafe as regards exceptions - if we fail to store sync time then
+            // we have added observations and not stored the sync time. However, getting this right
+            // transactionally through a content provider interface is not easy, we'd have to update
+            // everything through a single URL. As deletes and inserts aren't safe right now, this
+            // will do.
+            // TODO(nfortescue): make this transactionally safe.
+            storeLastSyncTime(provider, newSyncTime);
         } catch (InterruptedException e) {
             LOG.e(e, "Error interruption: ");
             syncResult.stats.numIoExceptions++;
@@ -465,12 +471,28 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         timingLogger.dumpToLog();
     }
 
-    private Instant getLastSyncTime() {
-        return null;
+    private Instant getLastSyncTime(ContentProviderClient provider) throws RemoteException {
+        Cursor c = null;
+        try {
+            c = provider.query(Contracts.Misc.CONTENT_URI,
+                    new String[]{Contracts.Misc.OBS_SYNC_TIME}, null, null, null);
+            if (c.moveToNext()) {
+                return new Instant(c.getLong(0));
+            } else {
+                return null;
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
-    private void storeLastSyncTime(Instant newSyncTime) {
-
+    private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)
+            throws RemoteException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contracts.Misc.OBS_SYNC_TIME, newSyncTime.getMillis());
+        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
     }
 
     private Instant updateAllObservations(
@@ -546,14 +568,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 LOG.e("null patient id in observation response");
                 continue;
             }
-            // Add the new observations
-            RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
-            timingLogger.addSplit("added incremental obs to list");
+            if (patientChart.encounters.length > 0) {
+                // Add the new observations
+                RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
+                timingLogger.addSplit("added incremental obs to list");
+            }
         }
         timingLogger.addSplit("making operations");
-        provider.bulkInsert(Contracts.Observations.CONTENT_URI,
-                toInsert.toArray(new ContentValues[toInsert.size()]));
-        timingLogger.addSplit("bulk inserts");
+        if (toInsert.size() > 0) {
+            provider.bulkInsert(Contracts.Observations.CONTENT_URI,
+                    toInsert.toArray(new ContentValues[toInsert.size()]));
+            timingLogger.addSplit("bulk inserts");
+        }
         return patientChartList.snapshotTime == null ? null :
                 patientChartList.snapshotTime.toInstant();
     }

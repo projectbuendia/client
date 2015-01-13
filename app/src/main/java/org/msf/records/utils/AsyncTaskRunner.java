@@ -13,7 +13,7 @@ public interface AsyncTaskRunner {
         public final <Params, Progress, Result> void runTask(
                 AsyncTask<Params, Progress, Result> asyncTask,
                 Params... params) {
-            ThreadUtils.checkOnMainThread();
+//            ThreadUtils.checkOnMainThread();
             asyncTask.execute(params);
         }
     };

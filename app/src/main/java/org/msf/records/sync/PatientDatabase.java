@@ -22,7 +22,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
     // name doesn't mean that they should reference the exact same string.
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 14;
+    public static final int DATABASE_VERSION = 15;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
     /**
@@ -142,6 +142,18 @@ public class PatientDatabase extends SQLiteOpenHelper {
                     Contracts.Users.UUID + TYPE_TEXT + COMMA_SEP +
                     Contracts.Users.FULL_NAME + TYPE_TEXT + ")";
 
+    /**
+     * A table for storing miscellaneous single items that need persistent storage.
+     * At the moment one table, one row, then a column per item.
+     * We use a column per item as we don't have many elements, and it gives type safety.
+     */
+    public static final String MISC_TABLE_NAME = "misc";
+
+    private static final String SQL_CREATE_MISC =
+            CREATE_TABLE + MISC_TABLE_NAME + " (" +
+                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
+                    Contracts.Misc.OBS_SYNC_TIME + TYPE_INTEGER + ")";
+
     private static String makeDropTable(String tableName) {
         return "DROP TABLE IF EXISTS " + tableName;
     }
@@ -160,6 +172,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_LOCATION_NAMES);
         db.execSQL(SQL_CREATE_OBSERVATIONS);
         db.execSQL(SQL_CREATE_USERS);
+        db.execSQL(SQL_CREATE_MISC);
     }
 
     @Override
