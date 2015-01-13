@@ -87,7 +87,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -3016,7 +3015,7 @@ public class FormEntryActivity
             // reliable for IAnswerData objects.
             String newText = getDisplayText(entry.getValue());
             String oldText = getDisplayText(mOriginalAnswerData.get(entry.getKey()));
-            if (!Objects.equals(newText, oldText)) {
+            if (!equalOrBothNull(newText, oldText)) {
                 return false;
             }
         }
@@ -3036,5 +3035,26 @@ public class FormEntryActivity
         }
 
         return data.getDisplayText();
+    }
+
+    /**
+     * Checks if the given objects are both equal or both null (equivalent to Objects.equals,
+     * but without the requirement for API level 19).
+     * @param a the first object to compare
+     * @param b the second object to compare
+     * @return true if a == b or a and b are both null, false otherwise
+     */
+    private boolean equalOrBothNull(Object a, Object b) {
+        // Check if a and b are the same object or both are null.
+        if (a == b) {
+            return true;
+        }
+
+        // If either a or b is null, then the two cannot be equal.
+        if (a == null || b == null) {
+            return false;
+        }
+
+        return a.equals(b);
     }
 }
