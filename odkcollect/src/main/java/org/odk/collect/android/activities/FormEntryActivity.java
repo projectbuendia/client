@@ -596,6 +596,9 @@ public class FormEntryActivity
                 }
             });
         }
+
+        // Store any pre-populated answers to enable performing a diff later on.
+        mOriginalAnswerData = getAnswers();
     }
 
     /**
@@ -675,9 +678,6 @@ public class FormEntryActivity
                 break;
             }
         }
-
-        // Store any pre-populated answers to enable performing a diff later on.
-        mOriginalAnswerData = getAnswers();
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
