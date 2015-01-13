@@ -66,8 +66,7 @@ public final class DefaultCrudEventBus implements CrudEventBus {
     public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
         synchronized (mSubscribersLock) {
             if (mCleanupSubscriber != null) {
-                throw new IllegalStateException(
-                        "Only one CleanupSubscriber can be registered at a time.");
+                mWrapped.unregister(subscriber);
             }
 
             mCleanupSubscriber = subscriber;

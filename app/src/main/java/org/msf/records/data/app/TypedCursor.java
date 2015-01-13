@@ -2,6 +2,7 @@ package org.msf.records.data.app;
 
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 
 /**
  * A {@link Cursor}-like data structure that exposes a type-safe interface.
@@ -10,7 +11,7 @@ import android.database.Cursor;
  *
  * @param <T> the type of the array elements
  */
-public interface TypedCursor<T> extends Iterable<T> {
+public interface TypedCursor<T> extends Iterable<T>, AppModelObservable {
 
     /**
      * Returns the number of items in this lazy array.
@@ -24,14 +25,7 @@ public interface TypedCursor<T> extends Iterable<T> {
     T get(int position);
 
     /**
-     * Closes the {@link TypedCursor} and any backing types.
-     *
-     * <p>Subsequent calls to {@code get} methods may return dummy values or
-     * throw exceptions.
+     * Returns the URI for which notifications are received.
      */
-    void close();
-
-    void registerContentObserver(ContentObserver observer);
-
-    void unregisterContentObserver(ContentObserver observer);
+    Uri getNotificationUri();
 }
