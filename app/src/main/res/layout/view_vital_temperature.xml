@@ -26,16 +26,16 @@
             android:textSize="16sp"
             android:text="Temperature" />
 
-        <me.grantland.widget.AutofitTextView
+        <org.msf.records.widget.AutoResizeTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/vital_name_temperature"
             android:padding="8dp"
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
-            android:textSize="72sp"
+            android:textSize="56sp"
             android:id="@+id/patient_chart_vital_temperature"
-            android:text="-"/>
+            android:text="–"/>
 
     </RelativeLayout>
 

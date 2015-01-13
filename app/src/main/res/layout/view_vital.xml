@@ -19,7 +19,7 @@
         android:textSize="16sp"
         android:text="Consciousness" />
 
-    <me.grantland.widget.AutofitTextView
+    <org.msf.records.widget.AutoResizeTextView
         android:id="@+id/view_vital_value"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,7 +27,7 @@
         android:padding="8dp"
         android:gravity="center"
         android:textColor="#FFFFFF"
-        android:textSize="36sp"
+        android:textSize="32sp"
         android:maxLines="1"
         tools:text="Pain"/>
 

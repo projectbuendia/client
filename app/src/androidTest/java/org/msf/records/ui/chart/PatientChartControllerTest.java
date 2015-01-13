@@ -40,7 +40,6 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	private PatientChartController mController;
 
 	@Mock private AppModel mMockAppModel;
-	@Mock private OpenMrsChartServer mMockServer;
 	@Mock private PatientChartController.Ui mMockUi;
 	@Mock private OdkResultSender mMockOdkResultSender;
 	@Mock private LocalizedChartHelper mMockObservationsProvider;
@@ -59,7 +58,6 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mFakeHandler = new FakeHandler();
 		mController = new PatientChartController(
 				mMockAppModel,
-				mMockServer,
                 fakeEventBus,
 				mFakeCrudEventBus,
 				mMockUi,

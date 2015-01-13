@@ -12,7 +12,6 @@ import org.msf.records.R;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import me.grantland.widget.AutofitTextView;
 
 /**
  * A compound view that displays a patient vital in a colorful rectangle.
@@ -20,7 +19,7 @@ import me.grantland.widget.AutofitTextView;
 public class VitalView extends LinearLayout {
 
     @InjectView(R.id.view_vital_name) TextView mNameView;
-    @InjectView(R.id.view_vital_value) AutofitTextView mValueView;
+    @InjectView(R.id.view_vital_value) AutoResizeTextView mValueView;
 
     public VitalView(Context context) {
         this(context, null);
@@ -59,6 +58,15 @@ public class VitalView extends LinearLayout {
         mValueView.setTextColor(textColor);
         mValueView.setText(value);
         mValueView.setMaxLines(vitalValueMaxLines);
+    }
+
+    /**
+     * Sets the name.
+     */
+    public VitalView setName(CharSequence name) {
+        mNameView.setText(name);
+
+        return this;
     }
 
     public VitalView setValue(CharSequence value) {

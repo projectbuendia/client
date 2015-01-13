@@ -1,8 +1,6 @@
 package org.msf.records.ui.chart;
 
-import static org.msf.records.utils.Utils.getSystemProperty;
-
-import org.msf.records.R;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,13 +15,10 @@ import android.widget.TextView;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
-
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.res.ResStatus;
@@ -36,7 +31,6 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -50,9 +44,8 @@ import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.VitalView;
+import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
-
-import de.greenrobot.event.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
@@ -64,10 +57,56 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
+
+import static org.msf.records.utils.Utils.getSystemProperty;
+
 /**
  * Activity displaying a patient's vitals and charts.
  */
 public final class PatientChartActivity extends BaseLoggedInActivity {
+
+    /**
+     * An enumeration of the XForms that can be launched from this activity.
+     */
+    enum XForm {
+        ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
+        ADD_TEST_RESULTS("TBD", 1);
+
+        public final String uuid;
+        public final int formIndex;
+
+        XForm(String uuid, int formIndex) {
+            this.uuid = uuid;
+            this.formIndex = formIndex;
+        }
+    }
+
+    /**
+     * An object that encapsulates a {@link Activity#startActivityForResult} request code.
+     */
+    static class RequestCode {
+
+        public final XForm form;
+        public final int requestIndex;
+
+        public RequestCode(XForm form, int requestIndex) {
+            this.form = form;
+            this.requestIndex = requestIndex;
+        }
+
+        public RequestCode(int code) {
+            this.form = XForm.values()[(code >> 8) & 0xFF];
+            this.requestIndex = code & 0xFF;
+        }
+
+        public int getCode() {
+            return ((form.formIndex & 0xFF) << 8) | (requestIndex & 0xFF);
+        }
+    }
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
@@ -106,13 +145,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
     @InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
 
+    @InjectView(R.id.patient_chart_pain_parent) ViewGroup mPainParent;
+    @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
+    @InjectView(R.id.vital_name_pain) TextView mPainName;
+
     @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
     @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
     @InjectView(R.id.vital_name_pcr) TextView mPcrName;
-
-    @InjectView(R.id.patient_chart_special_parent) ViewGroup mSpecialParent;
-    @InjectView(R.id.patient_chart_vital_special) TextView mSpecial;
-    @InjectView(R.id.vital_name_special) TextView mSpecialName;
 
     @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
     @InjectView(R.id.vital_mobility) VitalView mMobility;
@@ -122,6 +161,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_id) TextView mPatientIdView;
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
+    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
     @InjectView(R.id.patient_chart_location) TextView mPatientLocationView;
     @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
@@ -162,7 +202,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mController = new PatientChartController(
                 mAppModel,
-                new OpenMrsChartServer(App.getConnectionDetails()),
                 new EventBusWrapper(mEventBus),
                 mCrudEventBusProvider.get(),
                 mMyUi,
@@ -260,7 +299,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("Vital signs");
     }
 
-    @OnClick(R.id.patient_chart_special_parent)
+    @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
         mController.onAddObservationPressed("Special Group");
     }
@@ -343,6 +382,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mTemperatureParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mTemperature.setTextColor(mVitalUnknown.getForegroundColor());
                 mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mTemperature.setText("–"); // en dash
             }
 
             // General Condition
@@ -355,11 +396,29 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralCondition.setTextColor(status.getForegroundColor());
                 mGeneralConditionName.setTextColor(status.getForegroundColor());
 
-                mGeneralCondition.setText(observation.localizedValue);
+                mGeneralCondition.setText(status.getMessage());
             } else {
                 mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
                 mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mGeneralCondition.setText("–"); // en dash
+            }
+
+            // Pain Level
+            observation = observations.get(Concept.PAIN_UUID);
+            if (observation != null && observation.localizedValue != null) {
+                mPainParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
+                mPain.setTextColor(mVitalKnown.getForegroundColor());
+                mPainName.setTextColor(mVitalKnown.getForegroundColor());
+
+                mPain.setText(observation.localizedValue);
+            } else {
+                mPainParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mPain.setTextColor(mVitalUnknown.getForegroundColor());
+                mPainName.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mPain.setText("–"); // en dash
             }
 
             // PCR
@@ -369,32 +428,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mPcr.setText("Not\nImplemented");
 
-            // Special (Pregnancy and IV)
-            String specialText = "";
-
+            // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
-                specialText = "Pregnant";
-            }
-
-            observation = observations.get(Concept.IV_UUID);
-            if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
-                specialText += "\nIV fitted";
-            }
-
-            if (specialText.isEmpty()) {
-                mSpecialParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mSpecial.setTextColor(mVitalUnknown.getForegroundColor());
-                mSpecialName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                specialText = "-";
+                mPatientPregnantView.setText(" Pregnant");
             } else {
-                mSpecialParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-                mSpecial.setTextColor(mVitalKnown.getForegroundColor());
-                mSpecialName.setTextColor(mVitalKnown.getForegroundColor());
+                mPatientPregnantView.setText("");
             }
-
-            mSpecial.setText(specialText);
         }
 
         @Override
@@ -472,24 +512,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())
                     .getDays();
-            switch (days) {
-                case 0:
-                    mPatientAdmissionDateView.setText("Admitted today");
-                    break;
-                case 1:
-                    mPatientAdmissionDateView.setText("Admitted yesterday");
-                    break;
-                default:
-                    mPatientAdmissionDateView.setText("Admitted " + days + " days ago");
-                    break;
-            }
+            mPatientAdmissionDateView.setText("Day " + days + " since admission");
         }
 
         @Override
         public void fetchAndShowXform(
-                String formUuid,
-                int requestCode,
-                org.odk.collect.android.model.Patient patient,
+                XForm form,
+                int code,
+                Patient patient,
                 PrepopulatableFields fields) {
             if (mIsFetchingXform) {
                 return;
@@ -497,7 +527,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                    PatientChartActivity.this, formUuid, requestCode, patient, fields);
+                    PatientChartActivity.this, form.uuid, code, patient, fields);
         }
 
         @Override
