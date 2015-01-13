@@ -7,21 +7,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.msf.records.R;
-import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
 
-import de.greenrobot.event.EventBus;
-
 // TODO(akalachman): Split RoundActivity from Triage and Discharged, which may behave differently.
 public class RoundActivity extends PatientSearchActivity {
+    private RoundController mController;
     private String mLocationName;
     private String mLocationUuid;
-
     private int mLocationPatientCount;
-
-    private final LocationEventSubscriber mSubscriber = new LocationEventSubscriber();
 
     public static final String LOCATION_NAME_KEY = "location_name";
     public static final String LOCATION_PATIENT_COUNT_KEY = "location_patient_count";
@@ -34,6 +28,8 @@ public class RoundActivity extends PatientSearchActivity {
         mLocationName = getIntent().getStringExtra(LOCATION_NAME_KEY);
         mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
         mLocationUuid = getIntent().getStringExtra(LOCATION_UUID_KEY);
+
+        mController = new RoundController(new RoundUi(), mLocationUuid);
 
         setTitle(PatientCountDisplay.getPatientCountTitle(
                 this, mLocationPatientCount, mLocationName));
@@ -67,21 +63,20 @@ public class RoundActivity extends PatientSearchActivity {
     @Override
     protected void onResumeImpl() {
         super.onResumeImpl();
-        EventBus.getDefault().register(mSubscriber);
+        mController.resume();
     }
 
     @Override
     protected void onPauseImpl() {
         super.onPauseImpl();
-        EventBus.getDefault().unregister(mSubscriber);
+        mController.pause();
     }
 
-    // TODO(akalachman): Move to controller.
-    private class LocationEventSubscriber {
-        // Keep title up-to-date with any location changes.
-        public void onEventMainThread(LocationsLoadedEvent event) {
-            LocationSubtree subtree = event.locationTree.getLocationByUuid(mLocationUuid);
-            mLocationPatientCount = subtree.getPatientCount();
+    private class RoundUi implements RoundController.Ui {
+        @Override
+        public void updateLocation(int patientCount, String name) {
+            mLocationPatientCount = patientCount;
+            mLocationName = name;
             setTitle(PatientCountDisplay.getPatientCountTitle(
                     RoundActivity.this, mLocationPatientCount, mLocationName));
         }
