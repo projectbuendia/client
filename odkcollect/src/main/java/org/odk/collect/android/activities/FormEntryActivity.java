@@ -3041,21 +3041,21 @@ public class FormEntryActivity
     /**
      * Checks if the given objects are both equal or both null (equivalent to Objects.equals,
      * but without the requirement for API level 19).
-     * @param a the first object to compare
-     * @param b the second object to compare
-     * @return true if a == b or a and b are both null, false otherwise
+     * @param obj1 the first object to compare
+     * @param obj2 the second object to compare
+     * @return true if obj1 == obj2 or obj1 and obj2 are both null, false otherwise
      */
-    private boolean equalOrBothNull(Object a, Object b) {
-        // Check if a and b are the same object or both are null.
-        if (a == b) {
+    private boolean equalOrBothNull(Object obj1, Object obj2) {
+        // Check if the Objects refer to the same Object or are both null.
+        if (obj1 == obj2) {
             return true;
         }
 
-        // If either a or b is null, then the two cannot be equal.
-        if (a == null || b == null) {
+        // If either Object is null, then the two cannot be equal.
+        if (obj1 == null || obj2 == null) {
             return false;
         }
 
-        return a.equals(b);
+        return obj1.equals(obj2);
     }
 }
