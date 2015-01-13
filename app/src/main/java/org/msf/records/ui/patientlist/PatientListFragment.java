@@ -200,11 +200,6 @@ public class PatientListFragment extends ProgressFragment implements
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
         @Override
-        public void notifyDataSetChanged() {
-            mPatientAdapter.notifyDataSetChanged();
-        }
-
-        @Override
         public void setLocations(AppLocationTree locationTree) {
             // TODO(akalachman): Implement.
         }
@@ -217,11 +212,6 @@ public class PatientListFragment extends ProgressFragment implements
         @Override
         public void showSpinner(boolean show) {
             changeState(show ? State.LOADING : State.LOADED);
-        }
-
-        @Override
-        public void showRefreshIndicator(boolean show) {
-            // TODO(akalachman): Implement.
         }
     }
 }

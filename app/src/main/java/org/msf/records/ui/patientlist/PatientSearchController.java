@@ -10,11 +10,8 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
-import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
-import org.msf.records.events.sync.SyncFailedEvent;
-import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.filter.FilterGroup;
 import org.msf.records.filter.LocationUuidFilter;
 import org.msf.records.filter.PatientFilters;
@@ -35,22 +32,19 @@ public class PatientSearchController {
 
     public interface Ui {
         void launchChartActivity(String uuid, String givenName, String familyName, String id);
+        void setPatients(TypedCursor<AppPatient> patients);
         void showErrorMessage(int message);
-        void showErrorMessage(String message);
     }
 
     public interface FragmentUi {
-        void notifyDataSetChanged();
         void setLocations(AppLocationTree locationTree);
         void setPatients(TypedCursor<AppPatient> patients);
         void showSpinner(boolean show);
-        void showRefreshIndicator(boolean show);
     }
 
     private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
     private final AppModel mModel;
-    private final EventSubscriber mEventBusSubscriber;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
 
     private AppLocationTree mLocationTree;
@@ -69,9 +63,6 @@ public class PatientSearchController {
 
         mCrudEventBus.register(new LocationTreeUpdatedSubscriber());
         mModel.fetchLocationTree(mCrudEventBus, locale);
-
-        // TODO(dxchen): Inject this.
-        mEventBusSubscriber = new EventSubscriber();
 
         mFilter = PatientFilters.getDefaultFilter();
         // TODO(akalachman): Immediately load search results?
@@ -99,7 +90,7 @@ public class PatientSearchController {
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
-        mCrudEventBus.register(mEventBusSubscriber);
+        loadSearchResults();
     }
 
     public void attachFragmentUi(FragmentUi fragmentUi) {
@@ -118,7 +109,7 @@ public class PatientSearchController {
 
     /** Releases any resources used by the controller. */
     public void suspend() {
-        mCrudEventBus.unregister(mEventBusSubscriber);
+        // Intentionally blank.
     }
 
     public void onPatientSelected(AppPatient patient) {
@@ -181,6 +172,7 @@ public class PatientSearchController {
     private final class FilterSubscriber {
         public void onEventMainThread(TypedCursorFetchedEvent<AppPatient> event) {
             mCrudEventBus.unregister(this);
+            mUi.setPatients(event.cursor);
             for (FragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.setPatients(event.cursor);
                 if (mLocationTree != null) {
@@ -188,28 +180,6 @@ public class PatientSearchController {
                 }
             }
             event.cursor.close();
-        }
-    }
-
-    @SuppressWarnings("unused") // Called by reflection from EventBus.
-    private final class EventSubscriber {
-
-        public void onEvent(SingleItemCreatedEvent<AppPatient> event) {
-            loadSearchResults();
-        }
-
-        public synchronized void onEvent(SyncFinishedEvent event) {
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showRefreshIndicator(false);
-            }
-        }
-
-        public synchronized void onEvent(SyncFailedEvent event) {
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showRefreshIndicator(false);
-            }
-            mUi.showErrorMessage(R.string.patient_sync_failed);
-            Log.e(TAG, "Sync event failed");
         }
     }
 }

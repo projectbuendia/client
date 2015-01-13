@@ -7,12 +7,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.TypedCursor;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
 
 // TODO(akalachman): Split RoundActivity from Triage and Discharged, which may behave differently.
 public class RoundActivity extends PatientSearchActivity {
-    private RoundController mController;
     private String mLocationName;
     private String mLocationUuid;
     private int mLocationPatientCount;
@@ -28,8 +29,6 @@ public class RoundActivity extends PatientSearchActivity {
         mLocationName = getIntent().getStringExtra(LOCATION_NAME_KEY);
         mLocationPatientCount = getIntent().getIntExtra(LOCATION_PATIENT_COUNT_KEY, 0);
         mLocationUuid = getIntent().getStringExtra(LOCATION_UUID_KEY);
-
-        mController = new RoundController(new RoundUi(), mLocationUuid);
 
         setTitle(PatientCountDisplay.getPatientCountTitle(
                 this, mLocationPatientCount, mLocationName));
@@ -61,24 +60,9 @@ public class RoundActivity extends PatientSearchActivity {
     }
 
     @Override
-    protected void onResumeImpl() {
-        super.onResumeImpl();
-        mController.resume();
-    }
-
-    @Override
-    protected void onPauseImpl() {
-        super.onPauseImpl();
-        mController.pause();
-    }
-
-    private class RoundUi implements RoundController.Ui {
-        @Override
-        public void updateLocation(int patientCount, String name) {
-            mLocationPatientCount = patientCount;
-            mLocationName = name;
-            setTitle(PatientCountDisplay.getPatientCountTitle(
-                    RoundActivity.this, mLocationPatientCount, mLocationName));
-        }
+    protected void setPatients(TypedCursor<AppPatient> patients) {
+        mLocationPatientCount = patients.getCount();
+        setTitle(PatientCountDisplay.getPatientCountTitle(
+                RoundActivity.this, mLocationPatientCount, mLocationName));
     }
 }

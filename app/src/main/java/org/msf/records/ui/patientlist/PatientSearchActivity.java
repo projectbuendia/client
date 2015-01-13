@@ -15,7 +15,6 @@ import com.nispok.snackbar.listeners.ActionClickListener;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
@@ -179,6 +178,10 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         }
     }
 
+    protected void setPatients(TypedCursor<AppPatient> patients) {
+        // By default, do nothing.
+    }
+
     private final class SearchUi implements PatientSearchController.Ui {
 
         @Override
@@ -194,13 +197,14 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void showErrorMessage(int resource) {
-            BigToast.show(PatientSearchActivity.this, resource);
+        public void setPatients(TypedCursor<AppPatient> patients) {
+            // Delegate to implementers.
+            PatientSearchActivity.this.setPatients(patients);
         }
 
         @Override
-        public void showErrorMessage(String message) {
-            BigToast.show(PatientSearchActivity.this, message);
+        public void showErrorMessage(int resource) {
+            BigToast.show(PatientSearchActivity.this, resource);
         }
     }
 }
