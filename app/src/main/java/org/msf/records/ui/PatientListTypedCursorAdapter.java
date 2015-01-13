@@ -136,8 +136,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             ViewGroup parent) {
         AppPatient patient = (AppPatient)getChild(groupPosition, childPosition);
 
-        // Grab observations for this patient so we can determine condition and pregnant status.
-        // TODO(akalachman): Move to content provider/do in background.
+        // Show pregnancy status and condition if present.
         boolean pregnant = false;
         String condition = null;
         if (mObservations != null) {
