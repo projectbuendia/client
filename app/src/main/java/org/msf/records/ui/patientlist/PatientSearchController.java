@@ -65,7 +65,6 @@ public class PatientSearchController {
         mModel.fetchLocationTree(mCrudEventBus, locale);
 
         mFilter = PatientFilters.getDefaultFilter();
-        // TODO(akalachman): Immediately load search results?
     }
 
     private class LocationTreeUpdatedSubscriber {
