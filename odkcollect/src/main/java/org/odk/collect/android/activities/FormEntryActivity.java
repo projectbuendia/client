@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -85,6 +86,8 @@ import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -207,6 +210,7 @@ public class FormEntryActivity
 
     private String stepMessage = "";
     private ODKView mTargetView;
+    private Map<FormIndex, IAnswerData> mOriginalAnswerData;
 
     private static final double MAX_SCROLL_FRACTION = 0.9; // fraction of mScrollView height
     private View mBottomPaddingView;
@@ -287,7 +291,11 @@ public class FormEntryActivity
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAlertDialog();
+                if (allContentsUnchanged()) {
+                    finish();
+                } else {
+                    showAlertDialog();
+                }
             }
         });
 
@@ -668,6 +676,9 @@ public class FormEntryActivity
                 break;
             }
         }
+
+        // Store any pre-populated answers to enable performing a diff later on.
+        mOriginalAnswerData = getAnswers();
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
@@ -1081,6 +1092,24 @@ public class FormEntryActivity
 	}
 
     /**
+     * Collects all answers in the form into a single map.
+     * @return a {@link java.util.LinkedHashMap} of all answers in the form.
+     */
+    private LinkedHashMap<FormIndex, IAnswerData> getAnswers() {
+        int childCount = mQuestionHolder.getChildCount();
+        LinkedHashMap<FormIndex, IAnswerData> answers = new LinkedHashMap<FormIndex, IAnswerData>();
+        for (int i = 0; i < childCount; i++) {
+            View view = mQuestionHolder.getChildAt(i);
+            if (!(view instanceof ODKView)) {
+                continue;
+            }
+            answers.putAll(((ODKView) view).getAnswers());
+        }
+
+        return answers;
+    }
+
+    /**
      * Saves all answers in the form.
      *
      * @return false if any error occurs while saving (constraint violated,
@@ -1089,15 +1118,7 @@ public class FormEntryActivity
     private boolean saveAnswers(boolean evaluateConstraints) {
         FormController formController = Collect.getInstance().getFormController();
         int childCount = mQuestionHolder.getChildCount();
-        LinkedHashMap<FormIndex, IAnswerData> answers =
-                new LinkedHashMap<FormIndex, IAnswerData>();
-        for (int i = 0; i < childCount; i++) {
-            View view = mQuestionHolder.getChildAt(i);
-            if (!(view instanceof ODKView)) {
-                continue;
-            }
-            answers.putAll(((ODKView) view).getAnswers());
-        }
+        LinkedHashMap<FormIndex, IAnswerData> answers = getAnswers();
 
         try {
             FailedConstraint constraint = formController.saveAnswers(answers, evaluateConstraints);
@@ -2968,5 +2989,52 @@ public class FormEntryActivity
                     ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
                     ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
         }
+    }
+
+    /**
+     * Returns true iff no values in the form have changed from the
+     * pre-populated defaults. This will return true even if a value
+     * has been given and subsequently cleared.
+     * @return true iff no form values have changed, false otherwise
+     */
+    private boolean allContentsUnchanged() {
+        Map<FormIndex, IAnswerData> answers = getAnswers();
+
+        // Compare each individual answer to the original answers (after
+        // pre-population), returning false for any unmatched answer.
+        for (Map.Entry<FormIndex, IAnswerData> entry : answers.entrySet()) {
+            // Double-check the key even exists before continuing to avoid
+            // a NullPointerException, but this should never happen in
+            // practice.
+            if (!mOriginalAnswerData.containsKey(entry.getKey())) {
+                return false;
+            }
+
+            // Check for differences based on the display text of answers. This
+            // has the (rare) downside that different values may be considered
+            // equal if they have the same display text, but equals() is not
+            // reliable for IAnswerData objects.
+            String newText = getDisplayText(entry.getValue());
+            String oldText = getDisplayText(mOriginalAnswerData.get(entry.getKey()));
+            if (!Objects.equals(newText, oldText)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Retrieves the displayed text for an {@link org.javarosa.core.model.data.IAnswerData}
+     * object.
+     * @param data the field
+     * @return the displayed text, or null if the data is null
+     */
+    private @Nullable String getDisplayText(@Nullable IAnswerData data) {
+        if (data == null) {
+            return null;
+        }
+
+        return data.getDisplayText();
     }
 }
