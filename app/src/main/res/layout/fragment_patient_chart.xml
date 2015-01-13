@@ -23,7 +23,7 @@
             android:textSize="36sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
-            android:text="FirstName LastName"/>
+            tools:text="John Doe"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -32,7 +32,7 @@
             android:textSize="36sp"
             android:gravity="end"
             android:id="@+id/patient_chart_id"
-            android:text="PatientID#"/>
+            tools:text="Kh.293"/>
 
     </LinearLayout>
 
@@ -51,7 +51,17 @@
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/black"
             android:id="@+id/patient_chart_gender_age"
-            tools:text="M, 23 mo"/>
+            tools:text="M, 23 mo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:gravity="start"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/red"
+            android:id="@+id/patient_chart_pregnant"
+            tools:text=" Pregnant" />
 
         <TextView
             android:layout_width="match_parent"
@@ -59,9 +69,9 @@
             android:textSize="30sp"
             android:gravity="end"
             android:fontFamily="sans-serif-condensed"
-            android:text="EMC Location/Tent#"
             android:id="@+id/patient_chart_location"
-            android:textColor="@android:color/black"/>
+            android:textColor="@android:color/black"
+            tools:text="EMC Location/Tent#" />
 
     </LinearLayout>
 
@@ -111,34 +121,34 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="160dp">
 
             <include
                 layout="@layout/view_vital_general_condition"
                 android:id="@+id/patient_chart_general_condition_parent"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="144dp"
                 android:layout_margin="4dp" />
 
             <include
                 layout="@layout/view_vital_temperature"
                 android:id="@+id/patient_chart_temperature_parent"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="144dp"
+                android:layout_margin="4dp" />
+
+            <include
+                layout="@layout/view_vital_pain"
+                android:id="@+id/patient_chart_pain_parent"
+                android:layout_width="0dp"
+                android:layout_height="144dp"
                 android:layout_margin="4dp" />
 
             <include
                 layout="@layout/view_vital_pcr"
                 android:id="@+id/patient_chart_pcr_parent"
                 android:layout_width="0dp"
-                android:layout_height="200dp"
-                android:layout_margin="4dp" />
-
-            <include
-                layout="@layout/view_vital_special"
-                android:id="@+id/patient_chart_special_parent"
-                android:layout_width="0dp"
-                android:layout_height="200dp"
+                android:layout_height="144dp"
                 android:layout_margin="4dp" />
 
         </TableRow>
@@ -149,42 +159,42 @@
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_responsiveness"
                 android:layout_width="0dp"
-                android:layout_height="128dp"
+                android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Conscious State"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_mobility"
                 android:layout_width="0dp"
-                android:layout_height="128dp"
+                android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Mobility"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_diet"
                 android:layout_width="0dp"
-                android:layout_height="128dp"
+                android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Diet"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_food_drink"
                 android:layout_width="0dp"
-                android:layout_height="128dp"
+                android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Hydration"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
         </TableRow>
 

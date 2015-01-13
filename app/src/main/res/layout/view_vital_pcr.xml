@@ -27,9 +27,9 @@
         android:padding="8dp"
         android:gravity="center"
         android:textColor="@color/vital_fg_dark"
-        android:textSize="72sp"
+        android:textSize="56sp"
         android:maxLines="2"
         android:id="@+id/patient_chart_vital_pcr"
-        tools:text="-"/>
+        tools:text="–"/>
 
 </RelativeLayout>

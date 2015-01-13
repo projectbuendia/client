@@ -61,6 +61,15 @@ public class VitalView extends LinearLayout {
         mValueView.setMaxLines(vitalValueMaxLines);
     }
 
+    /**
+     * Sets the name.
+     */
+    public VitalView setName(CharSequence name) {
+        mNameView.setText(name);
+
+        return this;
+    }
+
     public VitalView setValue(CharSequence value) {
         mValueView.setText(value);
 

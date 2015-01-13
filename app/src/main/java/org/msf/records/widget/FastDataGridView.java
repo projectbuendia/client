@@ -64,9 +64,10 @@ public class FastDataGridView {
             }
         });
 
-        // Initialize rowHeaders.
+        // Initialize columnHeaders.
         LinearLayoutManager columnHeaderLayoutManager = new WrapContentLinearLayoutManager(
                 context, LinearLayoutManager.HORIZONTAL, false);
+        columnHeaderLayoutManager.setReverseLayout(true);
         columnHeaders.setAdapter(new ColumnHeaderAdapter(dataGridAdapter, layoutInflater));
         columnHeaders.setLayoutManager(columnHeaderLayoutManager);
         columnHeaders.setInternalScrollListener(new OnInternalScrollListener() {
@@ -81,7 +82,7 @@ public class FastDataGridView {
                 dataGridAdapter, layoutInflater);
         RecyclerView.LayoutManager layoutManager = new WrapContentGridLayoutManager(
                 context, dataGridAdapter.getRowCount(), LinearLayoutManager.HORIZONTAL,
-                false /* reverseLayout */);
+                true /* reverseLayout */);
         cells.setHasFixedSize(true);
         cells.setLayoutManager(layoutManager);
         cells.setAdapter(cellAdapter);
@@ -121,7 +122,12 @@ public class FastDataGridView {
         }
     }
 
-
+    /**
+     * A {@link RecyclerView.Adapter} for patient observation cells.
+     *
+     * <p>This class wraps {@link DataGridAdapter} but reverses the order in which columns are
+     * populated so that the most recent day with observations is shown on screen first.
+     */
     private static final class CellAdapter extends RecyclerView.Adapter {
         private final DataGridAdapter mDataGridAdapter;
         private final LayoutInflater mLayoutInflater;
@@ -155,8 +161,12 @@ public class FastDataGridView {
             int columnIndex = position / mDataGridAdapter.getRowCount();
             int rowIndex = position % mDataGridAdapter.getRowCount();
             CellViewHolder viewHolder = (CellViewHolder) holder;
-            viewHolder.textView = mDataGridAdapter.fillCell(rowIndex, columnIndex,
-                    viewHolder.itemView, viewHolder.viewStub, viewHolder.textView);
+            viewHolder.textView = mDataGridAdapter.fillCell(
+                    rowIndex,
+                    (mDataGridAdapter.getColumnCount() - columnIndex - 1),
+                    viewHolder.itemView,
+                    viewHolder.viewStub,
+                    viewHolder.textView);
             if (viewHolder.textView != null) {
                 // After inflation, the viewStub is no longer part of the view hierarchy, so let it
                 // be garbage collected.
@@ -227,7 +237,9 @@ public class FastDataGridView {
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            mDataGridAdapter.fillColumnHeader(position * 2, ((ViewHolder) holder).textView);
+            mDataGridAdapter.fillColumnHeader(
+                    (mDataGridAdapter.getColumnCount() - (position * 2) - 2),
+                    ((ViewHolder) holder).textView);
         }
 
         @Override
