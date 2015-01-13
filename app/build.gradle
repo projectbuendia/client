@@ -21,7 +21,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':autofittextview')
     compile project(':odkcollect')
     compile project(':snackbar')
     compile project(':ViewPagerIndicator')
