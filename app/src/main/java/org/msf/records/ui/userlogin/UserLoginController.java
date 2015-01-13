@@ -135,7 +135,7 @@ final class UserLoginController {
             List<T> list, Comparator<T> comparator, T newItem) {
         int index;
         for (index = 0; index < list.size(); index++) {
-            if (comparator.compare(list.get(index), newItem) == 1) {
+            if (comparator.compare(list.get(index), newItem) > 0) {
                 break;
             }
         }
