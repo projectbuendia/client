@@ -1,5 +1,6 @@
 package org.msf.records.data.app;
 
+import android.database.ContentObserver;
 import android.support.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
@@ -13,21 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.concurrent.Immutable;
-
 /**
  * A tree that contains all app model locations.
  */
-@Immutable
-public class AppLocationTree {
+public class AppLocationTree implements AppModelObservable {
 
     private static final Logger LOG = Logger.create();
-
-    private static final AppLocationTree EMPTY = new AppLocationTree(
-            null,
-            new HashMap<String, AppLocation>(),
-            new HashMap<String, AppLocation>(),
-            ImmutableSetMultimap.<String, AppLocation>of());
 
     public static final int ABSOLUTE_DEPTH_ROOT = 0;
     public static final int ABSOLUTE_DEPTH_ZONE = 1;
@@ -37,83 +29,82 @@ public class AppLocationTree {
     /**
      * Creates a {@link AppLocationTree} from a {@link TypedCursor} of {@link AppLocation}s.
      *
-     * <p>This method closes the cursor once it finishes constructing a tree.
+     * <p>Callers must call {@link #close} when done with an instance of this class.
      *
      * @throws IllegalArgumentException if the location tree contains multiple root nodes or if the
      *                                  the location tree has no root node or if the location tree
      *                                  contains any nodes whose parents are missing
      */
-    static AppLocationTree fromTypedCursor(TypedCursor<AppLocation> cursor) {
+    static AppLocationTree forTypedCursor(TypedCursor<AppLocation> cursor) {
         AppLocation root = null;
         Map<String, AppLocation> uuidsToLocations = new HashMap<>();
         Map<String, AppLocation> uuidsToParents = new HashMap<>();
         ImmutableSetMultimap.Builder<String, AppLocation> uuidsToChildrenBuilder =
                 ImmutableSetMultimap.builder();
 
-        try {
-            // First, create mappings from location UUIDs to the locations themselves and to their
-            // children.
-            for (AppLocation location : cursor) {
-                if (location.parentUuid == null) {
-                    if (root != null) {
-                        LOG.w(
-                                "Creating location tree with multiple root nodes. Both location '"
-                                        + root.name + "' (UUID '" + root.uuid + "') and location '"
-                                        + location.name + "' (UUID '" + location.uuid + "') have "
-                                        + "no parent nodes. The first location will be considered "
-                                        + "the root node.");
-                    }
-
-                    root = location;
-                } else {
-                    uuidsToChildrenBuilder.put(location.parentUuid, location);
+        // First, create mappings from location UUIDs to the locations themselves and to their
+        // children.
+        for (AppLocation location : cursor) {
+            if (location.parentUuid == null) {
+                if (root != null) {
+                    LOG.w(
+                            "Creating location tree with multiple root nodes. Both location '"
+                                    + root.name + "' (UUID '" + root.uuid + "') and location '"
+                                    + location.name + "' (UUID '" + location.uuid + "') have "
+                                    + "no parent nodes. The first location will be considered "
+                                    + "the root node.");
                 }
 
-                uuidsToLocations.put(location.uuid, location);
+                root = location;
+            } else {
+                uuidsToChildrenBuilder.put(location.parentUuid, location);
             }
 
-            if (root == null) {
-                LOG.w("Creating a location tree with no root node. This tree will have no data.");
+            uuidsToLocations.put(location.uuid, location);
+        }
 
-                return AppLocationTree.EMPTY;
-            }
-
-            // Then, create a mapping from location UUIDs to their parents.
-            for (AppLocation location : uuidsToLocations.values()) {
-                if (location.parentUuid == null) {
-                    continue;
-                }
-
-                AppLocation parent = uuidsToLocations.get(location.parentUuid);
-                if (parent == null) {
-                    // TODO(dxchen): Consider making this a warning rather than an exception.
-                    throw new IllegalArgumentException(
-                            "Unable to create tree because a location's parent does not exist. "
-                                    + "Location '" + location.name + "' (UUID '" + location.uuid
-                                    + "' points to parent location with UUID '"
-                                    + location.parentUuid + "', which does not exist.");
-                }
-
-                uuidsToParents.put(location.uuid, parent);
-            }
+        if (root == null) {
+            LOG.w("Creating a location tree with no root node. This tree has no data.");
 
             return new AppLocationTree(
-                    root, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
-        } finally {
-            cursor.close();
+                    cursor, null, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
         }
+
+        // Then, create a mapping from location UUIDs to their parents.
+        for (AppLocation location : uuidsToLocations.values()) {
+            if (location.parentUuid == null) {
+                continue;
+            }
+            AppLocation parent = uuidsToLocations.get(location.parentUuid);
+            if (parent == null) {
+                // TODO(dxchen): Consider making this a warning rather than an exception.
+                throw new IllegalArgumentException(
+                        "Unable to create tree because a location's parent does not exist. "
+                                + "Location '" + location.name + "' (UUID '" + location.uuid
+                                + "' points to parent location with UUID '"
+                                + location.parentUuid + "', which does not exist.");
+            }
+
+            uuidsToParents.put(location.uuid, parent);
+        }
+
+        return new AppLocationTree(
+                cursor, root, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
     }
 
+    private final TypedCursor<AppLocation> mCursor;
     private final AppLocation mRoot;
     private final Map<String, AppLocation> mUuidsToLocations;
     private final Map<String, AppLocation> mUuidsToParents;
     private final ImmutableSetMultimap<String, AppLocation> mUuidsToChildren;
 
     private AppLocationTree(
+            TypedCursor<AppLocation> cursor,
             AppLocation root,
             Map<String, AppLocation> uuidsToLocations,
             Map<String, AppLocation> uuidsToParents,
             ImmutableSetMultimap<String, AppLocation> uuidsToChildren) {
+        mCursor = cursor;
         mRoot = root;
         mUuidsToLocations = uuidsToLocations;
         mUuidsToParents = uuidsToParents;
@@ -208,5 +199,20 @@ public class AppLocationTree {
             count += getTotalPatientCount(child);
         }
         return count;
+    }
+
+    @Override
+    public void registerContentObserver(ContentObserver observer) {
+        mCursor.registerContentObserver(observer);
+    }
+
+    @Override
+    public void unregisterContentObserver(ContentObserver observer) {
+        mCursor.unregisterContentObserver(observer);
+    }
+
+    @Override
+    public void close() {
+        mCursor.close();
     }
 }

@@ -12,6 +12,7 @@ import android.widget.TextView;
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
+import org.msf.records.data.res.ResStatus;
 import org.msf.records.location.LocationTree;
 import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
@@ -150,14 +151,15 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = newChildView();
         }
+
+        ResStatus.Resolved status =
+                Concept.getResStatus(condition).resolve(mContext.getResources());
+
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(patient.givenName + " " + patient.familyName);
         holder.mPatientId.setText(patient.id);
-        holder.mPatientId.setTextColor(
-                mContext.getResources().getColor(
-                        Concept.getForegroundColorResourceForGeneralCondition(condition)));
-        holder.mPatientId.setBackgroundResource(
-                Concept.getBackgroundColorResourceForGeneralCondition(condition));
+        holder.mPatientId.setTextColor(status.getForegroundColor());
+        holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
 
         holder.mPatientAge.setText(
                 patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));

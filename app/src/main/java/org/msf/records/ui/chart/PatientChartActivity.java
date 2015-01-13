@@ -4,7 +4,6 @@ import static org.msf.records.utils.Utils.getSystemProperty;
 
 import org.msf.records.R;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -27,6 +26,9 @@ import org.joda.time.Days;
 import org.msf.records.App;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.res.ResStatus;
+import org.msf.records.data.res.ResTemperatureRange;
+import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.location.LocationManager;
@@ -80,6 +82,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // TODO(dxchen): Refactor.
     private boolean mIsFetchingXform = false;
 
+    private ResVital.Resolved mVitalUnknown;
+    private ResVital.Resolved mVitalKnown;
+
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -90,19 +95,30 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject LocalizedChartHelper mLocalizedChartHelper;
 
     @Nullable private View mChartView;
+
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
-    @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionContainer;
-    @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperature;
-    @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperatureTextView;
+
+    @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
+    @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
+    @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
+
+    @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperatureParent;
+    @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
+    @InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
+
+    @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
+    @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
+    @InjectView(R.id.vital_name_pcr) TextView mPcrName;
+
+    @InjectView(R.id.patient_chart_special_parent) ViewGroup mSpecialParent;
+    @InjectView(R.id.patient_chart_vital_special) TextView mSpecial;
+    @InjectView(R.id.vital_name_special) TextView mSpecialName;
 
     @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
     @InjectView(R.id.vital_mobility) VitalView mMobility;
     @InjectView(R.id.vital_diet) VitalView mDiet;
     @InjectView(R.id.vital_food_drink) VitalView mHydration;
 
-    @InjectView(R.id.patient_chart_vital_pcr) TextView mVitalPcr;
-    @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
-    @InjectView(R.id.patient_chart_vital_special) TextView mVitalSpecial;
     @InjectView(R.id.patient_chart_id) TextView mPatientIdView;
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
@@ -164,6 +180,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         if (patientName != null && patientId != null) {
             setTitle(patientId + ": " + patientName);
         }
+
+        mVitalUnknown = ResVital.UNKNOWN.resolve(getResources());
+        mVitalKnown = ResVital.KNOWN.resolve(getResources());
     }
 
     @Override
@@ -265,8 +284,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     /** Updates a {@link VitalView} to display a new observation value. */
     private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
         if (observation != null) {
+            view.setBackgroundColor(mVitalKnown.getBackgroundColor());
+            view.setTextColor(mVitalKnown.getForegroundColor());
+
             view.setValue(observation.localizedValue);
         } else {
+            view.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+            view.setTextColor(mVitalUnknown.getForegroundColor());
+
             view.setValue("-");
         }
     }
@@ -304,22 +329,45 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
             if (observation != null && observation.localizedValue != null) {
                 double value = Double.parseDouble(observation.localizedValue);
-                mTemperatureTextView.setText(String.format("%.1f°", value));
+                ResTemperatureRange.Resolved temperatureRange =
+                        value <= 37.5
+                                ? ResTemperatureRange.NORMAL.resolve(getResources())
+                                : ResTemperatureRange.HIGH.resolve(getResources());
 
-                if (value <= 37.5) {
-                    mTemperature.setBackgroundColor(Color.parseColor("#417505"));
-                } else {
-                    mTemperature.setBackgroundColor(Color.parseColor("#D0021B"));
-                }
+                mTemperatureParent.setBackgroundColor(temperatureRange.getBackgroundColor());
+                mTemperature.setTextColor(temperatureRange.getForegroundColor());
+                mTemperatureName.setTextColor(temperatureRange.getForegroundColor());
+
+                mTemperature.setText(String.format("%.1f°", value));
+            } else {
+                mTemperatureParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mTemperature.setTextColor(mVitalUnknown.getForegroundColor());
+                mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
             }
 
             // General Condition
             observation = observations.get(Concept.GENERAL_CONDITION_UUID);
             if (observation != null && observation.localizedValue != null) {
+                ResStatus.Resolved status =
+                        Concept.getResStatus(observation.value).resolve(getResources());
+
+                mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
+                mGeneralCondition.setTextColor(status.getForegroundColor());
+                mGeneralConditionName.setTextColor(status.getForegroundColor());
+
                 mGeneralCondition.setText(observation.localizedValue);
-                mGeneralConditionContainer.setBackgroundResource(
-                        Concept.getBackgroundColorResourceForGeneralCondition(observation.value));
+            } else {
+                mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
+                mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
             }
+
+            // PCR
+            mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+            mPcr.setTextColor(mVitalUnknown.getForegroundColor());
+            mPcrName.setTextColor(mVitalUnknown.getForegroundColor());
+
+            mPcr.setText("Not\nImplemented");
 
             // Special (Pregnancy and IV)
             String specialText = "";
@@ -335,13 +383,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             if (specialText.isEmpty()) {
+                mSpecialParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mSpecial.setTextColor(mVitalUnknown.getForegroundColor());
+                mSpecialName.setTextColor(mVitalUnknown.getForegroundColor());
+
                 specialText = "-";
+            } else {
+                mSpecialParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
+                mSpecial.setTextColor(mVitalKnown.getForegroundColor());
+                mSpecialName.setTextColor(mVitalKnown.getForegroundColor());
             }
 
-            mVitalSpecial.setText(specialText);
-
-            // PCR
-            mVitalPcr.setText("Not\nImplemented");
+            mSpecial.setText(specialText);
         }
 
         @Override

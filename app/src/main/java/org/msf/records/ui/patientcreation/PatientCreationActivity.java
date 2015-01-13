@@ -18,6 +18,7 @@ import com.google.common.base.Optional;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
+import org.msf.records.data.res.ResZone;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.location.LocationManager;
 import org.msf.records.location.LocationTree;
@@ -105,11 +106,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
                 LocationTree.LocationSubtree location =
                         LocationTree.singletonInstance.getLocationByUuid(newTentUuid);
+                ResZone.Resolved zone = Zone.getResZone(
+                        location.getLocation().parent_uuid).resolve(getResources());
+
                 mLocationText.setText(location.toString());
-                mLocationText.setBackgroundResource(
-                        Zone.getBackgroundColorResource(location.getLocation().parent_uuid));
-                mLocationText.setTextColor(getResources().getColor(
-                        Zone.getForegroundColorResource(location.getLocation().parent_uuid)));
+                mLocationText.setBackgroundColor(zone.getBackgroundColor());
+                mLocationText.setTextColor(zone.getForegroundColor());
 
                 return true;
             }

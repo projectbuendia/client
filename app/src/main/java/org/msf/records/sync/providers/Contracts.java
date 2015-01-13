@@ -6,6 +6,8 @@ import android.provider.BaseColumns;
 
 import org.msf.records.BuildConfig;
 
+import java.util.Locale;
+
 /**
  * The external contracts for {@link MsfRecordsProvider}.
  */
@@ -202,7 +204,14 @@ public class Contracts {
     }
 
     // TODO(dxchen): Implement.
-    interface LocalizedLocationColumns {}
+    interface LocalizedLocationColumns {
+
+        String LOCATION_UUID = LocationColumns.LOCATION_UUID;
+
+        String PARENT_UUID = LocationColumns.PARENT_UUID;
+
+        String LOCALIZED_NAME = LocaleColumns.LOCALIZED_NAME;
+    }
 
     public static class Charts implements ChartColumns, BaseColumns {
 
