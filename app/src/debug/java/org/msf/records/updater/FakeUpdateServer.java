@@ -2,15 +2,14 @@ package org.msf.records.updater;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.net.VolleySingleton;
-import org.msf.records.updater.UpdateServer;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A fake {@link UpdateServer} for testing.
@@ -23,22 +22,21 @@ public class FakeUpdateServer extends UpdateServer {
      */
     private final Handler mHandler;
 
-    private final UpdateInfo mUpdateInfo;
+    private final List<UpdateInfo> mUpdateInfo;
 
     public FakeUpdateServer(VolleySingleton volleySingleton) {
         super(volleySingleton, null /*rootUrl*/);
         mHandler = new Handler(Looper.getMainLooper());
-        mUpdateInfo = new UpdateInfo();
-        mUpdateInfo.androidClient = new UpdateInfo.ComponentUpdateInfo();
-        mUpdateInfo.androidClient.latestVersionString = "0.1.0";
-        mUpdateInfo.androidClient.installWindowHoursMin = 200;
-        mUpdateInfo.androidClient.installWindowHoursMax = 400;
-        mUpdateInfo.androidClient.run = Arrays.asList("foo/bar/baz.apk");
+        mUpdateInfo = new ArrayList<>();
+        UpdateInfo latestUpdateInfo = new UpdateInfo();
+        latestUpdateInfo.source = "http://www.example.org/foo.apk";
+        latestUpdateInfo.version = "0.1.0";
+        mUpdateInfo.add(latestUpdateInfo);
     }
 
     @Override
     public void getAndroidUpdateInfo(
-            final Response.Listener<UpdateInfo> listener,
+            final Response.Listener<List<UpdateInfo>> listener,
             final Response.ErrorListener errorListener) {
         mHandler.post(new Runnable() {
 

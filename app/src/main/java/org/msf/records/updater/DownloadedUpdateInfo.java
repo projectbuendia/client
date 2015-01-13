@@ -2,12 +2,9 @@ package org.msf.records.updater;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
-
-import com.github.zafarkhaja.semver.ParseException;
-import com.github.zafarkhaja.semver.Version;
 
 import org.msf.records.App;
+import org.msf.records.utils.LexicographicVersion;
 import org.msf.records.utils.Logger;
 
 /**
@@ -19,14 +16,14 @@ public class DownloadedUpdateInfo {
     private static final Logger LOG = Logger.create();
 
     public final boolean isValid;
-    public final Version currentVersion;
-    public final Version downloadedVersion;
+    public final LexicographicVersion currentVersion;
+    public final LexicographicVersion downloadedVersion;
     public final String path;
 
     /**
      * Creates an instance of {@link DownloadedUpdateInfo} for an invalid update.
      */
-    public static DownloadedUpdateInfo getInvalid(Version currentVersion) {
+    public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
         return new DownloadedUpdateInfo(
                 false /*isValid*/, currentVersion, UpdateManager.INVALID_VERSION, null /*path*/);
     }
@@ -34,32 +31,38 @@ public class DownloadedUpdateInfo {
     /**
      * Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk.
      */
-    public static DownloadedUpdateInfo fromPath(Version currentVersion, String path) {
-        if (path == null || path.equals("")) {
-            LOG.w("Path was not specified.");
+    public static DownloadedUpdateInfo fromUri(LexicographicVersion currentVersion, String uri) {
+        if (uri == null || uri.equals("") || !uri.startsWith("file://")) {
+            LOG.w("URI was not specified or invalid.");
             return getInvalid(currentVersion);
         }
 
+        // Remove the leading "file://".
+        String path = uri.substring(7);
         PackageManager packageManager = App.getInstance().getPackageManager();
+
         PackageInfo packageInfo = packageManager.getPackageArchiveInfo(path, 0 /*flags*/);
         if (packageInfo == null) {
-            LOG.w(path + " is not a valid APK.");
+            LOG.w("%1$s is not a valid APK.", uri);
             return getInvalid(currentVersion);
         }
 
-        Version downloadedVersion;
+        LexicographicVersion downloadedVersion;
         try {
-            downloadedVersion = Version.valueOf(packageInfo.versionName);
-        } catch (ParseException e) {
-            LOG.w(path + " has an invalid semantic version: " + packageInfo.versionName + ".");
+            downloadedVersion = LexicographicVersion.parse(packageInfo.versionName);
+        } catch (IllegalArgumentException e) {
+            LOG.w("%1$s has an invalid semantic version: %1$s.", uri, packageInfo.versionName);
             return getInvalid(currentVersion);
         }
 
-        return new DownloadedUpdateInfo(true /*isValid*/, currentVersion, downloadedVersion, path);
+        return new DownloadedUpdateInfo(true /*isValid*/, currentVersion, downloadedVersion, uri);
     }
 
     private DownloadedUpdateInfo(
-            boolean isValid, Version currentVersion, Version downloadedVersion, String path) {
+            boolean isValid,
+            LexicographicVersion currentVersion,
+            LexicographicVersion downloadedVersion,
+            String path) {
         this.isValid = isValid;
         this.currentVersion = currentVersion;
         this.downloadedVersion = downloadedVersion;

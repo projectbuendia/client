@@ -1,65 +1,29 @@
 package org.msf.records.model;
 
-import android.support.annotation.Nullable;
-
-import com.github.zafarkhaja.semver.ParseException;
-import com.github.zafarkhaja.semver.Version;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-import java.util.List;
+import org.msf.records.utils.LexicographicVersion;
 
 /**
- * A Gson object that represents update info responses from the update server.
+ * A Gson object that represents an available update.
  */
-public class UpdateInfo implements Serializable {
+public class UpdateInfo {
 
-    @SerializedName("androidclient")
-    public ComponentUpdateInfo androidClient;
+    @SerializedName("src")
+    public String source;
+
+    @SerializedName("version")
+    public String version;
 
     /**
-     * A Gson object that represents update info for a specific component.
+     * Returns the parsed {@link LexicographicVersion} or {@code null} if the version is
+     * malformed.
      */
-    public static class ComponentUpdateInfo implements Serializable {
-
-        /**
-         * The latest version available on the server, as a string.
-         */
-        @SerializedName("latest_version")
-        public String latestVersionString;
-
-        /**
-         * The first time of day at which the update can be automatically installed, in 24-hour
-         * format.
-         */
-        @SerializedName("install_window_hours_min")
-        public int installWindowHoursMin;
-
-        /**
-         * The last time of day at which the update can be automatically installed, in 24-hour
-         * format.
-         */
-        @SerializedName("install_window_hours_max")
-        public int installWindowHoursMax;
-
-        /**
-         * A list of commands to be run in order to update a component.
-         *
-         * <p>The format of each entry is component-specific.
-         */
-        public List<String> run;
-
-        /**
-         * Returns the latest semantic version available on the server or {@code null} if no latest
-         * version is specified.
-         */
-        @Nullable
-        public Version getLatestVersion() {
-            try {
-                return latestVersionString == null ? null : Version.valueOf(latestVersionString);
-            } catch (ParseException e) {
-                return null;
-            }
+    public LexicographicVersion getParsedVersion() {
+        try {
+            return version == null ? null : LexicographicVersion.parse(version);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 }
