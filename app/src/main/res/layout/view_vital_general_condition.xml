@@ -34,7 +34,7 @@
             android:textSize="56sp"
             android:maxLines="2"
             android:id="@+id/patient_chart_vital_general_condition"
-            android:text="-"/>
+            android:text="–"/>
 
     </RelativeLayout>
 

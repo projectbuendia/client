@@ -164,7 +164,7 @@
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Conscious State"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_mobility"
@@ -174,7 +174,7 @@
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Mobility"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_diet"
@@ -184,7 +184,7 @@
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Diet"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_food_drink"
@@ -194,7 +194,7 @@
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Hydration"
-                app:vitalValue="-"/>
+                app:vitalValue="–"/>
 
         </TableRow>
 

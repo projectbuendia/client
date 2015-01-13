@@ -32,9 +32,9 @@
             android:padding="8dp"
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
-            android:textSize="36sp"
+            android:textSize="56sp"
             android:maxLines="2"
-            tools:text="-"/>
+            tools:text="–"/>
 
     </RelativeLayout>
 

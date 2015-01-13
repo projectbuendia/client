@@ -35,7 +35,7 @@
             android:textColor="@color/vital_fg_dark"
             android:textSize="56sp"
             android:id="@+id/patient_chart_vital_temperature"
-            android:text="-"/>
+            android:text="–"/>
 
     </RelativeLayout>
 

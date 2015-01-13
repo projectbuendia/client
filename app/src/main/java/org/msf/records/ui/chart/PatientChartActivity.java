@@ -1,9 +1,5 @@
 package org.msf.records.ui.chart;
 
-import static org.msf.records.utils.Utils.getSystemProperty;
-
-import org.msf.records.R;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,13 +15,10 @@ import android.widget.TextView;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
-
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.res.ResStatus;
@@ -38,7 +31,6 @@ import org.msf.records.location.LocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -55,8 +47,6 @@ import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import de.greenrobot.event.EventBus;
-
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -66,6 +56,13 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
+
+import static org.msf.records.utils.Utils.getSystemProperty;
 
 /**
  * Activity displaying a patient's vitals and charts.
@@ -386,7 +383,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mTemperature.setTextColor(mVitalUnknown.getForegroundColor());
                 mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
 
-                mTemperature.setText("-");
+                mTemperature.setText("–"); // en dash
             }
 
             // General Condition
@@ -409,7 +406,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                 mGeneralCondition.setMaxLines(1);
 
-                mGeneralCondition.setText("-");
+                mGeneralCondition.setText("–"); // en dash
             }
 
             // Pain Level
@@ -425,7 +422,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mPain.setTextColor(mVitalUnknown.getForegroundColor());
                 mPainName.setTextColor(mVitalUnknown.getForegroundColor());
 
-                mPain.setText("-");
+                mPain.setText("–"); // en dash
             }
 
             // PCR
