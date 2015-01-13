@@ -72,13 +72,6 @@ public class PatientListActivity extends PatientSearchActivity {
                 resultCode, data);
     }
 
-    private void showFakeScanProgress() {
-        final ProgressDialog progressDialog = ProgressDialog
-                .show(PatientListActivity.this, null, "Scanning for near by bracelets ...", true);
-        progressDialog.setCancelable(true);
-        progressDialog.show();
-    }
-
     private void startActivity(Class<?> activityClass) {
       Intent intent = new Intent(PatientListActivity.this, activityClass);
       startActivity(intent);
