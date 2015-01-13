@@ -15,10 +15,10 @@
     <color name="status_fair">#f5cd23</color>
     <color name="status_poor">#d05802</color>
     <color name="status_very_poor">#d0021b</color>
-    <color name="status_suspected_dead">#807e7e</color>
-    <color name="status_confirmed_dead">#000000</color>
     <color name="status_discharged_non_case">#5eae00</color>
     <color name="status_cured">#5eae00</color>
+    <color name="status_suspected_dead">#807e7e</color>
+    <color name="status_confirmed_dead">#000000</color>
 
     <!-- Temperature Ranges -->
     <color name="temperature_normal">#417505</color>
@@ -38,25 +38,9 @@
     <color name="gray_400">#BDBDBD</color>
     <color name="gray_600">#757575</color>
 
-    <color name="status_probable_old">#fbb03b</color>
-    <color name="status_suspect_old">#ffff00</color>
-    <color name="status_confirmed_old">#ff0000</color>
-    <color name="status_non_case_old">#39b54a</color>
-    <color name="status_convalescent_old">#009245</color>
-    <color name="status_unconfirmed_death_old">#666666</color>
-    <color name="status_confirmed_death_old">#000000</color>
-    <color name="status_can_be_discharged_old">#d9e021</color>
-    <color name="status_discharged_old">#b3b3b3</color>
-    <color name="zone_outside">#FFFFFF</color>
-    <color name="zone_triage">#FFFFFF</color>
     <color name="chart_background_light">#e1e1e1</color>
     <color name="chart_background_dark">#cccccc</color>
     <color name="chart_grid_lines">#999999</color>
     <color name="zone_tent_selected_padding">@android:color/black</color>
-    <color name="general_condition_good">#4CAF50</color>
-    <color name="general_condition_fair">#FFC927</color>
-    <color name="general_condition_poor">#FF2121</color>
-    <color name="general_condition_very_poor">#D0021B</color>
-    <color name="general_condition_unknown">#D8D8D8</color>
 
 </resources>

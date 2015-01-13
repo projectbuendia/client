@@ -17,12 +17,20 @@ public class Concept {
     public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String UNKNOWN_UUID = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    public static final String GENERAL_CONDITION_VERY_POOR_UUID =
-            "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+    public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
+    public static final String GENERAL_CONDITION_FAIR_UUID = "162133AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_POOR_UUID =
             "162132AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_FAIR_UUID = "162133AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
+    public static final String GENERAL_CONDITION_VERY_POOR_UUID =
+            "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+    public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE =
+            "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
+    public static final String GENERAL_CONDITION_CURED =
+            "159791AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String GENERAL_CONDITION_SUSPECTED_DEAD =
+            "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
+    public static final String GENERAL_CONDITION_CONFIRMED_DEAD =
+            "160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     /**
      * Returns the {@link ResStatus} for the specified condition UUID.
@@ -41,6 +49,14 @@ public class Concept {
                 return ResStatus.POOR;
             case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
                 return ResStatus.VERY_POOR;
+            case Concept.GENERAL_CONDITION_DISCHARGED_NON_CASE:
+                return ResStatus.DISCHARGED_NON_CASE;
+            case Concept.GENERAL_CONDITION_CURED:
+                return ResStatus.CURED;
+            case Concept.GENERAL_CONDITION_SUSPECTED_DEAD:
+                return ResStatus.SUSPECTED_DEAD;
+            case Concept.GENERAL_CONDITION_CONFIRMED_DEAD:
+                return ResStatus.CONFIRMED_DEAD;
             default:
                 return ResStatus.UNKNOWN;
         }
