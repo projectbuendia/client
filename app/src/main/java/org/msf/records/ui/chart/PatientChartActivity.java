@@ -396,15 +396,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralCondition.setTextColor(status.getForegroundColor());
                 mGeneralConditionName.setTextColor(status.getForegroundColor());
 
-                mGeneralCondition.setMaxLines(status.getNumLines());
-
                 mGeneralCondition.setText(status.getMessage());
             } else {
                 mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
                 mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mGeneralCondition.setMaxLines(1);
 
                 mGeneralCondition.setText("–"); // en dash
             }

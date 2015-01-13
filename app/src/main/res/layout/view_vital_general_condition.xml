@@ -24,7 +24,7 @@
             android:textSize="16sp"
             android:text="Condition" />
 
-        <me.grantland.widget.AutofitTextView
+        <org.msf.records.widget.AutoResizeTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/vital_name_general_condition"
