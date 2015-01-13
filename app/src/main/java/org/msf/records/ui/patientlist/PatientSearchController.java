@@ -85,8 +85,6 @@ public class PatientSearchController {
             }
             mLocationTree = event.tree;
             for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.setLocations(mLocationTree);
-                loadSearchResults();
                 fragmentUi.showSpinner(false);
             }
         }
@@ -197,9 +195,7 @@ public class PatientSearchController {
     private final class EventSubscriber {
 
         public void onEvent(SingleItemCreatedEvent<AppPatient> event) {
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.notifyDataSetChanged();
-            }
+            loadSearchResults();
         }
 
         public synchronized void onEvent(SyncFinishedEvent event) {

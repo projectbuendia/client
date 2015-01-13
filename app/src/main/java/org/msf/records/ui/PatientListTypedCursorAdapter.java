@@ -1,6 +1,7 @@
 package org.msf.records.ui;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private final LocalizedChartHelper mLocalizedChartHelper;
 
     private LocationTree.LocationSubtree[] mLocations;
+    private Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> mObservations;
 
     /**
      * Creates a {@link org.msf.records.ui.PatientListTypedCursorAdapter}.
@@ -138,13 +140,16 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         // TODO(akalachman): Move to content provider/do in background.
         boolean pregnant = false;
         String condition = null;
-        Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
-                mLocalizedChartHelper.getMostRecentObservations(patient.uuid);
-        if (observationMap != null) {
-            pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID)
-                    && observationMap.get(Concept.PREGNANCY_UUID).value.equals(Concept.YES_UUID);
-            if (observationMap.containsKey(Concept.GENERAL_CONDITION_UUID)) {
-                condition = observationMap.get(Concept.GENERAL_CONDITION_UUID).value;
+        if (mObservations != null) {
+            Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
+                    mObservations.get(patient.uuid);
+            if (observationMap != null) {
+                pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID)
+                        && observationMap.get(Concept.PREGNANCY_UUID).value.equals(
+                        Concept.YES_UUID);
+                if (observationMap.containsKey(Concept.GENERAL_CONDITION_UUID)) {
+                    condition = observationMap.get(Concept.GENERAL_CONDITION_UUID).value;
+                }
             }
         }
 
@@ -209,10 +214,17 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     public void setPatients(TypedCursor<AppPatient> cursor) {
         mPatientsByLocation.clear();
+        if (mObservations != null) {
+            mObservations.clear();
+        }
+
+        String[] patientUuids = new String[cursor.getCount()];
 
         // Add all patients from cursor.
         for (int i = 0; i < cursor.getCount(); i++) {
-            addPatient(cursor.get(i));
+            AppPatient patient = cursor.get(i);
+            addPatient(patient);
+            patientUuids[i] = patient.uuid;
         }
 
         // Populate locations list accordingly.
@@ -228,7 +240,17 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             Collections.sort(entry.getValue());
         }
 
+        new FetchObservationsTask().doInBackground(patientUuids);
+
         notifyDataSetChanged();
+    }
+
+    private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            mObservations = mLocalizedChartHelper.getMostRecentObservationsBatch(params, "en");
+            return null;
+        }
     }
 
     // Add a single patient to relevant data structures.
