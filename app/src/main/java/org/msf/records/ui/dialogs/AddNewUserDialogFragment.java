@@ -14,6 +14,8 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
 
+import java.util.regex.Pattern;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -24,6 +26,8 @@ public class AddNewUserDialogFragment extends DialogFragment {
     public static AddNewUserDialogFragment newInstance() {
         return new AddNewUserDialogFragment();
     }
+
+    private static final Pattern USER_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9.\\-_]{2,50}$");
 
     @InjectView(R.id.add_user_username_tv) EditText mUsername;
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
@@ -66,10 +70,9 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                         if (isNullOrWhitespace(mUsername)) {
                                             setError(mUsername, R.string.username_cannot_be_null);
                                             return;
-                                        } else if (!isUsernameValid()) {
-                                            setError(
-                                                    mUsername,
-                                                    R.string.invalid_username);
+                                        }
+                                        if (!isUsernameValid()) {
+                                            setError(mUsername, R.string.invalid_username);
                                             return;
                                         }
                                         if (isNullOrWhitespace(mGivenName)) {
@@ -104,20 +107,8 @@ public class AddNewUserDialogFragment extends DialogFragment {
     }
 
     private boolean isUsernameValid() {
-        if (isNullOrWhitespace(mUsername)) {
-            return false;
-        }
-
         String username = mUsername.getText().toString().trim();
-        if (username.length() < 2 || username.length() > 50) {
-            return false;
-        }
-
-        if (!username.matches("[A-Za-z0-9\\.-_]*")) {
-            return false;
-        }
-
-        return true;
+        return USER_NAME_PATTERN.matcher(username).matches();
     }
 
     private void setError(EditText field, int resourceId) {
