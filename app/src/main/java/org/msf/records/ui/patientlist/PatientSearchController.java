@@ -37,7 +37,6 @@ public class PatientSearchController {
     }
 
     public interface FragmentUi {
-        void setLocations(AppLocationTree locationTree);
         void setPatients(TypedCursor<AppPatient> patients);
         void showSpinner(boolean show);
     }

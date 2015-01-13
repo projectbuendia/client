@@ -9,12 +9,9 @@ import android.widget.ListView;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
-import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
-import org.msf.records.location.LocationManager;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
@@ -45,7 +42,6 @@ public class PatientListFragment extends ProgressFragment implements
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
-    @Inject LocationManager mLocationManager;
     @Inject SyncManager mSyncManager;
 
     /**
@@ -77,17 +73,12 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public void onResume() {
         super.onResume();
-
-        // TODO(akalachman): Deal with this.
-        // changeState(State.LOADING);
         EventBus.getDefault().register(this);
-        mLocationManager.loadLocations();
     }
 
     @Override
     public void onPause() {
         EventBus.getDefault().unregister(this);
-
         super.onPause();
     }
 
@@ -109,6 +100,7 @@ public class PatientListFragment extends ProgressFragment implements
         }
     }
 
+    // TODO(akalachman): Move to controller.
     public synchronized void onEvent(SyncFinishedEvent event) {
         stopRefreshing();
     }
@@ -159,7 +151,6 @@ public class PatientListFragment extends ProgressFragment implements
         super.onDetach();
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -175,11 +166,6 @@ public class PatientListFragment extends ProgressFragment implements
         mController.onPatientSelected(patient);
 
         return true;
-    }
-
-    // TODO(akalachman): Move to controller.
-    public void onEvent(SingleItemCreatedEvent<AppPatient> event) {
-        onRefresh();
     }
 
     private void setActivatedPosition(int position) {
@@ -199,11 +185,6 @@ public class PatientListFragment extends ProgressFragment implements
     }
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
-        @Override
-        public void setLocations(AppLocationTree locationTree) {
-            // TODO(akalachman): Implement.
-        }
-
         @Override
         public void setPatients(TypedCursor<AppPatient> patients) {
             mPatientAdapter.setPatients(patients);
