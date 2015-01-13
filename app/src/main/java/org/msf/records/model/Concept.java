@@ -11,6 +11,7 @@ public class Concept {
     public static final String MOBILITY_UUID = "30143d74-f654-4427-bb92-685f68f92c15";
     public static final String PREGNANCY_UUID = "5272AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String TEMPERATURE_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String PAIN_UUID = "f75da5de-404c-42d0-b484-b69a4896e093";
 
     public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

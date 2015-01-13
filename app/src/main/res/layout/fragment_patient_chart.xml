@@ -23,7 +23,7 @@
             android:textSize="36sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
-            android:text="FirstName LastName"/>
+            tools:text="John Doe"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -32,7 +32,7 @@
             android:textSize="36sp"
             android:gravity="end"
             android:id="@+id/patient_chart_id"
-            android:text="PatientID#"/>
+            tools:text="Kh.293"/>
 
     </LinearLayout>
 
@@ -51,7 +51,17 @@
             android:fontFamily="sans-serif-condensed"
             android:textColor="@android:color/black"
             android:id="@+id/patient_chart_gender_age"
-            tools:text="M, 23 mo"/>
+            tools:text="M, 23 mo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:gravity="start"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/red"
+            android:id="@+id/patient_chart_pregnant"
+            tools:text=" Pregnant" />
 
         <TextView
             android:layout_width="match_parent"
@@ -59,9 +69,9 @@
             android:textSize="30sp"
             android:gravity="end"
             android:fontFamily="sans-serif-condensed"
-            android:text="EMC Location/Tent#"
             android:id="@+id/patient_chart_location"
-            android:textColor="@android:color/black"/>
+            android:textColor="@android:color/black"
+            tools:text="EMC Location/Tent#" />
 
     </LinearLayout>
 

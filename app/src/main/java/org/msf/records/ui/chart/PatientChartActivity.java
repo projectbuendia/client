@@ -106,13 +106,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
     @InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
 
+    @InjectView(R.id.patient_chart_pain_parent) ViewGroup mPainParent;
+    @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
+    @InjectView(R.id.vital_name_pain) TextView mPainName;
+
     @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
     @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
     @InjectView(R.id.vital_name_pcr) TextView mPcrName;
-
-    @InjectView(R.id.patient_chart_pain_parent) ViewGroup mSpecialParent;
-    @InjectView(R.id.patient_chart_vital_special) TextView mSpecial;
-    @InjectView(R.id.vital_name_special) TextView mSpecialName;
 
     @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
     @InjectView(R.id.vital_mobility) VitalView mMobility;
@@ -122,6 +122,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_id) TextView mPatientIdView;
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
+    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
     @InjectView(R.id.patient_chart_location) TextView mPatientLocationView;
     @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
@@ -343,6 +344,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mTemperatureParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mTemperature.setTextColor(mVitalUnknown.getForegroundColor());
                 mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mTemperature.setText("-");
             }
 
             // General Condition
@@ -360,6 +363,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
                 mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mGeneralCondition.setText("-");
+            }
+
+            // Pain Level
+            observation = observations.get(Concept.PAIN_UUID);
+            if (observation != null && observation.localizedValue != null) {
+                mPainParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
+                mPain.setTextColor(mVitalKnown.getForegroundColor());
+                mPainName.setTextColor(mVitalKnown.getForegroundColor());
+
+                mPain.setText(observation.localizedValue);
+            } else {
+                mPainParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mPain.setTextColor(mVitalUnknown.getForegroundColor());
+                mPainName.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mPain.setText("-");
             }
 
             // PCR
@@ -369,32 +390,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mPcr.setText("Not\nImplemented");
 
-            // Special (Pregnancy and IV)
-            String specialText = "";
-
+            // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
-                specialText = "Pregnant";
-            }
-
-            observation = observations.get(Concept.IV_UUID);
-            if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
-                specialText += "\nIV fitted";
-            }
-
-            if (specialText.isEmpty()) {
-                mSpecialParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mSpecial.setTextColor(mVitalUnknown.getForegroundColor());
-                mSpecialName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                specialText = "-";
+                mPatientPregnantView.setText(" Pregnant");
             } else {
-                mSpecialParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-                mSpecial.setTextColor(mVitalKnown.getForegroundColor());
-                mSpecialName.setTextColor(mVitalKnown.getForegroundColor());
+                mPatientPregnantView.setText("");
             }
-
-            mSpecial.setText(specialText);
         }
 
         @Override
@@ -472,17 +474,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())
                     .getDays();
-            switch (days) {
-                case 0:
-                    mPatientAdmissionDateView.setText("Admitted today");
-                    break;
-                case 1:
-                    mPatientAdmissionDateView.setText("Admitted yesterday");
-                    break;
-                default:
-                    mPatientAdmissionDateView.setText("Admitted " + days + " days ago");
-                    break;
-            }
+            mPatientAdmissionDateView.setText("Day " + days + " since admission");
         }
 
         @Override

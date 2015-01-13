@@ -12,7 +12,7 @@
         android:background="?android:attr/selectableItemBackground">
 
         <TextView
-            android:id="@+id/vital_name_special"
+            android:id="@+id/vital_name_pain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -25,10 +25,10 @@
             android:text="Pain Level" />
 
         <me.grantland.widget.AutofitTextView
-            android:id="@+id/patient_chart_vital_special"
+            android:id="@+id/patient_chart_vital_pain"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/vital_name_special"
+            android:layout_above="@id/vital_name_pain"
             android:padding="8dp"
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
