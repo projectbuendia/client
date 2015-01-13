@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Controller for {@link org.msf.records.ui.patientlist.PatientListActivity}.
+ * Controller for {@link org.msf.records.ui.patientlist.PatientSearchActivity}.
  *
  * Avoid adding untestable dependencies to this class.
  */

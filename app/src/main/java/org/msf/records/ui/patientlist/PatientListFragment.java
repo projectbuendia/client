@@ -11,30 +11,25 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
-import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
-import org.msf.records.utils.Logger;
 
 import javax.inject.Inject;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * A list fragment representing a filterable list of Patients.
  */
 public class PatientListFragment extends ProgressFragment implements
-        ExpandableListView.OnChildClickListener,
-        SwipeRefreshLayout.OnRefreshListener {
-
-    private static final Logger LOG = Logger.create();
+        ExpandableListView.OnChildClickListener {
 
     private PatientSearchController mController;
+    private PatientListController mListController;
     private PatientListTypedCursorAdapter mPatientAdapter;
     private FragmentUi mFragmentUi;
+    private ListUi mListUi;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -53,32 +48,32 @@ public class PatientListFragment extends ProgressFragment implements
 
     private SwipeRefreshLayout mSwipeToRefresh;
 
-    private boolean isRefreshing;
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public PatientListFragment() {
         mFragmentUi = new FragmentUi();
+        mListUi = new ListUi();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
+        mListController = new PatientListController(mListUi, mSyncManager);
         setContentView(R.layout.fragment_patient_list);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        EventBus.getDefault().register(this);
+        mListController.init();
     }
 
     @Override
     public void onPause() {
-        EventBus.getDefault().unregister(this);
+        mListController.suspend();
         super.onPause();
     }
 
@@ -87,29 +82,6 @@ public class PatientListFragment extends ProgressFragment implements
         super.onViewStateRestored(savedInstanceState);
         mController = ((PatientSearchActivity) getActivity()).getSearchController();
         mController.attachFragmentUi(mFragmentUi);
-    }
-
-    @Override
-    public void onRefresh() {
-        if(!isRefreshing){
-            LOG.d("onRefresh");
-
-            //triggers app wide data refresh
-            mSyncManager.forceSync();
-            isRefreshing = true;
-        }
-    }
-
-    // TODO(akalachman): Move to controller.
-    public synchronized void onEvent(SyncFinishedEvent event) {
-        stopRefreshing();
-    }
-
-    private void stopRefreshing(){
-        if (isRefreshing) {
-            mSwipeToRefresh.setRefreshing(false);
-            isRefreshing = false;
-        }
     }
 
     @Override
@@ -123,7 +95,7 @@ public class PatientListFragment extends ProgressFragment implements
         mListView.setAdapter(mPatientAdapter);
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
-        mSwipeToRefresh.setOnRefreshListener(this);
+        mSwipeToRefresh.setOnRefreshListener(mListController.getOnRefreshListener());
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
@@ -140,7 +112,7 @@ public class PatientListFragment extends ProgressFragment implements
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-       if(Constants.OFFLINE_SUPPORT){
+        if(Constants.OFFLINE_SUPPORT){
             // Create account, if needed
             GenericAccountService.registerSyncAccount(activity);
         }
@@ -193,6 +165,14 @@ public class PatientListFragment extends ProgressFragment implements
         @Override
         public void showSpinner(boolean show) {
             changeState(show ? State.LOADING : State.LOADED);
+        }
+    }
+
+    private class ListUi implements PatientListController.Ui {
+
+        @Override
+        public void setRefreshing(boolean refreshing) {
+            mSwipeToRefresh.setRefreshing(false);
         }
     }
 }
