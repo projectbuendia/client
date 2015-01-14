@@ -16,8 +16,11 @@ import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
+import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * A list fragment representing a filterable list of Patients.
@@ -61,7 +64,8 @@ public class PatientListFragment extends ProgressFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-        mListController = new PatientListController(mListUi, mSyncManager);
+        mListController = new PatientListController(
+                mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
         setContentView(R.layout.fragment_patient_list);
     }
 

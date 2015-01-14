@@ -4,6 +4,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
@@ -32,31 +33,39 @@ public class PatientListController {
                 }
             };
 
+    private final class SyncSubscriber {
+        public synchronized void onEventMainThread(SyncFinishedEvent event) {
+            stopRefreshing();
+        }
+    }
+
+    private final SyncSubscriber mSyncSubscriber = new SyncSubscriber();
+
     private final Ui mUi;
 
     private final SyncManager mSyncManager;
 
     private boolean mIsRefreshing;
 
+    private EventBusRegistrationInterface mEventBus;
+
     public interface Ui {
         void setRefreshing(boolean refreshing);
     }
 
-    public PatientListController(Ui ui, SyncManager syncManager) {
+    public PatientListController(
+            Ui ui, SyncManager syncManager, EventBusRegistrationInterface eventBus) {
         mUi = ui;
         mSyncManager = syncManager;
+        mEventBus = eventBus;
     }
 
     public void init() {
-        EventBus.getDefault().register(this);
+        mEventBus.register(mSyncSubscriber);
     }
 
     public void suspend() {
-        EventBus.getDefault().unregister(this);
-    }
-
-    public synchronized void onEvent(SyncFinishedEvent event) {
-        stopRefreshing();
+        mEventBus.unregister(mSyncSubscriber);
     }
 
     private void stopRefreshing() {
