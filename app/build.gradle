@@ -132,7 +132,6 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
-            versionNameSuffix '-dev'
 
             resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
             resValue "string", "account_type", defaultConfig.applicationId + '.dev'
