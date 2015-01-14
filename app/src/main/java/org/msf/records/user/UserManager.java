@@ -3,7 +3,6 @@ package org.msf.records.user;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.msf.records.events.user.ActiveUserSetEvent;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
@@ -250,6 +249,7 @@ public class UserManager {
 
         private final NewUser mUser;
         private boolean mAlreadyExists;
+        private boolean mFailedToConnect;
 
         public AddUserTask(NewUser user) {
             mUser = checkNotNull(user);
@@ -260,8 +260,12 @@ public class UserManager {
             try {
                 return mUserStore.addUser(mUser);
             } catch (VolleyError e) {
-                if (e.getMessage() != null && e.getMessage().contains("already in use")) {
-                    mAlreadyExists = true;
+                if (e.getMessage() != null) {
+                    if (e.getMessage().contains("already in use")) {
+                        mAlreadyExists = true;
+                    } else if (e.getMessage().contains("failed to connect")) {
+                        mFailedToConnect = true;
+                    }
                 }
                 return null;
             }
@@ -275,6 +279,9 @@ public class UserManager {
             } else if (mAlreadyExists) {
                 mEventBus.post(new UserAddFailedEvent(
                         mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
+            } else if (mFailedToConnect) {
+                mEventBus.post(new UserAddFailedEvent(
+                        mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
             } else {
                 mEventBus.post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
             }

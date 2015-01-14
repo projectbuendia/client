@@ -122,6 +122,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     protected void onStartImpl() {
         super.onStartImpl();
         mController.init();
+        setUiEnabled(true);  // UI may have been disabled previously.
     }
 
     @Override
@@ -201,6 +202,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             return;
         }
 
+        setUiEnabled(false);
         mIsCreatePending = mController.createPatient(
                 mId.getText().toString(),
                 mGivenName.getText().toString(),
@@ -341,7 +343,6 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         @Override
         public void quitActivity() {
             mIsCreatePending = false;
-            setUiEnabled(true);
             BigToast.show(PatientCreationActivity.this, R.string.patient_creation_success);
             finish();
         }
