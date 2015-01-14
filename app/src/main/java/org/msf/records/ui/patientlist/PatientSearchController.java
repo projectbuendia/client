@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * Controller for {@link org.msf.records.ui.patientlist.PatientSearchActivity}.
  *
- * Avoid adding untestable dependencies to this class.
+ * <p>Avoid adding untestable dependencies to this class.
  */
 public class PatientSearchController {
 
@@ -31,13 +31,18 @@ public class PatientSearchController {
     private static final boolean DEBUG = true;
 
     public interface Ui {
+
         void launchChartActivity(String uuid, String givenName, String familyName, String id);
+
         void setPatients(TypedCursor<AppPatient> patients);
+
         void showErrorMessage(int message);
     }
 
     public interface FragmentUi {
+
         void setPatients(TypedCursor<AppPatient> patients);
+
         void showSpinner(boolean show);
     }
 
@@ -56,6 +61,17 @@ public class PatientSearchController {
 
     private boolean mWaitingOnLocationTree = false;
 
+    /**
+     * Instantiates a {@link org.msf.records.ui.patientlist.PatientSearchController} with the
+     * given UI implementation, event bus, app model, and locale.
+     * @param ui a {@link org.msf.records.ui.patientlist.PatientSearchController.Ui} that will
+     *           respond to UI events
+     * @param crudEventBus a {@link org.msf.records.events.CrudEventBus} that will listen for
+     *                     patient and location fetch events
+     * @param model an {@link org.msf.records.data.app.AppModel} for fetching patient and location
+     *              data
+     * @param locale a language code/locale for presenting localized information (e.g. en)
+     */
     public PatientSearchController(
             Ui ui, CrudEventBus crudEventBus, AppModel model, String locale) {
         mUi = ui;
@@ -70,7 +86,7 @@ public class PatientSearchController {
 
     private class LocationTreeUpdatedSubscriber {
         public synchronized void onEvent(AppLocationTreeFetchedEvent event) {
-            synchronized(mFilterSubscriberLock) {
+            synchronized (mFilterSubscriberLock) {
                 mCrudEventBus.unregister(this);
                 mFilterSubscriber = null;
             }
@@ -92,6 +108,12 @@ public class PatientSearchController {
         }
     }
 
+    /**
+     * Registers a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi} with
+     * this controller for the purposes of subscribing to events.
+     * @param fragmentUi a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi}
+     *                   to add as a subscriber
+     */
     public void attachFragmentUi(FragmentUi fragmentUi) {
         if (DEBUG) {
             Log.d(TAG, "Attached new fragment UI: " + fragmentUi);
@@ -99,6 +121,12 @@ public class PatientSearchController {
         mFragmentUis.add(fragmentUi);
     }
 
+    /**
+     * Un-registers a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi} with
+     * this controller for the purposes of subscribing to events.
+     * @param fragmentUi a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi}
+     *                   to remove as a subscriber
+     */
     public void detachFragmentUi(FragmentUi fragmentUi) {
         if (DEBUG) {
             Log.d(TAG, "Detached fragment UI: " + fragmentUi);
@@ -106,20 +134,38 @@ public class PatientSearchController {
         mFragmentUis.remove(fragmentUi);
     }
 
+    /**
+     * Responds to a patient being selected.
+     * @param patient the selected {@link org.msf.records.data.app.AppPatient}
+     */
     public void onPatientSelected(AppPatient patient) {
         mUi.launchChartActivity(patient.uuid, patient.givenName, patient.familyName, patient.id);
     }
 
+    /**
+     * Responds to a change in the search query.
+     * @param constraint the search query
+     */
     public void onQuerySubmitted(String constraint) {
         App.getServer().cancelPendingRequests();
         mFilterQueryTerm = constraint;
         loadSearchResults();
     }
 
+    /**
+     * Sets a root location for the purposes of filtering.
+     * @param locationUuid UUID of the location to filter by
+     */
     public void setLocationFilter(String locationUuid) {
         mRootLocationUuid = locationUuid;
     }
 
+    /**
+     * Sets the filter to filter by, which may be (optionally) in conjunction with a root location
+     * specified by {@link PatientSearchController#setLocationFilter(String)}.
+     * @param filter the {@link org.msf.records.filter.SimpleSelectionFilter} that will be applied
+     *               to search results
+     */
     public void setFilter(SimpleSelectionFilter filter) {
         mFilter = filter;
     }
@@ -144,6 +190,10 @@ public class PatientSearchController {
         return filter;
     }
 
+    /**
+     * Asynchronously loads or reloads the search results based on previously specified filter and
+     * root location. If no filter is specified, all results are shown be default.
+     */
     public void loadSearchResults() {
         // If a location filter is applied but no location tree is present, wait.
         if (mRootLocationUuid != null && mLocationTree == null) {

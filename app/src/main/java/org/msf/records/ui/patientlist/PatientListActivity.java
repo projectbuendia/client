@@ -21,7 +21,7 @@ public class PatientListActivity extends PatientSearchActivity {
     private static final String SELECTED_FILTER_KEY = "selected_filter";
 
     private PatientListFilterController mFilterController;
-    private int selectedFilter = 0;
+    private int mSelectedFilter = 0;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -29,7 +29,7 @@ public class PatientListActivity extends PatientSearchActivity {
         setContentView(R.layout.activity_patient_list);
 
         if (savedInstanceState != null) {
-            selectedFilter = savedInstanceState.getInt(SELECTED_FILTER_KEY, 0);
+            mSelectedFilter = savedInstanceState.getInt(SELECTED_FILTER_KEY, 0);
         }
 
         mFilterController = new PatientListFilterController(
@@ -37,7 +37,7 @@ public class PatientListActivity extends PatientSearchActivity {
             mCrudEventBusProvider.get(),
             mAppModel,
             mLocale);
-            mFilterController.setupActionBarAsync();
+        mFilterController.setupActionBarAsync();
     }
 
     @Override
@@ -101,9 +101,9 @@ public class PatientListActivity extends PatientSearchActivity {
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             actionBar.setListNavigationCallbacks(adapter, callback);
-            actionBar.setSelectedNavigationItem(selectedFilter);
+            actionBar.setSelectedNavigationItem(mSelectedFilter);
 
-            getSearchController().setFilter(filters[selectedFilter]);
+            getSearchController().setFilter(filters[mSelectedFilter]);
         }
     }
 }

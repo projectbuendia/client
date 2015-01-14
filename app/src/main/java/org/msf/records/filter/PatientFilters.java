@@ -2,13 +2,8 @@ package org.msf.records.filter;
 
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
-import org.msf.records.events.location.LocationsLoadedEvent;
 import org.msf.records.filter.FilterGroup.FilterType;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
-
-import de.greenrobot.event.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +33,13 @@ public final class PatientFilters {
         return BASE_FILTERS;
     }
 
+    /**
+     * Returns an array of {@link org.msf.records.filter.SimpleSelectionFilter}'s, each
+     * representing a zone.
+     * @param locationTree an {@link org.msf.records.data.app.AppLocationTree} containing all known
+     *                     locations
+     * @return an array pf zone filters
+     */
     public static SimpleSelectionFilter[] getZoneFilters(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
 
@@ -51,10 +53,22 @@ public final class PatientFilters {
         return filterArray;
     }
 
+    /**
+     * Returns an array of all {@link org.msf.records.filter.SimpleSelectionFilter}'s that are
+     * unrelated to user location (for example, based on pregnancy or age).
+     * @return an array of {@link org.msf.records.filter.SimpleSelectionFilter}'s
+     */
     public static SimpleSelectionFilter[] getOtherFilters() {
         return OTHER_FILTERS;
     }
 
+    /**
+     * Returns an array of all {@link org.msf.records.filter.SimpleSelectionFilter}'s that should
+     * be displayed to the user.
+     * @param locationTree an {@link org.msf.records.data.app.AppLocationTree} containing all known
+     *                     locations
+     * @return an array of {@link org.msf.records.filter.SimpleSelectionFilter}'s to display
+     */
     public static SimpleSelectionFilter[] getFiltersForDisplay(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> allFilters = new ArrayList<>();
         allFilters.add(getDefaultFilter());

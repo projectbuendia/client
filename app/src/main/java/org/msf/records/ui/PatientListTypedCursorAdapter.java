@@ -211,6 +211,10 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
+    /**
+     * Updates the adapter to show all patients from the given cursor.
+     * @param cursor a {@link org.msf.records.data.app.TypedCursor} containing all patients to show
+     */
     public void setPatients(TypedCursor<AppPatient> cursor) {
         mPatientsByLocation.clear();
         if (mObservations != null) {

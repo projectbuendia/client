@@ -172,6 +172,12 @@ public class AppLocationTree implements AppModelObservable {
         return mUuidsToLocations.get(uuid);
     }
 
+    /**
+     * Returns a list of all AppLocations within a subtree rooted at the given
+     * {@link org.msf.records.data.app.AppLocation}.
+     * @param subroot the AppLocation that will form the root of the subtree
+     * @return a List of AppLocations in a subtree with the given root
+     */
     public List<AppLocation> locationsInSubtree(AppLocation subroot) {
         List<AppLocation> result = new ArrayList<>();
         result.add(subroot);

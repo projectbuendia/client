@@ -209,9 +209,10 @@ public class LocalizedChartHelper {
      * @param patientUuids the uuids of patients to return data for
      * @param locale the locale to return the results in, to match the server String
      */
-    public Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> getMostRecentObservationsBatch(
-            String[] patientUuids,
-            String locale) {
+    public Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>>
+            getMostRecentObservationsBatch(
+                    String[] patientUuids,
+                    String locale) {
         Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> observations =
                 new HashMap<String, Map<String, LocalizedObservation>>();
         for (String patientUuid : patientUuids) {

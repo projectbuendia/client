@@ -11,7 +11,14 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
+/**
+ * Test case for {@link org.msf.records.ui.patientlist.RoundActivity}.
+ */
 public class RoundActivityTest extends FunctionalTestCase {
+    /**
+     * Initializes the test by entering the Round view for Triage.
+     * @throws Exception if anything goes wrong
+     */
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
@@ -21,10 +28,10 @@ public class RoundActivityTest extends FunctionalTestCase {
     /** Checks for a populated title. */
     public void testTitlePopulation() {
         // TODO(akalachman): Check that title count actually matches patient count.
-        assert(getActivity().getTitle().toString().matches("$Triage \\((No|[0-9]+) Patients\\)"));
+        assert getActivity().getTitle().toString().matches("$Triage \\((No|[0-9]+) Patients\\)");
     }
 
-    /** Check that at least one patient is displayed. */
+    /** Checks that at least one patient is displayed. */
     public void testAtLeastOnePatientDisplayed() {
         // Click the first patient
         onData(is(AppPatient.class))

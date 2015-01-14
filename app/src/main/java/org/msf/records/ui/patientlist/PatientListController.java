@@ -11,32 +11,32 @@ import de.greenrobot.event.EventBus;
 /**
  * Controller for non-inherited parts of {@link org.msf.records.ui.patientlist.PatientListFragment}.
  *
- * TODO(nfortescue): Incremental sync.
- *
- * Avoid adding untestable dependencies to this class.
+ * <p>Avoid adding untestable dependencies to this class.
  */
 public class PatientListController {
 
     private static final Logger LOG = Logger.create();
 
-    private final SwipeRefreshLayout.OnRefreshListener REFRESH_LISTENER =
+    private final SwipeRefreshLayout.OnRefreshListener mRefreshListener =
             new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    if(!isRefreshing){
+                    if (!mIsRefreshing) {
                         LOG.d("onRefresh");
 
                         //triggers app wide data refresh
+                        // TODO(nfortescue): Incremental sync.
                         mSyncManager.forceSync();
-                        isRefreshing = true;
+                        mIsRefreshing = true;
                     }
                 }
             };
 
     private final Ui mUi;
+
     private final SyncManager mSyncManager;
 
-    private boolean isRefreshing;
+    private boolean mIsRefreshing;
 
     public interface Ui {
         void setRefreshing(boolean refreshing);
@@ -59,14 +59,14 @@ public class PatientListController {
         stopRefreshing();
     }
 
-    private void stopRefreshing(){
-        if (isRefreshing) {
+    private void stopRefreshing() {
+        if (mIsRefreshing) {
             mUi.setRefreshing(false);
-            isRefreshing = false;
+            mIsRefreshing = false;
         }
     }
 
     public SwipeRefreshLayout.OnRefreshListener getOnRefreshListener() {
-        return REFRESH_LISTENER;
+        return mRefreshListener;
     }
 }
