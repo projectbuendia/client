@@ -229,18 +229,19 @@ public class UpdateManager {
     }
 
     private DownloadedUpdateInfo getLastDownloadedUpdateInfo() {
-        File f = new File(Environment.getExternalStorageDirectory(), mDownloadDirectory);
-        if (!f.exists()) {
+        File downloadDirectoryFile =
+                new File(Environment.getExternalStorageDirectory(), mDownloadDirectory);
+        if (!downloadDirectoryFile.exists()) {
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
-        if (!f.isDirectory()) {
+        if (!downloadDirectoryFile.isDirectory()) {
             LOG.e(
                     "The path in which updates are downloaded is not a directory: '%1$s'",
-                    f.toString());
+                    downloadDirectoryFile.toString());
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
 
-        File[] files = f.listFiles();
+        File[] files = downloadDirectoryFile.listFiles();
         File latestApk = null;
         for (File file : files) {
             if (file.isFile()
