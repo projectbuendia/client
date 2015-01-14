@@ -33,6 +33,8 @@ public class RoundActivity extends PatientSearchActivity {
         setTitle(PatientCountDisplay.getPatientCountTitle(
                 this, mLocationPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
+
+        getSearchController().setLocationFilter(mLocationUuid);
     }
 
     @Override
@@ -52,9 +54,6 @@ public class RoundActivity extends PatientSearchActivity {
                         return true;
                     }
                 });
-
-        // TODO(akalachman): Still figure out why this needs to be here.
-        getSearchController().applyLocationFilter(mLocationUuid);
 
         super.onExtendOptionsMenu(menu);
     }

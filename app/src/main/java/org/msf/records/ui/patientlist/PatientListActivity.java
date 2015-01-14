@@ -1,7 +1,6 @@
 package org.msf.records.ui.patientlist;
 
 import android.app.ActionBar;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -91,7 +90,8 @@ public class PatientListActivity extends PatientSearchActivity {
             ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
                 @Override
                 public boolean onNavigationItemSelected(int position, long id) {
-                    getSearchController().applyFilter(filters[position]);
+                    getSearchController().setFilter(filters[position]);
+                    getSearchController().loadSearchResults();
                     return true;
                 }
             };
@@ -103,7 +103,7 @@ public class PatientListActivity extends PatientSearchActivity {
             actionBar.setListNavigationCallbacks(adapter, callback);
             actionBar.setSelectedNavigationItem(selectedFilter);
 
-            getSearchController().applyFilter(filters[selectedFilter]);
+            getSearchController().setFilter(filters[selectedFilter]);
         }
     }
 }

@@ -76,18 +76,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     }
 
     @Override
-    protected void onStartImpl() {
-        super.onStartImpl();
-        getSearchController().init();
-    }
-
-    @Override
-    protected void onStopImpl() {
-        getSearchController().suspend();
-        super.onStopImpl();
-    }
-
-    @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 
@@ -129,7 +117,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     @Override
     protected void onResumeImpl() {
         super.onResumeImpl();
-
+        mSearchController.loadSearchResults();
         // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
 

@@ -54,6 +54,8 @@ public class PatientSearchController {
     private FilterSubscriber mFilterSubscriber;
     private final Object mFilterSubscriberLock = new Object();
 
+    private boolean mWaitingOnLocationTree = false;
+
     public PatientSearchController(
             Ui ui, CrudEventBus crudEventBus, AppModel model, String locale) {
         mUi = ui;
@@ -73,8 +75,12 @@ public class PatientSearchController {
                 mFilterSubscriber = null;
             }
             mLocationTree = event.tree;
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showSpinner(false);
+
+            // If showing results was blocked on having a location tree, request results
+            // immediately.
+            if (mWaitingOnLocationTree) {
+                mWaitingOnLocationTree = false;
+                loadSearchResults();
             }
         }
 
@@ -84,11 +90,6 @@ public class PatientSearchController {
                 fragmentUi.showSpinner(false);
             }
         }
-    }
-
-    /** Initializes the controller, setting async operations going to collect data required by the UI. */
-    public void init() {
-        loadSearchResults();
     }
 
     public void attachFragmentUi(FragmentUi fragmentUi) {
@@ -105,11 +106,6 @@ public class PatientSearchController {
         mFragmentUis.remove(fragmentUi);
     }
 
-    /** Releases any resources used by the controller. */
-    public void suspend() {
-        // Intentionally blank.
-    }
-
     public void onPatientSelected(AppPatient patient) {
         mUi.launchChartActivity(patient.uuid, patient.givenName, patient.familyName, patient.id);
     }
@@ -120,14 +116,12 @@ public class PatientSearchController {
         loadSearchResults();
     }
 
-    public void applyLocationFilter(String locationUuid) {
+    public void setLocationFilter(String locationUuid) {
         mRootLocationUuid = locationUuid;
-        loadSearchResults();
     }
 
-    public void applyFilter(SimpleSelectionFilter filter) {
+    public void setFilter(SimpleSelectionFilter filter) {
         mFilter = filter;
-        loadSearchResults();
     }
 
     private SimpleSelectionFilter getLocationSubfilter() {
@@ -150,7 +144,13 @@ public class PatientSearchController {
         return filter;
     }
 
-    private void loadSearchResults() {
+    public void loadSearchResults() {
+        // If a location filter is applied but no location tree is present, wait.
+        if (mRootLocationUuid != null && mLocationTree == null) {
+            mWaitingOnLocationTree = true;
+            return;
+        }
+
         // Ensure only one subscriber is listening to filter events.
         synchronized (mFilterSubscriberLock) {
             if (mFilterSubscriber != null) {
@@ -173,9 +173,7 @@ public class PatientSearchController {
             mUi.setPatients(event.cursor);
             for (FragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.setPatients(event.cursor);
-                if (mLocationTree != null) {
-                    fragmentUi.showSpinner(false);
-                }
+                fragmentUi.showSpinner(false);
             }
             event.cursor.close();
         }
