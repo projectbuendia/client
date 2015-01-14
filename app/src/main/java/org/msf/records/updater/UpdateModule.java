@@ -24,8 +24,8 @@ public class UpdateModule {
 
     @Provides
     @Singleton
-    UpdateServer provideUpdateServer() {
-        return new UpdateServer(VolleySingleton.getInstance(App.getInstance()), null /*rootUrl*/);
+    UpdateServer provideUpdateServer(Application application) {
+        return new UpdateServer(VolleySingleton.getInstance(application), null /*rootUrl*/);
     }
 
     @Provides

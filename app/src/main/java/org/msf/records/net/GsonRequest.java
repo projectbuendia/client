@@ -18,6 +18,7 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -33,6 +34,22 @@ public class GsonRequest<T> extends Request<T> {
     private final Response.Listener<T> listener;
     private final boolean array;
     private Map<String,String> body = null;
+
+    /**
+     * Creates an instance of {@link GsonRequest} that expects an array of Gson objects as a
+     * response.
+     */
+    public static <T> GsonRequest<List<T>> withArrayResponse(
+            String url,
+            Class<T> clazz,
+            Map<String, String> headers,
+            Response.Listener<List<T>> listener,
+            Response.ErrorListener errorListener) {
+        // TODO(dxchen): This current class does not handle arrays well because it doesn't properly
+        // use Java generics. Until we can fix it, we'll just cast a lot to make Java happy.
+        return (GsonRequest<List<T>>) new GsonRequest<>(
+                url, clazz, true, headers, (Response.Listener<T>) listener, errorListener);
+    }
 
     /**
      * Make a GET request and return a parsed object from JSON.

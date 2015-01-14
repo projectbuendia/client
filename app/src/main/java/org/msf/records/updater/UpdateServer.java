@@ -2,18 +2,20 @@ package org.msf.records.updater;
 
 import android.support.annotation.Nullable;
 
+import com.android.volley.Response;
+
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.net.GsonRequest;
 import org.msf.records.net.VolleySingleton;
 
-import com.android.volley.Response;
+import java.util.List;
 
 /**
  * An object that talks to the update server.
  */
 public class UpdateServer {
 
-    public static final String ROOT_URL = "http://buendia.whitespell.com:8080/";
+    public static final String ROOT_URL = "http://packages.projectbuendia.org/";
 
     private final VolleySingleton mVolley;
     private final String mRootUrl;
@@ -30,13 +32,12 @@ public class UpdateServer {
      * @param errorListener the callback to be invoked if the request fails
      */
     public void getAndroidUpdateInfo(
-            Response.Listener<UpdateInfo> listener,
+            Response.Listener<List<UpdateInfo>> listener,
             Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
-                new GsonRequest<>(
-                        mRootUrl + "androidclient/version.json",
+                GsonRequest.withArrayResponse(
+                        mRootUrl + "android-client.json",
                         UpdateInfo.class,
-                        false /*array*/,
                         null /*headers*/,
                         listener,
                         errorListener
