@@ -9,11 +9,12 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
+
+import java.util.regex.Pattern;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -25,6 +26,8 @@ public class AddNewUserDialogFragment extends DialogFragment {
     public static AddNewUserDialogFragment newInstance() {
         return new AddNewUserDialogFragment();
     }
+
+    private static final Pattern USER_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9.\\-_]{2,50}$");
 
     @InjectView(R.id.add_user_username_tv) EditText mUsername;
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
@@ -64,38 +67,31 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (mUsername.getText() == null
-                                                || mUsername.getText().toString().equals("")) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Username must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mUsername.invalidate();
+                                        if (isNullOrWhitespace(mUsername)) {
+                                            setError(mUsername, R.string.username_cannot_be_null);
                                             return;
                                         }
-                                        if (mGivenName.getText() == null
-                                                || mGivenName.getText().toString().equals("")) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Given name must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mGivenName.invalidate();
+                                        if (!isUsernameValid()) {
+                                            setError(mUsername, R.string.invalid_username);
                                             return;
                                         }
-                                        if (mFamilyName.getText() == null
-                                                || mFamilyName.getText().toString().equals("")) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Family name must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mFamilyName.invalidate();
+                                        if (isNullOrWhitespace(mGivenName)) {
+                                            setError(
+                                                    mGivenName,
+                                                    R.string.given_name_cannot_be_null);
+                                            return;
+                                        }
+                                        if (isNullOrWhitespace(mFamilyName)) {
+                                            setError(
+                                                    mFamilyName,
+                                                    R.string.family_name_cannot_be_null);
                                             return;
                                         }
 
                                         App.getUserManager().addUser(NewUser.create(
-                                                mUsername.getText().toString(),
-                                                mGivenName.getText().toString(),
-                                                mFamilyName.getText().toString()
+                                                mUsername.getText().toString().trim(),
+                                                mGivenName.getText().toString().trim(),
+                                                mFamilyName.getText().toString().trim()
                                         ));
                                         dialog.dismiss();
                                     }
@@ -104,5 +100,20 @@ public class AddNewUserDialogFragment extends DialogFragment {
         });
 
         return dialog;
+    }
+
+    private boolean isNullOrWhitespace(EditText field) {
+        return field.getText() == null || field.getText().toString().trim().isEmpty();
+    }
+
+    private boolean isUsernameValid() {
+        String username = mUsername.getText().toString().trim();
+        return USER_NAME_PATTERN.matcher(username).matches();
+    }
+
+    private void setError(EditText field, int resourceId) {
+        field.setError(getResources().getString(resourceId));
+        field.invalidate();
+        field.requestFocus();
     }
 }
