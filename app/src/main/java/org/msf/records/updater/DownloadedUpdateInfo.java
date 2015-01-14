@@ -62,7 +62,7 @@ public class DownloadedUpdateInfo {
         try {
             downloadedVersion = LexicographicVersion.parse(packageInfo.versionName);
         } catch (IllegalArgumentException e) {
-            LOG.w("%1$s has an invalid version: %1$s.", uri, packageInfo.versionName);
+            LOG.w("%1$s has an invalid version: %2$s.", uri, packageInfo.versionName);
             return getInvalid(currentVersion);
         }
 
