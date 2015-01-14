@@ -2994,6 +2994,7 @@ public class FormEntryActivity
      * Returns true iff no values in the form have changed from the
      * pre-populated defaults. This will return true even if a value
      * has been given and subsequently cleared.
+     *
      * @return true iff no form values have changed, false otherwise
      */
     private boolean allContentsUnchanged() {
@@ -3024,8 +3025,8 @@ public class FormEntryActivity
     }
 
     /**
-     * Retrieves the displayed text for an {@link org.javarosa.core.model.data.IAnswerData}
-     * object.
+     * Retrieves the displayed text for an {@link IAnswerData} object.
+     *
      * @param data the field
      * @return the displayed text, or null if the data is null
      */
