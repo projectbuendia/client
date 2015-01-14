@@ -35,9 +35,11 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Populates all the fields on the New Patient screen, except location. */
     public void populateNewPatientFieldsExceptLocation(String id) {
+        String given = "Given" + id;
+        String family = "Family" + id;
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
-        onView(withId(R.id.patient_creation_text_patient_given_name)).perform(typeText("Given" + id));
-        onView(withId(R.id.patient_creation_text_patient_family_name)).perform(typeText("Family" + id));
+        onView(withId(R.id.patient_creation_text_patient_given_name)).perform(typeText(given));
+        onView(withId(R.id.patient_creation_text_patient_family_name)).perform(typeText(family));
         onView(withId(R.id.patient_creation_text_age)).perform(typeText(id));
         onView(withId(R.id.patient_creation_radiogroup_age_units_years)).perform(click());
         onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
@@ -61,10 +63,8 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         onView(withText("S1")).perform(click());
         onView(withText("Create")).perform(click());
 
-        // Navigate to patient list for test S1
+        // The new patient should be visible in the list for tent S1
         onView(withText("S1")).perform(click());
-
-        // The new patient should be visible in the list
         clickPatientWithIdInPatientList(id);
     }
 
@@ -73,6 +73,9 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         String id = "test" + new Date().getTime() % 1000;
         populateNewPatientFieldsExceptLocation(id);
         onView(withText("Create")).perform(click());
+
+        // The new patient should be visible in the list for Triage zone
+        onView(withText("Triage")).perform(click());
         clickPatientWithIdInPatientList(id);
     }
 
