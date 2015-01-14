@@ -50,8 +50,8 @@ public class OpenMrsChartServer {
     }
 
     /**
-     * Get all observations that happened in an encounter after or on lastTime. Allows a client to do
-     * incremental cache updating.
+     * Get all observations that happened in an encounter after or on lastTime. Allows a client to
+     * do incremental cache updating.
      *
      * @param lastTime a joda instant representing the start time for new observations (inclusive)
      * @param patientListener a listener to get the results on the event of success

@@ -504,7 +504,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
-        PatientChartList patientChartList = listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
+        PatientChartList patientChartList =
+                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
         for (PatientChart patientChart : patientChartList.results) {
@@ -531,7 +532,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 patientChartList.snapshotTime.toInstant();
     }
 
-    private void bulkDelete(ContentProviderClient provider, ArrayList<String> toDelete) throws RemoteException {
+    private void bulkDelete(ContentProviderClient provider, ArrayList<String> toDelete)
+            throws RemoteException {
         StringBuilder select = new StringBuilder(Contracts.Observations.PATIENT_UUID);
         select.append(" IN (");
         boolean first = true;
