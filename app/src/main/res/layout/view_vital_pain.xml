@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/vital_unknown">
@@ -34,7 +33,7 @@
             android:textColor="@color/vital_fg_dark"
             android:textSize="56sp"
             android:maxLines="2"
-            tools:text="–"/>
+            android:text="–"/>
 
     </RelativeLayout>
 
