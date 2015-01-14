@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import org.msf.records.App;
@@ -21,11 +20,7 @@ import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.Constants;
 import org.msf.records.net.OpenMrsChartServer;
-import org.msf.records.net.model.ChartStructure;
-import org.msf.records.net.model.ConceptList;
-import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -35,15 +30,13 @@ import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallbac
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
+import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.common.base.Optional;
 
 import de.greenrobot.event.EventBus;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,13 +56,11 @@ final class PatientChartController {
 
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
-    /*
-     * The ODK code for filling in a form has no way of attaching metadata to it This means we can't
-     * pass which patient is currently being edited. Instead, we keep an array of up to
-     * MAX_ODK_REQUESTS patientUuids. We then send request code BASE_ODK_REQUEST + index, and roll
-     * through the array. The array is persisted through activity restart in the savedInstanceState.
-     */
-    private static final int BASE_ODK_REQUEST = 100;
+    // The ODK code for filling in a form has no way of attaching metadata to it.
+    // This means we can't pass which patient is currently being edited. Instead, we keep an array
+    // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
+    // the savedInstanceState.
+
     /** Maximum concurrent ODK forms assigned request codes. */
     private static final int MAX_ODK_REQUESTS = 10;
     private int nextIndex = 0;
@@ -98,16 +89,15 @@ final class PatientChartController {
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
-                String formUuid,
-                int requestCode,
-                org.odk.collect.android.model.Patient patient,
+                PatientChartActivity.XForm form,
+                int code,
+                Patient patient,
                 PrepopulatableFields fields);
 
         /** Re-enables fetching. */
         void reEnableFetch();
     }
 
-    private final OpenMrsChartServer mServer;
     private final EventBusRegistrationInterface mDefaultEventBus;
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
@@ -135,7 +125,6 @@ final class PatientChartController {
 
     public PatientChartController(
             AppModel appModel,
-            OpenMrsChartServer server,
             EventBusRegistrationInterface defaultEventBus,
             CrudEventBus crudEventBus,
             Ui ui,
@@ -146,7 +135,6 @@ final class PatientChartController {
             SyncManager syncManager,
             MinimalHandler mainThreadHandler) {
         mAppModel = appModel;
-        mServer = checkNotNull(server);
         mDefaultEventBus = defaultEventBus;
         mCrudEventBus = crudEventBus;
         mUi = ui;
@@ -196,15 +184,31 @@ final class PatientChartController {
         mDefaultEventBus.unregister(mEventBusSubscriber);
     }
 
-    public void onXFormResult(int requestCode, int resultCode, Intent data) {
-        String patientUuid = getAndClearPatientUuidForRequestCode(requestCode);
+    public void onXFormResult(int code, int resultCode, Intent data) {
+        PatientChartActivity.RequestCode requestCode =
+                new PatientChartActivity.RequestCode(code);
+
+        String patientUuid = getAndClearPatientUuidForRequestCode(code);
         if (patientUuid == null) {
-            LOG.e("Received unknown request code: " + requestCode);
+            LOG.e("Received unknown request code: " + code);
             return;
         }
 
-        // This will fire a CreatePatientSucceededEvent.
-        mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
+        switch (requestCode.form) {
+            case ADD_OBSERVATION:
+                // This will fire a CreatePatientSucceededEvent.
+                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
+                break;
+            case ADD_TEST_RESULTS:
+                // This will fire a CreatePatientSucceededEvent.
+                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
+                break;
+            default:
+                LOG.e(
+                        "Received an ODK result for a form that we do not know about: '%1$s'. This "
+                                + "indicates programmer error.", requestCode.form.toString());
+                break;
+        }
     }
 
     /** Call when the user has indicated they want to add observation data. */
@@ -241,8 +245,29 @@ final class PatientChartController {
         fields.targetGroup = targetGroup;
 
         mUi.fetchAndShowXform(
-                Constants.ADD_OBSERVATION_UUID,
-                savePatientUuidForRequestCode(mPatientUuid),
+                PatientChartActivity.XForm.ADD_OBSERVATION,
+                savePatientUuidForRequestCode(
+                        PatientChartActivity.XForm.ADD_OBSERVATION, mPatientUuid),
+                mPatientModel.getOdkPatient(mPatientUuid),
+                fields);
+    }
+
+    public void onAddTestResultsPressed() {
+        PrepopulatableFields fields = new PrepopulatableFields();
+
+        // TODO(dxchen): Re-enable this post v0.2.1.
+//        fields.encounterTime = DateTime.now();
+        fields.locationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.clinicianName = user.getFullName();
+        }
+
+        mUi.fetchAndShowXform(
+                PatientChartActivity.XForm.ADD_TEST_RESULTS,
+                savePatientUuidForRequestCode(
+                        PatientChartActivity.XForm.ADD_TEST_RESULTS, mPatientUuid),
                 mPatientModel.getOdkPatient(mPatientUuid),
                 fields);
     }
@@ -277,9 +302,9 @@ final class PatientChartController {
     /**
      * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
      */
-    private int savePatientUuidForRequestCode(String patientUuid) {
+    private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {
         mPatientUuids[nextIndex] = patientUuid;
-        int requestCode = BASE_ODK_REQUEST + nextIndex;
+        int requestCode = new PatientChartActivity.RequestCode(form, nextIndex).getCode();
         nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
         return requestCode;
     }
@@ -325,10 +350,11 @@ final class PatientChartController {
      *
      * <p>Also removes details of that requestCode from the controller's state.
      */
-    @Nullable private String getAndClearPatientUuidForRequestCode(int requestCode) {
-        int index = requestCode - BASE_ODK_REQUEST;
-        String patientUuid = mPatientUuids[index];
-        mPatientUuids[index] = null;
+    @Nullable
+    private String getAndClearPatientUuidForRequestCode(int code) {
+        PatientChartActivity.RequestCode requestCode = new PatientChartActivity.RequestCode(code);
+        String patientUuid = mPatientUuids[requestCode.requestIndex];
+        mPatientUuids[requestCode.requestIndex] = null;
         return patientUuid;
     }
 

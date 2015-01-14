@@ -14,4 +14,7 @@
     <!-- The default value for whether Xform submission should update the client cache -->
     <bool name="xform_update_client_cache">true</bool>
 
+    <!-- The default value for whether observations should sync incrementally -->
+    <bool name="incremental_observation_update">true</bool>
+
 </resources>

@@ -21,7 +21,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':autofittextview')
     compile project(':odkcollect')
     compile project(':snackbar')
     compile project(':ViewPagerIndicator')
@@ -133,7 +132,6 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
-            versionNameSuffix '-dev'
 
             resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
             resValue "string", "account_type", defaultConfig.applicationId + '.dev'

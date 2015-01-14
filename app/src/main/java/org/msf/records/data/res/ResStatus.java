@@ -14,13 +14,21 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
     FAIR(R.string.status_fair, R.color.status_fair, R.color.vital_fg_dark),
     POOR(R.string.status_poor, R.color.status_poor, R.color.vital_fg_light),
     VERY_POOR(R.string.status_very_poor, R.color.status_very_poor, R.color.vital_fg_light),
-    SUSPECTED_DEAD(
-            R.string.status_suspected_dead, R.color.status_suspected_dead, R.color.vital_fg_light),
-    CONFIRMED_DEAD(
-            R.string.status_confirmed_dead, R.color.status_confirmed_dead, R.color.vital_fg_light),
-    DISCHARGED(
+    DISCHARGED_NON_CASE(
             R.string.status_discharged_non_case,
             R.color.status_discharged_non_case,
+            R.color.vital_fg_light),
+    CURED(
+            R.string.status_cured,
+            R.color.status_cured,
+            R.color.vital_fg_light),
+    SUSPECTED_DEAD(
+            R.string.status_suspected_dead,
+            R.color.status_suspected_dead,
+            R.color.vital_fg_light),
+    CONFIRMED_DEAD(
+            R.string.status_confirmed_dead,
+            R.color.status_confirmed_dead,
             R.color.vital_fg_light);
 
     public final int messageId;

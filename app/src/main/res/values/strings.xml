@@ -7,20 +7,10 @@
     <string name="status_fair">Fair</string>
     <string name="status_poor">Poor</string>
     <string name="status_very_poor">Very Poor</string>
+    <string name="status_discharged_non_case">Discharge Non-Case</string>
+    <string name="status_cured">Cured</string>
     <string name="status_suspected_dead">Dead?</string>
     <string name="status_confirmed_dead">Confirmed Dead</string>
-    <string name="status_discharged_non_case">Discharged Non-Case</string>
-    <string name="status_cured">Cured</string>
-
-    <string name="status_suspect">Suspect</string>
-    <string name="status_probable">Probable</string>
-    <string name="status_confirmed">Confirmed</string>
-    <string name="status_non_case">Non-case</string>
-    <string name="status_convalescence">Convalescence</string>
-    <string name="status_can_be_discharged">Can be discharged</string>
-    <string name="status_discharged_old">Discharged</string>
-    <string name="status_unconfirmed_death">Unconfirmed death</string>
-    <string name="status_confirmed_death">Confirmed death</string>
 
     <string name="app_name">MSF Medical Records</string>
     <string name="title_patient_list">Patients</string>
