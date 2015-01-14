@@ -12,7 +12,6 @@
             <option value="$PROJECT_DIR$/ViewPagerIndicator" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/odkcollect" />
-            <option value="$PROJECT_DIR$/snackbar" />
           </set>
         </option>
       </GradleProjectSettings>

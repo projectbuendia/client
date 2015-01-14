@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    A view that wraps the content view for most activities so that a status bar for important
+    information can be displayed if needed.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- The FrameLayout that contains wrapped content. -->
+    <FrameLayout
+        android:id="@+id/status_wrapper_inner_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <!-- The FrameLayout that contains the status bar, if present. -->
+    <FrameLayout
+        android:id="@+id/status_wrapper_status_content"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:visibility="gone" />
+
+</LinearLayout>
