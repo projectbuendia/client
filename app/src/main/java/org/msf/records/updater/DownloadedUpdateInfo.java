@@ -25,7 +25,7 @@ public class DownloadedUpdateInfo {
      */
     public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
         return new DownloadedUpdateInfo(
-                false /*isValid*/, currentVersion, UpdateManager.INVALID_VERSION, null /*path*/);
+                false /*isValid*/, currentVersion, UpdateManager.MINIMAL_VERSION, null /*path*/);
     }
 
     /**

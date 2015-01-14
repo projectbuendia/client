@@ -44,13 +44,13 @@ public class UpdateManager {
     public static final int CHECK_FOR_UPDATE_FREQUENCY_HOURS = 1;
 
     /**
-     * An invalid semantic version.
+     * The minimal version number.
      *
-     * <p>This value is smaller than any other semantic version. If the current application has this
-     * version, any valid update will be installed over it. If an update has this version, it will
+     * <p>This value is smaller than any other version. If the current application has this version,
+     * any non-minimal update will be installed over it. If an update has this version, it will
      * never be installed over any the current application.
      */
-    public static final LexicographicVersion INVALID_VERSION = LexicographicVersion.parse("0");
+    public static final LexicographicVersion MINIMAL_VERSION = LexicographicVersion.parse("0");
 
     private static final IntentFilter sDownloadCompleteIntentFilter =
             new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
@@ -191,7 +191,7 @@ public class UpdateManager {
                     e,
                     "No package found with the name " + mApplication.getPackageName() + ". "
                             + "This should never happen.");
-            return INVALID_VERSION;
+            return MINIMAL_VERSION;
         }
 
         try {
@@ -201,7 +201,7 @@ public class UpdateManager {
                     e,
                     "Application has an invalid semantic version: " + packageInfo.versionName + ". "
                             + "Please fix in build.gradle.");
-            return INVALID_VERSION;
+            return MINIMAL_VERSION;
         }
     }
 

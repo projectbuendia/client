@@ -29,7 +29,7 @@ public class AvailableUpdateInfo {
         return new AvailableUpdateInfo(
                 false /*isValid*/,
                 currentVersion,
-                UpdateManager.INVALID_VERSION,
+                UpdateManager.MINIMAL_VERSION,
                 null /*updateUri*/);
     }
 
