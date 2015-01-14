@@ -11,7 +11,7 @@ public class UserAddFailedEvent {
     public static final int REASON_INVALID_USER = 1;
     public static final int REASON_USER_EXISTS_LOCALLY = 2;
     public static final int REASON_USER_EXISTS_ON_SERVER = 3;
-    public static final int REASON_SERVER_ERROR = 4;
+    public static final int REASON_CONNECTION_ERROR = 4;
 
     public final NewUser user;
     public final int reason;

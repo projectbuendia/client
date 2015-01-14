@@ -41,7 +41,7 @@
     <string name="add_user_invalid_user">Invalid user</string>
     <string name="add_user_user_exists_locally">User already exists on tablet</string>
     <string name="add_user_user_exists_on_server">Username already exists on server</string>
-    <string name="add_user_server_error">Server error</string>
+    <string name="add_user_connection_error">Error connecting to server</string>
     <string name="title_activity_round">RoundActivity</string>
 
     <string name="no_patients">No patients</string>
@@ -83,4 +83,8 @@
     <string name="title_add_patient_cancel">Discard changes?</string>
     <string name="patient_creation_success">New patient has been added.</string>
     <string name="patient_creation_error">Unable to add patient: %s</string>
+    <string name="username_cannot_be_null">\"Username must not be null\"</string>
+    <string name="given_name_cannot_be_null">Given name must not be null</string>
+    <string name="family_name_cannot_be_null">Family name must not be null</string>
+    <string name="invalid_username">Username must be between 2 and 50 characters. Only letters, digits, ".", "-", and "_" are allowed.</string>
 </resources>
