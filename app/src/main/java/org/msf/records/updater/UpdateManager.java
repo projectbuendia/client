@@ -23,6 +23,7 @@ import org.msf.records.model.UpdateInfo;
 import org.msf.records.utils.LexicographicVersion;
 import org.msf.records.utils.Logger;
 
+import java.io.File;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -64,6 +65,8 @@ public class UpdateManager {
     private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
 
+    private final String mDownloadDirectory;
+
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
 
@@ -84,6 +87,9 @@ public class UpdateManager {
                 (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
 
         mCurrentVersion = getCurrentVersion();
+
+        mDownloadDirectory = getDownloadDirectory(application);
+
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
         mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
     }
@@ -114,9 +120,14 @@ public class UpdateManager {
     public void checkForUpdate() {
         DateTime now = DateTime.now();
         if (now.isBefore(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
-            if (!mIsDownloadInProgress && mLastAvailableUpdateInfo.shouldUpdate()) {
-                EventBus.getDefault()
-                        .post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+            if (!mIsDownloadInProgress) {
+                if (mLastDownloadedUpdateInfo.shouldInstall()) {
+                    EventBus.getDefault()
+                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
+                } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
+                    EventBus.getDefault()
+                            .post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+                }
             }
 
             return;
@@ -146,9 +157,8 @@ public class UpdateManager {
 
             DownloadManager.Request request =
                     new DownloadManager.Request(availableUpdateInfo.updateUri)
-                            .setDestinationInExternalFilesDir(
-                                    mApplication,
-                                    Environment.DIRECTORY_DOWNLOADS,
+                            .setDestinationInExternalPublicDir(
+                                    mDownloadDirectory,
                                     "android-client-"
                                             + availableUpdateInfo.availableVersion.toString()
                                             + ".apk")
@@ -179,7 +189,20 @@ public class UpdateManager {
     }
 
     /**
-     * Returns the semantic version of the application.
+     * Returns the relative path to the directory in which updates will be downloaded.
+     */
+    private String getDownloadDirectory(Application application) {
+        String externalStorageDirectory =
+                Environment.getExternalStorageDirectory().getAbsolutePath();
+        String downloadDirectory = application.getExternalFilesDir(null).getAbsolutePath();
+        if (downloadDirectory.startsWith(externalStorageDirectory)) {
+            downloadDirectory = downloadDirectory.substring(externalStorageDirectory.length());
+        }
+        return downloadDirectory;
+    }
+
+    /**
+     * Returns the version of the application.
      */
     private LexicographicVersion getCurrentVersion() {
         PackageInfo packageInfo;
@@ -205,6 +228,36 @@ public class UpdateManager {
         }
     }
 
+    private DownloadedUpdateInfo getLastDownloadedUpdateInfo() {
+        File f = new File(Environment.getExternalStorageDirectory(), mDownloadDirectory);
+        if (!f.exists()) {
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
+        if (!f.isDirectory()) {
+            LOG.e(
+                    "The path in which updates are downloaded is not a directory: '%1$s'",
+                    f.toString());
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
+
+        File[] files = f.listFiles();
+        File latestApk = null;
+        for (File file : files) {
+            if (file.isFile()
+                    && file.getName().endsWith(".apk")
+                    && (latestApk == null || file.lastModified() > latestApk.lastModified())) {
+                latestApk = file;
+            }
+        }
+
+        if (latestApk == null) {
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        } else {
+            return DownloadedUpdateInfo
+                    .fromUri(mCurrentVersion, "file://" + latestApk.getAbsolutePath());
+        }
+    }
+
     /**
      * A listener that handles check-for-update responses.
      */
@@ -216,6 +269,8 @@ public class UpdateManager {
             synchronized (mLock) {
                 mLastAvailableUpdateInfo =
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
+
+                mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
 
                 if (mLastDownloadedUpdateInfo.shouldInstall()
                         && mLastDownloadedUpdateInfo.downloadedVersion
@@ -331,8 +386,42 @@ public class UpdateManager {
 
                 mLastDownloadedUpdateInfo =
                         DownloadedUpdateInfo.fromUri(mCurrentVersion, uriString);
-                EventBus.getDefault()
-                        .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
+
+                if (!mLastDownloadedUpdateInfo.isValid) {
+                    LOG.w(
+                            "The last update downloaded from the server is invalid. Update checks "
+                                    + "will not occur for the next %1$d hour(s).",
+                            CHECK_FOR_UPDATE_FREQUENCY_HOURS);
+
+                    // Set the last available update info to an invalid value so as to prevent
+                    // further download attempts.
+                    mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
+
+                    return;
+                }
+
+                if (!mLastAvailableUpdateInfo.availableVersion
+                        .greaterThanOrEqualTo(mLastDownloadedUpdateInfo.downloadedVersion)) {
+                    LOG.w(
+                            "The last update downloaded from the server was reported to have "
+                                    + "version '%1$s' but actually has version '%2$s'. This "
+                                    + "indicates a server configuration problem. Update checks "
+                                    + "will not occur for the next %3$d hour(s).",
+                            mLastAvailableUpdateInfo.availableVersion.toString(),
+                            mLastDownloadedUpdateInfo.downloadedVersion.toString(),
+                            CHECK_FOR_UPDATE_FREQUENCY_HOURS);
+
+                    // Set the last available update info to an invalid value so as to prevent
+                    // further download attempts.
+                    mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
+
+                    return;
+                }
+
+                if (mLastDownloadedUpdateInfo.shouldInstall()) {
+                    EventBus.getDefault()
+                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
+                }
             }
         }
     }

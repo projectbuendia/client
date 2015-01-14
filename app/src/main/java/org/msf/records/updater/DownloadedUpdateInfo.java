@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import org.msf.records.App;
+import org.msf.records.BuildConfig;
 import org.msf.records.utils.LexicographicVersion;
 import org.msf.records.utils.Logger;
 
@@ -43,7 +44,17 @@ public class DownloadedUpdateInfo {
 
         PackageInfo packageInfo = packageManager.getPackageArchiveInfo(path, 0 /*flags*/);
         if (packageInfo == null) {
-            LOG.w("%1$s is not a valid APK.", uri);
+            LOG.w("'%1$s' is not a valid APK.", uri);
+            return getInvalid(currentVersion);
+        }
+
+        if (!packageInfo.packageName.equals(BuildConfig.APPLICATION_ID)) {
+            LOG.w(
+                    "'%1$s' does not have the correct package name. Expected: '%2$s'; actual: "
+                            + "'%3$s'.",
+                    uri,
+                    BuildConfig.APPLICATION_ID,
+                    packageInfo.packageName);
             return getInvalid(currentVersion);
         }
 
@@ -51,7 +62,7 @@ public class DownloadedUpdateInfo {
         try {
             downloadedVersion = LexicographicVersion.parse(packageInfo.versionName);
         } catch (IllegalArgumentException e) {
-            LOG.w("%1$s has an invalid semantic version: %1$s.", uri, packageInfo.versionName);
+            LOG.w("%1$s has an invalid version: %1$s.", uri, packageInfo.versionName);
             return getInvalid(currentVersion);
         }
 
@@ -62,11 +73,11 @@ public class DownloadedUpdateInfo {
             boolean isValid,
             LexicographicVersion currentVersion,
             LexicographicVersion downloadedVersion,
-            String path) {
+            String uri) {
         this.isValid = isValid;
         this.currentVersion = currentVersion;
         this.downloadedVersion = downloadedVersion;
-        this.path = path;
+        this.path = uri;
     }
 
     public boolean shouldInstall() {
