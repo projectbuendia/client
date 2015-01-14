@@ -146,9 +146,6 @@ public class UpdateManager {
 
             DownloadManager.Request request =
                     new DownloadManager.Request(availableUpdateInfo.updateUri)
-//                            .setTitle(
-//                                    "Downloading update v"
-//                                            + availableUpdateInfo.availableVersion.toString())
                             .setDestinationInExternalFilesDir(
                                     mApplication,
                                     Environment.DIRECTORY_DOWNLOADS,
@@ -156,7 +153,7 @@ public class UpdateManager {
                                             + availableUpdateInfo.availableVersion.toString()
                                             + ".apk")
                             .setNotificationVisibility(
-                                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                                    DownloadManager.Request.VISIBILITY_VISIBLE);
             mDownloadId = mDownloadManager.enqueue(request);
 
             return true;

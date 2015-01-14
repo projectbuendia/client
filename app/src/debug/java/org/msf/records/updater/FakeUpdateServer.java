@@ -29,7 +29,7 @@ public class FakeUpdateServer extends UpdateServer {
         mHandler = new Handler(Looper.getMainLooper());
         mUpdateInfo = new ArrayList<>();
         UpdateInfo latestUpdateInfo = new UpdateInfo();
-        latestUpdateInfo.source = "http://www.example.org/foo.apk";
+        latestUpdateInfo.url = "http://www.example.org/foo.apk";
         latestUpdateInfo.version = "0.1.0";
         mUpdateInfo.add(latestUpdateInfo);
     }

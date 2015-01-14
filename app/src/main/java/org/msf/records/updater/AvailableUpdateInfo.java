@@ -58,19 +58,19 @@ public class AvailableUpdateInfo {
             return getInvalid(currentVersion);
         }
 
-        if (Strings.isNullOrEmpty(latestUpdateInfo.source)) {
+        if (Strings.isNullOrEmpty(latestUpdateInfo.url)) {
             LOG.w("The latest update info is missing the src field.");
         }
 
         Uri updateUri;
         try {
-            updateUri = Uri.parse(latestUpdateInfo.source);
+            updateUri = Uri.parse(latestUpdateInfo.url);
         } catch (IllegalArgumentException e) {
             LOG.w(
                     e,
                     "The latest update info response src field is not a valid URI path segment: "
                             + "'%1$s'.",
-                    latestUpdateInfo.source);
+                    latestUpdateInfo.url);
             return getInvalid(currentVersion);
         }
 

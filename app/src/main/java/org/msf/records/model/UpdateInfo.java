@@ -9,8 +9,8 @@ import org.msf.records.utils.LexicographicVersion;
  */
 public class UpdateInfo {
 
-    @SerializedName("src")
-    public String source;
+    @SerializedName("url")
+    public String url;
 
     @SerializedName("version")
     public String version;
