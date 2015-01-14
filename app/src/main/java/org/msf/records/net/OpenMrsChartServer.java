@@ -49,12 +49,20 @@ public class OpenMrsChartServer {
                 errorListener);
     }
 
+    /**
+     * Get all observations that happened in an encounter after or on lastTime. Allows a client to do
+     * incremental cache updating.
+     *
+     * @param lastTime a joda instant representing the start time for new observations (inclusive)
+     * @param patientListener a listener to get the results on the event of success
+     * @param errorListener a (Volley) listener to get any errors
+     */
     public void getIncrementalCharts(
-            Instant lastDate,
+            Instant lastTime,
             Response.Listener<PatientChartList> patientListener,
             Response.ErrorListener errorListener) {
         doEncountersRequest(
-                mConnectionDetails.getRootUrl() + "/patientencounters?sm=" + lastDate.getMillis(),
+                mConnectionDetails.getRootUrl() + "/patientencounters?sm=" + lastTime.getMillis(),
                 patientListener, errorListener);
     }
 

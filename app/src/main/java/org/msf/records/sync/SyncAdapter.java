@@ -91,7 +91,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * RPC timeout for getting observations.
      */
-    private static final int OBSERVATIONS_TIMEOUT = 100;
+    private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
 
     /**
      * Content resolver, for performing database operations.
@@ -504,7 +504,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
-        PatientChartList patientChartList = listFuture.get(OBSERVATIONS_TIMEOUT, TimeUnit.SECONDS);
+        PatientChartList patientChartList = listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
         for (PatientChart patientChart : patientChartList.results) {
@@ -558,7 +558,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
-        PatientChartList patientChartList = listFuture.get(OBSERVATIONS_TIMEOUT, TimeUnit.SECONDS);
+        PatientChartList patientChartList =
+                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");
         for (PatientChart patientChart : patientChartList.results) {

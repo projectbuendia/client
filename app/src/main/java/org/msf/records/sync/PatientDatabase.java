@@ -50,97 +50,91 @@ public class PatientDatabase extends SQLiteOpenHelper {
     public static final String PATIENTS_TABLE_NAME = "patients";
 
     /** SQL statement to create "patient" table. */
-    private static final String SQL_CREATE_ENTRIES =
-            CREATE_TABLE + PATIENTS_TABLE_NAME + " (" +
-                    _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.Patients.GIVEN_NAME + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Patients.FAMILY_NAME + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Patients.UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Patients.LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Patients.ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP +
-                    Contracts.Patients.BIRTHDATE + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Patients.GENDER + TYPE_TEXT + ")";
+    private static final String SQL_CREATE_ENTRIES = CREATE_TABLE + PATIENTS_TABLE_NAME + " ("
+            + _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Patients.GIVEN_NAME + TYPE_TEXT + COMMA_SEP
+            + Contracts.Patients.FAMILY_NAME + TYPE_TEXT + COMMA_SEP
+            + Contracts.Patients.UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Patients.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Patients.ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP
+            + Contracts.Patients.BIRTHDATE + TYPE_TEXT + COMMA_SEP
+            + Contracts.Patients.GENDER + TYPE_TEXT
+            + ")";
 
     public static final String CONCEPTS_TABLE_NAME = "concepts";
 
-    private static final String SQL_CREATE_CONCEPTS =
-            CREATE_TABLE + CONCEPTS_TABLE_NAME + " (" +
-                    _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.Concepts.XFORM_ID + TYPE_INTEGER + UNIQUE + NOTNULL + COMMA_SEP +
-                    Contracts.Concepts.CONCEPT_TYPE + TYPE_TEXT +
-                    ")";
+    private static final String SQL_CREATE_CONCEPTS = CREATE_TABLE + CONCEPTS_TABLE_NAME + " ("
+            + _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Concepts.XFORM_ID + TYPE_INTEGER + UNIQUE + NOTNULL + COMMA_SEP
+            + Contracts.Concepts.CONCEPT_TYPE + TYPE_TEXT
+            + ")";
 
     public static final String CONCEPT_NAMES_TABLE_NAME = "concept_names";
 
-    private static final String SQL_CREATE_CONCEPT_NAMES =
-            CREATE_TABLE + CONCEPT_NAMES_TABLE_NAME + " (" +
-                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.ConceptNames.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.ConceptNames.LOCALE + TYPE_TEXT + COMMA_SEP +
-                    Contracts.ConceptNames.LOCALIZED_NAME + TYPE_TEXT + COMMA_SEP +
-                    UNIQUE_INDEX + Contracts.ConceptNames.CONCEPT_UUID + COMMA_SEP +
-                    Contracts.ConceptNames.LOCALE +
-                    ")" +
-                    ")";
+    private static final String SQL_CREATE_CONCEPT_NAMES = CREATE_TABLE + CONCEPT_NAMES_TABLE_NAME
+            + " (" + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.ConceptNames.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.ConceptNames.LOCALE + TYPE_TEXT + COMMA_SEP
+            + Contracts.ConceptNames.LOCALIZED_NAME + TYPE_TEXT + COMMA_SEP
+            + UNIQUE_INDEX + Contracts.ConceptNames.CONCEPT_UUID + COMMA_SEP
+            + Contracts.ConceptNames.LOCALE + ")"
+            + ")";
 
     public static final String LOCATIONS_TABLE_NAME = "locations";
 
-    private static final String SQL_CREATE_LOCATIONS =
-            CREATE_TABLE + LOCATIONS_TABLE_NAME + " (" +
-                _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                Contracts.Locations.LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
-                Contracts.Locations.PARENT_UUID + TYPE_TEXT +
-                ")";
+    private static final String SQL_CREATE_LOCATIONS = CREATE_TABLE + LOCATIONS_TABLE_NAME + " ("
+            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Locations.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Locations.PARENT_UUID + TYPE_TEXT
+            + ")";
 
     public static final String LOCATION_NAMES_TABLE_NAME = "location_names";
 
-    private static final String SQL_CREATE_LOCATION_NAMES =
-            CREATE_TABLE + LOCATION_NAMES_TABLE_NAME + " (" +
-                _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                Contracts.LocationNames.LOCATION_UUID + TYPE_TEXT + COMMA_SEP +
-                Contracts.LocationNames.LOCALE + TYPE_TEXT + COMMA_SEP +
-                Contracts.LocationNames.LOCALIZED_NAME + TYPE_TEXT + COMMA_SEP +
-                UNIQUE_INDEX + Contracts.LocationNames.LOCATION_UUID + COMMA_SEP + Contracts.LocationNames.LOCALE +
-                ")" +
-                ")";
+    private static final String SQL_CREATE_LOCATION_NAMES = CREATE_TABLE + LOCATION_NAMES_TABLE_NAME
+            + " ("
+            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.LocationNames.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.LocationNames.LOCALE + TYPE_TEXT + COMMA_SEP
+            + Contracts.LocationNames.LOCALIZED_NAME + TYPE_TEXT + COMMA_SEP
+            + UNIQUE_INDEX + Contracts.LocationNames.LOCATION_UUID + COMMA_SEP
+            + Contracts.LocationNames.LOCALE + ")"
+            + ")";
 
     public static final String OBSERVATIONS_TABLE_NAME = "observations";
 
-    private static final String SQL_CREATE_OBSERVATIONS =
-            CREATE_TABLE + OBSERVATIONS_TABLE_NAME + " (" +
-                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.Observations.PATIENT_UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Observations.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Observations.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP +
-                    Contracts.Observations.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
-                    Contracts.Observations.VALUE + TYPE_INTEGER + COMMA_SEP +
-                    Contracts.Observations.TEMP_CACHE + TYPE_INTEGER + COMMA_SEP + // really boolean
-                    UNIQUE_INDEX + Contracts.Observations.PATIENT_UUID + COMMA_SEP +
-                    Contracts.Observations.ENCOUNTER_UUID + COMMA_SEP +
-                    Contracts.Observations.CONCEPT_UUID + ")" +
-                    ")";
+    private static final String SQL_CREATE_OBSERVATIONS = CREATE_TABLE + OBSERVATIONS_TABLE_NAME
+            + " ("
+            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Observations.PATIENT_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Observations.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Observations.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP
+            + Contracts.Observations.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP
+            + Contracts.Observations.VALUE + TYPE_INTEGER + COMMA_SEP
+            + Contracts.Observations.TEMP_CACHE + TYPE_INTEGER + COMMA_SEP // really boolean
+            + UNIQUE_INDEX + Contracts.Observations.PATIENT_UUID + COMMA_SEP
+            + Contracts.Observations.ENCOUNTER_UUID + COMMA_SEP
+            + Contracts.Observations.CONCEPT_UUID + ")"
+            + ")";
 
     public static final String CHARTS_TABLE_NAME = "charts";
 
-    private static final String SQL_CREATE_CHARTS =
-            CREATE_TABLE + CHARTS_TABLE_NAME + " (" +
-                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.Charts.CHART_UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Charts.CHART_ROW + TYPE_INTEGER + COMMA_SEP +
-                    Contracts.Charts.GROUP_UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Charts.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP +
-                    UNIQUE_INDEX + Contracts.Charts.CHART_UUID + COMMA_SEP +
-                    Contracts.Charts.CONCEPT_UUID +
-                    ")" +
-                    ")";
+    private static final String SQL_CREATE_CHARTS = CREATE_TABLE + CHARTS_TABLE_NAME + " ("
+            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Charts.CHART_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Charts.CHART_ROW + TYPE_INTEGER + COMMA_SEP
+            + Contracts.Charts.GROUP_UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Charts.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP
+            + UNIQUE_INDEX + Contracts.Charts.CHART_UUID + COMMA_SEP
+            + Contracts.Charts.CONCEPT_UUID + ")"
+            + ")";
 
     public static final String USERS_TABLE_NAME = "users";
 
-    private static final String SQL_CREATE_USERS =
-            CREATE_TABLE + USERS_TABLE_NAME + " (" +
-                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.Users.UUID + TYPE_TEXT + COMMA_SEP +
-                    Contracts.Users.FULL_NAME + TYPE_TEXT + ")";
+    private static final String SQL_CREATE_USERS = CREATE_TABLE + USERS_TABLE_NAME + " ("
+            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Users.UUID + TYPE_TEXT + COMMA_SEP
+            + Contracts.Users.FULL_NAME + TYPE_TEXT
+            + ")";
 
     /**
      * A table for storing miscellaneous single items that need persistent storage.
@@ -149,10 +143,10 @@ public class PatientDatabase extends SQLiteOpenHelper {
      */
     public static final String MISC_TABLE_NAME = "misc";
 
-    private static final String SQL_CREATE_MISC =
-            CREATE_TABLE + MISC_TABLE_NAME + " (" +
-                    _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP +
-                    Contracts.Misc.OBS_SYNC_TIME + TYPE_INTEGER + ")";
+    private static final String SQL_CREATE_MISC = CREATE_TABLE + MISC_TABLE_NAME + " ("
+            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Misc.OBS_SYNC_TIME + TYPE_INTEGER
+            + ")";
 
     private static String makeDropTable(String tableName) {
         return "DROP TABLE IF EXISTS " + tableName;

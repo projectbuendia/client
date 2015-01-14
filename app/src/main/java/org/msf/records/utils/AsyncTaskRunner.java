@@ -13,6 +13,10 @@ public interface AsyncTaskRunner {
         public final <Params, Progress, Result> void runTask(
                 AsyncTask<Params, Progress, Result> asyncTask,
                 Params... params) {
+            // This seems incorrect to me (nfortescue). This can legitimately be called
+            // from the SyncAdapter, which is not on the main thread. I have commented out until
+            // it is resolved properly.
+            // TODO(nfortescue): work out if this should be main thread only and if so delete
 //            ThreadUtils.checkOnMainThread();
             asyncTask.execute(params);
         }

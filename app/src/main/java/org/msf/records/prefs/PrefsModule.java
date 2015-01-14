@@ -22,11 +22,15 @@ import dagger.Provides;
 )
 public class PrefsModule {
 
-    @Provides @Singleton SharedPreferences provideSharedPreferences(Application app) {
+    @Provides
+    @Singleton
+    SharedPreferences provideSharedPreferences(Application app) {
         return PreferenceManager.getDefaultSharedPreferences(app);
     }
 
-    @Provides @Singleton @Qualifiers.OpenMrsRootUrl
+    @Provides
+    @Singleton
+    @Qualifiers.OpenMrsRootUrl
     StringPreference provideOpenMrsRootUrlStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
         return new StringPreference(
@@ -35,7 +39,9 @@ public class PrefsModule {
                 resources.getString(R.string.openmrs_root_url_default));
     }
 
-    @Provides @Singleton @Qualifiers.OpenMrsUser
+    @Provides
+    @Singleton
+    @Qualifiers.OpenMrsUser
     StringPreference provideOpenMrsUserStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
         return new StringPreference(
@@ -44,7 +50,9 @@ public class PrefsModule {
                 resources.getString(R.string.openmrs_user_default));
     }
 
-    @Provides @Singleton @Qualifiers.OpenMrsPassword
+    @Provides
+    @Singleton
+    @Qualifiers.OpenMrsPassword
     StringPreference provideOpenMrsPasswordStringPreference(
             SharedPreferences sharedPreferences, Resources resources) {
         return new StringPreference(
@@ -53,7 +61,9 @@ public class PrefsModule {
                 resources.getString(R.string.openmrs_password_default));
     }
 
-    @Provides @Singleton @Qualifiers.XformUpdateClientCache
+    @Provides
+    @Singleton
+    @Qualifiers.XformUpdateClientCache
     BooleanPreference provideXformUpdateClientCache(
             SharedPreferences sharedPreferences, Resources resources) {
         return new BooleanPreference(
@@ -62,7 +72,9 @@ public class PrefsModule {
                 resources.getBoolean(R.bool.xform_update_client_cache));
     }
 
-    @Provides @Singleton @Qualifiers.IncrementalObservationUpdate
+    @Provides
+    @Singleton
+    @Qualifiers.IncrementalObservationUpdate
     BooleanPreference provideIncrementalObservationUpdate(
             SharedPreferences sharedPreferences, Resources resources) {
         return new BooleanPreference(
