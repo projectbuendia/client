@@ -9,6 +9,7 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -57,7 +58,7 @@ public class GenericAccountService extends Service {
      * but the user is not actively waiting for that data, you should omit this flag; this will give
      * the OS additional freedom in scheduling your sync request.
      */
-    static void triggerRefresh() {
+    static void triggerRefresh(SharedPreferences prefs) {
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -68,6 +69,12 @@ public class GenericAccountService extends Service {
         b.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
         b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
         b.putBoolean(SyncAdapter.SYNC_USERS, true);
+        // For manual update we might want to allow complete update, but for now do it
+        // incrementally.
+
+        if (prefs.getBoolean("incremental_observation_update", true)) {
+            b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+        }
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
                 Contracts.CONTENT_AUTHORITY, // Content authority
@@ -105,9 +112,9 @@ public class GenericAccountService extends Service {
         // data has been deleted. (Note that it's possible to clear app data WITHOUT affecting
         // the account list, so wee need to check both.)
         if (newAccount || !setupComplete) {
-            triggerRefresh();
-            PreferenceManager.getDefaultSharedPreferences(context).edit()
-                    .putBoolean(PREF_SETUP_COMPLETE, true).commit();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            triggerRefresh(prefs);
+            prefs.edit().putBoolean(PREF_SETUP_COMPLETE, true).commit();
         }
     }
 

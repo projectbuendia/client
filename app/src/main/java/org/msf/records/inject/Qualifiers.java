@@ -38,5 +38,10 @@ public class Qualifiers {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface XformUpdateClientCache {}
 
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface IncrementalObservationUpdate {}
+
     private Qualifiers() {}
 }

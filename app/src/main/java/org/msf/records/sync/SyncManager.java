@@ -4,8 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
+import org.msf.records.App;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -30,7 +32,8 @@ public class SyncManager {
      * Forces a sync to occur immediately.
      */
     public void forceSync() {
-        GenericAccountService.triggerRefresh();
+        GenericAccountService.triggerRefresh(
+                PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
     }
 
     /**

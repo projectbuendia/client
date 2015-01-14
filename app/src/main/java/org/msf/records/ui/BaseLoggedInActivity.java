@@ -18,6 +18,7 @@ import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
+import org.msf.records.updater.UpdateManager;
 import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.Logger;
 
@@ -35,6 +36,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
+    @Inject UpdateManager mUpdateManager;
 
     private User mLastActiveUser;
     private Menu mMenu;
@@ -127,6 +129,9 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     protected void onResumeImpl() {
         super.onResume();
+
+        // Check for updates whenever a logged-in activity resumes.
+        mUpdateManager.checkForUpdate();
     }
 
     @Override

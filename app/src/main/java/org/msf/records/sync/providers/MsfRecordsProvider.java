@@ -97,6 +97,13 @@ public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
         registry.registerDelegate(
                 Contracts.MostRecentLocalizedCharts.CONTENT_URI.getPath() + "/*/*",
                 new MostRecentLocalizedChartsDelegate());
+        // Content provider for our single item table for storing miscellaneous values.
+        registry.registerDelegate(
+                Contracts.Misc.CONTENT_URI.getPath(),
+                new InsertableItemProviderDelegate(
+                        Contracts.Misc.ITEM_CONTENT_TYPE,
+                        PatientDatabase.MISC_TABLE_NAME,
+                        Contracts.Misc._ID));
 
         return registry;
     }

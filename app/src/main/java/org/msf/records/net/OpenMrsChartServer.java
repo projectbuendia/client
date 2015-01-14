@@ -3,6 +3,7 @@ package org.msf.records.net;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
+import org.joda.time.Instant;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.CustomSerialization;
@@ -44,8 +45,33 @@ public class OpenMrsChartServer {
 
     public void getAllCharts(Response.Listener<PatientChartList> patientListener,
                              Response.ErrorListener errorListener) {
+        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
+                patientListener, errorListener);
+    }
+
+    /**
+     * Get all observations that happened in an encounter after or on lastTime. Allows a client to
+     * do incremental cache updating.
+     *
+     * @param lastTime a joda instant representing the start time for new observations (inclusive)
+     * @param patientListener a listener to get the results on the event of success
+     * @param errorListener a (Volley) listener to get any errors
+     */
+    public void getIncrementalCharts(
+            Instant lastTime,
+            Response.Listener<PatientChartList> patientListener,
+            Response.ErrorListener errorListener) {
+        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() +
+                        "/patientencounters?sm=" + lastTime.getMillis(),
+                patientListener, errorListener);
+    }
+
+    private void doEncountersRequest(
+            String url,
+            Response.Listener<PatientChartList> patientListener,
+            Response.ErrorListener errorListener) {
         GsonRequest<PatientChartList> request = new GsonRequest<>(
-                mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
+                url,
                 PatientChartList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
