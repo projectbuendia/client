@@ -27,19 +27,18 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
+        // Go to PatientCreationActivity
         onView(withText("Guest User")).perform(click());
+        onView(withId(R.id.action_add)).perform(click());
+        onView(withText("New Patient")).check(matches(isDisplayed()));
     }
 
     /** Tests adding a new patient. */
-    public void testAddPatientFromTentSelection() {
+    public void testAddPatient() {
         long n = new Date().getTime() % 1000;
         String id = "test" + n;
         String given = "Testgiven" + n;
         String family = "Testfamily" + n;
-
-        // Go to PatientCreationActivity
-        onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New Patient")).check(matches(isDisplayed()));
 
         // Add new patient
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
@@ -64,8 +63,34 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
                 .perform(click());
     }
 
-    /** Tests that the new patient form is available from the patient list. */
-    public void testAddPatientFromPatientList() {
+    /** Tests adding a new patient with no location. */
+    public void testAddPatientWithoutLocation() {
+        long n = new Date().getTime() % 1000;
+        String id = "test" + n;
+        String given = "Testgiven" + n;
+        String family = "Testfamily" + n;
+
+        // Add new patient
+        onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
+        onView(withId(R.id.patient_creation_text_patient_given_name)).perform(typeText(given));
+        onView(withId(R.id.patient_creation_text_patient_family_name)).perform(typeText(family));
+        onView(withId(R.id.patient_creation_text_age)).perform(typeText(id));
+        onView(withId(R.id.patient_creation_radiogroup_age_units_years)).perform(click());
+        onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
+        onView(withId(R.id.patient_creation_radiogroup_age_sex_male)).perform(click());
+        onView(withId(R.id.patient_creation_radiogroup_age_sex_female)).perform(click());
+        onView(withText("Create")).perform(click());
+
+        // Patient should appear in list
+        onData(isPatientWithId(equalTo(id)))
+                .inAdapterView(withId(R.id.fragment_patient_list))
+                .atPosition(0)
+                .check(matches(isDisplayed()));
+    }
+
+
+    /** Tests that a confirmation prompt appears upon cancelling the form. */
+    public void testAddPatientCancel() {
         onView(withText("ALL PATIENTS")).perform(click());
         onView(withId(R.id.action_add)).perform(click());
         onView(withText("New Patient")).check(matches(isDisplayed()));

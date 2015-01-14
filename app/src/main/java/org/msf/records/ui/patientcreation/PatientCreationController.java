@@ -87,7 +87,7 @@ final class PatientCreationController {
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
         if (id == null || id.equals("")) {
-            mUi.showValidationError(Ui.FIELD_ID, "Please enter the new patient ID.");
+            mUi.showValidationError(Ui.FIELD_ID, "Please enter the patient ID.");
             hasValidationErrors = true;
         }
         if (givenName == null || givenName.equals("")) {
@@ -119,11 +119,6 @@ final class PatientCreationController {
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
             mUi.showValidationError(Ui.FIELD_SEX, "Please select Male or Female.");
-            hasValidationErrors = true;
-        }
-
-        if (locationUuid == null) {
-            mUi.showValidationError(Ui.FIELD_LOCATION, "Please select a location");
             hasValidationErrors = true;
         }
 
