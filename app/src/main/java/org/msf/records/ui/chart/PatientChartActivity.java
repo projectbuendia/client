@@ -40,6 +40,8 @@ import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Logger;
+import org.msf.records.utils.RelativeDateTimeFormatter;
 import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
@@ -49,6 +51,7 @@ import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,12 +72,14 @@ import static org.msf.records.utils.Utils.getSystemProperty;
  */
 public final class PatientChartActivity extends BaseLoggedInActivity {
 
+    private static final Logger LOG = Logger.create();
+
     /**
      * An enumeration of the XForms that can be launched from this activity.
      */
     enum XForm {
         ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
-        ADD_TEST_RESULTS("TBD", 1);
+        ADD_TEST_RESULTS("34d727a6-e515-4f27-ae91-703ba2c164ae", 1);
 
         public final String uuid;
         public final int formIndex;
@@ -115,6 +120,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
     public static final String PATIENT_ID_KEY = "PATIENT_ID";
 
+    private static final RelativeDateTimeFormatter DATE_TIME_FORMATTER =
+            RelativeDateTimeFormatter.builder()
+                    .withCasing(RelativeDateTimeFormatter.Casing.SENTENCE_CASE)
+                    .build();
+
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
@@ -151,6 +161,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
     @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
+    @InjectView(R.id.patient_chart_vital_pcr_date) TextView mPcrDate;
     @InjectView(R.id.vital_name_pcr) TextView mPcrName;
 
     @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
@@ -314,6 +325,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("General health status of the patient");
     }
 
+    @OnClick(R.id.patient_chart_pcr_parent)
+    void onPcrPressed(View v) {
+        mController.onAddTestResultsPressed();
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -422,12 +438,63 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             // PCR
-            mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-            mPcr.setTextColor(mVitalUnknown.getForegroundColor());
-            mPcrName.setTextColor(mVitalUnknown.getForegroundColor());
+            LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
+            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
+                    && (pcrNpObservation == null || pcrNpObservation == null)) {
+                mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mPcr.setTextColor(mVitalUnknown.getForegroundColor());
+                mPcrName.setTextColor(mVitalUnknown.getForegroundColor());
+                mPcrDate.setVisibility(View.GONE);
 
-            mPcr.setText("Not\nImplemented");
+                mPcr.setText("–");
+            } else {
+                mPcrParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
+                mPcr.setTextColor(mVitalKnown.getForegroundColor());
+                mPcrName.setTextColor(mVitalKnown.getForegroundColor());
 
+                String pcrLString = "–";
+                long pcrObservationMillis = -1;
+                if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
+                    pcrObservationMillis = pcrLObservation.encounterTimeMillis;
+                    double pcrL;
+                    try {
+                        pcrL = Double.parseDouble(pcrLObservation.localizedValue);
+                        pcrLString = String.format("%1$.1f", pcrL);
+                    } catch (NumberFormatException e) {
+                        LOG.w(
+                                "Retrieved a malformed L-gene PCR value: '%1$s'.",
+                                pcrLObservation.localizedValue);
+                        pcrLString = pcrLObservation.localizedValue;
+                    }
+                }
+                String pcrNpString = "–";
+                if (pcrNpObservation != null && pcrNpObservation.localizedValue != null) {
+                    pcrObservationMillis = pcrNpObservation.encounterTimeMillis;
+                    double pcrNp;
+                    try {
+                        pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
+                        pcrNpString = String.format("%1$.1f", pcrNp);
+                    } catch (NumberFormatException e) {
+                        LOG.w(
+                                "Retrieved a malformed Np-gene PCR value: '%1$s'.",
+                                pcrNpObservation.localizedValue);
+                        pcrNpString = pcrNpObservation.localizedValue;
+                    }
+                }
+
+                mPcr.setText(String.format("%1$s / %2$s", pcrLString, pcrNpString));
+                if (pcrObservationMillis > 0) {
+                    mPcrDate.setTextColor(mVitalKnown.getForegroundColor());
+                    mPcrDate.setVisibility(View.VISIBLE);
+
+                    mPcrDate.setText(
+                            DATE_TIME_FORMATTER.format(
+                                    DateTime.now(),
+                                    new DateTime(pcrObservationMillis)));
+                }
+            }
+            
             // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
