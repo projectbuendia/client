@@ -86,11 +86,9 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="httpclientandroidlib-4.2.1" level="project" />
-    <orderEntry type="library" exported="" name="1_httpclientandroidlib-4.2.1" level="project" />
     <orderEntry type="library" exported="" name="apache-mime4j-dom-0.7.2" level="project" />
     <orderEntry type="library" exported="" name="opencsv-2.3" level="project" />
     <orderEntry type="library" exported="" name="javarosa-libraries-2014-04-29" level="project" />
-    <orderEntry type="library" exported="" name="1_javarosa-libraries-2014-04-29" level="project" />
     <orderEntry type="library" exported="" name="httpcore-4.2.4" level="project" />
     <orderEntry type="library" exported="" name="kxml2-2.3.0" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />

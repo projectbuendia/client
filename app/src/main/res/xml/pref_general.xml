@@ -51,4 +51,11 @@
         android:summary="@string/pref_desc_xform_update_client_cache"
         android:defaultValue="@bool/xform_update_client_cache" />
 
+    <!-- Whether to instantly update the observations cache incrementally -->
+    <CheckBoxPreference
+        android:key="incremental_observation_update"
+        android:title="@string/pref_title_incremental_observation_update"
+        android:summary="@string/pref_desc_xform_update_client_cache"
+        android:defaultValue="@bool/incremental_observation_update" />
+
 </PreferenceScreen>

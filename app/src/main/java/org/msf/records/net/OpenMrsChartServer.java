@@ -3,6 +3,7 @@ package org.msf.records.net;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
+import org.joda.time.Instant;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.CustomSerialization;
@@ -46,6 +47,7 @@ public class OpenMrsChartServer {
                              Response.ErrorListener errorListener) {
         GsonRequest<PatientChartList> request = new GsonRequest<>(
                 mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
+                url,
                 PatientChartList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
