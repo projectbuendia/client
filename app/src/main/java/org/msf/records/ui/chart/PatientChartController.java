@@ -200,7 +200,8 @@ final class PatientChartController {
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
-                LOG.w("Adding test results is not yet supported.");
+                // This will fire a CreatePatientSucceededEvent.
+                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             default:
                 LOG.e(
@@ -247,6 +248,26 @@ final class PatientChartController {
                 PatientChartActivity.XForm.ADD_OBSERVATION,
                 savePatientUuidForRequestCode(
                         PatientChartActivity.XForm.ADD_OBSERVATION, mPatientUuid),
+                mPatientModel.getOdkPatient(mPatientUuid),
+                fields);
+    }
+
+    public void onAddTestResultsPressed() {
+        PrepopulatableFields fields = new PrepopulatableFields();
+
+        // TODO(dxchen): Re-enable this post v0.2.1.
+//        fields.encounterTime = DateTime.now();
+        fields.locationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.clinicianName = user.getFullName();
+        }
+
+        mUi.fetchAndShowXform(
+                PatientChartActivity.XForm.ADD_TEST_RESULTS,
+                savePatientUuidForRequestCode(
+                        PatientChartActivity.XForm.ADD_TEST_RESULTS, mPatientUuid),
                 mPatientModel.getOdkPatient(mPatientUuid),
                 fields);
     }

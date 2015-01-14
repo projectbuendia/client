@@ -9,6 +9,7 @@ import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.Server;
+import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
@@ -39,6 +40,7 @@ public class App extends Application {
     @Inject Application mApplication;
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
+    @Inject UpdateManager mUpdateManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject PatientChartModel mPatientChartModel;
     @Inject Server mServer;

@@ -14,13 +14,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.TimingLogger;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
+import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.model.Zone;
@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Global sync adapter for syncing all client side database caches.
@@ -83,11 +84,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String SYNC_USERS = "SYNC_USERS";
 
     /**
+     * If this key is present with boolean value true then sync users.
+     */
+    public static final String INCREMENTAL_OBSERVATIONS_UPDATE = "INCREMENTAL_OBSERVATIONS_UPDATE";
+
+    /**
+     * RPC timeout for getting observations.
+     */
+    private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
+
+    /**
      * Content resolver, for performing database operations.
      */
     private final ContentResolver mContentResolver;
-
-
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -133,7 +142,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
             if (extras.getBoolean(SYNC_OBSERVATIONS)) {
                 specific = true;
-                updateObservations(provider, syncResult);
+                updateObservations(provider, syncResult, extras);
                 timings.addSplit("update observations specified");
             }
             if (extras.getBoolean(SYNC_LOCATIONS)) {
@@ -155,7 +164,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 timings.addSplit("update all (concepts)");
                 updateChartStructure(provider, syncResult);
                 timings.addSplit("update all (chart)");
-                updateObservations(provider, syncResult);
+                updateObservations(provider, syncResult, extras);
                 timings.addSplit("update all (observations)");
                 updateLocations(provider, syncResult);
                 timings.addSplit("update all (locations)");
@@ -403,7 +412,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
     }
 
-    private void updateObservations(final ContentProviderClient provider, SyncResult syncResult)
+    private void updateObservations(final ContentProviderClient provider, SyncResult syncResult,
+                                    Bundle extras)
             throws RemoteException {
 
         // Get call patients from the cache.
@@ -422,44 +432,108 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // Get the charts asynchronously using volley.
         RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
 
-        LOG.d("requesting all charts");
-        chartServer.getAllCharts(listFuture, listFuture);
-        ArrayList<String> toDelete = new ArrayList<>();
-        ArrayList<ContentValues> toInsert = new ArrayList<>();
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         try {
-            LOG.d("awaiting parsed response");
-            PatientChartList patientChartList = listFuture.get(100, TimeUnit.SECONDS);
-            LOG.d("got response ");
-            timingLogger.addSplit("Get all charts RPC");
-            for (PatientChart patientChart : patientChartList.results) {
-                // As we are doing multiple request in parallel, deal with exceptions in the loop.
-                timingLogger.addSplit("awaiting future");
-                if (patientChart.uuid == null) {
-                    LOG.e("null patient id in observation response");
-                    continue;
-                }
-                // Delete all existing observations for the patient.
-                toDelete.add(patientChart.uuid);
-                timingLogger.addSplit("added delete to list");
-                // Add the new observations
-                RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
-                timingLogger.addSplit("added obs to list");
+            Instant lastSyncTime = getLastSyncTime(provider);
+            Instant newSyncTime;
+            if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
+                newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
+                        chartServer, listFuture, timingLogger);
+            } else {
+                newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
+                        timingLogger);
             }
+            // This is completely unsafe as regards exceptions - if we fail to store sync time then
+            // we have added observations and not stored the sync time. However, getting this right
+            // transactionally through a content provider interface is not easy, we'd have to update
+            // everything through a single URL. As deletes and inserts aren't safe right now, this
+            // will do.
+            // TODO(nfortescue): make this transactionally safe.
+            storeLastSyncTime(provider, newSyncTime);
         } catch (InterruptedException e) {
             LOG.e(e, "Error interruption: ");
             syncResult.stats.numIoExceptions++;
             return;
-        } catch (ExecutionException e){
+        } catch (ExecutionException e) {
             LOG.e(e, "Error failed to execute: ");
             syncResult.stats.numIoExceptions++;
             return;
-        } catch (Exception e){
+        } catch (Exception e) {
             LOG.e(e, "Error reading from network: ");
             syncResult.stats.numIoExceptions++;
             return;
         }
+        // Remove all temporary observations now we have the real ones
+        provider.delete(Contracts.Observations.CONTENT_URI,
+                Contracts.Observations.TEMP_CACHE + "!=0",
+                new String[0]);
+        timingLogger.addSplit("delete temp observations");
+        timingLogger.dumpToLog();
+    }
+
+    private Instant getLastSyncTime(ContentProviderClient provider) throws RemoteException {
+        Cursor c = null;
+        try {
+            c = provider.query(Contracts.Misc.CONTENT_URI,
+                    new String[]{Contracts.Misc.OBS_SYNC_TIME}, null, null, null);
+            if (c.moveToNext()) {
+                return new Instant(c.getLong(0));
+            } else {
+                return null;
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
+
+    private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)
+            throws RemoteException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contracts.Misc.OBS_SYNC_TIME, newSyncTime.getMillis());
+        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
+    }
+
+    private Instant updateAllObservations(
+            ContentProviderClient provider, SyncResult syncResult, OpenMrsChartServer chartServer,
+            RequestFuture<PatientChartList> listFuture, TimingLogger timingLogger)
+            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
+        LOG.d("requesting all charts");
+        chartServer.getAllCharts(listFuture, listFuture);
+        ArrayList<String> toDelete = new ArrayList<>();
+        ArrayList<ContentValues> toInsert = new ArrayList<>();
+        LOG.d("awaiting parsed response");
+        PatientChartList patientChartList =
+                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
+        LOG.d("got response ");
+        timingLogger.addSplit("Get all charts RPC");
+        for (PatientChart patientChart : patientChartList.results) {
+            // As we are doing multiple request in parallel, deal with exceptions in the loop.
+            timingLogger.addSplit("awaiting future");
+            if (patientChart.uuid == null) {
+                LOG.e("null patient id in observation response");
+                continue;
+            }
+            // Delete all existing observations for the patient.
+            toDelete.add(patientChart.uuid);
+            timingLogger.addSplit("added delete to list");
+            // Add the new observations
+            RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
+            timingLogger.addSplit("added obs to list");
+        }
         timingLogger.addSplit("making operations");
+        bulkDelete(provider, toDelete);
+        timingLogger.addSplit("bulk deletes");
+        provider.bulkInsert(Contracts.Observations.CONTENT_URI,
+                toInsert.toArray(new ContentValues[toInsert.size()]));
+        timingLogger.addSplit("bulk inserts");
+        return patientChartList.snapshotTime == null ? null :
+                patientChartList.snapshotTime.toInstant();
+    }
+
+    private void bulkDelete(ContentProviderClient provider, ArrayList<String> toDelete)
+            throws RemoteException {
         StringBuilder select = new StringBuilder(Contracts.Observations.PATIENT_UUID);
         select.append(" IN (");
         boolean first = true;
@@ -476,16 +550,41 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         select.append(")");
         provider.delete(Contracts.Observations.CONTENT_URI, select.toString(),
                 new String[0]);
-        timingLogger.addSplit("batch deletes");
-        provider.bulkInsert(Contracts.Observations.CONTENT_URI,
-                toInsert.toArray(new ContentValues[toInsert.size()]));
-        timingLogger.addSplit("bulk inserts");
-        // Remove all temporary observations now we have the real ones
-        provider.delete(Contracts.Observations.CONTENT_URI,
-                Contracts.Observations.TEMP_CACHE + "!=0",
-                new String[0]);
-        timingLogger.addSplit("delete temp observations");
-        timingLogger.dumpToLog();
+    }
+
+    private Instant updateIncrementalObservations(Instant lastSyncTime,
+            ContentProviderClient provider, SyncResult syncResult, OpenMrsChartServer chartServer,
+            RequestFuture<PatientChartList> listFuture, TimingLogger timingLogger)
+            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
+        LOG.d("requesting incremental charts");
+        chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
+        ArrayList<ContentValues> toInsert = new ArrayList<>();
+        LOG.d("awaiting parsed incremental response");
+        PatientChartList patientChartList =
+                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
+        LOG.d("got incremental response");
+        timingLogger.addSplit("Get incremental charts RPC");
+        for (PatientChart patientChart : patientChartList.results) {
+            // As we are doing multiple request in parallel, deal with exceptions in the loop.
+            timingLogger.addSplit("awaiting incremental future");
+            if (patientChart.uuid == null) {
+                LOG.e("null patient id in observation response");
+                continue;
+            }
+            if (patientChart.encounters.length > 0) {
+                // Add the new observations
+                RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
+                timingLogger.addSplit("added incremental obs to list");
+            }
+        }
+        timingLogger.addSplit("making operations");
+        if (toInsert.size() > 0) {
+            provider.bulkInsert(Contracts.Observations.CONTENT_URI,
+                    toInsert.toArray(new ContentValues[toInsert.size()]));
+            timingLogger.addSplit("bulk inserts");
+        }
+        return patientChartList.snapshotTime == null ? null :
+                patientChartList.snapshotTime.toInstant();
     }
 
     private void updateUsers(final ContentProviderClient provider, SyncResult syncResult) {
