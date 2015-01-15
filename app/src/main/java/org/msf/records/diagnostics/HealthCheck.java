@@ -3,8 +3,6 @@ package org.msf.records.diagnostics;
 import android.app.Application;
 import android.support.annotation.Nullable;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
@@ -76,7 +74,7 @@ abstract class HealthCheck {
             eventBus = mHealthEventBus;
         }
 
-        eventBus.post(new HealthIssueDiscoveredEvent(healthIssue));
+        eventBus.post(healthIssue.discovered);
     }
 
     /**
@@ -99,7 +97,7 @@ abstract class HealthCheck {
         }
 
         for (HealthIssue healthIssue : activeIssues) {
-            eventBus.post(new HealthIssueResolvedEvent(healthIssue));
+            eventBus.post(healthIssue.resolved);
         }
     }
 
@@ -125,7 +123,7 @@ abstract class HealthCheck {
         }
 
         if (wasIssueActive) {
-            eventBus.post(new HealthIssueResolvedEvent(healthIssue));
+            eventBus.post(healthIssue.resolved);
         }
     }
 }

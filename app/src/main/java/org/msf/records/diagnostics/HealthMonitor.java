@@ -50,11 +50,11 @@ public class HealthMonitor {
         }
     }
 
-    public <T extends HealthIssue> void onEvent(HealthIssueDiscoveredEvent event) {
-        mTroubleshooter.onDiscovered(event.healthIssue);
+    public <T extends HealthIssue> void onEvent(HealthIssue.DiscoveredEvent event) {
+        mTroubleshooter.onDiscovered(event.getIssue());
     }
 
-    public void onEvent(HealthIssueResolvedEvent event) {
-        mTroubleshooter.onResolved(event.healthIssue);
+    public void onEvent(HealthIssue.ResolvedEvent event) {
+        mTroubleshooter.onResolved(event.getIssue());
     }
 }

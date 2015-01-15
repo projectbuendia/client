@@ -11,5 +11,28 @@ enum HealthIssue {
 
     SERVER_HOST_UNREACHABLE,
 
-    SERVER_NOT_RESPONDING
+    SERVER_NOT_RESPONDING;
+
+    /**
+     * The event to be posted when a health issue is discovered.
+     */
+    public final DiscoveredEvent discovered = new DiscoveredEvent();
+
+    /**
+     * The event to be posted when a health issue is resolved.
+     */
+    public final ResolvedEvent resolved = new ResolvedEvent();
+
+    class Event {
+
+        public HealthIssue getIssue() {
+            return HealthIssue.this;
+        }
+
+        private Event() {}
+    }
+
+    class DiscoveredEvent extends Event {}
+
+    class ResolvedEvent extends Event {}
 }
