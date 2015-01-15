@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Controller for {@link org.msf.records.ui.patientlist.PatientSearchActivity}.
+ * Controller for {@link PatientSearchActivity}.
  *
  * <p>Avoid adding untestable dependencies to this class.
  */
@@ -62,14 +62,13 @@ public class PatientSearchController {
     private boolean mWaitingOnLocationTree = false;
 
     /**
-     * Instantiates a {@link org.msf.records.ui.patientlist.PatientSearchController} with the
-     * given UI implementation, event bus, app model, and locale.
-     * @param ui a {@link org.msf.records.ui.patientlist.PatientSearchController.Ui} that will
-     *           respond to UI events
-     * @param crudEventBus a {@link org.msf.records.events.CrudEventBus} that will listen for
-     *                     patient and location fetch events
-     * @param model an {@link org.msf.records.data.app.AppModel} for fetching patient and location
-     *              data
+     * Instantiates a {@link PatientSearchController} with the given UI implementation, event bus,
+     * app model, and locale.
+     *
+     * @param ui a {@link Ui} that will respond to UI events
+     * @param crudEventBus a {@link CrudEventBus} that will listen for patient and location fetch
+     *                     events
+     * @param model an {@link AppModel} for fetching patient and location data
      * @param locale a language code/locale for presenting localized information (e.g. en)
      */
     public PatientSearchController(
@@ -109,10 +108,8 @@ public class PatientSearchController {
     }
 
     /**
-     * Registers a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi} with
-     * this controller for the purposes of subscribing to events.
-     * @param fragmentUi a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi}
-     *                   to add as a subscriber
+     * Registers a {@link FragmentUi} with this controller for the purposes of subscribing to
+     * events.
      */
     public void attachFragmentUi(FragmentUi fragmentUi) {
         if (DEBUG) {
@@ -122,10 +119,8 @@ public class PatientSearchController {
     }
 
     /**
-     * Un-registers a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi} with
-     * this controller for the purposes of subscribing to events.
-     * @param fragmentUi a {@link org.msf.records.ui.patientlist.PatientSearchController.FragmentUi}
-     *                   to remove as a subscriber
+     * Unregisters a {@link FragmentUi} with this controller for the purposes of subscribing to
+     * events.
      */
     public void detachFragmentUi(FragmentUi fragmentUi) {
         if (DEBUG) {
@@ -136,6 +131,7 @@ public class PatientSearchController {
 
     /**
      * Responds to a patient being selected.
+     *
      * @param patient the selected {@link org.msf.records.data.app.AppPatient}
      */
     public void onPatientSelected(AppPatient patient) {
@@ -144,6 +140,7 @@ public class PatientSearchController {
 
     /**
      * Responds to a change in the search query.
+     *
      * @param constraint the search query
      */
     public void onQuerySubmitted(String constraint) {
@@ -154,6 +151,7 @@ public class PatientSearchController {
 
     /**
      * Sets a root location for the purposes of filtering.
+     *
      * @param locationUuid UUID of the location to filter by
      */
     public void setLocationFilter(String locationUuid) {
@@ -163,8 +161,8 @@ public class PatientSearchController {
     /**
      * Sets the filter to filter by, which may be (optionally) in conjunction with a root location
      * specified by {@link PatientSearchController#setLocationFilter(String)}.
-     * @param filter the {@link org.msf.records.filter.SimpleSelectionFilter} that will be applied
-     *               to search results
+     *
+     * @param filter the {@link SimpleSelectionFilter} that will be applied to search results
      */
     public void setFilter(SimpleSelectionFilter filter) {
         mFilter = filter;

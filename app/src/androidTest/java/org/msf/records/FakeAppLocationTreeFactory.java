@@ -22,6 +22,7 @@ public class FakeAppLocationTreeFactory {
     /**
      * Builds an {@link AppLocationTree} with a facility, the Triage and Discharged zones, and
      * a Suspect zone containing two tents.
+     *
      * @return the constructed {@link AppLocationTree}
      */
     public static AppLocationTree build() {

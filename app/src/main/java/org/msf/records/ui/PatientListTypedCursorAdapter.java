@@ -30,8 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * A {@link android.widget.BaseExpandableListAdapter} that wraps a
- * {@link org.msf.records.data.app.TypedCursor} of {@link org.msf.records.data.app.AppPatient}s,
+ * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link AppPatient}'s,
  * displaying these patients grouped by location and filtered by a specified
  * {@link org.msf.records.filter.SimpleSelectionFilter}.
  */
@@ -46,7 +45,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> mObservations;
 
     /**
-     * Creates a {@link org.msf.records.ui.PatientListTypedCursorAdapter}.
+     * Creates a {@link PatientListTypedCursorAdapter}.
      *
      * @param context an activity context
      */
@@ -213,7 +212,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     /**
      * Updates the adapter to show all patients from the given cursor.
-     * @param cursor a {@link org.msf.records.data.app.TypedCursor} containing all patients to show
+     *
+     * @param cursor a {@link TypedCursor} containing all patients to show
      */
     public void setPatients(TypedCursor<AppPatient> cursor) {
         mPatientsByLocation.clear();

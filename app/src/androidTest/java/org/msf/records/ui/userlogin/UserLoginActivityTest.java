@@ -1,8 +1,6 @@
 package org.msf.records.ui.userlogin;
 
-import org.hamcrest.core.AllOf;
 import org.msf.records.R;
-import org.msf.records.location.LocationTree;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.ui.matchers.UserMatchers;
 
@@ -19,8 +17,6 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.text.StringStartsWith.startsWith;
 
 public class UserLoginActivityTest extends FunctionalTestCase {
 

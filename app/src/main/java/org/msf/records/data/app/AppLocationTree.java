@@ -173,22 +173,22 @@ public class AppLocationTree implements AppModelObservable {
     }
 
     /**
-     * Returns a list of all AppLocations within a subtree rooted at the given
-     * {@link org.msf.records.data.app.AppLocation}.
+     * Returns a list of all AppLocations within a subtree rooted at the given {@link AppLocation}.
+     *
      * @param subroot the AppLocation that will form the root of the subtree
      * @return a List of AppLocations in a subtree with the given root
      */
     public List<AppLocation> locationsInSubtree(AppLocation subroot) {
         List<AppLocation> result = new ArrayList<>();
         result.add(subroot);
-        addChildren(result, subroot);
+        addChildrenToCollection(result, subroot);
         return result;
     }
 
-    private void addChildren(Collection<AppLocation> collection, AppLocation root) {
+    private void addChildrenToCollection(Collection<AppLocation> collection, AppLocation root) {
         for (AppLocation child : getChildren(root)) {
             collection.add(child);
-            addChildren(collection, child);
+            addChildrenToCollection(collection, child);
         }
     }
 

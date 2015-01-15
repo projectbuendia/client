@@ -10,7 +10,7 @@ import org.msf.records.utils.Logger;
 import de.greenrobot.event.EventBus;
 
 /**
- * Controller for non-inherited parts of {@link org.msf.records.ui.patientlist.PatientListFragment}.
+ * Controller for non-inherited parts of {@link PatientListFragment}.
  *
  * <p>Avoid adding untestable dependencies to this class.
  */
@@ -55,6 +55,7 @@ public class PatientListController {
 
     /**
      * Initializes this with the given UI, sync manager, and event bus.
+     *
      * @param ui {@link Ui} that will respond to list refresh events
      * @param syncManager a {@link SyncManager} for performing sync operations
      * @param eventBus the {@link EventBusRegistrationInterface} that will listen for sync events

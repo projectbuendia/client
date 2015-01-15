@@ -18,9 +18,10 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
 
     /**
      * Creates a {@link FakeTypedCursor} that contains the specified objects.
+     *
      * @param objects the contents of the cursor
      */
-    public FakeTypedCursor(T[] objects) {
+    public FakeTypedCursor(T... objects) {
         mObjects = objects;
     }
 
@@ -35,8 +36,7 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
     }
 
     /**
-     * This operation is not supported.
-     * @return null
+     * Returns {@code null}.
      */
     @Override
     public Uri getNotificationUri() {
@@ -44,22 +44,16 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
     }
 
     /**
-     * This operation is not supported.
-     * @param observer the observer to register
+     * No-op.
      */
     @Override
-    public void registerContentObserver(ContentObserver observer) {
-
-    }
+    public void registerContentObserver(ContentObserver observer) {}
 
     /**
-     * This operation is not supported.
-     * @param observer the observer to unregister
+     * No-op.
      */
     @Override
-    public void unregisterContentObserver(ContentObserver observer) {
-
-    }
+    public void unregisterContentObserver(ContentObserver observer) {}
 
     @Override
     public void close() {

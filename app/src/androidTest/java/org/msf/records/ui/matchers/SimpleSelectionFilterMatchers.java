@@ -11,6 +11,11 @@ import java.util.List;
  * Matchers for {@link SimpleSelectionFilter} objects and arrays.
  */
 public class SimpleSelectionFilterMatchers {
+    private SimpleSelectionFilterMatchers() {}
+
+    /**
+     * Matches any array of filters containing a filter with the specified name.
+     */
     public static class ContainsFilterWithName extends ArgumentMatcher<SimpleSelectionFilter[]> {
         private String mFilterName;
 
@@ -20,6 +25,7 @@ public class SimpleSelectionFilterMatchers {
 
         /**
          * Matches any array of filters containing a filter with the specified name.
+         *
          * @param filters an array of {@link SimpleSelectionFilter}'s
          * @return true if the array contains a filter with the specified name
          */
@@ -35,6 +41,10 @@ public class SimpleSelectionFilterMatchers {
         }
     }
 
+    /**
+     * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link FilterGroup})
+     * a {@link LocationUuidFilter} filtering by the specified location UUID.
+     */
     public static class IsFilterGroupWithLocationFilter
             extends ArgumentMatcher<SimpleSelectionFilter> {
         private String mLocationUuid;
@@ -46,8 +56,6 @@ public class SimpleSelectionFilterMatchers {
         /**
          * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link FilterGroup})
          * a {@link LocationUuidFilter} filtering by the specified location UUID.
-         * @param filter the {@link SimpleSelectionFilter} to match
-         * @return true if the filter matches
          */
         public boolean matches(Object filter) {
             if (isMatchingLocationFilter((SimpleSelectionFilter)filter)) {

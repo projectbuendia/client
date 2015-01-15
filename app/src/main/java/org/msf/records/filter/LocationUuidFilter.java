@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 /**
  * LocationUuidFilter returns all patients who reside in the specified subtree of locations.
  *
- * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to that
- * zone, tents within that zone, beds within those tents, etc.
+ * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to
+ * that zone, tents within that zone, beds within those tents, etc.
  */
 public final class LocationUuidFilter implements SimpleSelectionFilter {
 
@@ -23,7 +23,6 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
 
     /**
      * Creates a filter that returns all patients in a valid location.
-     * @param tree the {@link org.msf.records.data.app.AppLocationTree} containing all locations
      */
     public LocationUuidFilter(AppLocationTree tree) {
         this(tree, tree == null ? null : tree.getRoot());
@@ -31,10 +30,6 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
 
     /**
      * Creates a filter returning only patients under a subroot of the given location tree.
-     /**
-     * Creates a filter returning only patients under a subroot of the given location tree.
-     * @param tree the {@link org.msf.records.data.app.AppLocationTree} containing all locations
-     * @param subroot the {@link org.msf.records.data.app.AppLocation} representing the subroot
      */
     public LocationUuidFilter(AppLocationTree tree, AppLocation subroot) {
         if (tree == null || subroot == null) {
@@ -68,7 +63,6 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
 
     /**
      * Returns the UUID of the root location used for filtering.
-     * @return the UUID of the root location used for filtering
      */
     public String getFilterRootUuid() {
         return mUuid;

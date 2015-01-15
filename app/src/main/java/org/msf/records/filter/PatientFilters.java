@@ -34,11 +34,7 @@ public final class PatientFilters {
     }
 
     /**
-     * Returns an array of {@link org.msf.records.filter.SimpleSelectionFilter}'s, each
-     * representing a zone.
-     * @param locationTree an {@link org.msf.records.data.app.AppLocationTree} containing all known
-     *                     locations
-     * @return an array pf zone filters
+     * Returns an array of {@link SimpleSelectionFilter}'s, each representing a zone.
      */
     public static SimpleSelectionFilter[] getZoneFilters(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
@@ -54,20 +50,15 @@ public final class PatientFilters {
     }
 
     /**
-     * Returns an array of all {@link org.msf.records.filter.SimpleSelectionFilter}'s that are
-     * unrelated to user location (for example, based on pregnancy or age).
-     * @return an array of {@link org.msf.records.filter.SimpleSelectionFilter}'s
+     * Returns an array of all {@link SimpleSelectionFilter}'s that are unrelated to user location
+     * (for example, based on pregnancy or age).
      */
     public static SimpleSelectionFilter[] getOtherFilters() {
         return OTHER_FILTERS;
     }
 
     /**
-     * Returns an array of all {@link org.msf.records.filter.SimpleSelectionFilter}'s that should
-     * be displayed to the user.
-     * @param locationTree an {@link org.msf.records.data.app.AppLocationTree} containing all known
-     *                     locations
-     * @return an array of {@link org.msf.records.filter.SimpleSelectionFilter}'s to display
+     * Returns an array of all {@link SimpleSelectionFilter}'s that should be displayed to the user.
      */
     public static SimpleSelectionFilter[] getFiltersForDisplay(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> allFilters = new ArrayList<>();

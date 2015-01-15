@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import org.msf.records.R;
 
 /**
- * A {@link org.msf.records.ui.PatientListTypedCursorAdapter} that hides its group headings, as the
- * group heading is expected to be reflected in the title bar or by other information on the screen.
+ * A {@link PatientListTypedCursorAdapter} that hides its group headings, as the group heading is
+ * expected to be reflected in the title bar or by other information on the screen.
  */
 public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdapter {
     public SingleLocationPatientListAdapter(Context context) {

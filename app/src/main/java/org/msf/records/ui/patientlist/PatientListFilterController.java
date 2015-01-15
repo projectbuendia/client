@@ -20,13 +20,12 @@ public class PatientListFilterController {
     }
 
     /**
-     * Creates a {@link org.msf.records.ui.patientlist.PatientListFilterController} with the
-     * specified UI implementation, event bus, model, and locale.
-     * @param ui a {@link org.msf.records.ui.patientlist.PatientListFilterController.Ui} that will
-     *           receive UI events
-     * @param crudEventBus a {@link org.msf.records.events.CrudEventBus} that will listen for filter
-     *                     events
-     * @param appModel an {@link org.msf.records.data.app.AppModel} used to retrieve patients
+     * Creates a {@link PatientListFilterController} with the specified UI implementation, event
+     * bus, model, and locale.
+     *
+     * @param ui a {@link Ui} that will receive UI events
+     * @param crudEventBus a {@link CrudEventBus} that will listen for filter events
+     * @param appModel an {@link AppModel} used to retrieve patients
      * @param locale a language code/locale for presenting localized information (e.g. en)
      */
     public PatientListFilterController(

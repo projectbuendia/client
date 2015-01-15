@@ -12,7 +12,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static org.hamcrest.Matchers.is;
 
 /**
- * Test case for {@link org.msf.records.ui.patientlist.RoundActivity}.
+ * Test case for {@link RoundActivity}.
  */
 public class RoundActivityTest extends FunctionalTestCase {
     /**
