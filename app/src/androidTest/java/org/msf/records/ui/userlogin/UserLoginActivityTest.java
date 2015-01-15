@@ -1,10 +1,14 @@
 package org.msf.records.ui.userlogin;
 
+import org.hamcrest.core.AllOf;
 import org.msf.records.R;
+import org.msf.records.location.LocationTree;
 import org.msf.records.ui.FunctionalTestCase;
+import org.msf.records.ui.matchers.UserMatchers;
 
 import java.util.Date;
 
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
@@ -13,6 +17,10 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.text.StringStartsWith.startsWith;
 
 public class UserLoginActivityTest extends FunctionalTestCase {
 
@@ -31,8 +39,8 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onView(withText("OK")).perform(click());
 
         // Click new user
-        onView(allOf(withText("TT"), isDisplayed()));
-        onView(withText(given + " " + family)).perform(click());
+        onData(allOf(hasToString(equalTo("TT")), isDisplayed()));
+        onData(new UserMatchers.HasFullName(given + " " + family)).perform(click());
 
         // Should be logged in
         onView(withText("MSF Medical Records")).check(matches(isDisplayed()));
