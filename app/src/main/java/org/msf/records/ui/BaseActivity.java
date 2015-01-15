@@ -68,6 +68,9 @@ public abstract class BaseActivity extends FragmentActivity {
 
     /**
      * Sets the view to be shown in the status bar.
+     *
+     * <p>The status bar is always a fixed height (80dp). Any view passed to this method should fit
+     * that height.
      */
     public void setStatusView(View view) {
         initializeWrapperView();
