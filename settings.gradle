@@ -1,4 +1,3 @@
 include ':app'
 include ':odkcollect'
-include ':snackbar'
 include ':ViewPagerIndicator'

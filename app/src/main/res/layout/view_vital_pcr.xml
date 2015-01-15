@@ -42,7 +42,7 @@
                 android:textSize="56sp"
                 android:maxLines="1"
                 android:id="@+id/patient_chart_vital_pcr"
-                tools:text="–"/>
+                android:text="–"/>
 
             <TextView
                 android:id="@+id/patient_chart_vital_pcr_date"
