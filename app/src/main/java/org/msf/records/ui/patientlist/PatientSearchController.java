@@ -85,7 +85,7 @@ public class PatientSearchController {
     }
 
     private class LocationTreeUpdatedSubscriber {
-        public synchronized void onEvent(AppLocationTreeFetchedEvent event) {
+        public synchronized void onEventMainThread(AppLocationTreeFetchedEvent event) {
             synchronized (mFilterSubscriberLock) {
                 mCrudEventBus.unregister(this);
                 mFilterSubscriber = null;
@@ -100,7 +100,7 @@ public class PatientSearchController {
             }
         }
 
-        public synchronized void onEvent(LocationsLoadFailedEvent event) {
+        public synchronized void onEventMainThread(LocationsLoadFailedEvent event) {
             mUi.showErrorMessage(R.string.location_load_error);
             for (FragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.showSpinner(false);

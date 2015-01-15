@@ -19,6 +19,7 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
 
     private final String mTentSelectionString;
     private final String[] mTentSelectionArgs;
+    private final String mUuid;
 
     /**
      * Creates a filter that returns all patients in a valid location.
@@ -39,6 +40,7 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
         if (tree == null || subroot == null) {
             mTentSelectionString = "";
             mTentSelectionArgs = new String[0];
+            mUuid = null;
             return;
         }
         List<AppLocation> allPossibleLocations = tree.locationsInSubtree(subroot);
@@ -60,6 +62,16 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
         for (int i = 0; i < allPossibleLocations.size(); i++) {
             mTentSelectionArgs[i] = allPossibleLocations.get(i).uuid;
         }
+
+        mUuid = subroot.uuid;
+    }
+
+    /**
+     * Returns the UUID of the root location used for filtering.
+     * @return the UUID of the root location used for filtering
+     */
+    public String getFilterRootUuid() {
+        return mUuid;
     }
 
     @Override

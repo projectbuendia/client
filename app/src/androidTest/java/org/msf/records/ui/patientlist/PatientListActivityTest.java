@@ -3,7 +3,6 @@ package org.msf.records.ui.patientlist;
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.ui.FunctionalTestCase;
-import org.msf.records.ui.userlogin.UserLoginActivity;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;

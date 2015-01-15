@@ -75,7 +75,9 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
 	@Override
 	public void post(Object event) {
 	    mEventLog.add(event);
-		for (Object receiver : mRegisteredReceivers) {
+        // Clone the receivers set so we can iterate without fear of concurrent modification.
+        Set<Object> receivers = new HashSet<Object>(mRegisteredReceivers);
+		for (Object receiver : receivers) {
 			for (Method method : receiver.getClass().getMethods()) {
 				if (method.getName().equals(METHOD_NAME_EVENT_RECEIVER_MAIN_THREAD)) {
 					Class<?> parameter = method.getParameterTypes()[0];
