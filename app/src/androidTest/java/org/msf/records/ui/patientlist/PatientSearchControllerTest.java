@@ -14,6 +14,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
+import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.Zone;
 import org.msf.records.ui.FakeEventBus;
@@ -117,7 +118,28 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         verify(mFragmentMockUi).showSpinner(true);
     }
 
-    // TODO(akalachman): Write even more tests!
+    public void testOnQuerySubmitted_filtersBySearchTerm() {
+        // GIVEN initialized PatientSearchController with no root location
+        // WHEN search term changes
+        mController.onQuerySubmitted("foo");
+        // THEN results are requested with that search term
+        verify(mMockAppModel).fetchPatients(
+                mFakeCrudEventBus, PatientFilters.getDefaultFilter(), "foo");
+    }
+
+    public void testOnPatientSelected_launchesChartActivity() {
+        // GIVEN initialized PatientSearchController
+        // WHEN a patient is selected
+        AppPatient patient = AppPatient.builder()
+            .setUuid("1234")
+            .setGivenName("Bob")
+            .setFamilyName("Smith")
+            .setId("KH.1234")
+            .build();
+        mController.onPatientSelected(patient);
+        // THEN launch chart activity for that patient
+        verify(mMockUi).launchChartActivity("1234", "Bob", "Smith", "KH.1234");
+    }
 
     private TypedCursor<AppPatient> getFakeAppPatientCursor() {
         AppPatient patient = AppPatient.builder().build();
