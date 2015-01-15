@@ -53,6 +53,12 @@ public class PatientListController {
         void setRefreshing(boolean refreshing);
     }
 
+    /**
+     * Initializes this with the given UI, sync manager, and event bus.
+     * @param ui {@link Ui} that will respond to list refresh events
+     * @param syncManager a {@link SyncManager} for performing sync operations
+     * @param eventBus the {@link EventBusRegistrationInterface} that will listen for sync events
+     */
     public PatientListController(
             Ui ui, SyncManager syncManager, EventBusRegistrationInterface eventBus) {
         mUi = ui;

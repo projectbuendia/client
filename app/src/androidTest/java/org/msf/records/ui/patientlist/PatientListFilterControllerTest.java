@@ -32,6 +32,7 @@ public class PatientListFilterControllerTest  extends AndroidTestCase {
                 mMockUi, mFakeCrudEventBus, mMockAppModel, LOCALE);
     }
 
+    /** Tests that requesting an action bar initialization fetches a location tree. */
     public void testSetupActionBarAsync_fetchesLocationTree() {
         // GIVEN initialized PatientListFilterController
         // WHEN setupActionBarAsync called
@@ -40,6 +41,7 @@ public class PatientListFilterControllerTest  extends AndroidTestCase {
         verify(mMockAppModel).fetchLocationTree(mFakeCrudEventBus, LOCALE);
     }
 
+    /** Tests that filters are correctly initialized once a location tree is retrieved. */
     public void testSetupActionBarAsync_passesLocationFilters() {
         // GIVEN initialized PatientListFilterController, after setupActionBarAsync called
         mController.setupActionBarAsync();

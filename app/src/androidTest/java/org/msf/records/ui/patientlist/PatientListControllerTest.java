@@ -28,6 +28,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         mController = new PatientListController(mMockUi, mMockSyncManager, mFakeEventBus);
     }
 
+    /** Tests whether refreshing results in a sync. */
     public void testRefresh_RequestsSync() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -37,6 +38,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         verify(mMockSyncManager).forceSync();
     }
 
+    /** Tests that refreshing multiple times in quick succession results in only one sync. */
     public void testRefresh_PreventsMultipleSimultaneousSyncs() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -47,6 +49,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         verify(mMockSyncManager, times(1)).forceSync();
     }
 
+    /** Tests that refreshing again after a first successful sync results in a new sync. */
     public void testRefresh_AllowsMultipleSequentialSyncsAfterSuccess() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -58,6 +61,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         verify(mMockSyncManager, times(2)).forceSync();
     }
 
+    /** Tests that refreshing again after a first failed sync results in a new sync. */
     public void testRefresh_AllowsMultipleSequentialSyncsAfterFailure() {
         // GIVEN initialized PatientListController
         mController.init();
@@ -69,6 +73,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         verify(mMockSyncManager, times(2)).forceSync();
     }
 
+    /** Tests that the PatientListController listens for events when initialized. */
     public void testInit_EnablesEventBusListener() {
         // GIVEN PatientListController
         // WHEN initialized
@@ -77,6 +82,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         assertEquals(1, mFakeEventBus.countRegisteredReceivers());
     }
 
+    /** Tests that the PatientListController stops listening for events when suspended. */
     public void testSuspend_DisablesEventBusListener() {
         // GIVEN suspended PatientListController
         mController.init();

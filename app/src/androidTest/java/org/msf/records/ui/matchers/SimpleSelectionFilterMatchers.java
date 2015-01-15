@@ -18,6 +18,11 @@ public class SimpleSelectionFilterMatchers {
             mFilterName = filterName;
         }
 
+        /**
+         * Matches any array of filters containing a filter with the specified name.
+         * @param filters an array of {@link SimpleSelectionFilter}'s
+         * @return true if the array contains a filter with the specified name
+         */
         public boolean matches(Object filters) {
             SimpleSelectionFilter[] filterArr = (SimpleSelectionFilter[])filters;
             for (int i = 0; i < filterArr.length; i++) {
@@ -38,6 +43,12 @@ public class SimpleSelectionFilterMatchers {
             mLocationUuid = locationUuid;
         }
 
+        /**
+         * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link FilterGroup})
+         * a {@link LocationUuidFilter} filtering by the specified location UUID.
+         * @param filter the {@link SimpleSelectionFilter} to match
+         * @return true if the filter matches
+         */
         public boolean matches(Object filter) {
             if (isMatchingLocationFilter((SimpleSelectionFilter)filter)) {
                 return true;
