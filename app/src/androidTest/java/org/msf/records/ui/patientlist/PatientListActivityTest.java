@@ -30,9 +30,13 @@ public class PatientListActivityTest extends FunctionalTestCase {
         onView(withText("Pregnant")).check(matches(isDisplayed()));
     }
 
-    /** Looks for a zone heading and at least one patient. */
+    /** Looks for two zone headings and at least one patient. */
     public void testZoneAndPatientDisplayed() {
-        onView(withText(matchesRegex("(Triage|S1) \\((No|[0-9]+) patients?\\)")))
+        // There should be patients in both Triage and S1.
+        onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))
+                .check(matches(isDisplayed()));
+
+        onView(withText(matchesRegex("S1 \\((No|[0-9]+) patients?\\)")))
                 .check(matches(isDisplayed()));
 
         // Click the first patient

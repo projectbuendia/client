@@ -27,21 +27,16 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
-        onView(withText("Guest User")).perform(click());
-    }
-
-    /** Tests adding a new patient. */
-    public void testAddPatientFromTentSelection() {
-        long n = new Date().getTime() % 1000;
-        String id = "test" + n;
-        String given = "Testgiven" + n;
-        String family = "Testfamily" + n;
-
         // Go to PatientCreationActivity
+        onView(withText("Guest User")).perform(click());
         onView(withId(R.id.action_add)).perform(click());
         onView(withText("New Patient")).check(matches(isDisplayed()));
+    }
 
-        // Add new patient
+    /** Populates all the fields on the New Patient screen, except location. */
+    public void populateNewPatientFieldsExceptLocation(String id) {
+        String given = "Given" + id;
+        String family = "Family" + id;
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
         onView(withId(R.id.patient_creation_text_patient_given_name)).perform(typeText(given));
         onView(withId(R.id.patient_creation_text_patient_family_name)).perform(typeText(family));
@@ -50,32 +45,50 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
         onView(withId(R.id.patient_creation_radiogroup_age_sex_male)).perform(click());
         onView(withId(R.id.patient_creation_radiogroup_age_sex_female)).perform(click());
-        onView(withId(R.id.patient_creation_button_change_location)).perform(click());
-        onView(withText("S1")).perform(click());
-        onView(withText("Create")).perform(click());
+    }
 
-        // Navigate to patient list for tent S1
-        onView(withText("S1")).perform(click());
-
-        // Patient should appear in list
+    /** Checks that a given patient appears in the patient list, and clicks it. */
+    public void clickPatientWithIdInPatientList(String id) {
         onData(isPatientWithId(equalTo(id)))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)
                 .perform(click());
     }
 
-    /** Tests that the new patient form is available from the patient list. */
-    public void testAddPatientFromPatientList() {
-        onView(withText("ALL PATIENTS")).perform(click());
-        onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New Patient")).check(matches(isDisplayed()));
+    /** Tests adding a new patient with a location. */
+    public void testNewPatientWithLocation() {
+        String id = "test" + new Date().getTime() % 1000;
+        populateNewPatientFieldsExceptLocation(id);
+        onView(withId(R.id.patient_creation_button_change_location)).perform(click());
+        onView(withText("S1")).perform(click());
+        onView(withText("Create")).perform(click());
 
+        // The new patient should be visible in the list for tent S1
+        onView(withText("S1")).perform(click());
+        clickPatientWithIdInPatientList(id);
+    }
+
+    /** Tests adding a new patient with no location. */
+    public void testNewPatientWithoutLocation() {
+        String id = "test" + new Date().getTime() % 1000;
+        populateNewPatientFieldsExceptLocation(id);
+        onView(withText("Create")).perform(click());
+
+        // The new patient should be visible in the list for Triage zone
+        onView(withText("Triage")).perform(click());
+        clickPatientWithIdInPatientList(id);
+    }
+
+    /** Tests that a confirmation prompt appears upon cancelling the form. */
+    public void testNewPatientCancel() {
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText("xyz"));
         pressBack(); // close the keyboard
 
-        // Expect a confirmation prompt; dismiss it
+        // Attempting to back out of the activity should trigger a prompt
         pressBack();
         onView(withText(containsString("Discard"))).check(matches(isDisplayed()));
+
+        // Dismiss the prompt
         onView(withText("Yes")).perform(click());
     }
 }
