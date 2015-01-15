@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.listeners.ActionClickListener;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -29,6 +29,9 @@ import org.msf.records.updater.UpdateManager;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
@@ -41,7 +44,9 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
-    private Snackbar updateAvailableSnackbar, updateDownloadedSnackbar;
+
+    @InjectView(R.id.status_bar_update_message) TextView mUpdateMessage;
+    @InjectView(R.id.status_bar_update_action) TextView mUpdateAction;
 
     // TODO(akalachman): Populate properly.
     protected final String mLocale = "en";
@@ -61,18 +66,8 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
                 mAppModel,
                 mLocale);
 
-        updateAvailableSnackbar = Snackbar.with(this)
-                .text(getString(R.string.snackbar_update_available))
-                .actionLabel(getString(R.string.snackbar_action_download))
-                .swipeToDismiss(true)
-                .animation(false)
-                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
-        updateDownloadedSnackbar = Snackbar.with(this)
-                .text(getString(R.string.snackbar_update_downloaded))
-                .actionLabel(getString(R.string.snackbar_action_install))
-                .swipeToDismiss(true)
-                .animation(false)
-                .duration(Snackbar.SnackbarDuration.LENGTH_FOREVER);
+        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_updates, null));
+        ButterKnife.inject(this);
     }
 
     @Override
@@ -123,47 +118,39 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     @Override
     protected void onPauseImpl() {
-        updateAvailableSnackbar.dismiss();
-        updateDownloadedSnackbar.dismiss();
-
         super.onPauseImpl();
     }
 
-    /**
-     * Displays a {@link com.nispok.snackbar.Snackbar} indicating that an update is available upon receiving an
-     * {@link org.msf.records.events.UpdateAvailableEvent}.
-     */
     public void onEventMainThread(final UpdateAvailableEvent event) {
-        updateAvailableSnackbar
-                .actionListener(new ActionClickListener() {
+        setStatusVisibility(View.VISIBLE);
 
-                    @Override
-                    public void onActionClicked() {
-                        mUpdateManager.downloadUpdate(event.updateInfo);
-                    }
-                });
-        if (updateAvailableSnackbar.isDismissed()) {
-            updateAvailableSnackbar.show(this);
-        }
+        mUpdateMessage.setText(R.string.snackbar_update_available);
+        mUpdateAction.setText(R.string.snackbar_action_download);
+
+        mUpdateAction.setOnClickListener(new View.OnClickListener() {
+
+            @Override public void onClick(View view) {
+                setStatusVisibility(View.GONE);
+
+                mUpdateManager.downloadUpdate(event.updateInfo);
+            }
+        });
     }
 
-    /**
-     * Displays a {@link com.nispok.snackbar.Snackbar} indicating that an update has been downloaded upon receiving an
-     * {@link org.msf.records.events.UpdateDownloadedEvent}.
-     */
     public void onEventMainThread(final UpdateDownloadedEvent event) {
-        updateAvailableSnackbar.dismiss();
-        updateDownloadedSnackbar
-                .actionListener(new ActionClickListener() {
+        setStatusVisibility(View.VISIBLE);
 
-                    @Override
-                    public void onActionClicked() {
-                        mUpdateManager.installUpdate(event.updateInfo);
-                    }
-                });
-        if (updateDownloadedSnackbar.isDismissed()) {
-            updateDownloadedSnackbar.show(this);
-        }
+        mUpdateMessage.setText(R.string.snackbar_update_downloaded);
+        mUpdateAction.setText(R.string.snackbar_action_install);
+
+        mUpdateAction.setOnClickListener(new View.OnClickListener() {
+
+            @Override public void onClick(View view) {
+                setStatusVisibility(View.GONE);
+
+                mUpdateManager.installUpdate(event.updateInfo);
+            }
+        });
     }
 
     protected void setPatients(TypedCursor<AppPatient> patients) {
