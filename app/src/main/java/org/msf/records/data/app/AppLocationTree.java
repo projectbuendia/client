@@ -6,9 +6,12 @@ import android.support.annotation.Nullable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import org.msf.records.utils.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +35,7 @@ public class AppLocationTree implements AppModelObservable {
      *                                  the location tree has no root node or if the location tree
      *                                  contains any nodes whose parents are missing
      */
-    static AppLocationTree forTypedCursor(TypedCursor<AppLocation> cursor) {
+    public static AppLocationTree forTypedCursor(TypedCursor<AppLocation> cursor) {
         AppLocation root = null;
         Map<String, AppLocation> uuidsToLocations = new HashMap<>();
         Map<String, AppLocation> uuidsToParents = new HashMap<>();
@@ -167,6 +170,26 @@ public class AppLocationTree implements AppModelObservable {
     @Nullable
     public AppLocation findByUuid(String uuid) {
         return mUuidsToLocations.get(uuid);
+    }
+
+    /**
+     * Returns a list of all AppLocations within a subtree rooted at the given {@link AppLocation}.
+     *
+     * @param subroot the AppLocation that will form the root of the subtree
+     * @return a List of AppLocations in a subtree with the given root
+     */
+    public List<AppLocation> locationsInSubtree(AppLocation subroot) {
+        List<AppLocation> result = new ArrayList<>();
+        result.add(subroot);
+        addChildrenToCollection(result, subroot);
+        return result;
+    }
+
+    private void addChildrenToCollection(Collection<AppLocation> collection, AppLocation root) {
+        for (AppLocation child : getChildren(root)) {
+            collection.add(child);
+            addChildrenToCollection(collection, child);
+        }
     }
 
     /**

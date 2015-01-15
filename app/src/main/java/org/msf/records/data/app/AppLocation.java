@@ -26,4 +26,9 @@ public final class AppLocation extends AppTypeBase<String> {
         // TODO(dxchen): Implement.
         this.patientCount = 0;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

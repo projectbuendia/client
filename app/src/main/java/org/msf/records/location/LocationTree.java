@@ -393,31 +393,6 @@ public final class LocationTree {
     	}
     }
 
-    // TODO(akalachman): Cache this or get rid of it once data model is refactored.
-    public String getLocationSortClause(String fieldName) {
-    	if (mUuidToSubtree.isEmpty()) {
-            return "";
-        }
-
-        Collection<LocationSubtree> allLocations = mUuidToSubtree.values();
-        // NOCOMMIT - check comparator
-        TreeSet<LocationSubtree> sortedLocations = new TreeSet<>(new SubtreeComparator());
-        sortedLocations.addAll(allLocations);
-
-        StringBuilder sb = new StringBuilder(" CASE ");
-        sb.append(fieldName);
-        int i = 0;
-        for (LocationSubtree subtree : sortedLocations) {
-            sb.append(" WHEN '");
-            sb.append(subtree.getLocation().uuid);
-            sb.append("' THEN ");
-            sb.append(i);
-            i++;
-        }
-        sb.append(" END ");
-        return sb.toString();
-    }
-
     /**
      * Returns {@code map.get(key)} or 0 if no entry for that key exists.
      */

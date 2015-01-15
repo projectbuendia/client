@@ -3,7 +3,6 @@ package org.msf.records.ui.patientlist;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,37 +15,44 @@ import com.joanzapata.android.iconify.Iconify;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.TypedCursor;
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.ui.BaseLoggedInActivity;
+import org.msf.records.ui.BigToast;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
-public abstract class PatientSearchActivity extends BaseLoggedInActivity
-        implements PatientListFragment.Callbacks {
+public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     @Inject UpdateManager mUpdateManager;
+    @Inject AppModel mAppModel;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+
+    private PatientSearchController mSearchController;
+    private SearchView mSearchView;
 
     @InjectView(R.id.status_bar_update_message) TextView mUpdateMessage;
-    @InjectView(R.id.status_bar_update_action)TextView mUpdateAction;
+    @InjectView(R.id.status_bar_update_action) TextView mUpdateAction;
 
-    private SearchView mSearchView;
-    private OnSearchListener mSearchListener;
+    // TODO(akalachman): Populate properly.
+    protected final String mLocale = "en";
 
-    protected static final int ODK_ACTIVITY_REQUEST = 1;
-
-    public SearchView getSearchView() {
-        return mSearchView;
+    public PatientSearchController getSearchController() {
+        return mSearchController;
     }
 
     @Override
@@ -54,30 +60,14 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
         super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
+        mSearchController = new PatientSearchController(
+                new SearchUi(),
+                mCrudEventBusProvider.get(),
+                mAppModel,
+                mLocale);
 
         setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_updates, null));
         ButterKnife.inject(this);
-    }
-
-    /**
-     * Callback method from {@link PatientListFragment.Callbacks}
-     * indicating that the item with the given uuid/name/id was selected.
-     */
-    @Override
-    public void onItemSelected(String uuid, String givenName, String familyName, String id) {
-        Intent detailIntent = new Intent(this, PatientChartActivity.class);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-        detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
-        startActivity(detailIntent);
-    }
-
-    public interface OnSearchListener {
-        void setQuerySubmitted(String q);
-    }
-
-    public void setOnSearchListener(OnSearchListener onSearchListener){
-        this.mSearchListener = onSearchListener;
     }
 
     @Override
@@ -105,7 +95,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-
                 InputMethodManager mgr = (InputMethodManager) getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
@@ -114,8 +103,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (mSearchListener != null)
-                    mSearchListener.setQuerySubmitted(newText);
+                mSearchController.onQuerySubmitted(newText);
                 return true;
             }
         });
@@ -124,7 +112,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
     @Override
     protected void onResumeImpl() {
         super.onResumeImpl();
-
+        mSearchController.loadSearchResults();
         // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
 
@@ -163,5 +151,35 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
                 mUpdateManager.installUpdate(event.updateInfo);
             }
         });
+    }
+
+    protected void setPatients(TypedCursor<AppPatient> patients) {
+        // By default, do nothing.
+    }
+
+    private final class SearchUi implements PatientSearchController.Ui {
+
+        @Override
+        public void launchChartActivity(
+                String uuid, String givenName, String familyName, String id) {
+            Intent detailIntent = new Intent(
+                    PatientSearchActivity.this, PatientChartActivity.class);
+            detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
+            detailIntent.putExtra(
+                    PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
+            detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
+            startActivity(detailIntent);
+        }
+
+        @Override
+        public void setPatients(TypedCursor<AppPatient> patients) {
+            // Delegate to implementers.
+            PatientSearchActivity.this.setPatients(patients);
+        }
+
+        @Override
+        public void showErrorMessage(int resource) {
+            BigToast.show(PatientSearchActivity.this, resource);
+        }
     }
 }

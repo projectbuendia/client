@@ -2,8 +2,8 @@ package org.msf.records.ui.patientlist;
 
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.location.LocationTree;
 import org.msf.records.ui.FunctionalTestCase;
-import org.msf.records.ui.userlogin.UserLoginActivity;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
@@ -12,7 +12,10 @@ import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewA
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.AllOf.allOf;
+import static org.hamcrest.text.StringStartsWith.startsWith;
 import static org.msf.records.ui.matchers.StringMatchers.matchesRegex;
 
 public class PatientListActivityTest extends FunctionalTestCase {
@@ -36,7 +39,8 @@ public class PatientListActivityTest extends FunctionalTestCase {
         onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))
                 .check(matches(isDisplayed()));
 
-        onView(withText(matchesRegex("S1 \\((No|[0-9]+) patients?\\)")))
+        onData(allOf(is(LocationTree.LocationSubtree.class), hasToString(startsWith("S1"))))
+                .inAdapterView(withId(R.id.fragment_patient_list))
                 .check(matches(isDisplayed()));
 
         // Click the first patient
