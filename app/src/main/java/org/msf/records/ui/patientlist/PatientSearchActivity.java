@@ -3,7 +3,6 @@ package org.msf.records.ui.patientlist;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +25,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
@@ -37,8 +35,8 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
 
     @Inject UpdateManager mUpdateManager;
 
-    @InjectView(R.id.status_bar_update_message) TextView mUpdateMessage;
-    @InjectView(R.id.status_bar_update_action)TextView mUpdateAction;
+    @InjectView(R.id.status_bar_default_message) TextView mUpdateMessage;
+    @InjectView(R.id.status_bar_default_action)TextView mUpdateAction;
 
     private SearchView mSearchView;
     private OnSearchListener mSearchListener;
@@ -55,7 +53,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity
 
         App.getInstance().inject(this);
 
-        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_updates, null));
+        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_default, null));
         ButterKnife.inject(this);
     }
 

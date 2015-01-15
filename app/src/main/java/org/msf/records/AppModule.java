@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 
 import org.msf.records.data.app.AppModelModule;
+import org.msf.records.diagnostics.DiagnosticsModule;
 import org.msf.records.events.EventsModule;
 import org.msf.records.location.LocationManager;
 import org.msf.records.mvcmodels.PatientChartModel;
@@ -40,6 +41,7 @@ import javax.inject.Singleton;
 @Module(
         includes = {
                 AppModelModule.class,
+                DiagnosticsModule.class,
                 EventsModule.class,
                 NetModule.class,
                 PrefsModule.class,
@@ -94,15 +96,6 @@ public final class AppModule {
     @Singleton
     SyncManager provideSyncManager() {
         return new SyncManager();
-    }
-
-    @Provides
-    @Singleton
-    PatientChartModel providePatientChartModel(SyncManager syncManager) {
-        PatientChartModel patientChartModel =
-                new PatientChartModel(EventBus.getDefault(), syncManager);
-        patientChartModel.init();
-        return patientChartModel;
     }
 
     @Provides
