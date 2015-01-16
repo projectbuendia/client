@@ -11,6 +11,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -350,14 +351,45 @@ public final class LocationTree {
          * Strings (from sequences of letters).  Other characters are ignored.
          */
         private List<Object> getParts(String str) {
-            Pattern numberOrWord = Pattern.compile("[0-9]+|[a-zA-Z]+");
-            Matcher matcher = numberOrWord.matcher(str == null ? "" : str);
             List<Object> parts = new ArrayList<>();
-            for (int pos = 0; matcher.find(pos); pos = matcher.end()) {
-                String part = matcher.group();
-                parts.add(part.matches("\\d.*") ? Integer.valueOf(part) : part);
+            if (str == null) {
+                return parts;
             }
+
+            int len = str.length();
+            StringBuilder chunkBuilder = new StringBuilder();
+            boolean isNumChunk = true;
+            for (int pos = 0; pos < len; pos++) {
+                // Continue the current chunk if the next character is the same type as the previous
+                // character; otherwise, add the chunk to the parts list and start a new chunk.
+                boolean isDigit = isLatinDigit(str.charAt(pos));
+                if (chunkBuilder.length() == 0) {
+                    isNumChunk = isDigit;
+                }
+
+                if (isNumChunk == isDigit) {
+                    chunkBuilder.append(str.charAt(pos));
+                } else {
+                    parts.add(getIntOrString(chunkBuilder.toString(), isNumChunk));
+                    chunkBuilder.setLength(0);
+                    chunkBuilder.append(str.charAt(pos));
+                    isNumChunk = isDigit;
+                }
+            }
+
+            if (chunkBuilder.length() > 0) {
+                parts.add(getIntOrString(chunkBuilder.toString(), isNumChunk));
+            }
+
             return parts;
+        }
+
+        private boolean isLatinDigit(char c) {
+            return c >= '0' && c <= '9';
+        }
+
+        private Object getIntOrString(String value, boolean isNum) {
+            return isNum ? Integer.valueOf(value) : value;
         }
 
     	@Override
