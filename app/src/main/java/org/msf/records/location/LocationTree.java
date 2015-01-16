@@ -362,7 +362,7 @@ public final class LocationTree {
             for (int pos = 0; pos < len; pos++) {
                 // Continue the current chunk if the next character is the same type as the previous
                 // character; otherwise, add the chunk to the parts list and start a new chunk.
-                boolean isDigit = Character.isDigit(str.charAt(pos));
+                boolean isDigit = isLatinDigit(str.charAt(pos));
                 if (chunkBuilder.length() == 0) {
                     isNumChunk = isDigit;
                 }
@@ -382,6 +382,10 @@ public final class LocationTree {
             }
 
             return parts;
+        }
+
+        private boolean isLatinDigit(char c) {
+            return c >= '0' && c <= '9';
         }
 
         private Object getIntOrString(String value, boolean isNum) {
