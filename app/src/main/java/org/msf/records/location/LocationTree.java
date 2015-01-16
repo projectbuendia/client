@@ -11,6 +11,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -350,13 +351,33 @@ public final class LocationTree {
          * Strings (from sequences of letters).  Other characters are ignored.
          */
         private List<Object> getParts(String str) {
-            Pattern numberOrWord = Pattern.compile("[0-9]+|[a-zA-Z]+");
-            Matcher matcher = numberOrWord.matcher(str == null ? "" : str);
             List<Object> parts = new ArrayList<>();
-            for (int pos = 0; matcher.find(pos); pos = matcher.end()) {
-                String part = matcher.group();
-                parts.add(part.matches("\\d.*") ? Integer.valueOf(part) : part);
+            if (str == null) {
+                return parts;
             }
+
+            int len = str.length();
+            StringBuilder chunkBuilder = new StringBuilder();
+            boolean isNumChunk = true;
+            for (int pos = 0; pos < len; pos++) {
+                // Continue the current chunk if the next character is the same type as the previous
+                // character; otherwise, add the chunk to the parts list and start a new chunk.
+                boolean isDigit = Character.isDigit(str.charAt(pos));
+                if (chunkBuilder.length() == 0) {
+                    isNumChunk = isDigit;
+                    chunkBuilder.append(str.charAt(pos));
+                } else if (isNumChunk == isDigit) {
+                    chunkBuilder.append(str.charAt(pos));
+                } else {
+                    if (isNumChunk) {
+                        parts.add(Integer.valueOf(chunkBuilder.toString()));
+                    } else {
+                        parts.add(chunkBuilder.toString());
+                    }
+                    chunkBuilder.setLength(0);
+                }
+            }
+
             return parts;
         }
 
