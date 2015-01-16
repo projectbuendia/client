@@ -365,20 +365,27 @@ public final class LocationTree {
                 boolean isDigit = Character.isDigit(str.charAt(pos));
                 if (chunkBuilder.length() == 0) {
                     isNumChunk = isDigit;
-                    chunkBuilder.append(str.charAt(pos));
-                } else if (isNumChunk == isDigit) {
+                }
+
+                if (isNumChunk == isDigit) {
                     chunkBuilder.append(str.charAt(pos));
                 } else {
-                    if (isNumChunk) {
-                        parts.add(Integer.valueOf(chunkBuilder.toString()));
-                    } else {
-                        parts.add(chunkBuilder.toString());
-                    }
+                    parts.add(getIntOrString(chunkBuilder.toString(), isNumChunk));
                     chunkBuilder.setLength(0);
+                    chunkBuilder.append(str.charAt(pos));
+                    isNumChunk = isDigit;
                 }
             }
 
+            if (chunkBuilder.length() > 0) {
+                parts.add(getIntOrString(chunkBuilder.toString(), isNumChunk));
+            }
+
             return parts;
+        }
+
+        private Object getIntOrString(String value, boolean isNum) {
+            return isNum ? Integer.valueOf(value) : value;
         }
 
     	@Override
