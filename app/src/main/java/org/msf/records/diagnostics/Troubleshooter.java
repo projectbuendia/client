@@ -46,7 +46,7 @@ public class Troubleshooter {
         // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
-        troubleshoot();
+        postTroubleshootingEvents();
     }
 
     /**
@@ -65,18 +65,22 @@ public class Troubleshooter {
         // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
-        troubleshoot();
+        postTroubleshootingEvents();
     }
 
-    private void troubleshoot() {
+    private void postTroubleshootingEvents() {
         synchronized (mTroubleshootingLock) {
             ImmutableSet.Builder<TroubleshootingAction> actionsBuilder = ImmutableSet.builder();
 
-            actionsBuilder.addAll(troubleshootNetworkConnectivity());
-            actionsBuilder.addAll(troubleshootConfiguration());
+            actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
+            actionsBuilder.addAll(getConfigurationTroubleshootingActions());
 
             ImmutableSet actions = actionsBuilder.build();
 
+            // If there are currently-active troubleshooting actions, remove any posted
+            // TroubleshootingNotRequiredEvents and post a TroubleshootingRequiredEvent; otherwise,
+            // do the opposite. This ensures that, at any point in time, only one of these events is
+            // active.
             if (!actions.isEmpty()) {
                 mEventBus.removeStickyEvent(TROUBLESHOOTING_NOT_REQUIRED_EVENT);
 
@@ -93,7 +97,7 @@ public class Troubleshooter {
         }
     }
 
-    private Set<TroubleshootingAction> troubleshootNetworkConnectivity() {
+    private Set<TroubleshootingAction> getNetworkConnectivityTroubleshootingActions() {
         Set<TroubleshootingAction> actions = new HashSet<>();
 
         if (mActiveIssues.contains(HealthIssue.WIFI_DISABLED)) {
@@ -109,7 +113,7 @@ public class Troubleshooter {
         return actions;
     }
 
-    private Set<TroubleshootingAction> troubleshootConfiguration() {
+    private Set<TroubleshootingAction> getConfigurationTroubleshootingActions() {
         Set<TroubleshootingAction> actions = new HashSet<>();
 
         if (mActiveIssues.contains(HealthIssue.SERVER_CONFIGURATION_INVALID)) {

@@ -96,7 +96,7 @@ public class HttpServerHealthCheck extends HealthCheck {
             try {
                 String uriString = mOpenMrsRootUrl.get();
                 Uri uri = Uri.parse(uriString);
-                if (uri.equals(Uri.EMPTY)) {
+                if (uri.getHost() == null) {
                     LOG.w("The configured OpenMRS root URL '%1$s' is invalid.", uriString);
                     reportIssue(HealthIssue.SERVER_CONFIGURATION_INVALID);
                     return;
@@ -124,7 +124,7 @@ public class HttpServerHealthCheck extends HealthCheck {
                     }
                 } catch (IOException e) {
                     LOG.w(
-                            "The host of the configured OpenMRS root URL '%1$s' could be "
+                            "The host of the configured OpenMRS root URL '%1$s' could not be "
                                     + "reached.",
                             uriString);
                     reportIssue(HealthIssue.SERVER_HOST_UNREACHABLE);

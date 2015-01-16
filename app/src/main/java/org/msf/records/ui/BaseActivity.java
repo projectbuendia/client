@@ -169,6 +169,8 @@ public abstract class BaseActivity extends FragmentActivity {
                     public void onClick(View view) {
                         action.setEnabled(false);
 
+                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // this message. This will require some hooking up of 
                         new AlertDialog.Builder(BaseActivity.this)
                                 .setIcon(android.R.drawable.ic_dialog_info)
                                 .setTitle("Server unreachable")
@@ -176,7 +178,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                         "The server could not be reached. This may be because:\n"
                                                 + "\n"
                                                 + " • The wifi network is incorrect.\n"
-                                                + " • The server URL is incorrect.\n"
+                                                + " • The server URL (%1$s) is incorrect.\n"
                                                 + " • The server is down.\n"
                                                 + "\n"
                                                 + "Please contact an administrator.")

@@ -2,6 +2,10 @@ package org.msf.records.diagnostics;
 
 /**
  * An enumeration of issues that can be reported by {@link HealthCheck}s.
+ *
+ * <p>A {@link HealthIssue} is an ongoing issue with the application (rather than a one-time
+ * problematic event): when a new issue is discovered, it will be reported to an instance of
+ * {@link HealthMonitor}, which will consider that issue active until the issue is resolved.
  */
 enum HealthIssue {
 

@@ -1,6 +1,7 @@
 package org.msf.records.diagnostics;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.support.annotation.Nullable;
 
 import org.msf.records.utils.Logger;
@@ -12,6 +13,15 @@ import de.greenrobot.event.EventBus;
 
 /**
  * An individual health check to be performed while the application is active.
+ *
+ * <p>Subclasses can choose to implement this class however they see fit so long as they call
+ * {@link #reportIssue} when a new issue occurs and {@link #resolveIssue} or
+ * {@link #resolveAllIssues} when issues are resolved. For example, if a health change can be
+ * triggered by an Android OS broadcast, it may register a {@link BroadcastReceiver}
+ * in {@link #startImpl}; if it needs to poll another service, it may start a background thread.
+ *
+ * <p>Subclasses must stop checking (e.g., unregister {@link BroadcastReceiver}s or stop
+ * background threads) when {@link #stopImpl} is called.
  */
 abstract class HealthCheck {
 
@@ -30,7 +40,10 @@ abstract class HealthCheck {
     }
 
     /**
-     * Starts the health check, posting any health issue events on the specified {@link EventBus}.
+     * Starts the health check.
+     *
+     * <p>After this method is called, the health check must post any health issue events on the
+     * specified {@link EventBus}.
      */
     public final void start(EventBus healthEventBus) {
         synchronized (mLock) {
@@ -42,6 +55,8 @@ abstract class HealthCheck {
 
     /**
      * Stops the health check.
+     *
+     * <p>{@link #start} may be called again to restart checks.
      */
     public final void stop() {
         synchronized (mLock) {
