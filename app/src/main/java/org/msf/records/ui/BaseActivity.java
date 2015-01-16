@@ -17,8 +17,7 @@ import android.widget.TextView;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.diagnostics.TroubleshootingAction;
-import org.msf.records.events.diagnostics.TroubleshootingNotRequiredEvent;
-import org.msf.records.events.diagnostics.TroubleshootingRequiredEvent;
+import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
@@ -110,9 +109,16 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     /**
-     * Called when troubleshooting is required.
+     * Called when the set of troubleshooting actions changes.
      */
-    public void onEventMainThread(TroubleshootingRequiredEvent event) {
+    public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
+        if (event.actions.isEmpty()) {
+            setStatusView(null);
+            setStatusVisibility(View.GONE);
+
+            return;
+        }
+
         TroubleshootingAction troubleshootingAction = event.actions.iterator().next();
 
         View view = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
@@ -170,7 +176,8 @@ public abstract class BaseActivity extends FragmentActivity {
                         action.setEnabled(false);
 
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
-                        // this message. This will require some hooking up of 
+                        // this message. This will require that injection be hooked up through to
+                        // this inner class, which may be complicated.
                         new AlertDialog.Builder(BaseActivity.this)
                                 .setIcon(android.R.drawable.ic_dialog_info)
                                 .setTitle("Server unreachable")
@@ -178,7 +185,7 @@ public abstract class BaseActivity extends FragmentActivity {
                                         "The server could not be reached. This may be because:\n"
                                                 + "\n"
                                                 + " • The wifi network is incorrect.\n"
-                                                + " • The server URL (%1$s) is incorrect.\n"
+                                                + " • The server URL is incorrect.\n"
                                                 + " • The server is down.\n"
                                                 + "\n"
                                                 + "Please contact an administrator.")
@@ -201,11 +208,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
         setStatusView(view);
         setStatusVisibility(View.VISIBLE);
-    }
-
-    public void onEventMainThread(TroubleshootingNotRequiredEvent event) {
-        setStatusView(null);
-        setStatusVisibility(View.GONE);
     }
 
     private void initializeWrapperView() {

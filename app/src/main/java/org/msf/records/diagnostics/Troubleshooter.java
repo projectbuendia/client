@@ -2,8 +2,7 @@ package org.msf.records.diagnostics;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.msf.records.events.diagnostics.TroubleshootingNotRequiredEvent;
-import org.msf.records.events.diagnostics.TroubleshootingRequiredEvent;
+import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
@@ -19,16 +18,13 @@ public class Troubleshooter {
 
     private static final Logger LOG = Logger.create();
 
-    private static final TroubleshootingNotRequiredEvent TROUBLESHOOTING_NOT_REQUIRED_EVENT =
-            new TroubleshootingNotRequiredEvent();
-
     private final Object mIssuesLock = new Object();
     private final Object mTroubleshootingLock = new Object();
 
     private final EventBus mEventBus;
     private Set<HealthIssue> mActiveIssues;
 
-    private TroubleshootingRequiredEvent mLastTroubleshootingRequiredEvent;
+    private TroubleshootingActionsChangedEvent mLastTroubleshootingActionsChangedEvent;
 
     public Troubleshooter(EventBus eventBus) {
         mEventBus = eventBus;
@@ -77,23 +73,18 @@ public class Troubleshooter {
 
             ImmutableSet actions = actionsBuilder.build();
 
-            // If there are currently-active troubleshooting actions, remove any posted
-            // TroubleshootingNotRequiredEvents and post a TroubleshootingRequiredEvent; otherwise,
-            // do the opposite. This ensures that, at any point in time, only one of these events is
-            // active.
-            if (!actions.isEmpty()) {
-                mEventBus.removeStickyEvent(TROUBLESHOOTING_NOT_REQUIRED_EVENT);
-
-                mLastTroubleshootingRequiredEvent = new TroubleshootingRequiredEvent(actions);
-                mEventBus.postSticky(mLastTroubleshootingRequiredEvent);
-            } else {
-                if (mLastTroubleshootingRequiredEvent != null) {
-                    mEventBus.removeStickyEvent(mLastTroubleshootingRequiredEvent);
-                    mLastTroubleshootingRequiredEvent = null;
+            if (mLastTroubleshootingActionsChangedEvent != null) {
+                // If nothing's changed since the last time we checked, don't post a new event.
+                if (mLastTroubleshootingActionsChangedEvent.actions.equals(actions)) {
+                    return;
                 }
 
-                mEventBus.postSticky(new TroubleshootingNotRequiredEvent());
+                mEventBus.removeStickyEvent(mLastTroubleshootingActionsChangedEvent);
             }
+
+            mLastTroubleshootingActionsChangedEvent =
+                    new TroubleshootingActionsChangedEvent(actions);
+            mEventBus.postSticky(mLastTroubleshootingActionsChangedEvent);
         }
     }
 
