@@ -73,6 +73,7 @@ public class Troubleshooter {
             ImmutableSet.Builder<TroubleshootingAction> actionsBuilder = ImmutableSet.builder();
 
             actionsBuilder.addAll(troubleshootNetworkConnectivity());
+            actionsBuilder.addAll(troubleshootConfiguration());
 
             ImmutableSet actions = actionsBuilder.build();
 
@@ -100,9 +101,19 @@ public class Troubleshooter {
         } else if (mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED)) {
             actions.add(TroubleshootingAction.CONNECT_WIFI);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_HOST_UNREACHABLE)) {
-            actions.add(TroubleshootingAction.CHECK_CONNECTIVITY);
+            actions.add(TroubleshootingAction.CHECK_SERVER_REACHABILITY);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_NOT_RESPONDING)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_STATUS);
+        }
+
+        return actions;
+    }
+
+    private Set<TroubleshootingAction> troubleshootConfiguration() {
+        Set<TroubleshootingAction> actions = new HashSet<>();
+
+        if (mActiveIssues.contains(HealthIssue.SERVER_CONFIGURATION_INVALID)) {
+            actions.add(TroubleshootingAction.CHECK_SERVER_CONFIGURATION);
         }
 
         return actions;

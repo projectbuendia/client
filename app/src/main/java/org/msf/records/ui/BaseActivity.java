@@ -1,6 +1,8 @@
 package org.msf.records.ui;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -142,6 +144,51 @@ public abstract class BaseActivity extends FragmentActivity {
                         action.setEnabled(false);
 
                         startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                    }
+                });
+                break;
+            case CHECK_SERVER_CONFIGURATION:
+                message.setText("Server address may be incorrect");
+                action.setText("Check");
+                action.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        action.setEnabled(false);
+
+                        startActivity(new Intent(BaseActivity.this, SettingsActivity.class));
+                    }
+                });
+                break;
+            case CHECK_SERVER_REACHABILITY:
+                message.setText("Server unreachable");
+                action.setText("More Info");
+                action.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        action.setEnabled(false);
+
+                        new AlertDialog.Builder(BaseActivity.this)
+                                .setIcon(android.R.drawable.ic_dialog_info)
+                                .setTitle("Server unreachable")
+                                .setMessage(
+                                        "The server could not be reached. This may be because:\n"
+                                                + "\n"
+                                                + " • The wifi network is incorrect.\n"
+                                                + " • The server URL is incorrect.\n"
+                                                + " • The server is down.\n"
+                                                + "\n"
+                                                + "Please contact an administrator.")
+                                .setNeutralButton("Ok", null)
+                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                                    @Override
+                                    public void onDismiss(DialogInterface dialogInterface) {
+                                        action.setEnabled(true);
+                                    }
+                                })
+                                .create().show();
                     }
                 });
                 break;
