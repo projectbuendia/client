@@ -14,6 +14,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.filter.PatientFilters;
 import org.msf.records.filter.SimpleSelectionFilter;
 import org.msf.records.model.Zone;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.verify;
 public class PatientSearchControllerTest extends AndroidTestCase {
     private PatientSearchController mController;
     private FakeEventBus mFakeCrudEventBus;
+    private FakeEventBus mFakeGlobalEventBus;
     @Mock private AppModel mMockAppModel;
     @Mock private PatientSearchController.Ui mMockUi;
     @Mock private PatientSearchController.FragmentUi mFragmentMockUi;
@@ -41,9 +43,30 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
 
         mFakeCrudEventBus = new FakeEventBus();
+        mFakeGlobalEventBus = new FakeEventBus();
         mController = new PatientSearchController(
-                mMockUi, mFakeCrudEventBus, mMockAppModel, LOCALE);
+                mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel, LOCALE);
         mController.attachFragmentUi(mFragmentMockUi);
+        mController.init();
+    }
+
+    /** Tests that results are reloaded when a sync event occurs. */
+    public void testSyncSubscriber_reloadsResults() {
+        // GIVEN initialized PatientSearchController
+        // WHEN a sync event completes
+        mFakeGlobalEventBus.post(new SyncSucceededEvent());
+        // THEN results should be reloaded
+        verify(mMockAppModel).fetchPatients(
+                any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
+    }
+
+    /** Tests that results are reloaded when a sync event occurs. */
+    public void testSyncSubscriber_doesNotShowSpinnerDuringReload() {
+        // GIVEN initialized PatientSearchController
+        // WHEN a sync event completes
+        mFakeGlobalEventBus.post(new SyncSucceededEvent());
+        // THEN the spinner is not shown
+        verify(mFragmentMockUi, times(0)).showSpinner(true);
     }
 
     /** Tests that patients are passed to fragment UI's after retrieval. */
@@ -127,6 +150,15 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.loadSearchResults();
         // THEN spinner is shown
         verify(mFragmentMockUi).showSpinner(true);
+    }
+
+    /** Tests that the spinner is shown when loadSearchResults() is called. */
+    public void testLoadSearchResults_hidesSpinnerWhenRequested() {
+        // GIVEN initialized PatientSearchController
+        // WHEN search results are requested with no spinner
+        mController.loadSearchResults(false);
+        // THEN spinner is not shown
+        verify(mFragmentMockUi, times(0)).showSpinner(true);
     }
 
     /** Tests that the spinner is hidden after results are retrieved. */
