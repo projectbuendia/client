@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,6 +120,7 @@ public class LocalizedChartHelper {
 
     /**
      * Get all observations for a given patient.
+     *
      * @param locale the locale to return the results in, to match the server String
      */
     public List<LocalizedObservation> getObservations(
@@ -165,6 +167,7 @@ public class LocalizedChartHelper {
      * Get the most recent observations for each concept for a given patient from the local cache,
      * Ordering will be by concept uuid, and there are not groups or other chart-based
      * configurations.
+     *
      * @param locale the locale to return the results in, to match the server String
      */
     public Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
@@ -202,7 +205,30 @@ public class LocalizedChartHelper {
     }
 
     /**
+     * Get the most recent observations for all concepts for a set of patients from the local
+     * cache. Ordering will be by concept uuid, and there are not groups or other chart-based
+     * configurations.
+     *
+     * @param patientUuids the uuids of patients to return data for
+     * @param locale the locale to return the results in, to match the server String
+     */
+    public Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>>
+            getMostRecentObservationsBatch(
+                    String[] patientUuids,
+                    String locale) {
+        Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> observations =
+                new HashMap<String, Map<String, LocalizedObservation>>();
+        for (String patientUuid : patientUuids) {
+            observations.put(patientUuid, getMostRecentObservations(patientUuid, locale));
+        }
+
+        return observations;
+    }
+
+
+    /**
      * Get all observations for a given patient.
+     *
      * @param locale the locale to return the results in, to match the server String
      */
     public List<LocalizedObservation> getEmptyChart(

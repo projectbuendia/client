@@ -96,8 +96,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
 
     @Override
     public int compareTo(AppPatient another) {
-        // TODO(akalachman): Smarter sorting on id (as is done in SubtreeComparator).
-
+        // TODO(akalachman): Once ids are numeric, compare them numerically.
         int idCompareTo = id.compareTo(another.id);
         if (idCompareTo != 0) {
             return idCompareTo;

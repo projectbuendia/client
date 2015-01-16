@@ -32,7 +32,7 @@ public class HttpServerHealthCheck extends HealthCheck {
     private Handler mHandler;
     private HttpServerHealthCheckRunnable mRunnable;
 
-    public HttpServerHealthCheck(
+    HttpServerHealthCheck(
             Application application,
             StringPreference openMrsRootUrl) {
         super(application);
@@ -131,7 +131,7 @@ public class HttpServerHealthCheck extends HealthCheck {
                     return;
                 }
 
-               resolveAllIssues();
+                resolveAllIssues();
             } finally {
                 mHandler.postDelayed(this, CHECK_FREQUENCY_MS);
             }

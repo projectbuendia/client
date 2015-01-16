@@ -58,10 +58,8 @@ import javax.inject.Singleton;
                 BaseActivity.class,
                 PatientChartActivity.class,
                 PatientListActivity.class,
-                PatientListTypedCursorAdapter.class,
                 PatientSearchActivity.class,
                 RoundActivity.class,
-                SingleLocationPatientListAdapter.class,
                 TentSelectionActivity.class,
                 PatientListFragment.class,
                 RoundFragment.class

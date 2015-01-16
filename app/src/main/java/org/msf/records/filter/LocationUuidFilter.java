@@ -1,5 +1,7 @@
 package org.msf.records.filter;
 
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.sync.providers.Contracts;
 
@@ -10,23 +12,33 @@ import javax.annotation.Nullable;
 /**
  * LocationUuidFilter returns all patients who reside in the specified subtree of locations.
  *
- * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to that
- * zone, tents within that zone, beds within those tents, etc.
+ * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to
+ * that zone, tents within that zone, beds within those tents, etc.
  */
 public final class LocationUuidFilter implements SimpleSelectionFilter {
 
     private final String mTentSelectionString;
     private final String[] mTentSelectionArgs;
+    private final String mUuid;
 
-    // Since all we know is that the patient is contained somewhere in the subtree of the given
-    // UUID, return any node within that subtree. Treat null as the entire tree.
-    public LocationUuidFilter(@Nullable LocationSubtree subtree) {
-        if (subtree == null) {
+    /**
+     * Creates a filter that returns all patients in a valid location.
+     */
+    public LocationUuidFilter(AppLocationTree tree) {
+        this(tree, tree == null ? null : tree.getRoot());
+    }
+
+    /**
+     * Creates a filter returning only patients under a subroot of the given location tree.
+     */
+    public LocationUuidFilter(AppLocationTree tree, AppLocation subroot) {
+        if (tree == null || subroot == null) {
             mTentSelectionString = "";
             mTentSelectionArgs = new String[0];
+            mUuid = null;
             return;
         }
-        List<LocationSubtree> allPossibleLocations = subtree.thisAndAllDescendents();
+        List<AppLocation> allPossibleLocations = tree.locationsInSubtree(subroot);
 
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.
@@ -43,8 +55,17 @@ public final class LocationUuidFilter implements SimpleSelectionFilter {
 
         mTentSelectionArgs = new String[allPossibleLocations.size()];
         for (int i = 0; i < allPossibleLocations.size(); i++) {
-            mTentSelectionArgs[i] = allPossibleLocations.get(i).getLocation().uuid;
+            mTentSelectionArgs[i] = allPossibleLocations.get(i).uuid;
         }
+
+        mUuid = subroot.uuid;
+    }
+
+    /**
+     * Returns the UUID of the root location used for filtering.
+     */
+    public String getFilterRootUuid() {
+        return mUuid;
     }
 
     @Override

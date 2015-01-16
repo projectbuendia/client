@@ -83,6 +83,7 @@
     <string name="title_add_patient_cancel">Discard changes?</string>
     <string name="patient_creation_success">New patient has been added.</string>
     <string name="patient_creation_error">Unable to add patient: %s</string>
+    <string name="patient_sync_failed">Patient sync event failed</string>
     <string name="username_cannot_be_null">\"Username must not be null\"</string>
     <string name="given_name_cannot_be_null">Given name must not be null</string>
     <string name="family_name_cannot_be_null">Family name must not be null</string>
