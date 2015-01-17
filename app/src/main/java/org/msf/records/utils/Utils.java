@@ -59,6 +59,7 @@ public class Utils {
      * according to numeric value; Strings sort according to string value.
      */
     public static Comparator<Object> integerOrStringComparator = new Comparator<Object>() {
+        @Override
         public int compare(Object a, Object b) {
             if (a instanceof Integer && b instanceof Integer) {
                 return (Integer) a - (Integer) b;
@@ -66,8 +67,8 @@ public class Utils {
             if (a instanceof String && b instanceof String) {
                 return ((String) a).compareTo((String) b);
             }
-            return (a == null ? 0 : a instanceof Integer ? 1 : 2) -
-                    (b == null ? 0 : b instanceof Integer ? 1 : 2);
+            return (a == null ? 0 : a instanceof Integer ? 1 : 2)
+                    - (b == null ? 0 : b instanceof Integer ? 1 : 2);
         }
     };
 
@@ -76,6 +77,7 @@ public class Utils {
      * lexicographically by element, just like Python does.
      */
     public static Comparator<List<Object>> integerOrStringListComparator = new Comparator<List<Object>>() {
+        @Override
         public int compare(List<Object> a, List<Object> b) {
             int result = 0;
             for (int i = 0; result == 0; i++) {
@@ -102,7 +104,7 @@ public class Utils {
      */
     public static Comparator<String> alphanumericComparator = new Comparator<String>() {
         // Note: Use of \L here assumes a string that is already NFC-normalized.
-        private Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("[0-9]+|\\p{L}+");
+        private final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("[0-9]+|\\p{L}+");
 
         /**
          * Breaks a string into a list of Integers (from sequences of ASCII digits)

@@ -312,24 +312,24 @@ public final class LocationTree {
     }
 
     public final class SubtreeComparator implements Comparator<LocationSubtree> {
-    	@Override
-    	public int compare(LocationSubtree lhs, LocationSubtree rhs) {
-    		List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
-    		List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
+        @Override
+        public int compare(LocationSubtree lhs, LocationSubtree rhs) {
+            List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
+            List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
             int compare = 0;
-    		for (int i = 0; compare == 0; i++) {
-    			if (i >= pathA.size() || i >= pathB.size()) {
-    				return pathA.size() - pathB.size();
-    			}
+            for (int i = 0; compare == 0; i++) {
+                if (i >= pathA.size() || i >= pathB.size()) {
+                    return pathA.size() - pathB.size();
+                }
                 Location locationA = pathA.get(i).getLocation();
                 Location locationB = pathB.get(i).getLocation();
                 compare = (i == ZONE_DEPTH) ? Zone.compare(locationA, locationB) :
                         Utils.alphanumericComparator.compare(
                                 locationA.names.get(DEFAULT_LOCALE),
                                 locationB.names.get(DEFAULT_LOCALE));
-    		}
+            }
             return compare;
-    	}
+        }
     }
 
     /**
