@@ -79,14 +79,13 @@ public class Utils {
     public static Comparator<List<Object>> integerOrStringListComparator = new Comparator<List<Object>>() {
         @Override
         public int compare(List<Object> a, List<Object> b) {
-            int result = 0;
-            for (int i = 0; result == 0; i++) {
-                if (i >= a.size() || i >= b.size()) {
-                    return a.size() - b.size();
+            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                int result = integerOrStringComparator.compare(a.get(i), b.get(i));
+                if (result != 0) {
+                    return result;
                 }
-                result = integerOrStringComparator.compare(a.get(i), b.get(i));
             }
-            return result;
+            return a.size() - b.size();
         }
     };
 
