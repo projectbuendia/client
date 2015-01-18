@@ -22,6 +22,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import javax.annotation.Nullable;
@@ -316,19 +317,18 @@ public final class LocationTree {
         public int compare(LocationSubtree lhs, LocationSubtree rhs) {
             List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
             List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
-            int compare = 0;
-            for (int i = 0; compare == 0; i++) {
-                if (i >= pathA.size() || i >= pathB.size()) {
-                    return pathA.size() - pathB.size();
-                }
+            for (int i = 0; i < Math.min(pathA.size(), pathB.size()); i++) {
                 Location locationA = pathA.get(i).getLocation();
                 Location locationB = pathB.get(i).getLocation();
-                compare = (i == ZONE_DEPTH) ? Zone.compare(locationA, locationB) :
+                int result = (i == ZONE_DEPTH) ? Zone.compare(locationA, locationB) :
                         Utils.alphanumericComparator.compare(
                                 locationA.names.get(DEFAULT_LOCALE),
                                 locationB.names.get(DEFAULT_LOCALE));
+                if (result != 0) {
+                    return result;
+                }
             }
-            return compare;
+            return pathA.size() - pathB.size();
         }
     }
 
