@@ -43,7 +43,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private final LocalizedChartHelper mLocalizedChartHelper;
 
     private LocationTree.LocationSubtree[] mLocations;
-    private Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> mObservations;
+    private Map<String, Map<String, LocalizedChartHelper.LocalizedObs>> mObservations;
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
@@ -140,13 +140,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean pregnant = false;
         String condition = null;
         if (mObservations != null) {
-            Map<String, LocalizedChartHelper.LocalizedObservation> obsMap =
-                    mObservations.get(patient.uuid);
+            Map<String, LocalizedChartHelper.LocalizedObs> obsMap = mObservations.get(patient.uuid);
             if (obsMap != null) {
-                LocalizedChartHelper.LocalizedObservation pregObs =
-                        obsMap.get(Concept.PREGNANCY_UUID);
+                LocalizedChartHelper.LocalizedObs pregObs = obsMap.get(Concept.PREGNANCY_UUID);
                 pregnant = pregObs == null ? false : Concept.YES_UUID.equals(pregObs.value);
-                LocalizedChartHelper.LocalizedObservation condObs =
+                LocalizedChartHelper.LocalizedObs condObs =
                         obsMap.get(Concept.GENERAL_CONDITION_UUID);
                 condition = condObs == null ? null : condObs.value;
             }

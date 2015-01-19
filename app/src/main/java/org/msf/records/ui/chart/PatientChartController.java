@@ -20,10 +20,8 @@ import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.location.LocationManager;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
@@ -76,10 +74,10 @@ final class PatientChartController {
         void setTitle(String title);
 
         /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
+        void updatePatientVitalsUI(Map<String, LocalizedChartHelper.LocalizedObs> observations);
 
         /** Updates the UI showing the historic log of observation values for this patient. */
-        void setObservationHistory(List<LocalizedObservation> observations);
+        void setObservationHistory(List<LocalizedChartHelper.LocalizedObs> observations);
 
         /** Shows the last time a user interacted with this patient. */
         void setLatestEncounter(long latestEncounterTimeMillis);
@@ -229,7 +227,7 @@ final class PatientChartController {
             fields.clinicianName = user.getFullName();
         }
 
-        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
+        Map<String, LocalizedChartHelper.LocalizedObs> observations =
                 mObservationsProvider.getMostRecentObservations(mPatientUuid);
 
         if (observations.containsKey(Concept.PREGNANCY_UUID)
@@ -276,12 +274,12 @@ final class PatientChartController {
     private void updatePatientUI() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
-        Map<String, LocalizedObservation> conceptsToLatestObservations =
+        List<LocalizedChartHelper.LocalizedObs> observations = mObservationsProvider.getObservations(mPatientUuid);
+        Map<String, LocalizedChartHelper.LocalizedObs> conceptsToLatestObservations =
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
-        for (LocalizedObservation observation : observations) {
+        for (LocalizedChartHelper.LocalizedObs observation : observations) {
             // TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
             conceptsToLatestObservations.put(observation.conceptUuid, observation);
             mLastObservation = Math.max(
