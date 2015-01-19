@@ -89,6 +89,9 @@ public class Utils {
         }
     };
 
+    // Note: Use of \L here assumes a string that is already NFC-normalized.
+    private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
+
     /**
      * Compares two strings in a way that sorts alphabetic parts in alphabetic
      * order and numeric parts in numeric order, while guaranteeing that:
@@ -102,9 +105,6 @@ public class Utils {
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
      */
     public static Comparator<String> alphanumericComparator = new Comparator<String>() {
-        // Note: Use of \L here assumes a string that is already NFC-normalized.
-        private final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
-
         /**
          * Breaks a string into a list of Integers (from sequences of ASCII digits)
          * and Strings (from sequences of letters).  Other characters are ignored.

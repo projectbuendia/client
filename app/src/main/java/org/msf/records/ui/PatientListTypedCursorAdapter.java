@@ -142,10 +142,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         if (mObservations != null) {
             Map<String, LocalizedChartHelper.LocalizedObs> obsMap = mObservations.get(patient.uuid);
             if (obsMap != null) {
-                LocalizedChartHelper.LocalizedObs pregnancyObs = obsMap.get(Concept.PREGNANCY_UUID);
-                pregnant = pregnancyObs == null ? false : Concept.YES_UUID.equals(pregnancyObs.value);
-                LocalizedChartHelper.LocalizedObs conditionObs = obsMap.get(Concept.GENERAL_CONDITION_UUID);
-                condition = conditionObs == null ? null : conditionObs.value;
+                LocalizedChartHelper.LocalizedObs pregObs = obsMap.get(Concept.PREGNANCY_UUID);
+                pregnant = pregObs == null ? false : Concept.YES_UUID.equals(pregObs.value);
+                LocalizedChartHelper.LocalizedObs condObs =
+                        obsMap.get(Concept.GENERAL_CONDITION_UUID);
+                condition = condObs == null ? null : condObs.value;
             }
         }
 
@@ -255,7 +256,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     // Add a single patient to relevant data structures.
     private void addPatient(AppPatient patient) {
-        LocationTree.LocationSubtree location = mLocationTree.getLocationByUuid(patient.locationUuid);
+        LocationTree.LocationSubtree location =
+                mLocationTree.getLocationByUuid(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
                 mPatientsByLocation.put(location, new ArrayList<AppPatient>());

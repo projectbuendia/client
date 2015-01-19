@@ -41,22 +41,25 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         this.locationUuid = builder.mLocationUuid;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * Creates an instance of {@link AppPatient} from a network {@link Patient} object.
      */
     public static AppPatient fromNet(Patient patient) {
-        Builder builder = new Builder();
-        builder.mId = patient.id;
-        builder.mUuid = patient.uuid;
-        builder.mGivenName = patient.given_name;
-        builder.mFamilyName = patient.family_name;
-        builder.mGender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
-        builder.mBirthdate = patient.birthdate;
-        builder.mAdmissionDateTime = new DateTime(patient.admission_timestamp * 1000);
-        if (patient.assigned_location != null && patient.assigned_location.uuid != null) {
-            builder.mLocationUuid = patient.assigned_location.uuid;
-        }
-        return builder.build();
+        return builder()
+                .setId(patient.id)
+                .setUuid(patient.uuid)
+                .setGivenName(patient.given_name)
+                .setFamilyName(patient.family_name)
+                .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
+                .setBirthdate(patient.birthdate)
+                .setAdmissionDateTime(new DateTime(patient.admission_timestamp * 1000))
+                .setLocationUuid(
+                        patient.assigned_location == null ? null : patient.assigned_location.uuid)
+                .build();
     }
 
     /**
@@ -108,6 +111,48 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         private LocalDate mBirthdate;
         private DateTime mAdmissionDateTime;
         private String mLocationUuid;
+
+        private Builder() {}
+
+        public Builder setId(String id) {
+            this.mId = id;
+            return this;
+        }
+
+        public Builder setUuid(String uuid) {
+            this.mUuid = uuid;
+            return this;
+        }
+
+        public Builder setGivenName(String givenName) {
+            this.mGivenName = givenName;
+            return this;
+        }
+
+        public Builder setFamilyName(String familyName) {
+            this.mFamilyName = familyName;
+            return this;
+        }
+
+        public Builder setGender(int gender) {
+            this.mGender = gender;
+            return this;
+        }
+
+        public Builder setBirthdate(LocalDate birthdate) {
+            this.mBirthdate = birthdate;
+            return this;
+        }
+
+        public Builder setAdmissionDateTime(DateTime admissionDateTime) {
+            this.mAdmissionDateTime = admissionDateTime;
+            return this;
+        }
+
+        public Builder setLocationUuid(String locationUuid) {
+            this.mLocationUuid = locationUuid;
+            return this;
+        }
 
         public AppPatient build() {
             return new AppPatient(this);
