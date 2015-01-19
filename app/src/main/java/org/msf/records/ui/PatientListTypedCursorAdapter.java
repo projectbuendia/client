@@ -21,7 +21,9 @@ import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,7 +39,7 @@ import butterknife.InjectView;
 public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
-    private final TreeMap<LocationTree.LocationSubtree, List<AppPatient>> mPatientsByLocation;
+    private final HashMap<LocationTree.LocationSubtree, List<AppPatient>> mPatientsByLocation;
     private final LocationTree mLocationTree;
     private final LocalizedChartHelper mLocalizedChartHelper;
 
@@ -52,7 +54,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     public PatientListTypedCursorAdapter(Context context) {
         mContext = context;
 
-        mPatientsByLocation = new TreeMap<LocationTree.LocationSubtree, List<AppPatient>>();
+        mPatientsByLocation = new HashMap<LocationTree.LocationSubtree, List<AppPatient>>();
 
         // TODO(dxchen): Use injected location tree instead of singleton.
         mLocationTree = LocationTree.singletonInstance;
@@ -233,6 +235,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         // Populate locations list accordingly.
         mLocations = new LocationTree.LocationSubtree[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
+        Arrays.sort(mLocations);
 
         // Finalize cursor.
         cursor.close();
