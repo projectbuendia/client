@@ -74,10 +74,10 @@ final class PatientChartController {
         void setTitle(String title);
 
         /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUI(Map<String, LocalizedChartHelper.LocalizedObs> observations);
+        void updatePatientVitalsUI(Map<String, LocalizedChartHelper.LocalizedObservation> observations);
 
         /** Updates the UI showing the historic log of observation values for this patient. */
-        void setObservationHistory(List<LocalizedChartHelper.LocalizedObs> observations);
+        void setObservationHistory(List<LocalizedChartHelper.LocalizedObservation> observations);
 
         /** Shows the last time a user interacted with this patient. */
         void setLatestEncounter(long latestEncounterTimeMillis);
@@ -227,7 +227,7 @@ final class PatientChartController {
             fields.clinicianName = user.getFullName();
         }
 
-        Map<String, LocalizedChartHelper.LocalizedObs> observations =
+        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
                 mObservationsProvider.getMostRecentObservations(mPatientUuid);
 
         if (observations.containsKey(Concept.PREGNANCY_UUID)
@@ -274,12 +274,12 @@ final class PatientChartController {
     private void updatePatientUI() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        List<LocalizedChartHelper.LocalizedObs> observations = mObservationsProvider.getObservations(mPatientUuid);
-        Map<String, LocalizedChartHelper.LocalizedObs> conceptsToLatestObservations =
+        List<LocalizedChartHelper.LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
+        Map<String, LocalizedChartHelper.LocalizedObservation> conceptsToLatestObservations =
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
-        for (LocalizedChartHelper.LocalizedObs observation : observations) {
+        for (LocalizedChartHelper.LocalizedObservation observation : observations) {
             // TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
             conceptsToLatestObservations.put(observation.conceptUuid, observation);
             mLastObservation = Math.max(

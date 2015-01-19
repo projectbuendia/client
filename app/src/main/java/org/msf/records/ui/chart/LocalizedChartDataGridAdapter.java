@@ -65,7 +65,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final List<String> columnHeaders = new ArrayList<>();
 
     public LocalizedChartDataGridAdapter(Context context,
-                                         List<LocalizedChartHelper.LocalizedObs> observations,
+                                         List<LocalizedChartHelper.LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         Context context1 = context;
         LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
@@ -89,7 +89,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         Row severeRow = null;
         ArrayList<Row> extraRows = new ArrayList<>();
 
-        for (LocalizedChartHelper.LocalizedObs ob : observations) {
+        for (LocalizedChartHelper.LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
             if (row == null || !ob.conceptName.equals(row.mName)) {
@@ -159,9 +159,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {
-            List<LocalizedChartHelper.LocalizedObs> emptyChart =
+            List<LocalizedChartHelper.LocalizedObservation> emptyChart =
                     localizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
-            for (LocalizedChartHelper.LocalizedObs ob : emptyChart) {
+            for (LocalizedChartHelper.LocalizedObservation ob : emptyChart) {
                 rows.add(new Row(ob.conceptUuid, ob.conceptName));
             }
         }
