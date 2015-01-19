@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
  * A simple helper method to get all observations for a patient in a nice java bean format.
  */
 public class LocalizedChartHelper {
+
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
     public static final String ENGLISH_LOCALE = "en";
 
@@ -105,13 +106,15 @@ public class LocalizedChartHelper {
 
     private final ContentResolver mContentResolver;
 
-    public LocalizedChartHelper(ContentResolver contentResolver) {
+    public LocalizedChartHelper(
+            ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
     }
     /**
      * Get all observations for a given patient from the local cache, localized to English.
      */
-    public List<LocalizedObservation> getObservations(String patientUuid) {
+    public List<LocalizedObservation> getObservations(
+            String patientUuid) {
         return getObservations(patientUuid, ENGLISH_LOCALE);
     }
 
@@ -120,7 +123,9 @@ public class LocalizedChartHelper {
      *
      * @param locale the locale to return the results in, to match the server String
      */
-    public List<LocalizedObservation> getObservations(String patientUuid, String locale) {
+    public List<LocalizedObservation> getObservations(
+            String patientUuid,
+            String locale) {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
@@ -153,7 +158,8 @@ public class LocalizedChartHelper {
      * localized to English. Ordering will be by concept uuid, and there are not groups or other
      * chart based configurations.
      */
-    public Map<String, LocalizedObservation> getMostRecentObservations(String patientUuid) {
+    public Map<String, LocalizedObservation> getMostRecentObservations(
+            String patientUuid) {
         return getMostRecentObservations(patientUuid, ENGLISH_LOCALE);
     }
 
@@ -164,7 +170,9 @@ public class LocalizedChartHelper {
      *
      * @param locale the locale to return the results in, to match the server String
      */
-    public Map<String, LocalizedObservation> getMostRecentObservations(String patientUuid, String locale) {
+    public Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
+            String patientUuid,
+            String locale) {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
@@ -174,7 +182,7 @@ public class LocalizedChartHelper {
                     null,
                     null);
 
-            Map<String, LocalizedObservation> result = Maps.newLinkedHashMap();
+            Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newLinkedHashMap();
             while (cursor.moveToNext()) {
                 String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
 
@@ -204,12 +212,16 @@ public class LocalizedChartHelper {
      * @param patientUuids the uuids of patients to return data for
      * @param locale the locale to return the results in, to match the server String
      */
-    public Map<String, Map<String, LocalizedObservation>>
-            getMostRecentObservationsBatch(String[] patientUuids, String locale) {
-        Map<String, Map<String, LocalizedObservation>> observations = new HashMap<String, Map<String, LocalizedObservation>>();
+    public Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>>
+            getMostRecentObservationsBatch(
+                    String[] patientUuids,
+                    String locale) {
+        Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> observations =
+                new HashMap<String, Map<String, LocalizedObservation>>();
         for (String patientUuid : patientUuids) {
             observations.put(patientUuid, getMostRecentObservations(patientUuid, locale));
         }
+
         return observations;
     }
 
@@ -219,7 +231,8 @@ public class LocalizedChartHelper {
      *
      * @param locale the locale to return the results in, to match the server String
      */
-    public List<LocalizedObservation> getEmptyChart(String locale) {
+    public List<LocalizedObservation> getEmptyChart(
+            String locale) {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(

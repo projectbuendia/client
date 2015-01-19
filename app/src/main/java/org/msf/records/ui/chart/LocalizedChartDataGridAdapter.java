@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import org.joda.time.chrono.ISOChronology;
 import org.msf.records.R;
 import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.utils.Logger;
 import org.msf.records.widget.DataGridAdapter;
 
@@ -65,7 +67,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final List<String> columnHeaders = new ArrayList<>();
 
     public LocalizedChartDataGridAdapter(Context context,
-                                         List<LocalizedChartHelper.LocalizedObservation> observations,
+                                         List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
         Context context1 = context;
         LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
@@ -89,7 +91,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         Row severeRow = null;
         ArrayList<Row> extraRows = new ArrayList<>();
 
-        for (LocalizedChartHelper.LocalizedObservation ob : observations) {
+        for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
             if (row == null || !ob.conceptName.equals(row.mName)) {
@@ -159,9 +161,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (rows.isEmpty()) {
-            List<LocalizedChartHelper.LocalizedObservation> emptyChart =
+            List<LocalizedObservation> emptyChart =
                     localizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
-            for (LocalizedChartHelper.LocalizedObservation ob : emptyChart) {
+            for (LocalizedObservation ob : emptyChart) {
                 rows.add(new Row(ob.conceptUuid, ob.conceptName));
             }
         }

@@ -33,6 +33,7 @@ import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.OdkActivityLauncher;
@@ -50,6 +51,7 @@ import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -335,7 +337,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     /** Updates a {@link VitalView} to display a new observation value. */
-    private void showObservation(VitalView view, @Nullable LocalizedChartHelper.LocalizedObservation observation) {
+    private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
         if (observation != null) {
             view.setBackgroundColor(mVitalKnown.getBackgroundColor());
             view.setTextColor(mVitalKnown.getForegroundColor());
@@ -372,14 +374,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientVitalsUI(Map<String, LocalizedChartHelper.LocalizedObservation> observations) {
+        public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
             showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
             showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
             showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
 
             // Temperature
-            LocalizedChartHelper.LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
+            LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
             if (observation != null && observation.localizedValue != null) {
                 double value = Double.parseDouble(observation.localizedValue);
                 ResTemperatureRange.Resolved temperatureRange =
@@ -436,8 +438,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             // PCR
-            LocalizedChartHelper.LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
-            LocalizedChartHelper.LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
+            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
             if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
                     && (pcrNpObservation == null || pcrNpObservation == null)) {
                 mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
@@ -492,7 +494,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                                     new DateTime(pcrObservationMillis)));
                 }
             }
-
+            
             // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
@@ -503,7 +505,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void setObservationHistory(List<LocalizedChartHelper.LocalizedObservation> observations) {
+        public void setObservationHistory(List<LocalizedObservation> observations) {
             if (mChartView != null) {
                 mRootView.removeView(mChartView);
             }
@@ -523,7 +525,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             return !"1".equalsIgnoreCase(getSystemProperty("debug.useOldChartGrid"));
         }
 
-        private View getChartView(List<LocalizedChartHelper.LocalizedObservation> observations) {
+        private View getChartView(List<LocalizedObservation> observations) {
             return new DataGridView.Builder()
                     .setDoubleWidthColumnHeaders(true)
                     .setDataGridAdapter(
@@ -534,7 +536,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     .build(PatientChartActivity.this);
         }
 
-        private View getChartViewNew(List<LocalizedChartHelper.LocalizedObservation> observations) {
+        private View getChartViewNew(List<LocalizedObservation> observations) {
             LocalizedChartDataGridAdapter dataGridAdapter =
                     new LocalizedChartDataGridAdapter(
                             PatientChartActivity.this,
