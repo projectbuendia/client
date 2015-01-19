@@ -101,7 +101,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
         mController.init();
         // WHEN that patient's details are loaded
-        AppPatient patient = new AppPatient.Builder().build();
+        AppPatient patient = AppPatient.builder().build();
         mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
         // TODO(rjlothian): When the handler UI updating hack in PatientChartController is
         // removed, this can also be removed.
@@ -116,7 +116,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
         mController.init();
         // WHEN that patient's details are loaded
-        AppPatient patient = new AppPatient.Builder().build();
+        AppPatient patient = AppPatient.builder().build();
         mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
         // THEN the controller updates the UI
         verify(mMockUi).setPatient(patient);
