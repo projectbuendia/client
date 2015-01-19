@@ -44,15 +44,6 @@ public class UpdateManager {
      */
     public static final int CHECK_FOR_UPDATE_FREQUENCY_HOURS = 1;
 
-    /**
-     * The minimal version number.
-     *
-     * <p>This value is smaller than any other version. If the current application has this version,
-     * any non-minimal update will be installed over it. If an update has this version, it will
-     * never be installed over any the current application.
-     */
-    public static final LexicographicVersion MINIMAL_VERSION = LexicographicVersion.parse("0");
-
     private static final IntentFilter sDownloadCompleteIntentFilter =
             new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
 
@@ -210,21 +201,17 @@ public class UpdateManager {
             packageInfo =
                     mPackageManager.getPackageInfo(mApplication.getPackageName(), 0 /*flags*/);
         } catch (PackageManager.NameNotFoundException e) {
-            LOG.e(
-                    e,
-                    "No package found with the name " + mApplication.getPackageName() + ". "
-                            + "This should never happen.");
-            return MINIMAL_VERSION;
+            LOG.e(e, "No package found with the name " + mApplication.getPackageName()
+                    + ".  This should never happen.");
+            return null;
         }
 
         try {
-            return LexicographicVersion.parse(packageInfo.versionName);
+            return new LexicographicVersion(packageInfo.versionName);
         } catch (IllegalArgumentException e) {
-            LOG.e(
-                    e,
-                    "Application has an invalid semantic version: " + packageInfo.versionName + ". "
-                            + "Please fix in build.gradle.");
-            return MINIMAL_VERSION;
+            LOG.e(e, "Invalid version string \"" + packageInfo.versionName
+                    + "\".  Please fix in build.gradle.");
+            return null;
         }
     }
 
@@ -274,8 +261,9 @@ public class UpdateManager {
                 mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
 
                 if (mLastDownloadedUpdateInfo.shouldInstall()
-                        && mLastDownloadedUpdateInfo.downloadedVersion
-                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
+                        && LexicographicVersion.compare(
+                                mLastDownloadedUpdateInfo.downloadedVersion,
+                                mLastAvailableUpdateInfo.availableVersion) >= 0) {
                     // If there's already a downloaded update that is as recent as the available
                     // update, post an UpdateDownloadedEvent.
                     EventBus.getDefault()
@@ -401,8 +389,9 @@ public class UpdateManager {
                     return;
                 }
 
-                if (!mLastAvailableUpdateInfo.availableVersion
-                        .greaterThanOrEqualTo(mLastDownloadedUpdateInfo.downloadedVersion)) {
+                if (LexicographicVersion.compare(
+                        mLastAvailableUpdateInfo.availableVersion,
+                        mLastDownloadedUpdateInfo.downloadedVersion) < 0) {
                     LOG.w(
                             "The last update downloaded from the server was reported to have "
                                     + "version '%1$s' but actually has version '%2$s'. This "

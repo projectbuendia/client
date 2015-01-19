@@ -26,11 +26,7 @@ public class AvailableUpdateInfo {
      * Creates an instance of {@link AvailableUpdateInfo} for an invalid update.
      */
     public static AvailableUpdateInfo getInvalid(LexicographicVersion currentVersion) {
-        return new AvailableUpdateInfo(
-                false /*isValid*/,
-                currentVersion,
-                UpdateManager.MINIMAL_VERSION,
-                null /*updateUri*/);
+        return new AvailableUpdateInfo(false, currentVersion, null, null);
     }
 
     /**
@@ -92,6 +88,6 @@ public class AvailableUpdateInfo {
      * Returns whether this update is valid and is newer than current version.
      */
     public boolean shouldUpdate() {
-        return isValid && availableVersion.greaterThan(currentVersion);
+        return isValid && LexicographicVersion.compare(availableVersion, currentVersion) > 0;
     }
 }

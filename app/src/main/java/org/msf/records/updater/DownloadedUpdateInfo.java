@@ -25,8 +25,7 @@ public class DownloadedUpdateInfo {
      * Creates an instance of {@link DownloadedUpdateInfo} for an invalid update.
      */
     public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
-        return new DownloadedUpdateInfo(
-                false /*isValid*/, currentVersion, UpdateManager.MINIMAL_VERSION, null /*path*/);
+        return new DownloadedUpdateInfo(false, currentVersion, null, null);
     }
 
     /**
@@ -60,7 +59,7 @@ public class DownloadedUpdateInfo {
 
         LexicographicVersion downloadedVersion;
         try {
-            downloadedVersion = LexicographicVersion.parse(packageInfo.versionName);
+            downloadedVersion = new LexicographicVersion(packageInfo.versionName);
         } catch (IllegalArgumentException e) {
             LOG.w("%1$s has an invalid version: %2$s.", uri, packageInfo.versionName);
             return getInvalid(currentVersion);
@@ -81,6 +80,6 @@ public class DownloadedUpdateInfo {
     }
 
     public boolean shouldInstall() {
-        return isValid && downloadedVersion.greaterThan(currentVersion);
+        return isValid && LexicographicVersion.compare(downloadedVersion, currentVersion) > 0;
     }
 }

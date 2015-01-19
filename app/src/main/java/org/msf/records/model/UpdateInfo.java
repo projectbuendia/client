@@ -21,7 +21,7 @@ public class UpdateInfo {
      */
     public LexicographicVersion getParsedVersion() {
         try {
-            return version == null ? null : LexicographicVersion.parse(version);
+            return version == null ? null : new LexicographicVersion(version);
         } catch (IllegalArgumentException e) {
             return null;
         }

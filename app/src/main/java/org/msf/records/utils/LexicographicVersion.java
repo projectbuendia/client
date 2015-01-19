@@ -1,9 +1,6 @@
 package org.msf.records.utils;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-
-import java.util.Objects;
+import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -12,89 +9,43 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public class LexicographicVersion implements Comparable<LexicographicVersion> {
+    private static final Pattern VERSION_PATTERN = Pattern.compile("[0-9]+(\\.[0-9]+)*");
+    private final String mString;
 
-    /**
-     * Returns an instance of {@link LexicographicVersion} parsed from the specified string.
-     */
-    public static LexicographicVersion parse(String raw) {
-        Preconditions.checkNotNull(raw);
-        Preconditions.checkArgument(!raw.equals(""));
-
-        String[] stringParts = raw.split("\\.");
-        int[] parts = new int[stringParts.length];
-        for (int i = 0; i < stringParts.length; i++) {
-            try {
-                parts[i] = Integer.parseInt(stringParts[i]);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(
-                        "'" + raw + "' is not a valid version string.", e);
-            }
+    public LexicographicVersion(String string) {
+        if (!VERSION_PATTERN.matcher(string).matches()) {
+            throw new IllegalArgumentException(
+                    "\"" + string + "\" is not a valid version string.");
         }
-
-        return new LexicographicVersion(raw, parts);
-    }
-
-    private final String mRaw;
-    private final int[] mParts;
-
-    private LexicographicVersion(String raw, int[] parts) {
-        mRaw = raw;
-        mParts = parts;
+        mString = string;
     }
 
     @Override
     public String toString() {
-        return mRaw;
+        return mString;
     }
 
-    public boolean greaterThan(LexicographicVersion other) {
-        return compareTo(other) > 0;
-    }
-
-    public boolean greaterThanOrEqualTo(LexicographicVersion other) {
-        return compareTo(other) >= 0;
-    }
-
-    public boolean lessThan(LexicographicVersion other) {
-        return compareTo(other) < 0;
-    }
-
-    public boolean lessThanOrEqualTo(LexicographicVersion other) {
-        return compareTo(other) <= 0;
+    /** Compares two optionally-null versions, treating null as the lowest value. */
+    public static int compare(LexicographicVersion a, LexicographicVersion b) {
+        if (a == null || b == null) {
+            return (a == null ? 0 : 1) - (b == null ? 0 : 1);
+        }
+        return a.compareTo(b);
     }
 
     @Override
     public int compareTo(LexicographicVersion other) {
-        Preconditions.checkNotNull(other);
-        if (this == other) {
-            return 0;
-        }
-
-        int minPartsLength = Math.min(mParts.length, other.mParts.length);
-        for (int i = 0; i < minPartsLength; i++) {
-            if (mParts[i] < other.mParts[i]) {
-                return -1;
-            } else if (mParts[i] > other.mParts[i]) {
-                return 1;
-            }
-        }
-
-        return mParts.length - other.mParts.length;
+        return Utils.alphanumericComparator.compare(mString, other.mString);
     }
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (!(other instanceof LexicographicVersion)) {
-            return false;
-        }
-        return compareTo((LexicographicVersion) other) == 0;
+        return other instanceof LexicographicVersion
+                && compareTo((LexicographicVersion) other) == 0;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mParts);
+        return mString.hashCode();
     }
 }
