@@ -214,7 +214,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     /**
      * Updates the adapter to show all patients from the given cursor.
-     *
      * @param cursor a {@link TypedCursor} containing all patients to show
      */
     public void setPatients(TypedCursor<AppPatient> cursor) {
@@ -236,9 +235,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         mLocations = new LocationTree.LocationSubtree[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
         Arrays.sort(mLocations);
-
-        // Finalize cursor.
-        cursor.close();
 
         // Sort each of the patient lists by the default patient comparator.
         for (Map.Entry<LocationTree.LocationSubtree, List<AppPatient>> entry :
