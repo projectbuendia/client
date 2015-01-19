@@ -140,9 +140,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean pregnant = false;
         String condition = null;
         if (mObservations != null) {
-            Map<String, LocalizedChartHelper.LocalizedObservation> obsMap = mObservations.get(patient.uuid);
+            Map<String, LocalizedChartHelper.LocalizedObservation> obsMap =
+                    mObservations.get(patient.uuid);
             if (obsMap != null) {
-                LocalizedChartHelper.LocalizedObservation pregObs = obsMap.get(Concept.PREGNANCY_UUID);
+                LocalizedChartHelper.LocalizedObservation pregObs =
+                        obsMap.get(Concept.PREGNANCY_UUID);
                 pregnant = pregObs == null ? false : Concept.YES_UUID.equals(pregObs.value);
                 LocalizedChartHelper.LocalizedObservation condObs =
                         obsMap.get(Concept.GENERAL_CONDITION_UUID);
