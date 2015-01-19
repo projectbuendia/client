@@ -33,7 +33,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
+ * Activity with a SearchView that filters a patient list.
  * Clicking on patients in the list displays details for that patient.
  */
 public abstract class PatientSearchActivity extends BaseLoggedInActivity {

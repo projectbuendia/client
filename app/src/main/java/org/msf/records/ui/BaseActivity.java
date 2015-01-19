@@ -9,12 +9,11 @@ import android.widget.LinearLayout;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.events.user.ActiveUserUnsetEvent;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * An abstract {@link FragmentActivity} that is the base for all activities.
- */
+/** An abstract {@link FragmentActivity} that is the base for all activities. */
 public abstract class BaseActivity extends FragmentActivity {
 
     private LinearLayout mWrapperView;
@@ -103,5 +102,32 @@ public abstract class BaseActivity extends FragmentActivity {
         mStatusContent =
                 (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
     }
-}
 
+    public void onEvent(ActiveUserUnsetEvent event) {
+        // TODO(dxchen): Implement this in one way or another!
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // All app activities are full-screen (no status or navigation bar).
+        try {
+            if (hasFocus) {
+                View decor = getWindow().getDecorView();
+                if (decor != null) {
+                    decor.setSystemUiVisibility(
+                            // View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                    // | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

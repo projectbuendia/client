@@ -28,11 +28,11 @@ import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 import de.greenrobot.event.EventBus;
-
-import javax.inject.Singleton;
 
 /**
  * A Dagger module that provides the top-level bindings for the app.

@@ -37,9 +37,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
-/**
- * A {@link BaseActivity} that allows users to create a new patient.
- */
+/** Activity for creating a new patient. */
 public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private PatientCreationController mController;

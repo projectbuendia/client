@@ -28,11 +28,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-/**
- * An activity that requires that there currently be a logged-in user.
- */
-public abstract class BaseLoggedInActivity extends BaseActivity {
-
+/** Base class for activities that require a logged-in user. */
+public class BaseLoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
@@ -56,7 +53,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             super.onCreate(savedInstanceState);
 
             // If there is no active user, then return the user to the user login activity.
-            BigToast.show(this, "Please login to continue");
+            BigToast.show(this, "Please log in to continue");
 
             Intent intent = new Intent(this, UserLoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -184,10 +181,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         initials.setBackgroundColor(mUserColorizer.getColorArgb(user.getId()));
         initials.setText(user.getInitials());
-    }
-
-    public void onEvent(ActiveUserUnsetEvent event) {
-        // TODO(dxchen): Implement this in one way or another!
     }
 
     class MenuPopupWindow extends PopupWindow {
