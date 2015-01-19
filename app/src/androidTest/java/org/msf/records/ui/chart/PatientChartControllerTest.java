@@ -11,7 +11,6 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
@@ -34,8 +33,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	private static final String PATIENT_NAME_1 = "bob";
 	private static final String PATIENT_ID_1 = "id1";
 
-	private static final LocalizedChartHelper.LocalizedObservation OBSERVATION_A =
-			new LocalizedChartHelper.LocalizedObservation(0, "g", "c", "c", "val", "localizedVal");
+	private static final LocalizedChartHelper.LocalizedObs OBSERVATION_A =
+			new LocalizedChartHelper.LocalizedObs(0, "g", "c", "c", "val", "localizedVal");
 
 	private PatientChartController mController;
 
@@ -47,7 +46,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
     private FakeHandler mFakeHandler;
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -90,9 +89,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
 	public void testPatientDetailsLoaded_SetsObservationsOnUi() {
 		// GIVEN the observations provider is set up to return some dummy data
-		List<LocalizedChartHelper.LocalizedObservation> allObservations =
+		List<LocalizedChartHelper.LocalizedObs> allObservations =
 				ImmutableList.of(OBSERVATION_A);
-		Map<String, LocalizedChartHelper.LocalizedObservation> recentObservations =
+		Map<String, LocalizedChartHelper.LocalizedObs> recentObservations =
 				ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
 		when(mMockObservationsProvider.getObservations(PATIENT_UUID_1))
 				.thenReturn(allObservations);
@@ -102,7 +101,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
 		mController.init();
 		// WHEN that patient's details are loaded
-		AppPatient patient = AppPatient.builder().build();
+		AppPatient patient = new AppPatient.Builder().build();
 		mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
 		// TODO(rjlothian): When the handler UI updating hack in PatientChartController is
 		// removed, this can also be removed.
@@ -117,7 +116,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
 		mController.init();
 		// WHEN that patient's details are loaded
-		AppPatient patient = AppPatient.builder().build();
+		AppPatient patient = new AppPatient.Builder().build();
 		mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
