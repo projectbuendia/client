@@ -221,9 +221,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             mObservations.clear();
         }
 
+        int count = cursor.getCount();
+        String[] patientUuids = new String[count];
+
         // Add all patients from cursor.
-        String[] patientUuids = new String[cursor.getCount()];
-        for (int i = 0; i < cursor.getCount(); i++) {
+        for (int i = 0; i < count; i++) {
             AppPatient patient = cursor.get(i);
             addPatient(patient);
             patientUuids[i] = patient.uuid;
