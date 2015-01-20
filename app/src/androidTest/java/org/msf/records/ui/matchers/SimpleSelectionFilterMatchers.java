@@ -42,8 +42,9 @@ public class SimpleSelectionFilterMatchers {
     }
 
     /**
-     * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link org.msf.records.filter.db.SimpleSelectionFilterGroup})
-     * a {@link LocationUuidFilter} filtering by the specified location UUID.
+     * Matches any {@link SimpleSelectionFilter} that is or wraps (via a
+     * {@link SimpleSelectionFilterGroup}) a {@link LocationUuidFilter} filtering by the specified
+     * location UUID.
      */
     public static class IsFilterGroupWithLocationFilter
             extends ArgumentMatcher<SimpleSelectionFilter> {
@@ -54,8 +55,9 @@ public class SimpleSelectionFilterMatchers {
         }
 
         /**
-         * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link org.msf.records.filter.db.SimpleSelectionFilterGroup})
-         * a {@link LocationUuidFilter} filtering by the specified location UUID.
+         * Matches any {@link SimpleSelectionFilter} that is or wraps (via a
+         * {@link SimpleSelectionFilterGroup}) a {@link LocationUuidFilter} filtering by the
+         * specified location UUID.
          */
         public boolean matches(Object filter) {
             if (isMatchingLocationFilter((SimpleSelectionFilter)filter)) {
@@ -74,7 +76,8 @@ public class SimpleSelectionFilterMatchers {
                 return false;
             }
 
-            List<SimpleSelectionFilter> filterList = ((SimpleSelectionFilterGroup) filter).getFilters();
+            List<SimpleSelectionFilter> filterList =
+                    ((SimpleSelectionFilterGroup) filter).getFilters();
             for (SimpleSelectionFilter internalFilter : filterList) {
                 if (matches(internalFilter)) {
                     return true;

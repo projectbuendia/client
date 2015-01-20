@@ -36,7 +36,7 @@ public final class PatientDbFilters {
         for (AppLocation zone : locationTree.getChildren(locationTree.getRoot())) {
             // TODO(akalachman): Remove FilterGroup dep (only used for setName).
             filters.add(new SimpleSelectionFilterGroup(
-                   new LocationUuidFilter(locationTree, zone)).setName(zone.toString()));
+                    new LocationUuidFilter(locationTree, zone)).setName(zone.toString()));
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
         filters.toArray(filterArray);

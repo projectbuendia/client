@@ -230,7 +230,8 @@ public class PatientSearchController {
             // Tack on a location filter to the filter to show only known locations in the subtree
             // of the current root.
             if (mRootLocationUuid == null) {
-                filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(mLocationTree), mFilter);
+                filter = new SimpleSelectionFilterGroup(
+                        new LocationUuidFilter(mLocationTree), mFilter);
             } else {
                 filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(
                         mLocationTree, mLocationTree.findByUuid(mRootLocationUuid)), mFilter);

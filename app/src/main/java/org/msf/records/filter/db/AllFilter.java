@@ -15,5 +15,7 @@ public final class AllFilter implements SimpleSelectionFilter {
     }
 
     @Override
-    public String toString() { return "All Patients"; }
+    public String toString() {
+        return "All Patients";
+    }
 }
