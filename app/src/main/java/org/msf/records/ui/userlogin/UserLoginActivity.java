@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.User;
+import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
@@ -29,7 +30,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Screen allowing the user to login by selecting their name.
  */
-public class UserLoginActivity extends FragmentActivity {
+public class UserLoginActivity extends BaseActivity {
 
     @Inject Colorizer mUserColorizer;
     @InjectView(R.id.users) GridView mUserListView;

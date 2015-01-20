@@ -41,22 +41,25 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         this.locationUuid = builder.mLocationUuid;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * Creates an instance of {@link AppPatient} from a network {@link Patient} object.
      */
     public static AppPatient fromNet(Patient patient) {
-        AppPatient.Builder builder = AppPatient.builder();
-        builder.mId = patient.id;
-        builder.mUuid = patient.uuid;
-        builder.mGivenName = patient.given_name;
-        builder.mFamilyName = patient.family_name;
-        builder.mGender = "M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE;
-        builder.mBirthdate = patient.birthdate;
-        builder.mAdmissionDateTime = new DateTime(patient.admission_timestamp * 1000);
-        if (patient.assigned_location != null && patient.assigned_location.uuid != null) {
-            builder.mLocationUuid = patient.assigned_location.uuid;
-        }
-        return builder.build();
+        return builder()
+                .setId(patient.id)
+                .setUuid(patient.uuid)
+                .setGivenName(patient.given_name)
+                .setFamilyName(patient.family_name)
+                .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
+                .setBirthdate(patient.birthdate)
+                .setAdmissionDateTime(new DateTime(patient.admission_timestamp * 1000))
+                .setLocationUuid(
+                        patient.assigned_location == null ? null : patient.assigned_location.uuid)
+                .build();
     }
 
     /**
@@ -95,32 +98,11 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
     }
 
     @Override
-    public int compareTo(AppPatient another) {
-        // TODO(akalachman): Once ids are numeric, compare them numerically.
-        int idCompareTo = id.compareTo(another.id);
-        if (idCompareTo != 0) {
-            return idCompareTo;
-        }
-
-        int familyNameCompareTo = familyName.compareTo(another.familyName);
-        if (familyNameCompareTo != 0) {
-            return familyNameCompareTo;
-        }
-
-        int givenNameCompareTo = givenName.compareTo(another.givenName);
-        if (givenNameCompareTo != 0) {
-            return givenNameCompareTo;
-        }
-
-        return 0;
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    public int compareTo(AppPatient other) {
+        return Utils.alphanumericComparator.compare(id, other.id);
     }
 
     public static final class Builder {
-
         private String mId;
         private String mUuid;
         private String mGivenName;
