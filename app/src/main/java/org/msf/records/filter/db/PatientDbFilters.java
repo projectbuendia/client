@@ -13,9 +13,10 @@ import java.util.List;
  */
 public final class PatientDbFilters {
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
-        // TODO(akalachman): Localize filter names.
-        // TODO(akalachman): Remove FilterGroup dep.
-        new SimpleSelectionFilterGroup(new ConceptFilter(Concept.PREGNANCY_UUID, Concept.YES_UUID)).setName("Pregnant"),
+        // TODO(akalachman): Localize filter names and extract elsewhere.
+        // TODO(akalachman): Remove FilterGroup dep (only used for setName).
+        new SimpleSelectionFilterGroup(
+                new ConceptFilter(Concept.PREGNANCY_UUID, Concept.YES_UUID)).setName("Pregnant"),
         new SimpleSelectionFilterGroup(new AgeFilter(5)).setName("Children Under 5"),
         new SimpleSelectionFilterGroup(new AgeFilter(2)).setName("Children Under 2")
     };
@@ -33,7 +34,7 @@ public final class PatientDbFilters {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
 
         for (AppLocation zone : locationTree.getChildren(locationTree.getRoot())) {
-            // TODO(akalachman): Remove FilterGroup dep.
+            // TODO(akalachman): Remove FilterGroup dep (only used for setName).
             filters.add(new SimpleSelectionFilterGroup(
                    new LocationUuidFilter(locationTree, zone)).setName(zone.toString()));
         }
