@@ -1,5 +1,6 @@
 package org.msf.records.ui.patientlist;
 
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.SingleLocationPatientListAdapter;
 
@@ -14,7 +15,7 @@ public class RoundFragment extends PatientListFragment {
     }
 
     @Override
-    public PatientListTypedCursorAdapter getAdapterInstance() {
-        return new SingleLocationPatientListAdapter(getActivity());
+    public PatientListTypedCursorAdapter getAdapterInstance(AppLocationTree locationTree) {
+        return new SingleLocationPatientListAdapter(getActivity(), locationTree);
     }
 }

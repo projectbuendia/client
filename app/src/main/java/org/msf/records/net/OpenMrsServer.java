@@ -17,9 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.msf.records.data.app.AppPatientDelta;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.model.Zone;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -255,15 +252,6 @@ public class OpenMrsServer implements Server {
 
     private Patient patientFromJson(JSONObject object) throws JSONException {
         Patient patient = mGson.fromJson(object.toString(), Patient.class);
-
-        // TODO(rjlothian): This shouldn't be done here.
-        if (patient.assigned_location == null && LocationTree.singletonInstance != null) {
-            LocationSubtree subtree =
-                    LocationTree.singletonInstance.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
-            if (subtree != null) {
-                patient.assigned_location = subtree.getLocation();
-            }
-        }
 
         if (!"M".equals(patient.gender) && !"F".equals(patient.gender)) {
             LOG.e("Invalid gender from server: " + patient.gender);

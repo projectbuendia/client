@@ -2,12 +2,9 @@ package org.msf.records.filter;
 
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.sync.providers.Contracts;
 
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  * LocationUuidFilter returns all patients who reside in the specified subtree of locations.

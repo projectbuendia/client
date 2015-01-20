@@ -1,8 +1,8 @@
 package org.msf.records.ui.patientlist;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppPatient;
-import org.msf.records.location.LocationTree;
 import org.msf.records.ui.FunctionalTestCase;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
@@ -39,7 +39,7 @@ public class PatientListActivityTest extends FunctionalTestCase {
         onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))
                 .check(matches(isDisplayed()));
 
-        onData(allOf(is(LocationTree.LocationSubtree.class), hasToString(startsWith("S1"))))
+        onData(allOf(is(AppLocation.class), hasToString(startsWith("S1"))))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .check(matches(isDisplayed()));
 

@@ -320,7 +320,7 @@ public final class LocationTree {
             for (int i = 0; i < Math.min(pathA.size(), pathB.size()); i++) {
                 Location locationA = pathA.get(i).getLocation();
                 Location locationB = pathB.get(i).getLocation();
-                int result = (i == ZONE_DEPTH) ? Zone.compare(locationA, locationB) :
+                int result = //(i == ZONE_DEPTH) ? Zone.compare(locationA, locationB) :
                         Utils.alphanumericComparator.compare(
                                 locationA.names.get(DEFAULT_LOCALE),
                                 locationB.names.get(DEFAULT_LOCALE));

@@ -8,11 +8,11 @@ import com.google.common.collect.ImmutableSetMultimap;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.msf.records.utils.Logger;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.msf.records.utils.Logger;
 
 /**
  * A tree that contains all app model locations.

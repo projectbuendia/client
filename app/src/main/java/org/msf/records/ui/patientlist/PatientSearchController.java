@@ -45,6 +45,8 @@ public class PatientSearchController {
 
     public interface FragmentUi {
 
+        void setLocationTree(AppLocationTree locationTree);
+
         void setPatients(TypedCursor<AppPatient> patients);
 
         void showSpinner(boolean show);
@@ -120,6 +122,9 @@ public class PatientSearchController {
             synchronized (mFilterSubscriberLock) {
                 mCrudEventBus.unregister(this);
                 mFilterSubscriber = null;
+            }
+            for (FragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.setLocationTree(event.tree);
             }
             mLocationTree = event.tree;
 
