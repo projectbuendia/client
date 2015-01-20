@@ -2,6 +2,17 @@ package org.msf.records.location;
 
 import android.content.res.Resources;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+
+import org.msf.records.R;
+import org.msf.records.model.Zone;
+import org.msf.records.net.model.Location;
+import org.msf.records.utils.Utils;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,21 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
-
-import org.msf.records.R;
-import org.msf.records.model.Zone;
-import org.msf.records.net.model.Location;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 
 /**
  * A LocationTree represents a tree of Locations, with each level of the tree sorted by the given
@@ -259,7 +257,7 @@ public final class LocationTree {
     }
 
     /**
-     * Returns a list of the zones in the tree, ordered by {@link Zone#compareTo(Location, Location)}.
+     * Returns a list of the zones in the tree, ordered by {@link Zone#compare(Location, Location)}.
      */
     public List<LocationSubtree> getZones() {
         return getLocationsForDepth(ZONE_DEPTH);
@@ -315,114 +313,23 @@ public final class LocationTree {
     }
 
     public final class SubtreeComparator implements Comparator<LocationSubtree> {
-        /**
-         * Compares two objects that may each be Integer or String.  All Integers
-         * sort before all Strings; Integers compare according to their numeric
-         * value and Strings compare according to their string value.
-         */
-        private int compareObjects(Object a, Object b) {
-            if (a instanceof Integer && b instanceof String) return -1;
-            if (a instanceof String && b instanceof Integer) return 1;
-            if (a instanceof Integer && b instanceof Integer) {
-                return (Integer) a - (Integer) b;
-            }
-            if (a instanceof String && b instanceof String) {
-                return ((String) a).compareTo((String) b);
-            }
-            throw new IllegalArgumentException("arguments must be Numbers or Strings");
-        }
-
-        /**
-         * Compares two lists lexicographically by element, just like Python does.
-         */
-        private int compareLists(List<Object> a, List<Object> b) {
-            int i;
-            for (i = 0; i < a.size() && i < b.size(); i++) {
-                int compare = compareObjects(a.get(i), b.get(i));
-                if (compare != 0) return compare;
-            }
-            if (i < a.size()) return -1;
-            if (i < b.size()) return 1;
-            return 0;
-        }
-
-        /**
-         * Turns a string into an array of Numbers (from sequences of digits) and
-         * Strings (from sequences of letters).  Other characters are ignored.
-         */
-        private List<Object> getParts(String str) {
-            List<Object> parts = new ArrayList<>();
-            if (str == null) {
-                return parts;
-            }
-
-            int len = str.length();
-            StringBuilder chunkBuilder = new StringBuilder();
-            boolean isNumChunk = true;
-            for (int pos = 0; pos < len; pos++) {
-                // Continue the current chunk if the next character is the same type as the previous
-                // character; otherwise, add the chunk to the parts list and start a new chunk.
-                boolean isDigit = isLatinDigit(str.charAt(pos));
-                if (chunkBuilder.length() == 0) {
-                    isNumChunk = isDigit;
-                }
-
-                if (isNumChunk == isDigit) {
-                    chunkBuilder.append(str.charAt(pos));
-                } else {
-                    parts.add(getIntOrString(chunkBuilder.toString(), isNumChunk));
-                    chunkBuilder.setLength(0);
-                    chunkBuilder.append(str.charAt(pos));
-                    isNumChunk = isDigit;
+        @Override
+        public int compare(LocationSubtree lhs, LocationSubtree rhs) {
+            List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
+            List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
+            for (int i = 0; i < Math.min(pathA.size(), pathB.size()); i++) {
+                Location locationA = pathA.get(i).getLocation();
+                Location locationB = pathB.get(i).getLocation();
+                int result = (i == ZONE_DEPTH) ? Zone.compare(locationA, locationB) :
+                        Utils.alphanumericComparator.compare(
+                                locationA.names.get(DEFAULT_LOCALE),
+                                locationB.names.get(DEFAULT_LOCALE));
+                if (result != 0) {
+                    return result;
                 }
             }
-
-            if (chunkBuilder.length() > 0) {
-                parts.add(getIntOrString(chunkBuilder.toString(), isNumChunk));
-            }
-
-            return parts;
+            return pathA.size() - pathB.size();
         }
-
-        private boolean isLatinDigit(char c) {
-            return c >= '0' && c <= '9';
-        }
-
-        private Object getIntOrString(String value, boolean isNum) {
-            return isNum ? Integer.valueOf(value) : value;
-        }
-
-    	@Override
-    	public int compare(LocationSubtree lhs, LocationSubtree rhs) {
-    		if (lhs == rhs) return 0;
-
-    		List<LocationSubtree> pathA = getAncestorsStartingFromRoot(lhs);
-    		List<LocationSubtree> pathB = getAncestorsStartingFromRoot(rhs);
-    		for (int i = 0;; i++) {
-    			if (i >= pathA.size() && i >= pathB.size()) {
-    				return 0;
-    			} else if (i >= pathA.size()) {
-    				return -1;
-    			} else if (i >= pathB.size()) {
-    				return 1;
-    			} else {
-    				LocationSubtree subtreeA = pathA.get(i);
-    				LocationSubtree subtreeB = pathB.get(i);
-
-    				int compare;
-	    			if (i == ZONE_DEPTH) {
-	    				compare = Zone.compareTo(subtreeA.getLocation(), subtreeB.getLocation());
-	    			} else {
-                        String nameA = subtreeA.mLocation.names.get(DEFAULT_LOCALE);
-                        String nameB = subtreeB.mLocation.names.get(DEFAULT_LOCALE);
-                        compare = compareLists(getParts(nameA), getParts(nameB));
-	    			}
-	    			if (compare != 0) {
-	    				return compare;
-	    			}
-    			}
-    		}
-    	}
     }
 
     /**
