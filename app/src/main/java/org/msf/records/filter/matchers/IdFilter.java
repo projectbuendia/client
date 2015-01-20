@@ -1,5 +1,7 @@
 package org.msf.records.filter.matchers;
 
+import android.support.annotation.Nullable;
+
 import org.msf.records.data.app.AppPatient;
 
 /**
@@ -7,7 +9,10 @@ import org.msf.records.data.app.AppPatient;
  */
 public final class IdFilter implements MatchingFilter<AppPatient> {
     @Override
-    public boolean matches(AppPatient object, CharSequence constraint) {
-        return object.id.contains(constraint);
+    public boolean matches(@Nullable AppPatient object, CharSequence constraint) {
+        if (object == null || object.id == null) {
+            return false;
+        }
+        return object.id.toLowerCase().contains(constraint.toString().toLowerCase());
     }
 }

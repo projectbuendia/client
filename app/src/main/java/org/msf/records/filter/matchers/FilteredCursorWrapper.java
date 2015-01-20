@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class FilteredCursorWrapper<T> implements TypedCursor<T> {
     private final TypedCursor<T> mCursor;
-    private final MatchingFilter<T> mFilter;
     private final List<Integer> mIndices;
 
     /**
@@ -25,7 +24,6 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
     public FilteredCursorWrapper(
             TypedCursor<T> cursor, MatchingFilter<T> filter, CharSequence constraint) {
         mCursor = cursor;
-        mFilter = filter;
         mIndices = new ArrayList<Integer>();
 
         int count = cursor.getCount();

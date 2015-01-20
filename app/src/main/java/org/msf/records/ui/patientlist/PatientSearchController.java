@@ -115,6 +115,10 @@ public class PatientSearchController {
 
     public void suspend() {
         mGlobalEventBus.unregister(mSyncSubscriber);
+        // Close any outstanding patient cursor. New results will be fetched when requested.
+        if (mPatientsCursor != null) {
+            mPatientsCursor.close();
+        }
     }
 
     private class SyncSubscriber {
@@ -283,6 +287,13 @@ public class PatientSearchController {
     private final class FilterSubscriber {
         public void onEventMainThread(TypedCursorFetchedEvent<AppPatient> event) {
             mCrudEventBus.unregister(this);
+
+            // If a patient cursor was already open, close it.
+            if (mPatientsCursor != null) {
+                mPatientsCursor.close();
+            }
+
+            // Replace the patient cursor with the newly-fetched results.
             mPatientsCursor = event.cursor;
             updatePatients();
         }

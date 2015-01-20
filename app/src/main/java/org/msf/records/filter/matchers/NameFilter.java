@@ -1,5 +1,7 @@
 package org.msf.records.filter.matchers;
 
+import android.support.annotation.Nullable;
+
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.providers.Contracts;
@@ -12,8 +14,13 @@ import org.msf.records.sync.providers.Contracts;
  */
 public final class NameFilter implements MatchingFilter<AppPatient> {
     @Override
-    public boolean matches(AppPatient object, CharSequence constraint) {
-        return object.familyName.startsWith(constraint.toString())
-                || object.givenName.startsWith(constraint.toString());
+    public boolean matches(@Nullable AppPatient object, CharSequence constraint) {
+        if (object == null) {
+            return false;
+        }
+        String familyName = (object.familyName == null) ? "" : object.familyName.toLowerCase();
+        String givenName = (object.givenName == null) ? "" : object.givenName.toLowerCase();
+        return familyName.startsWith(constraint.toString().toLowerCase())
+                || givenName.startsWith(constraint.toString().toLowerCase());
     }
 }

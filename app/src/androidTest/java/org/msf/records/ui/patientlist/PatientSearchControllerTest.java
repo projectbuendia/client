@@ -74,12 +74,11 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
         // WHEN patients are retrieved
-        TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        AppPatient.class, getFakeAppPatientCursor());
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to fragment UI's
-        verify(mFragmentMockUi).setPatients(event.cursor);
+        verify(mFragmentMockUi).setPatients(any(TypedCursor.class));
     }
 
     /** Tests that patients are passed to the activity UI after retrieval. */
@@ -87,25 +86,66 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
         // WHEN patients are retrieved
-        TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        AppPatient.class, getFakeAppPatientCursor());
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to activity UI
-        verify(mMockUi).setPatients(event.cursor);
+        verify(mMockUi).setPatients(any(TypedCursor.class));
     }
 
-    /** Tests that the patient cursor is closed after patients are passed to UI's. */
-    public void testFilterSubscriber_closesPatientCursor() {
-        // GIVEN initialized PatientSearchController
+    /** Tests that any old patient cursor is closed after results are reloaded. */
+    public void testFilterSubscriber_closesExistingPatientCursor() {
+        // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
-        // WHEN patients are retrieved
-        TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        AppPatient.class, getFakeAppPatientCursor());
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
-        // THEN patients cursor is closed
+        // WHEN new results are retrieved
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent reloadEvent = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(reloadEvent);
+        // THEN old patients cursor is closed
         assertTrue(((FakeTypedCursor<AppPatient>) event.cursor).isClosed());
+    }
+
+    /** Tests that retrieving a new cursor results in the closure of any existing cursor. */
+    public void testSuspend_closesExistingPatientCursor() {
+        // GIVEN initialized PatientSearchController with existing results
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(event);
+        // WHEN controller is suspended
+        mController.suspend();
+        // THEN patient cursor is closed
+        assertTrue(((FakeTypedCursor<AppPatient>) event.cursor).isClosed());
+    }
+
+    /** Tests that suspend() does not attempt to close a null cursor. */
+    public void testSuspend_ignoresNullPatientCursor() {
+        // GIVEN initialized PatientSearchController with no search results
+        // WHEN controller is suspended
+        mController.suspend();
+        // THEN nothing happens (no runtime exception thrown)
+    }
+
+    /** Tests that search results are loaded properly after a cycle of init() and suspend(). */
+    public void testLoadSearchResults_functionalAfterInitSuspendCycle() {
+        // GIVEN initialized PatientSearchController with existing results
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(event);
+        // WHEN a suspend()/init() cycle occurs
+        mController.suspend();
+        mController.init();
+        // THEN search results can be loaded successfully
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent reloadEvent = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(reloadEvent);
+        verify(mFragmentMockUi, times(2)).setPatients(any(TypedCursor.class));
     }
 
     /**
