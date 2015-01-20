@@ -25,12 +25,14 @@ import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
+import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 
 /**
  * PatientSearchActivity is a BaseActivity with a SearchView that filters a patient list.
@@ -40,13 +42,14 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
     @Inject UpdateManager mUpdateManager;
     @Inject AppModel mAppModel;
+    @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
 
-    @InjectView(R.id.status_bar_update_message) TextView mUpdateMessage;
-    @InjectView(R.id.status_bar_update_action) TextView mUpdateAction;
+    @InjectView(R.id.status_bar_default_message) TextView mUpdateMessage;
+    @InjectView(R.id.status_bar_default_action)TextView mUpdateAction;
 
     // TODO(akalachman): Populate properly.
     protected final String mLocale = "en";
@@ -63,10 +66,11 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         mSearchController = new PatientSearchController(
                 new SearchUi(),
                 mCrudEventBusProvider.get(),
+                new EventBusWrapper(mEventBus),
                 mAppModel,
                 mLocale);
 
-        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_updates, null));
+        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_default, null));
         ButterKnife.inject(this);
     }
 
@@ -112,6 +116,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     @Override
     protected void onResumeImpl() {
         super.onResumeImpl();
+        mSearchController.init();
         mSearchController.loadSearchResults();
         // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
@@ -119,6 +124,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     @Override
     protected void onPauseImpl() {
         super.onPauseImpl();
+        mSearchController.suspend();
     }
 
     public void onEventMainThread(final UpdateAvailableEvent event) {

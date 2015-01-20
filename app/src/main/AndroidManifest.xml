@@ -14,6 +14,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Required to check if there is a connection to the internet -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Required to check if there is a connection to the internet -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Required to fix wifi connectivity -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <!-- Required to enable our SyncAdapter after it's created. -->

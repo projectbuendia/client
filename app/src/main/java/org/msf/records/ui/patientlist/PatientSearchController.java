@@ -2,6 +2,8 @@ package org.msf.records.ui.patientlist;
 
 import android.util.Log;
 
+import com.google.common.eventbus.EventBus;
+
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
@@ -12,6 +14,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.location.LocationsLoadFailedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.filter.db.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilterGroup;
 import org.msf.records.filter.db.LocationUuidFilter;
@@ -21,6 +24,7 @@ import org.msf.records.filter.matchers.IdFilter;
 import org.msf.records.filter.matchers.MatchingFilter;
 import org.msf.records.filter.matchers.MatchingFilterGroup;
 import org.msf.records.filter.matchers.NameFilter;
+import org.msf.records.utils.EventBusRegistrationInterface;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -55,6 +59,7 @@ public class PatientSearchController {
 
     private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
+    private final EventBusRegistrationInterface mGlobalEventBus;
     private final AppModel mModel;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
 
@@ -71,27 +76,53 @@ public class PatientSearchController {
     private final MatchingFilter<AppPatient> mSearchFilter =
             new MatchingFilterGroup<AppPatient>(OR, new IdFilter(), new NameFilter());
     private TypedCursor<AppPatient> mPatientsCursor;
+    private final SyncSubscriber mSyncSubscriber;
 
     /**
      * Instantiates a {@link PatientSearchController} with the given UI implementation, event bus,
-     * app model, and locale.
+     * app model, and locale. The global event bus must also be passed in in order to reload results
+     * after a sync.
      *
      * @param ui a {@link Ui} that will respond to UI events
      * @param crudEventBus a {@link CrudEventBus} that will listen for patient and location fetch
      *                     events
+     * @param globalEventBus a {@link EventBusRegistrationInterface} that will listen for sync
+     *                       events
      * @param model an {@link AppModel} for fetching patient and location data
      * @param locale a language code/locale for presenting localized information (e.g. en)
      */
     public PatientSearchController(
-            Ui ui, CrudEventBus crudEventBus, AppModel model, String locale) {
+            Ui ui,
+            CrudEventBus crudEventBus,
+            EventBusRegistrationInterface globalEventBus,
+            AppModel model, String locale) {
         mUi = ui;
         mCrudEventBus = crudEventBus;
+        mGlobalEventBus = globalEventBus;
         mModel = model;
 
         mCrudEventBus.register(new LocationTreeUpdatedSubscriber());
         mModel.fetchLocationTree(mCrudEventBus, locale);
 
         mFilter = PatientDbFilters.getDefaultFilter();
+
+        mSyncSubscriber = new SyncSubscriber();
+    }
+
+    public void init() {
+        mGlobalEventBus.register(mSyncSubscriber);
+    }
+
+    public void suspend() {
+        mGlobalEventBus.unregister(mSyncSubscriber);
+    }
+
+    private class SyncSubscriber {
+        public void onEventMainThread(SyncSucceededEvent event) {
+            // Load search results, but don't show the spinner, as the user may be in the middle
+            // of performing an operation.
+            loadSearchResults(false);
+        }
     }
 
     private class LocationTreeUpdatedSubscriber {
@@ -205,11 +236,16 @@ public class PatientSearchController {
         return filter;
     }
 
+    public void loadSearchResults() {
+        loadSearchResults(true); // By default, show spinner.
+    }
+
     /**
      * Asynchronously loads or reloads the search results based on previously specified filter and
      * root location. If no filter is specified, all results are shown be default.
+     * @param showSpinner whether or not to show a spinner until operation is complete
      */
-    public void loadSearchResults() {
+    public void loadSearchResults(boolean showSpinner) {
         // If a location filter is applied but no location tree is present, wait.
         if (mRootLocationUuid != null && mLocationTree == null) {
             mWaitingOnLocationTree = true;
@@ -224,8 +260,10 @@ public class PatientSearchController {
         }
         mFilterSubscriber = new FilterSubscriber();
 
-        for (FragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.showSpinner(true);
+        if (showSpinner) {
+            for (FragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.showSpinner(true);
+            }
         }
         mCrudEventBus.register(mFilterSubscriber);
         mModel.fetchPatients(mCrudEventBus, getLocationSubfilter(), mFilterQueryTerm);
