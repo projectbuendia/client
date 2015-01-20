@@ -48,8 +48,8 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
 
-    @InjectView(R.id.status_bar_update_message) TextView mUpdateMessage;
-    @InjectView(R.id.status_bar_update_action) TextView mUpdateAction;
+    @InjectView(R.id.status_bar_default_message) TextView mUpdateMessage;
+    @InjectView(R.id.status_bar_default_action)TextView mUpdateAction;
 
     // TODO(akalachman): Populate properly.
     protected final String mLocale = "en";
@@ -70,7 +70,7 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
                 mAppModel,
                 mLocale);
 
-        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_updates, null));
+        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_default, null));
         ButterKnife.inject(this);
     }
 

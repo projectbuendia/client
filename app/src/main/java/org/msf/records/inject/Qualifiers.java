@@ -8,6 +8,13 @@ import javax.inject.Qualifier;
 
 public class Qualifiers {
 
+    // .diagnostics
+
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface HealthEventBus {}
+
     // .events
 
     @Qualifier

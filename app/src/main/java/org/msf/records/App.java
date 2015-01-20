@@ -4,6 +4,8 @@ import android.app.Application;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
+import org.msf.records.diagnostics.DiagnosticsModule;
+import org.msf.records.diagnostics.HealthMonitor;
 import org.msf.records.events.mvcmodels.ModelReadyEvent;
 import org.msf.records.mvcmodels.Models;
 import org.msf.records.mvcmodels.PatientChartModel;
@@ -37,18 +39,17 @@ public class App extends Application {
 
     private static OpenMrsConnectionDetails sConnectionDetails;
 
-    @Inject Application mApplication;
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
-    @Inject UpdateManager mUpdateManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
-    @Inject PatientChartModel mPatientChartModel;
     @Inject Server mServer;
+    @Inject HealthMonitor mHealthMonitor;
 
     @Override
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
         initializeSqlCipher();
 
         buildObjectGraphAndInject();
@@ -62,6 +63,8 @@ public class App extends Application {
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
             sServer = mServer; // TODO(dxchen): Remove when Daggered.
         }
+
+        mHealthMonitor.start();
 
         // TODO(dxchen): Refactor this into the model classes.
         EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
