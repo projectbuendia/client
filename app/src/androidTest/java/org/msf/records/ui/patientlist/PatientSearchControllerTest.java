@@ -157,7 +157,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController
         // WHEN search results are requested with no spinner
         mController.loadSearchResults(false);
-        // THEN spinner is not shown
+        // THEN spinner is shown
         verify(mFragmentMockUi, times(0)).showSpinner(true);
     }
 
