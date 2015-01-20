@@ -1,4 +1,4 @@
-package org.msf.records.filter;
+package org.msf.records.filter.db;
 
 /**
  * A pass-through filter that returns all results.

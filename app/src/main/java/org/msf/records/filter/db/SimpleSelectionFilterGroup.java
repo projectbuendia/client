@@ -1,4 +1,4 @@
-package org.msf.records.filter;
+package org.msf.records.filter.db;
 
 import com.google.common.collect.ImmutableList;
 
@@ -7,10 +7,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A FilterGroup is a filter that acts as a container for multiple filters or filter groups, with
+ * A database filter that acts as a container for multiple filters or filter groups, with
  * an optional name used for string representations.
  */
-public final class FilterGroup implements SimpleSelectionFilter {
+public final class SimpleSelectionFilterGroup implements SimpleSelectionFilter {
     private static final String DEFAULT_FILTER_NAME = "";
 
     private final FilterType mFilterType;
@@ -27,16 +27,16 @@ public final class FilterGroup implements SimpleSelectionFilter {
     }
 
     /** Assume AND by default. */
-    public FilterGroup(SimpleSelectionFilter... filters) {
+    public SimpleSelectionFilterGroup(SimpleSelectionFilter... filters) {
         this(FilterType.AND, filters);
     }
 
-    public FilterGroup(FilterType filterType, SimpleSelectionFilter... filters) {
+    public SimpleSelectionFilterGroup(FilterType filterType, SimpleSelectionFilter... filters) {
         mFilters = ImmutableList.copyOf(filters);
         mFilterType = filterType;
     }
 
-    public FilterGroup(FilterType filterType, List<SimpleSelectionFilter> filters) {
+    public SimpleSelectionFilterGroup(FilterType filterType, List<SimpleSelectionFilter> filters) {
         mFilters = ImmutableList.copyOf(filters);
         mFilterType = filterType;
     }
@@ -96,7 +96,7 @@ public final class FilterGroup implements SimpleSelectionFilter {
      * @param name the filter name
      * @return this, with the name set
      */
-    public FilterGroup setName(String name) {
+    public SimpleSelectionFilterGroup setName(String name) {
         mName = name;
         return this;
     }

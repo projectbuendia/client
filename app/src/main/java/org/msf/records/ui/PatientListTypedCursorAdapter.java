@@ -32,7 +32,7 @@ import butterknife.InjectView;
 /**
  * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link AppPatient}'s,
  * displaying these patients grouped by location and filtered by a specified
- * {@link org.msf.records.filter.SimpleSelectionFilter}.
+ * {@link org.msf.records.filter.db.SimpleSelectionFilter}.
  */
 public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;

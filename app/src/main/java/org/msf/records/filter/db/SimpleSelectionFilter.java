@@ -1,4 +1,4 @@
-package org.msf.records.filter;
+package org.msf.records.filter.db;
 
 /**
  * SimpleSelectionFilter is a container for a filter string (part of an SQL WHERE

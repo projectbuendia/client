@@ -3,7 +3,6 @@ package org.msf.records.data.app.tasks;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
@@ -16,8 +15,8 @@ import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.filter.UuidFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.filter.db.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;

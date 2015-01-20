@@ -14,8 +14,8 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
-import org.msf.records.filter.PatientFilters;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.db.PatientDbFilters;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.model.Zone;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.matchers.SimpleSelectionFilterMatchers;
@@ -82,7 +82,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
                         AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients cursor is closed
-        assertTrue(((FakeTypedCursor<AppPatient>)event.cursor).isClosed());
+        assertTrue(((FakeTypedCursor<AppPatient>) event.cursor).isClosed());
     }
 
     /**
@@ -149,7 +149,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.onQuerySubmitted("foo");
         // THEN results are requested with that search term
         verify(mMockAppModel).fetchPatients(
-                mFakeCrudEventBus, PatientFilters.getDefaultFilter(), "foo");
+                mFakeCrudEventBus, PatientDbFilters.getDefaultFilter(), "foo");
     }
 
     /** Tests that the chart activity is launched for a patient when that patient is selected. */

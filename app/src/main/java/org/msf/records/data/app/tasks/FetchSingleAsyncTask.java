@@ -9,7 +9,7 @@ import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 
