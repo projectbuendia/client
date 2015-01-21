@@ -100,7 +100,7 @@ public final class AssignLocationDialog
 
     public void onPatientUpdateFailed( int reason )
     {
-        mAdapter.setSelectedLocationUuid(mCurrentLocationUuid);
+        mAdapter.setmSelectedLocationUuid(mCurrentLocationUuid);
 
         Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ), Toast.LENGTH_SHORT ).show();
         mProgressDialog.dismiss();
@@ -129,7 +129,7 @@ public final class AssignLocationDialog
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         String newTentUuid = mAdapter.getItem(position).uuid;
-        mAdapter.setSelectedLocationUuid(Optional.fromNullable(newTentUuid));
+        mAdapter.setmSelectedLocationUuid(Optional.fromNullable(newTentUuid));
         mProgressDialog = ProgressDialog.show(mContext,
                 mContext.getResources().getString(R.string.title_updating_patient),
                 mContext.getResources().getString(R.string.please_wait), true);
@@ -149,7 +149,7 @@ public final class AssignLocationDialog
     // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentTent(String newTentUuid) {
-        return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());
+        return mCurrentLocationUuid.equals(mAdapter.getmSelectedLocationUuid());
     }
 
     @Override

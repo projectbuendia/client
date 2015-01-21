@@ -17,52 +17,55 @@ import org.msf.records.ui.FakeEventBus;
  */
 public final class TentSelectionControllerTest extends AndroidTestCase {
 
-	private TentSelectionController mController;
-	private FakeEventBus mFakeEventBus;
+    private TentSelectionController mController;
+    private FakeEventBus mFakeEventBus;
     @Mock private AppModel mMockAppModel;
-	@Mock private TentSelectionController.Ui mMockUi;
-	@Mock private TentSelectionController.TentFragmentUi mMockFragmentUi;
+    @Mock private TentSelectionController.Ui mMockUi;
+    @Mock private TentSelectionController.TentFragmentUi mMockFragmentUi;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		MockitoAnnotations.initMocks(this);
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
 
-		// TODO: Create a fake event bus so we can check whether the controller
-		// unregistered its event handler.
-		mFakeEventBus = new FakeEventBus();
-		mController = new TentSelectionController(
+        // TODO: Create a fake event bus so we can check whether the controller
+        // unregistered its event handler.
+        mFakeEventBus = new FakeEventBus();
+        mController = new TentSelectionController(
                 mMockAppModel,
                 mFakeEventBus,
                 mMockUi,
                 mFakeEventBus);
 	}
 
-	public void testInit_RequestsLoadLocations() {
-		// GIVEN the controller hasn't previously fetched the location tree
-		// WHEN the controller is initialized
-		mController.init();
-		// THEN the controller asks the location manager to provide the location tree
-		verify(mMockAppModel).fetchLocationTree(mFakeEventBus, "en");
+    /** Tests that locations are loaded during initialization. */
+    public void testInit_RequestsLoadLocations() {
+        // GIVEN the controller hasn't previously fetched the location tree
+        // WHEN the controller is initialized
+        mController.init();
+        // THEN the controller asks the location manager to provide the location tree
+        verify(mMockAppModel).fetchLocationTree(mFakeEventBus, "en");
     }
 
-	public void testSuspend_UnregistersFromEventBus() {
-		// GIVEN an initialized controller
-		mController.init();
-		// WHEN the controller is suspended
-		mController.suspend();
-		// THEN the controller unregisters from the event bus
-		assertEquals(0, mFakeEventBus.countRegisteredReceivers());
-	}
+    /** Tests that suspend() unregisters any subscribers from the event bus. */
+    public void testSuspend_UnregistersFromEventBus() {
+        // GIVEN an initialized controller
+        mController.init();
+        // WHEN the controller is suspended
+        mController.suspend();
+        // THEN the controller unregisters from the event bus
+        assertEquals(0, mFakeEventBus.countRegisteredReceivers());
+    }
 
-	public void testLoadLocations_HidesSpinner() {
-		// GIVEN an initialized controller with a fragment attached
-		mController.init();
-		mController.attachFragmentUi(mMockFragmentUi);
-		// WHEN the location tree is loaded
-		AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
-		mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
-		// THEN the controller hides the progress spinner
-		verify(mMockFragmentUi).showSpinner(false);
-	}
+    /** Tests that the spinner is hidden after locations are loaded. */
+    public void testLoadLocations_HidesSpinner() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN the location tree is loaded
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // THEN the controller hides the progress spinner
+        verify(mMockFragmentUi).showSpinner(false);
+    }
 }

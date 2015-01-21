@@ -25,9 +25,9 @@ public class AppLocationComparator implements Comparator<AppLocation> {
         for (int i = 0; i < Math.min(pathA.size(), pathB.size()); i++) {
             AppLocation locationA = pathA.get(i);
             AppLocation locationB = pathB.get(i);
-            int result = (i == AppLocationTree.ABSOLUTE_DEPTH_ZONE) ?
-                    Zone.compare(locationA, locationB) :
-                    Utils.alphanumericComparator.compare(locationA.name, locationB.name);
+            int result = (i == AppLocationTree.ABSOLUTE_DEPTH_ZONE)
+                    ? Zone.compare(locationA, locationB)
+                    : Utils.alphanumericComparator.compare(locationA.name, locationB.name);
             if (result != 0) {
                 return result;
             }

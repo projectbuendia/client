@@ -29,8 +29,6 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.LocaleSelector;
 
-import java.util.Locale;
-
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -104,13 +102,13 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
             @Override public boolean onNewTentSelected(String newTentUuid) {
                 mLocationUuid = newTentUuid;
-                updateLocationUI();
+                updateLocationUi();
                 return true;
             }
         };
     }
 
-    private void updateLocationUI() {
+    private void updateLocationUi() {
         if (mLocationTree == null || mLocationUuid == null) {
             return;
         }
@@ -299,7 +297,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         @Override
         public void setLocationTree(AppLocationTree locationTree) {
             mLocationTree = locationTree;
-            updateLocationUI();
+            updateLocationUi();
         }
 
         @Override

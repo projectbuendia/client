@@ -82,11 +82,11 @@ public final class TentSelectionFragment extends ProgressFragment {
     	mController.attachFragmentUi(mMyUi);
     }
 
-	@Override
-	public void onDestroyView() {
-		mController.detachFragmentUi(mMyUi);
-		super.onDestroyView();
-	}
+    @Override
+    public void onDestroyView() {
+        mController.detachFragmentUi(mMyUi);
+        super.onDestroyView();
+    }
 
     private final class MyUi implements TentSelectionController.TentFragmentUi {
     	@Override
@@ -111,10 +111,10 @@ public final class TentSelectionFragment extends ProgressFragment {
     	}
 
     	@Override
-    	public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
+        public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
             List<AppLocation> sortedTents = new ArrayList<AppLocation>(tents);
             Collections.sort(sortedTents, new AppLocationComparator(locationTree));
-    		mAdapter = new TentListAdapter(
+            mAdapter = new TentListAdapter(
                     getActivity(), sortedTents, locationTree, Optional.<String>absent());
     		mTentGrid.setAdapter(mAdapter);
 		}

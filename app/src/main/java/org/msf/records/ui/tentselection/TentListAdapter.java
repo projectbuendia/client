@@ -27,9 +27,9 @@ import butterknife.InjectView;
  */
 final class TentListAdapter extends ArrayAdapter<AppLocation> {
 
-    private final Context context;
-    private final AppLocationTree locationTree;
-    private Optional<String> selectedLocationUuid;
+    private final Context mContext;
+    private final AppLocationTree mLocationTree;
+    private Optional<String> mSelectedLocationUuid;
     private View mSelectedView;
 
     public TentListAdapter(
@@ -38,18 +38,18 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
             AppLocationTree locationTree,
             Optional<String> selectedTent) {
         super(context, R.layout.listview_cell_tent_selection, tents);
-        this.context = context;
-        this.locationTree = locationTree;
-        this.selectedLocationUuid = Preconditions.checkNotNull(selectedTent);
+        mContext = context;
+        mLocationTree = locationTree;
+        mSelectedLocationUuid = Preconditions.checkNotNull(selectedTent);
     }
 
-    public Optional<String> getSelectedLocationUuid() {
-        return selectedLocationUuid;
+    public Optional<String> getmSelectedLocationUuid() {
+        return mSelectedLocationUuid;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
+        LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view;
         ViewHolder holder;
@@ -65,17 +65,17 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
 
         AppLocation location = getItem(position);
         ResZone.Resolved zone = Zone.getResZone(
-                location.parentUuid).resolve(context.getResources());
+                location.parentUuid).resolve(mContext.getResources());
 
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle(
                 PatientCountDisplay.getPatientCountSubtitle(
-                        context, locationTree.getTotalPatientCount(location)));
+                        mContext, mLocationTree.getTotalPatientCount(location)));
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());
         holder.mButton.setTextColor(zone.getForegroundColor());
 
-        if (selectedLocationUuid.isPresent() &&
-                selectedLocationUuid.get().equals(location.uuid)) {
+        if (mSelectedLocationUuid.isPresent()
+                && mSelectedLocationUuid.get().equals(location.uuid)) {
             view.setBackgroundResource(R.color.zone_tent_selected_padding);
         } else {
             view.setBackgroundResource(R.drawable.tent_selector);
@@ -84,8 +84,8 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
         return view;
     }
 
-    public void setSelectedLocationUuid(Optional<String> locationUuid) {
-        selectedLocationUuid = locationUuid;
+    public void setmSelectedLocationUuid(Optional<String> locationUuid) {
+        mSelectedLocationUuid = locationUuid;
 
         notifyDataSetChanged();
     }

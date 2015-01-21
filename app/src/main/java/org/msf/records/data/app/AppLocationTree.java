@@ -168,6 +168,10 @@ public class AppLocationTree implements AppModelObservable {
         return descendants.build();
     }
 
+    /**
+     * Returns a {@link List} representing a branch of {@link AppLocation}s starting at the root
+     * of the location tree and terminating at the given {@link AppLocation}.
+     */
     public List<AppLocation> getAncestorsStartingFromRoot(AppLocation node) {
         List<AppLocation> result = new ArrayList<>();
         AppLocation current = node;

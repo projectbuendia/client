@@ -38,8 +38,8 @@ public class Zone {
     );
 
     /** Compares two zones so that they sort in the order given in ORDERED_ZONES. */
-    public static int compare(AppLocation a, AppLocation b) {
-        return Integer.compare(ORDERED_ZONES.indexOf(a.uuid), ORDERED_ZONES.indexOf(b.uuid));
+    public static int compare(AppLocation a1, AppLocation a2) {
+        return Integer.compare(ORDERED_ZONES.indexOf(a1.uuid), ORDERED_ZONES.indexOf(a2.uuid));
     }
 
     /**

@@ -29,37 +29,46 @@ final class TentSelectionController {
 
     private static final Logger LOG = Logger.create();
 
-	private static final boolean DEBUG = true;
+    private static final boolean DEBUG = true;
 
-	public interface Ui {
-		void switchToTentSelectionScreen();
-		void switchToPatientListScreen();
-		void launchActivityForLocation(AppLocation location);
-		void showErrorMessage(int stringResourceId);
-	}
+    public interface Ui {
 
-	public interface TentFragmentUi {
-		void setTents(AppLocationTree locationTree, List<AppLocation> tents);
-		void setPatientCount(int patientCount);
-		void setTriagePatientCount(int patientCount);
-		void setDischargedPatientCount(int dischargedPatientCount);
-		void showSpinner(boolean show);
+        void switchToTentSelectionScreen();
+
+        void switchToPatientListScreen();
+
+        void launchActivityForLocation(AppLocation location);
+
+        void showErrorMessage(int stringResourceId);
+    }
+
+    public interface TentFragmentUi {
+
+        void setTents(AppLocationTree locationTree, List<AppLocation> tents);
+
+        void setPatientCount(int patientCount);
+
+        void setTriagePatientCount(int patientCount);
+
+        void setDischargedPatientCount(int dischargedPatientCount);
+
+        void showSpinner(boolean show);
 	}
 
     private final AppModel mAppModel;
     private final CrudEventBus mCrudEventBus;
     private final Ui mUi;
-	private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
-	private final EventBusRegistrationInterface mEventBus;
-	private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
+    private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
+    private final EventBusRegistrationInterface mEventBus;
+    private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
 
-	private boolean mLoadedLocationTree;
-	private long mLoadRequestTimeMs;
-	@Nullable private AppLocationTree mAppLocationTree;
-	@Nullable private AppLocation mTriageZone;
-	@Nullable private AppLocation mDischargedZone;
+    private boolean mLoadedLocationTree;
+    private long mLoadRequestTimeMs;
+    @Nullable private AppLocationTree mAppLocationTree;
+    @Nullable private AppLocation mTriageZone;
+    @Nullable private AppLocation mDischargedZone;
 
-	public TentSelectionController(
+    public TentSelectionController(
             AppModel appModel,
             CrudEventBus crudEventBus,
             Ui ui,
@@ -67,11 +76,11 @@ final class TentSelectionController {
         mAppModel = appModel;
         mCrudEventBus = crudEventBus;
         mUi = ui;
-		mEventBus = eventBus;
-	}
+        mEventBus = eventBus;
+    }
 
-	public void init() {
-		mEventBus.register(mEventBusSubscriber);
+    public void init() {
+        mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
 
         LOG.d("Controller inited. Loaded tree: "
@@ -79,79 +88,80 @@ final class TentSelectionController {
 
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
 
-		if (!mLoadedLocationTree) {
-			mLoadRequestTimeMs = SystemClock.elapsedRealtime();
-		}
-		for (TentFragmentUi fragmentUi : mFragmentUis) {
-			populateFragmentUi(fragmentUi);
-		}
-	}
+        if (!mLoadedLocationTree) {
+            mLoadRequestTimeMs = SystemClock.elapsedRealtime();
+        }
+        for (TentFragmentUi fragmentUi : mFragmentUis) {
+            populateFragmentUi(fragmentUi);
+        }
+    }
 
-	public void attachFragmentUi(TentFragmentUi fragmentUi) {
+    public void attachFragmentUi(TentFragmentUi fragmentUi) {
         LOG.d("Attached new fragment UI: " + fragmentUi);
-		mFragmentUis.add(fragmentUi);
-		populateFragmentUi(fragmentUi);
-	}
+        mFragmentUis.add(fragmentUi);
+        populateFragmentUi(fragmentUi);
+    }
 
-	public void detachFragmentUi(TentFragmentUi fragmentUi) {
+    public void detachFragmentUi(TentFragmentUi fragmentUi) {
         LOG.d("Detached fragment UI: " + fragmentUi);
-		mFragmentUis.remove(fragmentUi);
-	}
+        mFragmentUis.remove(fragmentUi);
+    }
 
-	/** Frees any resources used by the controller. */
-	public void suspend() {
+    /** Frees any resources used by the controller. */
+    public void suspend() {
         LOG.d("Controller suspended.");
 
         mCrudEventBus.unregister(mEventBusSubscriber);
-		mEventBus.unregister(mEventBusSubscriber);
+        mEventBus.unregister(mEventBusSubscriber);
 	}
 
-	/** Call when the user presses the search button. */
-	public void onSearchPressed() {
-		mUi.switchToPatientListScreen();
-	}
+    /** Call when the user presses the search button. */
+    public void onSearchPressed() {
+        mUi.switchToPatientListScreen();
+    }
 
-	/** Call when the user exits search mode. */
-	public void onSearchCancelled() {
-		mUi.switchToTentSelectionScreen();
-	}
+    /** Call when the user exits search mode. */
+    public void onSearchCancelled() {
+        mUi.switchToTentSelectionScreen();
+    }
 
-	/** Call when the user presses the discharged zone. */
-	public void onDischargedPressed() {
-		mUi.launchActivityForLocation(mDischargedZone);
-	}
+    /** Call when the user presses the discharged zone. */
+    public void onDischargedPressed() {
+        mUi.launchActivityForLocation(mDischargedZone);
+    }
 
 	/** Call when the user presses the triage zone. */
-	public void onTriagePressed() {
-		mUi.launchActivityForLocation(mTriageZone);
-	}
+    public void onTriagePressed() {
+        mUi.launchActivityForLocation(mTriageZone);
+    }
 
-	/** Call when the user presses a tent. */
-	public void onTentSelected(AppLocation tent) {
-		mUi.launchActivityForLocation(tent);
-	}
+    /** Call when the user presses a tent. */
+    public void onTentSelected(AppLocation tent) {
+        mUi.launchActivityForLocation(tent);
+    }
 
-	private void populateFragmentUi(TentFragmentUi fragmentUi) {
-		fragmentUi.showSpinner(!mLoadedLocationTree);
-		if (mAppLocationTree != null) {
-			fragmentUi.setTents(
+    private void populateFragmentUi(TentFragmentUi fragmentUi) {
+        fragmentUi.showSpinner(!mLoadedLocationTree);
+        if (mAppLocationTree != null) {
+            fragmentUi.setTents(
                     mAppLocationTree,
                     mAppLocationTree.getDescendantsAtDepth(
                             AppLocationTree.ABSOLUTE_DEPTH_TENT).asList());
-	    	fragmentUi.setPatientCount(
-                    mAppLocationTree == null ?
-                            0 : mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot()));
-	        fragmentUi.setDischargedPatientCount(
-                    mDischargedZone == null ?
-                            0 : mAppLocationTree.getTotalPatientCount(mDischargedZone));
-	    	fragmentUi.setTriagePatientCount(
-                    mTriageZone == null ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
-		}
-	}
+            fragmentUi.setPatientCount(
+                    (mAppLocationTree == null)
+                            ? 0
+                            : mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot()));
+            fragmentUi.setDischargedPatientCount(
+                    (mDischargedZone == null)
+                            ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone));
+            fragmentUi.setTriagePatientCount(
+                    (mTriageZone == null) ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
+        }
+    }
 
 
-	@SuppressWarnings("unused") // Called by reflection from EventBus
-	private final class EventBusSubscriber {
+    @SuppressWarnings("unused") // Called by reflection from EventBus
+    private final class EventBusSubscriber {
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
             mLoadedLocationTree = true;
@@ -176,5 +186,5 @@ final class TentSelectionController {
                 populateFragmentUi(fragmentUi);
             }
         }
-	}
+    }
 }

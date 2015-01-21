@@ -141,8 +141,8 @@ final class PatientCreationController {
         patientDelta.familyName = Optional.of(familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid = locationUuid == null ?
-                Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
+        patientDelta.assignedLocationUuid = (locationUuid == null)
+                ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
         patientDelta.admissionDate = Optional.of(DateTime.now());
 
         mModel.addPatient(mCrudEventBus, patientDelta);
