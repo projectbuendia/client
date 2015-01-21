@@ -214,7 +214,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 odkResultSender,
                 mLocalizedChartHelper,
                 controllerState,
-                mPatientModel,
                 mSyncManager,
                 minimalHandler);
 
