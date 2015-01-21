@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.widget.FilterQueryProvider;
 
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 

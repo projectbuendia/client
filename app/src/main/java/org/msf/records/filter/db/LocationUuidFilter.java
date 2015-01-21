@@ -1,4 +1,4 @@
-package org.msf.records.filter;
+package org.msf.records.filter.db;
 
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;

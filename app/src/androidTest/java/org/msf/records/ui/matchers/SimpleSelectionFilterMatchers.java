@@ -1,9 +1,9 @@
 package org.msf.records.ui.matchers;
 
 import org.mockito.ArgumentMatcher;
-import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.LocationUuidFilter;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.db.SimpleSelectionFilterGroup;
+import org.msf.records.filter.db.LocationUuidFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 
 import java.util.List;
 
@@ -42,8 +42,9 @@ public class SimpleSelectionFilterMatchers {
     }
 
     /**
-     * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link FilterGroup})
-     * a {@link LocationUuidFilter} filtering by the specified location UUID.
+     * Matches any {@link SimpleSelectionFilter} that is or wraps (via a
+     * {@link SimpleSelectionFilterGroup}) a {@link LocationUuidFilter} filtering by the specified
+     * location UUID.
      */
     public static class IsFilterGroupWithLocationFilter
             extends ArgumentMatcher<SimpleSelectionFilter> {
@@ -54,8 +55,9 @@ public class SimpleSelectionFilterMatchers {
         }
 
         /**
-         * Matches any {@link SimpleSelectionFilter} that is or wraps (via a {@link FilterGroup})
-         * a {@link LocationUuidFilter} filtering by the specified location UUID.
+         * Matches any {@link SimpleSelectionFilter} that is or wraps (via a
+         * {@link SimpleSelectionFilterGroup}) a {@link LocationUuidFilter} filtering by the
+         * specified location UUID.
          */
         public boolean matches(Object filter) {
             if (isMatchingLocationFilter((SimpleSelectionFilter)filter)) {
@@ -70,11 +72,12 @@ public class SimpleSelectionFilterMatchers {
         }
 
         private boolean isMatchingFilterGroup(SimpleSelectionFilter filter) {
-            if (!(filter instanceof FilterGroup)) {
+            if (!(filter instanceof SimpleSelectionFilterGroup)) {
                 return false;
             }
 
-            List<SimpleSelectionFilter> filterList = ((FilterGroup) filter).getFilters();
+            List<SimpleSelectionFilter> filterList =
+                    ((SimpleSelectionFilterGroup) filter).getFilters();
             for (SimpleSelectionFilter internalFilter : filterList) {
                 if (matches(internalFilter)) {
                     return true;
