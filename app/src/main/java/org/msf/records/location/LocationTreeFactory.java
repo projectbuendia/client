@@ -7,9 +7,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import org.msf.records.App;
-import org.msf.records.filter.AllFilter;
+import org.msf.records.filter.db.AllFilter;
 import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.model.LocalizedString;
 import org.msf.records.net.model.Location;
 import org.msf.records.sync.LocationProjection;

@@ -1,4 +1,4 @@
-package org.msf.records.filter;
+package org.msf.records.filter.db;
 
 import org.joda.time.LocalDate;
 import org.msf.records.sync.providers.Contracts;

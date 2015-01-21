@@ -4,7 +4,7 @@ import android.database.Cursor;
 
 import org.msf.records.App;
 import org.msf.records.filter.FilterQueryProviderFactory;
-import org.msf.records.filter.UuidFilter;
+import org.msf.records.filter.db.UuidFilter;
 import org.msf.records.sync.PatientProjection;
 import org.odk.collect.android.model.Patient;
 
