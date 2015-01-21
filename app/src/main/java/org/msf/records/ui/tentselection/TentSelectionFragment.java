@@ -112,10 +112,8 @@ public final class TentSelectionFragment extends ProgressFragment {
 
     	@Override
         public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
-            List<AppLocation> sortedTents = new ArrayList<AppLocation>(tents);
-            Collections.sort(sortedTents, new AppLocationComparator(locationTree));
             mAdapter = new TentListAdapter(
-                    getActivity(), sortedTents, locationTree, Optional.<String>absent());
+                    getActivity(), tents, locationTree, Optional.<String>absent());
     		mTentGrid.setAdapter(mAdapter);
 		}
 

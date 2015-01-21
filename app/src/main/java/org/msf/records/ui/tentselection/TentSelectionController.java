@@ -83,8 +83,8 @@ final class TentSelectionController {
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
 
-        LOG.d("Controller inited. Loaded tree: "
-                + mLoadedLocationTree + ". Tree: " + mAppLocationTree);
+        LOG.d("Controller inited. Loaded tree: %1$s. Tree: %2$s",
+                mLoadedLocationTree, mAppLocationTree);
 
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
 
@@ -148,9 +148,7 @@ final class TentSelectionController {
                     mAppLocationTree.getDescendantsAtDepth(
                             AppLocationTree.ABSOLUTE_DEPTH_TENT).asList());
             fragmentUi.setPatientCount(
-                    (mAppLocationTree == null)
-                            ? 0
-                            : mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot()));
+                    mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot()));
             fragmentUi.setDischargedPatientCount(
                     (mDischargedZone == null)
                             ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone));

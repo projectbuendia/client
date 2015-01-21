@@ -14,7 +14,6 @@ import com.google.common.base.Optional;
 
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
-import org.msf.records.data.app.AppLocationComparator;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
@@ -23,7 +22,6 @@ import org.msf.records.model.Zone;
 import org.msf.records.utils.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -115,7 +113,6 @@ public final class AssignLocationDialog
         if (mGridView != null) {
             List<AppLocation> locations = new ArrayList(
                     locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT));
-            Collections.sort(locations, new AppLocationComparator(locationTree));
             AppLocation dischargedZone = locationTree.findByUuid(Zone.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
             mAdapter = new TentListAdapter(mContext, locations, locationTree, mCurrentLocationUuid);
@@ -149,7 +146,7 @@ public final class AssignLocationDialog
     // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentTent(String newTentUuid) {
-        return mCurrentLocationUuid.equals(mAdapter.getmSelectedLocationUuid());
+        return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());
     }
 
     @Override

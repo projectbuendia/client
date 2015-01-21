@@ -43,7 +43,7 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
         mSelectedLocationUuid = Preconditions.checkNotNull(selectedTent);
     }
 
-    public Optional<String> getmSelectedLocationUuid() {
+    public Optional<String> getSelectedLocationUuid() {
         return mSelectedLocationUuid;
     }
 

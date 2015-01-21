@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ImmutableSortedSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,31 +137,35 @@ public class AppLocationTree implements AppModelObservable {
     }
 
     /**
-     * Returns the descendants of the root location at the specified absolute depth.
+     * Returns the sorted descendants of the root location at the specified absolute depth.
      *
      * <p>The named values {@link #ABSOLUTE_DEPTH_ROOT}, {@link #ABSOLUTE_DEPTH_ZONE},
      * {@link #ABSOLUTE_DEPTH_TENT}, and {@link #ABSOLUTE_DEPTH_BED} can be used for the
      * {@code level} parameter.
      */
-    public ImmutableSet<AppLocation> getDescendantsAtDepth(int absoluteDepth) {
+    public ImmutableSortedSet<AppLocation> getDescendantsAtDepth(int absoluteDepth) {
         return getDescendantsAtDepth(mRoot, absoluteDepth);
     }
 
     /**
-     * Returns the descendants of the specified location at the specified depth relative to that
-     * location.
+     * Returns the sorted descendants of the specified location at the specified depth relative to
+     * that location.
      */
-    public ImmutableSet<AppLocation> getDescendantsAtDepth(
+    public ImmutableSortedSet<AppLocation> getDescendantsAtDepth(
             AppLocation location, int relativeDepth) {
         if (location == null) {
-            return ImmutableSet.of();
+            return ImmutableSortedSet.of();
         }
 
         if (relativeDepth == 0) {
-            return ImmutableSet.of(location);
+            ImmutableSortedSet.Builder<AppLocation> thisLocationSet =
+                    ImmutableSortedSet.orderedBy(new AppLocationComparator(this));
+            thisLocationSet.add(location);
+            return thisLocationSet.build();
         }
 
-        ImmutableSet.Builder<AppLocation> descendants = ImmutableSet.builder();
+        ImmutableSortedSet.Builder<AppLocation> descendants =
+                ImmutableSortedSet.orderedBy(new AppLocationComparator(this));
         for (AppLocation child : getChildren(location)) {
             descendants.addAll(getDescendantsAtDepth(child, relativeDepth - 1));
         }
