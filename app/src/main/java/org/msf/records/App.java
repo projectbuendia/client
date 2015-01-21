@@ -4,14 +4,9 @@ import android.app.Application;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
-import org.msf.records.diagnostics.DiagnosticsModule;
 import org.msf.records.diagnostics.HealthMonitor;
-import org.msf.records.events.mvcmodels.ModelReadyEvent;
-import org.msf.records.mvcmodels.Models;
-import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.Server;
-import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
@@ -19,7 +14,6 @@ import org.odk.collect.android.application.Collect;
 import javax.inject.Inject;
 
 import dagger.ObjectGraph;
-import de.greenrobot.event.EventBus;
 
 /**
  * An {@link Application} the represents the Android Client.
@@ -65,9 +59,6 @@ public class App extends Application {
         }
 
         mHealthMonitor.start();
-
-        // TODO(dxchen): Refactor this into the model classes.
-        EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
     }
 
     private void initializeSqlCipher() {
