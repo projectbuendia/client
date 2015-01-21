@@ -310,7 +310,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
-        mController.onAddObservationPressed("Special Group");
+        mController.onAddObservationPressed("The pain assessment field");
     }
 
     @OnClick({
