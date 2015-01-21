@@ -39,26 +39,26 @@ public class FakeAppLocationTreeFactory {
     }
 
     private static AppLocation getSiteLocation() {
-        return new AppLocation(ROOT_UUID, null, SITE_NAME);
+        return new AppLocation(ROOT_UUID, null, SITE_NAME, 0);
     }
 
     private static AppLocation getTriageZoneLocation() {
-        return new AppLocation(Zone.TRIAGE_ZONE_UUID, ROOT_UUID, TRIAGE_ZONE_NAME);
+        return new AppLocation(Zone.TRIAGE_ZONE_UUID, ROOT_UUID, TRIAGE_ZONE_NAME, 0);
     }
 
     private static AppLocation getDischargedZoneLocation() {
-        return new AppLocation(Zone.DISCHARGED_ZONE_UUID, ROOT_UUID, DISCHARGED_ZONE_NAME);
+        return new AppLocation(Zone.DISCHARGED_ZONE_UUID, ROOT_UUID, DISCHARGED_ZONE_NAME, 0);
     }
 
     private static AppLocation getSuspectZoneLocation() {
-        return new AppLocation(Zone.SUSPECT_ZONE_UUID, ROOT_UUID, SUSPECT_ZONE_NAME);
+        return new AppLocation(Zone.SUSPECT_ZONE_UUID, ROOT_UUID, SUSPECT_ZONE_NAME, 0);
     }
 
     private static AppLocation getSuspect1TentLocation() {
-        return new AppLocation(SUSPECT_1_UUID, Zone.SUSPECT_ZONE_UUID, SUSPECT_1_TENT_NAME);
+        return new AppLocation(SUSPECT_1_UUID, Zone.SUSPECT_ZONE_UUID, SUSPECT_1_TENT_NAME, 0);
     }
 
     private static AppLocation getSuspect2TentLocation() {
-        return new AppLocation(SUSPECT_2_UUID, Zone.SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME);
+        return new AppLocation(SUSPECT_2_UUID, Zone.SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
     }
 }

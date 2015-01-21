@@ -11,10 +11,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationComparator;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.location.LocationTree;
 import org.msf.records.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.utils.PatientCountDisplay;
@@ -38,11 +40,11 @@ import butterknife.InjectView;
 public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
-    private final HashMap<LocationTree.LocationSubtree, List<AppPatient>> mPatientsByLocation;
-    private final LocationTree mLocationTree;
+    private final HashMap<AppLocation, List<AppPatient>> mPatientsByLocation;
+    private final AppLocationTree mLocationTree;
     private final LocalizedChartHelper mLocalizedChartHelper;
 
-    private LocationTree.LocationSubtree[] mLocations;
+    private AppLocation[] mLocations;
     private Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> mObservations;
 
     /**
@@ -50,13 +52,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      *
      * @param context an activity context
      */
-    public PatientListTypedCursorAdapter(Context context) {
+    public PatientListTypedCursorAdapter(Context context, AppLocationTree locationTree) {
         mContext = context;
 
-        mPatientsByLocation = new HashMap<LocationTree.LocationSubtree, List<AppPatient>>();
+        mPatientsByLocation = new HashMap<AppLocation, List<AppPatient>>();
 
-        // TODO(dxchen): Use injected location tree instead of singleton.
-        mLocationTree = LocationTree.singletonInstance;
+        mLocationTree = locationTree;
         mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
     }
 
@@ -107,8 +108,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(
             int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        LocationTree.LocationSubtree location =
-                (LocationTree.LocationSubtree)getGroup(groupPosition);
+        AppLocation location = (AppLocation)getGroup(groupPosition);
 
         int patientCount = getChildrenCount(groupPosition);
         String tentName = location.toString();
@@ -232,9 +232,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         // Produce a sorted list of all the locations that have patients.
-        mLocations = new LocationTree.LocationSubtree[mPatientsByLocation.size()];
+        mLocations = new AppLocation[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
-        Arrays.sort(mLocations);
+        Arrays.sort(mLocations, new AppLocationComparator(mLocationTree));
 
         // Sort the patient lists within each location using the default comparator.
         for (List<AppPatient> patients : mPatientsByLocation.values()) {
@@ -260,8 +260,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     // Add a single patient to relevant data structures.
     private void addPatient(AppPatient patient) {
-        LocationTree.LocationSubtree location =
-                mLocationTree.getLocationByUuid(patient.locationUuid);
+        AppLocation location = mLocationTree.findByUuid(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
                 mPatientsByLocation.put(location, new ArrayList<AppPatient>());

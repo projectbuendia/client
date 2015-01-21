@@ -17,17 +17,17 @@ import com.google.common.base.Optional;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.res.ResZone;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
 import org.msf.records.model.Zone;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
-import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.LocaleSelector;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -35,7 +35,6 @@ import javax.inject.Provider;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 
 /**
  * A {@link BaseActivity} that allows users to create a new patient.
@@ -47,7 +46,6 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject LocationManager mLocationManager;
 
     @InjectView(R.id.patient_creation_text_patient_id) EditText mId;
     @InjectView(R.id.patient_creation_text_patient_given_name) EditText mGivenName;
@@ -61,6 +59,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private String mLocationUuid;
     private boolean mIsCreatePending = false;
+
+    private AppLocationTree mLocationTree;
 
     private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
 
@@ -76,7 +76,6 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         App.getInstance().inject(this);
 
         CrudEventBus crudEventBus = mCrudEventBusProvider.get();
-        mLocationManager.subscribe(crudEventBus);
 
         mController =
                 new PatientCreationController(new MyUi(), crudEventBus, mModel);
@@ -103,19 +102,24 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
             @Override public boolean onNewTentSelected(String newTentUuid) {
                 mLocationUuid = newTentUuid;
-
-                LocationTree.LocationSubtree location =
-                        LocationTree.singletonInstance.getLocationByUuid(newTentUuid);
-                ResZone.Resolved zone = Zone.getResZone(
-                        location.getLocation().parent_uuid).resolve(getResources());
-
-                mLocationText.setText(location.toString());
-                mLocationText.setBackgroundColor(zone.getBackgroundColor());
-                mLocationText.setTextColor(zone.getForegroundColor());
-
+                updateLocationUi();
                 return true;
             }
         };
+    }
+
+    private void updateLocationUi() {
+        if (mLocationTree == null || mLocationUuid == null) {
+            return;
+        }
+
+        AppLocation location = mLocationTree.findByUuid(mLocationUuid);
+        ResZone.Resolved zone = Zone.getResZone(
+                location.parentUuid).resolve(getResources());
+
+        mLocationText.setText(location.toString());
+        mLocationText.setBackgroundColor(zone.getBackgroundColor());
+        mLocationText.setTextColor(zone.getForegroundColor());
     }
 
     @Override
@@ -143,8 +147,10 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         };
         new AssignLocationDialog(
                 this,
-                reEnableButton, mLocationManager,
-                new EventBusWrapper(EventBus.getDefault()),
+                mModel,
+                LocaleSelector.getCurrentLocale().getLanguage(),
+                reEnableButton,
+                mCrudEventBusProvider.get(),
                 mLocationUuid == null ? Optional.<String>absent() : Optional.of(mLocationUuid),
                 mTentSelectedCallback).show();
     }
@@ -287,6 +293,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     }
 
     private final class MyUi implements PatientCreationController.Ui {
+
+        @Override
+        public void setLocationTree(AppLocationTree locationTree) {
+            mLocationTree = locationTree;
+            updateLocationUi();
+        }
 
         @Override
         public void showValidationError(int field, String message) {

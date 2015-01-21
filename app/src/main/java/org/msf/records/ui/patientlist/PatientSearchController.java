@@ -2,10 +2,7 @@ package org.msf.records.ui.patientlist;
 
 import android.util.Log;
 
-import com.google.common.eventbus.EventBus;
-
 import org.msf.records.App;
-import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -13,7 +10,6 @@ import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
-import org.msf.records.events.location.LocationsLoadFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.filter.db.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilterGroup;
@@ -51,6 +47,8 @@ public class PatientSearchController {
     }
 
     public interface FragmentUi {
+
+        void setLocationTree(AppLocationTree locationTree);
 
         void setPatients(TypedCursor<AppPatient> patients);
 
@@ -135,6 +133,9 @@ public class PatientSearchController {
                 mCrudEventBus.unregister(this);
                 mFilterSubscriber = null;
             }
+            for (FragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.setLocationTree(event.tree);
+            }
             mLocationTree = event.tree;
 
             // If showing results was blocked on having a location tree, request results
@@ -142,13 +143,6 @@ public class PatientSearchController {
             if (mWaitingOnLocationTree) {
                 mWaitingOnLocationTree = false;
                 loadSearchResults();
-            }
-        }
-
-        public synchronized void onEventMainThread(LocationsLoadFailedEvent event) {
-            mUi.showErrorMessage(R.string.location_load_error);
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showSpinner(false);
             }
         }
     }

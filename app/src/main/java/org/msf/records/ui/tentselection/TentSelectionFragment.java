@@ -1,9 +1,13 @@
 package org.msf.records.ui.tentselection;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.msf.records.R;
-import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationComparator;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.ui.ProgressFragment;
 import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
@@ -78,11 +82,11 @@ public final class TentSelectionFragment extends ProgressFragment {
     	mController.attachFragmentUi(mMyUi);
     }
 
-	@Override
-	public void onDestroyView() {
-		mController.detachFragmentUi(mMyUi);
-		super.onDestroyView();
-	}
+    @Override
+    public void onDestroyView() {
+        mController.detachFragmentUi(mMyUi);
+        super.onDestroyView();
+    }
 
     private final class MyUi implements TentSelectionController.TentFragmentUi {
     	@Override
@@ -107,8 +111,9 @@ public final class TentSelectionFragment extends ProgressFragment {
     	}
 
     	@Override
-    	public void setTents(List<LocationSubtree> tents) {
-    		mAdapter = new TentListAdapter(getActivity(), tents, Optional.<String>absent());
+        public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
+            mAdapter = new TentListAdapter(
+                    getActivity(), tents, locationTree, Optional.<String>absent());
     		mTentGrid.setAdapter(mAdapter);
 		}
 

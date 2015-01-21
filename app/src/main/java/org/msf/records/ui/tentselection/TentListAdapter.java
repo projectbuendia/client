@@ -10,8 +10,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.res.ResZone;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
@@ -24,28 +25,31 @@ import butterknife.InjectView;
 /**
  * Adapter for displaying a list of tents (locations).
  */
-final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
+final class TentListAdapter extends ArrayAdapter<AppLocation> {
 
-    private final Context context;
-    private Optional<String> selectedLocationUuid;
+    private final Context mContext;
+    private final AppLocationTree mLocationTree;
+    private Optional<String> mSelectedLocationUuid;
     private View mSelectedView;
 
     public TentListAdapter(
             Context context,
-            List<LocationSubtree> tents,
+            List<AppLocation> tents,
+            AppLocationTree locationTree,
             Optional<String> selectedTent) {
         super(context, R.layout.listview_cell_tent_selection, tents);
-        this.context = context;
-        this.selectedLocationUuid = Preconditions.checkNotNull(selectedTent);
+        mContext = context;
+        mLocationTree = locationTree;
+        mSelectedLocationUuid = Preconditions.checkNotNull(selectedTent);
     }
 
     public Optional<String> getSelectedLocationUuid() {
-        return selectedLocationUuid;
+        return mSelectedLocationUuid;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
+        LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view;
         ViewHolder holder;
@@ -59,18 +63,19 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
             view.setTag(holder);
         }
 
-        LocationSubtree location = getItem(position);
+        AppLocation location = getItem(position);
         ResZone.Resolved zone = Zone.getResZone(
-                location.getLocation().parent_uuid).resolve(context.getResources());
+                location.parentUuid).resolve(mContext.getResources());
 
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle(
-                PatientCountDisplay.getPatientCountSubtitle(context, location.getPatientCount()));
+                PatientCountDisplay.getPatientCountSubtitle(
+                        mContext, mLocationTree.getTotalPatientCount(location)));
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());
         holder.mButton.setTextColor(zone.getForegroundColor());
 
-        if (selectedLocationUuid.isPresent() &&
-                selectedLocationUuid.get().equals(location.getLocation().uuid)) {
+        if (mSelectedLocationUuid.isPresent()
+                && mSelectedLocationUuid.get().equals(location.uuid)) {
             view.setBackgroundResource(R.color.zone_tent_selected_padding);
         } else {
             view.setBackgroundResource(R.drawable.tent_selector);
@@ -79,8 +84,8 @@ final class TentListAdapter extends ArrayAdapter<LocationSubtree> {
         return view;
     }
 
-    public void setSelectedLocationUuid(Optional<String> locationUuid) {
-        selectedLocationUuid = locationUuid;
+    public void setmSelectedLocationUuid(Optional<String> locationUuid) {
+        mSelectedLocationUuid = locationUuid;
 
         notifyDataSetChanged();
     }

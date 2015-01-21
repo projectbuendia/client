@@ -1,7 +1,7 @@
 package org.msf.records.model;
 
+import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.res.ResZone;
-import org.msf.records.net.model.Location;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,8 +38,8 @@ public class Zone {
     );
 
     /** Compares two zones so that they sort in the order given in ORDERED_ZONES. */
-    public static int compare(Location a, Location b) {
-        return Integer.compare(ORDERED_ZONES.indexOf(a), ORDERED_ZONES.indexOf(b));
+    public static int compare(AppLocation a, AppLocation b) {
+        return Integer.compare(ORDERED_ZONES.indexOf(a.uuid), ORDERED_ZONES.indexOf(b.uuid));
     }
 
     /**
