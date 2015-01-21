@@ -27,6 +27,7 @@ import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
+import org.msf.records.utils.LocaleSelector;
 
 import java.util.Locale;
 
@@ -149,7 +150,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         new AssignLocationDialog(
                 this,
                 mModel,
-                Locale.getDefault().toString(), // TODO(akalachman): Replace with real locale.
+                LocaleSelector.getCurrentLocale().getLanguage(),
                 reEnableButton,
                 mCrudEventBusProvider.get(),
                 mLocationUuid == null ? Optional.<String>absent() : Optional.of(mLocationUuid),

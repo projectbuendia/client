@@ -26,6 +26,7 @@ import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
@@ -178,8 +179,7 @@ final class PatientChartController {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
-        // TODO(akalachman): Deal with locale.
-        mAppModel.fetchLocationTree(mCrudEventBus, Locale.getDefault().toString());
+        mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
     }
 
     /** Releases any resources used by the controller. */
@@ -338,7 +338,7 @@ final class PatientChartController {
         mAssignLocationDialog = new AssignLocationDialog(
                 context,
                 mAppModel,
-                Locale.getDefault().toString(), // TODO(akalachman): Replace with real locale.
+                LocaleSelector.getCurrentLocale().getLanguage(),
                 reEnableButton,
                 mCrudEventBus,
                 Optional.of(mPatient.locationUuid),
@@ -366,10 +366,7 @@ final class PatientChartController {
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
             mLocationTree = event.tree;
-
-            if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
-                mUi.updatePatientLocationUi(mLocationTree, mPatient);
-            }
+            updatePatientLocationUi();
         }
 
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
@@ -383,9 +380,7 @@ final class PatientChartController {
         public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
             mPatient = event.item;
             mUi.setPatient(mPatient);
-            if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
-                mUi.updatePatientLocationUi(mLocationTree, mPatient);
-            }
+            updatePatientLocationUi();
 
             if (mAssignLocationDialog != null) {
                 mAssignLocationDialog.dismiss();
@@ -413,6 +408,12 @@ final class PatientChartController {
 
         public void onEventMainThread(FetchXformFailedEvent event) {
             mUi.reEnableFetch();
+        }
+    }
+
+    private synchronized void updatePatientLocationUi() {
+        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
+            mUi.updatePatientLocationUi(mLocationTree, mPatient);
         }
     }
 }

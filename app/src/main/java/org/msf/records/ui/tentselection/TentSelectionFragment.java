@@ -1,9 +1,12 @@
 package org.msf.records.ui.tentselection;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationComparator;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.ui.ProgressFragment;
 import org.msf.records.ui.patientlist.PatientListActivity;
@@ -109,8 +112,10 @@ public final class TentSelectionFragment extends ProgressFragment {
 
     	@Override
     	public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
+            List<AppLocation> sortedTents = new ArrayList<AppLocation>(tents);
+            Collections.sort(sortedTents, new AppLocationComparator(locationTree));
     		mAdapter = new TentListAdapter(
-                    getActivity(), tents, locationTree, Optional.<String>absent());
+                    getActivity(), sortedTents, locationTree, Optional.<String>absent());
     		mTentGrid.setAdapter(mAdapter);
 		}
 

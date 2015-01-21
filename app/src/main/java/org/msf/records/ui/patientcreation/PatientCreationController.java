@@ -14,6 +14,8 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.model.Zone;
+import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 
 import java.util.Locale;
@@ -79,8 +81,7 @@ final class PatientCreationController {
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
         mCrudEventBus.register(mEventBusSubscriber);
-        // TODO(akalachman): Deal with locale.
-        mModel.fetchLocationTree(mCrudEventBus, Locale.getDefault().toString());
+        mModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
     }
 
     /** Releases any resources used by the controller. */
@@ -140,8 +141,8 @@ final class PatientCreationController {
         patientDelta.familyName = Optional.of(familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid =
-                locationUuid == null ? Optional.<String>absent() : Optional.of(locationUuid);
+        patientDelta.assignedLocationUuid = locationUuid == null ?
+                Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
         patientDelta.admissionDate = Optional.of(DateTime.now());
 
         mModel.addPatient(mCrudEventBus, patientDelta);

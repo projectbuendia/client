@@ -13,6 +13,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 
 import android.os.SystemClock;
@@ -76,7 +77,7 @@ final class TentSelectionController {
         LOG.d("Controller inited. Loaded tree: "
                 + mLoadedLocationTree + ". Tree: " + mAppLocationTree);
 
-        mAppModel.fetchLocationTree(mCrudEventBus, "en");
+        mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
 
 		if (!mLoadedLocationTree) {
 			mLoadRequestTimeMs = SystemClock.elapsedRealtime();
