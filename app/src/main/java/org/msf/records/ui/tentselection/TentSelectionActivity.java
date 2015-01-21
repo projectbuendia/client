@@ -12,10 +12,9 @@ import javax.inject.Provider;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
@@ -33,7 +32,6 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
 	private TentSelectionController mController;
 
-	@Inject LocationManager mLocationManager;
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
 
@@ -42,7 +40,6 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
         mController = new TentSelectionController(
-        		mLocationManager,
                 mAppModel,
                 mCrudEventBusProvider.get(),
         		new MyUi(),
@@ -134,15 +131,12 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     	}
 
     	@Override
-    	public void launchActivityForLocation(LocationSubtree subtree) {
+    	public void launchActivityForLocation(AppLocation location) {
 			Intent roundIntent =
 					new Intent(TentSelectionActivity.this, RoundActivity.class);
-			roundIntent.putExtra(RoundActivity.LOCATION_NAME_KEY,
-					subtree.toString());
-			roundIntent.putExtra(RoundActivity.LOCATION_UUID_KEY,
-					subtree.getLocation().uuid);
-			roundIntent.putExtra(RoundActivity.LOCATION_PATIENT_COUNT_KEY,
-					subtree.getPatientCount());
+			roundIntent.putExtra(RoundActivity.LOCATION_NAME_KEY, location.name);
+			roundIntent.putExtra(RoundActivity.LOCATION_UUID_KEY, location.uuid);
+			roundIntent.putExtra(RoundActivity.LOCATION_PATIENT_COUNT_KEY, location.patientCount);
 			startActivity(roundIntent);
 		}
     }

@@ -19,6 +19,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.res.ResStatus;
@@ -26,9 +28,6 @@ import org.msf.records.data.res.ResTemperatureRange;
 import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.prefs.BooleanPreference;
@@ -138,7 +137,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject PatientModel mPatientModel;
-    @Inject LocationManager mLocationManager;
     @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
     @Inject SyncManager mSyncManager;
     @Inject LocalizedChartHelper mLocalizedChartHelper;
@@ -264,7 +262,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         mController.showAssignLocationDialog(
-                                PatientChartActivity.this, assignLocation,  mLocationManager);
+                                PatientChartActivity.this, assignLocation);
                         return true;
                     }
                 }
@@ -548,25 +546,31 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void setPatient(AppPatient patient) {
-            String locationText = "Unknown Location";
-            // TODO: Don't use this singleton
-            LocationTree locationTree = LocationTree.singletonInstance;
-            if (patient.locationUuid != null) {
-                LocationSubtree patientZone = locationTree.getZoneForUuid(patient.locationUuid);
-                LocationSubtree patientTent = locationTree.getTentForUuid(patient.locationUuid);
+        public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {
+            String locationText;
+            List<AppLocation> patientLocationBranch =
+                    locationTree.getAncestorsStartingFromRoot(
+                            locationTree.findByUuid(patient.locationUuid));
+            AppLocation patientZone = patientLocationBranch.get(
+                    AppLocationTree.ABSOLUTE_DEPTH_ZONE);
+            AppLocation patientTent = patientLocationBranch.get(
+                    AppLocationTree.ABSOLUTE_DEPTH_TENT);
 
-                if (patientZone == null && patientTent == null) {
-                    locationText = "Unknown Location";
-                } else if (patientZone == null) {
-                    locationText = "Unknown Zone / " + patientTent.toString();
-                } else if (patientTent == null) {
-                    locationText = patientZone.toString();
-                } else {
-                    locationText = patientZone.toString() + " / " + patientTent.toString();
-                }
+            if (patientZone == null && patientTent == null) {
+                locationText = "Unknown Location";
+            } else if (patientZone == null) {
+                locationText = "Unknown Zone / " + patientTent.toString();
+            } else if (patientTent == null) {
+                locationText = patientZone.toString();
+            } else {
+                locationText = patientZone.toString() + " / " + patientTent.toString();
             }
 
+            mPatientLocationView.setText(locationText);
+        }
+
+        @Override
+        public void setPatient(AppPatient patient) {
             mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
             mPatientIdView.setText(patient.id);
 
@@ -574,7 +578,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             String ageText = patient.birthdate == null
                     ? "age unknown" : Utils.birthdateToAge(patient.birthdate);
             mPatientGenderAgeView.setText(genderText + ", " + ageText);
-            mPatientLocationView.setText(locationText);
 
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())

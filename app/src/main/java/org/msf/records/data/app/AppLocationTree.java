@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +166,17 @@ public class AppLocationTree implements AppModelObservable {
         }
 
         return descendants.build();
+    }
+
+    public List<AppLocation> getAncestorsStartingFromRoot(AppLocation node) {
+        List<AppLocation> result = new ArrayList<>();
+        AppLocation current = node;
+        while (current != null) {
+            result.add(current);
+            current = getParent(current);
+        }
+        Collections.reverse(result);
+        return result;
     }
 
     @Nullable

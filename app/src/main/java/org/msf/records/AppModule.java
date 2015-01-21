@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import org.msf.records.data.app.AppModelModule;
 import org.msf.records.diagnostics.DiagnosticsModule;
 import org.msf.records.events.EventsModule;
-import org.msf.records.location.LocationManager;
 import org.msf.records.mvcmodels.PatientChartModel;
 import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.NetModule;
@@ -100,17 +99,6 @@ public final class AppModule {
     @Singleton
     PatientModel providePatientModel() {
         return new PatientModel();
-    }
-
-    @Provides
-    @Singleton
-    LocationManager provideLocationManager(SyncManager syncManager) {
-        LocationManager locationManager = new LocationManager(
-                EventBus.getDefault(),
-                App.getInstance(),
-                syncManager);
-        locationManager.init();
-        return locationManager;
     }
 
     @Provides

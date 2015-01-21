@@ -20,8 +20,8 @@ public class AppLocationComparator implements Comparator<AppLocation> {
 
     @Override
     public int compare(AppLocation lhs, AppLocation rhs) {
-        List<AppLocation> pathA = getAncestorsStartingFromRoot(lhs);
-        List<AppLocation> pathB = getAncestorsStartingFromRoot(rhs);
+        List<AppLocation> pathA = mTree.getAncestorsStartingFromRoot(lhs);
+        List<AppLocation> pathB = mTree.getAncestorsStartingFromRoot(rhs);
         for (int i = 0; i < Math.min(pathA.size(), pathB.size()); i++) {
             AppLocation locationA = pathA.get(i);
             AppLocation locationB = pathB.get(i);
@@ -33,16 +33,5 @@ public class AppLocationComparator implements Comparator<AppLocation> {
             }
         }
         return pathA.size() - pathB.size();
-    }
-
-    private List<AppLocation> getAncestorsStartingFromRoot(AppLocation node) {
-        List<AppLocation> result = new ArrayList<>();
-        AppLocation current = node;
-        while (current != null) {
-            result.add(current);
-            current = mTree.getParent(current);
-        }
-        Collections.reverse(result);
-        return result;
     }
 }

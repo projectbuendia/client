@@ -1,26 +1,24 @@
 package org.msf.records.ui.chart;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import org.msf.records.App;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.location.LocationManager;
 import org.msf.records.model.Concept;
 import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -28,7 +26,6 @@ import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
 import org.msf.records.utils.EventBusRegistrationInterface;
-import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
@@ -39,6 +36,7 @@ import de.greenrobot.event.EventBus;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -68,6 +66,7 @@ final class PatientChartController {
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
     private AppPatient mPatient = AppPatient.builder().build();
+    private AppLocationTree mLocationTree;
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
 
@@ -77,6 +76,9 @@ final class PatientChartController {
 
         /** Updates the UI showing current observation values for this patient. */
         void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
+
+        /** Updates the UI with the patient's location. */
+        void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
 
         /** Updates the UI showing the historic log of observation values for this patient. */
         void setObservationHistory(List<LocalizedObservation> observations);
@@ -176,6 +178,8 @@ final class PatientChartController {
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
+        // TODO(akalachman): Deal with locale.
+        mAppModel.fetchLocationTree(mCrudEventBus, Locale.getDefault().toString());
     }
 
     /** Releases any resources used by the controller. */
@@ -311,8 +315,7 @@ final class PatientChartController {
 
     public void showAssignLocationDialog(
             Context context,
-            final MenuItem menuItem,
-            final LocationManager locationManager) {
+            final MenuItem menuItem) {
         TentSelectedCallback callback =
                 new TentSelectedCallback() {
 
@@ -321,7 +324,6 @@ final class PatientChartController {
                         AppPatientDelta patientDelta = new AppPatientDelta();
                         patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
-                        locationManager.subscribe(mCrudEventBus);
                         mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
                         return false;
                     }
@@ -335,9 +337,10 @@ final class PatientChartController {
         };
         mAssignLocationDialog = new AssignLocationDialog(
                 context,
+                mAppModel,
+                Locale.getDefault().toString(), // TODO(akalachman): Replace with real locale.
                 reEnableButton,
-                locationManager,
-                new EventBusWrapper(EventBus.getDefault()),
+                mCrudEventBus,
                 Optional.of(mPatient.locationUuid),
                 callback);
 
@@ -361,6 +364,14 @@ final class PatientChartController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
+        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            mLocationTree = event.tree;
+
+            if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
+                mUi.updatePatientLocationUi(mLocationTree, mPatient);
+            }
+        }
+
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             mSyncManager.forceSync();
         }
@@ -372,6 +383,9 @@ final class PatientChartController {
         public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
             mPatient = event.item;
             mUi.setPatient(mPatient);
+            if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
+                mUi.updatePatientLocationUi(mLocationTree, mPatient);
+            }
 
             if (mAssignLocationDialog != null) {
                 mAssignLocationDialog.dismiss();

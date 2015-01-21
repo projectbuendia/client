@@ -5,14 +5,18 @@ import android.util.Log;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.utils.Logger;
+
+import java.util.Locale;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -41,6 +45,8 @@ final class PatientCreationController {
         static final int FIELD_AGE_UNITS = 5;
         static final int FIELD_SEX = 6;
         static final int FIELD_LOCATION = 7;
+
+        void setLocationTree(AppLocationTree locationTree);
 
         /** Adds a validation error message for a specific field. */
         void showValidationError(int field, String message);
@@ -73,6 +79,8 @@ final class PatientCreationController {
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
         mCrudEventBus.register(mEventBusSubscriber);
+        // TODO(akalachman): Deal with locale.
+        mModel.fetchLocationTree(mCrudEventBus, Locale.getDefault().toString());
     }
 
     /** Releases any resources used by the controller. */
@@ -155,6 +163,10 @@ final class PatientCreationController {
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
+
+        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            mUi.setLocationTree(event.tree);
+        }
 
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             mUi.quitActivity();
