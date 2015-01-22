@@ -43,6 +43,7 @@ import org.msf.records.utils.RelativeDateTimeFormatter;
 import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
+import org.msf.records.widget.PatientAttributeView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
@@ -142,6 +143,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
 
+    @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
+
     @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
     @InjectView(R.id.patient_chart_vital_general_condition_number) TextView mGeneralConditionNum;
     @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
@@ -176,7 +179,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
-    @InjectView(R.id.patient_chart_location) TextView mPatientLocationView;
     @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
     @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
@@ -591,7 +593,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 locationText = patientZone.toString() + " / " + patientTent.toString();
             }
 
-            mPatientLocationView.setText(locationText);
+            mPatientLocationView.setValue(locationText);
         }
 
         @Override

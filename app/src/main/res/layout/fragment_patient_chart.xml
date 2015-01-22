@@ -52,18 +52,40 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="4dp">
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="match_parent"
+        <org.msf.records.widget.PatientAttributeView
+            android:id="@+id/attribute_admission_days"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:gravity="end"
-            android:fontFamily="sans-serif-condensed"
-            android:id="@+id/patient_chart_location"
-            android:textColor="@android:color/black"
-            tools:text="EMC Location/Tent#" />
+            android:layout_weight="0.25"
+            app:attributeName="Since admission"
+            app:attributeValue="–"/>
 
+        <org.msf.records.widget.PatientAttributeView
+            android:id="@+id/attribute_symptoms_onset_days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            app:attributeName="Since symptoms onset"
+            app:attributeValue="–"/>
+
+        <org.msf.records.widget.PatientAttributeView
+            android:id="@+id/attribute_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            app:attributeName="Location"
+            app:attributeValue="–"/>
+
+        <org.msf.records.widget.PatientAttributeView
+            android:id="@+id/attribute_pcr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            app:attributeName="Latest Ebola Result"
+            app:attributeValue="–"/>
     </LinearLayout>
 
     <RelativeLayout
