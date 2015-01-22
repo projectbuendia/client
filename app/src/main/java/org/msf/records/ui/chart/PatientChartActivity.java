@@ -151,6 +151,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     //@InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
     //@InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
 
+    @InjectView(R.id.patient_chart_responsiveness_parent) ViewGroup mResponsivenessParent;
+    @InjectView(R.id.patient_chart_vital_responsiveness) TextView mResponsiveness;
+    @InjectView(R.id.vital_name_responsiveness) TextView mResponsivenessName;
+
+    @InjectView(R.id.patient_chart_mobility_parent) ViewGroup mMobilityParent;
+    @InjectView(R.id.patient_chart_vital_mobility) TextView mMobility;
+    @InjectView(R.id.vital_name_mobility) TextView mMobilityName;
+
     @InjectView(R.id.patient_chart_pain_parent) ViewGroup mPainParent;
     @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
     @InjectView(R.id.vital_name_pain) TextView mPainName;
@@ -160,8 +168,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     //@InjectView(R.id.patient_chart_vital_pcr_date) TextView mPcrDate;
     //@InjectView(R.id.vital_name_pcr) TextView mPcrName;
 
-    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
-    @InjectView(R.id.vital_mobility) VitalView mMobility;
     @InjectView(R.id.vital_diet) VitalView mDiet;
     @InjectView(R.id.vital_food_drink) VitalView mHydration;
     @InjectView(R.id.vital_pulse) VitalView mPulse;
@@ -314,8 +320,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick({
             R.id.patient_chart_general_condition_parent,
-            R.id.vital_responsiveness,
-            R.id.vital_mobility,
+            R.id.patient_chart_responsiveness_parent, // TODO(akalachman): Revisit
+            R.id.patient_chart_mobility_parent,  // TODO(akalachman): Revisit
             R.id.vital_diet,
             R.id.vital_food_drink})
     void onSignsAndSymptomsPressed(View v) {
@@ -348,6 +354,25 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
+    /** Updates a {@link ViewGroup} to display a new observation value. */
+    private void showObservationForViewGroup(
+            ViewGroup parent, TextView nameView, TextView valueView,
+            @Nullable LocalizedObservation observation) {
+        if (observation != null && observation.localizedValue != null) {
+            parent.setBackgroundColor(mVitalKnown.getBackgroundColor());
+            valueView.setTextColor(mVitalKnown.getForegroundColor());
+            nameView.setTextColor(mVitalKnown.getForegroundColor());
+
+            valueView.setText(observation.localizedValue);
+        } else {
+            parent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+            valueView.setTextColor(mVitalUnknown.getForegroundColor());
+            nameView.setTextColor(mVitalUnknown.getForegroundColor());
+
+            valueView.setText("–"); // en dash
+        }
+    }
+
     private final class MyUi implements PatientChartController.Ui {
         @Override
         public void setTitle(String title) {
@@ -372,14 +397,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-            // TODO(akalachman): REMOVE
-            LOG.d("Observations: " + observations.toString());
-            showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
-            showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
             showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
             showObservation(mPulse, observations.get(Concept.PULSE_UUID));
             showObservation(mRespiration, observations.get(Concept.RESPIRATION_UUID));
+
+            showObservationForViewGroup(
+                    mResponsivenessParent, mResponsivenessName, mResponsiveness,
+                    observations.get(Concept.CONSCIOUS_STATE_UUID));
+            showObservationForViewGroup(
+                    mMobilityParent, mMobilityName, mMobility,
+                    observations.get(Concept.MOBILITY_UUID));
+            showObservationForViewGroup(
+                    mPainParent, mPainName, mPain, observations.get(Concept.PAIN_UUID));
 
             // Temperature
             LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
@@ -424,22 +454,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                 mGeneralCondition.setText("–"); // en dash
                 mGeneralConditionNum.setText("–");
-            }
-
-            // Pain Level
-            observation = observations.get(Concept.PAIN_UUID);
-            if (observation != null && observation.localizedValue != null) {
-                mPainParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-                mPain.setTextColor(mVitalKnown.getForegroundColor());
-                mPainName.setTextColor(mVitalKnown.getForegroundColor());
-
-                mPain.setText(observation.localizedValue);
-            } else {
-                mPainParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mPain.setTextColor(mVitalUnknown.getForegroundColor());
-                mPainName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mPain.setText("–"); // en dash
             }
 
             // PCR
@@ -502,7 +516,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             
             // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
-            if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
+            if (observation != null && observation.localizedValue != null &&
+                    observation.localizedValue.equals("Yes")) {
                 mPatientPregnantView.setText(" Pregnant");
             } else {
                 mPatientPregnantView.setText("");
@@ -521,7 +536,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 //                 some testing and feedback.
                 mChartView = getChartView(observations);
             }
-            mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            mChartView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             mRootView.addView(mChartView);
             mRootView.invalidate();
         }

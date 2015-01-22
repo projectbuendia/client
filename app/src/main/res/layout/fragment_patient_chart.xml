@@ -130,25 +130,19 @@
                 android:layout_height="144dp"
                 android:layout_margin="4dp" />
 
-            <org.msf.records.widget.VitalView
-                android:id="@+id/vital_responsiveness"
+            <include
+                layout="@layout/view_vital_responsiveness"
+                android:id="@+id/patient_chart_responsiveness_parent"
                 android:layout_width="0dp"
                 android:layout_height="144dp"
-                android:layout_margin="4dp"
-                android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_dark"
-                app:vitalName="Conscious State"
-                app:vitalValue="–"/>
+                android:layout_margin="4dp" />
 
-            <org.msf.records.widget.VitalView
-                android:id="@+id/vital_mobility"
+            <include
+                layout="@layout/view_vital_mobility"
+                android:id="@+id/patient_chart_mobility_parent"
                 android:layout_width="0dp"
                 android:layout_height="144dp"
-                android:layout_margin="4dp"
-                android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_dark"
-                app:vitalName="Mobility"
-                app:vitalValue="–"/>
+                android:layout_margin="4dp" />
 
             <include
                 layout="@layout/view_vital_pain"
