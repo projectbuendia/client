@@ -84,46 +84,38 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.25"
-            app:attributeName="Latest Ebola Result"
+            app:attributeName="@string/latest_pcr_label"
             app:attributeValue="–"/>
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp">
-
-        <TextView
+        android:layout_margin="8dp">
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:layout_alignParentStart="true"
-            android:text="Admitted 4 days ago"
-            android:id="@+id/patient_chart_days"
-            android:fontFamily="sans-serif-condensed"/>
+            android:layout_gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="18sp"
+                android:text="@string/chart_last_updated"
+                android:id="@+id/patient_chart_last_observation_label"
+                tools:ignore="RelativeOverlap"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:layout_alignParentEnd="true"
-            android:id="@+id/patient_chart_last_observation_date_time"
-            android:fontFamily="sans-serif-condensed"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/patient_chart_last_observation_date_time"
-            android:fontFamily="sans-serif-condensed"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="30sp"
-            android:text="@string/last_observation"
-            android:id="@+id/patient_chart_last_observation_label"
-            tools:ignore="RelativeOverlap"/>
-
-    </RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="–"
+                android:layout_toEndOf="@id/patient_chart_last_observation_label"
+                android:id="@+id/patient_chart_last_observation_date_time"
+                android:fontFamily="sans-serif-condensed"/>
+        </RelativeLayout>
+    </FrameLayout>
 
     <TableLayout
         android:layout_width="match_parent"

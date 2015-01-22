@@ -24,7 +24,6 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.data.res.ResTemperatureRange;
 import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
@@ -144,15 +143,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
 
     @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
+    @InjectView(R.id.attribute_admission_days) PatientAttributeView mPatientAdmissionDaysView;
+    @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
+
+    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
+    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
 
     @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
     @InjectView(R.id.patient_chart_vital_general_condition_number) TextView mGeneralConditionNum;
     @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
     @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
-
-    // @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperatureParent;
-    //@InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
-    //@InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
 
     @InjectView(R.id.patient_chart_responsiveness_parent) ViewGroup mResponsivenessParent;
     @InjectView(R.id.patient_chart_vital_responsiveness) TextView mResponsiveness;
@@ -166,11 +166,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
     @InjectView(R.id.vital_name_pain) TextView mPainName;
 
-    // @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
-    //@InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
-    //@InjectView(R.id.patient_chart_vital_pcr_date) TextView mPcrDate;
-    //@InjectView(R.id.vital_name_pcr) TextView mPcrName;
-
     @InjectView(R.id.vital_diet) VitalView mDiet;
     @InjectView(R.id.vital_food_drink) VitalView mHydration;
     @InjectView(R.id.vital_pulse) VitalView mPulse;
@@ -179,9 +174,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
-    @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
-    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
-    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -412,30 +404,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             showObservationForViewGroup(
                     mPainParent, mPainName, mPain, observations.get(Concept.PAIN_UUID));
 
-            // Temperature
-            LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
-            if (observation != null && observation.localizedValue != null) {/*
-                double value = Double.parseDouble(observation.localizedValue);
-                ResTemperatureRange.Resolved temperatureRange =
-                        value <= 37.5
-                                ? ResTemperatureRange.NORMAL.resolve(getResources())
-                                : ResTemperatureRange.HIGH.resolve(getResources());
-
-                mTemperatureParent.setBackgroundColor(temperatureRange.getBackgroundColor());
-                mTemperature.setTextColor(temperatureRange.getForegroundColor());
-                mTemperatureName.setTextColor(temperatureRange.getForegroundColor());
-
-                mTemperature.setText(String.format("%.1f°", value));
-            } else {
-                mTemperatureParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mTemperature.setTextColor(mVitalUnknown.getForegroundColor());
-                mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mTemperature.setText("–"); // en dash
-            */}
-
             // General Condition
-            observation = observations.get(Concept.GENERAL_CONDITION_UUID);
+            LocalizedObservation observation = observations.get(Concept.GENERAL_CONDITION_UUID);
             if (observation != null && observation.localizedValue != null) {
                 ResStatus resStatus = Concept.getResStatus(observation.value);
                 ResStatus.Resolved status = resStatus.resolve(getResources());
@@ -459,20 +429,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             // PCR
             LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
-            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);/*
+            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
             if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
                     && (pcrNpObservation == null || pcrNpObservation == null)) {
-                mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mPcr.setTextColor(mVitalUnknown.getForegroundColor());
-                mPcrName.setTextColor(mVitalUnknown.getForegroundColor());
-                mPcrDate.setVisibility(View.GONE);
-
-                mPcr.setText("–");
+                mPcr.setValue("–");
             } else {
-                mPcrParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-                mPcr.setTextColor(mVitalKnown.getForegroundColor());
-                mPcrName.setTextColor(mVitalKnown.getForegroundColor());
-
                 String pcrLString = "–";
                 long pcrObservationMillis = -1;
                 if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
@@ -503,17 +464,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
 
-                mPcr.setText(String.format("%1$s / %2$s", pcrLString, pcrNpString));
+                mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
                 if (pcrObservationMillis > 0) {
-                    mPcrDate.setTextColor(mVitalKnown.getForegroundColor());
-                    mPcrDate.setVisibility(View.VISIBLE);
-
-                    mPcrDate.setText(
+                    mPcr.setName(getResources().getString(
+                            R.string.latest_pcr_label_with_date,
                             DATE_TIME_FORMATTER.format(
                                     DateTime.now(),
-                                    new DateTime(pcrObservationMillis)));
+                                    new DateTime(pcrObservationMillis))));
                 }
-            }*/
+            }
             
             // Pregnancy
             // TODO: Localize all of this.
@@ -602,7 +561,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setPatient(AppPatient patient) {
-            // TODO: Localize this construction.
+            // TODO: Localize everything below.
             mPatientFullNameView.setText(
                     patient.id + ": " + patient.givenName + " " + patient.familyName);
 
@@ -614,7 +573,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())
                     .getDays();
-            mPatientAdmissionDateView.setText("Day " + days + " since admission");
+            mPatientAdmissionDaysView.setValue("Day " + days);
         }
 
         @Override
