@@ -492,7 +492,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                                     new DateTime(pcrObservationMillis)));
                 }
             }
-            
+
             // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
@@ -551,10 +551,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<AppLocation> patientLocationBranch =
                     locationTree.getAncestorsStartingFromRoot(
                             locationTree.findByUuid(patient.locationUuid));
-            AppLocation patientZone = patientLocationBranch.get(
-                    AppLocationTree.ABSOLUTE_DEPTH_ZONE);
-            AppLocation patientTent = patientLocationBranch.get(
-                    AppLocationTree.ABSOLUTE_DEPTH_TENT);
+            AppLocation patientZone =
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE)
+                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
+            AppLocation patientTent =
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT)
+                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
 
             if (patientZone == null && patientTent == null) {
                 locationText = "Unknown Location";
