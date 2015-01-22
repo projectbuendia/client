@@ -285,15 +285,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concept.PAIN_UUID:
-                String painValueUuid = rowData.datesToValues.get(dateKey);
+            case Concept.WEAKNESS_UUID:
+                String valueUuid = rowData.datesToValues.get(dateKey);
                 int value = 0;
-                if (Concept.MILD_UUID.equals(painValueUuid)) {
+                if (Concept.MILD_UUID.equals(valueUuid)) {
                     value = 1;
                     textColorResource = Color.BLACK;
-                } else if (Concept.MODERATE_UUID.equals(painValueUuid)) {
+                } else if (Concept.MODERATE_UUID.equals(valueUuid)) {
                     value = 2;
                     textColorResource = Color.BLACK;
-                } else if (Concept.SEVERE_UUID.equals(painValueUuid)) {
+                } else if (Concept.SEVERE_UUID.equals(valueUuid)) {
                     value = 3;
                     backgroundResource = R.drawable.chart_cell_bad;
                     textColorResource = Color.WHITE;
@@ -329,9 +330,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         if (textView != null) {
             textView.setText(text);
             textView.setTag(textViewTag);
-            if (backgroundResource != 0) {
-                textView.setBackgroundResource(backgroundResource);
-            }
+            textView.setBackgroundResource(backgroundResource);
             if (textColorResource != 0) {
                 textView.setTextColor(textColorResource);
             }

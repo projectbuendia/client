@@ -30,6 +30,10 @@ public class Concept {
      */
     public static final String PAIN_UUID = "f75da5de-404c-42d0-b484-b69a4896e093";
     /**
+     * UUID for the (question) concept for (severe) weakness.
+     */
+    public static final String WEAKNESS_UUID = "5226AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
      * UUID for the (question) concept for the notes field.
      */
     public static final String NOTES_UUID = "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
