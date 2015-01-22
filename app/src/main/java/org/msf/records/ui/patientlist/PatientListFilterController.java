@@ -48,6 +48,7 @@ public class PatientListFilterController {
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
             mCrudEventBus.unregister(this);
             mUi.populateActionBar(PatientDbFilters.getFiltersForDisplay(event.tree));
+            event.tree.close();
         }
     }
 }  

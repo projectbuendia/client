@@ -186,6 +186,10 @@ final class PatientChartController {
     public void suspend() {
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
+
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
     }
 
     public void onXFormResult(int code, int resultCode, Intent data) {
@@ -365,6 +369,9 @@ final class PatientChartController {
     private final class EventSubscriber {
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            if (mLocationTree != null) {
+                mLocationTree.close();
+            }
             mLocationTree = event.tree;
             updatePatientLocationUi();
         }
