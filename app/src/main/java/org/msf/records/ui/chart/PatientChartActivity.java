@@ -173,7 +173,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.vital_pulse) VitalView mPulse;
     @InjectView(R.id.vital_respiration) VitalView mRespiration;
 
-    @InjectView(R.id.patient_chart_id) TextView mPatientIdView;
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
@@ -515,10 +514,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }*/
             
             // Pregnancy
+            // TODO: Localize all of this.
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null &&
                     observation.localizedValue.equals("Yes")) {
-                mPatientPregnantView.setText(" Pregnant");
+                mPatientPregnantView.setText(" (Pregnant)");
             } else {
                 mPatientPregnantView.setText("");
             }
@@ -596,8 +596,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setPatient(AppPatient patient) {
-            mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
-            mPatientIdView.setText(patient.id);
+            // TODO: Localize this construction.
+            mPatientFullNameView.setText(
+                    patient.id + ": " + patient.givenName + " " + patient.familyName);
 
             String genderText = patient.gender == AppPatient.GENDER_MALE ? "M" : "F";
             String ageText = patient.birthdate == null
