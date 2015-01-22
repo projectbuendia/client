@@ -14,6 +14,10 @@ public class Concept {
      */
     public static final String TEMPERATURE_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     /**
+     * UUID for the (question) concept for the weight.
+     */
+    public static final String WEIGHT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
      * UUID for the (question) concept for Diarrhea.
      */
     public static final String DIARRHEA_UUID = "142412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

@@ -6,6 +6,8 @@ import org.msf.records.R;
 
 /**
  * An enumeration of patient statuses and the resources associated with them.
+ *
+ * <p>Note: the order of statuses in this enum determines the integer value displayed in the chart.
  */
 public enum ResStatus implements Resolvable<ResStatus.Resolved> {
 

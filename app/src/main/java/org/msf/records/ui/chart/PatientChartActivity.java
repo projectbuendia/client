@@ -143,6 +143,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
 
     @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
+    @InjectView(R.id.patient_chart_vital_general_condition_number) TextView mGeneralConditionNum;
     @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
     @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
 
@@ -405,20 +406,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // General Condition
             observation = observations.get(Concept.GENERAL_CONDITION_UUID);
             if (observation != null && observation.localizedValue != null) {
-                ResStatus.Resolved status =
-                        Concept.getResStatus(observation.value).resolve(getResources());
+                ResStatus resStatus = Concept.getResStatus(observation.value);
+                ResStatus.Resolved status = resStatus.resolve(getResources());
 
                 mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
                 mGeneralCondition.setTextColor(status.getForegroundColor());
                 mGeneralConditionName.setTextColor(status.getForegroundColor());
+                mGeneralConditionNum.setTextColor(status.getForegroundColor());
 
                 mGeneralCondition.setText(status.getMessage());
+                mGeneralConditionNum.setText(Integer.toString(resStatus.ordinal()));
             } else {
                 mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
                 mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
+                mGeneralConditionNum.setTextColor(mVitalUnknown.getForegroundColor());
 
                 mGeneralCondition.setText("–"); // en dash
+                mGeneralConditionNum.setText("–");
             }
 
             // Pain Level

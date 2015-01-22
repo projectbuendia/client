@@ -249,6 +249,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         String text = EMPTY_STRING;
         String textViewTag = null;
         int backgroundResource = 0;
+        int textColorResource = 0;
+        boolean useBigText = false;
         View.OnClickListener onClickListener = null;
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
@@ -266,6 +268,19 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                         }
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Temperature format was invalid");
+                    }
+                }
+                break;
+            case Concept.WEIGHT_UUID:
+                String weightString = rowData.datesToValues.get(dateKey);
+                if (weightString != null) {
+                    try {
+                        double weight = Double.parseDouble(weightString);
+                        text = String.format(Locale.US, "%d", (int) weight);
+                        textColorResource = R.color.black;
+                        useBigText = true;
+                    } catch (NumberFormatException e) {
+                        LOG.w(e, "Weight format was invalid");
                     }
                 }
                 break;
@@ -287,14 +302,22 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             }
         }
 
-        if (textView == null && backgroundResource != 0) {
+        if (textView == null) {
             // We need the textView, so inflate it.
             textView = (TextView) viewStub.inflate();
         }
         if (textView != null) {
             textView.setText(text);
             textView.setTag(textViewTag);
-            textView.setBackgroundResource(backgroundResource);
+            if (backgroundResource != 0) {
+                textView.setBackgroundResource(backgroundResource);
+            }
+            if (textColorResource != 0) {
+                textView.setTextColor(textColorResource);
+            }
+            if (useBigText) {
+                textView.setTextSize(28);
+            }
             textView.setOnClickListener(onClickListener);
         }
         return textView;
