@@ -3,6 +3,7 @@ package org.msf.records.ui.chart;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -98,8 +99,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 row = new Row(ob.conceptUuid, ob.conceptName);
                 rows.add(row);
                 if (Concept.DIARRHEA_UUID.equals(ob.conceptUuid)
-                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)
-                        || Concept.PAIN_UUID.equals(ob.conceptUuid)) {
+                        || Concept.VOMITING_UUID.equals(ob.conceptUuid)) {
                     // TODO(nfortescue): this should really look up the localized values from the concept database
                     // otherwise the strings could be inconsistent with the form
                     severeRow = new Row(null, ob.conceptName + " (" + context.getResources().getString(R.string.severe_symptom) + ")");
@@ -277,11 +277,31 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     try {
                         double weight = Double.parseDouble(weightString);
                         text = String.format(Locale.US, "%d", (int) weight);
-                        textColorResource = R.color.black;
+                        textColorResource = Color.BLACK;
                         useBigText = true;
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Weight format was invalid");
                     }
+                }
+                break;
+            case Concept.PAIN_UUID:
+                String painValueUuid = rowData.datesToValues.get(dateKey);
+                int value = 0;
+                if (Concept.MILD_UUID.equals(painValueUuid)) {
+                    value = 1;
+                    textColorResource = Color.BLACK;
+                } else if (Concept.MODERATE_UUID.equals(painValueUuid)) {
+                    value = 2;
+                    textColorResource = Color.BLACK;
+                } else if (Concept.SEVERE_UUID.equals(painValueUuid)) {
+                    value = 3;
+                    backgroundResource = R.drawable.chart_cell_bad;
+                    textColorResource = Color.WHITE;
+                }
+
+                if (value != 0) {
+                    text = String.format(Locale.US, "%d", value);
+                    useBigText = true;
                 }
                 break;
             case Concept.NOTES_UUID: {
