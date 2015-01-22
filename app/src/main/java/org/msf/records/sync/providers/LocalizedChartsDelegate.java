@@ -48,11 +48,11 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
                 " FROM " +
                 PatientDatabase.CHARTS_TABLE_NAME + " chart " +
 
-                " INNER JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names " +
+                " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names " +
                 "ON chart." + Contracts.Charts.CONCEPT_UUID + "=" +
                 "names." + Contracts.Charts.CONCEPT_UUID +
 
-                " INNER JOIN " +
+                " LEFT JOIN " +
                 PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " group_names " +
                 "ON chart." + Contracts.Charts.GROUP_UUID + "=" +
                 "group_names." + Contracts.Charts.CONCEPT_UUID +
@@ -73,15 +73,15 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
                 " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" + // 1st selection arg
 
 //                " WHERE chart." + ChartColumns.CHART_UUID + "=? AND " +
-                " WHERE " +
-                "names." + Contracts.ConceptNames.LOCALE + "=? AND " + // 3rd selection arg
-                "group_names." + Contracts.ConceptNames.LOCALE + "=?" + // 4th selection arg
+                //" WHERE " +
+                //"names." + Contracts.ConceptNames.LOCALE + "=? AND " + // 3rd selection arg
+                //"group_names." + Contracts.ConceptNames.LOCALE + "=?" + // 4th selection arg
 
                 " ORDER BY chart." + Contracts.Charts.CHART_ROW + ", obs." + Contracts.Observations.ENCOUNTER_TIME
                 ;
 
         return dbHelper.getReadableDatabase()
-                .rawQuery(query, new String[]{patientUuid, locale, locale, locale});
+                .rawQuery(query, new String[]{patientUuid, locale});//, locale, locale});
     }
 
     @Override

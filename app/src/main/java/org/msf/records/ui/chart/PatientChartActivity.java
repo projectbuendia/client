@@ -149,23 +149,25 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
     @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
 
-    @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperatureParent;
-    @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
-    @InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
+    // @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperatureParent;
+    //@InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
+    //@InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
 
     @InjectView(R.id.patient_chart_pain_parent) ViewGroup mPainParent;
     @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
     @InjectView(R.id.vital_name_pain) TextView mPainName;
 
-    @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
-    @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
-    @InjectView(R.id.patient_chart_vital_pcr_date) TextView mPcrDate;
-    @InjectView(R.id.vital_name_pcr) TextView mPcrName;
+    // @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
+    //@InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
+    //@InjectView(R.id.patient_chart_vital_pcr_date) TextView mPcrDate;
+    //@InjectView(R.id.vital_name_pcr) TextView mPcrName;
 
     @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
     @InjectView(R.id.vital_mobility) VitalView mMobility;
     @InjectView(R.id.vital_diet) VitalView mDiet;
     @InjectView(R.id.vital_food_drink) VitalView mHydration;
+    @InjectView(R.id.vital_pulse) VitalView mPulse;
+    @InjectView(R.id.vital_respiration) VitalView mRespiration;
 
     @InjectView(R.id.patient_chart_id) TextView mPatientIdView;
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
@@ -301,16 +303,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
+/*
     @OnClick({
             R.id.patient_chart_temperature_parent})
     void onVitalsPressed(View v) {
         mController.onAddObservationPressed("Vital signs");
     }
-
+*/
     @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
-        mController.onAddObservationPressed("Special Group");
+        mController.onAddObservationPressed("The pain assessment field");
     }
 
     @OnClick({
@@ -322,12 +324,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     void onSignsAndSymptomsPressed(View v) {
         mController.onAddObservationPressed("General health status of the patient");
     }
-
+/*
     @OnClick(R.id.patient_chart_pcr_parent)
     void onPcrPressed(View v) {
         mController.onAddTestResultsPressed();
     }
-
+*/
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -373,14 +375,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
+            // TODO(akalachman): REMOVE
+            LOG.d("Observations: " + observations.toString());
             showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
             showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
             showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
+            showObservation(mPulse, observations.get(Concept.PULSE_UUID));
+            showObservation(mRespiration, observations.get(Concept.RESPIRATION_UUID));
 
             // Temperature
             LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
-            if (observation != null && observation.localizedValue != null) {
+            if (observation != null && observation.localizedValue != null) {/*
                 double value = Double.parseDouble(observation.localizedValue);
                 ResTemperatureRange.Resolved temperatureRange =
                         value <= 37.5
@@ -398,7 +404,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
 
                 mTemperature.setText("–"); // en dash
-            }
+            */}
 
             // General Condition
             observation = observations.get(Concept.GENERAL_CONDITION_UUID);
@@ -437,7 +443,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             // PCR
             LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
-            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);/*
             if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
                     && (pcrNpObservation == null || pcrNpObservation == null)) {
                 mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
@@ -491,7 +497,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                                     DateTime.now(),
                                     new DateTime(pcrObservationMillis)));
                 }
-            }
+            }*/
             
             // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
@@ -551,10 +557,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<AppLocation> patientLocationBranch =
                     locationTree.getAncestorsStartingFromRoot(
                             locationTree.findByUuid(patient.locationUuid));
-            AppLocation patientZone = patientLocationBranch.get(
-                    AppLocationTree.ABSOLUTE_DEPTH_ZONE);
-            AppLocation patientTent = patientLocationBranch.get(
-                    AppLocationTree.ABSOLUTE_DEPTH_TENT);
+            AppLocation patientZone =
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE) ?
+                            patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
+            AppLocation patientTent =
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT) ?
+                            patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
 
             if (patientZone == null && patientTent == null) {
                 locationText = "Unknown Location";

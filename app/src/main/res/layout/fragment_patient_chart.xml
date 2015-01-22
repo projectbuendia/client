@@ -130,36 +130,10 @@
                 android:layout_height="144dp"
                 android:layout_margin="4dp" />
 
-            <include
-                layout="@layout/view_vital_temperature"
-                android:id="@+id/patient_chart_temperature_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-
-            <include
-                layout="@layout/view_vital_pain"
-                android:id="@+id/patient_chart_pain_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-
-            <include
-                layout="@layout/view_vital_pcr"
-                android:id="@+id/patient_chart_pcr_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-
-        </TableRow>
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_responsiveness"
                 android:layout_width="0dp"
-                android:layout_height="104dp"
+                android:layout_height="144dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
@@ -169,11 +143,50 @@
             <org.msf.records.widget.VitalView
                 android:id="@+id/vital_mobility"
                 android:layout_width="0dp"
-                android:layout_height="104dp"
+                android:layout_height="144dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
                 app:vitalName="Mobility"
+                app:vitalValue="–"/>
+
+            <include
+                layout="@layout/view_vital_pain"
+                android:id="@+id/patient_chart_pain_parent"
+                android:layout_width="0dp"
+                android:layout_height="144dp"
+                android:layout_margin="4dp" />
+            <!--
+            <include
+                layout="@layout/view_vital_pcr"
+                android:id="@+id/patient_chart_pcr_parent"
+                android:layout_width="0dp"
+                android:layout_height="144dp"
+                android:layout_margin="4dp" />
+            -->
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <org.msf.records.widget.VitalView
+                android:id="@+id/vital_pulse"
+                android:layout_width="0dp"
+                android:layout_height="104dp"
+                android:layout_margin="4dp"
+                android:background="@color/vital_unknown"
+                app:textColor="@color/vital_fg_dark"
+                app:vitalName="Pulse"
+                app:vitalValue="–"/>
+
+            <org.msf.records.widget.VitalView
+                android:id="@+id/vital_respiration"
+                android:layout_width="0dp"
+                android:layout_height="104dp"
+                android:layout_margin="4dp"
+                android:background="@color/vital_unknown"
+                app:textColor="@color/vital_fg_dark"
+                app:vitalName="Respiration"
                 app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView
@@ -183,7 +196,7 @@
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
                 app:textColor="@color/vital_fg_dark"
-                app:vitalName="Diet"
+                app:vitalName="Tolerating Diet"
                 app:vitalValue="–"/>
 
             <org.msf.records.widget.VitalView

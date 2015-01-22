@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.util.Log;
 
 import org.msf.records.net.model.Concept;
 import org.msf.records.sync.providers.Contracts;
@@ -143,6 +144,7 @@ public class LocalizedChartHelper {
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
+                Log.d("LocalizedChartHelper", "OBSERVATION FETCHED: " + obs.toString());
                 result.add(obs);
             }
             return result;
