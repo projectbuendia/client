@@ -594,6 +594,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             mPatientLocationView.setValue(locationText);
+            mPatientLocationView.setIconDrawable(
+                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
+                            .color(0x00000000)
+                            .sizeDp(36));
         }
 
         @Override

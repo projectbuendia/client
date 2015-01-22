@@ -3,6 +3,7 @@ package org.msf.records.widget;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
@@ -93,8 +94,19 @@ public class PatientAttributeView extends LinearLayout {
         return this;
     }
 
-    public PatientAttributeView setIcon(int icon) {
-        mImageView.setImageResource(icon);
+    public PatientAttributeView setIconResource(int icon) {
+        if (icon == 0) {
+            mImageView.setVisibility(GONE);
+        } else {
+            mImageView.setVisibility(VISIBLE);
+            mImageView.setImageResource(icon);
+        }
+        return this;
+    }
+
+    public PatientAttributeView setIconDrawable(Drawable drawable) {
+        mImageView.setVisibility(VISIBLE);
+        mImageView.setImageDrawable(drawable);
 
         return this;
     }
