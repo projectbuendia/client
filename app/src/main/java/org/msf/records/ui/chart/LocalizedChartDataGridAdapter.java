@@ -307,15 +307,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 if (Concept.MILD_UUID.equals(valueUuid)) {
                     value = 1;
                     textColor = Color.BLACK;
-                    backgroundColor = mContext.getResources().getColor(R.color.severity_mild);
+                    // backgroundColor = mContext.getResources().getColor(R.color.severity_mild);
                 } else if (Concept.MODERATE_UUID.equals(valueUuid)) {
                     value = 2;
-                    textColor = Color.WHITE;
-                    backgroundColor = mContext.getResources().getColor(R.color.severity_moderate);
+                    textColor = Color.BLACK;
+                    // backgroundColor =
+                    // mContext.getResources().getColor(R.color.severity_moderate);
                 } else if (Concept.SEVERE_UUID.equals(valueUuid)) {
                     value = 3;
-                    textColor = Color.WHITE;
-                    backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
+                    textColor = Color.RED;
+                    // backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
                 }
 
                 if (value != 0) {
