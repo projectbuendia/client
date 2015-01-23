@@ -29,7 +29,6 @@ import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -50,7 +49,6 @@ import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -136,7 +134,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject PatientModel mPatientModel;
     @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
     @Inject SyncManager mSyncManager;
     @Inject LocalizedChartHelper mLocalizedChartHelper;
@@ -217,7 +214,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 odkResultSender,
                 mLocalizedChartHelper,
                 controllerState,
-                mPatientModel,
                 mSyncManager,
                 minimalHandler);
 
@@ -310,7 +306,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
-        mController.onAddObservationPressed("Special Group");
+        mController.onAddObservationPressed("The pain assessment field");
     }
 
     @OnClick({
@@ -492,7 +488,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                                     new DateTime(pcrObservationMillis)));
                 }
             }
-            
+
             // Pregnancy
             observation = observations.get(Concept.PREGNANCY_UUID);
             if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
@@ -551,10 +547,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             List<AppLocation> patientLocationBranch =
                     locationTree.getAncestorsStartingFromRoot(
                             locationTree.findByUuid(patient.locationUuid));
-            AppLocation patientZone = patientLocationBranch.get(
-                    AppLocationTree.ABSOLUTE_DEPTH_ZONE);
-            AppLocation patientTent = patientLocationBranch.get(
-                    AppLocationTree.ABSOLUTE_DEPTH_TENT);
+            AppLocation patientZone =
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE)
+                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
+            AppLocation patientTent =
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT)
+                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
 
             if (patientZone == null && patientTent == null) {
                 locationText = "Unknown Location";

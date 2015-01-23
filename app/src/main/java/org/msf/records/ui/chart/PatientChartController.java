@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.google.common.base.Optional;
+
 import org.msf.records.App;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.data.odk.OdkConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
@@ -18,7 +21,6 @@ import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Concept;
-import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -31,13 +33,8 @@ import org.msf.records.utils.Logger;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import com.google.common.base.Optional;
-
-import de.greenrobot.event.EventBus;
-
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -108,7 +105,6 @@ final class PatientChartController {
     private final LocalizedChartHelper mObservationsProvider;
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
-    private final PatientModel mPatientModel;
     private final SyncManager mSyncManager;
     private final MinimalHandler mMainThreadHandler;
 
@@ -134,7 +130,6 @@ final class PatientChartController {
             OdkResultSender odkResultSender,
             LocalizedChartHelper observationsProvider,
             @Nullable Bundle savedState,
-            PatientModel patientModel,
             SyncManager syncManager,
             MinimalHandler mainThreadHandler) {
         mAppModel = appModel;
@@ -143,7 +138,6 @@ final class PatientChartController {
         mUi = ui;
         mOdkResultSender = odkResultSender;
         mObservationsProvider = observationsProvider;
-        mPatientModel = patientModel;
         if (savedState != null) {
             mPatientUuids = savedState.getStringArray(KEY_PENDING_UUIDS);
         } else {
@@ -224,7 +218,11 @@ final class PatientChartController {
         onAddObservationPressed(null);
     }
 
-    /** Call when the user has indicated they want to add observation data. */
+    /**
+     * Call when the user has indicated they want to add observation data.
+     * @param targetGroup the description of the corresponding group in the XForm. This corresponds
+     *                    with the "description" field in OpenMRS.
+     */
     public void onAddObservationPressed(String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
@@ -256,7 +254,7 @@ final class PatientChartController {
                 PatientChartActivity.XForm.ADD_OBSERVATION,
                 savePatientUuidForRequestCode(
                         PatientChartActivity.XForm.ADD_OBSERVATION, mPatientUuid),
-                mPatientModel.getOdkPatient(mPatientUuid),
+                OdkConverter.toOdkPatient(mPatient),
                 fields);
     }
 
@@ -276,7 +274,7 @@ final class PatientChartController {
                 PatientChartActivity.XForm.ADD_TEST_RESULTS,
                 savePatientUuidForRequestCode(
                         PatientChartActivity.XForm.ADD_TEST_RESULTS, mPatientUuid),
-                mPatientModel.getOdkPatient(mPatientUuid),
+                OdkConverter.toOdkPatient(mPatient),
                 fields);
     }
 
