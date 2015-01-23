@@ -91,4 +91,7 @@
     <string name="latest_pcr_label">Latest Ebola Result</string>
     <string name="latest_pcr_label_with_date">Latest Ebola Result (%s)</string>
     <string name="action_add_test_result">Add test result</string>
+    <string name="pregnant_with_iv">(Pregnant, IV Fitted)</string>
+    <string name="pregnant">(Pregnant)</string>
+    <string name="iv_fitted">(IV Fitted)</string>
 </resources>

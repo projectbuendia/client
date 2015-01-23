@@ -173,7 +173,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
-    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
+    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -490,14 +490,26 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
             }
 
-            // Pregnancy
+            // Pregnancy & IV status
             // TODO: Localize all of this.
             observation = observations.get(Concept.PREGNANCY_UUID);
-            if (observation != null && observation.localizedValue != null
-                    && observation.localizedValue.equals("Yes")) {
-                mPatientPregnantView.setText(" (Pregnant)");
+            boolean pregnant = (observation != null && Concept.YES_UUID.equals(observation.value));
+
+            observation = observations.get(Concept.IV_UUID);
+            boolean ivFitted = (observation != null && Concept.YES_UUID.equals(observation.value));
+
+            if (pregnant) {
+                if (ivFitted) {
+                    mPatientPregnantOrIvView.setText(R.string.pregnant_with_iv);
+                } else {
+                    mPatientPregnantOrIvView.setText(R.string.pregnant);
+                }
             } else {
-                mPatientPregnantView.setText("");
+                if (ivFitted) {
+                    mPatientPregnantOrIvView.setText(R.string.iv_fitted);
+                } else {
+                    mPatientPregnantOrIvView.setText("");
+                }
             }
         }
 
