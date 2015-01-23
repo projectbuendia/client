@@ -6,7 +6,7 @@ package org.msf.records.net.model;
  * Java bean for GSON converting to and from a JSON encoding.
  */
 public class ChartStructure {
-    public Double version; // should this be int? String? Should be comparable.
+    public String version; // should this be int? String? Should be comparable.
     public String uuid;
     /**
      * The groups that results should be displayed in, in order.

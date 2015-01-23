@@ -60,6 +60,7 @@ public class PatientSearchController {
     private final EventBusRegistrationInterface mGlobalEventBus;
     private final AppModel mModel;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
+    private final String mLocale;
 
     private AppLocationTree mLocationTree;
     private String mRootLocationUuid;
@@ -68,6 +69,8 @@ public class PatientSearchController {
     private String mFilterQueryTerm = "";
     private FilterSubscriber mFilterSubscriber;
     private final Object mFilterSubscriberLock = new Object();
+
+    private final LocationTreeUpdatedSubscriber mLocationTreeUpdatedSubscriber;
 
     private boolean mWaitingOnLocationTree = false;
 
@@ -98,24 +101,29 @@ public class PatientSearchController {
         mCrudEventBus = crudEventBus;
         mGlobalEventBus = globalEventBus;
         mModel = model;
-
-        mCrudEventBus.register(new LocationTreeUpdatedSubscriber());
-        mModel.fetchLocationTree(mCrudEventBus, locale);
+        mLocale = locale;
 
         mFilter = PatientDbFilters.getDefaultFilter();
 
         mSyncSubscriber = new SyncSubscriber();
+        mLocationTreeUpdatedSubscriber = new LocationTreeUpdatedSubscriber();
     }
 
     public void init() {
         mGlobalEventBus.register(mSyncSubscriber);
+        mCrudEventBus.register(mLocationTreeUpdatedSubscriber);
+        mModel.fetchLocationTree(mCrudEventBus, mLocale);
     }
 
     public void suspend() {
         mGlobalEventBus.unregister(mSyncSubscriber);
-        // Close any outstanding patient cursor. New results will be fetched when requested.
+        mCrudEventBus.unregister(mLocationTreeUpdatedSubscriber);
+        // Close any outstanding cursors. New results will be fetched when requested.
         if (mPatientsCursor != null) {
             mPatientsCursor.close();
+        }
+        if (mLocationTree != null) {
+            mLocationTree.close();
         }
     }
 
@@ -130,11 +138,13 @@ public class PatientSearchController {
     private class LocationTreeUpdatedSubscriber {
         public synchronized void onEventMainThread(AppLocationTreeFetchedEvent event) {
             synchronized (mFilterSubscriberLock) {
-                mCrudEventBus.unregister(this);
                 mFilterSubscriber = null;
             }
             for (FragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.setLocationTree(event.tree);
+            }
+            if (mLocationTree != null) {
+                mLocationTree.close();
             }
             mLocationTree = event.tree;
 

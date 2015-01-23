@@ -51,6 +51,8 @@ public final class AssignLocationDialog
     private final Optional<String> mCurrentLocationUuid;
     private final TentSelectedCallback mTentSelectedCallback;
     private ProgressDialog mProgressDialog;
+    private AppLocationTree mLocationTree;
+    private boolean mRegistered;
 
     // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
@@ -105,6 +107,7 @@ public final class AssignLocationDialog
     }
 
     private void startListeningForLocations() {
+        mRegistered = true;
         mEventBus.register(mEventBusSubscriber);
         mAppModel.fetchLocationTree(mEventBus, mLocale);
     }
@@ -139,6 +142,9 @@ public final class AssignLocationDialog
     }
 
     public void dismiss() {
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
         mProgressDialog.dismiss();
         mDialog.dismiss();
     }
@@ -151,7 +157,9 @@ public final class AssignLocationDialog
 
     @Override
     public void onDismiss(DialogInterface dialog) {
-        mEventBus.unregister(mEventBusSubscriber);
+        if (mRegistered) {
+            mEventBus.unregister(mEventBusSubscriber);
+        }
         mOnDismiss.run();
     }
 
@@ -163,6 +171,7 @@ public final class AssignLocationDialog
                 return;
             }
 
+            mLocationTree = event.tree;
             setTents(event.tree);
         }
     }
