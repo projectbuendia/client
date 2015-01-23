@@ -34,7 +34,7 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
             + "  locations.location_uuid as location_uuid,\n"
             + "  locations.parent_uuid as parent_uuid,\n"
             + "  location_names.name as name,\n"
-            + "  COUNT(*) as patient_count\n"
+            + "  COUNT(patients.location_uuid) as patient_count\n"
             + "FROM locations\n"
             + "  INNER JOIN location_names\n"
             + "    ON locations.location_uuid = location_names.location_uuid\n"
