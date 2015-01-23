@@ -18,6 +18,7 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.msf.records.R;
+import org.msf.records.data.res.ResStatus;
 import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -66,11 +67,12 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
     private final List<String> columnHeaders = new ArrayList<>();
+    private final Context mContext;
 
     public LocalizedChartDataGridAdapter(Context context,
                                          List<LocalizedObservation> observations,
                                          LayoutInflater layoutInflater) {
-        Context context1 = context;
+        mContext = context;
         LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
         Resources resources = context.getResources();
@@ -251,7 +253,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         String text = EMPTY_STRING;
         String textViewTag = null;
         int backgroundResource = 0;
-        int textColorResource = 0;
+        int backgroundColor = 0;
+        int textColor = 0;
         boolean useBigText = false;
         View.OnClickListener onClickListener = null;
 
@@ -273,13 +276,23 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     }
                 }
                 break;
+            case org.msf.records.model.Concept.GENERAL_CONDITION_UUID:
+                String conditionUuid = rowData.datesToValues.get(dateKey);
+                if (conditionUuid != null) {
+                    ResStatus resStatus = org.msf.records.model.Concept.getResStatus(conditionUuid);
+                    ResStatus.Resolved status = resStatus.resolve(mContext.getResources());
+                    text = String.format(Locale.US, "%d", resStatus.ordinal());
+                    textColor = status.getForegroundColor();
+                    backgroundColor = status.getBackgroundColor();
+                    useBigText = true;
+                }
             case Concept.WEIGHT_UUID:
                 String weightString = rowData.datesToValues.get(dateKey);
                 if (weightString != null) {
                     try {
                         double weight = Double.parseDouble(weightString);
                         text = String.format(Locale.US, "%d", (int) weight);
-                        textColorResource = Color.BLACK;
+                        textColor = Color.BLACK;
                         useBigText = true;
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Weight format was invalid");
@@ -292,14 +305,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 int value = 0;
                 if (Concept.MILD_UUID.equals(valueUuid)) {
                     value = 1;
-                    textColorResource = Color.BLACK;
+                    textColor = Color.BLACK;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_mild);
                 } else if (Concept.MODERATE_UUID.equals(valueUuid)) {
                     value = 2;
-                    textColorResource = Color.BLACK;
+                    textColor = Color.WHITE;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_moderate);
                 } else if (Concept.SEVERE_UUID.equals(valueUuid)) {
                     value = 3;
-                    backgroundResource = R.drawable.chart_cell_bad;
-                    textColorResource = Color.WHITE;
+                    textColor = Color.WHITE;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
                 }
 
                 if (value != 0) {
@@ -333,8 +348,11 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             textView.setText(text);
             textView.setTag(textViewTag);
             textView.setBackgroundResource(backgroundResource);
-            if (textColorResource != 0) {
-                textView.setTextColor(textColorResource);
+            if (backgroundColor != 0) {
+                textView.setBackgroundColor(backgroundColor);
+            }
+            if (textColor != 0) {
+                textView.setTextColor(textColor);
             }
             if (useBigText) {
                 textView.setTextSize(28);

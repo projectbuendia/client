@@ -306,6 +306,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @OnClick({
+            R.id.patient_chart_general_condition_parent,
+            R.id.vital_diet,
+            R.id.vital_food_drink,
             R.id.patient_chart_responsiveness_parent,
             R.id.patient_chart_mobility_parent})
     void onOverallAssessmentPressed(View v) {
@@ -313,11 +316,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @OnClick({
-            R.id.patient_chart_general_condition_parent,
-            R.id.vital_diet,
-            R.id.vital_food_drink})
+            R.id.vital_respiration,
+            R.id.vital_pulse})
     void onSignsAndSymptomsPressed(View v) {
-        mController.onAddObservationPressed("General health status of the patient");
+        mController.onAddObservationPressed("Vital signs");
     }
 
     @Override
