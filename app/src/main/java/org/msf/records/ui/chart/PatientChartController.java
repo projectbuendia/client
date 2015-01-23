@@ -214,7 +214,11 @@ final class PatientChartController {
         onAddObservationPressed(null);
     }
 
-    /** Call when the user has indicated they want to add observation data. */
+    /**
+     * Call when the user has indicated they want to add observation data.
+     * @param targetGroup the description of the corresponding group in the XForm. This corresponds
+     *                    with the "description" field in OpenMRS.
+     */
     public void onAddObservationPressed(String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
