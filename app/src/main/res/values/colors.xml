@@ -11,12 +11,13 @@
     <color name="vital_known">#01579b</color>
 
     <!-- Statuses -->
-    <color name="status_good">#417505</color>
-    <color name="status_fair">#f5cd23</color>
-    <color name="status_poor">#d05802</color>
-    <color name="status_very_poor">#d0021b</color>
+    <color name="status_well">#417505</color>
+    <color name="status_unwell">#f5cd23</color>
+    <color name="status_critical">#d0021b</color>
+    <color name="status_pallative">#bd10e0</color>
+    <color name="status_convalescent">#30b2cf</color>
     <color name="status_discharged_non_case">#5eae00</color>
-    <color name="status_cured">#5eae00</color>
+    <color name="status_discharged_cured">#5eae00</color>
     <color name="status_suspected_dead">#807e7e</color>
     <color name="status_confirmed_dead">#000000</color>
 

@@ -44,19 +44,20 @@ public class Concept {
             return ResStatus.UNKNOWN;
         }
 
+        // TODO(akalachman): Fix these UUID's once fixed on the server.
         switch (conditionUuid) {
             case Concept.GENERAL_CONDITION_GOOD_UUID:
-                return ResStatus.GOOD;
+                return ResStatus.WELL;
             case Concept.GENERAL_CONDITION_FAIR_UUID:
-                return ResStatus.FAIR;
+                return ResStatus.UNWELL;
             case Concept.GENERAL_CONDITION_POOR_UUID:
-                return ResStatus.POOR;
+                return ResStatus.CRITICAL;
             case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
-                return ResStatus.VERY_POOR;
+                return ResStatus.PALLATIVE;
             case Concept.GENERAL_CONDITION_DISCHARGED_NON_CASE:
                 return ResStatus.DISCHARGED_NON_CASE;
             case Concept.GENERAL_CONDITION_CURED:
-                return ResStatus.CURED;
+                return ResStatus.DISCHARGED_CURED;
             case Concept.GENERAL_CONDITION_SUSPECTED_DEAD:
                 return ResStatus.SUSPECTED_DEAD;
             case Concept.GENERAL_CONDITION_CONFIRMED_DEAD:

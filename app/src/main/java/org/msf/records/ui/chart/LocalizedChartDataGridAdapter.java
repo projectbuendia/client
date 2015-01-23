@@ -262,7 +262,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 if (conditionUuid != null) {
                     ResStatus resStatus = org.msf.records.model.Concept.getResStatus(conditionUuid);
                     ResStatus.Resolved status = resStatus.resolve(mContext.getResources());
-                    text = String.format(Locale.US, "%d", resStatus.ordinal());
+                    text = status.getShortDescription().toString();
                     textColor = status.getForegroundColor();
                     backgroundColor = status.getBackgroundColor();
                     useBigText = true;

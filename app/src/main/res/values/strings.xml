@@ -3,13 +3,14 @@
 
     <!-- Statuses -->
     <string name="status_unknown">Unknown</string>
-    <string name="status_good">Good</string>
-    <string name="status_fair">Fair</string>
-    <string name="status_poor">Poor</string>
-    <string name="status_very_poor">Very Poor</string>
-    <string name="status_discharged_non_case">Discharge Non-Case</string>
-    <string name="status_cured">Cured</string>
-    <string name="status_suspected_dead">Dead?</string>
+    <string name="status_well">Well</string>
+    <string name="status_unwell">Unwell</string>
+    <string name="status_critical">Critical</string>
+    <string name="status_pallative">Pallative</string>
+    <string name="status_convalescent">Convalescent</string>
+    <string name="status_discharged_non_case">Discharged Non-Case</string>
+    <string name="status_discharged_cured">Discharged Cured</string>
+    <string name="status_suspected_dead">Suspected Dead</string>
     <string name="status_confirmed_dead">Confirmed Dead</string>
 
     <string name="app_name">MSF Medical Records</string>
@@ -94,4 +95,14 @@
     <string name="pregnant_with_iv">(Pregnant, IV Fitted)</string>
     <string name="pregnant">(Pregnant)</string>
     <string name="iv_fitted">(IV Fitted)</string>
+    <string name="status_short_desc_unknown">-</string>
+    <string name="status_short_desc_well">1</string>
+    <string name="status_short_desc_unwell">2</string>
+    <string name="status_short_desc_critical">3</string>
+    <string name="status_short_desc_pallative">4</string>
+    <string name="status_short_desc_convalescent">5</string>
+    <string name="status_short_desc_discharged_non_case">8</string>
+    <string name="status_short_desc_discharged_cured">7</string>
+    <string name="status_short_desc_suspected_dead">6?</string>
+    <string name="status_short_desc_confirmed_dead">6</string>
 </resources>

@@ -428,7 +428,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralConditionNum.setTextColor(status.getForegroundColor());
 
                 mGeneralCondition.setText(status.getMessage());
-                mGeneralConditionNum.setText(Integer.toString(resStatus.ordinal()));
+                mGeneralConditionNum.setText(status.getShortDescription());
             } else {
                 mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
