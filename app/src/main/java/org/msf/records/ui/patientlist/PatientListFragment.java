@@ -168,7 +168,9 @@ public class PatientListFragment extends ProgressFragment implements
 
         @Override
         public void setPatients(TypedCursor<AppPatient> patients) {
-            mPatientAdapter.setPatients(patients);
+            if (mPatientAdapter != null) {
+                mPatientAdapter.setPatients(patients);
+            }
         }
 
         @Override
