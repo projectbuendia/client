@@ -286,6 +286,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     backgroundColor = status.getBackgroundColor();
                     useBigText = true;
                 }
+                break;
             case Concept.WEIGHT_UUID:
                 String weightString = rowData.datesToValues.get(dateKey);
                 if (weightString != null) {
