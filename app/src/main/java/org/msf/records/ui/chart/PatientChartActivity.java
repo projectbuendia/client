@@ -489,7 +489,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                                     new DateTime(pcrObservationMillis))));
                 }
             }
-            
+
             // Pregnancy
             // TODO: Localize all of this.
             observation = observations.get(Concept.PREGNANCY_UUID);
@@ -553,10 +553,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                             locationTree.findByUuid(patient.locationUuid));
             AppLocation patientZone =
                     (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE)
-                            ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
+                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
             AppLocation patientTent =
                     (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT)
-                            ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
+                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
 
             if (patientZone == null && patientTent == null) {
                 locationText = "Unknown Location";

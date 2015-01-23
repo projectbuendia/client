@@ -11,6 +11,7 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
@@ -111,6 +112,10 @@ final class TentSelectionController {
     public void suspend() {
         LOG.d("Controller suspended.");
 
+        if (mAppLocationTree != null) {
+            mAppLocationTree.close();
+        }
+
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
 	}
@@ -157,13 +162,25 @@ final class TentSelectionController {
         }
     }
 
-
     @SuppressWarnings("unused") // Called by reflection from EventBus
     private final class EventBusSubscriber {
 
+        public void onEventMainThread(SyncFinishedEvent event) {
+            // Reload locations when a sync completes.
+            mAppModel.fetchLocationTree(
+                    mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
+        }
+
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            mLoadedLocationTree = true;
+            if (mAppLocationTree != null) {
+                mAppLocationTree.close();
+            }
             mAppLocationTree = event.tree;
+            if (mAppLocationTree == null || mAppLocationTree.getRoot() == null) {
+                mLoadedLocationTree = false;
+            } else {
+                mLoadedLocationTree = true;
+            }
             ImmutableSet<AppLocation> zones =
                     mAppLocationTree.getChildren(mAppLocationTree.getRoot());
             for (AppLocation zone : zones) {

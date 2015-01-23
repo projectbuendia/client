@@ -131,7 +131,17 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
-                row.datesToValues.put(dateKey, ob.value);
+                // For notes, perform a concatenation rather than overwriting.
+                if (Concept.NOTES_UUID.equals(ob.conceptUuid)) {
+                    if (row.datesToValues.containsKey(dateKey)) {
+                        row.datesToValues.put(
+                                dateKey, row.datesToValues.get(dateKey) + '\n' + ob.value);
+                    } else {
+                        row.datesToValues.put(dateKey, ob.value);
+                    }
+                } else {
+                    row.datesToValues.put(dateKey, ob.value);
+                }
                 // Do an ugly expansion into the extra rows.
                 if (Concept.MILD_UUID.equals(ob.value) && mildRow != null) {
                     mildRow.datesToValues.put(dateKey, ob.value);

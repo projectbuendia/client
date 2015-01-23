@@ -69,6 +69,8 @@ final class PatientCreationController {
 
     private final EventSubscriber mEventBusSubscriber;
 
+    private AppLocationTree mLocationTree;
+
     public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
         mUi = ui;
         mCrudEventBus = crudEventBus;
@@ -87,6 +89,9 @@ final class PatientCreationController {
     /** Releases any resources used by the controller. */
     public void suspend() {
         mCrudEventBus.unregister(mEventBusSubscriber);
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
     }
 
     public boolean createPatient(
@@ -167,6 +172,10 @@ final class PatientCreationController {
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
             mUi.setLocationTree(event.tree);
+            if (mLocationTree != null) {
+                mLocationTree.close();
+            }
+            mLocationTree = event.tree;
         }
 
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {

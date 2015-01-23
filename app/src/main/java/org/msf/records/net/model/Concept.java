@@ -20,11 +20,11 @@ public class Concept {
     /**
      * UUID for the (question) concept for Diarrhea.
      */
-    public static final String DIARRHEA_UUID = "142412AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String DIARRHEA_UUID = "1aa247f3-2d83-4efc-94bc-123b1a71b19f";
     /**
      * UUID for the (question) concept for Vomiting.
      */
-    public static final String VOMITING_UUID = "122983AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String VOMITING_UUID = "405ad95d-f6e1-4023-a459-28cffdb055c5";
     /**
      * UUID for the (question) concept for pain.
      */

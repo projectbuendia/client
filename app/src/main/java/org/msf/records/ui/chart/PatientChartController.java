@@ -180,6 +180,10 @@ final class PatientChartController {
     public void suspend() {
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
+
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
     }
 
     public void onXFormResult(int code, int resultCode, Intent data) {
@@ -214,7 +218,11 @@ final class PatientChartController {
         onAddObservationPressed(null);
     }
 
-    /** Call when the user has indicated they want to add observation data. */
+    /**
+     * Call when the user has indicated they want to add observation data.
+     * @param targetGroup the description of the corresponding group in the XForm. This corresponds
+     *                    with the "description" field in OpenMRS.
+     */
     public void onAddObservationPressed(String targetGroup) {
         PrepopulatableFields fields = new PrepopulatableFields();
 
@@ -359,6 +367,9 @@ final class PatientChartController {
     private final class EventSubscriber {
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            if (mLocationTree != null) {
+                mLocationTree.close();
+            }
             mLocationTree = event.tree;
             updatePatientLocationUi();
         }
