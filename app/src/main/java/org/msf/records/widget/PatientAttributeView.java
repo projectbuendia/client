@@ -32,6 +32,9 @@ public class PatientAttributeView extends LinearLayout {
         this(context, attrs, 0);
     }
 
+    /**
+     * Constructs a {@link PatientAttributeView} with custom style parameters.
+     */
     public PatientAttributeView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
@@ -70,7 +73,7 @@ public class PatientAttributeView extends LinearLayout {
     }
 
     /**
-     * Sets the name.
+     * Sets the text in the name view.
      */
     public PatientAttributeView setName(CharSequence name) {
         mNameView.setText(name);
@@ -78,6 +81,9 @@ public class PatientAttributeView extends LinearLayout {
         return this;
     }
 
+    /**
+     * Sets the text in the value view.
+     */
     public PatientAttributeView setValue(CharSequence value) {
         mValueView.setText(value);
 
@@ -94,16 +100,9 @@ public class PatientAttributeView extends LinearLayout {
         return this;
     }
 
-    public PatientAttributeView setIconResource(int icon) {
-        if (icon == 0) {
-            mImageView.setVisibility(GONE);
-        } else {
-            mImageView.setVisibility(VISIBLE);
-            mImageView.setImageResource(icon);
-        }
-        return this;
-    }
-
+    /**
+     * Sets a {@link Drawable} for use as an icon.
+     */
     public PatientAttributeView setIconDrawable(Drawable drawable) {
         mImageView.setVisibility(VISIBLE);
         mImageView.setImageDrawable(drawable);

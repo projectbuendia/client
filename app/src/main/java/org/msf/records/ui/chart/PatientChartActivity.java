@@ -477,8 +477,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // Pregnancy
             // TODO: Localize all of this.
             observation = observations.get(Concept.PREGNANCY_UUID);
-            if (observation != null && observation.localizedValue != null &&
-                    observation.localizedValue.equals("Yes")) {
+            if (observation != null && observation.localizedValue != null
+                    && observation.localizedValue.equals("Yes")) {
                 mPatientPregnantView.setText(" (Pregnant)");
             } else {
                 mPatientPregnantView.setText("");
@@ -536,11 +536,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     locationTree.getAncestorsStartingFromRoot(
                             locationTree.findByUuid(patient.locationUuid));
             AppLocation patientZone =
-                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE) ?
-                            patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE)
+                            ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
             AppLocation patientTent =
-                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT) ?
-                            patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
+                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT)
+                            ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
 
             if (patientZone == null && patientTent == null) {
                 locationText = "Unknown Location";
