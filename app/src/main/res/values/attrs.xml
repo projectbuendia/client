@@ -15,4 +15,10 @@
         <attr name="subtitledButtonSubtitle" format="string" localization="suggested" />
         <attr name="subtitledButtonSubtitleFormat" format="string" />
     </declare-styleable>
+    <declare-styleable name="PatientAttributeView">
+        <attr name="attributeTextColor" format="color" />
+        <attr name="attributeName" format="string" localization="suggested" />
+        <attr name="attributeValue" format="string" />
+        <attr name="attributeIconResource" format="integer" />
+    </declare-styleable>
 </resources>
