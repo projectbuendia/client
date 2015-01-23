@@ -299,33 +299,27 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-/*
-    @OnClick({
-            R.id.patient_chart_temperature_parent})
-    void onVitalsPressed(View v) {
-        mController.onAddObservationPressed("Vital signs");
-    }
-*/
+
     @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
         mController.onAddObservationPressed("The pain assessment field");
     }
 
     @OnClick({
+            R.id.patient_chart_responsiveness_parent,
+            R.id.patient_chart_mobility_parent})
+    void onOverallAssessmentPressed(View v) {
+        mController.onAddObservationPressed("Overall Assessment");
+    }
+
+    @OnClick({
             R.id.patient_chart_general_condition_parent,
-            R.id.patient_chart_responsiveness_parent, // TODO(akalachman): Revisit
-            R.id.patient_chart_mobility_parent,  // TODO(akalachman): Revisit
             R.id.vital_diet,
             R.id.vital_food_drink})
     void onSignsAndSymptomsPressed(View v) {
         mController.onAddObservationPressed("General health status of the patient");
     }
-/*
-    @OnClick(R.id.patient_chart_pcr_parent)
-    void onPcrPressed(View v) {
-        mController.onAddTestResultsPressed();
-    }
-*/
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
