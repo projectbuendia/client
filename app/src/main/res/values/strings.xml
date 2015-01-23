@@ -90,4 +90,5 @@
     <string name="invalid_username">Username must be between 2 and 50 characters. Only letters, digits, ".", "-", and "_" are allowed.</string>
     <string name="latest_pcr_label">Latest Ebola Result</string>
     <string name="latest_pcr_label_with_date">Latest Ebola Result (%s)</string>
+    <string name="action_add_test_result">Add test result</string>
 </resources>

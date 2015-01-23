@@ -249,6 +249,22 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.overview, menu);
 
+        final MenuItem addTestResult = menu.findItem(R.id.action_add_test_result);
+        addTestResult.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_flask)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+        addTestResult.setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        mController.onAddTestResultsPressed();
+                        return true;
+                    }
+                }
+        );
+
         final MenuItem assignLocation = menu.findItem(R.id.action_relocate_patient);
         assignLocation.setIcon(
                 new IconDrawable(this, Iconify.IconValue.fa_map_marker)
@@ -426,6 +442,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // PCR
             LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
             LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            mPcr.setIconDrawable(
+                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
+                            .color(0x00000000)
+                            .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
                     && (pcrNpObservation == null || pcrNpObservation == null)) {
                 mPcr.setValue("–");
