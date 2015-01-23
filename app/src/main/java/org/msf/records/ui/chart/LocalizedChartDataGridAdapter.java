@@ -269,6 +269,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View.OnClickListener onClickListener = null;
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
+        // TODO: Proper localization for numeric fields.
         switch (conceptUuid) {
             case Concept.TEMPERATURE_UUID:
                 String temperatureString = rowData.datesToValues.get(dateKey);
@@ -302,7 +303,11 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 if (weightString != null) {
                     try {
                         double weight = Double.parseDouble(weightString);
-                        text = String.format(Locale.US, "%d", (int) weight);
+                        if (weight >= 10) {
+                            text = String.format(Locale.US, "%d", (int) weight);
+                        } else {
+                            text = String.format(Locale.US, "%.1f", weight);
+                        }
                         textColor = Color.BLACK;
                         useBigText = true;
                     } catch (NumberFormatException e) {
