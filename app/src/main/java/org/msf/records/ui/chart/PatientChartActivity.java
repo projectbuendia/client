@@ -572,7 +572,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())
-                    .getDays();
+                    .getDays() + 1;
             mPatientAdmissionDaysView.setValue("Day " + days);
         }
 

@@ -122,10 +122,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
             DateTime d = new DateTime(ob.encounterTimeMillis, chronology);
             LocalDate localDate = d.toLocalDate();
-            String amKey = toAmKey(todayString, localDate);
+            days.add(localDate);
+            String amKey = toAmKey(todayString, localDate, days.first());
             String pmKey = toPmKey(amKey); // this is never displayed to the user
             String dateKey = d.getHourOfDay() < 12 ? amKey : pmKey;
-            days.add(localDate);
 
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
@@ -144,13 +144,13 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
         if (days.isEmpty()) {
             // Just put today, with nothing there.
-            String am = toAmKey(todayString, today);
+            String am = toAmKey(todayString, today, today);
             columnHeaders.add(am);
             columnHeaders.add(toPmKey(am));
         } else {
             // Fill in all the columns between start and end.
             for (LocalDate d = days.first(); !d.isAfter(days.last()); d = d.plus(Days.ONE)) {
-                String amKey = toAmKey(todayString, d);
+                String amKey = toAmKey(todayString, d, days.first());
                 String pmKey = toPmKey(amKey); // this is never displayed to the user
                 columnHeaders.add(amKey);
                 columnHeaders.add(pmKey);
@@ -169,13 +169,15 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
-    private String toAmKey(String todayString, LocalDate localDate) {
+    private String toAmKey(String todayString, LocalDate localDate, LocalDate earliestDate) {
+        // TODO: Localize.
         String amKey;
+        int day = Days.daysBetween(earliestDate, localDate).getDays() + 1;
         int daysDiff = Days.daysBetween(localDate, today).getDays();
         if (daysDiff == 0) {
-            amKey = todayString;
+            amKey = todayString + " (Day " + day + ")\n" + localDate.toString("dd MMM");
         } else {
-            amKey = "-" + daysDiff + " Day";
+            amKey = "Day " + day + "\n" + localDate.toString("dd MMM");
         }
         return amKey;
     }
