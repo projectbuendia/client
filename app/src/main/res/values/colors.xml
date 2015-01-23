@@ -20,6 +20,11 @@
     <color name="status_suspected_dead">#807e7e</color>
     <color name="status_confirmed_dead">#000000</color>
 
+    <!-- Severity (pain, weakness, etc.) -->
+    <color name="severity_mild">#f5cd23</color>
+    <color name="severity_moderate">#d05802</color>
+    <color name="severity_severe">#d0021b</color>
+
     <!-- Temperature Ranges -->
     <color name="temperature_normal">#417505</color>
     <color name="temperature_high">#d0021b</color>
