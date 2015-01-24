@@ -6,7 +6,7 @@
     <string name="status_well">Well</string>
     <string name="status_unwell">Unwell</string>
     <string name="status_critical">Critical</string>
-    <string name="status_pallative">Pallative</string>
+    <string name="status_palliative">Palliative</string>
     <string name="status_convalescent">Convalescing</string>
     <string name="status_discharged_non_case">Discharged Non-Case</string>
     <string name="status_discharged_cured">Discharged Cured</string>

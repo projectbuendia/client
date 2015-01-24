@@ -21,12 +21,15 @@ public class Concept {
     public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String UNKNOWN_UUID = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    public static final String GENERAL_CONDITION_GOOD_UUID = "ae03f060-e6af-4390-a22a-eaabdb54ad69";
-    public static final String GENERAL_CONDITION_FAIR_UUID = "162133AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_POOR_UUID =
-            "162132AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-    public static final String GENERAL_CONDITION_VERY_POOR_UUID =
+    public static final String GENERAL_CONDITION_WELL_UUID = "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String GENERAL_CONDITION_UNWELL_UUID =
+            "137793AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String GENERAL_CONDITION_CRITICAL_UUID =
             "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+    public static final String GENERAL_CONDITION_PALLIATIVE_UUID =
+            "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
+    public static final String GENERAL_CONDITION_CONVALESCENT_UUID =
+            "119844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE =
             "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
     public static final String GENERAL_CONDITION_CURED =
@@ -44,16 +47,17 @@ public class Concept {
             return ResStatus.UNKNOWN;
         }
 
-        // TODO(akalachman): Fix these UUID's once fixed on the server.
         switch (conditionUuid) {
-            case Concept.GENERAL_CONDITION_GOOD_UUID:
+            case Concept.GENERAL_CONDITION_WELL_UUID:
                 return ResStatus.WELL;
-            case Concept.GENERAL_CONDITION_FAIR_UUID:
+            case Concept.GENERAL_CONDITION_UNWELL_UUID:
                 return ResStatus.UNWELL;
-            case Concept.GENERAL_CONDITION_POOR_UUID:
+            case Concept.GENERAL_CONDITION_CRITICAL_UUID:
                 return ResStatus.CRITICAL;
-            case Concept.GENERAL_CONDITION_VERY_POOR_UUID:
-                return ResStatus.PALLATIVE;
+            case Concept.GENERAL_CONDITION_PALLIATIVE_UUID:
+                return ResStatus.PALLIATIVE;
+            case Concept.GENERAL_CONDITION_CONVALESCENT_UUID:
+                return ResStatus.CONVALESCENT;
             case Concept.GENERAL_CONDITION_DISCHARGED_NON_CASE:
                 return ResStatus.DISCHARGED_NON_CASE;
             case Concept.GENERAL_CONDITION_CURED:
