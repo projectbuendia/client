@@ -3,13 +3,14 @@
 
     <!-- Statuses -->
     <string name="status_unknown">Unknown</string>
-    <string name="status_good">Good</string>
-    <string name="status_fair">Fair</string>
-    <string name="status_poor">Poor</string>
-    <string name="status_very_poor">Very Poor</string>
-    <string name="status_discharged_non_case">Discharge Non-Case</string>
-    <string name="status_cured">Cured</string>
-    <string name="status_suspected_dead">Dead?</string>
+    <string name="status_well">Well</string>
+    <string name="status_unwell">Unwell</string>
+    <string name="status_critical">Critical</string>
+    <string name="status_palliative">Palliative</string>
+    <string name="status_convalescent">Convalescing</string>
+    <string name="status_discharged_non_case">Discharged Non-Case</string>
+    <string name="status_discharged_cured">Discharged Cured</string>
+    <string name="status_suspected_dead">Suspected Dead</string>
     <string name="status_confirmed_dead">Confirmed Dead</string>
 
     <string name="app_name">MSF Medical Records</string>
@@ -61,7 +62,7 @@
     <string name="location_load_error">Error loading location resources</string>
     <string name="unknown_location">Unknown location</string>
     <string name="unknown_tent_in_zone">%s (no tent assigned)</string>
-    <string name="last_observation">"Last observation: "</string>
+    <string name="chart_last_updated">"Chart last updated: "</string>
     <string name="last_observation_none">No observations</string>
     <string name="sex_male">Male</string>
     <string name="sex_female">Female</string>
@@ -88,4 +89,20 @@
     <string name="given_name_cannot_be_null">Given name must not be null</string>
     <string name="family_name_cannot_be_null">Family name must not be null</string>
     <string name="invalid_username">Username must be between 2 and 50 characters. Only letters, digits, ".", "-", and "_" are allowed.</string>
+    <string name="latest_pcr_label">Latest Ebola Result</string>
+    <string name="latest_pcr_label_with_date">Latest Ebola Result (%s)</string>
+    <string name="action_add_test_result">Add test result</string>
+    <string name="pregnant_with_iv">(Pregnant, IV Fitted)</string>
+    <string name="pregnant">(Pregnant)</string>
+    <string name="iv_fitted">(IV Fitted)</string>
+    <string name="status_short_desc_unknown">-</string>
+    <string name="status_short_desc_well">1</string>
+    <string name="status_short_desc_unwell">2</string>
+    <string name="status_short_desc_critical">3</string>
+    <string name="status_short_desc_pallative">4</string>
+    <string name="status_short_desc_convalescent">5</string>
+    <string name="status_short_desc_discharged_non_case">8</string>
+    <string name="status_short_desc_discharged_cured">7</string>
+    <string name="status_short_desc_suspected_dead">6?</string>
+    <string name="status_short_desc_confirmed_dead">6</string>
 </resources>

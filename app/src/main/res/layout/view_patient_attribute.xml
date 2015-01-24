@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+    <ImageView
+        android:id="@+id/view_attribute_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        tools:src="@drawable/ic_launcher"/>
+
+    <TextView
+        android:id="@+id/view_attribute_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/view_attribute_icon"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:textColor="#000000"
+        android:textSize="12sp"
+        tools:text="Location" />
+
+    <TextView
+        android:id="@+id/view_attribute_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/view_attribute_name"
+        android:layout_alignStart="@id/view_attribute_name"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:textColor="#000000"
+        android:textSize="28sp"
+        tools:text="Suspect / S1"/>
+
+</RelativeLayout>

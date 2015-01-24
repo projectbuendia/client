@@ -12,28 +12,47 @@
         android:background="?android:attr/selectableItemBackground">
 
         <TextView
+            android:id="@+id/patient_chart_vital_general_condition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/vital_name_general_condition"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:gravity="center_horizontal|bottom"
+            android:textAllCaps="true"
+            android:textColor="@color/vital_fg_light"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:text="–"/>
+
+        <TextView
             android:id="@+id/vital_name_general_condition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:padding="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp"
+            android:paddingTop="0dp"
             android:gravity="center"
             android:textAllCaps="true"
             android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
             android:textSize="16sp"
-            android:text="Condition" />
+            android:text="General Condition" />
 
         <org.msf.records.widget.AutoResizeTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/vital_name_general_condition"
+            android:layout_above="@+id/patient_chart_vital_general_condition"
             android:padding="8dp"
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
             android:textSize="56sp"
             android:maxLines="2"
-            android:id="@+id/patient_chart_vital_general_condition"
+            android:id="@+id/patient_chart_vital_general_condition_number"
             android:text="–"/>
 
     </RelativeLayout>

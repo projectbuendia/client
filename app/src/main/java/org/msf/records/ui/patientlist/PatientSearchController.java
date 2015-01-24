@@ -166,6 +166,23 @@ public class PatientSearchController {
             Log.d(TAG, "Attached new fragment UI: " + fragmentUi);
         }
         mFragmentUis.add(fragmentUi);
+
+        // Initialize fragment with locations and patients, as necessary.
+        if (mLocationTree != null) {
+            fragmentUi.setLocationTree(mLocationTree);
+        }
+
+        if (mPatientsCursor != null) {
+            FilteredCursorWrapper<AppPatient> filteredCursorWrapper =
+                    new FilteredCursorWrapper<AppPatient>(
+                            mPatientsCursor, mSearchFilter, mFilterQueryTerm);
+            fragmentUi.setPatients(filteredCursorWrapper);
+        }
+
+        // If all data is loaded, no need for a spinner.
+        if (mLocationTree != null && mPatientsCursor != null) {
+            fragmentUi.showSpinner(false);
+        }
     }
 
     /**

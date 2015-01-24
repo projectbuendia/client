@@ -4,7 +4,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/chart_grid_column_width"
     android:layout_height="@dimen/chart_grid_row_height"
-    android:padding="16dp">
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <ViewStub
         android:id="@+id/data_grid_cell_chart_viewstub"

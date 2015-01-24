@@ -24,7 +24,6 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.data.res.ResTemperatureRange;
 import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
@@ -43,6 +42,7 @@ import org.msf.records.utils.RelativeDateTimeFormatter;
 import org.msf.records.utils.Utils;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
+import org.msf.records.widget.PatientAttributeView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
@@ -142,36 +142,38 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
 
+    @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
+    @InjectView(R.id.attribute_admission_days) PatientAttributeView mPatientAdmissionDaysView;
+    @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
+
+    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
+    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
+
     @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
+    @InjectView(R.id.patient_chart_vital_general_condition_number) TextView mGeneralConditionNum;
     @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
     @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
 
-    @InjectView(R.id.patient_chart_temperature_parent) ViewGroup mTemperatureParent;
-    @InjectView(R.id.patient_chart_vital_temperature) TextView mTemperature;
-    @InjectView(R.id.vital_name_temperature) TextView mTemperatureName;
+    @InjectView(R.id.patient_chart_responsiveness_parent) ViewGroup mResponsivenessParent;
+    @InjectView(R.id.patient_chart_vital_responsiveness) TextView mResponsiveness;
+    @InjectView(R.id.vital_name_responsiveness) TextView mResponsivenessName;
+
+    @InjectView(R.id.patient_chart_mobility_parent) ViewGroup mMobilityParent;
+    @InjectView(R.id.patient_chart_vital_mobility) TextView mMobility;
+    @InjectView(R.id.vital_name_mobility) TextView mMobilityName;
 
     @InjectView(R.id.patient_chart_pain_parent) ViewGroup mPainParent;
     @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
     @InjectView(R.id.vital_name_pain) TextView mPainName;
 
-    @InjectView(R.id.patient_chart_pcr_parent) ViewGroup mPcrParent;
-    @InjectView(R.id.patient_chart_vital_pcr) TextView mPcr;
-    @InjectView(R.id.patient_chart_vital_pcr_date) TextView mPcrDate;
-    @InjectView(R.id.vital_name_pcr) TextView mPcrName;
-
-    @InjectView(R.id.vital_responsiveness) VitalView mResponsiveness;
-    @InjectView(R.id.vital_mobility) VitalView mMobility;
     @InjectView(R.id.vital_diet) VitalView mDiet;
     @InjectView(R.id.vital_food_drink) VitalView mHydration;
+    @InjectView(R.id.vital_pulse) VitalView mPulse;
+    @InjectView(R.id.vital_respiration) VitalView mRespiration;
 
-    @InjectView(R.id.patient_chart_id) TextView mPatientIdView;
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
-    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantView;
-    @InjectView(R.id.patient_chart_location) TextView mPatientLocationView;
-    @InjectView(R.id.patient_chart_days) TextView mPatientAdmissionDateView;
-    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
-    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
+    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -247,6 +249,22 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.overview, menu);
 
+        final MenuItem addTestResult = menu.findItem(R.id.action_add_test_result);
+        addTestResult.setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_flask)
+                        .color(0xCCFFFFFF)
+                        .sizeDp(36));
+        addTestResult.setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        mController.onAddTestResultsPressed();
+                        return true;
+                    }
+                }
+        );
+
         final MenuItem assignLocation = menu.findItem(R.id.action_relocate_patient);
         assignLocation.setIcon(
                 new IconDrawable(this, Iconify.IconValue.fa_map_marker)
@@ -298,12 +316,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @OnClick({
-            R.id.patient_chart_temperature_parent})
-    void onVitalsPressed(View v) {
-        mController.onAddObservationPressed("Vital signs");
-    }
-
     @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
         mController.onAddObservationPressed("The pain assessment field");
@@ -311,17 +323,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick({
             R.id.patient_chart_general_condition_parent,
-            R.id.vital_responsiveness,
-            R.id.vital_mobility,
             R.id.vital_diet,
-            R.id.vital_food_drink})
-    void onSignsAndSymptomsPressed(View v) {
-        mController.onAddObservationPressed("General health status of the patient");
+            R.id.vital_food_drink,
+            R.id.patient_chart_responsiveness_parent,
+            R.id.patient_chart_mobility_parent})
+    void onOverallAssessmentPressed(View v) {
+        mController.onAddObservationPressed("Overall Assessment");
     }
 
-    @OnClick(R.id.patient_chart_pcr_parent)
-    void onPcrPressed(View v) {
-        mController.onAddTestResultsPressed();
+    @OnClick({
+            R.id.vital_respiration,
+            R.id.vital_pulse})
+    void onSignsAndSymptomsPressed(View v) {
+        mController.onAddObservationPressed("Vital signs");
     }
 
     @Override
@@ -342,6 +356,25 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             view.setTextColor(mVitalUnknown.getForegroundColor());
 
             view.setValue("-");
+        }
+    }
+
+    /** Updates a {@link ViewGroup} to display a new observation value. */
+    private void showObservationForViewGroup(
+            ViewGroup parent, TextView nameView, TextView valueView,
+            @Nullable LocalizedObservation observation) {
+        if (observation != null && observation.localizedValue != null) {
+            parent.setBackgroundColor(mVitalKnown.getBackgroundColor());
+            valueView.setTextColor(mVitalKnown.getForegroundColor());
+            nameView.setTextColor(mVitalKnown.getForegroundColor());
+
+            valueView.setText(observation.localizedValue);
+        } else {
+            parent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+            valueView.setTextColor(mVitalUnknown.getForegroundColor());
+            nameView.setTextColor(mVitalUnknown.getForegroundColor());
+
+            valueView.setText("–"); // en dash
         }
     }
 
@@ -369,84 +402,54 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-            showObservation(mResponsiveness, observations.get(Concept.CONSCIOUS_STATE_UUID));
-            showObservation(mMobility, observations.get(Concept.MOBILITY_UUID));
             showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
+            showObservation(mPulse, observations.get(Concept.PULSE_UUID));
+            showObservation(mRespiration, observations.get(Concept.RESPIRATION_UUID));
 
-            // Temperature
-            LocalizedObservation observation = observations.get(Concept.TEMPERATURE_UUID);
-            if (observation != null && observation.localizedValue != null) {
-                double value = Double.parseDouble(observation.localizedValue);
-                ResTemperatureRange.Resolved temperatureRange =
-                        value <= 37.5
-                                ? ResTemperatureRange.NORMAL.resolve(getResources())
-                                : ResTemperatureRange.HIGH.resolve(getResources());
-
-                mTemperatureParent.setBackgroundColor(temperatureRange.getBackgroundColor());
-                mTemperature.setTextColor(temperatureRange.getForegroundColor());
-                mTemperatureName.setTextColor(temperatureRange.getForegroundColor());
-
-                mTemperature.setText(String.format("%.1f°", value));
-            } else {
-                mTemperatureParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mTemperature.setTextColor(mVitalUnknown.getForegroundColor());
-                mTemperatureName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mTemperature.setText("–"); // en dash
-            }
+            showObservationForViewGroup(
+                    mResponsivenessParent, mResponsivenessName, mResponsiveness,
+                    observations.get(Concept.CONSCIOUS_STATE_UUID));
+            showObservationForViewGroup(
+                    mMobilityParent, mMobilityName, mMobility,
+                    observations.get(Concept.MOBILITY_UUID));
+            showObservationForViewGroup(
+                    mPainParent, mPainName, mPain, observations.get(Concept.PAIN_UUID));
 
             // General Condition
-            observation = observations.get(Concept.GENERAL_CONDITION_UUID);
+            LocalizedObservation observation = observations.get(Concept.GENERAL_CONDITION_UUID);
             if (observation != null && observation.localizedValue != null) {
-                ResStatus.Resolved status =
-                        Concept.getResStatus(observation.value).resolve(getResources());
+                ResStatus resStatus = Concept.getResStatus(observation.value);
+                ResStatus.Resolved status = resStatus.resolve(getResources());
 
                 mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
                 mGeneralCondition.setTextColor(status.getForegroundColor());
                 mGeneralConditionName.setTextColor(status.getForegroundColor());
+                mGeneralConditionNum.setTextColor(status.getForegroundColor());
 
                 mGeneralCondition.setText(status.getMessage());
+                mGeneralConditionNum.setText(status.getShortDescription());
             } else {
                 mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
                 mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
                 mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
+                mGeneralConditionNum.setTextColor(mVitalUnknown.getForegroundColor());
 
                 mGeneralCondition.setText("–"); // en dash
-            }
-
-            // Pain Level
-            observation = observations.get(Concept.PAIN_UUID);
-            if (observation != null && observation.localizedValue != null) {
-                mPainParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-                mPain.setTextColor(mVitalKnown.getForegroundColor());
-                mPainName.setTextColor(mVitalKnown.getForegroundColor());
-
-                mPain.setText(observation.localizedValue);
-            } else {
-                mPainParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mPain.setTextColor(mVitalUnknown.getForegroundColor());
-                mPainName.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mPain.setText("–"); // en dash
+                mGeneralConditionNum.setText("–");
             }
 
             // PCR
             LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
             LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            mPcr.setIconDrawable(
+                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
+                            .color(0x00000000)
+                            .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
                     && (pcrNpObservation == null || pcrNpObservation == null)) {
-                mPcrParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mPcr.setTextColor(mVitalUnknown.getForegroundColor());
-                mPcrName.setTextColor(mVitalUnknown.getForegroundColor());
-                mPcrDate.setVisibility(View.GONE);
-
-                mPcr.setText("–");
+                mPcr.setValue("–");
             } else {
-                mPcrParent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-                mPcr.setTextColor(mVitalKnown.getForegroundColor());
-                mPcrName.setTextColor(mVitalKnown.getForegroundColor());
-
                 String pcrLString = "–";
                 long pcrObservationMillis = -1;
                 if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
@@ -477,24 +480,36 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 }
 
-                mPcr.setText(String.format("%1$s / %2$s", pcrLString, pcrNpString));
+                mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
                 if (pcrObservationMillis > 0) {
-                    mPcrDate.setTextColor(mVitalKnown.getForegroundColor());
-                    mPcrDate.setVisibility(View.VISIBLE);
-
-                    mPcrDate.setText(
+                    mPcr.setName(getResources().getString(
+                            R.string.latest_pcr_label_with_date,
                             DATE_TIME_FORMATTER.format(
                                     DateTime.now(),
-                                    new DateTime(pcrObservationMillis)));
+                                    new DateTime(pcrObservationMillis))));
                 }
             }
 
-            // Pregnancy
+            // Pregnancy & IV status
+            // TODO: Localize all of this.
             observation = observations.get(Concept.PREGNANCY_UUID);
-            if (observation != null && observation.localizedValue != null && observation.localizedValue.equals("Yes")) {
-                mPatientPregnantView.setText(" Pregnant");
+            boolean pregnant = (observation != null && Concept.YES_UUID.equals(observation.value));
+
+            observation = observations.get(Concept.IV_UUID);
+            boolean ivFitted = (observation != null && Concept.YES_UUID.equals(observation.value));
+
+            if (pregnant) {
+                if (ivFitted) {
+                    mPatientPregnantOrIvView.setText(R.string.pregnant_with_iv);
+                } else {
+                    mPatientPregnantOrIvView.setText(R.string.pregnant);
+                }
             } else {
-                mPatientPregnantView.setText("");
+                if (ivFitted) {
+                    mPatientPregnantOrIvView.setText(R.string.iv_fitted);
+                } else {
+                    mPatientPregnantOrIvView.setText("");
+                }
             }
         }
 
@@ -510,7 +525,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 //                 some testing and feedback.
                 mChartView = getChartView(observations);
             }
-            mChartView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            mChartView.setLayoutParams(
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             mRootView.addView(mChartView);
             mRootView.invalidate();
         }
@@ -564,13 +580,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 locationText = patientZone.toString() + " / " + patientTent.toString();
             }
 
-            mPatientLocationView.setText(locationText);
+            mPatientLocationView.setValue(locationText);
+            mPatientLocationView.setIconDrawable(
+                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
+                            .color(0x00000000)
+                            .sizeDp(36));
         }
 
         @Override
         public void setPatient(AppPatient patient) {
-            mPatientFullNameView.setText(patient.givenName + " " + patient.familyName);
-            mPatientIdView.setText(patient.id);
+            // TODO: Localize everything below.
+            mPatientFullNameView.setText(
+                    patient.id + ": " + patient.givenName + " " + patient.familyName);
 
             String genderText = patient.gender == AppPatient.GENDER_MALE ? "M" : "F";
             String ageText = patient.birthdate == null
@@ -579,8 +600,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())
-                    .getDays();
-            mPatientAdmissionDateView.setText("Day " + days + " since admission");
+                    .getDays() + 1;
+            mPatientAdmissionDaysView.setValue("Day " + days);
         }
 
         @Override
