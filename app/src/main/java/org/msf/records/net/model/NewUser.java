@@ -34,6 +34,9 @@ public class NewUser implements Serializable {
     }
 
     private String generateUsername() {
+        // Usernames are used to log into OpenMRS, but there is no expectation that users will
+        // be logging into OpenMRS directly, so here we use a new UUID for the user's username.
+        // This is NOT the same UUID as the internal OpenMRS user UUID.
         return UUID.randomUUID().toString();
     }
 }
