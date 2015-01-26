@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public final class UserManagerTest extends InstrumentationTestCase {
 
-    private static final User USER = User.create("id", "name");
+    private static final User USER = new User("id", "name");
 
     private UserManager mUserManager;
     private FakeEventBus mFakeEventBus;

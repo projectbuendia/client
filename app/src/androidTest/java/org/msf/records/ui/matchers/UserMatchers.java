@@ -28,7 +28,7 @@ public class UserMatchers {
                 return false;
             }
 
-            return ((User)user).getFullName().equals(mFullName);
+            return ((User)user).fullName.equals(mFullName);
         }
     }
 }

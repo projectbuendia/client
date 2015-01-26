@@ -182,7 +182,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
                 .getActionView()
                 .findViewById(R.id.user_initials);
 
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.getId()));
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
         initials.setText(user.getInitials());
     }
 
@@ -225,7 +225,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
                 return;
             }
 
-            mUserName.setText(App.getUserManager().getActiveUser().getFullName());
+            mUserName.setText(App.getUserManager().getActiveUser().fullName);
         }
 
         @OnClick(R.id.button_settings)

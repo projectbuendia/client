@@ -18,22 +18,6 @@
         android:layout_gravity="center"
         android:stretchColumns="1">
 
-        <TableRow>
-            <TextView
-                android:layout_marginEnd="50dp"
-                android:gravity="center_vertical"
-                android:text="@string/username"
-                android:layout_column="0"
-                android:id="@+id/add_user_username_label" />
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="@string/add_user_example_username"
-                android:id="@+id/add_user_username_tv"
-                android:layout_column="1" />
-        </TableRow>
-
         <TableRow
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">

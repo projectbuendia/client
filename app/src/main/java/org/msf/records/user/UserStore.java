@@ -62,7 +62,7 @@ public class UserStore {
             Set<User> result = new HashSet<>();
             while (cursor.moveToNext()) {
                 User user =
-                        User.create(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
+                        new User(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
                 result.add(user);
             }
             return result;
@@ -172,8 +172,8 @@ public class UserStore {
                         Contracts.Users.CONTENT_URI);
         try {
             ContentValues values = new ContentValues();
-            values.put(Contracts.Users.UUID, result.user.getId());
-            values.put(Contracts.Users.FULL_NAME, result.user.getFullName());
+            values.put(Contracts.Users.UUID, result.user.id);
+            values.put(Contracts.Users.FULL_NAME, result.user.fullName);
             client.insert(Contracts.Users.CONTENT_URI, values);
         } catch (RemoteException e) {
             LOG.e(e, "Failed to update database");

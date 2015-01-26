@@ -157,10 +157,10 @@ public class OpenMrsServer implements Server {
             final Response.ErrorListener errorListener) {
         JSONObject requestBody = new JSONObject();
         try {
-            requestBody.put("user_name", user.getUsername());
-            requestBody.put("given_name", user.getGivenName());
-            requestBody.put("family_name", user.getFamilyName());
-            requestBody.put("password", user.getPassword());
+            requestBody.put("user_name", user.username);
+            requestBody.put("given_name", user.givenName);
+            requestBody.put("family_name", user.familyName);
+            requestBody.put("password", user.password);
 
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
@@ -290,7 +290,7 @@ public class OpenMrsServer implements Server {
     }
 
     private User userFromJson(JSONObject object) throws JSONException {
-        return User.create(object.getString("user_id"), object.getString("full_name"));
+        return new User(object.getString("user_id"), object.getString("full_name"));
     }
 
     @Override

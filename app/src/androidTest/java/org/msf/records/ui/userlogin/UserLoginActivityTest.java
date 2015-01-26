@@ -29,7 +29,6 @@ public class UserLoginActivityTest extends FunctionalTestCase {
 
         // Add new user
         onView(withText("Add User")).perform(click());
-        onView(withId(R.id.add_user_username_tv)).perform(typeText(username));
         onView(withId(R.id.add_user_given_name_tv)).perform(typeText(given));
         onView(withId(R.id.add_user_family_name_tv)).perform(typeText(family));
         onView(withText("OK")).perform(click());
