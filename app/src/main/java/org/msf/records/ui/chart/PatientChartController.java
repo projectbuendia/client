@@ -232,7 +232,7 @@ final class PatientChartController {
 
         User user = App.getUserManager().getActiveUser();
         if (user != null) {
-            fields.clinicianName = user.getFullName();
+            fields.clinicianName = user.fullName;
         }
 
         Map<String, LocalizedChartHelper.LocalizedObservation> observations =
@@ -267,7 +267,7 @@ final class PatientChartController {
 
         User user = App.getUserManager().getActiveUser();
         if (user != null) {
-            fields.clinicianName = user.getFullName();
+            fields.clinicianName = user.fullName;
         }
 
         mUi.fetchAndShowXform(

@@ -27,9 +27,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
         return new AddNewUserDialogFragment();
     }
 
-    private static final Pattern USER_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9.\\-_]{2,50}$");
-
-    @InjectView(R.id.add_user_username_tv) EditText mUsername;
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
     @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
 
@@ -67,14 +64,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (isNullOrWhitespace(mUsername)) {
-                                            setError(mUsername, R.string.username_cannot_be_null);
-                                            return;
-                                        }
-                                        if (!isUsernameValid()) {
-                                            setError(mUsername, R.string.invalid_username);
-                                            return;
-                                        }
                                         if (isNullOrWhitespace(mGivenName)) {
                                             setError(
                                                     mGivenName,
@@ -88,8 +77,7 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                             return;
                                         }
 
-                                        App.getUserManager().addUser(NewUser.create(
-                                                mUsername.getText().toString().trim(),
+                                        App.getUserManager().addUser(new NewUser(
                                                 mGivenName.getText().toString().trim(),
                                                 mFamilyName.getText().toString().trim()
                                         ));
@@ -104,11 +92,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
 
     private boolean isNullOrWhitespace(EditText field) {
         return field.getText() == null || field.getText().toString().trim().isEmpty();
-    }
-
-    private boolean isUsernameValid() {
-        String username = mUsername.getText().toString().trim();
-        return USER_NAME_PATTERN.matcher(username).matches();
     }
 
     private void setError(EditText field, int resourceId) {
