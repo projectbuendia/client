@@ -30,6 +30,10 @@ public class Concept {
      */
     public static final String PAIN_UUID = "f75da5de-404c-42d0-b484-b69a4896e093";
     /**
+     * UUID for the (question) concept for best conscious state (AVPU).
+     */
+    public static final String RESPONSIVENESS_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
      * UUID for the (question) concept for (severe) weakness.
      */
     public static final String WEAKNESS_UUID = "5226AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -53,6 +57,24 @@ public class Concept {
      * UUID for the (answer) concept Moderate, used for Diarrhea and vomiting.
      */
     public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /**
+     * UUID for the (answer) concept Alert, used for Best Conscious State (AVPU).
+     */
+    public static final String RESPONSIVENESS_ALERT_UUID = "160282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept Responds to Voice, used for Best Conscious State (AVPU).
+     */
+    public static final String RESPONSIVENESS_VOICE_UUID = "162645AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept Responds to Pain, used for Best Conscious State (AVPU).
+     */
+    public static final String RESPONSIVENESS_PAIN_UUID = "162644AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * UUID for the (answer) concept Unresponsive, used for Best Conscious State (AVPU).
+     */
+    public static final String RESPONSIVENESS_UNRESPONSIVE_UUID =
+            "159508AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     public String uuid;
     /**

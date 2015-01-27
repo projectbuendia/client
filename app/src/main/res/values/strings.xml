@@ -105,4 +105,9 @@
     <string name="status_short_desc_discharged_cured">7</string>
     <string name="status_short_desc_suspected_dead">6?</string>
     <string name="status_short_desc_confirmed_dead">6</string>
+    <string name="avpu_unknown">\?</string>
+    <string name="avpu_alert">A</string>
+    <string name="avpu_voice">V</string>
+    <string name="avpu_pain">P</string>
+    <string name="avpu_unresponsive">U</string>
 </resources>
