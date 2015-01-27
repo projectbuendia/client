@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -238,8 +237,15 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View.OnClickListener onClickListener = null;
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
-        // TODO: Proper localization for numeric fields.
+        // TODO: Proper localization.
         switch (conceptUuid) {
+            case Concept.RESPONSIVENESS_UUID:
+                String responsivenessString = rowData.datesToValues.get(dateKey);
+                if (responsivenessString != null) {
+                    text = getLocalizedAvpuInitials(responsivenessString);
+                    textColor = Color.BLACK;
+                }
+                break;
             case Concept.TEMPERATURE_UUID:
                 String temperatureString = rowData.datesToValues.get(dateKey);
                 if (temperatureString != null) {
@@ -364,5 +370,27 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             textView.setOnClickListener(onClickListener);
         }
         return textView;
+    }
+
+    private String getLocalizedAvpuInitials(String responsivenessUuid) {
+        int resId = R.string.avpu_unknown;
+        switch (responsivenessUuid) {
+            case Concept.RESPONSIVENESS_ALERT_UUID:
+                resId = R.string.avpu_alert;
+                break;
+            case Concept.RESPONSIVENESS_VOICE_UUID:
+                resId = R.string.avpu_voice;
+                break;
+            case Concept.RESPONSIVENESS_PAIN_UUID:
+                resId = R.string.avpu_pain;
+                break;
+            case Concept.RESPONSIVENESS_UNRESPONSIVE_UUID:
+                resId = R.string.avpu_unresponsive;
+                break;
+            default:
+                LOG.e("Unrecognized consciousness state UUID: %s", responsivenessUuid);
+        }
+
+        return mContext.getResources().getString(resId);
     }
 }
