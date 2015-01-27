@@ -110,4 +110,5 @@
     <string name="avpu_voice">V</string>
     <string name="avpu_pain">P</string>
     <string name="avpu_unresponsive">U</string>
+    <string name="pcr_negative">NEG</string>
 </resources>

@@ -70,6 +70,8 @@ import static org.msf.records.utils.Utils.getSystemProperty;
 public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
+    // Allowed margin for double comparisons for PCR (e.g. consider 39.95-40.05 to count as 40.0).
+    private static final double PCR_EPSILON = 0.05;
 
     /**
      * An enumeration of the XForms that can be launched from this activity.
@@ -457,7 +459,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     double pcrL;
                     try {
                         pcrL = Double.parseDouble(pcrLObservation.localizedValue);
-                        pcrLString = String.format("%1$.1f", pcrL);
+                        pcrLString = getFormattedPcrString(pcrL);
                     } catch (NumberFormatException e) {
                         LOG.w(
                                 "Retrieved a malformed L-gene PCR value: '%1$s'.",
@@ -471,7 +473,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     double pcrNp;
                     try {
                         pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
-                        pcrNpString = String.format("%1$.1f", pcrNp);
+                        pcrNpString = getFormattedPcrString(pcrNp);
                     } catch (NumberFormatException e) {
                         LOG.w(
                                 "Retrieved a malformed Np-gene PCR value: '%1$s'.",
@@ -623,5 +625,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void reEnableFetch() {
             mIsFetchingXform = false;
         }
+    }
+
+    private String getFormattedPcrString(double pcrValue) {
+        String pcrValueString;
+        if (Math.abs(pcrValue - 40.0) < PCR_EPSILON) {
+            pcrValueString = getResources().getString(R.string.pcr_negative);
+        } else {
+            pcrValueString = String.format("%1$.1f", pcrValue);
+        }
+        return pcrValueString;
     }
 }
