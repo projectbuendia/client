@@ -65,7 +65,8 @@ public class AppPatientDelta {
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concept.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(Server.PATIENT_ANSWER_DATE, getDateTimeString(firstSymptomDate.get()));
+                observation.put(Server.PATIENT_ANSWER_DATE,
+                        getDateTimeString(firstSymptomDate.get()));
                 JSONArray observations = new JSONArray();
                 observations.put(observation);
                 json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
