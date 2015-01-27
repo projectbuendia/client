@@ -109,6 +109,7 @@ final class PatientChartController {
     private final MinimalHandler mMainThreadHandler;
 
     private AssignLocationDialog mAssignLocationDialog;
+    private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
 
     /** Sends ODK form data. */
     public interface OdkResultSender {
@@ -313,6 +314,25 @@ final class PatientChartController {
         int requestCode = new PatientChartActivity.RequestCode(form, nextIndex).getCode();
         nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
         return requestCode;
+    }
+
+    public void showAssignGeneralConditionDialog(Context context) {
+        AssignGeneralConditionDialog.ConditionSelectedCallback callback =
+                new AssignGeneralConditionDialog.ConditionSelectedCallback() {
+
+                    @Override
+                    public boolean onNewConditionSelected(String newConditionUuid) {
+                        // TODO: Actually do something here.
+                        LOG.v("New general condition assigned: %s", newConditionUuid);
+                        return false;
+                    }
+                };
+        mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
+                context,
+                Optional.of(""),  // TODO: Real condition uuid.
+                callback);
+
+        mAssignGeneralConditionDialog.show();
     }
 
     public void showAssignLocationDialog(

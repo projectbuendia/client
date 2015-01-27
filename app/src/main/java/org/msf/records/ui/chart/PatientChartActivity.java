@@ -321,8 +321,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("The pain assessment field");
     }
 
+    @OnClick(R.id.patient_chart_general_condition_parent)
+    void onGeneralConditionPressed(View v) {
+        mController.showAssignGeneralConditionDialog(this);
+    }
+
     @OnClick({
-            R.id.patient_chart_general_condition_parent,
             R.id.vital_diet,
             R.id.vital_food_drink,
             R.id.patient_chart_responsiveness_parent,

@@ -39,6 +39,18 @@ public class Concept {
     public static final String GENERAL_CONDITION_CONFIRMED_DEAD =
             "160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+    public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
+            GENERAL_CONDITION_WELL_UUID,
+            GENERAL_CONDITION_UNWELL_UUID,
+            GENERAL_CONDITION_CRITICAL_UUID,
+            GENERAL_CONDITION_PALLIATIVE_UUID,
+            GENERAL_CONDITION_CONVALESCENT_UUID,
+            GENERAL_CONDITION_DISCHARGED_NON_CASE,
+            GENERAL_CONDITION_CURED,
+            GENERAL_CONDITION_SUSPECTED_DEAD,
+            GENERAL_CONDITION_CONFIRMED_DEAD
+    };
+
     /**
      * Returns the {@link ResStatus} for the specified condition UUID.
      */

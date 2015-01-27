@@ -105,4 +105,5 @@
     <string name="status_short_desc_discharged_cured">7</string>
     <string name="status_short_desc_suspected_dead">6?</string>
     <string name="status_short_desc_confirmed_dead">6</string>
+    <string name="action_assign_condition">General Condition</string>
 </resources>
