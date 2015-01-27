@@ -396,6 +396,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             case Concept.MOBILITY_BED_BOUND_UUID:
                 resId = R.string.mobility_bed_bound;
                 break;
+            default:
+                LOG.e("Unrecognized mobility state UUID: %s", mobilityUuid);
         }
         return mContext.getResources().getString(resId);
     }
