@@ -34,10 +34,14 @@ public interface DataGridAdapter {
     View getRowHeader(int row, View convertView, ViewGroup parent);
 
     /**
-     * Sets a light or dark background for view {@code view}, depending on the {@code viewType}.
-     * @param viewType 0 or 1, usually the row index modulo 2
+     * Sets a background for view {@code view}, depending on the {@code viewType} and
+     * {@code rowType}.
+     * @param viewType an identifier for the type of cell (e.g. cell vs. row header vs. column
+     *                 header) which may be used to visualize different sections of the grid
+     *                 differently
+     * @param rowType 0 or 1, usually the row index modulo 2 -- used to alternate between colors
      */
-    void setCellBackgroundForViewType(View view, int viewType);
+    void setCellBackgroundForViewType(View view, CellType viewType, int rowType);
 
     /**
      * Returns the column header view for a given column.

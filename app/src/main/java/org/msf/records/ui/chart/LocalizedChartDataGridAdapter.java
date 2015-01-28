@@ -22,6 +22,7 @@ import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.utils.Logger;
+import org.msf.records.widget.CellType;
 import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     public static final int TEXT_SIZE_LARGE = 28;
     public static final int TEXT_SIZE_NORMAL = 16;
 
+    private static final String HEADER_TAG = "CELL_TYPE_HEADER";
+
     private static final Logger LOG = Logger.create();
 
     private static final String EMPTY_STRING = "";
@@ -51,8 +54,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                             .show();
                 }
             };
-    private final Drawable backgroundLight;
-    private final Drawable backgroundDark;
+    private final Drawable mBackgroundLight;
+    private final Drawable mBackgroundDark;
+    private final Drawable mRowHeaderBackgroundLight;
+    private final Drawable mRowHeaderBackgroundDark;
 
     private static class Row {
         private final String mConceptUuid;
@@ -78,8 +83,12 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
         Resources resources = context.getResources();
-        this.backgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
-        this.backgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
+        this.mBackgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
+        this.mBackgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
+        this.mRowHeaderBackgroundLight =
+                resources.getDrawable(R.drawable.chart_grid_row_header_background_light);
+        this.mRowHeaderBackgroundDark =
+                resources.getDrawable(R.drawable.chart_grid_row_header_background_dark);
 
 
         Row row = null;
@@ -183,17 +192,28 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getRowHeader(int row, View convertView, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(
-                R.layout.data_grid_row_header_chart, null /*root*/);
+        View view;
+        if (convertView == null || convertView.getTag() != HEADER_TAG) {
+            view = mLayoutInflater.inflate(
+                    R.layout.data_grid_row_header_chart, null /*root*/);
+        } else {
+            view = convertView;
+        }
         TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
-        setCellBackgroundForViewType(textView, row % 2);
+        setCellBackgroundForViewType(textView, CellType.ROW_HEADER, row % 2);
         fillRowHeader(row, view, textView);
+        view.setTag(HEADER_TAG);
         return view;
     }
 
     @Override
-    public void setCellBackgroundForViewType(View view, int viewType) {
-        view.setBackground(viewType == 0 ? backgroundLight : backgroundDark);
+    public void setCellBackgroundForViewType(View view, CellType viewType, int rowType) {
+        if (viewType == CellType.CELL) {
+            view.setBackground(rowType % 2 == 0 ? mBackgroundLight : mBackgroundDark);
+        } else {
+            view.setBackground(
+                    rowType % 2 == 0 ? mRowHeaderBackgroundLight : mRowHeaderBackgroundDark);
+        }
     }
 
     @Override
@@ -211,9 +231,14 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(
-                R.layout.data_grid_cell_chart_text, null /*root*/);
-        setCellBackgroundForViewType(view, rowIndex % 2);
+        View view;
+        if (convertView == null || convertView.getTag() == HEADER_TAG) {
+            view = mLayoutInflater.inflate(
+                    R.layout.data_grid_cell_chart_text, null /*root*/);
+        } else {
+            view = convertView;
+        }
+        setCellBackgroundForViewType(view, CellType.CELL, rowIndex % 2);
         ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
         fillCell(rowIndex, columnIndex, view, viewStub, null);
         return view;
