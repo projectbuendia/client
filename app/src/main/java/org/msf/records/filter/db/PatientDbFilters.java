@@ -56,7 +56,7 @@ public final class PatientDbFilters {
      */
     public static SimpleSelectionFilter[] getFiltersForDisplay(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> allFilters = new ArrayList<>();
-        allFilters.add(getDefaultFilter());
+        allFilters.add(new PresentFilter());
         Collections.addAll(allFilters, getZoneFilters(locationTree));
         allFilters.add(null); // Section break
         Collections.addAll(allFilters, getOtherFilters());
