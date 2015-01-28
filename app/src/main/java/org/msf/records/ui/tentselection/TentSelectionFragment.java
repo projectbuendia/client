@@ -104,7 +104,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     	}
 
     	@Override
-    	public void setPresentPatientCount(int patientCount) {
+        public void setPresentPatientCount(int patientCount) {
     		mAllPatientsButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
                             getActivity(), patientCount, true));
