@@ -115,4 +115,5 @@
     <string name="mobility_walking_with_difficulty">Wd</string>
     <string name="mobility_assisted">As</string>
     <string name="mobility_bed_bound">BB</string>
+    <string name="pcr_negative">NEG</string>
 </resources>

@@ -70,6 +70,10 @@ import static org.msf.records.utils.Utils.getSystemProperty;
 public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
+    // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
+    // as it would be displayed as 40.0 (and values slightly below 40.0 may be the result of
+    // rounding errors).
+    private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     /**
      * An enumeration of the XForms that can be launched from this activity.
@@ -457,7 +461,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     double pcrL;
                     try {
                         pcrL = Double.parseDouble(pcrLObservation.localizedValue);
-                        pcrLString = String.format("%1$.1f", pcrL);
+                        pcrLString = getFormattedPcrString(pcrL);
                     } catch (NumberFormatException e) {
                         LOG.w(
                                 "Retrieved a malformed L-gene PCR value: '%1$s'.",
@@ -471,7 +475,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     double pcrNp;
                     try {
                         pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
-                        pcrNpString = String.format("%1$.1f", pcrNp);
+                        pcrNpString = getFormattedPcrString(pcrNp);
                     } catch (NumberFormatException e) {
                         LOG.w(
                                 "Retrieved a malformed Np-gene PCR value: '%1$s'.",
@@ -623,5 +627,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void reEnableFetch() {
             mIsFetchingXform = false;
         }
+    }
+
+    private String getFormattedPcrString(double pcrValue) {
+        String pcrValueString;
+        if (pcrValue >= PCR_NEGATIVE_THRESHOLD) {
+            pcrValueString = getResources().getString(R.string.pcr_negative);
+        } else {
+            pcrValueString = String.format("%1$.1f", pcrValue);
+        }
+        return pcrValueString;
     }
 }
