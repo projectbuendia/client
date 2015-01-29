@@ -47,7 +47,7 @@ final class TentSelectionController {
 
         void setTents(AppLocationTree locationTree, List<AppLocation> tents);
 
-        void setPatientCount(int patientCount);
+        void setPresentPatientCount(int patientCount);
 
         void setTriagePatientCount(int patientCount);
 
@@ -148,12 +148,15 @@ final class TentSelectionController {
     private void populateFragmentUi(TentFragmentUi fragmentUi) {
         fragmentUi.showSpinner(!mLoadedLocationTree);
         if (mAppLocationTree != null) {
+            int dischargedPatientCount = (mDischargedZone == null)
+                    ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
+            int totalPatientCount =
+                    mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot());
             fragmentUi.setTents(
                     mAppLocationTree,
                     mAppLocationTree.getDescendantsAtDepth(
                             AppLocationTree.ABSOLUTE_DEPTH_TENT).asList());
-            fragmentUi.setPatientCount(
-                    mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot()));
+            fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
             fragmentUi.setDischargedPatientCount(
                     (mDischargedZone == null)
                             ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone));

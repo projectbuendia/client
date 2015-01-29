@@ -23,12 +23,12 @@ public class PatientListActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
-        onView(withText("ALL PATIENTS")).perform(click());
+        onView(withText("ALL PRESENT PATIENTS")).perform(click());
     }
 
     /** Looks for the filter menu. */
     public void testFilterMenu() {
-        onView(withText("All Patients")).perform(click());
+        onView(withText("All Present Patients")).perform(click());
         onView(withText("Triage")).check(matches(isDisplayed()));
         onView(withText("Pregnant")).check(matches(isDisplayed()));
     }
