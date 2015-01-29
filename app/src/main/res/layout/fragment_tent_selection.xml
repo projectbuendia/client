@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_margin="10dp"
             android:clickable="true"
-            app:subtitledButtonTitle="ALL PATIENTS"
+            app:subtitledButtonTitle="ALL PRESENT PATIENTS"
             app:subtitledButtonSubtitle="No patients"/>
         <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_triage"

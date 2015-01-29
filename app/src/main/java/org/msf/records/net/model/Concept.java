@@ -76,6 +76,29 @@ public class Concept {
     public static final String RESPONSIVENESS_UNRESPONSIVE_UUID =
             "159508AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+    /**
+     * UUID for the (question) concept for Mobility.
+     */
+    public static final String MOBILITY_UUID = "30143d74-f654-4427-bb92-685f68f92c15";
+    /**
+     * UUID for the (answer) concept Walking, used for Mobility.
+     */
+    public static final String MOBILITY_WALKING_UUID = "c2a547f7-6329-4273-80c2-eae804897efd";
+    /**
+     * UUID for the (answer) concept Walking with Difficulty, used for Mobility.
+     */
+    public static final String MOBILITY_WALKING_WITH_DIFFICULTY_UUID =
+            "b5267d48-2456-4ffc-bbf7-4ab2f7c6f7c3";
+    /**
+     * UUID for the (answer) concept Assisted, used for Mobility.
+     */
+    public static final String MOBILITY_ASSISTED_UUID = "765d620f-5db3-47ec-9884-9e32f8e978a9";
+    /**
+     * UUID for the (answer) concept Bed-Bound, used for Mobility.
+     */
+    public static final String MOBILITY_BED_BOUND_UUID = "3ac0cbb9-f52b-453e-b867-f3cca2e804a3";
+
+
     public String uuid;
     /**
      * The server side id. Prefer the UUID for sending to the server, but this is needed for some

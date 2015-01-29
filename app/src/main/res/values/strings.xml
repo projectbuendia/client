@@ -110,4 +110,10 @@
     <string name="avpu_voice">V</string>
     <string name="avpu_pain">P</string>
     <string name="avpu_unresponsive">U</string>
+    <string name="mobility_unknown">\?</string>
+    <string name="mobility_walking">W</string>
+    <string name="mobility_walking_with_difficulty">Wd</string>
+    <string name="mobility_assisted">As</string>
+    <string name="mobility_bed_bound">BB</string>
+    <string name="pcr_negative">NEG</string>
 </resources>
