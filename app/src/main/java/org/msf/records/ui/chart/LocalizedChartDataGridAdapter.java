@@ -83,6 +83,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
         Resources resources = context.getResources();
+
+        // Even though these Drawables are currently identical, referencing different drawables
+        // for row headers and table cells ensures that RecyclerView does not improperly reuse
+        // one as the other.
         this.mBackgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
         this.mBackgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
         this.mRowHeaderBackgroundLight =
