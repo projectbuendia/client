@@ -70,8 +70,10 @@ import static org.msf.records.utils.Utils.getSystemProperty;
 public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
-    // Allowed margin for double comparisons for PCR (e.g. consider 39.95-40.05 to count as 40.0).
-    private static final double PCR_EPSILON = 0.05;
+    // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
+    // as it would be displayed as 40.0 (and values slightly below 40.0 may be the result of
+    // rounding errors).
+    private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     /**
      * An enumeration of the XForms that can be launched from this activity.
@@ -629,7 +631,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private String getFormattedPcrString(double pcrValue) {
         String pcrValueString;
-        if (Math.abs(pcrValue - 40.0) < PCR_EPSILON) {
+        if (pcrValue >= PCR_NEGATIVE_THRESHOLD) {
             pcrValueString = getResources().getString(R.string.pcr_negative);
         } else {
             pcrValueString = String.format("%1$.1f", pcrValue);
