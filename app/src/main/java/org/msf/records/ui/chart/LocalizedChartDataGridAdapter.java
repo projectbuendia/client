@@ -87,7 +87,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
         final String todayString = context.getResources().getString(R.string.today);
         today = new LocalDate(chronology);
-
+        // Today should always be shown in the chart, as well as any days between the last
+        // observation and today.
+        days.add(today);
         for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
