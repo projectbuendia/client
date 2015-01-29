@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
  */
 final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
-    public static final int TEXT_SIZE_LARGE = 28;
+    public static final int TEXT_SIZE_LARGE = 26;
     public static final int TEXT_SIZE_NORMAL = 16;
 
     private static final Logger LOG = Logger.create();
@@ -244,6 +244,15 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 if (responsivenessString != null) {
                     text = getLocalizedAvpuInitials(responsivenessString);
                     textColor = Color.BLACK;
+                    useBigText = true;
+                }
+                break;
+            case Concept.MOBILITY_UUID:
+                String mobilityString = rowData.datesToValues.get(dateKey);
+                if (mobilityString != null) {
+                    text = getLocalizedMobilityInitials(mobilityString);
+                    textColor = Color.BLACK;
+                    useBigText = true;
                 }
                 break;
             case Concept.TEMPERATURE_UUID:
@@ -370,6 +379,27 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             textView.setOnClickListener(onClickListener);
         }
         return textView;
+    }
+
+    private String getLocalizedMobilityInitials(String mobilityUuid) {
+        int resId = R.string.mobility_unknown;
+        switch (mobilityUuid) {
+            case Concept.MOBILITY_WALKING_UUID:
+                resId = R.string.mobility_walking;
+                break;
+            case Concept.MOBILITY_WALKING_WITH_DIFFICULTY_UUID:
+                resId = R.string.mobility_walking_with_difficulty;
+                break;
+            case Concept.MOBILITY_ASSISTED_UUID:
+                resId = R.string.mobility_assisted;
+                break;
+            case Concept.MOBILITY_BED_BOUND_UUID:
+                resId = R.string.mobility_bed_bound;
+                break;
+            default:
+                LOG.e("Unrecognized mobility state UUID: %s", mobilityUuid);
+        }
+        return mContext.getResources().getString(resId);
     }
 
     private String getLocalizedAvpuInitials(String responsivenessUuid) {

@@ -41,7 +41,6 @@ public class LocalizedChartHelper {
         "95d50bc3-6281-4661-94ab-1a26455c40a2", // Normal pulse
         "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // NORMAL
         "db2ac5ad-cc64-4184-b4be-1324730e1882", // Can talk
-        "c2a547f7-6329-4273-80c2-eae804897efd", // Can walk
         Concept.NONE_UUID); // None
 
     /**
