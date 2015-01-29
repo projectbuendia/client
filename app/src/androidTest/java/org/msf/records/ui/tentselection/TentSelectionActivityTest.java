@@ -19,7 +19,7 @@ public class TentSelectionActivityTest extends FunctionalTestCase {
     /** Looks for the expected zones and tents. */
     public void testZonesAndTentsDisplayed() {
         // Should be at tent selection screen
-        onView(withText("ALL PATIENTS")).check(matches(isDisplayed()));
+        onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
 
         // Zones and tents should be visible
         onView(withText("Triage")).check(matches(isDisplayed()));
