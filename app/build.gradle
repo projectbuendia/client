@@ -54,15 +54,21 @@ dependencies {
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 def releaseRepoRoot = file('../../release/')
 
-// Commonly used OpenMRS root URLs for convenience.
-def openmrsRootUrlGce = 'http://104.155.15.141:8080/openmrs';
-def openmrsRootUrlTest = 'http://23.251.140.223:8080/openmrs';
+// OpenMRS instance for development (default for dev tablets, kept at tip of dev branch).
+def openmrsRootUrlDev = 'http://dev.projectbuendia.org:8080/openmrs';
+
+// OpenMRS instance for automated testing (constantly wiped and repopulated for tests).
+def openmrsRootUrlTest = 'http://test.projectbuendia.org:8080/openmrs';
+
+// OpenMRS root URL for Edison on local network.
 def openmrsRootUrlEdison = 'http://10.0.0.50:8080/openmrs';
+
+// OpenMRS root URL for host machine when client runs in an emulator (AVD).
 def openmrsRootUrlLocalhost = 'http://10.0.2.2:8080/openmrs';
 
-// Just for development.  In all production builds these should be overridden
+// Just for development.  In all production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlGce;
+def openmrsRootUrlDefault = openmrsRootUrlDev;
 def openmrsUserDefault = 'android';
 def openmrsPasswordDefault = 'Android123';
 
