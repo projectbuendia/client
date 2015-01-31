@@ -132,7 +132,6 @@
     <orderEntry type="library" exported="" name="gson-2.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-integration-1.1" level="project" />
     <orderEntry type="library" exported="" name="javawriter-2.5.0" level="project" />
-    <orderEntry type="module" module-name="ViewPagerIndicator" exported="" />
     <orderEntry type="module" module-name="odkcollect" exported="" />
   </component>
 </module>

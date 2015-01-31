@@ -22,7 +22,6 @@ dependencies {
 
     // Local project dependencies
     compile project(':odkcollect')
-    compile project(':ViewPagerIndicator')
 
     // External dependencies
     compile 'com.android.support:appcompat-v7:21.0.0'
