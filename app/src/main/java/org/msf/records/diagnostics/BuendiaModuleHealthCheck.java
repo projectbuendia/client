@@ -122,9 +122,6 @@ public class BuendiaModuleHealthCheck extends HealthCheck {
 
                     HttpResponse httpResponse = httpClient.execute(httpGet);
                     if (httpResponse.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-                        for (Header header : httpGet.getAllHeaders()) {
-                            LOG.w("%1$s: %2$s", header.getName(), header.getValue());
-                        }
                         LOG.w(
                                 "The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
                                 uriString,
