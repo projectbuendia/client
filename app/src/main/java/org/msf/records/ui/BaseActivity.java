@@ -201,6 +201,44 @@ public abstract class BaseActivity extends FragmentActivity {
                     }
                 });
                 break;
+            case CHECK_SERVER_STATUS:
+                message.setText("Server not responding");
+                action.setText("More Info");
+                action.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        action.setEnabled(false);
+
+                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // this message. This will require that injection be hooked up through to
+                        // this inner class, which may be complicated.
+                        // TODO(akalachman): Localize, along with all other strings in this class.
+                        new AlertDialog.Builder(BaseActivity.this)
+                                .setIcon(android.R.drawable.ic_dialog_info)
+                                .setTitle("Server not responding")
+                                .setMessage(
+                                        "The server is currently not responding to requests. "
+                                                + "This may be because:\n"
+                                                + "\n"
+                                                + " • The server is temporarily unavailable.\n"
+                                                + " • The server is still starting up.\n"
+                                                + " • The server username and/or password "
+                                                + "are incorrect.\n"
+                                                + "\n"
+                                                + "Please contact an administrator.")
+                                .setNeutralButton("Ok", null)
+                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                                    @Override
+                                    public void onDismiss(DialogInterface dialogInterface) {
+                                        action.setEnabled(true);
+                                    }
+                                })
+                                .create().show();
+                    }
+                });
+                break;
             default:
                 LOG.w("Troubleshooting action '%1$s' is unknown.");
                 return;
