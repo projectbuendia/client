@@ -93,6 +93,8 @@ android {
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
         testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
 
@@ -141,13 +143,14 @@ android {
             resValue "string", "account_type", defaultConfig.applicationId + '.dev'
             buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // For release builds, it's useful to include the real build time.
+            // However, including the time would force recompilation on every run
+            // even when no code has changed; so for debug builds, use a constant.
+            buildConfigField "String", "BUILD_TIME", "\"[debug]\""
         }
 
         release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-            //noinspection GroovyAssignabilityCheck
+            // noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.release
         }
     }
