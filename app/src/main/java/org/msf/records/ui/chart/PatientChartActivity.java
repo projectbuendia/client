@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
+import com.google.common.base.Joiner;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
@@ -48,6 +49,7 @@ import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
@@ -496,25 +498,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             // Pregnancy & IV status
             // TODO: Localize all of this.
+            List<String> specialLabels = new ArrayList<>();
+
             observation = observations.get(Concept.PREGNANCY_UUID);
-            boolean pregnant = (observation != null && Concept.YES_UUID.equals(observation.value));
+            if (observation != null && Concept.YES_UUID.equals(observation.value)) {
+                specialLabels.add("Pregnant");
+            }
 
             observation = observations.get(Concept.IV_UUID);
-            boolean ivFitted = (observation != null && Concept.YES_UUID.equals(observation.value));
-
-            if (pregnant) {
-                if (ivFitted) {
-                    mPatientPregnantOrIvView.setText(R.string.pregnant_with_iv);
-                } else {
-                    mPatientPregnantOrIvView.setText(R.string.pregnant);
-                }
-            } else {
-                if (ivFitted) {
-                    mPatientPregnantOrIvView.setText(R.string.iv_fitted);
-                } else {
-                    mPatientPregnantOrIvView.setText("");
-                }
+            if (observation != null && Concept.YES_UUID.equals(observation.value)) {
+                specialLabels.add("IV fitted");
             }
+
+            mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
         }
 
         @Override
@@ -563,26 +559,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {
-            String locationText;
-            List<AppLocation> patientLocationBranch =
-                    locationTree.getAncestorsStartingFromRoot(
-                            locationTree.findByUuid(patient.locationUuid));
-            AppLocation patientZone =
-                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_ZONE)
-                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_ZONE) : null;
-            AppLocation patientTent =
-                    (patientLocationBranch.size() > AppLocationTree.ABSOLUTE_DEPTH_TENT)
-                    ? patientLocationBranch.get(AppLocationTree.ABSOLUTE_DEPTH_TENT) : null;
-
-            if (patientZone == null && patientTent == null) {
-                locationText = "Unknown Location";
-            } else if (patientZone == null) {
-                locationText = "Unknown Zone / " + patientTent.toString();
-            } else if (patientTent == null) {
-                locationText = patientZone.toString();
-            } else {
-                locationText = patientZone.toString() + " / " + patientTent.toString();
-            }
+            AppLocation location = locationTree.findByUuid(patient.locationUuid);
+            String locationText = location == null ? "Unknown" : location.toString();
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
@@ -597,10 +575,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientFullNameView.setText(
                     patient.id + ": " + patient.givenName + " " + patient.familyName);
 
-            String genderText = patient.gender == AppPatient.GENDER_MALE ? "M" : "F";
-            String ageText = patient.birthdate == null
-                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate);
-            mPatientGenderAgeView.setText(genderText + ", " + ageText);
+            List<String> labels = new ArrayList<>();
+            if (patient.gender == AppPatient.GENDER_MALE) {
+                labels.add("M");
+            } else if (patient.gender == AppPatient.GENDER_FEMALE) {
+                labels.add("F");
+            }
+            labels.add(patient.birthdate == null
+                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+            mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
 
             int days = Days
                     .daysBetween(patient.admissionDateTime, DateTime.now())

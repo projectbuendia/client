@@ -35,7 +35,7 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
             R.string.status_palliative,
             R.color.status_palliative,
             R.color.vital_fg_light,
-            R.string.status_short_desc_pallative),
+            R.string.status_short_desc_palliative),
     CONVALESCENT(
             R.string.status_convalescent,
             R.color.status_convalescent,
