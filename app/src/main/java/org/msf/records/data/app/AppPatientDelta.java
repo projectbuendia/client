@@ -1,15 +1,16 @@
 package org.msf.records.data.app;
 
 import android.content.ContentValues;
-import android.util.Log;
 
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.model.Concept;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
@@ -32,6 +33,7 @@ public class AppPatientDelta {
     public Optional<DateTime> birthdate = Optional.absent();
 
     public Optional<DateTime> admissionDate = Optional.absent();
+    public Optional<DateTime> firstSymptomDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();
 
     /**
@@ -59,6 +61,15 @@ public class AppPatientDelta {
             }
             if (admissionDate.isPresent()) {
                 json.put(Server.PATIENT_ADMISSION_TIMESTAMP, getTimestamp(admissionDate.get()));
+            }
+            if (firstSymptomDate.isPresent()) {
+                JSONObject observation = new JSONObject();
+                observation.put(Server.PATIENT_QUESTION_UUID, Concept.FIRST_SYMPTOM_DATE_UUID);
+                observation.put(Server.PATIENT_ANSWER_DATE,
+                        getDateTimeString(firstSymptomDate.get()));
+                JSONArray observations = new JSONArray();
+                observations.put(observation);
+                json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
             }
             if (assignedLocationUuid.isPresent()) {
                 json.put(
