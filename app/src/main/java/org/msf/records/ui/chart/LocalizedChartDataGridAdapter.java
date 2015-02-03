@@ -340,7 +340,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                             text = String.format(Locale.US, "%.1f", weight);
                         }
                         textColor = Color.BLACK;
-                        useBigText = true;
+                        // Three digits won't fit in the TextView with the larger font.
+                        if (weight < 100) {
+                            useBigText = true;
+                        }
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Weight format was invalid");
                     }
