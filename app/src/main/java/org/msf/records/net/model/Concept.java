@@ -26,10 +26,10 @@ public class Concept {
      */
     public static final String BLEEDING_UUID = "147241AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     /**
-     * Group name for Bleeding (Detail) section.
-     * TODO(akalachman): This breaks localization. Figure out something better.
+     * Group name for Bleeding Sites section.
+     * TODO(akalachman): This may break localization.
      */
-    public static final String BLEEDING_DETAIL_NAME = "Bleeding (Detail)";
+    public static final String BLEEDING_SITES_NAME = "Bleeding site";
     /**
      * UUID for the (question) concept for Vomiting.
      */
