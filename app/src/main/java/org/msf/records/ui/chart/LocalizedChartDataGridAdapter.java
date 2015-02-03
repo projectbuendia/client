@@ -70,6 +70,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
+    private static HashMap<String, Integer> datesToBleedingSiteCount = new HashMap<>();
+
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
@@ -135,6 +137,15 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     }
                 } else {
                     row.datesToValues.put(dateKey, ob.value);
+                }
+
+                // If this is a bleeding site, updating bleeding site counts for this key.
+                if (Concept.BLEEDING_DETAIL_NAME.equals(ob.groupName) &&
+                        !row.datesToValues.containsKey(dateKey)) {
+                    int newCount = datesToBleedingSiteCount.containsKey(dateKey)
+                            ? datesToBleedingSiteCount.get(dateKey) + 1
+                            : 1;
+                    datesToBleedingSiteCount.put(dateKey, newCount);
                 }
             }
         }
@@ -347,6 +358,28 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Weight format was invalid");
                     }
+                }
+                break;
+            case Concept.BLEEDING_UUID:
+                // Use the exact number of bleeding sites, if available. Otherwise, show one
+                // site if "Bleeding (Any)" is specified or 0 otherwise.
+                int bleedingSiteCount = datesToBleedingSiteCount.containsKey(dateKey)
+                        ? datesToBleedingSiteCount.get(dateKey)
+                        : (Concept.YES_UUID.equals(rowData.datesToValues.get(dateKey)) ? 1 : 0);
+                if (bleedingSiteCount == 1) {
+                    textColor = Color.BLACK;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_mild);
+                } else if (bleedingSiteCount == 2) {
+                    textColor = Color.BLACK;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_moderate);
+                } else if (bleedingSiteCount >= 3) {
+                    textColor = Color.WHITE;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
+                }
+
+                if (bleedingSiteCount != 0) {
+                    text = String.format(Locale.US, "%d", bleedingSiteCount);
+                    useBigText = true;
                 }
                 break;
             case Concept.PAIN_UUID:
