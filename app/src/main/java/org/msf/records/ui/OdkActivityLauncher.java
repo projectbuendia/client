@@ -448,7 +448,7 @@ public class OdkActivityLauncher {
     public static void showSavedXform(final Activity caller) {
 
         // This has to be at the start of anything that uses the ODK file system.
-        Collect.createODKDirs();
+        Collect.getInstance().createODKDirs();
 
         final String selection = InstanceProviderAPI.InstanceColumns.STATUS + " != ?";
         final String[] selectionArgs = {InstanceProviderAPI.STATUS_SUBMITTED};
