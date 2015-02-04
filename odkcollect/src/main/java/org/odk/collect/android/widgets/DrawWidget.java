@@ -157,7 +157,7 @@ public class DrawWidget extends QuestionWidget implements IBinaryWidget {
 			i.putExtra(DrawActivity.REF_IMAGE, Uri.fromFile(f));
 		}
 		i.putExtra(DrawActivity.EXTRA_OUTPUT,
-				Uri.fromFile(new File(Collect.TMPFILE_PATH)));
+				Uri.fromFile(new File(Collect.mTmpFilePath)));
 
 		try {
 			Collect.getInstance().getFormController()

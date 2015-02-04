@@ -511,7 +511,7 @@ public class FormEntryActivity
 									mFormPath.lastIndexOf('.'))
 									+ "_";
 							final String fileSuffix = ".xml.save";
-							File cacheDir = new File(Collect.CACHE_PATH);
+							File cacheDir = new File(Collect.mCachePath);
 							File[] files = cacheDir.listFiles(new FileFilter() {
 								@Override
 								public boolean accept(File pathname) {
@@ -531,7 +531,7 @@ public class FormEntryActivity
 												candidate.getName().length()
 														- fileSuffix.length());
 								File instanceDir = new File(
-										Collect.INSTANCES_PATH + File.separator
+										Collect.mInstancesPath + File.separator
 												+ instanceDirName);
 								File instanceFile = new File(instanceDir,
 										instanceDirName + ".xml");
@@ -800,7 +800,7 @@ public class FormEntryActivity
                  */
                 // The intent is empty, but we know we saved the image to the temp
                 // file
-                File fi = new File(Collect.TMPFILE_PATH);
+                File fi = new File(Collect.mTmpFilePath);
                 String mInstanceFolder = formController.getInstancePath()
                         .getParent();
                 String s = mInstanceFolder + File.separator
@@ -2598,7 +2598,7 @@ public class FormEntryActivity
 					Locale.ENGLISH).format(Calendar.getInstance().getTime());
 			String file = mFormPath.substring(mFormPath.lastIndexOf('/') + 1,
 					mFormPath.lastIndexOf('.'));
-			String path = Collect.INSTANCES_PATH + File.separator + file + "_"
+			String path = Collect.mInstancesPath + File.separator + file + "_"
 					+ time;
 			if (FileUtils.createFolder(path)) {
 				formController.setInstancePath(new File(path + File.separator

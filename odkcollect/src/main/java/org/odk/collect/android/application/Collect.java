@@ -44,20 +44,6 @@ import java.io.File;
  */
 public class Collect {
 
-    // Storage paths
-    public static final String ODK_ROOT = Environment.getExternalStorageDirectory()
-            + File.separator + "odk";
-    public static final String FORMS_PATH = ODK_ROOT + File.separator + "forms";
-    public static final String INSTANCES_PATH = ODK_ROOT + File.separator + "instances";
-    public static final String CACHE_PATH = ODK_ROOT + File.separator + ".cache";
-    public static final String METADATA_PATH = ODK_ROOT + File.separator + "metadata";
-    public static final String TMPFILE_PATH = CACHE_PATH + File.separator + "tmp.jpg";
-    public static final String TMPDRAWFILE_PATH = CACHE_PATH + File.separator + "tmpDraw.jpg";
-    public static final String TMPXML_PATH = CACHE_PATH + File.separator + "tmp.xml";
-    public static final String LOG_PATH = ODK_ROOT + File.separator + "log";
-
-    public static final String DEFAULT_FONTSIZE = "21";
-
     // share all session cookies across all sessions...
     private CookieStore cookieStore = new BasicCookieStore();
     // retain credentials for 7 minutes...
@@ -67,6 +53,57 @@ public class Collect {
     private ExternalDataManager externalDataManager;
     // The root application when embedded as a library
     private Application mApplication;
+
+    // Storage paths (which require ODK to be embedded as a library)
+    private final String mOdkRoot = mApplication.getApplicationContext().getFilesDir()
+            + File.separator + "odk";
+    private final String mFormsPath = mOdkRoot + File.separator + "forms";
+    private final String mInstancesPath = mOdkRoot + File.separator + "instances";
+    private final String mCachePath = mOdkRoot + File.separator + ".cache";
+
+    public String getmOdkRoot() {
+        return mOdkRoot;
+    }
+
+    public String getmFormsPath() {
+        return mFormsPath;
+    }
+
+    public String getmInstancesPath() {
+        return mInstancesPath;
+    }
+
+    public String getmCachePath() {
+        return mCachePath;
+    }
+
+    public String getmMetadataPath() {
+        return mMetadataPath;
+    }
+
+    public String getmTmpFilePath() {
+        return mTmpFilePath;
+    }
+
+    public String getmTmpDrawFilePath() {
+        return mTmpDrawFilePath;
+    }
+
+    public String getmTmpXmlPath() {
+        return mTmpXmlPath;
+    }
+
+    public String getmLogPath() {
+        return mLogPath;
+    }
+
+    private final String mMetadataPath = mOdkRoot + File.separator + "metadata";
+    private final String mTmpFilePath = mCachePath + File.separator + "tmp.jpg";
+    private final String mTmpDrawFilePath = mCachePath + File.separator + "tmpDraw.jpg";
+    private final String mTmpXmlPath = mCachePath + File.separator + "tmp.xml";
+    private final String mLogPath = mOdkRoot + File.separator + "log";
+
+    public static final String DEFAULT_FONTSIZE = "21";
 
     private static Collect singleton = null;
 
@@ -132,7 +169,7 @@ public class Collect {
      *
      * @throws RuntimeException if there is no SDCard or the directory exists as a non directory
      */
-    public static void createODKDirs() throws RuntimeException {
+    public void createODKDirs() throws RuntimeException {
         String cardstatus = Environment.getExternalStorageState();
         if (!cardstatus.equals(Environment.MEDIA_MOUNTED)) {
             throw new RuntimeException(Collect.getInstance().getApplication().getString(
@@ -140,7 +177,7 @@ public class Collect {
         }
 
         String[] dirs = {
-                ODK_ROOT, FORMS_PATH, INSTANCES_PATH, CACHE_PATH, METADATA_PATH
+                mOdkRoot, mFormsPath, mInstancesPath, mCachePath, mMetadataPath
         };
 
         for (String dirName : dirs) {
@@ -170,14 +207,14 @@ public class Collect {
      * @param directory
      * @return
      */
-    public static boolean isODKTablesInstanceDataDirectory(File directory) {
+    public boolean isODKTablesInstanceDataDirectory(File directory) {
 		/**
 		 * Special check to prevent deletion of files that
 		 * could be in use by ODK Tables.
 		 */
     	String dirPath = directory.getAbsolutePath();
-    	if ( dirPath.startsWith(Collect.ODK_ROOT) ) {
-    		dirPath = dirPath.substring(Collect.ODK_ROOT.length());
+    	if ( dirPath.startsWith(mOdkRoot) ) {
+    		dirPath = dirPath.substring(mOdkRoot.length());
     		String[] parts = dirPath.split(File.separator);
     		// [appName, instances, tableId, instanceId ]
     		if ( parts.length == 4 && parts[1].equals("instances") ) {

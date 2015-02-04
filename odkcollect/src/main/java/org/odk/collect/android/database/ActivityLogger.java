@@ -45,8 +45,8 @@ public final class ActivityLogger {
     private static class DatabaseHelper extends ODKSQLiteOpenHelper {
 
 		DatabaseHelper() {
-			super(Collect.LOG_PATH, DATABASE_NAME, null, DATABASE_VERSION);
-			new File(Collect.LOG_PATH).mkdirs();
+			super(Collect.mLogPath, DATABASE_NAME, null, DATABASE_VERSION);
+			new File(Collect.mLogPath).mkdirs();
 		}
 
 		@Override
@@ -112,7 +112,7 @@ public final class ActivityLogger {
 
 	public ActivityLogger(String deviceId) {
 		this.mDeviceId = deviceId;
-		mLoggingEnabled = new File(Collect.LOG_PATH, ENABLE_LOGGING).exists();
+		mLoggingEnabled = new File(Collect.mLogPath, ENABLE_LOGGING).exists();
         open();
 	}
 

@@ -62,7 +62,7 @@ public class InstanceProvider extends ContentProvider {
     private static class DatabaseHelper extends ODKSQLiteOpenHelper {
 
         DatabaseHelper(String databaseName) {
-            super(Collect.METADATA_PATH, databaseName, null, DATABASE_VERSION);
+            super(Collect.mMetadataPath, databaseName, null, DATABASE_VERSION);
         }
 
 

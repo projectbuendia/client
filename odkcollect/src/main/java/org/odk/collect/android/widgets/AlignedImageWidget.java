@@ -130,7 +130,7 @@ public class AlignedImageWidget extends QuestionWidget implements IBinaryWidget 
                 Intent i = new Intent();
                 i.setComponent(new ComponentName(ODK_CAMERA_INTENT_PACKAGE,
                 					ODK_CAMERA_TAKE_PICTURE_INTENT_COMPONENT));
-                i.putExtra(FILE_PATH_EXTRA, Collect.CACHE_PATH);
+                i.putExtra(FILE_PATH_EXTRA, Collect.mCachePath);
                 i.putExtra(DIMENSIONS_EXTRA, iArray);
                 i.putExtra(RETAKE_OPTION_EXTRA, false);
 
