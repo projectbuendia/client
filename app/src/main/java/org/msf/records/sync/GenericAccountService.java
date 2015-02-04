@@ -85,6 +85,7 @@ public class GenericAccountService extends Service {
     static void triggerIncrementalObservationSync(SharedPreferences prefs) {
         if (prefs.getBoolean("incremental_observation_update", true)) {
             Bundle b = new Bundle();
+            b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
             b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
             b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
             b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
