@@ -124,7 +124,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         if (location == null || location.parentUuid == null) {
             // This can apparently happen, on rare occasions, for an unknown reason. In this
             // case, notify the user to try again.
-            LOG.e("Location was selected but not found in location tree.");
+            LOG.e("Location %s was selected but not found in location tree.", mLocationUuid);
             BigToast.show(this, R.string.error_setting_location);
             return;
         }
