@@ -60,48 +60,47 @@ public class Collect {
     private final String mFormsPath = mOdkRoot + File.separator + "forms";
     private final String mInstancesPath = mOdkRoot + File.separator + "instances";
     private final String mCachePath = mOdkRoot + File.separator + ".cache";
-
-    public String getmOdkRoot() {
-        return mOdkRoot;
-    }
-
-    public String getmFormsPath() {
-        return mFormsPath;
-    }
-
-    public String getmInstancesPath() {
-        return mInstancesPath;
-    }
-
-    public String getmCachePath() {
-        return mCachePath;
-    }
-
-    public String getmMetadataPath() {
-        return mMetadataPath;
-    }
-
-    public String getmTmpFilePath() {
-        return mTmpFilePath;
-    }
-
-    public String getmTmpDrawFilePath() {
-        return mTmpDrawFilePath;
-    }
-
-    public String getmTmpXmlPath() {
-        return mTmpXmlPath;
-    }
-
-    public String getmLogPath() {
-        return mLogPath;
-    }
-
     private final String mMetadataPath = mOdkRoot + File.separator + "metadata";
     private final String mTmpFilePath = mCachePath + File.separator + "tmp.jpg";
     private final String mTmpDrawFilePath = mCachePath + File.separator + "tmpDraw.jpg";
     private final String mTmpXmlPath = mCachePath + File.separator + "tmp.xml";
     private final String mLogPath = mOdkRoot + File.separator + "log";
+
+    public String getOdkRoot() {
+        return mOdkRoot;
+    }
+
+    public String getFormsPath() {
+        return mFormsPath;
+    }
+
+    public String getInstancesPath() {
+        return mInstancesPath;
+    }
+
+    public String getCachePath() {
+        return mCachePath;
+    }
+
+    public String getMetadataPath() {
+        return mMetadataPath;
+    }
+
+    public String getTmpFilePath() {
+        return mTmpFilePath;
+    }
+
+    public String getTmpDrawFilePath() {
+        return mTmpDrawFilePath;
+    }
+
+    public String getTmpXmlPath() {
+        return mTmpXmlPath;
+    }
+
+    public String getLogPath() {
+        return mLogPath;
+    }
 
     public static final String DEFAULT_FONTSIZE = "21";
 
