@@ -1,13 +1,20 @@
 package org.msf.records.ui.sync;
 
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
-import com.google.common.eventbus.EventBus;
 
 import org.mockito.Mock;
+import org.msf.records.App;
+import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.events.sync.SyncStartedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
+import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.EventBusWrapper;
+
+import de.greenrobot.event.EventBus;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
@@ -17,29 +24,30 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static org.mockito.Mockito.verify;
 
 public class InitialSyncTest extends SyncTestCase {
-    @Mock private SyncManager mMockSyncManager;
     private EventBusRegistrationInterface mEventBus;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        mEventBus = new FakeEventBus();
+        mEventBus = new EventBusWrapper(EventBus.getDefault());
 
         // Wait for users to sync.
-        UserManagerIdlingResource resource = new UserManagerIdlingResource(mEventBus);
+        EventBusIdlingResource<KnownUsersLoadedEvent> resource =
+                new EventBusIdlingResource<>("USERS", mEventBus);
         Espresso.registerIdlingResources(resource);
 
         onView(withText("Guest User")).perform(click());
     }
 
-    /** Expects sync to be in progress. */
-    public void testRequestsSync() {
-        verify(mMockSyncManager).forceSync();
-    }
-
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
     public void testZonesAndTentsDisplayed() {
+        EventBusIdlingResource<SyncStartedEvent> syncStartedResource =
+                new EventBusIdlingResource<>("SYNC", mEventBus);
+        EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
+                new EventBusIdlingResource<>("SYNC_FINISH", mEventBus);
+        Espresso.registerIdlingResources(syncStartedResource, syncSucceededResource);
+
         // Should be at tent selection screen
         onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
 
