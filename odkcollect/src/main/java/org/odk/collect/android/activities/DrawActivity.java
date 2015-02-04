@@ -114,7 +114,7 @@ public class DrawActivity extends Activity {
 			refImage = null;
 			savepointImage = new File(Collect.getInstance().getTmpDrawFilePath());
 			savepointImage.delete();
-			output = new File(Collect.getInstance().getTmpDrawFilePath());
+			output = new File(Collect.getInstance().getTmpFilePath());
 		} else {
 			loadOption = extras.getString(OPTION);
 			if (loadOption == null) {
@@ -143,7 +143,7 @@ public class DrawActivity extends Activity {
 			if (uri != null) {
 				output = new File(uri.getPath());
 			} else {
-				output = new File(Collect.getInstance().getTmpDrawFilePath());
+				output = new File(Collect.getInstance().getTmpFilePath());
 			}
 		}
 
