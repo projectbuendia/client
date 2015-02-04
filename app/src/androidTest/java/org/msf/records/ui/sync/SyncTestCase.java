@@ -11,8 +11,8 @@ import java.io.File;
  * A {@link FunctionalTestCase} that clears the application database as part of set up, allowing for
  * sync behavior to be tested more easily. This class does NOT currently clear ODK forms.
  *
- * WARNING: Syncing requires the transfer of large quantities of data, so {@link SyncTestCase}s will
- * almost always be very large tests.
+ * <p>WARNING: Syncing requires the transfer of large quantities of data, so {@link SyncTestCase}s
+ * will almost always be very large tests.
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
@@ -23,6 +23,7 @@ public class SyncTestCase extends FunctionalTestCase {
         super.setUp();
     }
 
+    /** Clears all contents of the database (note: this does not include ODK forms or instances). */
     public void clearDatabase() {
         PatientDatabase db = new PatientDatabase(App.getInstance().getApplicationContext());
         db.onUpgrade(db.getWritableDatabase(), 0, 1);

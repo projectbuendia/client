@@ -11,7 +11,8 @@ import org.msf.records.utils.Logger;
  * {@link EventBusRegistrationInterface}.
  */
 public class EventBusIdlingResource<T> implements IdlingResource {
-    private final Logger LOG = Logger.create();
+    private static final Logger LOG = Logger.create();
+
     private final EventBusRegistrationInterface mEventBus;
     private final String mName;
     private final EventSubscriber mSubscriber = new EventSubscriber();
@@ -20,6 +21,9 @@ public class EventBusIdlingResource<T> implements IdlingResource {
     private boolean mEventFired = false;
 
     /**
+     * Listens for events on the given EventBusRegistrationInterface. Resources with the same name
+     * as existing resources may be ignored, so be sure to use different names when registering
+     * multiple resources.
      * @param name a unique name for idempotency
      * @param eventBus {@link EventBusRegistrationInterface} to register for user events
      */
