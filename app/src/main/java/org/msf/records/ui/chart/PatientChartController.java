@@ -54,7 +54,7 @@ final class PatientChartController {
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
     /** Period between observation syncs while the chart view is active. */
-    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 10000;
+    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 15000;
 
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array

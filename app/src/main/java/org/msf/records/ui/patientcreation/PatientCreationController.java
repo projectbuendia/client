@@ -131,6 +131,10 @@ final class PatientCreationController {
             mUi.showValidationError(Ui.FIELD_AGE_UNITS, "Please select Years or Months.");
             hasValidationErrors = true;
         }
+        if (sex != SEX_MALE && sex != SEX_FEMALE) {
+            mUi.showValidationError(Ui.FIELD_SEX, "Please select Male or Female.");
+            hasValidationErrors = true;
+        }
 
         if (hasValidationErrors) {
             return false;
