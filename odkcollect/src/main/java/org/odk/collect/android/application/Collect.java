@@ -106,6 +106,7 @@ public class Collect {
     private static Collect singleton = null;
 
     public static Collect getInstance() {
+        assert singleton != null;
         return singleton;
     }
 
