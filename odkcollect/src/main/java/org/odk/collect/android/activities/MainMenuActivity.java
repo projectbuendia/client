@@ -107,7 +107,7 @@ public class MainMenuActivity extends Activity {
 		// external intent
 		Log.i(t, "Starting up, creating directories");
 		try {
-			Collect.createODKDirs();
+			Collect.getInstance().createODKDirs();
 		} catch (RuntimeException e) {
 			createErrorDialog(e.getMessage(), EXIT);
 			return;
@@ -125,7 +125,7 @@ public class MainMenuActivity extends Activity {
 		setTitle(getString(R.string.app_name) + " > "
 				+ getString(R.string.main_menu));
 
-		File f = new File(Collect.mOdkRoot + "/collect.settings");
+		File f = new File(Collect.getInstance().getOdkRoot() + "/collect.settings");
 		if (f.exists()) {
 			boolean success = loadSharedPreferencesFromFile(f);
 			if (success) {

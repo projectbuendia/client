@@ -55,16 +55,15 @@ public class Collect {
     private Application mApplication;
 
     // Storage paths (which require ODK to be embedded as a library)
-    private final String mOdkRoot = mApplication.getApplicationContext().getFilesDir()
-            + File.separator + "odk";
-    private final String mFormsPath = mOdkRoot + File.separator + "forms";
-    private final String mInstancesPath = mOdkRoot + File.separator + "instances";
-    private final String mCachePath = mOdkRoot + File.separator + ".cache";
-    private final String mMetadataPath = mOdkRoot + File.separator + "metadata";
-    private final String mTmpFilePath = mCachePath + File.separator + "tmp.jpg";
-    private final String mTmpDrawFilePath = mCachePath + File.separator + "tmpDraw.jpg";
-    private final String mTmpXmlPath = mCachePath + File.separator + "tmp.xml";
-    private final String mLogPath = mOdkRoot + File.separator + "log";
+    private final String mOdkRoot;
+    private final String mFormsPath;
+    private final String mInstancesPath;
+    private final String mCachePath;
+    private final String mMetadataPath;
+    private final String mTmpFilePath;
+    private final String mTmpDrawFilePath;
+    private final String mTmpXmlPath;
+    private final String mLogPath;
 
     public String getOdkRoot() {
         return mOdkRoot;
@@ -116,6 +115,16 @@ public class Collect {
 
     private Collect(Application mApplication) {
         this.mApplication = mApplication;
+        mOdkRoot = mApplication.getApplicationContext().getFilesDir()
+                + File.separator + "odk";
+        mFormsPath = mOdkRoot + File.separator + "forms";
+        mInstancesPath = mOdkRoot + File.separator + "instances";
+        mCachePath = mOdkRoot + File.separator + ".cache";
+        mMetadataPath = mOdkRoot + File.separator + "metadata";
+        mTmpFilePath = mCachePath + File.separator + "tmp.jpg";
+        mTmpDrawFilePath = mCachePath + File.separator + "tmpDraw.jpg";
+        mTmpXmlPath = mCachePath + File.separator + "tmp.xml";
+        mLogPath = mOdkRoot + File.separator + "log";
     }
 
     public Application getApplication() {

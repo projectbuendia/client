@@ -116,7 +116,7 @@ public class AnnotateWidget extends QuestionWidget implements IBinaryWidget {
 				// if this gets modified, the onActivityResult in
 				// FormEntyActivity will also need to be updated.
 				i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
-						Uri.fromFile(new File(Collect.mTmpFilePath)));
+						Uri.fromFile(new File(Collect.getInstance().getTmpFilePath())));
 				try {
 					Collect.getInstance().getFormController()
 							.setIndexWaitingForData(mPrompt.getIndex());
@@ -263,7 +263,7 @@ public class AnnotateWidget extends QuestionWidget implements IBinaryWidget {
 			i.putExtra(DrawActivity.REF_IMAGE, Uri.fromFile(f));
 		}
 		i.putExtra(DrawActivity.EXTRA_OUTPUT,
-				Uri.fromFile(new File(Collect.mTmpFilePath)));
+				Uri.fromFile(new File(Collect.getInstance().getTmpFilePath())));
 
 		try {
 			Collect.getInstance().getFormController()

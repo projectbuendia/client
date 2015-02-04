@@ -59,7 +59,7 @@ public class FormChooserList extends ListActivity implements DiskSyncListener {
 
         // must be at the beginning of any activity that can be called from an external intent
         try {
-            Collect.createODKDirs();
+            Collect.getInstance().createODKDirs();
         } catch (RuntimeException e) {
             createErrorDialog(e.getMessage(), EXIT);
             return;

@@ -112,9 +112,9 @@ public class DrawActivity extends Activity {
 		if (extras == null) {
 			loadOption = OPTION_DRAW;
 			refImage = null;
-			savepointImage = new File(Collect.mTmpDrawFilePath);
+			savepointImage = new File(Collect.getInstance().getTmpDrawFilePath());
 			savepointImage.delete();
-			output = new File(Collect.mTmpFilePath);
+			output = new File(Collect.getInstance().getTmpDrawFilePath());
 		} else {
 			loadOption = extras.getString(OPTION);
 			if (loadOption == null) {
@@ -133,7 +133,7 @@ public class DrawActivity extends Activity {
 					FileUtils.copyFile(refImage, savepointImage);
 				}
 			} else {
-				savepointImage = new File(Collect.mTmpDrawFilePath);
+				savepointImage = new File(Collect.getInstance().getTmpDrawFilePath());
 				savepointImage.delete();
 				if (refImage != null && refImage.exists()) {
 					FileUtils.copyFile(refImage, savepointImage);
@@ -143,7 +143,7 @@ public class DrawActivity extends Activity {
 			if (uri != null) {
 				output = new File(uri.getPath());
 			} else {
-				output = new File(Collect.mTmpFilePath);
+				output = new File(Collect.getInstance().getTmpDrawFilePath());
 			}
 		}
 
@@ -447,7 +447,7 @@ public class DrawActivity extends Activity {
 			mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 			mCurrentPath = new Path();
 			setBackgroundColor(0xFFFFFFFF);
-			mBackgroundBitmapFile = new File(Collect.mTmpDrawFilePath);
+			mBackgroundBitmapFile = new File(Collect.getInstance().getTmpDrawFilePath());
 		}
 
 		public DrawView(Context c, boolean isSignature, File f) {

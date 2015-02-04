@@ -67,7 +67,7 @@ public class FormsProvider extends ContentProvider {
 		private static final String MODEL_VERSION = "modelVersion";
 
 		DatabaseHelper(String databaseName) {
-			super(Collect.mMetadataPath, databaseName, null, DATABASE_VERSION);
+			super(Collect.getInstance().getMetadataPath(), databaseName, null, DATABASE_VERSION);
 		}
 
 		@Override
@@ -238,7 +238,7 @@ public class FormsProvider extends ContentProvider {
     private DatabaseHelper getDbHelper() {
         // wrapper to test and reset/set the dbHelper based upon the attachment state of the device.
         try {
-            Collect.createODKDirs();
+            Collect.getInstance().createODKDirs();
         } catch (RuntimeException e) {
         	mDbHelper = null;
             return null;
@@ -360,7 +360,7 @@ public class FormsProvider extends ContentProvider {
 		values.put(FormsColumns.MD5_HASH, md5);
 
 		if (values.containsKey(FormsColumns.JRCACHE_FILE_PATH) == false) {
-			String cachePath = Collect.mCachePath + File.separator + md5
+			String cachePath = Collect.getInstance().getCachePath() + File.separator + md5
 					+ ".formdef";
 			values.put(FormsColumns.JRCACHE_FILE_PATH, cachePath);
 		}
@@ -655,7 +655,7 @@ public class FormsProvider extends ContentProvider {
 								.getMd5Hash(new File(formFile));
 						values.put(FormsColumns.MD5_HASH, newMd5);
 						values.put(FormsColumns.JRCACHE_FILE_PATH,
-								Collect.mCachePath + File.separator + newMd5
+								Collect.getInstance().getCachePath() + File.separator + newMd5
 										+ ".formdef");
 					}
 

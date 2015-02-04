@@ -48,7 +48,7 @@ public class InfoLogger {
 
 	@SuppressWarnings("unused")
 	private static final void geologToFile(String msg) {
-		File dir = new File( Collect.mOdkRoot + File.separator + LOG_DIRECTORY );
+		File dir = new File( Collect.getInstance().getOdkRoot() + File.separator + LOG_DIRECTORY );
 		if ( !dir.exists() ) {
 			dir.mkdirs();
 		}

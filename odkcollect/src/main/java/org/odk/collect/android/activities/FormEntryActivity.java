@@ -233,7 +233,7 @@ public class FormEntryActivity
 		// must be at the beginning of any activity that can be called from an
 		// external intent
 		try {
-			Collect.createODKDirs();
+			Collect.getInstance().createODKDirs();
 		} catch (RuntimeException e) {
 			createErrorDialog(e.getMessage(), EXIT);
 			return;
@@ -511,7 +511,7 @@ public class FormEntryActivity
 									mFormPath.lastIndexOf('.'))
 									+ "_";
 							final String fileSuffix = ".xml.save";
-							File cacheDir = new File(Collect.mCachePath);
+							File cacheDir = new File(Collect.getInstance().getCachePath());
 							File[] files = cacheDir.listFiles(new FileFilter() {
 								@Override
 								public boolean accept(File pathname) {
@@ -531,7 +531,7 @@ public class FormEntryActivity
 												candidate.getName().length()
 														- fileSuffix.length());
 								File instanceDir = new File(
-										Collect.mInstancesPath + File.separator
+										Collect.getInstance().getInstancesPath() + File.separator
 												+ instanceDirName);
 								File instanceFile = new File(instanceDir,
 										instanceDirName + ".xml");
@@ -800,7 +800,7 @@ public class FormEntryActivity
                  */
                 // The intent is empty, but we know we saved the image to the temp
                 // file
-                File fi = new File(Collect.mTmpFilePath);
+                File fi = new File(Collect.getInstance().getTmpFilePath());
                 String mInstanceFolder = formController.getInstancePath()
                         .getParent();
                 String s = mInstanceFolder + File.separator
@@ -2598,7 +2598,7 @@ public class FormEntryActivity
 					Locale.ENGLISH).format(Calendar.getInstance().getTime());
 			String file = mFormPath.substring(mFormPath.lastIndexOf('/') + 1,
 					mFormPath.lastIndexOf('.'));
-			String path = Collect.mInstancesPath + File.separator + file + "_"
+			String path = Collect.getInstance().getInstancesPath() + File.separator + file + "_"
 					+ time;
 			if (FileUtils.createFolder(path)) {
 				formController.setInstancePath(new File(path + File.separator

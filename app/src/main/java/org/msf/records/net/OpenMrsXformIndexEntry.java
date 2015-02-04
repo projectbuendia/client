@@ -35,6 +35,6 @@ public class OpenMrsXformIndexEntry {
      * @return the unique file path in the ODK file system for storing this form.
      */
     public File makeFileForForm() {
-        return new File(Collect.mFormsPath + File.separator + uuid + ".xml");
+        return new File(Collect.getInstance().getFormsPath() + File.separator + uuid + ".xml");
     }
 }
