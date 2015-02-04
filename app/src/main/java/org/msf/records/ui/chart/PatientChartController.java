@@ -3,6 +3,7 @@ package org.msf.records.ui.chart;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 
 import com.google.common.base.Optional;
@@ -52,6 +53,9 @@ final class PatientChartController {
 
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
+    /** Period between observation syncs while the chart view is active. */
+    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 10000;
+
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array
     // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
@@ -67,6 +71,9 @@ final class PatientChartController {
     private AppLocationTree mLocationTree;
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
+
+    // Number of calls to init() + calls to suspend().
+    private int mInitSuspendCount = 0;
 
     public interface Ui {
         /** Sets the activity title. */
@@ -174,16 +181,41 @@ final class PatientChartController {
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
+
+        mInitSuspendCount++;
+        startObservationSync(mInitSuspendCount);
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
-
         if (mLocationTree != null) {
             mLocationTree.close();
         }
+        mInitSuspendCount++;
+    }
+
+    /** Starts syncing observations more frequently while the user is viewing the chart. */
+    private void startObservationSync(final int initialInitSuspendCount) {
+        final Handler handler = new Handler();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                // This check guarantees that at most one cycle of postDelayed() calls can
+                // be active at any given time.  Each call to startObservationSync gets a
+                // unique value of initialInitSuspendCount.  Since mInitSuspendCount
+                // can only have one value, only one cycle can be active; as soon as
+                // mInitSuspendCount advances, the cycle of postDelayed() calls is broken.
+                if (mInitSuspendCount == initialInitSuspendCount) {
+                    mSyncManager.incrementalObservationSync();
+                    handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
+                }
+            }
+        };
+
+        handler.postDelayed(runnable, OBSERVATION_SYNC_PERIOD_MILLIS);
     }
 
     public void onXFormResult(int code, int resultCode, Intent data) {

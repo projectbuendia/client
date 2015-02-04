@@ -37,6 +37,15 @@ public class SyncManager {
     }
 
     /**
+     * Initiates an incremental sync of observations.  No-op if incremental observation
+     * update is disabled.
+     */
+    public void incrementalObservationSync() {
+        GenericAccountService.triggerIncrementalObservationSync(
+                PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
+    }
+
+    /**
      * Returns {@code true} if a sync is pending or active.
      */
     public boolean isSyncing() {

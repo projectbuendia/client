@@ -81,6 +81,17 @@ public class GenericAccountService extends Service {
                 b);                                      // Extras
     }
 
+    /** Starts an incremental update of observations.  No-op if incremental update is disabled. */
+    static void triggerIncrementalObservationSync(SharedPreferences prefs) {
+        if (prefs.getBoolean("incremental_observation_update", true)) {
+            Bundle b = new Bundle();
+            b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+            b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+            ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
+        }
+    }
+
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
      *
