@@ -46,6 +46,8 @@ public class SyncTestCase extends FunctionalTestCase {
 
     /** Idles until sync has completed. */
     protected void waitForInitialSync() {
+        // Use a UUID as a tag so that we can wait for an arbitrary number of events, since
+        // EventBusIdlingResource<> only works for a single event.
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);

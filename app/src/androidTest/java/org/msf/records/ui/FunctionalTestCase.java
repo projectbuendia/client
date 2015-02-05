@@ -75,14 +75,26 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         return activity[0];
     }
 
-    /** Instructs espresso to wait for a {@link ProgressFragment} to finish loading. */
+    /**
+     * Instructs espresso to wait for a {@link ProgressFragment} to finish loading. Espresso will
+     * also wait every subsequent time the {@link ProgressFragment} returns to the busy state, and
+     * will period check whether or not the fragment is currently idle.
+     */
     protected void waitForProgressFragment(ProgressFragment progressFragment) {
         ProgressFragmentIdlingResource idlingResource = new ProgressFragmentIdlingResource(
                 "progress_fragment", progressFragment);
         Espresso.registerIdlingResources(idlingResource);
     }
 
-    /** Instructs espresso to wait for the first {@link ProgressFragment} found for an activity. */
+    /**
+     * Instructs espresso to wait for the {@link ProgressFragment} contained in the current
+     * activity to finish loading, if such a fragment is present. Espresso will also wait every
+     * subsequent time the {@link ProgressFragment} returns to the busy state, and
+     * will period check whether or not the fragment is currently idle.
+     *
+     * If the current activity does not contain a progress fragment, then this function will throw
+     * an {@link IllegalArgumentException}.
+     */
     protected void waitForProgressFragment() {
         Activity activity;
         try {
