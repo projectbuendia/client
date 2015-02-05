@@ -16,7 +16,7 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
-    private final Logger LOG = Logger.create();
+    private static final Logger LOG = Logger.create();
 
     public FunctionalTestCase() {
         super(UserLoginActivity.class);
