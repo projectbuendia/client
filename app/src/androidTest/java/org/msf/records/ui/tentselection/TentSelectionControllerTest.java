@@ -37,6 +37,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         // TODO: Create a fake event bus so we can check whether the controller
         // unregistered its event handler.
         mFakeEventBus = new FakeEventBus();
+        mFakeSyncManager = new FakeSyncManager();
         mController = new TentSelectionController(
                 mMockAppModel,
                 mFakeEventBus,

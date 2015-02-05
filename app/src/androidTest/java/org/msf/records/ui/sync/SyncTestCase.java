@@ -10,6 +10,7 @@ import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.ui.FunctionalTestCase;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,7 +47,7 @@ public class SyncTestCase extends FunctionalTestCase {
     /** Idles until sync has completed. */
     protected void waitForInitialSync() {
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
-                new EventBusIdlingResource<>("SYNC_FINISH", mEventBus);
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
     }
 }
