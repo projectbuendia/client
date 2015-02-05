@@ -25,7 +25,7 @@ public class GenericAccountService extends Service {
 
     private static final String ACCOUNT_TYPE = BuildConfig.ACCOUNT_TYPE;
     public static final String ACCOUNT_NAME = "sync";
-    private static final long SYNC_FREQUENCY = 10 * 60;  // 10 minutes (in seconds)
+    private static final long SYNC_FREQUENCY = 5 * 60;  // 10 minutes (in seconds)
     private static final String CONTENT_AUTHORITY = Contracts.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
     private Authenticator mAuthenticator;
@@ -115,8 +115,12 @@ public class GenericAccountService extends Service {
             // on other scheduled syncs and network utilization.
             Bundle extras = new Bundle();
             extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-            ContentResolver.addPeriodicSync(
-                    account, CONTENT_AUTHORITY, extras,SYNC_FREQUENCY);
+            extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
+            extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
+            extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
+            extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+            extras.putBoolean(SyncAdapter.SYNC_USERS, true);
+            ContentResolver.addPeriodicSync(account, CONTENT_AUTHORITY, extras,SYNC_FREQUENCY);
             newAccount = true;
         }
 

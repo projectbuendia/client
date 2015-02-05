@@ -72,8 +72,9 @@ final class PatientChartController {
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
 
-    // Number of calls to init() + calls to suspend().
-    private int mInitSuspendCount = 0;
+    // This value is incremented whenever the controller is activated or suspended.
+    // A "phase" is a period of time between such transition points.
+    private int mCurrentPhaseId = 0;
 
     public interface Ui {
         /** Sets the activity title. */
@@ -177,38 +178,41 @@ final class PatientChartController {
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
+        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
+
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
 
-        mInitSuspendCount++;
-        startObservationSync(mInitSuspendCount);
+        startObservationSync();
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
+        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
+
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
         if (mLocationTree != null) {
             mLocationTree.close();
         }
-        mInitSuspendCount++;
     }
 
     /** Starts syncing observations more frequently while the user is viewing the chart. */
-    private void startObservationSync(final int initialInitSuspendCount) {
+    private void startObservationSync() {
         final Handler handler = new Handler();
+        final int phaseId = mCurrentPhaseId;
 
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                // This check guarantees that at most one cycle of postDelayed() calls can
-                // be active at any given time.  Each call to startObservationSync gets a
-                // unique value of initialInitSuspendCount.  Since mInitSuspendCount
-                // can only have one value, only one cycle can be active; as soon as
-                // mInitSuspendCount advances, the cycle of postDelayed() calls is broken.
-                if (mInitSuspendCount == initialInitSuspendCount) {
+                // This runnable triggers itself in a cycle, each run calling postDelayed()
+                // to schedule the next run.  Each such cycle belongs to a phase, identified
+                // by phaseId; once the current phase is exited the cycle stops.  Thus, when the
+                // controller is suspended the cycle stops; and also since mCurrentPhaseId can
+                // only have one value, only one such cycle can be active at any given time.
+                if (mCurrentPhaseId == phaseId) {
                     mSyncManager.incrementalObservationSync();
                     handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
                 }
