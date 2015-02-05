@@ -80,6 +80,10 @@ public class UserManager {
         mUserStore = checkNotNull(userStore);
     }
 
+    public boolean hasUsers() {
+        return !mKnownUsers.isEmpty();
+    }
+
     /**
      * Loads the set of all users known to the application from local cache.
      *
@@ -192,8 +196,9 @@ public class UserManager {
         @Override
         protected void onPostExecute(Set<User> knownUsers) {
             mKnownUsers.clear();
-            mKnownUsers.addAll(knownUsers);
-
+            if (knownUsers != null) {
+                mKnownUsers.addAll(knownUsers);
+            }
             if (mKnownUsers.isEmpty()) {
                 LOG.e("No users returned from db");
                 mEventBus.post(new KnownUsersLoadFailedEvent(
