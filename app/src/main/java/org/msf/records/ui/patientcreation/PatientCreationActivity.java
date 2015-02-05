@@ -122,6 +122,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         AppLocation location = mLocationTree.findByUuid(mLocationUuid);
 
         if (location == null || location.parentUuid == null) {
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationUuid=" + mLocationUuid +
+                    " location=" + location
+                    " location.parentUuid=" + (location == null ? "<invalid>" : location.parentUuid)
+            );
+
             // This can apparently happen, on rare occasions, for an unknown reason. In this
             // case, notify the user to try again.
             LOG.e("Location %s was selected but not found in location tree.", mLocationUuid);
@@ -132,6 +138,13 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         ResZone resZone = Zone.getResZone(location.parentUuid);
 
         if (resZone == null) {
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationUuid=" + mLocationUuid +
+                    " location=" + location +
+                    " location.parentUuid=" + location.parentUuid +
+                    " resZone=" + resZone
+            );
+
             // This should never happen. If it does, notify the user to try again.
             LOG.e("%s could not be resolved to a zone.", location.parentUuid);
             BigToast.show(this, R.string.error_setting_location);
