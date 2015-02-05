@@ -137,13 +137,6 @@ public class PatientSearchController {
 
     private class LocationTreeUpdatedSubscriber {
         public synchronized void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            // If given an empty tree, data has not yet been fully retrieved, so continue to wait
-            // for further updates.
-            if (event.tree != null && event.tree.getRoot() == null) {
-                event.tree.close();
-                return;
-            }
-
             synchronized (mFilterSubscriberLock) {
                 mFilterSubscriber = null;
             }
@@ -174,13 +167,9 @@ public class PatientSearchController {
         }
         mFragmentUis.add(fragmentUi);
 
-        // Initialize fragment with locations and patients, as necessary. It's possible that
-        // locations were not fully available when this controller was initialized, so re-check
-        // whenever a new fragment is attached.
-        if (mLocationTree != null && mLocationTree.getRoot() != null) {
+        // Initialize fragment with locations and patients, as necessary.
+        if (mLocationTree != null) {
             fragmentUi.setLocationTree(mLocationTree);
-        } else if (mWaitingOnLocationTree) {
-            mModel.fetchLocationTree(mCrudEventBus, mLocale);
         }
 
         if (mPatientsCursor != null) {
@@ -193,9 +182,6 @@ public class PatientSearchController {
         // If all data is loaded, no need for a spinner.
         if (mLocationTree != null && mPatientsCursor != null) {
             fragmentUi.showSpinner(false);
-            loadSearchResults();
-        } else {
-            fragmentUi.showSpinner(true);
         }
     }
 

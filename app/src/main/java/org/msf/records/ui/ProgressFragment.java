@@ -32,7 +32,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     public enum State {
         LOADING,
         LOADED,
-        State, ERROR
+        ERROR
     }
 
     protected View mContent;
