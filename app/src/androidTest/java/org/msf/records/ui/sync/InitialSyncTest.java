@@ -1,6 +1,7 @@
 package org.msf.records.ui.sync;
 
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
+import com.squareup.spoon.Spoon;
 
 import org.mockito.Mock;
 import org.msf.records.App;
@@ -34,12 +35,16 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
     public void testZonesAndTentsDisplayed() {
+        screenshot("Before Sync Completed");
+
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>("SYNC_FINISH", mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
 
         // Should be at tent selection screen
         onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
+
+        screenshot("After Sync Completed");
 
         // Zones and tents should be visible
         onView(withText("Triage")).check(matches(isDisplayed()));

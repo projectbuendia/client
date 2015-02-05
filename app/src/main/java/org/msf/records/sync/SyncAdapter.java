@@ -217,7 +217,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         App.getServer().listPatients("", "", "", future, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                LOG.d(error.toString());
+                LOG.d(error, "Error in network call");
             }
         });
 
