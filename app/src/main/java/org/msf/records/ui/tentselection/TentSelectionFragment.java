@@ -1,18 +1,17 @@
 package org.msf.records.ui.tentselection;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
-import org.msf.records.data.app.AppLocationComparator;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.ui.ProgressFragment;
 import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,6 +39,8 @@ public final class TentSelectionFragment extends ProgressFragment {
     private final MyUi mMyUi = new MyUi();
     private TentListAdapter mAdapter;
 
+    private AlertDialog mAlertDialog;
+
     public TentSelectionFragment() {
         // Required empty public constructor
     }
@@ -64,6 +65,12 @@ public final class TentSelectionFragment extends ProgressFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setTitle(getString(R.string.tent_selection_dialog_title))
+                .setMessage(R.string.tent_selection_dialog_message)
+                .setCancelable(false)
+                .create();
         setContentView(R.layout.fragment_tent_selection);
     }
 
@@ -120,6 +127,15 @@ public final class TentSelectionFragment extends ProgressFragment {
     	@Override
     	public void showSpinner(boolean show) {
     		changeState(show ? State.LOADING : State.LOADED);
+            if (show) {
+                if (mAlertDialog != null && !mAlertDialog.isShowing()) {
+                    mAlertDialog.show();
+                }
+            } else {
+                if (mAlertDialog != null && mAlertDialog.isShowing()) {
+                    mAlertDialog.hide();
+                }
+            }
     	}
     }
 }

@@ -7,17 +7,10 @@ import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import org.msf.records.App;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.ui.FunctionalTestCase;
-import org.msf.records.utils.EventBusRegistrationInterface;
-import org.msf.records.utils.EventBusWrapper;
-import org.msf.records.utils.Logger;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * A {@link FunctionalTestCase} that clears the application database as part of set up, allowing for
@@ -27,10 +20,6 @@ import de.greenrobot.event.EventBus;
  * will almost always be very large tests.
  */
 public class SyncTestCase extends FunctionalTestCase {
-    private static final Logger LOG = Logger.create();
-
-    private EventBusRegistrationInterface mEventBus;
-
     @Override
     public void setUp() throws Exception {
         // Give additional leeway for idling resources, as sync may be slow.
@@ -38,13 +27,6 @@ public class SyncTestCase extends FunctionalTestCase {
 
         clearDatabase();
         clearPreferences();
-
-        mEventBus = new EventBusWrapper(EventBus.getDefault());
-
-        // Wait for users to sync.
-        EventBusIdlingResource<KnownUsersLoadedEvent> resource =
-                new EventBusIdlingResource<>("USERS", mEventBus);
-        Espresso.registerIdlingResources(resource);
 
         super.setUp();
     }

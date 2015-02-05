@@ -17,6 +17,7 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
@@ -34,6 +35,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject SyncManager mSyncManager;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -43,7 +45,8 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                 mAppModel,
                 mCrudEventBusProvider.get(),
         		new MyUi(),
-        		new EventBusWrapper(EventBus.getDefault()));
+        		new EventBusWrapper(EventBus.getDefault()),
+                mSyncManager);
 
         setContentView(R.layout.activity_tent_selection);
         if (savedInstanceState == null) {

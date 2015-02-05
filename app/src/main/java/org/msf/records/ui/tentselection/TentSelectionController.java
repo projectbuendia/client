@@ -13,6 +13,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.model.Zone;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
@@ -62,8 +63,10 @@ final class TentSelectionController {
     private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
+    private final SyncManager mSyncManager;
 
     private boolean mLoadedLocationTree;
+    private boolean mWaitingForSync = false;
     private long mLoadRequestTimeMs;
     @Nullable private AppLocationTree mAppLocationTree;
     @Nullable private AppLocation mTriageZone;
@@ -73,11 +76,13 @@ final class TentSelectionController {
             AppModel appModel,
             CrudEventBus crudEventBus,
             Ui ui,
-            EventBusRegistrationInterface eventBus) {
+            EventBusRegistrationInterface eventBus,
+            SyncManager syncManager) {
         mAppModel = appModel;
         mCrudEventBus = crudEventBus;
         mUi = ui;
         mEventBus = eventBus;
+        mSyncManager = syncManager;
     }
 
     public void init() {
@@ -88,6 +93,9 @@ final class TentSelectionController {
                 mLoadedLocationTree, mAppLocationTree);
 
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
+        mWaitingForSync = mSyncManager.isSyncing();
+
+        LOG.d("Waiting for sync before showing tents? %b", mWaitingForSync);
 
         if (!mLoadedLocationTree) {
             mLoadRequestTimeMs = SystemClock.elapsedRealtime();
@@ -147,7 +155,7 @@ final class TentSelectionController {
 
     private void populateFragmentUi(TentFragmentUi fragmentUi) {
         fragmentUi.showSpinner(!mLoadedLocationTree);
-        if (mAppLocationTree != null) {
+        if (mAppLocationTree != null && !mWaitingForSync) {
             int dischargedPatientCount = (mDischargedZone == null)
                     ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
             int totalPatientCount =
@@ -169,6 +177,8 @@ final class TentSelectionController {
     private final class EventBusSubscriber {
 
         public void onEventMainThread(SyncFinishedEvent event) {
+            mWaitingForSync = false;
+
             // Reload locations when a sync completes.
             mAppModel.fetchLocationTree(
                     mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());

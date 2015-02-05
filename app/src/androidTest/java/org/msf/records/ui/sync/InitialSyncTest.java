@@ -60,11 +60,10 @@ public class InitialSyncTest extends SyncTestCase {
     public void testSearchAfterSync() {
         waitForInitialSync();
 
-        // Search for "test". One or more test patients should contain this string.
         onView(withId(R.id.action_search)).perform(click());
-        onView(withId(R.id.action_search)).perform(typeText("test"));
 
-        // Check that at least one patient is returned.
+        // Check that at least one patient is returned (since clicking search should show
+        // all patients).
         onData(is(AppPatient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)
