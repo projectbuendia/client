@@ -14,6 +14,7 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.patientlist.PatientSearchController;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
@@ -64,6 +65,7 @@ final class TentSelectionController {
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final SyncManager mSyncManager;
+    private final PatientSearchController mPatientSearchController;
 
     private boolean mLoadedLocationTree;
     private boolean mWaitingForSync = false;
@@ -77,12 +79,14 @@ final class TentSelectionController {
             CrudEventBus crudEventBus,
             Ui ui,
             EventBusRegistrationInterface eventBus,
-            SyncManager syncManager) {
+            SyncManager syncManager,
+            PatientSearchController patientSearchController) {
         mAppModel = appModel;
         mCrudEventBus = crudEventBus;
         mUi = ui;
         mEventBus = eventBus;
         mSyncManager = syncManager;
+        mPatientSearchController = patientSearchController;
     }
 
     public void init() {
@@ -213,6 +217,10 @@ final class TentSelectionController {
             for (TentFragmentUi fragmentUi : mFragmentUis) {
                 populateFragmentUi(fragmentUi);
             }
+
+            // Update the search controller immediately -- it does not listen for location updates
+            // on this controller's bus and would otherwise be unaware of changes.
+            mPatientSearchController.setLocations(mAppLocationTree);
         }
     }
 }
