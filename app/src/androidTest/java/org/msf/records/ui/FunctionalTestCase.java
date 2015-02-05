@@ -92,8 +92,8 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
      * subsequent time the {@link ProgressFragment} returns to the busy state, and
      * will period check whether or not the fragment is currently idle.
      *
-     * If the current activity does not contain a progress fragment, then this function will throw
-     * an {@link IllegalArgumentException}.
+     * <p>If the current activity does not contain a progress fragment, then this function will
+     * throw an {@link IllegalArgumentException}.
      */
     protected void waitForProgressFragment() {
         Activity activity;
