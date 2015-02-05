@@ -6,6 +6,7 @@ import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import org.msf.records.App;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.ui.FunctionalTestCase;
@@ -28,7 +29,7 @@ import de.greenrobot.event.EventBus;
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
 
-    protected EventBusRegistrationInterface mEventBus;
+    private EventBusRegistrationInterface mEventBus;
 
     @Override
     public void setUp() throws Exception {
@@ -58,5 +59,12 @@ public class SyncTestCase extends FunctionalTestCase {
     /** Clears all shared preferences of the application. */
     public void clearPreferences() {
         PreferenceManager.getDefaultSharedPreferences(App.getInstance()).edit().clear().commit();
+    }
+
+    /** Idles until sync has completed. */
+    protected void waitForInitialSync() {
+        EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
+                new EventBusIdlingResource<>("SYNC_FINISH", mEventBus);
+        Espresso.registerIdlingResources(syncSucceededResource);
     }
 }
