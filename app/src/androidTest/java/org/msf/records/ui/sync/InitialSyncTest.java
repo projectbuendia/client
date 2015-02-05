@@ -24,29 +24,19 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static org.mockito.Mockito.verify;
 
 public class InitialSyncTest extends SyncTestCase {
-    private EventBusRegistrationInterface mEventBus;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        mEventBus = new EventBusWrapper(EventBus.getDefault());
-
-        // Wait for users to sync.
-        EventBusIdlingResource<KnownUsersLoadedEvent> resource =
-                new EventBusIdlingResource<>("USERS", mEventBus);
-        Espresso.registerIdlingResources(resource);
 
         onView(withText("Guest User")).perform(click());
     }
 
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
     public void testZonesAndTentsDisplayed() {
-        EventBusIdlingResource<SyncStartedEvent> syncStartedResource =
-                new EventBusIdlingResource<>("SYNC", mEventBus);
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>("SYNC_FINISH", mEventBus);
-        Espresso.registerIdlingResources(syncStartedResource, syncSucceededResource);
+        Espresso.registerIdlingResources(syncSucceededResource);
 
         // Should be at tent selection screen
         onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
