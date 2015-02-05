@@ -40,7 +40,8 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
         onView(withId(R.id.patient_creation_text_patient_given_name)).perform(typeText(given));
         onView(withId(R.id.patient_creation_text_patient_family_name)).perform(typeText(family));
-        onView(withId(R.id.patient_creation_text_age)).perform(typeText(id));
+        onView(withId(R.id.patient_creation_text_age))
+                .perform(typeText(id.substring(id.length() - 2)));
         onView(withId(R.id.patient_creation_radiogroup_age_units_years)).perform(click());
         onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
         onView(withId(R.id.patient_creation_radiogroup_age_sex_male)).perform(click());
@@ -57,7 +58,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with a location. */
     public void testNewPatientWithLocation() {
-        String id = "test" + new Date().getTime() % 1000;
+        String id = "test" + new Date().getTime() % 100000;
         populateNewPatientFieldsExceptLocation(id);
         onView(withId(R.id.patient_creation_button_change_location)).perform(click());
         onView(withText("S1")).perform(click());
@@ -70,7 +71,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with no location. */
     public void testNewPatientWithoutLocation() {
-        String id = "test" + new Date().getTime() % 1000;
+        String id = "test" + new Date().getTime() % 100000;
         populateNewPatientFieldsExceptLocation(id);
         onView(withText("Create")).perform(click());
 
