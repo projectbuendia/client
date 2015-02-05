@@ -128,6 +128,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             BigToast.show(this, R.string.error_setting_location);
 
             throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
                     " mLocationUuid=" + mLocationUuid +
                     " location=" + location +
                     " location.parentUuid=" + (location == null ? "<invalid>" : location.parentUuid)
@@ -145,6 +146,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             BigToast.show(this, R.string.error_setting_location);
 
             throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
                     " mLocationUuid=" + mLocationUuid +
                     " location=" + location +
                     " location.parentUuid=" + location.parentUuid +
