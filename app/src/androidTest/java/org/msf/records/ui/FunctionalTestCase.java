@@ -88,7 +88,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         try {
             activity = getCurrentActivity();
         } catch (Throwable throwable) {
-
             throw new IllegalStateException("Error retrieving current activity.", throwable);
         }
 
@@ -96,15 +95,12 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
             throw new IllegalStateException("Activity is not a FragmentActivity.");
         }
 
-        try {
-            for (Fragment fragment :
-                    ((FragmentActivity)activity).getSupportFragmentManager().getFragments()) {
-                if (fragment instanceof ProgressFragment) {
-                    waitForProgressFragment((ProgressFragment)fragment);
-                    return;
-                }
+        for (Fragment fragment :
+                ((FragmentActivity)activity).getSupportFragmentManager().getFragments()) {
+            if (fragment instanceof ProgressFragment) {
+                waitForProgressFragment((ProgressFragment)fragment);
+                return;
             }
-        } catch (Throwable throwable) {
         }
 
         throw new IllegalStateException("Could not find a progress fragment to wait on.");

@@ -45,7 +45,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                 mAppModel,
                 mCrudEventBusProvider.get(),
         		new MyUi(),
-        		new EventBusWrapper(EventBus.getDefault()),
+                new EventBusWrapper(EventBus.getDefault()),
                 mSyncManager,
                 getSearchController());
 
