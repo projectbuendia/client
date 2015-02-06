@@ -210,11 +210,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // insert into content provider
             try {
                 ContentResolver contentResolver = Collect.getInstance().getApplication().getContentResolver();
-                if (mUpdate) {
-                    contentResolver.update(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues, null, null);
-                } else {
-                    contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
-                }
+                // Always replace existing forms.
+                contentValues.put(FormsProviderAPI.SQL_INSERT_OR_REPLACE, true);
+                contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
             } catch (SQLException e) {
                 LOG.i(e, "failed to insert fetched file");
             }
