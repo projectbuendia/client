@@ -241,6 +241,14 @@ public class PatientSearchController {
         mFilter = filter;
     }
 
+    /**
+     * Manually sets the locations for this controller, which is useful if locations have been
+     * updated from an outside context.
+     */
+    public void setLocations(AppLocationTree appLocationTree) {
+        mLocationTree = appLocationTree;
+    }
+
     private SimpleSelectionFilter getLocationSubfilter() {
         SimpleSelectionFilter filter;
 

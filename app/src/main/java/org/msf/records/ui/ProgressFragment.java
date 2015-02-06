@@ -21,6 +21,9 @@ import com.google.common.base.Charsets;
 
 import org.msf.records.App;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -40,7 +43,16 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
 
     protected int mShortAnimationDuration;
 
+    private State mState = State.LOADING;
+    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<ChangeStateSubscriber>();
+
     public ProgressFragment() {
+    }
+
+    /** Subscriber for listening for state changes. */
+    public interface ChangeStateSubscriber {
+        /** Called whenever the state is changed. */
+        public void onChangeState(State newState);
     }
 
     @Override
@@ -105,6 +117,22 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         }
     }
 
+    /** Registers a {@link ChangeStateSubscriber}. */
+    public void registerSubscriber(ChangeStateSubscriber subscriber) {
+        mSubscribers.add(subscriber);
+    }
+
+    /** Unregisters a {@link ChangeStateSubscriber} if the subscriber is currently registered. */
+    public void unregisterSubscriber(ChangeStateSubscriber subscriber) {
+        if (mSubscribers.contains(subscriber)) {
+            mSubscribers.remove(subscriber);
+        }
+    }
+
+    public State getState() {
+        return mState;
+    }
+
     protected void setContentView(int layout){
         mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
     }
@@ -115,9 +143,13 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     }
 
     protected void changeState(State state){
-        mProgressBar.setVisibility(state != State.LOADED && state != State.ERROR ? View.VISIBLE : View.GONE);
-        mContent.setVisibility(state != State.LOADING && state != State.ERROR ? View.VISIBLE : View.GONE);
-        mErrorTextView.setVisibility(state != State.LOADING && state != State.LOADED ? View.VISIBLE : View.GONE);
+        mState = state;
+        mProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
+        mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);
+        mErrorTextView.setVisibility(state == State.ERROR ? View.VISIBLE : View.GONE);
+        for (ChangeStateSubscriber subscriber : mSubscribers) {
+            subscriber.onChangeState(mState);
+        }
     }
 
     private void crossfade(View inView, final View outView) {

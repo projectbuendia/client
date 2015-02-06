@@ -47,13 +47,10 @@ public class SyncManager {
 
     /**
      * Returns {@code true} if a sync is pending or active.
-     */
+    */
     public boolean isSyncing() {
         return
                 ContentResolver.isSyncActive(
-                        GenericAccountService.getAccount(),
-                        Contracts.CONTENT_AUTHORITY)
-                || ContentResolver.isSyncPending(
                         GenericAccountService.getAccount(),
                         Contracts.CONTENT_AUTHORITY);
     }
