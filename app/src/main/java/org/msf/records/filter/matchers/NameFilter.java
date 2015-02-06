@@ -30,16 +30,18 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
 
         // Loop through each of the search terms checking if there is a prefix match for each in any word of the name
         boolean found = false;
-        for(int i = 0; i < searchTerms.length; i++) {
+        for (int i = 0; i < searchTerms.length; i++) {
             found = false;
-            for(int j = 0; j < nameParts.length; j++) {
-                if nameParts[j].startsWith(searchTerms[i]) {}
+            for (int j = 0; j < nameParts.length; j++) {
+                if (nameParts[j].startsWith(searchTerms[i])) {
                     found = true;
                     break;
                 }
             }
             // This search term was not found in any word of the name, so this patient is not a match
-            if !found return false;
+            if (!found) {
+                return false;
+            }
         }
 
         // If we've been through all the search terms without returning false, then we must have found a match for all of them
