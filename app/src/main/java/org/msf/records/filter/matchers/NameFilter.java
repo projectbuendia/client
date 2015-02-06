@@ -28,7 +28,8 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
         // Get array of words in the search query
         String[] searchTerms = constraint.toString().toLowerCase().split(" ");
 
-        // Loop through each of the search terms checking if there is a prefix match for each in any word of the name
+        // Loop through each of the search terms checking if there is a prefix match
+        // for each in any word of the name
         boolean found = false;
         for (int i = 0; i < searchTerms.length; i++) {
             found = false;
@@ -38,13 +39,15 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
                     break;
                 }
             }
-            // This search term was not found in any word of the name, so this patient is not a match
+            // This search term was not found in any word of the name,
+            // so this patient is not a match
             if (!found) {
                 return false;
             }
         }
 
-        // If we've been through all the search terms without returning false, then we must have found a match for all of them
+        // If we've been through all the search terms without returning false,
+        // then we must have found a match for all of them
         return true;
     }
 }
