@@ -4,13 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- A dummy view to prevent auto-focusing on the first EditText. -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true" />
-
     <TableLayout
         android:padding="32dp"
         android:layout_width="match_parent"
