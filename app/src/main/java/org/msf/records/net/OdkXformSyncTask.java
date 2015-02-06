@@ -117,6 +117,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         return null;
     }
 
+    /**
+     * Get a Cursor for the form from the filename. If there is more than one they are ordered
+     * descending by id, so most recent is first.
+     *
+     * @param proposedPath the path for the forms file
+     * @param projection a projection of fields to get
+     * @return the Cursor pointing to ideally one form.
+     */
     public static Cursor getCursorForFormFile(File proposedPath, String [] projection) {
         String[] selectionArgs = {
                 proposedPath.getAbsolutePath()
@@ -126,7 +134,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 .getApplication()
                 .getContentResolver()
                 .query(FormsProviderAPI.FormsColumns.CONTENT_URI, projection, selection,
-                        selectionArgs, null);
+                        selectionArgs, FormsProviderAPI.FormsColumns._ID + " DESC");
     }
 
     private static boolean writeStringToFile(String response, File proposedPath) {
