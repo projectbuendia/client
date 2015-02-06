@@ -29,6 +29,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         super.setUp();
         // Go to PatientCreationActivity
         onView(withText("Guest User")).perform(click());
+        waitForProgressFragment();
         onView(withId(R.id.action_add)).perform(click());
         onView(withText("New Patient")).check(matches(isDisplayed()));
     }

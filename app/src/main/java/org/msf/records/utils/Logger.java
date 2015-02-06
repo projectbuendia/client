@@ -104,7 +104,7 @@ public final class Logger {
 
     private static final String getTag() {
         String[] parts = new Throwable().getStackTrace()[2].getClassName().split("\\.");
-        return parts[parts.length - 1];
+        return "buendia/" + parts[parts.length - 1];
     }
 
     private static String formatIfNeeded(String message, Object... args) {

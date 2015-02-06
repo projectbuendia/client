@@ -8,7 +8,10 @@ import org.msf.records.utils.Logger;
 
 /**
  * An {@link IdlingResource} that is busy until one of an event of a particular type fires on an
- * {@link EventBusRegistrationInterface}.
+ * {@link EventBusRegistrationInterface}. Once the event fires, this IdlingResource unregisters
+ * from future events, since we only know that this resource is "busy" because an event signifying
+ * completion hasn't fired. Once such an event has fired, we don't know when another async task may
+ * have started.
  */
 public class EventBusIdlingResource<T> implements IdlingResource {
     private static final Logger LOG = Logger.create();

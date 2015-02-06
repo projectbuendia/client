@@ -22,6 +22,7 @@ public class RoundActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
+        waitForProgressFragment();
         onView(withText("Triage")).perform(click());
     }
 
