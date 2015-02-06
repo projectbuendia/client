@@ -338,7 +338,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick({
             R.id.patient_chart_general_condition_parent})
-    void onOverallAssessmentPressed(View v) {
+    void onGeneralConditionPressed(View v) {
         mController.onAddObservationPressed("General condition section");
     }
 
