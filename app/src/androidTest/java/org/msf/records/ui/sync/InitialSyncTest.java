@@ -1,33 +1,16 @@
 package org.msf.records.ui.sync;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-
-import org.mockito.Mock;
-import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
-import org.msf.records.events.sync.SyncFinishedEvent;
-import org.msf.records.events.sync.SyncStartedEvent;
-import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.events.user.KnownUsersLoadedEvent;
-import org.msf.records.sync.SyncManager;
-import org.msf.records.ui.FakeEventBus;
-import org.msf.records.ui.FunctionalTestCase;
-import org.msf.records.utils.EventBusRegistrationInterface;
-import org.msf.records.utils.EventBusWrapper;
-
-import de.greenrobot.event.EventBus;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.verify;
 
 public class InitialSyncTest extends SyncTestCase {
 
@@ -40,10 +23,14 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Expects zones and tents to appear within Espresso's idling period (60s). */
     public void testZonesAndTentsDisplayed() {
+        screenshot("Before Sync Completed");
+
         waitForInitialSync();
 
         // Should be at tent selection screen
         onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
+
+        screenshot("After Sync Completed");
 
         // Zones and tents should be visible
         onView(withText("Triage")).check(matches(isDisplayed()));

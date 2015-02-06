@@ -7,13 +7,15 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.testrunner.Stage;
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.common.collect.Iterables;
+import com.squareup.spoon.Spoon;
+import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
+import org.msf.records.utils.Logger;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 
@@ -23,8 +25,9 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
-    protected EventBusRegistrationInterface mEventBus;
+    private static final Logger LOG = Logger.create();
 
+    protected EventBusRegistrationInterface mEventBus;
 
     public FunctionalTestCase() {
         super(UserLoginActivity.class);
@@ -73,6 +76,14 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
                 activity[0] = Iterables.getOnlyElement(activities);
             }});
         return activity[0];
+    }
+
+    protected void screenshot(String tag) {
+        try {
+            Spoon.screenshot(getCurrentActivity(), tag.replace(" ", ""));
+        } catch (Throwable throwable) {
+            LOG.w("Could not create screenshot with tag %s", tag);
+        }
     }
 
     /**
