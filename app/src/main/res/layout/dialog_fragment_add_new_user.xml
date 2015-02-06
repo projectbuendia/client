@@ -31,7 +31,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
+                android:inputType="textCapWords|textPersonName"
                 android:hint="@string/add_user_example_given_name"
                 android:ems="10"
                 android:id="@+id/add_user_given_name_tv"
@@ -52,7 +52,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
+                android:inputType="textCapWords|textPersonName"
                 android:hint="@string/add_user_example_family_name"
                 android:ems="10"
                 android:id="@+id/add_user_family_name_tv"
