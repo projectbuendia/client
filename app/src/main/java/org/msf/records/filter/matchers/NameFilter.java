@@ -18,30 +18,27 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
         if (object == null) {
             return false;
         }
-        String familyName = (object.familyName == null) ? "" : object.familyName.toLowerCase();
-        String givenName = (object.givenName == null) ? "" : object.givenName.toLowerCase();
 
         // Get array of words that appear in any part of the name
         String fullName = givenName + " " + familyName;
-        String[] nameParts = fullName.split(" ");
+        String[] nameParts = fullName.toLowerCase().split(" ");
 
         // Get array of words in the search query
         String[] searchTerms = constraint.toString().toLowerCase().split(" ");
 
         // Loop through each of the search terms checking if there is a prefix match
-        // for each in any word of the name
-        boolean found = false;
-        for (int i = 0; i < searchTerms.length; i++) {
-            found = false;
-            for (int j = 0; j < nameParts.length; j++) {
-                if (nameParts[j].startsWith(searchTerms[i])) {
-                    found = true;
-                    break;
+        // for it in any word of the name
+        for (String searchTerm : searchTerms) {
+            boolean termMatched = false;
+            for (String namePart : nameParts) {
+                if (namePart.startsWith(searchTerm)) {
+                    termMatched = true;
+                    break;  // no need to keep checking for this term
                 }
             }
-            // This search term was not found in any word of the name,
+            // This search term was not matched to any word of the name,
             // so this patient is not a match
-            if (!found) {
+            if (!termMatched) {
                 return false;
             }
         }
