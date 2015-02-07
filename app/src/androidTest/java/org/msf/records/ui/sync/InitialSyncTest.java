@@ -45,9 +45,15 @@ public class InitialSyncTest extends SyncTestCase {
 
     /** Tests that search functionality works right after initial sync. */
     public void testSearchAfterSync() {
+        screenshot("Before Sync Completed");
+
         waitForInitialSync();
 
+        screenshot("After Sync Completed");
+
         onView(withId(R.id.action_search)).perform(click());
+
+        screenshot("After Search Clicked");
 
         // Check that at least one patient is returned (since clicking search should show
         // all patients).
@@ -55,5 +61,7 @@ public class InitialSyncTest extends SyncTestCase {
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)
                 .perform(click());
+
+        screenshot("Final State");
     }
 }

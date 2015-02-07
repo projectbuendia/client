@@ -29,15 +29,18 @@ public class RoundActivityTest extends FunctionalTestCase {
     /** Checks for a populated title. */
     public void testTitlePopulation() {
         // TODO(akalachman): Check that title count actually matches patient count.
+        screenshot("Test Start");
         assert getActivity().getTitle().toString().matches("$Triage \\((No|[0-9]+) Patients\\)");
     }
 
     /** Checks that at least one patient is displayed. */
     public void testAtLeastOnePatientDisplayed() {
+        screenshot("Test Start");
         // Click the first patient
         onData(is(AppPatient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)
                 .perform(click());
+        screenshot("After Patient Clicked");
     }
 }

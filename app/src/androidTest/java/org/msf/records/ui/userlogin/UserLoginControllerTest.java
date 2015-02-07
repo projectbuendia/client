@@ -25,6 +25,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
     private UserLoginController mController;
     @Mock private UserManager mMockUserManager;
     @Mock private UserLoginController.Ui mMockUi;
+    @Mock private UserLoginController.FragmentUi mMockFragmentUi;
     private FakeEventBus mFakeEventBus;
 
     @Override
@@ -38,7 +39,8 @@ public class UserLoginControllerTest extends AndroidTestCase {
         mController = new UserLoginController(
                 mMockUserManager,
                 mFakeEventBus,
-                mMockUi);
+                mMockUi,
+                mMockFragmentUi);
     }
 
     /** Tests that init() attempts to load known users. */
@@ -104,4 +106,24 @@ public class UserLoginControllerTest extends AndroidTestCase {
         verify(mMockUi).showTentSelectionScreen();
     }
 
+    /** Tests that spinner is shown when the controller is first initialized. */
+    public void testInit_showsSpinner() {
+        // WHEN controller is inited
+        mController.init();
+        // THEN spinner is shown
+        verify(mMockFragmentUi).showSpinner(true);
+    }
+
+    /** Tests that successful user load hides the spinner. */
+    public void testUsersLoaded_hidesSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN users are loaded
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
+        // THEN the spinner is hidden
+        verify(mMockFragmentUi).showSpinner(false);
+    }
+
+    // TODO: Test that failed user load brings up dialog once available.
 }

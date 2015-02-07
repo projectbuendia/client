@@ -35,13 +35,19 @@ final class UserLoginController {
 
         void showErrorToast(int stringResourceId);
 
-        void showUsers(List<User> users);
-
         void showTentSelectionScreen();
+    }
+
+    public interface FragmentUi {
+
+        void showSpinner(boolean show);
+
+        void showUsers(List<User> users);
     }
 
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
+    private final FragmentUi mFragmentUi;
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
@@ -49,14 +55,17 @@ final class UserLoginController {
     public UserLoginController(
             UserManager userManager,
             EventBusRegistrationInterface eventBus,
-            Ui ui) {
+            Ui ui,
+            FragmentUi fragmentUi) {
         mUserManager = userManager;
         mEventBus = eventBus;
         mUi = ui;
+        mFragmentUi = fragmentUi;
     }
 
     public void init() {
         mEventBus.register(mSubscriber);
+        mFragmentUi.showSpinner(true);
         mUserManager.loadKnownUsers();
     }
 
@@ -89,18 +98,21 @@ final class UserLoginController {
             mUsersSortedByName.clear();
             mUsersSortedByName
                     .addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
-            mUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
         }
 
         public void onEventMainThread(KnownUsersLoadFailedEvent event) {
             LOG.e("Failed to load list of users");
+            // TODO(akalachman): Replace toast here with dialog a la tent selection.
             mUi.showErrorToast(R.string.error_occured);
+            mFragmentUi.showSpinner(false);
         }
 
         public void onEventMainThread(UserAddedEvent event) {
             LOG.d("User added");
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
-            mUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showUsers(mUsersSortedByName);
         }
 
         public void onEventMainThread(UserAddFailedEvent event) {

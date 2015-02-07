@@ -7,11 +7,11 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.testrunner.Stage;
-import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
+import org.msf.records.TestCleanupHelper;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
@@ -20,8 +20,6 @@ import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 
 import de.greenrobot.event.EventBus;
-
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
@@ -48,15 +46,12 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void tearDown() {
+        // Remove activities from the stack until the app is closed.  If we don't do this, the test
+        // runner sometimes has trouble launching the activity to start the next test.
         try {
-            // Keep pressing back until the app is closed.  If we don't do this, the test
-            // runner sometimes has trouble launching the activity to start the next test.
-            for (int i = 0; i < 10; i++) {
-                Thread.sleep(100, 0);
-                pressBack();
-            }
-        } catch (NoActivityResumedException | InterruptedException e) {
-            // app closed
+            TestCleanupHelper.closeAllActivities(getInstrumentation());
+        } catch (Exception e) {
+            LOG.e("Error tearing down test case, test isolation may be broken.", e);
         }
     }
 
