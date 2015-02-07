@@ -1,6 +1,5 @@
 package org.msf.records.ui.sync;
 
-import org.mockito.MockitoAnnotations;
 import org.msf.records.R;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
@@ -11,13 +10,12 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 
 /**
- * Test cases for handling when the initial sync fails.
+ * Test cases for handling when the initial sync fails on the tent selection screen.
  */
-public class FailingSyncTest extends SyncTestCase {
+public class TentSelectionFailingSyncTest extends SyncTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        MockitoAnnotations.initMocks(this);
 
         onView(withText("Guest User")).perform(click());
     }

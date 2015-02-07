@@ -57,7 +57,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(getString(R.string.sync_failed_dialog_title))
                 .setMessage(R.string.sync_failed_dialog_message)
-                .setPositiveButton(
+                .setNegativeButton(
                         R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -65,7 +65,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                                         TentSelectionActivity.this,SettingsActivity.class));
                             }
                         })
-                .setNegativeButton(
+                .setPositiveButton(
                         R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

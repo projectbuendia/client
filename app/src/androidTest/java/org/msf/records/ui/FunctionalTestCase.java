@@ -25,6 +25,8 @@ import de.greenrobot.event.EventBus;
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
     private static final Logger LOG = Logger.create();
 
+    private boolean mWaitForUserSync = true;
+
     protected EventBusRegistrationInterface mEventBus;
 
     public FunctionalTestCase() {
@@ -36,12 +38,18 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
         // Wait for users to sync.
-        EventBusIdlingResource<KnownUsersLoadedEvent> resource =
-                new EventBusIdlingResource<>("USERS", mEventBus);
-        Espresso.registerIdlingResources(resource);
+        if (mWaitForUserSync) {
+            EventBusIdlingResource<KnownUsersLoadedEvent> resource =
+                    new EventBusIdlingResource<>("USERS", mEventBus);
+            Espresso.registerIdlingResources(resource);
+        }
 
         super.setUp();
         getActivity();
+    }
+
+    public void setWaitForUserSync(boolean waitForUserSync) {
+        mWaitForUserSync = waitForUserSync;
     }
 
     @Override

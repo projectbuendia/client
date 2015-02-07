@@ -35,6 +35,8 @@ final class UserLoginController {
 
         void showErrorToast(int stringResourceId);
 
+        void showSyncFailedDialog(boolean show);
+
         void showTentSelectionScreen();
     }
 
@@ -65,6 +67,12 @@ final class UserLoginController {
 
     public void init() {
         mEventBus.register(mSubscriber);
+        mFragmentUi.showSpinner(true);
+        mUserManager.loadKnownUsers();
+    }
+
+    /** Attempts to reload users. */
+    public void onSyncRetry() {
         mFragmentUi.showSpinner(true);
         mUserManager.loadKnownUsers();
     }
@@ -100,16 +108,17 @@ final class UserLoginController {
                     .addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
             mFragmentUi.showUsers(mUsersSortedByName);
             mFragmentUi.showSpinner(false);
+            mUi.showSyncFailedDialog(false);
         }
 
         public void onEventMainThread(KnownUsersLoadFailedEvent event) {
             LOG.e("Failed to load list of users");
             // TODO(akalachman): Replace toast here with dialog a la tent selection.
-            mUi.showErrorToast(R.string.error_occured);
-            mFragmentUi.showSpinner(false);
+            mUi.showSyncFailedDialog(true);
         }
 
         public void onEventMainThread(UserAddedEvent event) {
+            mUi.showSyncFailedDialog(false);  // Just in case.
             LOG.d("User added");
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
             mFragmentUi.showUsers(mUsersSortedByName);

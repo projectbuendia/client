@@ -125,5 +125,44 @@ public class UserLoginControllerTest extends AndroidTestCase {
         verify(mMockFragmentUi).showSpinner(false);
     }
 
-    // TODO: Test that failed user load brings up dialog once available.
+    /** Tests that the sync failed dialog appears when loading users fails. */
+    public void testUserLoadFails_showsSyncFailedDialog() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN users fail to load
+        mFakeEventBus.post(new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
+        // THEN the sync fail dialog is shown
+        verify(mMockUi).showSyncFailedDialog(true);
+    }
+
+    /** Tests that the sync failed dialog is hidden when users are successfully loaded. */
+    public void testUserLoaded_hidesSyncFailedDialog() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN users are loaded
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
+        // THEN the sync fail dialog is hidden
+        verify(mMockUi).showSyncFailedDialog(false);
+    }
+
+    /** Tests that users are requested when a retry is requested. */
+    public void testOnSyncRetry_requestsUsers() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN onSyncRetry is called
+        mController.onSyncRetry();
+        // THEN users are requested
+        verify(mMockUserManager).loadKnownUsers();
+    }
+
+    /** Tests that the spinner is shown when a retry is requested. */
+    public void testOnSyncRetry_showsSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN onSyncRetry is called
+        mController.onSyncRetry();
+        // THEN spinner is shown
+        verify(mMockFragmentUi).showSpinner(true);
+    }
 }
