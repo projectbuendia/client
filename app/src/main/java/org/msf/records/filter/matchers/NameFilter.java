@@ -14,14 +14,14 @@ import org.msf.records.sync.providers.Contracts;
  */
 public final class NameFilter implements MatchingFilter<AppPatient> {
     @Override
-    public boolean matches(@Nullable AppPatient object, CharSequence constraint) {
-        if (object == null) {
+    public boolean matches(@Nullable AppPatient patient, CharSequence constraint) {
+        if (patient == null) {
             return false;
         }
 
         // Get array of words that appear in any part of the name
-        String givenName = (object.givenName == null) ? "" : object.givenName;
-        String familyName = (object.familyName == null) ? "" : object.familyName;
+        String givenName = (patient.givenName == null) ? "" : patient.givenName;
+        String familyName = (patient.familyName == null) ? "" : patient.familyName;
         String fullName = givenName + " " + familyName;
         String[] nameParts = fullName.toLowerCase().split(" ");
 
