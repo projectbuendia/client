@@ -20,6 +20,8 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
         }
 
         // Get array of words that appear in any part of the name
+        String givenName = (object.givenName == null) ? "" : object.givenName;
+        String familyName = (object.familyName == null) ? "" : object.familyName;
         String fullName = givenName + " " + familyName;
         String[] nameParts = fullName.toLowerCase().split(" ");
 
