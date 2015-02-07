@@ -1,6 +1,7 @@
 package org.msf.records.ui.userlogin;
 
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.mockito.Mock;
@@ -140,21 +141,21 @@ public class UserLoginControllerTest extends AndroidTestCase {
     public void testOnSyncRetry_requestsUsers() {
         // GIVEN initialized controller
         mController.init();
-        verify(mMockUserManager).loadKnownUsers();
         // WHEN onSyncRetry is called
         mController.onSyncRetry();
         // THEN users are requested
-        verify(mMockUserManager).loadKnownUsers();
+        // Note: already called once in init().
+        verify(mMockUserManager, times(2)).loadKnownUsers();
     }
 
     /** Tests that the spinner is shown when a retry is requested. */
     public void testOnSyncRetry_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
-        verify(mMockFragmentUi).showSpinner(true);
         // WHEN onSyncRetry is called
         mController.onSyncRetry();
         // THEN spinner is shown
-        verify(mMockFragmentUi).showSpinner(true);
+        // Note: already shown once in init().
+        verify(mMockFragmentUi, times(2)).showSpinner(true);
     }
 }
