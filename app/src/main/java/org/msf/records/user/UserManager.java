@@ -69,6 +69,7 @@ public class UserManager {
 
     private final Set<User> mKnownUsers = new HashSet<>();
     private boolean mSynced = false;
+    private boolean mAutoCancelEnabled = false;
     @Nullable private AsyncTask mLastTask;
     @Nullable private User mActiveUser;
 
@@ -82,16 +83,21 @@ public class UserManager {
     }
 
     /**
-     * Utility function for canceling the last-requested sync task.
+     * Utility function for automatically canceling user load tasks to simulate network connectivity
+     * issues.
+     * TODO: Move to a fake or mock out when daggered.
      */
-    public void cancelLastUserSyncTask() {
-        if (mLastTask == null) {
-            LOG.i("No user sync task to cancel.");
-            return;
-        }
+    public void setAutoCancelEnabled(boolean autoCancelEnabled) {
+        mAutoCancelEnabled = autoCancelEnabled;
+    }
 
-        LOG.i("Cancelling last user sync task.");
-        mLastTask.cancel(true);
+    /**
+     * Manually resets the UserManager for testing purposes, since it may retain sync state between
+     * tests.
+     * TODO: Remove when daggered.
+     */
+    public void reset() {
+        mSynced = false;
     }
 
     public boolean hasUsers() {
@@ -197,6 +203,11 @@ public class UserManager {
     private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<User>> {
         @Override
         protected Set<User> doInBackground(Object... unusedObjects) {
+            if (mAutoCancelEnabled) {
+                cancel(true);
+                return null;
+            }
+
             try {
                 return mUserStore.loadKnownUsers();
             } catch (Exception e) {

@@ -23,7 +23,8 @@ public class UserLoginActivityTest extends FunctionalTestCase {
 
     public void setUp() {
         // We need to explicitly specify the ProgressFragment here since we can't check the current
-        // activity during setup.
+        // activity during setup. This works for UserLoginActivity because it is always returned
+        // by getActivity().
         waitForProgressFragment(
                 (ProgressFragment)(
                         getActivity().getSupportFragmentManager().getFragments().get(0)));

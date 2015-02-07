@@ -14,11 +14,12 @@ public class TentSelectionActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
-        waitForProgressFragment();
     }
 
     /** Looks for the expected zones and tents. */
     public void testZonesAndTentsDisplayed() {
+        waitForProgressFragment();
+
         // Should be at tent selection screen
         onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
         screenshot("Test Start");

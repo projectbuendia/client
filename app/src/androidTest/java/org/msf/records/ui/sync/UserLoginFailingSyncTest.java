@@ -16,15 +16,25 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
     @Override
     public void setUp() throws Exception {
         setWaitForUserSync(false);
+        // TODO: Remove all this manual UserManager management once daggered.
+        App.getInstance().getUserManager().reset();
+        // Force all user sync tasks to fail. If you need one to pass, remember to reset this to
+        // false!
+        App.getInstance().getUserManager().setAutoCancelEnabled(true);
         super.setUp();
+    }
 
-        // Potentially flaky, but hopefully shouldn't be in practice.
-        App.getInstance().getUserManager().cancelLastUserSyncTask();
+    @Override
+    public void tearDown() {
+        App.getInstance().getUserManager().setAutoCancelEnabled(false);
+        super.tearDown();
     }
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
     public void testSyncFailedDialogAppearsWhenSyncFails() {
+        screenshot("Test Start");
         onView(withText(R.string.user_sync_failed_dialog_message)).check(matches(isDisplayed()));
+        App.getInstance().getUserManager().setAutoCancelEnabled(false);
         screenshot("After Sync Fails");
 
         onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
@@ -34,7 +44,9 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
+        screenshot("Test Start");
         onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
+        App.getInstance().getUserManager().setAutoCancelEnabled(false);
         screenshot("After Sync Fails");
 
         onView(withText(R.string.sync_failed_settings)).perform(click());
@@ -45,7 +57,9 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
+        screenshot("Test Start");
         onView(withText(R.string.sync_failed_retry)).check(matches(isDisplayed()));
+        App.getInstance().getUserManager().setAutoCancelEnabled(false);
         screenshot("After Sync Failed");
 
         onView(withText(R.string.sync_failed_retry)).perform(click());

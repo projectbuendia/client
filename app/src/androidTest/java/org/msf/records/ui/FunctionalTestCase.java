@@ -19,6 +19,8 @@ import org.msf.records.utils.Logger;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 
+import java.util.UUID;
+
 import de.greenrobot.event.EventBus;
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
@@ -95,8 +97,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
      * will period check whether or not the fragment is currently idle.
      */
     protected void waitForProgressFragment(ProgressFragment progressFragment) {
+        // Use the ProgressFragment hashCode as the identifier so that multiple ProgressFragments
+        // can be tracked, but only one resource will be registered to each fragment.
         ProgressFragmentIdlingResource idlingResource = new ProgressFragmentIdlingResource(
-                "progress_fragment", progressFragment);
+                Integer.toString(progressFragment.hashCode()), progressFragment);
         Espresso.registerIdlingResources(idlingResource);
     }
 
