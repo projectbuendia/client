@@ -29,8 +29,8 @@ public class SyncTestCase extends FunctionalTestCase {
 
     @Override
     public void setUp() throws Exception {
-        // Give additional leeway for idling resources, as sync may be slow.
-        IdlingPolicies.setIdlingResourceTimeout(120, TimeUnit.SECONDS);
+        // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
+        IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
 
         clearDatabase();
         clearPreferences();

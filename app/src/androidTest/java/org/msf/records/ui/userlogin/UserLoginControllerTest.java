@@ -72,16 +72,6 @@ public class UserLoginControllerTest extends AndroidTestCase {
         verify(mMockFragmentUi).showUsers(ImmutableList.of(user));
     }
 
-    /** Tests that an error is shown if users fail to load. */
-    public void testKnownUsersLoadFailed_ShowsErrorUi() throws Exception {
-        // GIVEN the controller is inited
-        mController.init();
-        // WHEN an error occurs loading the list of users
-        mFakeEventBus.post(new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
-        // THEN an error is displayed
-        verify(mMockUi).showErrorToast(anyInt());
-    }
-
     /** Tests that settings are shown when requested. */
     public void testSettingsPress_ShowsSettings() {
         // GIVEN an inited controller
@@ -150,6 +140,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
     public void testOnSyncRetry_requestsUsers() {
         // GIVEN initialized controller
         mController.init();
+        verify(mMockUserManager).loadKnownUsers();
         // WHEN onSyncRetry is called
         mController.onSyncRetry();
         // THEN users are requested
@@ -160,6 +151,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
     public void testOnSyncRetry_showsSpinner() {
         // GIVEN initialized controller
         mController.init();
+        verify(mMockFragmentUi).showSpinner(true);
         // WHEN onSyncRetry is called
         mController.onSyncRetry();
         // THEN spinner is shown
