@@ -69,7 +69,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
         User user = new User("idA", "nameA");
         mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
         // THEN the UI is updated
-        verify(mMockUi).showUsers(ImmutableList.of(user));
+        verify(mMockFragmentUi).showUsers(ImmutableList.of(user));
     }
 
     /** Tests that an error is shown if users fail to load. */

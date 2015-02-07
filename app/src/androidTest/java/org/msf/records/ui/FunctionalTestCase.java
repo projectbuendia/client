@@ -100,6 +100,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
      *
      * <p>If the current activity does not contain a progress fragment, then this function will
      * throw an {@link IllegalArgumentException}.
+     *
+     * <p>Warning: This function will not work properly in setUp() as the current activity won't
+     * be available. If you need to call this function during setUp(), use
+     * {@link #waitForProgressFragment(ProgressFragment)}.
      */
     protected void waitForProgressFragment() {
         Activity activity;
