@@ -73,6 +73,8 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         onView(withText("Create")).perform(click());
         screenshot("After Create Pressed");
 
+        waitForProgressFragment();
+
         // The new patient should be visible in the list for tent S1
         onView(withText("S1")).perform(click());
         screenshot("In S1");
@@ -88,6 +90,8 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         screenshot("After Patient Populated");
         onView(withText("Create")).perform(click());
         screenshot("After Create Pressed");
+
+        waitForProgressFragment();
 
         // The new patient should be visible in the list for Triage zone
         onView(withText("Triage")).perform(click());
