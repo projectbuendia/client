@@ -2,7 +2,6 @@ package org.msf.records.ui.patientcreation;
 
 import org.msf.records.R;
 import org.msf.records.ui.FunctionalTestCase;
-import org.msf.records.ui.userlogin.UserLoginActivity;
 
 import java.util.Date;
 
@@ -12,15 +11,11 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isDialog;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.withDecorView;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsNot.not;
 import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 
 public class PatientCreationActivityTest extends FunctionalTestCase {
@@ -29,12 +24,18 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         super.setUp();
         // Go to PatientCreationActivity
         onView(withText("Guest User")).perform(click());
+
+        // NOTE: Requires additional setup to enter add patient screen. See enterAddPatientScreen().
+    }
+
+    private void enterAddPatientScreen() {
+        waitForProgressFragment(); // Cannot be run in setUp
         onView(withId(R.id.action_add)).perform(click());
         onView(withText("New Patient")).check(matches(isDisplayed()));
     }
 
     /** Populates all the fields on the New Patient screen, except location. */
-    public void populateNewPatientFieldsExceptLocation(String id) {
+    private void populateNewPatientFieldsExceptLocation(String id) {
         screenshot("Test Start");
         String given = "Given" + id;
         String family = "Family" + id;
@@ -51,7 +52,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     }
 
     /** Checks that a given patient appears in the patient list, and clicks it. */
-    public void clickPatientWithIdInPatientList(String id) {
+    private void clickPatientWithIdInPatientList(String id) {
         screenshot("Test Start");
         onData(isPatientWithId(equalTo(id)))
                 .inAdapterView(withId(R.id.fragment_patient_list))
@@ -62,6 +63,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with a location. */
     public void testNewPatientWithLocation() {
+        enterAddPatientScreen();
         screenshot("Test Start");
         String id = "test" + new Date().getTime() % 100000;
         populateNewPatientFieldsExceptLocation(id);
@@ -83,6 +85,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with no location. */
     public void testNewPatientWithoutLocation() {
+        enterAddPatientScreen();
         screenshot("Test Start");
         String id = "test" + new Date().getTime() % 100000;
         populateNewPatientFieldsExceptLocation(id);
@@ -101,6 +104,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Tests that a confirmation prompt appears upon cancelling the form. */
     public void testNewPatientCancel() {
+        enterAddPatientScreen();
         screenshot("Test Start");
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText("xyz"));
         screenshot("After Id Added");

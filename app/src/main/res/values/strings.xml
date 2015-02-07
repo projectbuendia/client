@@ -124,4 +124,5 @@
     <string name="sync_failed_settings">Settings</string>
     <string name="sync_failed_retry">Retry</string>
     <string name="user_sync_failed_dialog_message">An error occurred while retrieving the user list. Please check your network settings or try again.</string>
+    <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check network settings or try again.</string>
 </resources>

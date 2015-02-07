@@ -20,8 +20,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 
 public class UserLoginActivityTest extends FunctionalTestCase {
-
-    public void setUp() {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
         // We need to explicitly specify the ProgressFragment here since we can't check the current
         // activity during setup. This works for UserLoginActivity because it is always returned
         // by getActivity().
@@ -47,7 +48,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onView(withText("OK")).perform(click());
         screenshot("After OK Pressed");
 
-        waitForProgressFragment();
+        // TODO: Use the spinner when new user added, then wait on progress fragment here.
 
         // Click new user
         onData(allOf(hasToString(equalTo("TT")), isDisplayed()));

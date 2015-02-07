@@ -3,18 +3,15 @@ package org.msf.records.ui.sync;
 import android.content.ContentResolver;
 import android.preference.PreferenceManager;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import org.msf.records.App;
-import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.Logger;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,16 +45,6 @@ public class SyncTestCase extends FunctionalTestCase {
     /** Clears all shared preferences of the application. */
     public void clearPreferences() {
         PreferenceManager.getDefaultSharedPreferences(App.getInstance()).edit().clear().commit();
-    }
-
-    /** Idles until sync has completed. */
-    protected void waitForInitialSync() {
-        // Use a UUID as a tag so that we can wait for an arbitrary number of events, since
-        // EventBusIdlingResource<> only works for a single event.
-        LOG.i("Registering resource to wait for initial sync.");
-        EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
-        Espresso.registerIdlingResources(syncSucceededResource);
     }
 
     /**

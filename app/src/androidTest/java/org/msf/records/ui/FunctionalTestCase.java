@@ -3,6 +3,7 @@ package org.msf.records.ui;
 import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
@@ -12,6 +13,9 @@ import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
 import org.msf.records.TestCleanupHelper;
+import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.events.sync.SyncStartedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
@@ -19,6 +23,7 @@ import org.msf.records.utils.Logger;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 
+import java.util.List;
 import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
@@ -27,6 +32,7 @@ import de.greenrobot.event.EventBus;
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
     private static final Logger LOG = Logger.create();
 
+    private SyncCounter mSyncCounter;
     private boolean mWaitForUserSync = true;
 
     protected EventBusRegistrationInterface mEventBus;
@@ -38,6 +44,9 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     @Override
     public void setUp() throws Exception {
         mEventBus = new EventBusWrapper(EventBus.getDefault());
+
+        mSyncCounter = new SyncCounter();
+        mEventBus.register(mSyncCounter);
 
         // Wait for users to sync.
         if (mWaitForUserSync) {
@@ -56,6 +65,14 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void tearDown() {
+        // If a sync is in progress, let it complete before starting the next test, or it may
+        // break test isolation.
+        if (mSyncCounter.inProgressSyncCount > 0) {
+            waitForInitialSync();
+        }
+
+        mEventBus.unregister(mSyncCounter);
+
         // Remove activities from the stack until the app is closed.  If we don't do this, the test
         // runner sometimes has trouble launching the activity to start the next test.
         try {
@@ -129,14 +146,41 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
             throw new IllegalStateException("Activity is not a FragmentActivity.");
         }
 
-        for (Fragment fragment :
-                ((FragmentActivity)activity).getSupportFragmentManager().getFragments()) {
-            if (fragment instanceof ProgressFragment) {
-                waitForProgressFragment((ProgressFragment)fragment);
-                return;
+        FragmentActivity fragmentActivity = (FragmentActivity)activity;
+        try {
+            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
+                if (fragment instanceof ProgressFragment) {
+                    waitForProgressFragment((ProgressFragment) fragment);
+                    return;
+                }
             }
+        } catch (NullPointerException e) {
+            LOG.w("Unable to wait for ProgressFragment to initialize.");
+            return;
         }
 
         throw new IllegalStateException("Could not find a progress fragment to wait on.");
+    }
+
+    /** Idles until sync has completed. */
+    protected void waitForInitialSync() {
+        // Use a UUID as a tag so that we can wait for an arbitrary number of events, since
+        // EventBusIdlingResource<> only works for a single event.
+        LOG.i("Registering resource to wait for initial sync.");
+        EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncSucceededResource);
+    }
+
+    private class SyncCounter {
+        public int inProgressSyncCount = 0;
+
+        public void onEventMainThread(SyncStartedEvent event) {
+            inProgressSyncCount++;
+        }
+
+        public void onEventMainThread(SyncFinishedEvent event) {
+            inProgressSyncCount--;
+        }
     }
 }
