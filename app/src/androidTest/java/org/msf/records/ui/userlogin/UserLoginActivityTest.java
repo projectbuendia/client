@@ -48,7 +48,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onView(withText("OK")).perform(click());
         screenshot("After OK Pressed");
 
-        // TODO: Use the spinner when new user added, then wait on progress fragment here.
+        waitForProgressFragment();
 
         // Click new user
         onData(allOf(hasToString(equalTo("TT")), isDisplayed()));

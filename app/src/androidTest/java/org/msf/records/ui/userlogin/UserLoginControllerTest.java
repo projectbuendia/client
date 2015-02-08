@@ -8,6 +8,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
+import org.msf.records.events.user.UserAddFailedEvent;
+import org.msf.records.events.user.UserAddedEvent;
+import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.userlogin.UserLoginController;
@@ -157,5 +160,27 @@ public class UserLoginControllerTest extends AndroidTestCase {
         // THEN spinner is shown
         // Note: already shown once in init().
         verify(mMockFragmentUi, times(2)).showSpinner(true);
+    }
+
+    /** Tests that the spinner is hidden whenever a user is added. */
+    public void testOnUserAdded_showsSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN a user is added
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new UserAddedEvent(user));
+        // THEN spinner is hidden
+        verify(mMockFragmentUi).showSpinner(false);
+    }
+
+    /** Tests that the spinner is hidden whenever a user add operation fails. */
+    public void testOnUserAddFailed_showsSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN a user fails to be added
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new UserAddFailedEvent(new NewUser(), 0));
+        // THEN spinner is hidden
+        verify(mMockFragmentUi).showSpinner(false);
     }
 }

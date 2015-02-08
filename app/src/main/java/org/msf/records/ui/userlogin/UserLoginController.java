@@ -10,6 +10,8 @@ import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
+import org.msf.records.ui.ProgressFragment;
+import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
@@ -50,6 +52,7 @@ final class UserLoginController {
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
     private final FragmentUi mFragmentUi;
+    private final DialogUi mDialogUi = new DialogUi();
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
@@ -122,11 +125,25 @@ final class UserLoginController {
             LOG.d("User added");
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
             mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
         }
 
         public void onEventMainThread(UserAddFailedEvent event) {
             LOG.d("Failed to add user");
             mUi.showErrorToast(errorToStringId(event));
+            mFragmentUi.showSpinner(false);
+        }
+    }
+
+    public AddNewUserDialogFragment.Ui getDialogUi() {
+        return mDialogUi;
+    }
+
+    public final class DialogUi implements AddNewUserDialogFragment.Ui {
+
+        @Override
+        public void showSpinner(boolean show) {
+            mFragmentUi.showSpinner(show);
         }
     }
 

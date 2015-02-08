@@ -142,7 +142,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         changeState(State.ERROR);
     }
 
-    protected void changeState(State state){
+    public void changeState(State state){
         mState = state;
         mProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
         mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);

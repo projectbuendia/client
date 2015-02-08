@@ -3,10 +3,13 @@ package org.msf.records.ui.userlogin;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BigToast;
+import org.msf.records.ui.ProgressFragment;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Logger;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -23,6 +26,7 @@ import de.greenrobot.event.EventBus;
  */
 public class UserLoginActivity extends BaseActivity {
 
+    private static final Logger LOG = Logger.create();
     private UserLoginController mController;
     private AlertDialog mSyncFailedDialog;
 
@@ -112,12 +116,12 @@ public class UserLoginActivity extends BaseActivity {
     	super.onPause();
     }
 
-
     private final class MyUi implements UserLoginController.Ui {
     	@Override
     	public void showAddNewUserDialog() {
             FragmentManager fm = getSupportFragmentManager();
-            AddNewUserDialogFragment dialogFragment = AddNewUserDialogFragment.newInstance();
+            AddNewUserDialogFragment dialogFragment =
+                    AddNewUserDialogFragment.newInstance(mController.getDialogUi());
             dialogFragment.show(fm, null);
     	}
 
@@ -130,11 +134,7 @@ public class UserLoginActivity extends BaseActivity {
 
     	@Override
     	public void showErrorToast(int stringResourceId) {
-    		Toast toast = Toast.makeText(
-    				UserLoginActivity.this,
-    				getResources().getString(stringResourceId),
-    				Toast.LENGTH_SHORT);
-    		toast.show();
+            BigToast.show(UserLoginActivity.this, getString(stringResourceId));
     	}
 
         @Override

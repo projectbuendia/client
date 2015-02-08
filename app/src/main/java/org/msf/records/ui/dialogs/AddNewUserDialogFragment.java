@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +24,27 @@ import butterknife.InjectView;
  * A {@link android.support.v4.app.DialogFragment} for adding a new user.
  */
 public class AddNewUserDialogFragment extends DialogFragment {
-    public static AddNewUserDialogFragment newInstance() {
-        return new AddNewUserDialogFragment();
+    public static AddNewUserDialogFragment newInstance(Ui ui) {
+        AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
+        fragment.setUi(ui);
+        return fragment;
     }
 
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
     @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
 
     private LayoutInflater mInflater;
+    // Optional UI for exposing a spinner.
+    @Nullable private Ui mUi;
+
+    public interface Ui {
+
+        void showSpinner(boolean show);
+    }
+
+    public void setUi(Ui ui) {
+        mUi = ui;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +95,9 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                                 mGivenName.getText().toString().trim(),
                                                 mFamilyName.getText().toString().trim()
                                         ));
+                                        if (mUi != null) {
+                                            mUi.showSpinner(true);
+                                        }
                                         dialog.dismiss();
                                     }
                                 });
