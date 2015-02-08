@@ -36,7 +36,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Populates all the fields on the New Patient screen, except location. */
     private void populateNewPatientFieldsExceptLocation(String id) {
-        screenshot("Test Start");
+        screenshot("Before Patient Populated");
         String given = "Given" + id;
         String family = "Family" + id;
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
@@ -53,7 +53,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
 
     /** Checks that a given patient appears in the patient list, and clicks it. */
     private void clickPatientWithIdInPatientList(String id) {
-        screenshot("Test Start");
+        screenshot("Before Patient Selected");
         onData(isPatientWithId(equalTo(id)))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)

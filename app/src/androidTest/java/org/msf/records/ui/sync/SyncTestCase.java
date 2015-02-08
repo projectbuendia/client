@@ -12,6 +12,7 @@ import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.Logger;
 
+import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,20 +24,29 @@ import java.util.concurrent.TimeUnit;
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
+    private static final int MAX_DATABASE_CLEAR_RETRIES = 3;
 
     @Override
     public void setUp() throws Exception {
-        // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
-        IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
-
-        clearDatabase();
-        clearPreferences();
+        // Clearing the database can be flaky if previous tests are temporarily holding a DB lock,
+        // so try a few times before failing.
+        boolean cleared = false;
+        int retriesRemaining = MAX_DATABASE_CLEAR_RETRIES;
+        while (!cleared && retriesRemaining > 0) {
+            try {
+                clearDatabase();
+                clearPreferences();
+                cleared = true;
+            } catch (SQLException e) {
+                retriesRemaining--;
+            }
+        }
 
         super.setUp();
     }
 
     /** Clears all contents of the database (note: this does not include ODK forms or instances). */
-    public void clearDatabase() {
+    public void clearDatabase() throws SQLException {
         PatientDatabase db = new PatientDatabase(App.getInstance().getApplicationContext());
         db.onUpgrade(db.getWritableDatabase(), 0, 1);
         db.close();

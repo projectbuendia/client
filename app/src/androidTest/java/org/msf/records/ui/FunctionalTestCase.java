@@ -8,6 +8,7 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.testrunner.Stage;
+import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
@@ -25,6 +26,7 @@ import org.msf.records.utils.EventBusWrapper;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
 
@@ -43,6 +45,9 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void setUp() throws Exception {
+        // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
+        IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
+
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
         mSyncCounter = new SyncCounter();

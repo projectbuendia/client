@@ -63,9 +63,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
         onView(withText(R.string.tent_selection_dialog_message)).check(matches(isDisplayed()));
         screenshot("After Retry Clicked");
-
-        // Allow sync to finish so it's not in progress for the next test.
-        waitForInitialSync();
     }
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
@@ -107,8 +104,5 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         pressBack();
         onView(withText(R.string.tent_selection_dialog_message)).check(matches(isDisplayed()));
         screenshot("After Back Pressed");
-
-        // Allow sync to finish so it's not in progress for the next test.
-        waitForInitialSync();
     }
 }
