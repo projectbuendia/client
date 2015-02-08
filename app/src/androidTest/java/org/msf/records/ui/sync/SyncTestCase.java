@@ -77,7 +77,7 @@ public class SyncTestCase extends FunctionalTestCase {
                         public boolean apply(Request<?> request) {
                             return true;
                         }
-            });
+                    });
         } catch (Throwable t) {
             LOG.w("Failed to kill in-flight network requests as part of sync cancellation", t);
         }

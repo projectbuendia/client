@@ -24,6 +24,9 @@ import butterknife.InjectView;
  * A {@link android.support.v4.app.DialogFragment} for adding a new user.
  */
 public class AddNewUserDialogFragment extends DialogFragment {
+    /**
+     * Creates a new instance and registers the given UI, if specified.
+     */
     public static AddNewUserDialogFragment newInstance(Ui ui) {
         AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
         fragment.setUi(ui);

@@ -18,11 +18,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * Helps solve the problem described here:
  * https://code.google.com/p/android-test-kit/issues/detail?id=66
  *
- * Effectively, provides a way to get proper test isolation.
+ * <p>Effectively, provides a way to get proper test isolation.
  */
 public class TestCleanupHelper {
+    private static final int NUMBER_OF_RETRIES = 200;
+
+    /**
+     * Closes all activities on the stack.
+     */
     public static void closeAllActivities(Instrumentation instrumentation) throws Exception {
-        final int NUMBER_OF_RETRIES = 200;
         int i = 0;
         while (closeActivity(instrumentation)) {
             if (i++ > NUMBER_OF_RETRIES) {
@@ -32,7 +36,8 @@ public class TestCleanupHelper {
         }
     }
 
-    private static <X> X callOnMainSync(Instrumentation instrumentation, final Callable<X> callable) throws Exception {
+    private static <X> X callOnMainSync(Instrumentation instrumentation, final Callable<X> callable)
+            throws Exception {
         final AtomicReference<X> retAtomic = new AtomicReference<>();
         final AtomicReference<Throwable> exceptionAtomic = new AtomicReference<>();
         instrumentation.runOnMainSync(new Runnable() {

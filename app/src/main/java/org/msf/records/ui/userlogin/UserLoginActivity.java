@@ -41,7 +41,7 @@ public class UserLoginActivity extends BaseActivity {
         mController = new UserLoginController(
         		App.getUserManager(),
         		new EventBusWrapper(EventBus.getDefault()),
-        		new MyUi(),
+                new MyUi(),
                 fragment.getFragmentUi());
 
         // TODO: Consider refactoring out some common code between here and tent selection.

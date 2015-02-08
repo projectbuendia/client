@@ -80,6 +80,9 @@ public class PatientListController {
         mEventBus.unregister(mSyncSubscriber);
     }
 
+    /**
+     * Forces a new sync of all data from server, unless a sync is already in progress.
+     */
     public void forceSync() {
         if (!mIsRefreshing) {
             LOG.d("onRefresh");

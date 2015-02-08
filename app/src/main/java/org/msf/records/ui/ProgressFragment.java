@@ -142,7 +142,10 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         changeState(State.ERROR);
     }
 
-    public void changeState(State state){
+    /**
+     * Changes the state of this fragment, hiding or showing the spinner as necessary.
+     */
+    public void changeState(State state) {
         mState = state;
         mProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
         mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);
