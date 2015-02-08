@@ -203,11 +203,13 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            LOG.i("Location tree fetched.");
             if (mAppLocationTree != null) {
                 mAppLocationTree.close();
             }
             mAppLocationTree = event.tree;
             if (mAppLocationTree == null || mAppLocationTree.getRoot() == null) {
+                LOG.w("Location tree was null or had null root.");
                 mLoadedLocationTree = false;
             } else {
                 mLoadedLocationTree = true;

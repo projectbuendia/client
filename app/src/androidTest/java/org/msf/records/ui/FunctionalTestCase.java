@@ -1,6 +1,9 @@
 package org.msf.records.ui;
 
+import android.accounts.Account;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +21,9 @@ import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
+import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncAdapter;
+import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Logger;
@@ -45,6 +51,9 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void setUp() throws Exception {
+        // Make sure periodic sync doesn't interfere with testing.
+        removePeriodicSync();
+
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
 
@@ -175,6 +184,18 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
+    }
+
+    protected void removePeriodicSync() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
+        extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_USERS, true);
+        ContentResolver.removePeriodicSync(
+                GenericAccountService.getAccount(), Contracts.CONTENT_AUTHORITY, extras);
     }
 
     private class SyncCounter {

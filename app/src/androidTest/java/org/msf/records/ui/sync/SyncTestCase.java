@@ -3,9 +3,12 @@ package org.msf.records.ui.sync;
 import android.content.ContentResolver;
 import android.preference.PreferenceManager;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import org.msf.records.App;
+import org.msf.records.net.VolleySingleton;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.providers.Contracts;
@@ -63,5 +66,18 @@ public class SyncTestCase extends FunctionalTestCase {
     protected void failSync() {
         LOG.i("Triggering sync cancel.");
         ContentResolver.cancelSync(GenericAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+
+        // Also kill in-flight Volley requests in case sync has already gotten that far.
+        try {
+            VolleySingleton.getInstance(getCurrentActivity())
+                    .getRequestQueue().cancelAll(new RequestQueue.RequestFilter() {
+                        @Override
+                        public boolean apply(Request<?> request) {
+                            return true;
+                        }
+            });
+        } catch (Throwable t) {
+            LOG.w("Failed to kill in-flight network requests as part of sync cancellation", t);
+        }
     }
 }
