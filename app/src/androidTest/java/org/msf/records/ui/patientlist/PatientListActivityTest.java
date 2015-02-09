@@ -23,6 +23,7 @@ public class PatientListActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
+        waitForProgressFragment();
         onView(withText("ALL PRESENT PATIENTS")).perform(click());
     }
 

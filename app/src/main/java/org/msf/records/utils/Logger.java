@@ -64,13 +64,13 @@ public final class Logger {
 
     public void d(String message, Object... args) {
         if (BuildConfig.DEBUG) {
-            Log.v(tag, formatIfNeeded(message, args));
+            Log.d(tag, formatIfNeeded(message, args));
         }
     }
 
     public void d(Throwable t, String message, Object... args) {
         if (BuildConfig.DEBUG) {
-            Log.v(tag, formatIfNeeded(message, args), t);
+            Log.d(tag, formatIfNeeded(message, args), t);
         }
     }
 

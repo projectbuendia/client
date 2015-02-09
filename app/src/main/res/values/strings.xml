@@ -117,4 +117,6 @@
     <string name="mobility_bed_bound">BB</string>
     <string name="pcr_negative">NEG</string>
     <string name="error_setting_location">An unknown error occurred while setting patient location. Please try again.</string>
+    <string name="tent_selection_dialog_title">Loading...</string>
+    <string name="tent_selection_dialog_message">Please wait while patient and location data are retrieved. If this is the first time patient data has been loaded, this process may take a few minutes.</string>
 </resources>

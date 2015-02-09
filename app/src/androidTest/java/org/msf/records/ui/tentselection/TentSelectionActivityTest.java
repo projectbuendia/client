@@ -14,6 +14,7 @@ public class TentSelectionActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
+        waitForProgressFragment();
     }
 
     /** Looks for the expected zones and tents. */

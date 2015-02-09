@@ -53,8 +53,14 @@ final class PatientChartController {
 
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
-    /** Period between observation syncs while the chart view is active. */
-    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 15000;
+    /**
+     * Period between observation syncs while the chart view is active.  It would be nice for
+     * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
+     * each sync.  TODO: Try reducing this period to improve responsiveness, but only after
+     * we're able to prevent the table from scrolling to the top on sync, or when we're able to
+     * skip re-rendering for syncs that pull down no new patient or observation data.
+     */
+    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array
