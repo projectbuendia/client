@@ -73,8 +73,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {
             // TODO(dxchen): Parse the VolleyError to see exactly what kind of error was raised.
-            return new PatientAddFailedEvent(
-                    PatientAddFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
+            return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_NETWORK, e);
         }
 
         if (patient.uuid == null) {

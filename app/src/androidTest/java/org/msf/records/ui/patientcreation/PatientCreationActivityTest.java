@@ -2,7 +2,6 @@ package org.msf.records.ui.patientcreation;
 
 import org.msf.records.R;
 import org.msf.records.ui.FunctionalTestCase;
-import org.msf.records.ui.userlogin.UserLoginActivity;
 
 import java.util.Date;
 
@@ -12,15 +11,13 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isDialog;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.withDecorView;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 
 public class PatientCreationActivityTest extends FunctionalTestCase {
@@ -82,9 +79,21 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     }
 
     /** Tests that the admission date is visible right after adding a patient. */
-    public void testNewPatientHasAdmissionDate() {
-        testNewPatientWithLocation();
-        onView(withText("Day 1")).check(matches(isDisplayed()));
+    public void testNewPatientHasDefaultAdmissionDate() {
+        testNewPatientWithoutLocation();
+        onView(allOf(
+                isDescendantOfA(withId(R.id.attribute_admission_days)),
+                withText("Day 1")))
+                .check(matches(isDisplayed()));
+    }
+
+    /** Tests that symptoms onset is optional and not assigned a default value. */
+    public void testNewPatientDoesNotHaveDefaultSymptomsOnsetDate() {
+        testNewPatientWithoutLocation();
+        onView(allOf(
+                isDescendantOfA(withId(R.id.attribute_symptoms_onset_days)),
+                withText("–")))
+                .check(matches(isDisplayed()));
     }
 
     /** Tests that a confirmation prompt appears upon cancelling the form. */

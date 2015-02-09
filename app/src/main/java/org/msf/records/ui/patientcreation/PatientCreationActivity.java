@@ -1,6 +1,7 @@
 package org.msf.records.ui.patientcreation;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -33,9 +35,6 @@ import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -50,10 +49,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
 
-    private static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
+    private DatePickerDialog mAdmissionDatePickerDialog;
+    private DatePickerDialog mSymptomsOnsetDatePickerDialog;
 
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -111,6 +112,24 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         setContentView(R.layout.activity_patient_creation);
         ButterKnife.inject(this);
 
+        DateTime now = DateTime.now();
+        mAdmissionDatePickerDialog = new DatePickerDialog(
+                this,
+                new DateSetListener(mAdmissionDate),
+                now.getYear(),
+                now.getMonthOfYear() - 1,
+                now.getDayOfMonth());
+        mAdmissionDatePickerDialog.setTitle(R.string.admission_date_picker_title);
+        mAdmissionDatePickerDialog.getDatePicker().setCalendarViewShown(false);
+        mSymptomsOnsetDatePickerDialog = new DatePickerDialog(
+                this,
+                new DateSetListener(mSymptomsOnsetDate),
+                now.getYear(),
+                now.getMonthOfYear() - 1,
+                now.getDayOfMonth());
+        mSymptomsOnsetDatePickerDialog.setTitle(R.string.symptoms_onset_date_picker_title);
+        mSymptomsOnsetDatePickerDialog.getDatePicker().setCalendarViewShown(false);
+
         mTentSelectedCallback = new AssignLocationDialog.TentSelectedCallback() {
 
             @Override public boolean onNewTentSelected(String newTentUuid) {
@@ -119,6 +138,9 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 return true;
             }
         };
+
+        // Pre-populate admission date with today.
+        mAdmissionDate.setText(DATE_FORMAT.print(DateTime.now()));
     }
 
     private void updateLocationUi() {
@@ -232,6 +254,16 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
     }
 
+    @OnClick(R.id.patient_creation_admission_date)
+    void onAdmissionDateClick() {
+        mAdmissionDatePickerDialog.show();
+    }
+
+    @OnClick(R.id.patient_creation_symptoms_onset_date)
+    void onSymptomsOnsetDateClick() {
+        mSymptomsOnsetDatePickerDialog.show();
+    }
+
     @OnClick(R.id.patient_creation_button_cancel)
     void onCancelClick() {
         showAlertDialog();
@@ -258,20 +290,27 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     }
 
     private DateTime getSymptomsOnsetDate() {
-        String dateString = mSymptomsOnsetDate.getText().toString();
+        return fromEditText(mSymptomsOnsetDate, null);
     }
 
     private DateTime getAdmissionDate() {
-        return null;
+        return fromEditText(mAdmissionDate, DateTime.now());
     }
 
-    private DateTime fromEditText(EditText editText) {
+    /**
+     * Parses a {@link DateTime} object from an {@link EditText} field, with optional default date.
+     */
+    private DateTime fromEditText(EditText editText, DateTime defaultDate) {
         String dateString = editText.getText().toString();
         if (dateString == null) {
-            return DateTime.now();
+            return defaultDate;
         }
 
-        DateTime.parse(dateString, dateFormat);
+        try {
+            return DateTime.parse(dateString, DATE_FORMAT);
+        } catch (Exception e) {
+            return defaultDate;
+        }
     }
 
     @Override
@@ -369,6 +408,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 case PatientCreationController.Ui.FIELD_AGE:
                     mAge.setError(message);
                     break;
+                case PatientCreationController.Ui.FIELD_ADMISSION_DATE:
+                    mAdmissionDate.setError(message);
+                    break;
+                case PatientCreationController.Ui.FIELD_SYMPTOMS_ONSET_DATE:
+                    mSymptomsOnsetDate.setError(message);
+                    break;
                 case PatientCreationController.Ui.FIELD_LOCATION:
                     //TODO(mathewi) Using setError doesn't really work properly. Implement a better
                     // UI
@@ -400,10 +445,16 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void showErrorMessage(String error) {
+        public void showErrorMessage(int errorResource) {
+            showErrorMessage(getString(errorResource));
+        }
+
+        @Override
+        public void showErrorMessage(String errorString) {
             mIsCreatePending = false;
             setUiEnabled(true);
-            BigToast.show(PatientCreationActivity.this, R.string.patient_creation_error, error);
+            BigToast.show(
+                    PatientCreationActivity.this, R.string.patient_creation_error, errorString);
         }
 
         @Override
@@ -411,6 +462,24 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             mIsCreatePending = false;
             BigToast.show(PatientCreationActivity.this, R.string.patient_creation_success);
             finish();
+        }
+    }
+
+    private final class DateSetListener implements DatePickerDialog.OnDateSetListener {
+        private final EditText mDateField;
+
+        public DateSetListener(final EditText dateField) {
+            mDateField = dateField;
+        }
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            DateTime dt = new DateTime()
+                    .withYear(year)
+                    .withMonthOfYear(monthOfYear + 1)
+                    .withDayOfMonth(dayOfMonth)
+                    .withTimeAtStartOfDay();
+            mDateField.setText(DATE_FORMAT.print(dt));
         }
     }
 }

@@ -176,7 +176,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         int daysDiff = Days.daysBetween(localDate, today).getDays();
         if (admissionDate == null) {
             if (daysDiff == 0) {
-                return todayString + "\n" + localizedDateString;
+                return todayString + " (" + localizedDateString + ")";
             } else {
                 return localizedDateString;
             }

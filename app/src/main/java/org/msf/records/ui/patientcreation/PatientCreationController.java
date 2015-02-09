@@ -1,10 +1,9 @@
 package org.msf.records.ui.patientcreation;
 
-import android.util.Log;
-
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -17,8 +16,6 @@ import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
-
-import java.util.Locale;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -59,7 +56,10 @@ final class PatientCreationController {
         void clearValidationErrors();
 
         /** Invoked when the server RPC to create a patient fails. */
-        void showErrorMessage(String error);
+        void showErrorMessage(int errorResource);
+
+        /** Invoked when the server RPC to create a patient fails. */
+        void showErrorMessage(String errorString);
 
         /** Invoked when the server RPC to create a patient succeeds. */
         void quitActivity();
@@ -151,7 +151,7 @@ final class PatientCreationController {
         patientDelta.assignedLocationUuid = (locationUuid == null)
                 ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
         patientDelta.admissionDate = Optional.of(admissionDate);
-        patientDelta.firstSymptomDate = Optional.of(symptomsOnsetDate);
+        patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
 
@@ -186,7 +186,27 @@ final class PatientCreationController {
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {
-            mUi.showErrorMessage(event.exception == null ? "unknown" : event.exception.getMessage());
+            switch (event.reason) {
+                case PatientAddFailedEvent.REASON_CLIENT:
+                    mUi.showErrorMessage(R.string.patient_creation_client_error);
+                    break;
+                case PatientAddFailedEvent.REASON_NETWORK:
+                    mUi.showErrorMessage(R.string.patient_creation_network_error);
+                    break;
+                case PatientAddFailedEvent.REASON_SERVER:
+                    mUi.showErrorMessage(R.string.patient_creation_server_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INTERRUPTED:
+                    mUi.showErrorMessage(R.string.patient_creation_interrupted_error);
+                    break;
+                case PatientAddFailedEvent.REASON_UNKNOWN:
+                default:
+                    if (event.exception == null || event.exception.getMessage() == null) {
+                        mUi.showErrorMessage(R.string.patient_creation_unknown_error);
+                    } else {
+                        mUi.showErrorMessage(event.exception.getMessage());
+                    }
+            }
             LOG.e("Patient add failed", event.exception);
         }
 

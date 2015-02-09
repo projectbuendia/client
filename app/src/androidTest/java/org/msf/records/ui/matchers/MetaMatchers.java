@@ -12,6 +12,7 @@ import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewA
 
 public class MetaMatchers {
     private static final Logger LOG = Logger.create();
+    private static final int CHECK_INTERVAL_MILLIS = 200;
 
     /**
      * Periodically applies the matcher, asserting that the matcher is matched at some point before
@@ -26,7 +27,6 @@ public class MetaMatchers {
     private static ArgumentMatcher<View> within(
             final Matcher<View> matcher, final long timeoutMs) {
         return new ArgumentMatcher<View>() {
-            final int CHECK_INTERVAL_MILLIS = 200;
 
             @Override
             public boolean matches(final Object o) {
@@ -41,7 +41,7 @@ public class MetaMatchers {
                         return true;
                     }
                     // Wait until the next check interval.
-                    while (System.currentTimeMillis() < endTime) ;
+                    while (System.currentTimeMillis() < endTime) {}
                 }
 
                 // Timeout.
