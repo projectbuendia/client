@@ -25,7 +25,7 @@ public class GenericAccountService extends Service {
 
     private static final String ACCOUNT_TYPE = BuildConfig.ACCOUNT_TYPE;
     public static final String ACCOUNT_NAME = "sync";
-    private static final long SYNC_FREQUENCY = 10 * 60;  // 10 minutes (in seconds)
+    private static final long SYNC_FREQUENCY = 5 * 60;  // 10 minutes (in seconds)
     private static final String CONTENT_AUTHORITY = Contracts.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
     private Authenticator mAuthenticator;
@@ -81,6 +81,18 @@ public class GenericAccountService extends Service {
                 b);                                      // Extras
     }
 
+    /** Starts an incremental update of observations.  No-op if incremental update is disabled. */
+    static void triggerIncrementalObservationSync(SharedPreferences prefs) {
+        if (prefs.getBoolean("incremental_observation_update", true)) {
+            Bundle b = new Bundle();
+            b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+            b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+            b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+            b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+            ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
+        }
+    }
+
     /**
      * Create an entry for this application in the system account list, if it isn't already there.
      *
@@ -101,10 +113,8 @@ public class GenericAccountService extends Service {
             ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
             // Recommend a schedule for automatic synchronization. The system may modify this based
             // on other scheduled syncs and network utilization.
-            Bundle extras = new Bundle();
-            extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
             ContentResolver.addPeriodicSync(
-                    account, CONTENT_AUTHORITY, extras,SYNC_FREQUENCY);
+                    account, CONTENT_AUTHORITY, getExtrasForPeriodicSync(), SYNC_FREQUENCY);
             newAccount = true;
         }
 
@@ -116,6 +126,28 @@ public class GenericAccountService extends Service {
             triggerRefresh(prefs);
             prefs.edit().putBoolean(PREF_SETUP_COMPLETE, true).commit();
         }
+    }
+
+    private static Bundle getExtrasForPeriodicSync() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
+        extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_USERS, true);
+
+        return extras;
+    }
+
+    /**
+     * Removes the periodic sync that is started when this app registers its account.
+     */
+    public static void removePeriodicSync() {
+        ContentResolver.removePeriodicSync(
+                GenericAccountService.getAccount(),
+                Contracts.CONTENT_AUTHORITY,
+                getExtrasForPeriodicSync());
     }
 
     @Override

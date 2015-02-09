@@ -11,6 +11,8 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import net.sqlcipher.database.SQLiteException;
+
 import org.msf.records.App;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
@@ -66,6 +68,9 @@ public class UserStore {
                 result.add(user);
             }
             return result;
+        } catch (SQLiteException e) {
+            LOG.w(e, "Error loading users from database, will attempt to retrieve from server.");
+            return syncKnownUsers();
         } finally {
             if (cursor != null) {
                 cursor.close();

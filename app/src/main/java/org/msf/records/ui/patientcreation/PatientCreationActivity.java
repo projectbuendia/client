@@ -28,6 +28,7 @@ import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.LocaleSelector;
+import org.msf.records.utils.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -40,6 +41,8 @@ import butterknife.OnClick;
  * A {@link BaseActivity} that allows users to create a new patient.
  */
 public final class PatientCreationActivity extends BaseLoggedInActivity {
+
+    private static final Logger LOG = Logger.create();
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
@@ -110,12 +113,32 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private void updateLocationUi() {
         if (mLocationTree == null || mLocationUuid == null) {
+            // This is not an error--most likely the user just dismissed the dialog without
+            // setting a location.
+            LOG.i("No location tree was selected or location tree was unavailable.");
             return;
         }
 
         AppLocation location = mLocationTree.findByUuid(mLocationUuid);
-        ResZone.Resolved zone = Zone.getResZone(
-                location.parentUuid).resolve(getResources());
+
+        if (location == null || location.parentUuid == null) {
+            // This can apparently happen, on rare occasions, for an unknown reason. In this
+            // case, notify the user to try again.
+            LOG.e("Location %s was selected but not found in location tree.", mLocationUuid);
+            BigToast.show(this, R.string.error_setting_location);
+            return;
+        }
+
+        ResZone resZone = Zone.getResZone(location.parentUuid);
+
+        if (resZone == null) {
+            // This should never happen. If it does, notify the user to try again.
+            LOG.e("%s could not be resolved to a zone.", location.parentUuid);
+            BigToast.show(this, R.string.error_setting_location);
+            return;
+        }
+
+        ResZone.Resolved zone = resZone.resolve(getResources());
 
         mLocationText.setText(location.toString());
         mLocationText.setBackgroundColor(zone.getBackgroundColor());

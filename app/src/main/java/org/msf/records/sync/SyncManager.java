@@ -32,19 +32,26 @@ public class SyncManager {
      * Forces a sync to occur immediately.
      */
     public void forceSync() {
+        LOG.d("In SyncManager#forceSync()");
         GenericAccountService.triggerRefresh(
                 PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
     }
 
     /**
-     * Returns {@code true} if a sync is pending or active.
+     * Initiates an incremental sync of observations.  No-op if incremental observation
+     * update is disabled.
      */
+    public void incrementalObservationSync() {
+        GenericAccountService.triggerIncrementalObservationSync(
+                PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
+    }
+
+    /**
+     * Returns {@code true} if a sync is pending or active.
+    */
     public boolean isSyncing() {
         return
                 ContentResolver.isSyncActive(
-                        GenericAccountService.getAccount(),
-                        Contracts.CONTENT_AUTHORITY)
-                || ContentResolver.isSyncPending(
                         GenericAccountService.getAccount(),
                         Contracts.CONTENT_AUTHORITY);
     }
@@ -60,12 +67,15 @@ public class SyncManager {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
                 case STARTED:
+                    LOG.i("Sync started");
                     EventBus.getDefault().post(new SyncStartedEvent());
                     break;
                 case COMPLETED:
+                    LOG.i("Sync completed");
                     EventBus.getDefault().post(new SyncSucceededEvent());
                     break;
                 case FAILED:
+                    LOG.i("Sync failed");
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case -1:

@@ -116,4 +116,13 @@
     <string name="mobility_assisted">As</string>
     <string name="mobility_bed_bound">BB</string>
     <string name="pcr_negative">NEG</string>
+    <string name="error_setting_location">An unknown error occurred while setting patient location. Please try again.</string>
+    <string name="tent_selection_dialog_title">Loading...</string>
+    <string name="tent_selection_dialog_message">Please wait while patient and location data are retrieved. If this is the first time patient data has been loaded, this process may take a few minutes.</string>
+    <string name="sync_failed_dialog_title">Sync Error</string>
+    <string name="sync_failed_dialog_message">An error occurred while retrieving data from the server. Please check your OpenMRS settings or try again.</string>
+    <string name="sync_failed_settings">Settings</string>
+    <string name="sync_failed_retry">Retry</string>
+    <string name="user_sync_failed_dialog_message">An error occurred while retrieving the user list. Please check your OpenMRS settings or try again.</string>
+    <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check settings or try again.</string>
 </resources>

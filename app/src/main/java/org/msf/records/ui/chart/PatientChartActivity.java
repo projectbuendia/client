@@ -328,13 +328,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     @OnClick({
-            R.id.patient_chart_general_condition_parent,
             R.id.vital_diet,
             R.id.vital_food_drink,
             R.id.patient_chart_responsiveness_parent,
             R.id.patient_chart_mobility_parent})
     void onOverallAssessmentPressed(View v) {
         mController.onAddObservationPressed("Overall Assessment");
+    }
+
+    @OnClick({
+            R.id.patient_chart_general_condition_parent})
+    void onGeneralConditionPressed(View v) {
+        mController.onAddObservationPressed("General condition section");
     }
 
     @OnClick({

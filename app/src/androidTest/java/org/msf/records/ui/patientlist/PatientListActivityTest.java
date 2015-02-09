@@ -23,18 +23,23 @@ public class PatientListActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
+        waitForProgressFragment(); // Wait for tents.
         onView(withText("ALL PRESENT PATIENTS")).perform(click());
+        waitForProgressFragment(); // Wait for patients.
     }
 
     /** Looks for the filter menu. */
     public void testFilterMenu() {
+        screenshot("Test Start");
         onView(withText("All Present Patients")).perform(click());
         onView(withText("Triage")).check(matches(isDisplayed()));
         onView(withText("Pregnant")).check(matches(isDisplayed()));
+        screenshot("In Filter Menu");
     }
 
     /** Looks for two zone headings and at least one patient. */
     public void testZoneAndPatientDisplayed() {
+        screenshot("Test Start");
         // There should be patients in both Triage and S1.
         onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))
                 .check(matches(isDisplayed()));
@@ -48,5 +53,6 @@ public class PatientListActivityTest extends FunctionalTestCase {
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)
                 .perform(click());
+        screenshot("After Patient Clicked");
     }
 }
