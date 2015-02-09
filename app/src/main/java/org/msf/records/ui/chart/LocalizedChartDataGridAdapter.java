@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,7 @@ import org.msf.records.net.model.Concept;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.utils.Logger;
+import org.msf.records.widget.CellType;
 import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
@@ -38,8 +38,10 @@ import javax.annotation.Nullable;
  */
 final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
-    public static final int TEXT_SIZE_LARGE = 28;
+    public static final int TEXT_SIZE_LARGE = 26;
     public static final int TEXT_SIZE_NORMAL = 16;
+
+    private static final String HEADER_TAG = "CELL_TYPE_HEADER";
 
     private static final Logger LOG = Logger.create();
 
@@ -52,8 +54,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                             .show();
                 }
             };
-    private final Drawable backgroundLight;
-    private final Drawable backgroundDark;
+    private final Drawable mBackgroundLight;
+    private final Drawable mBackgroundDark;
+    private final Drawable mRowHeaderBackgroundLight;
+    private final Drawable mRowHeaderBackgroundDark;
 
     private static class Row {
         private final String mConceptUuid;
@@ -79,8 +83,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
         Resources resources = context.getResources();
-        this.backgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
-        this.backgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
+
+        // Even though these Drawables are currently identical, referencing different drawables
+        // for row headers and table cells ensures that RecyclerView does not improperly reuse
+        // one as the other.
+        this.mBackgroundLight = resources.getDrawable(R.drawable.chart_grid_background_light);
+        this.mBackgroundDark = resources.getDrawable(R.drawable.chart_grid_background_dark);
+        this.mRowHeaderBackgroundLight =
+                resources.getDrawable(R.drawable.chart_grid_row_header_background_light);
+        this.mRowHeaderBackgroundDark =
+                resources.getDrawable(R.drawable.chart_grid_row_header_background_dark);
 
 
         Row row = null;
@@ -88,7 +100,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         ISOChronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
         final String todayString = context.getResources().getString(R.string.today);
         today = new LocalDate(chronology);
-
+        // Today should always be shown in the chart, as well as any days between the last
+        // observation and today.
+        days.add(today);
         for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
@@ -184,17 +198,28 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getRowHeader(int row, View convertView, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(
-                R.layout.data_grid_row_header_chart, null /*root*/);
+        View view;
+        if (convertView == null || convertView.getTag() != HEADER_TAG) {
+            view = mLayoutInflater.inflate(
+                    R.layout.data_grid_row_header_chart, null /*root*/);
+        } else {
+            view = convertView;
+        }
         TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
-        setCellBackgroundForViewType(textView, row % 2);
+        setCellBackgroundForViewType(textView, CellType.ROW_HEADER, row % 2);
         fillRowHeader(row, view, textView);
+        view.setTag(HEADER_TAG);
         return view;
     }
 
     @Override
-    public void setCellBackgroundForViewType(View view, int viewType) {
-        view.setBackground(viewType == 0 ? backgroundLight : backgroundDark);
+    public void setCellBackgroundForViewType(View view, CellType viewType, int rowType) {
+        if (viewType == CellType.CELL) {
+            view.setBackground(rowType % 2 == 0 ? mBackgroundLight : mBackgroundDark);
+        } else {
+            view.setBackground(
+                    rowType % 2 == 0 ? mRowHeaderBackgroundLight : mRowHeaderBackgroundDark);
+        }
     }
 
     @Override
@@ -212,9 +237,14 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public View getCell(int rowIndex, int columnIndex, View convertView, ViewGroup parent) {
-        View view = mLayoutInflater.inflate(
-                R.layout.data_grid_cell_chart_text, null /*root*/);
-        setCellBackgroundForViewType(view, rowIndex % 2);
+        View view;
+        if (convertView == null || convertView.getTag() == HEADER_TAG) {
+            view = mLayoutInflater.inflate(
+                    R.layout.data_grid_cell_chart_text, null /*root*/);
+        } else {
+            view = convertView;
+        }
+        setCellBackgroundForViewType(view, CellType.CELL, rowIndex % 2);
         ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
         fillCell(rowIndex, columnIndex, view, viewStub, null);
         return view;
@@ -238,8 +268,24 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View.OnClickListener onClickListener = null;
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
-        // TODO: Proper localization for numeric fields.
+        // TODO: Proper localization.
         switch (conceptUuid) {
+            case Concept.RESPONSIVENESS_UUID:
+                String responsivenessString = rowData.datesToValues.get(dateKey);
+                if (responsivenessString != null) {
+                    text = getLocalizedAvpuInitials(responsivenessString);
+                    textColor = Color.BLACK;
+                    useBigText = true;
+                }
+                break;
+            case Concept.MOBILITY_UUID:
+                String mobilityString = rowData.datesToValues.get(dateKey);
+                if (mobilityString != null) {
+                    text = getLocalizedMobilityInitials(mobilityString);
+                    textColor = Color.BLACK;
+                    useBigText = true;
+                }
+                break;
             case Concept.TEMPERATURE_UUID:
                 String temperatureString = rowData.datesToValues.get(dateKey);
                 if (temperatureString != null) {
@@ -294,7 +340,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                             text = String.format(Locale.US, "%.1f", weight);
                         }
                         textColor = Color.BLACK;
-                        useBigText = true;
+                        // Three digits won't fit in the TextView with the larger font.
+                        if (weight < 100) {
+                            useBigText = true;
+                        }
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Weight format was invalid");
                     }
@@ -364,5 +413,48 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             textView.setOnClickListener(onClickListener);
         }
         return textView;
+    }
+
+    private String getLocalizedMobilityInitials(String mobilityUuid) {
+        int resId = R.string.mobility_unknown;
+        switch (mobilityUuid) {
+            case Concept.MOBILITY_WALKING_UUID:
+                resId = R.string.mobility_walking;
+                break;
+            case Concept.MOBILITY_WALKING_WITH_DIFFICULTY_UUID:
+                resId = R.string.mobility_walking_with_difficulty;
+                break;
+            case Concept.MOBILITY_ASSISTED_UUID:
+                resId = R.string.mobility_assisted;
+                break;
+            case Concept.MOBILITY_BED_BOUND_UUID:
+                resId = R.string.mobility_bed_bound;
+                break;
+            default:
+                LOG.e("Unrecognized mobility state UUID: %s", mobilityUuid);
+        }
+        return mContext.getResources().getString(resId);
+    }
+
+    private String getLocalizedAvpuInitials(String responsivenessUuid) {
+        int resId = R.string.avpu_unknown;
+        switch (responsivenessUuid) {
+            case Concept.RESPONSIVENESS_ALERT_UUID:
+                resId = R.string.avpu_alert;
+                break;
+            case Concept.RESPONSIVENESS_VOICE_UUID:
+                resId = R.string.avpu_voice;
+                break;
+            case Concept.RESPONSIVENESS_PAIN_UUID:
+                resId = R.string.avpu_pain;
+                break;
+            case Concept.RESPONSIVENESS_UNRESPONSIVE_UUID:
+                resId = R.string.avpu_unresponsive;
+                break;
+            default:
+                LOG.e("Unrecognized consciousness state UUID: %s", responsivenessUuid);
+        }
+
+        return mContext.getResources().getString(resId);
     }
 }

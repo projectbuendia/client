@@ -15,8 +15,6 @@
         <item name="android:radioButtonStyle">
             @style/Widget.Buendia.CompoundButton.RadioButton
         </item>
-
-        <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
     </style>
 
     <!-- Use if the activity has text buttons for the action bar -->
@@ -71,17 +69,6 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
-    </style>
-
-    <style name="CustomTabPageIndicator" >
-        <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/vpi__tab_indicator</item>
-        <item name="android:paddingTop">20dp</item>
-        <item name="android:paddingBottom">20dp</item>
-        <item name="android:textAppearance">@style/TextAppearance.TabPageIndicator</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:textColor">#FF555555</item>
     </style>
 
     <style name="FormLabel">

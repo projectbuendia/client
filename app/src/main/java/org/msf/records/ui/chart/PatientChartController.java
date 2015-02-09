@@ -3,6 +3,7 @@ package org.msf.records.ui.chart;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 
 import com.google.common.base.Optional;
@@ -52,6 +53,15 @@ final class PatientChartController {
 
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
+    /**
+     * Period between observation syncs while the chart view is active.  It would be nice for
+     * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
+     * each sync.  TODO: Try reducing this period to improve responsiveness, but only after
+     * we're able to prevent the table from scrolling to the top on sync, or when we're able to
+     * skip re-rendering for syncs that pull down no new patient or observation data.
+     */
+    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
+
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array
     // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
@@ -67,6 +77,10 @@ final class PatientChartController {
     private AppLocationTree mLocationTree;
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
+
+    // This value is incremented whenever the controller is activated or suspended.
+    // A "phase" is a period of time between such transition points.
+    private int mCurrentPhaseId = 0;
 
     public interface Ui {
         /** Sets the activity title. */
@@ -171,20 +185,48 @@ final class PatientChartController {
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
+        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
+
         mDefaultEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         mAppModel.fetchSinglePatient(mCrudEventBus, mPatientUuid);
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().toString());
+
+        startObservationSync();
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
+        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
+
         mCrudEventBus.unregister(mEventBusSubscriber);
         mDefaultEventBus.unregister(mEventBusSubscriber);
-
         if (mLocationTree != null) {
             mLocationTree.close();
         }
+    }
+
+    /** Starts syncing observations more frequently while the user is viewing the chart. */
+    private void startObservationSync() {
+        final Handler handler = new Handler();
+        final int phaseId = mCurrentPhaseId;
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                // This runnable triggers itself in a cycle, each run calling postDelayed()
+                // to schedule the next run.  Each such cycle belongs to a phase, identified
+                // by phaseId; once the current phase is exited the cycle stops.  Thus, when the
+                // controller is suspended the cycle stops; and also since mCurrentPhaseId can
+                // only have one value, only one such cycle can be active at any given time.
+                if (mCurrentPhaseId == phaseId) {
+                    mSyncManager.incrementalObservationSync();
+                    handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
+                }
+            }
+        };
+
+        handler.postDelayed(runnable, OBSERVATION_SYNC_PERIOD_MILLIS);
     }
 
     public void onXFormResult(int code, int resultCode, Intent data) {

@@ -13,6 +13,8 @@ public enum ConceptType {
     CODED,
     @SerializedName("text")
     TEXT,
+    @SerializedName("date")
+    DATE,
     @SerializedName("none")
     NONE,
 }

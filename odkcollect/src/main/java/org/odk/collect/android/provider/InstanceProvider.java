@@ -62,7 +62,7 @@ public class InstanceProvider extends ContentProvider {
     private static class DatabaseHelper extends ODKSQLiteOpenHelper {
 
         DatabaseHelper(String databaseName) {
-            super(Collect.METADATA_PATH, databaseName, null, DATABASE_VERSION);
+            super(Collect.getInstance().getMetadataPath(), databaseName, null, DATABASE_VERSION);
         }
 
 
@@ -108,7 +108,7 @@ public class InstanceProvider extends ContentProvider {
     private DatabaseHelper getDbHelper() {
         // wrapper to test and reset/set the dbHelper based upon the attachment state of the device.
         try {
-            Collect.createODKDirs();
+            Collect.getInstance().createODKDirs();
         } catch (RuntimeException e) {
         	mDbHelper = null;
             return null;
@@ -243,7 +243,8 @@ public class InstanceProvider extends ContentProvider {
         	// ODK Tables instance data directory. Let ODK Tables
         	// manage the lifetimes of its filled-in form data
         	// media attachments.
-            if (directory.isDirectory() && !Collect.isODKTablesInstanceDataDirectory(directory)) {
+            if (directory.isDirectory()
+                    && !Collect.getInstance().isODKTablesInstanceDataDirectory(directory)) {
             	// delete any media entries for files in this directory...
                 int images = MediaUtils.deleteImagesInFolderFromMediaProvider(directory);
                 int audio = MediaUtils.deleteAudioInFolderFromMediaProvider(directory);

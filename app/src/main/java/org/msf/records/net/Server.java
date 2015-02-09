@@ -19,18 +19,15 @@ import java.util.List;
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
-    public static final String PATIENT_STATUS_KEY = "status";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
-    @Deprecated public static final String PATIENT_DOB_YEARS_KEY = "age_years";
-    @Deprecated public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
-    @Deprecated public static final String PATIENT_AGE_TYPE_KEY = "age_type";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
-    public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
-    public static final String PATIENT_MOVEMENT_KEY = "movement";
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
     public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
+    public static final String PATIENT_OBSERVATIONS_KEY = "observations";
+    public static final String PATIENT_QUESTION_UUID = "question_uuid";
+    public static final String PATIENT_ANSWER_DATE = "answer_date";
 
     /**
      * Adds a patient.

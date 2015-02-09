@@ -1,5 +1,7 @@
 package org.msf.records.ui.tentselection;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,6 +19,8 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
@@ -31,9 +35,11 @@ import de.greenrobot.event.EventBus;
 public final class TentSelectionActivity extends PatientSearchActivity {
 
     private TentSelectionController mController;
+    private AlertDialog mSyncFailedDialog;
 
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject SyncManager mSyncManager;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -43,7 +49,31 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                 mAppModel,
                 mCrudEventBusProvider.get(),
         		new MyUi(),
-        		new EventBusWrapper(EventBus.getDefault()));
+                new EventBusWrapper(EventBus.getDefault()),
+                mSyncManager,
+                getSearchController());
+
+        mSyncFailedDialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(getString(R.string.sync_failed_dialog_title))
+                .setMessage(R.string.sync_failed_dialog_message)
+                .setNegativeButton(
+                        R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(
+                                        TentSelectionActivity.this,SettingsActivity.class));
+                            }
+                        })
+                .setPositiveButton(
+                        R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mController.onSyncRetry();
+                            }
+                        })
+                .setCancelable(false)
+                .create();
 
         setContentView(R.layout.activity_tent_selection);
         if (savedInstanceState == null) {
@@ -130,7 +160,22 @@ public final class TentSelectionActivity extends PatientSearchActivity {
             Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
         }
 
-    	@Override
+        @Override
+        public void showSyncFailedDialog(boolean show) {
+            if (mSyncFailedDialog == null) {
+                return;
+            }
+
+            if (show != mSyncFailedDialog.isShowing()) {
+                if (show) {
+                    mSyncFailedDialog.show();
+                } else {
+                    mSyncFailedDialog.hide();
+                }
+            }
+        }
+
+        @Override
         public void launchActivityForLocation(AppLocation location) {
             Intent roundIntent =
                     new Intent(TentSelectionActivity.this, RoundActivity.class);

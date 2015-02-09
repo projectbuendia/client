@@ -214,12 +214,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         LOG.d("Before network call");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
-        App.getServer().listPatients("", "", "", future, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                LOG.d(error.toString());
-            }
-        });
+        App.getServer().listPatients("", "", "", future, future);
 
         //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
         List<Patient> patients = future.get();

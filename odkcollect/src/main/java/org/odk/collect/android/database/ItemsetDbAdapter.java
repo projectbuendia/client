@@ -40,7 +40,7 @@ public class ItemsetDbAdapter {
      */
     private static class DatabaseHelper extends ODKSQLiteOpenHelper {
         DatabaseHelper() {
-            super(Collect.METADATA_PATH, DATABASE_NAME, null, DATABASE_VERSION);
+            super(Collect.getInstance().getMetadataPath(), DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override

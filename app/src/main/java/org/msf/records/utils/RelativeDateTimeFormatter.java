@@ -21,7 +21,7 @@ public class RelativeDateTimeFormatter {
                 "Right now",
                 "In the future",
                 "Today",
-                "yesterday",
+                "Yesterday",
                 "%1$s days ago"),
         TITLE_CASE(
                 "Right Now",
@@ -29,7 +29,7 @@ public class RelativeDateTimeFormatter {
                 "Today",
                 "Yesterday",
                 "%1$s Days Ago");
-        
+
         public final String rightNow;
         public final String inTheFuture;
         public final String today;

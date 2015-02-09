@@ -2,6 +2,10 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
+    dependencies {
+        classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
+    }
 }
 
 apply plugin: 'com.android.application'
@@ -16,13 +20,13 @@ dependencies {
     // TODO(dxchen): Figure out why removing this causes a Dagger error.
     provided 'com.github.frankiesardo:auto-parcel-processor:0.2' // Automatic Parcelables
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
+    // provided 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1' // Test multiplexing/selection
 
     // Local .jar dependencies
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
     compile project(':odkcollect')
-    compile project(':ViewPagerIndicator')
 
     // External dependencies
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -47,22 +51,38 @@ dependencies {
         exclude group: 'com.squareup.dagger' // Provided by com.squareup.dagger
         exclude group: 'javax.inject' // Provided by com.squareup.dagger
     }
+    androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
     compile files('libs/sqlcipher.jar')
 }
 
+apply plugin: 'spoon'
+
+spoon {
+    if (project.hasProperty('spoonClassName')) {
+        className = project.spoonClassName
+    }
+}
+
+// Consider spoon to always be "out-of-date" so that spoon tests will run (when requested) even
+// when no changes have been made to the build.
+tasks["spoon"].outputs.upToDateWhen { false }
+
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 def releaseRepoRoot = file('../../release/')
 
-// Commonly used OpenMRS root URLs for convenience.
-def openmrsRootUrlGce = 'http://104.155.15.141:8080/openmrs';
-def openmrsRootUrlTest = 'http://23.251.140.223:8080/openmrs';
-def openmrsRootUrlEdison = 'http://10.0.0.50:8080/openmrs';
-def openmrsRootUrlLocalhost = 'http://10.0.2.2:8080/openmrs';
+// OpenMRS instance for development (default for dev tablets, kept at tip of dev branch).
+def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs';
 
-// Just for development.  In all production builds these should be overridden
+// OpenMRS root URL for Edison on local network.
+def openmrsRootUrlEdison = 'http://10.0.0.50:9000/openmrs';
+
+// OpenMRS root URL for host machine when client runs in an emulator (AVD).
+def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs';
+
+// Just for development.  In all production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlGce;
+def openmrsRootUrlDefault = openmrsRootUrlDev;
 def openmrsUserDefault = 'android';
 def openmrsPasswordDefault = 'Android123';
 
@@ -87,6 +107,8 @@ android {
 
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
         testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
@@ -136,13 +158,14 @@ android {
             resValue "string", "account_type", defaultConfig.applicationId + '.dev'
             buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // For release builds, it's useful to include the real build time.
+            // However, including the time would force recompilation on every run
+            // even when no code has changed; so for debug builds, use a constant.
+            buildConfigField "String", "BUILD_TIME", "\"[debug]\""
         }
 
         release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-            //noinspection GroovyAssignabilityCheck
+            // noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.release
         }
     }

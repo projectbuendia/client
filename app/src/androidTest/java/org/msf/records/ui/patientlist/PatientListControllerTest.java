@@ -93,4 +93,49 @@ public class PatientListControllerTest extends AndroidTestCase {
         // THEN nothing happens
         assertEquals(0, mFakeEventBus.countRegisteredReceivers());
     }
+
+    /** Tests that the failure of a requested sync results in an error being displayed. */
+    public void testForcedSyncFailure_DisplaysSyncError() {
+        // GIVEN initialized PatientListController with a forced sync
+        mController.init();
+        mController.forceSync();
+        // WHEN a forced sync fails
+        SyncFinishedEvent event = new SyncFailedEvent();
+        mFakeEventBus.post(event);
+        // THEN an error is shown
+        verify(mMockUi).showSyncError();
+    }
+
+    /** Tests that a background sync does not result in a sync error being displayed. */
+    public void testBackgroundSyncFailure_DoesNotDisplaySyncError() {
+        // GIVEN initialized PatientListController
+        mController.init();
+        // WHEN a background sync fails
+        SyncFinishedEvent event = new SyncFailedEvent();
+        mFakeEventBus.post(event);
+        // THEN no error is shown
+        verify(mMockUi, times(0)).showSyncError();
+    }
+
+    /** Tests that a successful sync hides the refresh indicator. */
+    public void testSyncSuccess_StopsRefresh() {
+        // GIVEN initialized PatientListController
+        mController.init();
+        // WHEN a sync succeeds
+        SyncFinishedEvent event = new SyncSucceededEvent();
+        mFakeEventBus.post(event);
+        // THEN the refresh indicator disappears
+        verify(mMockUi).setRefreshing(false);
+    }
+
+    /** Tests that a failed sync hides the refresh indicator. */
+    public void testSyncFailure_StopsRefresh() {
+        // GIVEN initialized PatientListController
+        mController.init();
+        // WHEN a sync fails
+        SyncFinishedEvent event = new SyncFailedEvent();
+        mFakeEventBus.post(event);
+        // THEN the refresh indicator disappears
+        verify(mMockUi).setRefreshing(false);
+    }
 }

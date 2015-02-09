@@ -5,6 +5,7 @@ import android.app.Application;
 import com.google.common.collect.ImmutableSet;
 
 import org.msf.records.inject.Qualifiers;
+import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.prefs.StringPreference;
 
 import javax.inject.Singleton;
@@ -32,10 +33,12 @@ public class DiagnosticsModule {
     @Singleton
     ImmutableSet<HealthCheck> provideHealthChecks(
             Application application,
-            @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl) {
+            @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
+            OpenMrsConnectionDetails connectionDetails) {
         return ImmutableSet.<HealthCheck>of(
                 new WifiHealthCheck(application),
-                new HttpServerHealthCheck(application, openMrsRootUrl));
+                new HttpServerHealthCheck(application, openMrsRootUrl),
+                new BuendiaModuleHealthCheck(application, connectionDetails));
     }
 
     @Provides
