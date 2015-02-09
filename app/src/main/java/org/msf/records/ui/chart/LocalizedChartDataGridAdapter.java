@@ -125,7 +125,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             DateTime d = new DateTime(ob.encounterTimeMillis, chronology);
             LocalDate localDate = d.toLocalDate();
             days.add(localDate);
-            String amKey = toAmKey(todayString, localDate, days.first());
+            String amKey = toAmKey(todayString, localDate, admissionDate);
             String pmKey = toPmKey(amKey); // this is never displayed to the user
             String dateKey = d.getHourOfDay() < 12 ? amKey : pmKey;
 
