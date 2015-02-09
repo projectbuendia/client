@@ -69,6 +69,8 @@ public class UserManager {
 
     private final Set<User> mKnownUsers = new HashSet<>();
     private boolean mSynced = false;
+    private boolean mAutoCancelEnabled = false;
+    @Nullable private AsyncTask mLastTask;
     @Nullable private User mActiveUser;
 
     UserManager(
@@ -78,6 +80,24 @@ public class UserManager {
         mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
         mEventBus = checkNotNull(eventBus);
         mUserStore = checkNotNull(userStore);
+    }
+
+    /**
+     * Utility function for automatically canceling user load tasks to simulate network connectivity
+     * issues.
+     * TODO: Move to a fake or mock out when daggered.
+     */
+    public void setAutoCancelEnabled(boolean autoCancelEnabled) {
+        mAutoCancelEnabled = autoCancelEnabled;
+    }
+
+    /**
+     * Manually resets the UserManager for testing purposes, since it may retain sync state between
+     * tests.
+     * TODO: Remove when daggered.
+     */
+    public void reset() {
+        mSynced = false;
     }
 
     public boolean hasUsers() {
@@ -94,7 +114,8 @@ public class UserManager {
      */
     public void loadKnownUsers() {
         if (!mSynced) {
-            mAsyncTaskRunner.runTask(new LoadKnownUsersTask());
+            mLastTask = new LoadKnownUsersTask();
+            mAsyncTaskRunner.runTask(mLastTask);
         } else {
             mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
         }
@@ -179,9 +200,14 @@ public class UserManager {
      *
      * <p>Forces a network sync if the database has not been downloaded yet.
      */
-    private class LoadKnownUsersTask extends AsyncTask<Void, Void, Set<User>> {
+    private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<User>> {
         @Override
-        protected Set<User> doInBackground(Void... voids) {
+        protected Set<User> doInBackground(Object... unusedObjects) {
+            if (mAutoCancelEnabled) {
+                cancel(true);
+                return null;
+            }
+
             try {
                 return mUserStore.loadKnownUsers();
             } catch (Exception e) {
@@ -191,6 +217,13 @@ public class UserManager {
                         new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
                 return null;
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            LOG.w("Load users task cancelled");
+            mEventBus.post(
+                    new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_CANCELLED));
         }
 
         @Override

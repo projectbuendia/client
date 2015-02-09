@@ -1,12 +1,16 @@
 package org.msf.records.ui.userlogin;
 
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
+import org.msf.records.events.user.UserAddFailedEvent;
+import org.msf.records.events.user.UserAddedEvent;
+import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.userlogin.UserLoginController;
@@ -25,6 +29,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
     private UserLoginController mController;
     @Mock private UserManager mMockUserManager;
     @Mock private UserLoginController.Ui mMockUi;
+    @Mock private UserLoginController.FragmentUi mMockFragmentUi;
     private FakeEventBus mFakeEventBus;
 
     @Override
@@ -38,7 +43,8 @@ public class UserLoginControllerTest extends AndroidTestCase {
         mController = new UserLoginController(
                 mMockUserManager,
                 mFakeEventBus,
-                mMockUi);
+                mMockUi,
+                mMockFragmentUi);
     }
 
     /** Tests that init() attempts to load known users. */
@@ -67,17 +73,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
         User user = new User("idA", "nameA");
         mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
         // THEN the UI is updated
-        verify(mMockUi).showUsers(ImmutableList.of(user));
-    }
-
-    /** Tests that an error is shown if users fail to load. */
-    public void testKnownUsersLoadFailed_ShowsErrorUi() throws Exception {
-        // GIVEN the controller is inited
-        mController.init();
-        // WHEN an error occurs loading the list of users
-        mFakeEventBus.post(new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
-        // THEN an error is displayed
-        verify(mMockUi).showErrorToast(anyInt());
+        verify(mMockFragmentUi).showUsers(ImmutableList.of(user));
     }
 
     /** Tests that settings are shown when requested. */
@@ -104,4 +100,87 @@ public class UserLoginControllerTest extends AndroidTestCase {
         verify(mMockUi).showTentSelectionScreen();
     }
 
+    /** Tests that spinner is shown when the controller is first initialized. */
+    public void testInit_showsSpinner() {
+        // WHEN controller is inited
+        mController.init();
+        // THEN spinner is shown
+        verify(mMockFragmentUi).showSpinner(true);
+    }
+
+    /** Tests that successful user load hides the spinner. */
+    public void testUsersLoaded_hidesSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN users are loaded
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
+        // THEN the spinner is hidden
+        verify(mMockFragmentUi).showSpinner(false);
+    }
+
+    /** Tests that the sync failed dialog appears when loading users fails. */
+    public void testUserLoadFails_showsSyncFailedDialog() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN users fail to load
+        mFakeEventBus.post(new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
+        // THEN the sync fail dialog is shown
+        verify(mMockUi).showSyncFailedDialog(true);
+    }
+
+    /** Tests that the sync failed dialog is hidden when users are successfully loaded. */
+    public void testUserLoaded_hidesSyncFailedDialog() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN users are loaded
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
+        // THEN the sync fail dialog is hidden
+        verify(mMockUi).showSyncFailedDialog(false);
+    }
+
+    /** Tests that users are requested when a retry is requested. */
+    public void testOnSyncRetry_requestsUsers() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN onSyncRetry is called
+        mController.onSyncRetry();
+        // THEN users are requested
+        // Note: already called once in init().
+        verify(mMockUserManager, times(2)).loadKnownUsers();
+    }
+
+    /** Tests that the spinner is shown when a retry is requested. */
+    public void testOnSyncRetry_showsSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN onSyncRetry is called
+        mController.onSyncRetry();
+        // THEN spinner is shown
+        // Note: already shown once in init().
+        verify(mMockFragmentUi, times(2)).showSpinner(true);
+    }
+
+    /** Tests that the spinner is hidden whenever a user is added. */
+    public void testOnUserAdded_showsSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN a user is added
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new UserAddedEvent(user));
+        // THEN spinner is hidden
+        verify(mMockFragmentUi).showSpinner(false);
+    }
+
+    /** Tests that the spinner is hidden whenever a user add operation fails. */
+    public void testOnUserAddFailed_showsSpinner() {
+        // GIVEN initialized controller
+        mController.init();
+        // WHEN a user fails to be added
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new UserAddFailedEvent(new NewUser(), 0));
+        // THEN spinner is hidden
+        verify(mMockFragmentUi).showSpinner(false);
+    }
 }

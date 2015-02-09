@@ -36,7 +36,7 @@ public class NetModule {
     }
 
     @Provides @Singleton RequestConfigurator provideRequestConfigurator() {
-        return new RequestConfigurator(5000 /*timeoutMs*/);
+        return new RequestConfigurator(10000 /*timeout*/, 2 /*retry attempts*/, 1 /*back-off*/);
     }
 
     @Provides @Singleton RequestFactory provideRequestFactory(RequestConfigurator configurator) {

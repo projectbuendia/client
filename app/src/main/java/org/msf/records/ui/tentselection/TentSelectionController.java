@@ -11,7 +11,9 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.patientlist.PatientSearchController;
@@ -43,6 +45,8 @@ final class TentSelectionController {
         void launchActivityForLocation(AppLocation location);
 
         void showErrorMessage(int stringResourceId);
+
+        void showSyncFailedDialog(boolean show);
     }
 
     public interface TentFragmentUi {
@@ -109,6 +113,10 @@ final class TentSelectionController {
         }
     }
 
+    public void onSyncRetry() {
+        mSyncManager.forceSync();
+    }
+
     public void attachFragmentUi(TentFragmentUi fragmentUi) {
         LOG.d("Attached new fragment UI: " + fragmentUi);
         mFragmentUis.add(fragmentUi);
@@ -158,7 +166,6 @@ final class TentSelectionController {
     }
 
     private void populateFragmentUi(TentFragmentUi fragmentUi) {
-        fragmentUi.showSpinner(!mLoadedLocationTree);
         if (mAppLocationTree != null && !mWaitingForSync) {
             int dischargedPatientCount = (mDischargedZone == null)
                     ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
@@ -175,12 +182,15 @@ final class TentSelectionController {
             fragmentUi.setTriagePatientCount(
                     (mTriageZone == null) ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
         }
+        fragmentUi.showSpinner(!mLoadedLocationTree);
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
     private final class EventBusSubscriber {
 
-        public void onEventMainThread(SyncFinishedEvent event) {
+        public void onEventMainThread(SyncSucceededEvent event) {
+            mUi.showSyncFailedDialog(false);
+
             mWaitingForSync = false;
 
             // Reload locations when a sync completes.
@@ -188,12 +198,18 @@ final class TentSelectionController {
                     mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
         }
 
+        public void onEventMainThread(SyncFailedEvent event) {
+            mUi.showSyncFailedDialog(true);
+        }
+
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            LOG.i("Location tree fetched.");
             if (mAppLocationTree != null) {
                 mAppLocationTree.close();
             }
             mAppLocationTree = event.tree;
             if (mAppLocationTree == null || mAppLocationTree.getRoot() == null) {
+                LOG.w("Location tree was null or had null root.");
                 mLoadedLocationTree = false;
             } else {
                 mLoadedLocationTree = true;
