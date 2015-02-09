@@ -22,6 +22,15 @@ public class Concept {
      */
     public static final String DIARRHEA_UUID = "1aa247f3-2d83-4efc-94bc-123b1a71b19f";
     /**
+     * UUID for the (question) concept for (any) bleeding.
+     */
+    public static final String BLEEDING_UUID = "147241AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    /**
+     * Group name for Bleeding Sites section.
+     * TODO(akalachman): This may break localization.
+     */
+    public static final String BLEEDING_SITES_NAME = "Bleeding site";
+    /**
      * UUID for the (question) concept for Vomiting.
      */
     public static final String VOMITING_UUID = "405ad95d-f6e1-4023-a459-28cffdb055c5";
@@ -98,6 +107,10 @@ public class Concept {
      */
     public static final String MOBILITY_BED_BOUND_UUID = "3ac0cbb9-f52b-453e-b867-f3cca2e804a3";
 
+    /**
+     * UUID for the (answer) concept of Yes.
+     */
+    public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     public String uuid;
     /**

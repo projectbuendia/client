@@ -70,6 +70,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
+    private final HashMap<String, Integer> mDatesToBleedingSiteCount = new HashMap<>();
+
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
@@ -125,6 +127,15 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
+                // If this is a bleeding site, updating bleeding site counts for this key.
+                if (Concept.BLEEDING_SITES_NAME.equals(ob.groupName)
+                        && !row.datesToValues.containsKey(dateKey)) {
+                    int newCount = mDatesToBleedingSiteCount.containsKey(dateKey)
+                            ? mDatesToBleedingSiteCount.get(dateKey) + 1
+                            : 1;
+                    mDatesToBleedingSiteCount.put(dateKey, newCount);
+                }
+
                 // For notes, perform a concatenation rather than overwriting.
                 if (Concept.NOTES_UUID.equals(ob.conceptUuid)) {
                     if (row.datesToValues.containsKey(dateKey)) {
@@ -347,6 +358,23 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     } catch (NumberFormatException e) {
                         LOG.w(e, "Weight format was invalid");
                     }
+                }
+                break;
+            case Concept.BLEEDING_UUID:
+                // Use the exact number of bleeding sites, if available. Otherwise, show one
+                // site if "Bleeding (Any)" is specified or 0 otherwise.
+                int bleedingSiteCount = mDatesToBleedingSiteCount.containsKey(dateKey)
+                        ? mDatesToBleedingSiteCount.get(dateKey)
+                        : (Concept.YES_UUID.equals(rowData.datesToValues.get(dateKey)) ? 1 : 0);
+                textColor = Color.BLACK;
+                if (bleedingSiteCount >= 3) {
+                    textColor = Color.WHITE;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
+                }
+
+                if (bleedingSiteCount != 0) {
+                    text = String.format(Locale.US, "%d", bleedingSiteCount);
+                    useBigText = true;
                 }
                 break;
             case Concept.PAIN_UUID:
