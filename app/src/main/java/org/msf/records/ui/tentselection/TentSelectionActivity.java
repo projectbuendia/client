@@ -93,15 +93,15 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     }
 
     @Override
-    protected void onStartImpl() {
-        super.onStartImpl();
+    public void onResumeImpl() {
+        super.onResumeImpl();
         mController.init();
     }
 
     @Override
-    protected void onStopImpl() {
+    public void onPauseImpl() {
+        super.onPauseImpl();
         mController.suspend();
-        super.onStopImpl();
     }
 
     @Override
