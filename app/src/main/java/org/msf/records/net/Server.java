@@ -19,13 +19,10 @@ import java.util.List;
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
-    public static final String PATIENT_STATUS_KEY = "status";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
-    public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
-    public static final String PATIENT_MOVEMENT_KEY = "movement";
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
     public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
     public static final String PATIENT_OBSERVATIONS_KEY = "observations";
