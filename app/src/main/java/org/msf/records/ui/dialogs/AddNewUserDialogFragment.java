@@ -15,8 +15,6 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
 
-import java.util.regex.Pattern;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -27,9 +25,9 @@ public class AddNewUserDialogFragment extends DialogFragment {
     /**
      * Creates a new instance and registers the given UI, if specified.
      */
-    public static AddNewUserDialogFragment newInstance(Ui ui) {
+    public static AddNewUserDialogFragment newInstance(ActivityUi activityUi) {
         AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
-        fragment.setUi(ui);
+        fragment.setUi(activityUi);
         return fragment;
     }
 
@@ -38,15 +36,19 @@ public class AddNewUserDialogFragment extends DialogFragment {
 
     private LayoutInflater mInflater;
     // Optional UI for exposing a spinner.
-    @Nullable private Ui mUi;
+    @Nullable private ActivityUi mActivityUi;
 
-    public interface Ui {
+    /**
+     * Delegate for the UI that will be shown when the dialog is closed, so that a spinner can be
+     * shown until the user has loaded.
+     */
+    public interface ActivityUi {
 
         void showSpinner(boolean show);
     }
 
-    public void setUi(Ui ui) {
-        mUi = ui;
+    public void setUi(ActivityUi activityUi) {
+        mActivityUi = activityUi;
     }
 
     @Override
@@ -98,8 +100,8 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                                 mGivenName.getText().toString().trim(),
                                                 mFamilyName.getText().toString().trim()
                                         ));
-                                        if (mUi != null) {
-                                            mUi.showSpinner(true);
+                                        if (mActivityUi != null) {
+                                            mActivityUi.showSpinner(true);
                                         }
                                         dialog.dismiss();
                                     }

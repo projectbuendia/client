@@ -85,10 +85,9 @@ public class PatientListController {
      */
     public void forceSync() {
         if (!mIsRefreshing) {
-            LOG.d("onRefresh");
+            LOG.d("forceSync");
 
             //triggers app wide data refresh
-            // TODO(nfortescue): Incremental sync.
             mSyncManager.forceSync();
             mIsRefreshing = true;
         }

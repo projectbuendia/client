@@ -10,7 +10,6 @@ import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
-import org.msf.records.ui.ProgressFragment;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
@@ -52,7 +51,7 @@ final class UserLoginController {
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
     private final FragmentUi mFragmentUi;
-    private final DialogUi mDialogUi = new DialogUi();
+    private final DialogActivityUi mDialogUi = new DialogActivityUi();
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
@@ -135,11 +134,11 @@ final class UserLoginController {
         }
     }
 
-    public AddNewUserDialogFragment.Ui getDialogUi() {
+    public AddNewUserDialogFragment.ActivityUi getDialogUi() {
         return mDialogUi;
     }
 
-    public final class DialogUi implements AddNewUserDialogFragment.Ui {
+    public final class DialogActivityUi implements AddNewUserDialogFragment.ActivityUi {
 
         @Override
         public void showSpinner(boolean show) {

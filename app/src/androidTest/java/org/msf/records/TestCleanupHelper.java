@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>Effectively, provides a way to get proper test isolation.
  */
 public class TestCleanupHelper {
+    // Originally 100 but doubled after 100 proved to be flaky.
     private static final int NUMBER_OF_RETRIES = 200;
 
     /**
@@ -30,7 +31,7 @@ public class TestCleanupHelper {
         int i = 0;
         while (closeActivity(instrumentation)) {
             if (i++ > NUMBER_OF_RETRIES) {
-                throw new AssertionError("Limit of retries excesses");
+                throw new AssertionError("Retry limit exceeded.");
             }
             Thread.sleep(200);
         }

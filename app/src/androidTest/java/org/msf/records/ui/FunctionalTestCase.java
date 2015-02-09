@@ -52,9 +52,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     @Override
     public void setUp() throws Exception {
         // Make sure periodic sync doesn't interfere with testing.
-        removePeriodicSync();
+        GenericAccountService.removePeriodicSync();
 
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
+        // Even a 2-minute timeout proved to be flaky, so doubled to 4 minutes.
         IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
 
         mEventBus = new EventBusWrapper(EventBus.getDefault());
@@ -184,18 +185,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
-    }
-
-    protected void removePeriodicSync() {
-        Bundle extras = new Bundle();
-        extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-        extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
-        extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
-        extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
-        extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-        extras.putBoolean(SyncAdapter.SYNC_USERS, true);
-        ContentResolver.removePeriodicSync(
-                GenericAccountService.getAccount(), Contracts.CONTENT_AUTHORITY, extras);
     }
 
     private class SyncCounter {
