@@ -28,6 +28,7 @@ public interface Server {
     public static final String PATIENT_OBSERVATIONS_KEY = "observations";
     public static final String PATIENT_QUESTION_UUID = "question_uuid";
     public static final String PATIENT_ANSWER_DATE = "answer_date";
+    public static final String PATIENT_ANSWER_UUID = "answer_uuid";
 
     /**
      * Adds a patient.

@@ -111,6 +111,10 @@ public class AppModel {
         task.execute();
     }
 
+    //public void addObservations(CrudEventBus bus, Set<Observation> observationSet) {
+        //AppAddObservationAsyncTask task = mTaskFactory.newAddObservationAsyncTask()
+    //}
+
     /**
      * Asynchronously updates a patient, posting a
      * {@link org.msf.records.events.data.SingleItemUpdatedEvent} with the updated

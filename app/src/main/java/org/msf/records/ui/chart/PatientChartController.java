@@ -364,7 +364,11 @@ final class PatientChartController {
 
                     @Override
                     public boolean onNewConditionSelected(String newConditionUuid) {
-                        // TODO: Actually do something here.
+                        AppPatientDelta patientWithNewCondition = new AppPatientDelta();
+                        patientWithNewCondition.generalConditionUuid =
+                                Optional.of(newConditionUuid);
+                        mAppModel.
+                        mAppModel.updatePatient(mCrudEventBus, mPatient, patientWithNewCondition);
                         LOG.v("New general condition assigned: %s", newConditionUuid);
                         return false;
                     }
