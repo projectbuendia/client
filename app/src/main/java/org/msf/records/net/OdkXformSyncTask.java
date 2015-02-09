@@ -63,8 +63,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
                     if (cursor.getCount() != 1) {
-                        throw new IllegalArgumentException("Saw " + cursor.getCount()
-                                + " rows for " + proposedPath.getPath());
+                        LOG.e("Saw " + cursor.getCount() + " rows for " + proposedPath.getPath());
+                        // In a fail-fast environment we would crash here, but we will keep going
+                        // to lead the code more robust to errors in the field.
                     }
                     Preconditions.checkArgument(cursor.getColumnCount() == 1);
                     cursor.moveToNext();
