@@ -334,7 +334,7 @@ public class FormsProvider extends ContentProvider {
 
         // Decide if we should do an insert or replace.
         boolean replace = false;
-        if ( values.containsKey(FormsProviderAPI.SQL_INSERT_OR_REPLACE)) {
+        if (values.containsKey(FormsProviderAPI.SQL_INSERT_OR_REPLACE)) {
             replace = values.getAsBoolean(FormsProviderAPI.SQL_INSERT_OR_REPLACE);
 
             // Remove the key, so we don't pass that on to db.insert() or db.replace()

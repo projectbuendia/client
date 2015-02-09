@@ -33,7 +33,7 @@ public final class FormsProviderAPI {
     private FormsProviderAPI() {}
 
     /**
-     * Used as with ContentValues for an insert statement to specify if it should be an
+     * Used with ContentValues for an insert statement to specify if it should be an
      * insert or replace (true) or just an insert (false). See:
      * https://www.buzzingandroid.com/2013/01/sqlite-insert-or-replace-through-contentprovider/
      * for background. Can avoid race conditions.
