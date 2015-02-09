@@ -17,6 +17,7 @@ public class Concept {
     public static final String PCR_NP_UUID = "ab2be5ca-2c61-4cda-9890-36fff0313821";
     public static final String PCR_L_UUID = "ec513d2c-d86c-4aec-ab45-0a0a89f2a0b8";
     public static final String FIRST_SYMPTOM_DATE_UUID = "1730AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    public static final String ADMISSION_DATE_UUID = "162622AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     public static final String YES_UUID = "1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String NO_UUID = "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

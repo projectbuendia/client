@@ -104,7 +104,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// removed, this can also be removed.
 	    mFakeHandler.runUntilEmpty();
 		// THEN the controller puts observations on the UI
-		verify(mMockUi).setObservationHistory(allObservations);
+		verify(mMockUi).setObservationHistory(allObservations, null);
 		verify(mMockUi).updatePatientVitalsUI(recentObservations);
 	}
 

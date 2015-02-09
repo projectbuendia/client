@@ -47,6 +47,8 @@ final class PatientCreationController {
         static final int FIELD_AGE_UNITS = 5;
         static final int FIELD_SEX = 6;
         static final int FIELD_LOCATION = 7;
+        static final int FIELD_ADMISSION_DATE = 8;
+        static final int FIELD_SYMPTOMS_ONSET_DATE = 9;
 
         void setLocationTree(AppLocationTree locationTree);
 
@@ -96,7 +98,7 @@ final class PatientCreationController {
 
     public boolean createPatient(
             String id, String givenName, String familyName, String age, int ageUnits, int sex,
-            String locationUuid) {
+            DateTime admissionDate, DateTime symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
@@ -148,7 +150,8 @@ final class PatientCreationController {
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid = (locationUuid == null)
                 ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
-        patientDelta.admissionDate = Optional.of(DateTime.now());
+        patientDelta.admissionDate = Optional.of(admissionDate);
+        patientDelta.firstSymptomDate = Optional.of(symptomsOnsetDate);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
 

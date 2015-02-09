@@ -59,18 +59,26 @@ public class AppPatientDelta {
             if (birthdate.isPresent()) {
                 json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
             }
-            if (admissionDate.isPresent()) {
-                json.put(Server.PATIENT_ADMISSION_TIMESTAMP, getTimestamp(admissionDate.get()));
-            }
-            if (firstSymptomDate.isPresent()) {
-                JSONObject observation = new JSONObject();
-                observation.put(Server.PATIENT_QUESTION_UUID, Concept.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(Server.PATIENT_ANSWER_DATE,
-                        getDateTimeString(firstSymptomDate.get()));
+
+            if (admissionDate.isPresent() || firstSymptomDate.isPresent()) {
                 JSONArray observations = new JSONArray();
-                observations.put(observation);
+                if (admissionDate.isPresent()) {
+                    JSONObject observation = new JSONObject();
+                    observation.put(Server.PATIENT_QUESTION_UUID, Concept.ADMISSION_DATE_UUID);
+                    observation.put(Server.PATIENT_ANSWER_DATE,
+                            getDateTimeString(admissionDate.get()));
+                    observations.put(observation);
+                }
+                if (firstSymptomDate.isPresent()) {
+                    JSONObject observation = new JSONObject();
+                    observation.put(Server.PATIENT_QUESTION_UUID, Concept.FIRST_SYMPTOM_DATE_UUID);
+                    observation.put(Server.PATIENT_ANSWER_DATE,
+                            getDateTimeString(firstSymptomDate.get()));
+                    observations.put(observation);
+                }
                 json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
             }
+
             if (assignedLocationUuid.isPresent()) {
                 json.put(
                         Server.PATIENT_ASSIGNED_LOCATION,

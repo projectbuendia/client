@@ -12,12 +12,15 @@ import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
+
+import java.util.UUID;
 
 import de.greenrobot.event.EventBus;
 
@@ -93,7 +96,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
      */
     protected void waitForProgressFragment(ProgressFragment progressFragment) {
         ProgressFragmentIdlingResource idlingResource = new ProgressFragmentIdlingResource(
-                "progress_fragment", progressFragment);
+                Integer.toString(progressFragment.hashCode()), progressFragment);
         Espresso.registerIdlingResources(idlingResource);
     }
 
@@ -127,5 +130,14 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         }
 
         throw new IllegalStateException("Could not find a progress fragment to wait on.");
+    }
+
+    /** Idles until sync has completed. */
+    protected void waitForInitialSync() {
+        // Use a UUID as a tag so that we can wait for an arbitrary number of events, since
+        // EventBusIdlingResource<> only works for a single event.
+        EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncSucceededResource);
     }
 }

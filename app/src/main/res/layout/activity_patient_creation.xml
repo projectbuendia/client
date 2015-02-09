@@ -151,6 +151,46 @@
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
+                android:text="@string/admission_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_admission_date"
+                android:inputType="date"
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/symptoms_onset_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_symptoms_onset_date"
+                android:inputType="date"
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="104dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
                 android:text="@string/patient_creation_location_label" />
 
             <LinearLayout

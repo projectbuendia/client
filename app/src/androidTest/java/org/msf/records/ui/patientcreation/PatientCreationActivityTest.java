@@ -81,6 +81,12 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         clickPatientWithIdInPatientList(id);
     }
 
+    /** Tests that the admission date is visible right after adding a patient. */
+    public void testNewPatientHasAdmissionDate() {
+        testNewPatientWithLocation();
+        onView(withText("Day 1")).check(matches(isDisplayed()));
+    }
+
     /** Tests that a confirmation prompt appears upon cancelling the form. */
     public void testNewPatientCancel() {
         onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText("xyz"));

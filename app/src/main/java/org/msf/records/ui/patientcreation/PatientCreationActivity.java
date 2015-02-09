@@ -15,6 +15,9 @@ import android.widget.TextView;
 
 import com.google.common.base.Optional;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
@@ -30,6 +33,9 @@ import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -44,6 +50,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
 
+    private static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
+
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
 
@@ -56,6 +64,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_creation_text_age) EditText mAge;
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
+    @InjectView(R.id.patient_creation_admission_date) EditText mAdmissionDate;
+    @InjectView(R.id.patient_creation_symptoms_onset_date) EditText mSymptomsOnsetDate;
     @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
     @InjectView(R.id.patient_creation_button_create) Button mCreateButton;
     @InjectView(R.id.patient_creation_button_cancel) Button mCancelButton;
@@ -186,6 +196,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         mAge.setEnabled(enable);
         mAgeUnits.setEnabled(enable);
         mSex.setEnabled(enable);
+        mAdmissionDate.setEnabled(enable);
+        mSymptomsOnsetDate.setEnabled(enable);
         mLocationText.setEnabled(enable);
         mCreateButton.setEnabled(enable);
         mCancelButton.setEnabled(enable);
@@ -239,8 +251,27 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 mAge.getText().toString(),
                 getAgeUnits(),
                 getSex(),
+                getAdmissionDate(),
+                getSymptomsOnsetDate(),
                 mLocationUuid);
         setUiEnabled(!mIsCreatePending);
+    }
+
+    private DateTime getSymptomsOnsetDate() {
+        String dateString = mSymptomsOnsetDate.getText().toString();
+    }
+
+    private DateTime getAdmissionDate() {
+        return null;
+    }
+
+    private DateTime fromEditText(EditText editText) {
+        String dateString = editText.getText().toString();
+        if (dateString == null) {
+            return DateTime.now();
+        }
+
+        DateTime.parse(dateString, dateFormat);
     }
 
     @Override

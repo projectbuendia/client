@@ -19,6 +19,7 @@ import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.filter.db.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
+import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
 
@@ -88,6 +89,9 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         AppPatient appPatient = AppPatient.fromNet(patient);
         Uri uri = mContentResolver.insert(
                 Contracts.Patients.CONTENT_URI, appPatient.toContentValues());
+
+        // Perform incremental observation sync so we get admission date.
+        GenericAccountService.forceIncrementalObservationSync();
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(
