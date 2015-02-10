@@ -24,6 +24,10 @@ public class MetaMatchers {
         return matches(within(matcher, timeoutMs));
     }
 
+    /**
+     * Provides a {@link Matcher} that wraps another {@link Matcher}, periodically applying it and
+     * returning true if the {@link View} is matched within a specified period of time.
+     */
     private static ArgumentMatcher<View> within(
             final Matcher<View> matcher, final long timeoutMs) {
         return new ArgumentMatcher<View>() {
@@ -41,7 +45,13 @@ public class MetaMatchers {
                         return true;
                     }
                     // Wait until the next check interval.
-                    while (System.currentTimeMillis() < endTime) {}
+                    if (endTime > System.currentTimeMillis()) {
+                        try {
+                            Thread.sleep(endTime - System.currentTimeMillis());
+                        } catch (InterruptedException e) {
+                            LOG.w("Unable to sleep");
+                        }
+                    }
                 }
 
                 // Timeout.

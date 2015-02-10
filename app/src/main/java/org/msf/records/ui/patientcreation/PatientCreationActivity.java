@@ -5,6 +5,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -83,6 +84,9 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
     private static final int ALERT_DIALOG_PADDING = 32;
 
+    private DateSetListener mAdmissionDateSetListener;
+    private DateSetListener mSymptomsOnsetDateSetListener;
+
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
@@ -113,17 +117,19 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         ButterKnife.inject(this);
 
         DateTime now = DateTime.now();
+        mAdmissionDateSetListener = new DateSetListener(mAdmissionDate);
         mAdmissionDatePickerDialog = new DatePickerDialog(
                 this,
-                new DateSetListener(mAdmissionDate),
+                mAdmissionDateSetListener,
                 now.getYear(),
                 now.getMonthOfYear() - 1,
                 now.getDayOfMonth());
         mAdmissionDatePickerDialog.setTitle(R.string.admission_date_picker_title);
         mAdmissionDatePickerDialog.getDatePicker().setCalendarViewShown(false);
+        mSymptomsOnsetDateSetListener = new DateSetListener(mSymptomsOnsetDate);
         mSymptomsOnsetDatePickerDialog = new DatePickerDialog(
                 this,
-                new DateSetListener(mSymptomsOnsetDate),
+                mSymptomsOnsetDateSetListener,
                 now.getYear(),
                 now.getMonthOfYear() - 1,
                 now.getDayOfMonth());
@@ -290,27 +296,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     }
 
     private DateTime getSymptomsOnsetDate() {
-        return fromEditText(mSymptomsOnsetDate, null);
+        return mSymptomsOnsetDateSetListener.getDateTime();
     }
 
     private DateTime getAdmissionDate() {
-        return fromEditText(mAdmissionDate, DateTime.now());
-    }
-
-    /**
-     * Parses a {@link DateTime} object from an {@link EditText} field, with optional default date.
-     */
-    private DateTime fromEditText(EditText editText, DateTime defaultDate) {
-        String dateString = editText.getText().toString();
-        if (dateString == null) {
-            return defaultDate;
-        }
-
-        try {
-            return DateTime.parse(dateString, DATE_FORMAT);
-        } catch (Exception e) {
-            return defaultDate;
-        }
+        DateTime admissionDate = mAdmissionDateSetListener.getDateTime();
+        return admissionDate == null ? DateTime.now() : admissionDate;
     }
 
     @Override
@@ -467,6 +458,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private final class DateSetListener implements DatePickerDialog.OnDateSetListener {
         private final EditText mDateField;
+        private DateTime mDateTime;
 
         public DateSetListener(final EditText dateField) {
             mDateField = dateField;
@@ -480,6 +472,11 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     .withDayOfMonth(dayOfMonth)
                     .withTimeAtStartOfDay();
             mDateField.setText(DATE_FORMAT.print(dt));
+            mDateTime = dt;
+        }
+
+        public DateTime getDateTime() {
+            return mDateTime;
         }
     }
 }
