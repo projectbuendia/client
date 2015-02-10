@@ -32,6 +32,13 @@ public class Troubleshooter {
     }
 
     /**
+     * Returns a set of all currently-active health issues.
+     */
+    public ImmutableSet<HealthIssue> getActiveIssues() {
+        return ImmutableSet.copyOf(mActiveIssues);
+    }
+
+    /**
      * Called when a new health issue is discovered.
      */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
