@@ -67,20 +67,23 @@ spoon {
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 def releaseRepoRoot = file('../../release/')
 
-// OpenMRS instance for development (default for dev tablets, kept at tip of dev branch).
+// OpenMRS instance for development (kept at tip of dev branch).
 def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs';
 
-// OpenMRS root URL for Edison on local network.
-def openmrsRootUrlEdison = 'http://10.0.0.50:9000/openmrs';
+// OpenMRS instance for integration testing server.
+def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/openmrs';
+
+// OpenMRS root URL for Edison on local network (default for dev tablets).
+def openmrsRootUrlEdison = 'http://server:9000/openmrs';
 
 // OpenMRS root URL for host machine when client runs in an emulator (AVD).
 def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs';
 
-// Just for development.  In all production builds, these should be overridden
+// Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlDev;
-def openmrsUserDefault = 'android';
-def openmrsPasswordDefault = 'Android123';
+def openmrsRootUrlDefault = openmrsRootUrlEdison;
+def openmrsUserDefault = 'buendia';
+def openmrsPasswordDefault = 'buendia';
 
 android {
     compileSdkVersion 21
@@ -102,7 +105,7 @@ android {
         targetSdkVersion 19
 
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}" + (project.hasProperty('buildNumber') ? '.' + project.buildNumber : '')
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
