@@ -21,7 +21,7 @@ import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -280,13 +280,13 @@ final class PatientChartController {
         Map<String, LocalizedChartHelper.LocalizedObservation> observations =
                 mObservationsProvider.getMostRecentObservations(mPatientUuid);
 
-        if (observations.containsKey(Concept.PREGNANCY_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
+        if (observations.containsKey(Concepts.PREGNANCY_UUID)
+                && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
             fields.pregnant = PrepopulatableFields.YES;
         }
 
-        if (observations.containsKey(Concept.IV_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
+        if (observations.containsKey(Concepts.IV_UUID)
+                && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
             fields.ivFitted = PrepopulatableFields.YES;
         }
 
