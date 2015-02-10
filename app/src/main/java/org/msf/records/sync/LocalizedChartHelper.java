@@ -31,10 +31,10 @@ public class LocalizedChartHelper {
      * there is no worrying symptom.
      */
     public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
-        Concepts.NO_UUID, // NO
-        Concepts.SOLID_FOOD_UUID, // Solid food
-        Concepts.NORMAL_UUID, // NORMAL
-        Concepts.NONE_UUID); // None
+            Concepts.NO_UUID, // NO
+            Concepts.SOLID_FOOD_UUID, // Solid food
+            Concepts.NORMAL_UUID, // NORMAL
+            Concepts.NONE_UUID); // None
 
     /**
      * A simple bean class representing an observation. All names and values have been localized.
