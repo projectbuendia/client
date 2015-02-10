@@ -10,7 +10,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
@@ -64,7 +64,7 @@ public class AppPatientDelta {
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.PATIENT_QUESTION_UUID, Concept.FIRST_SYMPTOM_DATE_UUID);
+                observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(Server.PATIENT_ANSWER_DATE,
                         getDateTimeString(firstSymptomDate.get()));
                 JSONArray observations = new JSONArray();

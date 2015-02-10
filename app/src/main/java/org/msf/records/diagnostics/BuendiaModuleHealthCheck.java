@@ -5,14 +5,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.utils.Logger;
 
@@ -32,7 +31,7 @@ public class BuendiaModuleHealthCheck extends HealthCheck {
     // Retrieving a concept should be quick and ensures that the module is both running and has
     // database access.
     private static final String HEALTH_CHECK_ENDPOINT =
-            "/concept/" + Concept.GENERAL_CONDITION_UUID;
+            "/concept/" + Concepts.GENERAL_CONDITION_UUID;
 
     private final Object mLock = new Object();
 
