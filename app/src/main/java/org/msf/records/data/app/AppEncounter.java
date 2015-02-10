@@ -57,6 +57,8 @@ public class AppEncounter extends AppTypeBase<String> {
                 observationsJson.put(observationJson);
             }
             json.put(Server.PATIENT_OBSERVATIONS_KEY, observationsJson);
+            json.put(Server.PATIENT_UUID_KEY, patientUuid);
+            json.put(Server.PATIENT_OBSERVATIONS_TIMESTAMP, timestamp.getMillis() / 1000);
             return true;
         } catch (JSONException e) {
             LOG.e("Error constructing encounter JSON", e);
@@ -117,11 +119,12 @@ public class AppEncounter extends AppTypeBase<String> {
      */
     public ContentValues[] toContentValuesArray() {
         ContentValues[] valuesArray = new ContentValues[observations.length];
+        long timestampSec = timestamp.getMillis() / 1000;
         for (int i = 0; i < observations.length; i++) {
             AppObservation observation = observations[i];
             ContentValues contentValues = new ContentValues();
             contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, observation.conceptUuid);
-            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestamp.getMillis());
+            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestampSec);
             contentValues.put(Contracts.ObservationColumns.ENCOUNTER_UUID, encounterUuid);
             contentValues.put(Contracts.ObservationColumns.PATIENT_UUID, patientUuid);
             contentValues.put(Contracts.ObservationColumns.VALUE, observation.value);

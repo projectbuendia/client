@@ -1,49 +1,40 @@
 package org.msf.records.ui.chart;
 
 import android.content.Context;
-import android.text.Layout;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.common.base.Optional;
-
 import org.msf.records.R;
-import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.data.res.ResZone;
 import org.msf.records.model.Concept;
-import org.msf.records.model.Zone;
-import org.msf.records.utils.PatientCountDisplay;
-import org.msf.records.widget.AutoResizeTextView;
-import org.msf.records.widget.SubtitledButtonView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Created by akalachman on 1/26/15.
+ * Shows a list of general conditions, with corresponding number, color, and name.
  */
 public class GeneralConditionAdapter extends ArrayAdapter<String> {
     private static final int VIEW_RESOURCE = R.layout.listview_cell_condition_selection;
     private String[] mConditions;
-    private Optional<String> mSelectedConditionUuid;
+    @Nullable private String mSelectedConditionUuid;
 
-    public Optional<String> getSelectedConditionUuid() {
+    @Nullable public String getSelectedConditionUuid() {
         return mSelectedConditionUuid;
     }
 
-    public void setSelectedConditionUuid(Optional<String> selectedConditionUuid) {
+    public void setSelectedConditionUuid(@Nullable String selectedConditionUuid) {
         mSelectedConditionUuid = selectedConditionUuid;
         notifyDataSetChanged();
     }
 
     public GeneralConditionAdapter(
-            Context context, String[] conditions, Optional<String> selectedConditionUuid)  {
+            Context context, String[] conditions, @Nullable String selectedConditionUuid)  {
         super(context, VIEW_RESOURCE, conditions);
         mConditions = conditions;
         mSelectedConditionUuid = selectedConditionUuid;
@@ -74,13 +65,7 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
         holder.mConditionText.setTextColor(condition.getForegroundColor());
         holder.mConditionParent.setBackgroundColor(condition.getBackgroundColor());
 
-        // TODO: This is probably wrong.
-        /*if (mSelectedConditionUuid.isPresent()
-                && mSelectedConditionUuid.get().equals(conditionUuid)) {
-            view.setBackgroundResource(R.color.zone_tent_selected_padding);
-        } else {
-            view.setBackgroundResource(R.drawable.tent_selector);
-        }*/
+        // TODO: Show currently-selected condition differently.
 
         return view;
     }

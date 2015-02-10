@@ -12,13 +12,13 @@ import java.util.Map;
  */
 public class Encounter {
     /**
-     * The encounterUuid of the encounter.
+     * The uuid of the encounter.
      */
     public String uuid;
     public DateTime timestamp;
     public String enterer_id;
     /**
-     * Keys are encounterUuid strings for the concept representing the concept observed. Values are the
+     * Keys are uuid strings for the concept representing the concept observed. Values are the
      * value observed. To find out what the type is the type in the concept dictionary must be
      * inspected. Common values are doubles and String representing concept uuids of coded concepts.
      */

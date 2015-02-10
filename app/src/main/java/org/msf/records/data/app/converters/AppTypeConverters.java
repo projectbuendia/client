@@ -12,8 +12,7 @@ public class AppTypeConverters {
     public final AppLocationConverter location;
 
     AppTypeConverters(
-            AppPatientConverter patientConverter,
-            AppLocationConverter locationConverter) {
+            AppPatientConverter patientConverter, AppLocationConverter locationConverter) {
         patient = patientConverter;
         location = locationConverter;
     }

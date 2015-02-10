@@ -3,14 +3,11 @@ package org.msf.records.ui.chart;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.Toast;
-
-import com.google.common.base.Optional;
 
 import org.msf.records.R;
 import org.msf.records.model.Concept;
@@ -30,7 +27,7 @@ public final class AssignGeneralConditionDialog
     @Nullable private GeneralConditionAdapter mAdapter;
 
     private final Context mContext;
-    private final Optional<String> mCurrentConditionUuid;
+    @Nullable private final String mCurrentConditionUuid;
     private final ConditionSelectedCallback mConditionSelectedCallback;
     private ProgressDialog mProgressDialog;
 
@@ -49,7 +46,7 @@ public final class AssignGeneralConditionDialog
 
     public AssignGeneralConditionDialog(
             Context context,
-            Optional<String> currentConditionUuid,
+            @Nullable String currentConditionUuid,
             ConditionSelectedCallback conditionSelectedCallback) {
         mContext = checkNotNull(context);
         mCurrentConditionUuid = currentConditionUuid;
@@ -79,7 +76,9 @@ public final class AssignGeneralConditionDialog
 
     public void onPatientUpdateFailed( int reason )
     {
-        mAdapter.setSelectedConditionUuid(mCurrentConditionUuid);
+        if (mCurrentConditionUuid != null) {
+            mAdapter.setSelectedConditionUuid(mCurrentConditionUuid);
+        }
 
         Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ),
                 Toast.LENGTH_SHORT ).show();
@@ -90,7 +89,7 @@ public final class AssignGeneralConditionDialog
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         String newConditionUuid = mAdapter.getItem(position);
-        mAdapter.setSelectedConditionUuid(Optional.fromNullable(newConditionUuid));
+        mAdapter.setSelectedConditionUuid(newConditionUuid);
         mProgressDialog = ProgressDialog.show(mContext,
                 mContext.getResources().getString(R.string.title_updating_patient),
                 mContext.getResources().getString(R.string.please_wait), true);
@@ -108,6 +107,7 @@ public final class AssignGeneralConditionDialog
     // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentCondition(String newConditionUuid) {
-        return mCurrentConditionUuid.equals(mAdapter.getSelectedConditionUuid());
+        return mCurrentConditionUuid != null &&
+                mCurrentConditionUuid.equals(mAdapter.getSelectedConditionUuid());
     }
 }

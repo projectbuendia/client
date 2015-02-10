@@ -131,7 +131,7 @@ public class AppPatientDelta {
 
     private static JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {
         JSONObject location = new JSONObject();
-        location.put("encounterUuid", assignedLocationUuid);
+        location.put("uuid", assignedLocationUuid);
         return location;
     }
 

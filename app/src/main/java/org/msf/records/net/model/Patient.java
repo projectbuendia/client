@@ -47,7 +47,7 @@ public class Patient implements Serializable {
         // TODO(nfortescue): Do this with a nice reflection based loop
         if (source.uuid != null) {
             if (!source.uuid.equals(this.uuid)) {
-                throw new IllegalArgumentException("Cannot overwrite with different encounterUuid");
+                throw new IllegalArgumentException("Cannot overwrite with different uuid");
             }
         }
         if (source.id != null) {

@@ -38,7 +38,7 @@ public class OpenMrsXformsConnection {
 
     /**
      * Get a single (full) Xform from the OpenMRS server
-     * @param uuid the encounterUuid of the form to fetch
+     * @param uuid the uuid of the form to fetch
      * @param resultListener the listener to be informed of the form asynchronously
      * @param errorListener a listener to be informed of any errors
      */
@@ -96,7 +96,7 @@ public class OpenMrsXformsConnection {
                                 }
 
                                 OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
-                                        entry.getString("encounterUuid"),
+                                        entry.getString("uuid"),
                                         entry.getString("name"),
                                         date_changed);
                                 result.add(indexEntry);

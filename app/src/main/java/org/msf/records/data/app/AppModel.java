@@ -88,7 +88,12 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
-                new UuidFilter(), uuid, mConverters.patient, bus);
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
+                new UuidFilter(),
+                uuid,
+                mConverters.patient,
+                bus);
         task.execute();
     }
 

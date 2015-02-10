@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * LocationUuidFilter returns all patients who reside in the specified subtree of locations.
  *
- * <p>For example, a LocationUuidFilter given a encounterUuid of a zone will return all patients assigned to
+ * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to
  * that zone, tents within that zone, beds within those tents, etc.
  */
 public final class LocationUuidFilter implements SimpleSelectionFilter<AppPatient> {

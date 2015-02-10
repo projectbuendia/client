@@ -23,6 +23,7 @@ import java.util.List;
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
+    public static final String PATIENT_UUID_KEY = "uuid";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
@@ -30,6 +31,7 @@ public interface Server {
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
     public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
     public static final String PATIENT_OBSERVATIONS_KEY = "observations";
+    public static final String PATIENT_OBSERVATIONS_TIMESTAMP = "timestamp";
     public static final String PATIENT_QUESTION_UUID = "question_uuid";
     public static final String PATIENT_ANSWER_DATE = "answer_date";
     public static final String PATIENT_ANSWER_UUID = "answer_uuid";
@@ -112,7 +114,7 @@ public interface Server {
     /**
      * Add a new location to the server.
      *
-     * @param location encounterUuid must not be set, parent_uuid must be set, and the names map must have a
+     * @param location uuid must not be set, parent_uuid must be set, and the names map must have a
      *                 name for at least one locale.
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
@@ -124,7 +126,7 @@ public interface Server {
     /**
      * Update the names for a location on the server.
      *
-     * @param location the location, only encounterUuid and new locale names for the location will be used,
+     * @param location the location, only uuid and new locale names for the location will be used,
      *                 but ideally the other arguments should be correct
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors

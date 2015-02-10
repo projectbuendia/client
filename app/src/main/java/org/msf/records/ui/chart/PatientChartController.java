@@ -21,6 +21,7 @@ import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
+import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Concept;
@@ -91,6 +92,9 @@ final class PatientChartController {
         /** Updates the UI showing current observation values for this patient. */
         void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
 
+        /** Updates the general condition UI with the patient's current condition. */
+        void updatePatientGeneralConditionUi(String generalConditionUuid);
+
         /** Updates the UI with the patient's location. */
         void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
 
@@ -102,6 +106,9 @@ final class PatientChartController {
 
         /** Shows the patient's personal details. */
         void setPatient(AppPatient patient);
+
+        /** Displays an error. */
+        void showError(String errorMessage);
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
@@ -360,7 +367,7 @@ final class PatientChartController {
         return requestCode;
     }
 
-    public void showAssignGeneralConditionDialog(Context context) {
+    public void showAssignGeneralConditionDialog(Context context, String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
                 new AssignGeneralConditionDialog.ConditionSelectedCallback() {
 
@@ -369,7 +376,7 @@ final class PatientChartController {
                         AppEncounter appEncounter = new AppEncounter(
                                 mPatientUuid,
                                 null, // encounter UUID, which the server will generate
-                                DateTime.now(),
+                                DateTime.now().minusSeconds(5), // TODO: We shouldn't need this.
                                 new AppEncounter.AppObservation[] {
                                         new AppEncounter.AppObservation(
                                                 Concept.GENERAL_CONDITION_UUID,
@@ -377,14 +384,12 @@ final class PatientChartController {
                                                 AppEncounter.AppObservation.Type.UUID)
                                 });
                         mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
-                        LOG.v("New general condition assigned: %s", newConditionUuid);
+                        LOG.v("Assigning general condition: %s", newConditionUuid);
                         return false;
                     }
                 };
         mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
-                context,
-                Optional.of(""),  // TODO: Real condition encounterUuid.
-                callback);
+                context, generalConditionUuid, callback);
 
         mAssignGeneralConditionDialog.show();
     }
@@ -456,22 +461,48 @@ final class PatientChartController {
             updatePatientUI();
         }
 
-        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-            mPatient = event.item;
-            mUi.setPatient(mPatient);
-            updatePatientLocationUi();
-
-            if (mAssignLocationDialog != null) {
-                mAssignLocationDialog.dismiss();
-                mAssignLocationDialog = null;
+        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+            if (mAssignGeneralConditionDialog != null) {
+                mAssignGeneralConditionDialog.dismiss();
+                mAssignGeneralConditionDialog = null;
             }
 
-            // TODO(dxchen): Displaying the observations part of the UI takes a lot of
-            // main-thread time. This delays rendering of the rest of UI.
-            // To allow the rest of the UI to be displayed before we attempt to populate
-            // the observations, we delay the observation update slightly.
-            // We need this hack because we load observations on the main thread. We should change
-            // this to use a background thread. Either an async task or using CrudEventBus events.
+            mUi.showError(event.error);
+        }
+
+        public void onEventMainThread(SingleItemFetchedEvent event) {
+            if (event.item instanceof AppPatient) {
+                mPatient = (AppPatient)event.item;
+                mUi.setPatient(mPatient);
+                updatePatientLocationUi();
+
+                if (mAssignLocationDialog != null) {
+                    mAssignLocationDialog.dismiss();
+                    mAssignLocationDialog = null;
+                }
+
+                // TODO(dxchen): Displaying the observations part of the UI takes a lot of
+                // main-thread time. This delays rendering of the rest of UI.
+                // To allow the rest of the UI to be displayed before we attempt to populate
+                // the observations, we delay the observation update slightly.
+                // We need this hack because we load observations on the main thread. We should change
+                // this to use a background thread. Either an async task or using CrudEventBus events.
+
+            } else if (event.item instanceof AppEncounter) {
+                AppEncounter.AppObservation[] observations =
+                        ((AppEncounter)event.item).observations;
+                for (AppEncounter.AppObservation observation : observations) {
+                    if (observation.conceptUuid.equals(Concept.GENERAL_CONDITION_UUID)) {
+                        mUi.updatePatientGeneralConditionUi(observation.value);
+                        LOG.v("Setting general condition in UI: %s", observation.value);
+                    }
+                }
+
+                if (mAssignGeneralConditionDialog != null) {
+                    mAssignGeneralConditionDialog.dismiss();
+                    mAssignGeneralConditionDialog = null;
+                }
+            }
 
             mMainThreadHandler.post(new Runnable() {
                 @Override

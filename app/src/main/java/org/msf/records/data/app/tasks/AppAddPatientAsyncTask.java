@@ -19,6 +19,7 @@ import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
+import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
 
@@ -121,7 +122,12 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
-                new UuidFilter(), mUuid, mConverters.patient, mBus);
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
+                new UuidFilter(),
+                mUuid,
+                mConverters.patient,
+                mBus);
         task.execute();
     }
 

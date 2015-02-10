@@ -1,6 +1,7 @@
 package org.msf.records.data.app.tasks;
 
 import android.content.ContentResolver;
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.msf.records.data.app.AppEncounter;
@@ -65,10 +66,14 @@ public class AppAsyncTaskFactory {
      * Creates a new {@link FetchSingleAsyncTask}.
      */
     public <T extends AppTypeBase<?>> FetchSingleAsyncTask<T> newFetchSingleAsyncTask(
+            Uri contentUri,
+            String[] projectionColumns,
             SimpleSelectionFilter filter,
             String constraint,
             AppTypeConverter<T> converter,
             CrudEventBus bus) {
-        return new FetchSingleAsyncTask<>(mContentResolver, filter, constraint, converter, bus);
+        return new FetchSingleAsyncTask<>(
+                mContentResolver, contentUri, projectionColumns, filter, constraint, converter,
+                bus);
     }
 }

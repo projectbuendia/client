@@ -1,8 +1,6 @@
 package org.msf.records.data.app.tasks;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.android.volley.VolleyError;
@@ -18,7 +16,6 @@ import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.filter.db.encounter.EncounterUuidFilter;
-import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Encounter;
 import org.msf.records.sync.providers.Contracts;
@@ -34,6 +31,14 @@ import java.util.concurrent.ExecutionException;
 public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAddFailedEvent> {
 
     private static final Logger LOG = Logger.create();
+
+    private static final String[] ENCOUNTER_PROJECTION = new String[] {
+            Contracts.ObservationColumns.CONCEPT_UUID,
+            Contracts.ObservationColumns.ENCOUNTER_TIME,
+            Contracts.ObservationColumns.ENCOUNTER_UUID,
+            Contracts.ObservationColumns.PATIENT_UUID,
+            Contracts.ObservationColumns.VALUE
+    };
 
     private final AppAsyncTaskFactory mTaskFactory;
     private final AppTypeConverters mConverters;
@@ -77,6 +82,8 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
             return new EncounterAddFailedEvent(EncounterAddFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {
             // TODO(dxchen): Parse the VolleyError to see exactly what kind of error was raised.
+            LOG.e("Server error while adding encounter", e);
+            LOG.e("Error response: %s", ((VolleyError)e.getCause()).networkResponse);
             return new EncounterAddFailedEvent(
                     EncounterAddFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
         }
@@ -133,7 +140,12 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         FetchSingleAsyncTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
-                new EncounterUuidFilter(), mUuid, new AppEncounterConverter(mPatient.uuid), mBus);
+                Contracts.Observations.CONTENT_URI,
+                ENCOUNTER_PROJECTION,
+                new EncounterUuidFilter(),
+                mUuid,
+                new AppEncounterConverter(mPatient.uuid),
+                mBus);
         task.execute();
     }
 

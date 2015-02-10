@@ -2,6 +2,7 @@ package org.msf.records.data.app.tasks;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.msf.records.data.app.AppTypeBase;
@@ -20,6 +21,8 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
         extends AsyncTask<Void, Void, Object> {
 
     private final ContentResolver mContentResolver;
+    private final Uri mContentUri;
+    private final String[] mProjectionColumns;
     private final SimpleSelectionFilter<T> mFilter;
     private final String mConstraint;
     private final AppTypeConverter<T> mConverter;
@@ -27,11 +30,15 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
 
     FetchSingleAsyncTask(
             ContentResolver contentResolver,
+            Uri contentUri,
+            String[] projectionColumns,
             SimpleSelectionFilter filter,
             String constraint,
             AppTypeConverter<T> converter,
             CrudEventBus bus) {
         mContentResolver = contentResolver;
+        mContentUri = contentUri;
+        mProjectionColumns = projectionColumns;
         mFilter = filter;
         mConstraint = constraint;
         mConverter = converter;
@@ -40,13 +47,11 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
 
     @Override
     protected Object doInBackground(Void... params) {
-        // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
-        // different types of queries.
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                    Contracts.Patients.CONTENT_URI,
-                    PatientProjection.getProjectionColumns(),
+                    mContentUri,
+                    mProjectionColumns,
                     mFilter.getSelectionString(),
                     mFilter.getSelectionArgs(mConstraint),
                     null);

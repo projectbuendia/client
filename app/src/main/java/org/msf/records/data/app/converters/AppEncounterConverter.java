@@ -29,7 +29,7 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
                 cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_TIME));
         DateTime dateTime = new DateTime(timestamp);
         List<AppEncounter.AppObservation> observationList = new ArrayList<>();
-        cursor.move(0);
+        cursor.move(-1);
         while (cursor.moveToNext()) {
             String value =
                     cursor.getString((cursor.getColumnIndex(Contracts.ObservationColumns.VALUE)));
