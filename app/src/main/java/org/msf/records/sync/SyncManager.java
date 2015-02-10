@@ -32,6 +32,7 @@ public class SyncManager {
      * Forces a sync to occur immediately.
      */
     public void forceSync() {
+        LOG.d("In SyncManager#forceSync()");
         GenericAccountService.triggerRefresh(
                 PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
     }

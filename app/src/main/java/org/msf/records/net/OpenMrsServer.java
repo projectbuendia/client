@@ -242,7 +242,7 @@ public class OpenMrsServer implements Server {
                                 patients.add(patientFromJson(results.getJSONObject(i)));
                             }
                         } catch (JSONException e) {
-                            LOG.e("Failed to convert JSON response");
+                            LOG.e(e, "Failed to convert JSON response");
                         }
                         patientListener.onResponse(patients);
                     }

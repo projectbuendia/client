@@ -19,6 +19,10 @@ class RequestConfigurator {
                 new DefaultRetryPolicy(timeoutMs, 0 /*maxNumRetries*/, 0 /*backoffMultiplier*/);
     }
 
+    RequestConfigurator(int timeoutMs, int maxNumRetries, int backoffMultiplier) {
+        mRetryPolicy = new DefaultRetryPolicy(timeoutMs, maxNumRetries, backoffMultiplier);
+    }
+
     public <T extends Request> T configure(T request) {
         request.setRetryPolicy(mRetryPolicy);
         return request;

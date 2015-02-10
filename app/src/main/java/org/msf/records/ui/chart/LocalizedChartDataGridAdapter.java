@@ -18,7 +18,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.msf.records.R;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.net.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.utils.Logger;
@@ -70,6 +70,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
+    private final HashMap<String, Integer> mDatesToBleedingSiteCount = new HashMap<>();
+
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
     private final List<Row> rows = new ArrayList<>();
@@ -117,7 +119,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 rows.add(row);
             }
 
-            if (ob.value == null || LocalizedChartHelper.UNKNOWN_VALUE.equals(ob.value)) {
+            if (ob.value == null || Concepts.UNKNOWN_UUID.equals(ob.value)) {
                 // Don't display any dots or handle dates if there are no positive observations.
                 continue;
             }
@@ -131,8 +133,17 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
             // Only display dots for positive symptoms.
             if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
+                // If this is a bleeding site, updating bleeding site counts for this key.
+                if (Concepts.BLEEDING_SITES_NAME.equals(ob.groupName)
+                        && !row.datesToValues.containsKey(dateKey)) {
+                    int newCount = mDatesToBleedingSiteCount.containsKey(dateKey)
+                            ? mDatesToBleedingSiteCount.get(dateKey) + 1
+                            : 1;
+                    mDatesToBleedingSiteCount.put(dateKey, newCount);
+                }
+
                 // For notes, perform a concatenation rather than overwriting.
-                if (Concept.NOTES_UUID.equals(ob.conceptUuid)) {
+                if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
                     if (row.datesToValues.containsKey(dateKey)) {
                         row.datesToValues.put(
                                 dateKey, row.datesToValues.get(dateKey) + '\n' + ob.value);
@@ -285,7 +296,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
         // TODO: Proper localization.
         switch (conceptUuid) {
-            case Concept.RESPONSIVENESS_UUID:
+            case Concepts.RESPONSIVENESS_UUID:
                 String responsivenessString = rowData.datesToValues.get(dateKey);
                 if (responsivenessString != null) {
                     text = getLocalizedAvpuInitials(responsivenessString);
@@ -293,7 +304,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     useBigText = true;
                 }
                 break;
-            case Concept.MOBILITY_UUID:
+            case Concepts.MOBILITY_UUID:
                 String mobilityString = rowData.datesToValues.get(dateKey);
                 if (mobilityString != null) {
                     text = getLocalizedMobilityInitials(mobilityString);
@@ -301,7 +312,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     useBigText = true;
                 }
                 break;
-            case Concept.TEMPERATURE_UUID:
+            case Concepts.TEMPERATURE_UUID:
                 String temperatureString = rowData.datesToValues.get(dateKey);
                 if (temperatureString != null) {
                     try {
@@ -318,10 +329,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     }
                 }
                 break;
-            case org.msf.records.model.Concept.GENERAL_CONDITION_UUID:
+            case Concepts.GENERAL_CONDITION_UUID:
                 String conditionUuid = rowData.datesToValues.get(dateKey);
                 if (conditionUuid != null) {
-                    ResStatus resStatus = org.msf.records.model.Concept.getResStatus(conditionUuid);
+                    ResStatus resStatus = Concepts.getResStatus(conditionUuid);
                     ResStatus.Resolved status = resStatus.resolve(mContext.getResources());
                     text = status.getShortDescription().toString();
                     textColor = status.getForegroundColor();
@@ -330,8 +341,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             // Concepts with a discrete count value.
-            case Concept.DIARRHEA_UUID:
-            case Concept.VOMITING_UUID:
+            case Concepts.DIARRHEA_UUID:
+            case Concepts.VOMITING_UUID:
                 String valueString = rowData.datesToValues.get(dateKey);
                 if (valueString != null) {
                     try {
@@ -344,7 +355,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     }
                 }
                 break;
-            case Concept.WEIGHT_UUID:
+            case Concepts.WEIGHT_UUID:
                 String weightString = rowData.datesToValues.get(dateKey);
                 if (weightString != null) {
                     try {
@@ -364,20 +375,37 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     }
                 }
                 break;
-            case Concept.PAIN_UUID:
-            case Concept.WEAKNESS_UUID:
+            case Concepts.BLEEDING_UUID:
+                // Use the exact number of bleeding sites, if available. Otherwise, show one
+                // site if "Bleeding (Any)" is specified or 0 otherwise.
+                int bleedingSiteCount = mDatesToBleedingSiteCount.containsKey(dateKey)
+                        ? mDatesToBleedingSiteCount.get(dateKey)
+                        : (Concepts.YES_UUID.equals(rowData.datesToValues.get(dateKey)) ? 1 : 0);
+                textColor = Color.BLACK;
+                if (bleedingSiteCount >= 3) {
+                    textColor = Color.WHITE;
+                    backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
+                }
+
+                if (bleedingSiteCount != 0) {
+                    text = String.format(Locale.US, "%d", bleedingSiteCount);
+                    useBigText = true;
+                }
+                break;
+            case Concepts.PAIN_UUID:
+            case Concepts.WEAKNESS_UUID:
                 String valueUuid = rowData.datesToValues.get(dateKey);
                 int value = 0;
-                if (Concept.MILD_UUID.equals(valueUuid)) {
+                if (Concepts.MILD_UUID.equals(valueUuid)) {
                     value = 1;
                     textColor = Color.BLACK;
                     // backgroundColor = mContext.getResources().getColor(R.color.severity_mild);
-                } else if (Concept.MODERATE_UUID.equals(valueUuid)) {
+                } else if (Concepts.MODERATE_UUID.equals(valueUuid)) {
                     value = 2;
                     textColor = Color.BLACK;
                     // backgroundColor =
                     // mContext.getResources().getColor(R.color.severity_moderate);
-                } else if (Concept.SEVERE_UUID.equals(valueUuid)) {
+                } else if (Concepts.SEVERE_UUID.equals(valueUuid)) {
                     value = 3;
                     textColor = Color.RED;
                     // backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
@@ -388,7 +416,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                     useBigText = true;
                 }
                 break;
-            case Concept.NOTES_UUID: {
+            case Concepts.NOTES_UUID: {
                 boolean isActive = rowData.datesToValues.containsKey(dateKey);
                 if (isActive) {
                     backgroundResource = R.drawable.chart_cell_active_pressable;
@@ -433,16 +461,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private String getLocalizedMobilityInitials(String mobilityUuid) {
         int resId = R.string.mobility_unknown;
         switch (mobilityUuid) {
-            case Concept.MOBILITY_WALKING_UUID:
+            case Concepts.MOBILITY_WALKING_UUID:
                 resId = R.string.mobility_walking;
                 break;
-            case Concept.MOBILITY_WALKING_WITH_DIFFICULTY_UUID:
+            case Concepts.MOBILITY_WALKING_WITH_DIFFICULTY_UUID:
                 resId = R.string.mobility_walking_with_difficulty;
                 break;
-            case Concept.MOBILITY_ASSISTED_UUID:
+            case Concepts.MOBILITY_ASSISTED_UUID:
                 resId = R.string.mobility_assisted;
                 break;
-            case Concept.MOBILITY_BED_BOUND_UUID:
+            case Concepts.MOBILITY_BED_BOUND_UUID:
                 resId = R.string.mobility_bed_bound;
                 break;
             default:
@@ -454,16 +482,16 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private String getLocalizedAvpuInitials(String responsivenessUuid) {
         int resId = R.string.avpu_unknown;
         switch (responsivenessUuid) {
-            case Concept.RESPONSIVENESS_ALERT_UUID:
+            case Concepts.RESPONSIVENESS_ALERT_UUID:
                 resId = R.string.avpu_alert;
                 break;
-            case Concept.RESPONSIVENESS_VOICE_UUID:
+            case Concepts.RESPONSIVENESS_VOICE_UUID:
                 resId = R.string.avpu_voice;
                 break;
-            case Concept.RESPONSIVENESS_PAIN_UUID:
+            case Concepts.RESPONSIVENESS_PAIN_UUID:
                 resId = R.string.avpu_pain;
                 break;
-            case Concept.RESPONSIVENESS_UNRESPONSIVE_UUID:
+            case Concepts.RESPONSIVENESS_UNRESPONSIVE_UUID:
                 resId = R.string.avpu_unresponsive;
                 break;
             default:

@@ -22,7 +22,7 @@ import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -55,8 +55,14 @@ final class PatientChartController {
 
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
 
-    /** Period between observation syncs while the chart view is active. */
-    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 15000;
+    /**
+     * Period between observation syncs while the chart view is active.  It would be nice for
+     * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
+     * each sync.  TODO: Try reducing this period to improve responsiveness, but only after
+     * we're able to prevent the table from scrolling to the top on sync, or when we're able to
+     * skip re-rendering for syncs that pull down no new patient or observation data.
+     */
+    private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array
@@ -277,13 +283,13 @@ final class PatientChartController {
         Map<String, LocalizedChartHelper.LocalizedObservation> observations =
                 mObservationsProvider.getMostRecentObservations(mPatientUuid);
 
-        if (observations.containsKey(Concept.PREGNANCY_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.PREGNANCY_UUID).value)) {
+        if (observations.containsKey(Concepts.PREGNANCY_UUID)
+                && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
             fields.pregnant = PrepopulatableFields.YES;
         }
 
-        if (observations.containsKey(Concept.IV_UUID)
-                && Concept.YES_UUID.equals(observations.get(Concept.IV_UUID).value)) {
+        if (observations.containsKey(Concepts.IV_UUID)
+                && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
             fields.ivFitted = PrepopulatableFields.YES;
         }
 
@@ -351,9 +357,9 @@ final class PatientChartController {
         mUi.updatePatientVitalsUI(conceptsToLatestObservations);
 
         LocalDate admissionDate = null;
-        if (conceptsToLatestObservations.containsKey(Concept.ADMISSION_DATE_UUID)) {
+        if (conceptsToLatestObservations.containsKey(Concepts.ADMISSION_DATE_UUID)) {
             LocalizedObservation admissionDateObservation =
-                    conceptsToLatestObservations.get(Concept.ADMISSION_DATE_UUID);
+                    conceptsToLatestObservations.get(Concepts.ADMISSION_DATE_UUID);
             String admissionDateString = admissionDateObservation.localizedValue;
             if (admissionDateString != null) {
                 admissionDate = Utils.stringToLocalDate(admissionDateString);

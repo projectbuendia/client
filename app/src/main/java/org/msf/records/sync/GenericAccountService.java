@@ -118,14 +118,8 @@ public class GenericAccountService extends Service {
             ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
             // Recommend a schedule for automatic synchronization. The system may modify this based
             // on other scheduled syncs and network utilization.
-            Bundle extras = new Bundle();
-            extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-            extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
-            extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
-            extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
-            extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-            extras.putBoolean(SyncAdapter.SYNC_USERS, true);
-            ContentResolver.addPeriodicSync(account, CONTENT_AUTHORITY, extras,SYNC_FREQUENCY);
+            ContentResolver.addPeriodicSync(
+                    account, CONTENT_AUTHORITY, getExtrasForPeriodicSync(), SYNC_FREQUENCY);
             newAccount = true;
         }
 
@@ -137,6 +131,28 @@ public class GenericAccountService extends Service {
             triggerRefresh(prefs);
             prefs.edit().putBoolean(PREF_SETUP_COMPLETE, true).commit();
         }
+    }
+
+    private static Bundle getExtrasForPeriodicSync() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
+        extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_USERS, true);
+
+        return extras;
+    }
+
+    /**
+     * Removes the periodic sync that is started when this app registers its account.
+     */
+    public static void removePeriodicSync() {
+        ContentResolver.removePeriodicSync(
+                GenericAccountService.getAccount(),
+                Contracts.CONTENT_AUTHORITY,
+                getExtrasForPeriodicSync());
     }
 
     @Override

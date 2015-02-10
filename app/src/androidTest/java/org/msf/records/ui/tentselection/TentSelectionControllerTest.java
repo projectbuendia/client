@@ -1,5 +1,6 @@
 package org.msf.records.ui.tentselection;
 
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.test.AndroidTestCase;
@@ -11,6 +12,7 @@ import org.msf.records.FakeSyncManager;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
@@ -104,5 +106,89 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the progress spinner
         verify(mMockFragmentUi).showSpinner(false);
+    }
+
+    /**
+     * Tests that a sync failure causes the error dialog to appear even if locations have been
+     * properly loaded.
+     */
+    public void testSyncFailureShowsErrorDialog_withLocations() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN the location tree is loaded BUT sync has failed
+        mFakeSyncManager.setSyncing(true);
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        mFakeEventBus.post(new SyncFailedEvent());
+        // THEN the controller shows the sync failure dialog
+        verify(mMockUi).showSyncFailedDialog(true);
+    }
+
+    /**
+     * Tests that a sync failure causes the error dialog to appear when no locations are present.
+     */
+    public void testSyncFailureShowsErrorDialog_noLocations() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN the location tree is loaded BUT sync has failed
+        mFakeSyncManager.setSyncing(true);
+        mFakeEventBus.post(new SyncFailedEvent());
+        // THEN the controller shows the sync failure dialog
+        verify(mMockUi).showSyncFailedDialog(true);
+    }
+
+    /**
+     * Tests that if, for some reason, a sync succeeds while the sync dialog is showing, the
+     * sync dialog disappears and the tents are usable.
+     */
+    public void testSyncSuccessHidesSyncDialog() {
+        // GIVEN an initialized controller with a fragment attached and a failed sync
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        mFakeEventBus.post(new SyncFailedEvent());
+        // WHEN the location tree is loaded and a sync succeeds
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        mFakeEventBus.post(new SyncSucceededEvent());
+        // THEN the controller hides the sync failed dialog
+        verify(mMockUi).showSyncFailedDialog(false);
+    }
+
+    /** Tests that loading an empty location tree results in a new sync. */
+    public void testFetchingIncompleteLocationTree_causesNewSync() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN an empty location tree is loaded
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // THEN the controller starts a new sync
+        assertTrue(mFakeSyncManager.isSyncing());
+    }
+
+    /** Tests that loading an empty location tree does not hide the loading dialog. */
+    public void testFetchingIncompleteLocationTree_retainsLoadingDialog() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN an empty location tree is loaded
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // THEN the loading dialog is not hidden
+        verify(mMockUi, times(0)).showSyncFailedDialog(false);
+    }
+
+    /** Tests that loading a populated location tree does not result in a new sync. */
+    public void testFetchingPopulatedLocationTree_doesNotCauseNewSync() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN a populated location tree is loaded
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // THEN the controller does not start a new sync
+        assertTrue(!mFakeSyncManager.isSyncing());
     }
 }
