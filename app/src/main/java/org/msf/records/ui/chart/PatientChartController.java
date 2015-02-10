@@ -371,9 +371,10 @@ final class PatientChartController {
                                 null, // encounter UUID, which the server will generate
                                 DateTime.now(),
                                 new AppEncounter.AppObservation[] {
-                                        new AppEncounter.AppObservation<String>(
+                                        new AppEncounter.AppObservation(
                                                 Concept.GENERAL_CONDITION_UUID,
-                                                newConditionUuid)
+                                                newConditionUuid,
+                                                AppEncounter.AppObservation.Type.UUID)
                                 });
                         mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
                         LOG.v("New general condition assigned: %s", newConditionUuid);
