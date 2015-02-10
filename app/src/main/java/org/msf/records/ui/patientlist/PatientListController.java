@@ -2,7 +2,9 @@ package org.msf.records.ui.patientlist;
 
 import android.support.v4.widget.SwipeRefreshLayout;
 
+import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
@@ -22,19 +24,19 @@ public class PatientListController {
             new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    if (!mIsRefreshing) {
-                        LOG.d("onRefresh");
-
-                        //triggers app wide data refresh
-                        // TODO(nfortescue): Incremental sync.
-                        mSyncManager.forceSync();
-                        mIsRefreshing = true;
-                    }
+                    forceSync();
                 }
             };
 
     private final class SyncSubscriber {
-        public synchronized void onEventMainThread(SyncFinishedEvent event) {
+        public synchronized void onEventMainThread(SyncSucceededEvent event) {
+            stopRefreshing();
+        }
+
+        public synchronized void onEventMainThread(SyncFailedEvent event) {
+            if (mIsRefreshing) {
+                mUi.showSyncError();
+            }
             stopRefreshing();
         }
     }
@@ -50,7 +52,10 @@ public class PatientListController {
     private EventBusRegistrationInterface mEventBus;
 
     public interface Ui {
+
         void setRefreshing(boolean refreshing);
+
+        void showSyncError();
     }
 
     /**
@@ -75,11 +80,22 @@ public class PatientListController {
         mEventBus.unregister(mSyncSubscriber);
     }
 
-    private void stopRefreshing() {
-        if (mIsRefreshing) {
-            mUi.setRefreshing(false);
-            mIsRefreshing = false;
+    /**
+     * Forces a new sync of all data from server, unless a sync is already in progress.
+     */
+    public void forceSync() {
+        if (!mIsRefreshing) {
+            LOG.d("forceSync");
+
+            //triggers app wide data refresh
+            mSyncManager.forceSync();
+            mIsRefreshing = true;
         }
+    }
+
+    private void stopRefreshing() {
+        mUi.setRefreshing(false);
+        mIsRefreshing = false;
     }
 
     public SwipeRefreshLayout.OnRefreshListener getOnRefreshListener() {

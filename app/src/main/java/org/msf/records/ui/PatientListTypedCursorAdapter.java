@@ -17,7 +17,7 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.utils.Utils;
@@ -144,10 +144,10 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
                     mObservations.get(patient.uuid);
             if (obsMap != null) {
                 LocalizedChartHelper.LocalizedObservation pregObs =
-                        obsMap.get(Concept.PREGNANCY_UUID);
-                pregnant = pregObs == null ? false : Concept.YES_UUID.equals(pregObs.value);
+                        obsMap.get(Concepts.PREGNANCY_UUID);
+                pregnant = pregObs == null ? false : Concepts.YES_UUID.equals(pregObs.value);
                 LocalizedChartHelper.LocalizedObservation condObs =
-                        obsMap.get(Concept.GENERAL_CONDITION_UUID);
+                        obsMap.get(Concepts.GENERAL_CONDITION_UUID);
                 condition = condObs == null ? null : condObs.value;
             }
         }
@@ -157,7 +157,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         ResStatus.Resolved status =
-                Concept.getResStatus(condition).resolve(mContext.getResources());
+                Concepts.getResStatus(condition).resolve(mContext.getResources());
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(patient.givenName + " " + patient.familyName);

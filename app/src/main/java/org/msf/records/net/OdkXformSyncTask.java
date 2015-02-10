@@ -63,8 +63,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
                     if (cursor.getCount() != 1) {
-                        throw new IllegalArgumentException("Saw " + cursor.getCount()
-                                + " rows for " + proposedPath.getPath());
+                        LOG.e("Saw " + cursor.getCount() + " rows for " + proposedPath.getPath());
+                        // In a fail-fast environment we would crash here, but we will keep going
+                        // to lead the code more robust to errors in the field.
                     }
                     Preconditions.checkArgument(cursor.getColumnCount() == 1);
                     cursor.moveToNext();
@@ -117,6 +118,14 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         return null;
     }
 
+    /**
+     * Get a Cursor for the form from the filename. If there is more than one they are ordered
+     * descending by id, so most recent is first.
+     *
+     * @param proposedPath the path for the forms file
+     * @param projection a projection of fields to get
+     * @return the Cursor pointing to ideally one form.
+     */
     public static Cursor getCursorForFormFile(File proposedPath, String [] projection) {
         String[] selectionArgs = {
                 proposedPath.getAbsolutePath()
@@ -126,7 +135,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 .getApplication()
                 .getContentResolver()
                 .query(FormsProviderAPI.FormsColumns.CONTENT_URI, projection, selection,
-                        selectionArgs, null);
+                        selectionArgs, FormsProviderAPI.FormsColumns._ID + " DESC");
     }
 
     private static boolean writeStringToFile(String response, File proposedPath) {
@@ -202,11 +211,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // insert into content provider
             try {
                 ContentResolver contentResolver = Collect.getInstance().getApplication().getContentResolver();
-                if (mUpdate) {
-                    contentResolver.update(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues, null, null);
-                } else {
-                    contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
-                }
+                // Always replace existing forms.
+                contentValues.put(FormsProviderAPI.SQL_INSERT_OR_REPLACE, true);
+                contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
             } catch (SQLException e) {
                 LOG.i(e, "failed to insert fetched file");
             }

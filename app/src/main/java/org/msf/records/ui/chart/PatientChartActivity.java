@@ -28,7 +28,7 @@ import org.msf.records.data.res.ResStatus;
 import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -413,24 +413,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-            showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
-            showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
-            showObservation(mPulse, observations.get(Concept.PULSE_UUID));
-            showObservation(mRespiration, observations.get(Concept.RESPIRATION_UUID));
+            showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
+            showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
+            showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
+            showObservation(mRespiration, observations.get(Concepts.RESPIRATION_UUID));
 
             showObservationForViewGroup(
                     mResponsivenessParent, mResponsivenessName, mResponsiveness,
-                    observations.get(Concept.CONSCIOUS_STATE_UUID));
+                    observations.get(Concepts.CONSCIOUS_STATE_UUID));
             showObservationForViewGroup(
                     mMobilityParent, mMobilityName, mMobility,
-                    observations.get(Concept.MOBILITY_UUID));
+                    observations.get(Concepts.MOBILITY_UUID));
             showObservationForViewGroup(
-                    mPainParent, mPainName, mPain, observations.get(Concept.PAIN_UUID));
+                    mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
 
             // General Condition
-            LocalizedObservation observation = observations.get(Concept.GENERAL_CONDITION_UUID);
+            LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
             if (observation != null && observation.localizedValue != null) {
-                ResStatus resStatus = Concept.getResStatus(observation.value);
+                ResStatus resStatus = Concepts.getResStatus(observation.value);
                 ResStatus.Resolved status = resStatus.resolve(getResources());
 
                 mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
@@ -451,8 +451,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             // PCR
-            LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
-            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            LocalizedObservation pcrLObservation = observations.get(Concepts.PCR_L_UUID);
+            LocalizedObservation pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
             mPcr.setIconDrawable(
                     new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                             .color(0x00000000)
@@ -505,13 +505,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // TODO: Localize all of this.
             List<String> specialLabels = new ArrayList<>();
 
-            observation = observations.get(Concept.PREGNANCY_UUID);
-            if (observation != null && Concept.YES_UUID.equals(observation.value)) {
+            observation = observations.get(Concepts.PREGNANCY_UUID);
+            if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
                 specialLabels.add("Pregnant");
             }
 
-            observation = observations.get(Concept.IV_UUID);
-            if (observation != null && Concept.YES_UUID.equals(observation.value)) {
+            observation = observations.get(Concepts.IV_UUID);
+            if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
                 specialLabels.add("IV fitted");
             }
 
