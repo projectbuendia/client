@@ -220,6 +220,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(10000, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
