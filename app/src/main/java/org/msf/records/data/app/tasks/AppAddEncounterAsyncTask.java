@@ -10,6 +10,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.converters.AppEncounterConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.EncounterAddFailedEvent;
@@ -132,7 +133,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         FetchSingleAsyncTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
-                new EncounterUuidFilter(), mUuid, mConverters.encounter, mBus);
+                new EncounterUuidFilter(), mUuid, new AppEncounterConverter(mPatient.uuid), mBus);
         task.execute();
     }
 

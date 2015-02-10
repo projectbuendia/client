@@ -22,8 +22,9 @@ import javax.annotation.concurrent.Immutable;
  * An encounter in the app model. Encounters contain one or more observations taken at a particular
  * timestamp.
  *
- * <p>NOTE: Because of lack of typing info from the server, this class currently is only guaranteed
- * to support coded observations (observations with concepts as answers).
+ * <p>NOTE: Because of lack of typing info from the server, AppEncounter attempts to determine the
+ * most appropriate type, but this typing is not guaranteed to succeed; also, currently only DATE
+ * and UUID (coded) types are supported.
  */
 @Immutable
 public class AppEncounter extends AppTypeBase<String> {
@@ -76,6 +77,22 @@ public class AppEncounter extends AppTypeBase<String> {
             UUID
         }
 
+        /**
+         * Produces a best guess for the type of a given value, since the server doesn't give us
+         * typing information.
+         */
+        public static Type estimatedTypeFor(String value) {
+            try {
+                long longValue = Long.parseLong(value);
+                DateTime dateTime = new DateTime(longValue);
+                return Type.DATE;
+            } catch (Exception e) {
+                // Intentionally blank -- value is not numeric or not a date.
+            }
+
+            return Type.UUID;
+        }
+
         public String serverType() {
             switch (type) {
                 case DATE:
@@ -124,8 +141,7 @@ public class AppEncounter extends AppTypeBase<String> {
             observationList.add(new AppObservation(
                     (String)observation.getKey(),
                     (String)observation.getValue(),
-                    // TODO: This is not good. The server needs to give us type info.
-                    AppObservation.Type.UUID
+                    AppObservation.estimatedTypeFor((String)observation.getValue())
             ));
         }
         AppObservation[] observations = new AppObservation[observationList.size()];

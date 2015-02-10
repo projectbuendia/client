@@ -15,6 +15,11 @@ import java.util.List;
  * single encounter, represented by multiple observations, one per row.
  */
 public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
+    private String mPatientUuid;
+
+    public AppEncounterConverter(String patientUuid) {
+        mPatientUuid = patientUuid;
+    }
 
     @Override
     public AppEncounter fromCursor(Cursor cursor) {
@@ -26,16 +31,20 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
         List<AppEncounter.AppObservation> observationList = new ArrayList<>();
         cursor.move(0);
         while (cursor.moveToNext()) {
-            // TODO: Stronger typing.
-            observationList.add(new AppEncounter.AppObservation<String>(
+            String value =
+                    cursor.getString((cursor.getColumnIndex(Contracts.ObservationColumns.VALUE)));
+            AppEncounter.AppObservation.Type type =
+                    AppEncounter.AppObservation.estimatedTypeFor(value);
+            observationList.add(new AppEncounter.AppObservation(
                     cursor.getString((cursor.getColumnIndex(Contracts.ObservationColumns.CONCEPT_UUID))),
-                    cursor.getString((cursor.getColumnIndex(Contracts.ObservationColumns.VALUE)))
+                    value,
+                    type
             ));
         }
         AppEncounter.AppObservation[] observations =
                 new AppEncounter.AppObservation[observationList.size()];
         observationList.toArray(observations);
 
-        return new AppEncounter(encounterUuid, dateTime, observations);
+        return new AppEncounter(mPatientUuid, encounterUuid, dateTime, observations);
     }
 }
