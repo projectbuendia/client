@@ -32,6 +32,28 @@ public class Troubleshooter {
     }
 
     /**
+     * Returns a set of all currently-active health issues.
+     */
+    public ImmutableSet<HealthIssue> getActiveIssues() {
+        return ImmutableSet.copyOf(mActiveIssues);
+    }
+
+    /**
+     * Returns true iff the given issue is current active.
+     * @param issue {@link HealthIssue} to check for
+     */
+    public boolean hasIssue(HealthIssue issue) {
+        return mActiveIssues.contains(issue);
+    }
+
+    /**
+     * Returns true iff no active issues exist.
+     */
+    public boolean isHealthy() {
+        return mActiveIssues.isEmpty();
+    }
+
+    /**
      * Called when a new health issue is discovered.
      */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
@@ -97,6 +119,8 @@ public class Troubleshooter {
             actions.add(TroubleshootingAction.CONNECT_WIFI);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_HOST_UNREACHABLE)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_REACHABILITY);
+        } else if (mActiveIssues.contains(HealthIssue.SERVER_INTERNAL_ISSUE)) {
+            actions.add(TroubleshootingAction.CHECK_SERVER_SETUP);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_NOT_RESPONDING)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_STATUS);
         }
@@ -109,6 +133,8 @@ public class Troubleshooter {
 
         if (mActiveIssues.contains(HealthIssue.SERVER_CONFIGURATION_INVALID)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_CONFIGURATION);
+        } else if (mActiveIssues.contains(HealthIssue.SERVER_AUTHENTICATION_ISSUE)) {
+            actions.add(TroubleshootingAction.CHECK_SERVER_AUTH);
         }
 
         return actions;
