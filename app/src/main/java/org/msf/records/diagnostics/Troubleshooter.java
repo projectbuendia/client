@@ -39,6 +39,13 @@ public class Troubleshooter {
     }
 
     /**
+     * Returns true iff no active issues exist.
+     */
+    public boolean isHealthy() {
+        return mActiveIssues.isEmpty();
+    }
+
+    /**
      * Called when a new health issue is discovered.
      */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
@@ -108,8 +115,6 @@ public class Troubleshooter {
             actions.add(TroubleshootingAction.CHECK_SERVER_SETUP);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_NOT_RESPONDING)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_STATUS);
-        } else if (mActiveIssues.contains(HealthIssue.SERVER_AUTHENTICATION_ISSUE)) {
-            actions.add(TroubleshootingAction.CHECK_SERVER_AUTH);
         }
 
         return actions;
@@ -120,6 +125,8 @@ public class Troubleshooter {
 
         if (mActiveIssues.contains(HealthIssue.SERVER_CONFIGURATION_INVALID)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_CONFIGURATION);
+        } else if (mActiveIssues.contains(HealthIssue.SERVER_AUTHENTICATION_ISSUE)) {
+            actions.add(TroubleshootingAction.CHECK_SERVER_AUTH);
         }
 
         return actions;
