@@ -210,10 +210,16 @@ final class TentSelectionController {
             mAppLocationTree = event.tree;
             if (mAppLocationTree == null || mAppLocationTree.getRoot() == null) {
                 LOG.w("Location tree was null or had null root.");
+                if (!mWaitingForSync) {
+                    LOG.i("Forcing a new sync.");
+                    mWaitingForSync = true;
+                    mSyncManager.forceSync();
+                }
                 mLoadedLocationTree = false;
-            } else {
-                mLoadedLocationTree = true;
+                return;
             }
+            mLoadedLocationTree = true;
+
             ImmutableSet<AppLocation> zones =
                     mAppLocationTree.getChildren(mAppLocationTree.getRoot());
             for (AppLocation zone : zones) {
