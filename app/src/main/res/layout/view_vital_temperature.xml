@@ -23,7 +23,7 @@
             android:textAllCaps="true"
             android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:text="Temperature" />
 
         <org.msf.records.widget.AutoResizeTextView
@@ -33,7 +33,7 @@
             android:padding="8dp"
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
-            android:textSize="56sp"
+            android:textSize="45sp"
             android:id="@+id/patient_chart_vital_temperature"
             android:text="–"/>
 

@@ -13,18 +13,18 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         >
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="sans-serif-condensed"
-            android:textSize="44sp"
+            android:fontFamily="sans-serif"
+            android:textSize="36sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
-            tools:text="KH.106: Rosky Entocher"/>
+            tools:text="106: Rosky Entocher"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -33,9 +33,9 @@
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="30sp"
+                    android:textSize="36sp"
                     android:gravity="end"
-                    android:fontFamily="sans-serif-condensed"
+                    android:fontFamily="sans-serif"
                     android:textColor="@android:color/black"
                     android:id="@+id/patient_chart_gender_age"
                     tools:text="M, 23 mo" />
@@ -43,9 +43,9 @@
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="24sp"
+                    android:textSize="22sp"
                     android:gravity="end"
-                    android:fontFamily="sans-serif-condensed"
+                    android:fontFamily="sans-serif"
                     android:textColor="@color/red"
                     android:id="@+id/patient_chart_pregnant"
                     tools:text="(Pregnant, IV Fitted)" />
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal">
 
         <org.msf.records.widget.PatientAttributeView
@@ -104,9 +104,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
+                android:fontFamily="sans-serif"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:text="@string/chart_last_updated"
                 android:id="@+id/patient_chart_last_observation_label"
                 tools:ignore="RelativeOverlap"/>
@@ -114,11 +114,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:text="–"
                 android:layout_toEndOf="@id/patient_chart_last_observation_label"
                 android:id="@+id/patient_chart_last_observation_date_time"
-                android:fontFamily="sans-serif-condensed"/>
+                android:fontFamily="sans-serif"/>
         </RelativeLayout>
     </FrameLayout>
 

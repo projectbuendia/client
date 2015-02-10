@@ -24,7 +24,7 @@
             android:textAllCaps="true"
             android:textColor="@color/vital_fg_light"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:text="–"/>
 
         <TextView
@@ -40,7 +40,7 @@
             android:textAllCaps="true"
             android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:text="Condition" />
 
         <org.msf.records.widget.AutoResizeTextView
@@ -50,7 +50,7 @@
             android:padding="8dp"
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
-            android:textSize="56sp"
+            android:textSize="45sp"
             android:maxLines="2"
             android:id="@+id/patient_chart_vital_general_condition_number"
             android:text="–"/>

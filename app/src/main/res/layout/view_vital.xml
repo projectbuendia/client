@@ -16,7 +16,7 @@
         android:textAllCaps="true"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
-        android:textSize="16sp"
+        android:textSize="17sp"
         android:text="Consciousness" />
 
     <org.msf.records.widget.AutoResizeTextView
@@ -27,7 +27,7 @@
         android:padding="8dp"
         android:gravity="center"
         android:textColor="#FFFFFF"
-        android:textSize="32sp"
+        android:textSize="36sp"
         android:maxLines="1"
         tools:text="Pain"/>
 

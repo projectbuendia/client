@@ -14,7 +14,7 @@
         android:layout_height="60dp"
         android:gravity="center"
         android:background="#000000"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textColor="#FFFFFF"
         tools:text="CC" />
 

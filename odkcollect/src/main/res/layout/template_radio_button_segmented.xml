@@ -9,6 +9,6 @@
     android:padding="16dp"
     android:button="@null"
     android:background="@drawable/bg_radio_button"
-    android:textSize="40sp"
+    android:textSize="36sp"
     tools:text="This is a Radio">
 </RadioButton>

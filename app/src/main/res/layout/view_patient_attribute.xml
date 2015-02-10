@@ -9,7 +9,7 @@
         android:id="@+id/view_attribute_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="0dp"
+        android:paddingTop="6dp"
         android:paddingRight="6dp"
         tools:src="@drawable/ic_launcher"/>
 
@@ -23,7 +23,7 @@
         android:paddingTop="0dp"
         android:paddingBottom="0dp"
         android:textColor="#000000"
-        android:textSize="32sp"
+        android:textSize="36sp"
         tools:text="Day 5"/>
 
     <!-- paddingStart="1dp" aligns left edge of view_attribute_name with view_attribute_value -->
@@ -38,7 +38,7 @@
         android:paddingTop="0dp"
         android:paddingBottom="0dp"
         android:textColor="#000000"
-        android:textSize="16sp"
+        android:textSize="17sp"
         tools:text="Since admission" />
 
 </RelativeLayout>

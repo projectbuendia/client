@@ -77,7 +77,7 @@ def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs';
 // OpenMRS instance for integration testing server.
 def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/openmrs';
 
-// OpenMRS root URL for Edison on local network (default for dev tablets).
+// OpenMRS root URL for Edison on local network.
 def openmrsRootUrlEdison = 'http://server:9000/openmrs';
 
 // OpenMRS root URL for host machine when client runs in an emulator (AVD).

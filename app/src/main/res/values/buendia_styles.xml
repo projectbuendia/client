@@ -4,27 +4,27 @@
     <!-- Text appearance -->
 
     <style name="TextAppearance.Buendia" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">26sp</item>
+        <item name="android:textSize">28sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Tiny">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">17sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Small">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">22sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Medium">
-        <item name="android:textSize">26sp</item>
+        <item name="android:textSize">28sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Large">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">36sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Huge">
-        <item name="android:textSize">40sp</item>
+        <item name="android:textSize">45sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Tiny.Inverse">

@@ -509,48 +509,44 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                             .color(0x00000000)
                             .sizeDp(36));
-            if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
-                    && (pcrNpObservation == null || pcrNpObservation == null)) {
-                mPcr.setValue("–");
-            } else {
-                String pcrLString = "–";
-                long pcrObservationMillis = -1;
-                if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
-                    pcrObservationMillis = pcrLObservation.encounterTimeMillis;
-                    double pcrL;
-                    try {
-                        pcrL = Double.parseDouble(pcrLObservation.localizedValue);
-                        pcrLString = getFormattedPcrString(pcrL);
-                    } catch (NumberFormatException e) {
-                        LOG.w(
-                                "Retrieved a malformed L-gene PCR value: '%1$s'.",
-                                pcrLObservation.localizedValue);
-                        pcrLString = pcrLObservation.localizedValue;
-                    }
-                }
-                String pcrNpString = "–";
-                if (pcrNpObservation != null && pcrNpObservation.localizedValue != null) {
-                    pcrObservationMillis = pcrNpObservation.encounterTimeMillis;
-                    double pcrNp;
-                    try {
-                        pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
-                        pcrNpString = getFormattedPcrString(pcrNp);
-                    } catch (NumberFormatException e) {
-                        LOG.w(
-                                "Retrieved a malformed Np-gene PCR value: '%1$s'.",
-                                pcrNpObservation.localizedValue);
-                        pcrNpString = pcrNpObservation.localizedValue;
-                    }
-                }
 
-                mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
-                if (pcrObservationMillis > 0) {
-                    mPcr.setName(getResources().getString(
-                            R.string.latest_pcr_label_with_date,
-                            DATE_TIME_FORMATTER.format(
-                                    DateTime.now(),
-                                    new DateTime(pcrObservationMillis))));
+            String pcrLString = "–";
+            long pcrObservationMillis = -1;
+            if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
+                pcrObservationMillis = pcrLObservation.encounterTimeMillis;
+                double pcrL;
+                try {
+                    pcrL = Double.parseDouble(pcrLObservation.localizedValue);
+                    pcrLString = getFormattedPcrString(pcrL);
+                } catch (NumberFormatException e) {
+                    LOG.w(
+                            "Retrieved a malformed L-gene PCR value: '%1$s'.",
+                            pcrLObservation.localizedValue);
+                    pcrLString = pcrLObservation.localizedValue;
                 }
+            }
+            String pcrNpString = "–";
+            if (pcrNpObservation != null && pcrNpObservation.localizedValue != null) {
+                pcrObservationMillis = pcrNpObservation.encounterTimeMillis;
+                double pcrNp;
+                try {
+                    pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
+                    pcrNpString = getFormattedPcrString(pcrNp);
+                } catch (NumberFormatException e) {
+                    LOG.w(
+                            "Retrieved a malformed Np-gene PCR value: '%1$s'.",
+                            pcrNpObservation.localizedValue);
+                    pcrNpString = pcrNpObservation.localizedValue;
+                }
+            }
+
+            mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
+            if (pcrObservationMillis > 0) {
+                mPcr.setName(getResources().getString(
+                        R.string.latest_pcr_label_with_date,
+                        DATE_TIME_FORMATTER.format(
+                                DateTime.now(),
+                                new DateTime(pcrObservationMillis))));
             }
 
             // Pregnancy & IV status
