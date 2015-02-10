@@ -27,14 +27,19 @@ public class FakeAppLocationTreeFactory {
      */
     public static AppLocationTree build() {
         FakeTypedCursor<AppLocation> locationCursor =
-                new FakeTypedCursor<AppLocation>(new AppLocation[] {
+                new FakeTypedCursor<>(
                         getSiteLocation(),
                         getTriageZoneLocation(),
                         getDischargedZoneLocation(),
                         getSuspectZoneLocation(),
                         getSuspect1TentLocation(),
                         getSuspect2TentLocation()
-                });
+                );
+        return AppLocationTree.forTypedCursor(locationCursor);
+    }
+
+    public static AppLocationTree emptyTree() {
+        FakeTypedCursor<AppLocation> locationCursor = new FakeTypedCursor<>();
         return AppLocationTree.forTypedCursor(locationCursor);
     }
 

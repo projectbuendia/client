@@ -58,6 +58,13 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                 .setTitle(getString(R.string.sync_failed_dialog_title))
                 .setMessage(R.string.sync_failed_dialog_message)
                 .setNegativeButton(
+                        R.string.sync_failed_back, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                .setNeutralButton(
                         R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -93,15 +100,15 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     }
 
     @Override
-    protected void onStartImpl() {
-        super.onStartImpl();
+    public void onResumeImpl() {
+        super.onResumeImpl();
         mController.init();
     }
 
     @Override
-    protected void onStopImpl() {
+    public void onPauseImpl() {
+        super.onPauseImpl();
         mController.suspend();
-        super.onStopImpl();
     }
 
     @Override

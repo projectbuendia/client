@@ -34,6 +34,21 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         screenshot("Test Finish");
     }
 
+    /** Tests that the back button in the sync failed dialog returns to user selection. */
+    public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
+        // TODO: Potentially flaky, as sync may finish before being force-failed.
+        waitForInitialSync();
+        failSync();
+
+        onView(withText(R.string.sync_failed_dialog_message)).check(matches(isDisplayed()));
+
+        onView(withText(R.string.sync_failed_back)).perform(click());
+        screenshot("After Sync Fails");
+        waitForProgressFragment(); // Wait for user screen to display.
+        onView(withText("GU")).check(matches(isDisplayed()));
+        screenshot("Test Finish");
+    }
+
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
         // TODO: Potentially flaky, as sync may finish before being force-failed.
