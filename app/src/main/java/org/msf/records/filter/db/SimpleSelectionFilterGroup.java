@@ -2,6 +2,8 @@ package org.msf.records.filter.db;
 
 import com.google.common.collect.ImmutableList;
 
+import org.msf.records.data.app.AppTypeBase;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +12,8 @@ import java.util.List;
  * A database filter that acts as a container for multiple filters or filter groups, with
  * an optional name used for string representations.
  */
-public final class SimpleSelectionFilterGroup implements SimpleSelectionFilter {
+public final class SimpleSelectionFilterGroup<T extends AppTypeBase>
+        implements SimpleSelectionFilter<T> {
     private static final String DEFAULT_FILTER_NAME = "";
 
     private final FilterType mFilterType;

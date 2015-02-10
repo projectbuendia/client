@@ -46,14 +46,14 @@ public class RpcToDb {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();
         String chartUuid = response.uuid;
         if (chartUuid == null) {
-            LOG.e("null chart uuid when fetching chart structure");
+            LOG.e("null chart encounterUuid when fetching chart structure");
         }
         int chartRow = 0;
         String groupUuid;
         for (ChartGroup group : response.groups) {
             groupUuid = group.uuid;
             if (groupUuid == null) {
-                LOG.e("null group uuid for chart " + chartUuid);
+                LOG.e("null group encounterUuid for chart " + chartUuid);
                 continue;
             }
             for (String conceptUuid : group.concepts) {
@@ -78,7 +78,7 @@ public class RpcToDb {
         final String patientUuid = response.uuid;
         for (Encounter encounter : response.encounters) {
             if (encounter.uuid == null) {
-                LOG.e("Encounter uuid was null for " + patientUuid);
+                LOG.e("Encounter encounterUuid was null for " + patientUuid);
                 continue;
             }
             final String encounterUuid = encounter.uuid;

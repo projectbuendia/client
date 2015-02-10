@@ -242,10 +242,10 @@ public class OdkActivityLauncher {
     private static void updateClientCache(String patientUuid, TreeElement savedRoot,
                                           ContentResolver resolver) {
         // id, fill in auto
-        // patient uuid: context
-        // encounter uuid: make one up
+        // patient encounterUuid: context
+        // encounter encounterUuid: make one up
         // encounter time: <encounter><encounter.encounter_datetime>2014-12-15T13:33:00.000Z</encounter.encounter_datetime>
-        // concept uuid: <vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM"> <- 5088
+        // concept encounterUuid: <vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM"> <- 5088
         // value: 	<vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
         //              <value>36.0</value>
         // temp_cache: true
@@ -323,7 +323,7 @@ public class OdkActivityLauncher {
                 }
 
                 ContentValues observation = new ContentValues(common);
-                // Set to the id for now, we'll replace with uuid later
+                // Set to the id for now, we'll replace with encounterUuid later
                 observation.put(Contracts.Observations.CONCEPT_UUID, id.toString());
                 observation.put(Contracts.Observations.VALUE, value);
                 toInsert.add(observation);
@@ -420,7 +420,7 @@ public class OdkActivityLauncher {
         return sb.toString();
     }
 
-    // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
+    // Out of a list of OpenMRS Xform entries, find the form that matches the given encounterUuid, or
     // return null if no xform is found.
     private static OpenMrsXformIndexEntry findUuid(List<OpenMrsXformIndexEntry> allEntries, String uuid) {
         for (OpenMrsXformIndexEntry entry : allEntries) {

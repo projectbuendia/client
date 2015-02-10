@@ -2,7 +2,7 @@ package org.msf.records.ui.matchers;
 
 import org.mockito.ArgumentMatcher;
 import org.msf.records.filter.db.SimpleSelectionFilterGroup;
-import org.msf.records.filter.db.LocationUuidFilter;
+import org.msf.records.filter.db.patient.LocationUuidFilter;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 
 import java.util.List;

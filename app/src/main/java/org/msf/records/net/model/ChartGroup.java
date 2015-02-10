@@ -11,8 +11,8 @@ public class ChartGroup {
     public String uuid;
 
     /**
-     * The uuid of concepts in this group, in the order they should be displayed.
-     * The uuid can be used to look up the localized name (and type) in the concept dictionary.
+     * The encounterUuid of concepts in this group, in the order they should be displayed.
+     * The encounterUuid can be used to look up the localized name (and type) in the concept dictionary.
      */
     public String [] concepts;
 }

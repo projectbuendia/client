@@ -3,8 +3,12 @@ package org.msf.records.net;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.RequestFuture;
 
+import org.msf.records.data.app.AppEncounter;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -58,6 +62,18 @@ public interface Server {
             Response.ErrorListener errorListener);
 
     /**
+     * Creates a new encounter for a given patient.
+     *
+     * @param patient the patient being observed
+     * @param encounter the encounter to add
+     */
+    void addEncounter(
+            AppPatient patient,
+            AppEncounter encounter,
+            Response.Listener<Encounter> encounterListener,
+            Response.ErrorListener errorListener);
+
+    /**
      * Get the patient record for an existing patient. Currently we are just using a String-String
      * map for parameters, but this is a bit close in implementation details to the old Buendia UI
      * so it will probably need to be generalized in future.
@@ -96,7 +112,7 @@ public interface Server {
     /**
      * Add a new location to the server.
      *
-     * @param location uuid must not be set, parent_uuid must be set, and the names map must have a
+     * @param location encounterUuid must not be set, parent_uuid must be set, and the names map must have a
      *                 name for at least one locale.
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
@@ -108,7 +124,7 @@ public interface Server {
     /**
      * Update the names for a location on the server.
      *
-     * @param location the location, only uuid and new locale names for the location will be used,
+     * @param location the location, only encounterUuid and new locale names for the location will be used,
      *                 but ideally the other arguments should be correct
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors

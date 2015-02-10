@@ -27,7 +27,7 @@ public class LocalizedChartHelper {
     public static final String ENGLISH_LOCALE = "en";
 
     /**
-     * A uuid representing when a clinician fills in "Unknown".
+     * A encounterUuid representing when a clinician fills in "Unknown".
      */
     public static final String UNKNOWN_VALUE = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -153,7 +153,7 @@ public class LocalizedChartHelper {
 
     /**
      * Get the most recent observations for each concept for a given patient from the local cache,
-     * localized to English. Ordering will be by concept uuid, and there are not groups or other
+     * localized to English. Ordering will be by concept encounterUuid, and there are not groups or other
      * chart based configurations.
      */
     public Map<String, LocalizedObservation> getMostRecentObservations(
@@ -163,7 +163,7 @@ public class LocalizedChartHelper {
 
     /**
      * Get the most recent observations for each concept for a given patient from the local cache,
-     * Ordering will be by concept uuid, and there are not groups or other chart-based
+     * Ordering will be by concept encounterUuid, and there are not groups or other chart-based
      * configurations.
      *
      * @param locale the locale to return the results in, to match the server String
@@ -204,7 +204,7 @@ public class LocalizedChartHelper {
 
     /**
      * Get the most recent observations for all concepts for a set of patients from the local
-     * cache. Ordering will be by concept uuid, and there are not groups or other chart-based
+     * cache. Ordering will be by concept encounterUuid, and there are not groups or other chart-based
      * configurations.
      *
      * @param patientUuids the uuids of patients to return data for

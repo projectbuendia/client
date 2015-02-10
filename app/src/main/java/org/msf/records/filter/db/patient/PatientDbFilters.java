@@ -1,7 +1,11 @@
-package org.msf.records.filter.db;
+package org.msf.records.filter.db.patient;
 
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.filter.db.AllFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.filter.db.SimpleSelectionFilterGroup;
 import org.msf.records.model.Concept;
 
 import java.util.ArrayList;
@@ -12,7 +16,8 @@ import java.util.List;
  * All available patient filters available to the user, categorized by filter type.
  */
 public final class PatientDbFilters {
-    private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
+    private static final SimpleSelectionFilter[] OTHER_FILTERS =
+            new SimpleSelectionFilter[] {
         // TODO(akalachman): Localize filter names and extract elsewhere.
         // TODO(akalachman): Remove FilterGroup dep (only used for setName).
         new SimpleSelectionFilterGroup(

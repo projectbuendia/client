@@ -3,6 +3,7 @@ package org.msf.records.data.app.tasks;
 import android.content.ContentResolver;
 import android.os.AsyncTask;
 
+import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
@@ -12,6 +13,7 @@ import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.net.Server;
+import org.msf.records.net.model.Encounter;
 
 /**
  * An assisted injection factory that creates {@link AppModel} {@link AsyncTask}s.
@@ -48,6 +50,15 @@ public class AppAsyncTaskFactory {
             AppPatient originalPatient, AppPatientDelta patientDelta, CrudEventBus bus) {
         return new AppUpdatePatientAsyncTask(
                 this, mConverters, mServer, mContentResolver, originalPatient, patientDelta, bus);
+    }
+
+    /**
+     * Creates a new {@link AppAddEncounterAsyncTask}.
+     */
+    public AppAddEncounterAsyncTask newAddEncounterAsyncTask(
+            AppPatient appPatient, AppEncounter appEncounter, CrudEventBus bus) {
+        return new AppAddEncounterAsyncTask(
+                this, mConverters, mServer, mContentResolver, appPatient, appEncounter, bus);
     }
 
     /**

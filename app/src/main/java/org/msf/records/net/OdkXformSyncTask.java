@@ -28,7 +28,7 @@ import java.io.IOException;
  * {@see org.odk.collect.android.tasks.DownloadFormsTask}
  *
  * Takes the UUID, if it doesn't exist in ODK storage fetches it from OpenMRS, then creates
- * {$uuid}.xml in storage. Finally inserts into ODK local metadata DB.
+ * {$encounterUuid}.xml in storage. Finally inserts into ODK local metadata DB.
  *
  * @author nfortescue@google.com
  */
@@ -52,7 +52,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         for (final OpenMrsXformIndexEntry formInfo : formInfos) {
             final File proposedPath = formInfo.makeFileForForm();
 
-            // Check if the uuid already exists in the database.
+            // Check if the encounterUuid already exists in the database.
             Cursor cursor = null;
             boolean isNew;
             final boolean isUpdate;

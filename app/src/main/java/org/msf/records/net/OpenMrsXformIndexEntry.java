@@ -13,7 +13,7 @@ import java.io.File;
 public class OpenMrsXformIndexEntry {
 
     /**
-     * The uuid of the form.
+     * The encounterUuid of the form.
      */
     public final String uuid;
     /**

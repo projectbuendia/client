@@ -1,5 +1,7 @@
-package org.msf.records.filter.db;
+package org.msf.records.filter.db.patient;
 
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.providers.Contracts;
 
@@ -7,7 +9,7 @@ import org.msf.records.sync.providers.Contracts;
  * Returns only patients with a concept present and matching the given value for the
  * most recent observation.
  */
-public final class ConceptFilter implements SimpleSelectionFilter {
+public final class ConceptFilter implements SimpleSelectionFilter<AppPatient> {
     // WHERE subclause returning only patients that had the concept with the given value in
     // the latest observation.
     private static final String CONCEPT_SUBQUERY =

@@ -156,7 +156,7 @@ public class Contracts {
         /**
          * UUID.
          */
-        String UUID = "uuid";
+        String UUID = "encounterUuid";
 
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
         
@@ -198,7 +198,7 @@ public class Contracts {
 
     interface UserColumns {
 
-        String UUID = "uuid";
+        String UUID = "encounterUuid";
 
         String FULL_NAME = "full_name";
     }

@@ -8,7 +8,9 @@ import android.view.MenuItem;
 
 import com.google.common.base.Optional;
 
+import org.joda.time.DateTime;
 import org.msf.records.App;
+import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -364,18 +366,23 @@ final class PatientChartController {
 
                     @Override
                     public boolean onNewConditionSelected(String newConditionUuid) {
-                        AppPatientDelta patientWithNewCondition = new AppPatientDelta();
-                        patientWithNewCondition.generalConditionUuid =
-                                Optional.of(newConditionUuid);
-                        mAppModel.
-                        mAppModel.updatePatient(mCrudEventBus, mPatient, patientWithNewCondition);
+                        AppEncounter appEncounter = new AppEncounter(
+                                mPatientUuid,
+                                null, // encounter UUID, which the server will generate
+                                DateTime.now(),
+                                new AppEncounter.AppObservation[] {
+                                        new AppEncounter.AppObservation<String>(
+                                                Concept.GENERAL_CONDITION_UUID,
+                                                newConditionUuid)
+                                });
+                        mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
                         LOG.v("New general condition assigned: %s", newConditionUuid);
                         return false;
                     }
                 };
         mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
                 context,
-                Optional.of(""),  // TODO: Real condition uuid.
+                Optional.of(""),  // TODO: Real condition encounterUuid.
                 callback);
 
         mAssignGeneralConditionDialog.show();

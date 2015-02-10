@@ -20,7 +20,7 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
         extends AsyncTask<Void, Void, Object> {
 
     private final ContentResolver mContentResolver;
-    private final SimpleSelectionFilter mFilter;
+    private final SimpleSelectionFilter<T> mFilter;
     private final String mConstraint;
     private final AppTypeConverter<T> mConverter;
     private final CrudEventBus mBus;
