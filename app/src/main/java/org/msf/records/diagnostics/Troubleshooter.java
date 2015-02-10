@@ -104,8 +104,12 @@ public class Troubleshooter {
             actions.add(TroubleshootingAction.CONNECT_WIFI);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_HOST_UNREACHABLE)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_REACHABILITY);
+        } else if (mActiveIssues.contains(HealthIssue.SERVER_INTERNAL_ISSUE)) {
+            actions.add(TroubleshootingAction.CHECK_SERVER_SETUP);
         } else if (mActiveIssues.contains(HealthIssue.SERVER_NOT_RESPONDING)) {
             actions.add(TroubleshootingAction.CHECK_SERVER_STATUS);
+        } else if (mActiveIssues.contains(HealthIssue.SERVER_AUTHENTICATION_ISSUE)) {
+            actions.add(TroubleshootingAction.CHECK_SERVER_AUTH);
         }
 
         return actions;

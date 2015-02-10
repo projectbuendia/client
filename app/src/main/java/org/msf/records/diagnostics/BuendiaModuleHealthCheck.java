@@ -126,7 +126,19 @@ public class BuendiaModuleHealthCheck extends HealthCheck {
                                 "The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
                                 uriString,
                                 httpResponse.getStatusLine().getStatusCode());
-                        reportIssue(HealthIssue.SERVER_NOT_RESPONDING);
+                        switch (httpResponse.getStatusLine().getStatusCode()) {
+                            case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                                reportIssue(HealthIssue.SERVER_INTERNAL_ISSUE);
+                                break;
+                            case HttpURLConnection.HTTP_FORBIDDEN:
+                            case HttpURLConnection.HTTP_UNAUTHORIZED:
+                                reportIssue(HealthIssue.SERVER_AUTHENTICATION_ISSUE);
+                                break;
+                            case HttpURLConnection.HTTP_NOT_FOUND:
+                            default:
+                                reportIssue(HealthIssue.SERVER_NOT_RESPONDING);
+                                break;
+                        }
                         return;
                     }
                 } catch (IOException e) {
