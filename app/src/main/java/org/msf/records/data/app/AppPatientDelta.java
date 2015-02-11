@@ -6,7 +6,6 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.base.BaseDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;

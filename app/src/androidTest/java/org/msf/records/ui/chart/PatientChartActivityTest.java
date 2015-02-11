@@ -235,7 +235,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // mDemoPatient.assignedLocationUuid = Optional.of(Zone.TRIAGE_ZONE_UUID);
         mDemoPatient.familyName = Optional.of("ChartActivity");
         mDemoPatient.givenName = Optional.of("TestPatientFor");
-        mDemoPatient.firstSymptomDate = Optional.of(DateTime.now().minusMonths(7));
+        mDemoPatient.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
         mDemoPatient.gender = Optional.of(Patient.GENDER_FEMALE);
         mDemoPatient.id = Optional.of(UUID.randomUUID().toString().substring(30));
         mDemoPatient.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
