@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
@@ -32,8 +33,8 @@ public class AppPatientDelta {
     public Optional<Integer> gender = Optional.absent();
     public Optional<DateTime> birthdate = Optional.absent();
 
-    public Optional<DateTime> admissionDate = Optional.absent();
-    public Optional<DateTime> firstSymptomDate = Optional.absent();
+    public Optional<LocalDate> admissionDate = Optional.absent();
+    public Optional<LocalDate> firstSymptomDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();
 
     /**
@@ -59,18 +60,26 @@ public class AppPatientDelta {
             if (birthdate.isPresent()) {
                 json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
             }
+
+            JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
-                json.put(Server.PATIENT_ADMISSION_TIMESTAMP, getTimestamp(admissionDate.get()));
+                JSONObject observation = new JSONObject();
+                observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
+                observation.put(Server.PATIENT_ANSWER_DATE,
+                        getLocalDateString(admissionDate.get()));
+                observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(Server.PATIENT_ANSWER_DATE,
-                        getDateTimeString(firstSymptomDate.get()));
-                JSONArray observations = new JSONArray();
+                        getLocalDateString(firstSymptomDate.get()));
                 observations.put(observation);
+            }
+            if (observations != null) {
                 json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
             }
+
             if (assignedLocationUuid.isPresent()) {
                 json.put(
                         Server.PATIENT_ASSIGNED_LOCATION,
@@ -116,10 +125,11 @@ public class AppPatientDelta {
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
+        // TODO: Either remove admission date here as it's no longer used from the database.
         if (admissionDate.isPresent()) {
             contentValues.put(
                     Contracts.Patients.ADMISSION_TIMESTAMP,
-                    getTimestamp(admissionDate.get()));
+                    getTimestamp(admissionDate.get().toDateTimeAtStartOfDay()));
         }
         if (assignedLocationUuid.isPresent()) {
             contentValues.put(
@@ -133,6 +143,10 @@ public class AppPatientDelta {
         JSONObject location = new JSONObject();
         location.put("uuid", assignedLocationUuid);
         return location;
+    }
+
+    private static String getLocalDateString(LocalDate localDate) {
+        return BIRTHDATE_FORMATTER.print(localDate);
     }
 
     private static String getDateTimeString(DateTime dateTime) {
