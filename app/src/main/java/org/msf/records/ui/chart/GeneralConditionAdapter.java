@@ -24,15 +24,18 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
     private String[] mConditions;
     @Nullable private String mSelectedConditionUuid;
 
-    @Nullable public String getSelectedConditionUuid() {
-        return mSelectedConditionUuid;
-    }
-
     public void setSelectedConditionUuid(@Nullable String selectedConditionUuid) {
         mSelectedConditionUuid = selectedConditionUuid;
         notifyDataSetChanged();
     }
 
+    /**
+     * Creates a new adapter that displays conditions corresponding to the given UUID's.
+     * @param context an activity context
+     * @param conditions UUID's of the general conditions to display
+     * @param selectedConditionUuid UUID of the current general condition, or null if the patient
+     *                              has no prior known condition
+     */
     public GeneralConditionAdapter(
             Context context, String[] conditions, @Nullable String selectedConditionUuid)  {
         super(context, VIEW_RESOURCE, conditions);

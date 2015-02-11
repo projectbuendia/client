@@ -35,6 +35,13 @@ public class AppEncounter extends AppTypeBase<String> {
     public final DateTime timestamp;
     public final AppObservation[] observations;
 
+    /**
+     * Creates a new AppEncounter for the given patient.
+     * @param patientUuid the patient under observation
+     * @param encounterUuid id for this encounter--for encounters created on the client, use null
+     * @param timestamp the encounter time
+     * @param observations an array of observations to include in the encounter
+     */
     public AppEncounter(
             String patientUuid,
             @Nullable String encounterUuid, // May not be known.
@@ -47,6 +54,9 @@ public class AppEncounter extends AppTypeBase<String> {
         this.observations = observations;
     }
 
+    /**
+     * Serializes this into a {@link JSONObject}.
+     */
     public boolean toJson(JSONObject json) {
         try {
             JSONArray observationsJson = new JSONArray();
@@ -74,6 +84,9 @@ public class AppEncounter extends AppTypeBase<String> {
         public final String value;
         public final Type type;
 
+        /**
+         * Datatype of the observation.
+         */
         public enum Type {
             DATE,
             UUID
@@ -95,16 +108,27 @@ public class AppEncounter extends AppTypeBase<String> {
             return Type.UUID;
         }
 
+        /**
+         * Returns the string used to represent the datatype of this observation on the server.
+         */
         public String serverType() {
             switch (type) {
                 case DATE:
                     return Server.PATIENT_ANSWER_DATE;
                 case UUID:
                     return Server.PATIENT_ANSWER_UUID;
+                default:
+                    // Intentionally blank.
             }
             throw new IllegalArgumentException("Invalid type: " + type.toString());
         }
 
+        /**
+         * Creates a new observation.
+         * @param conceptUuid UUID of the observation concept
+         * @param value value of the observation
+         * @param type datatype of the observation value
+         */
         public AppObservation(String conceptUuid, String value, Type type) {
             this.conceptUuid = conceptUuid;
             this.value = value;

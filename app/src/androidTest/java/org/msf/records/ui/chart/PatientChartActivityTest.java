@@ -35,6 +35,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasToString;
@@ -91,23 +92,19 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         screenshot("General Condition Dialog");
 
         onView(withText(R.string.status_convalescent)).perform(click());
-        // Wait on operation to complete, and for sync to complete to update the chart.
-        EventBusIdlingResource<SingleItemCreatedEvent> encounterIdlingResource =
-                new EventBusIdlingResource<SingleItemCreatedEvent>(
-                        UUID.randomUUID().toString(), mEventBus);
+        // Wait for a sync operation to update the chart.
         EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
                 new EventBusIdlingResource<SyncFinishedEvent>(
                         UUID.randomUUID().toString(), mEventBus);
-        Espresso.registerIdlingResources(encounterIdlingResource, syncFinishedIdlingResource);
+        Espresso.registerIdlingResources(syncFinishedIdlingResource);
 
         // Check for updated vital view.
         onView(withText(R.string.status_convalescent)).check(matches(isDisplayed()));
 
         // Check for updated chart view.
-        onData(
-                hasToString(
-                        equalTo(getActivity().getString(R.string.status_short_desc_convalescent))))
-                .inAdapterView(withClassName(equalTo("LocalizedChartDataGridAdapter")))
+        onView(allOf(
+                withText(R.string.status_short_desc_convalescent),
+                not(withId(R.id.patient_chart_vital_general_condition_number))))
                 .check(matches(isDisplayed()));
     }
 

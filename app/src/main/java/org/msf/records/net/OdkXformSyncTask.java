@@ -111,7 +111,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     // TODO(nfortescue): design error handling properly
-                    LOG.e("failed to fetch file");
+                    LOG.e(error, "failed to fetch file");
                 }
             });
         }

@@ -24,7 +24,6 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
-import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Concepts;
@@ -534,8 +533,9 @@ final class PatientChartController {
                 // main-thread time. This delays rendering of the rest of UI.
                 // To allow the rest of the UI to be displayed before we attempt to populate
                 // the observations, we delay the observation update slightly.
-                // We need this hack because we load observations on the main thread. We should change
-                // this to use a background thread. Either an async task or using CrudEventBus events.
+                // We need this hack because we load observations on the main thread. We should
+                // change this to use a background thread. Either an async task or using
+                // CrudEventBus events.
 
             } else if (event.item instanceof AppEncounter) {
                 AppEncounter.AppObservation[] observations =

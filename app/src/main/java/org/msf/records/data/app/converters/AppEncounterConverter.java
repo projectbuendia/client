@@ -23,11 +23,11 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
 
     @Override
     public AppEncounter fromCursor(Cursor cursor) {
-        String encounterUuid = cursor.getString(
+        final String encounterUuid = cursor.getString(
                 cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_UUID));
-        long timestamp = cursor.getLong(
+        final long timestamp = cursor.getLong(
                 cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_TIME));
-        DateTime dateTime = new DateTime(timestamp);
+        final DateTime dateTime = new DateTime(timestamp);
         List<AppEncounter.AppObservation> observationList = new ArrayList<>();
         cursor.move(-1);
         while (cursor.moveToNext()) {
@@ -36,7 +36,8 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
             AppEncounter.AppObservation.Type type =
                     AppEncounter.AppObservation.estimatedTypeFor(value);
             observationList.add(new AppEncounter.AppObservation(
-                    cursor.getString((cursor.getColumnIndex(Contracts.ObservationColumns.CONCEPT_UUID))),
+                    cursor.getString(
+                            (cursor.getColumnIndex(Contracts.ObservationColumns.CONCEPT_UUID))),
                     value,
                     type
             ));

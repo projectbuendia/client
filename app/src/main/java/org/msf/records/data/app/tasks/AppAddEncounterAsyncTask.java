@@ -25,11 +25,9 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link android.os.AsyncTask} that adds an encounter to a server.
- *
- * // TODO: Factor out common code between this and AppAddPatientAsyncTask.
  */
 public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAddFailedEvent> {
-
+    // TODO: Factor out common code between this class and AppAddPatientAsyncTask.
     private static final Logger LOG = Logger.create();
 
     private static final String[] ENCOUNTER_PROJECTION = new String[] {

@@ -44,6 +44,14 @@ public final class AssignGeneralConditionDialog
         boolean onNewConditionSelected(String newConditionUuid);
     }
 
+    /**
+     * Creates a new dialog.
+     * @param context an activity context
+     * @param currentConditionUuid optional UUID representing the current general condition; may
+     *                             eventually be used for highlighting the selected entry but is
+     *                             currently unused
+     * @param conditionSelectedCallback callback that responds to a condition selection
+     */
     public AssignGeneralConditionDialog(
             Context context,
             @Nullable String currentConditionUuid,
@@ -53,8 +61,11 @@ public final class AssignGeneralConditionDialog
         mConditionSelectedCallback = checkNotNull(conditionSelectedCallback);
     }
 
+    /**
+     * Builds and displays the dialog.
+     */
     public void show() {
-        FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to just work
+        FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to work
         View.inflate(mContext, R.layout.condition_grid, frameLayout);
         mGridView = (GridView) frameLayout.findViewById(R.id.condition_selection_conditions);
 
@@ -74,40 +85,38 @@ public final class AssignGeneralConditionDialog
         mDialog.show();
     }
 
-    public void onPatientUpdateFailed( int reason )
-    {
-        if (mCurrentConditionUuid != null) {
-            mAdapter.setSelectedConditionUuid(mCurrentConditionUuid);
-        }
-
-        Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ),
-                Toast.LENGTH_SHORT ).show();
-        mProgressDialog.dismiss();
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (mAdapter == null) {
+            return;
+        }
 
         String newConditionUuid = mAdapter.getItem(position);
         mAdapter.setSelectedConditionUuid(newConditionUuid);
         mProgressDialog = ProgressDialog.show(mContext,
                 mContext.getResources().getString(R.string.title_updating_patient),
                 mContext.getResources().getString(R.string.please_wait), true);
-        if (isCurrentCondition(newConditionUuid) ||
-                mConditionSelectedCallback.onNewConditionSelected(newConditionUuid)) {
+        if (isCurrentCondition(newConditionUuid)
+                || mConditionSelectedCallback.onNewConditionSelected(newConditionUuid)) {
             dismiss();
         }
     }
 
+    /**
+     * Dismisses the dialog.
+     */
     public void dismiss() {
         mProgressDialog.dismiss();
-        mDialog.dismiss();
+
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
     }
 
-    // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
+    // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentCondition(String newConditionUuid) {
-        return mCurrentConditionUuid != null &&
-                mCurrentConditionUuid.equals(mAdapter.getSelectedConditionUuid());
+        return mCurrentConditionUuid != null
+                && mCurrentConditionUuid.equals(newConditionUuid);
     }
 }
