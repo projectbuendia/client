@@ -1,5 +1,6 @@
 package org.msf.records.utils;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
@@ -174,7 +175,15 @@ public class Utils {
         }
     }
 
+    /**
+     * Describes a given date as a number of days since a starting date, where the starting date
+     * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
+     */
+    public static int dayNumberSince(LocalDate startDate, LocalDate date) {
+        return date == null ? -1 : Days.daysBetween(startDate, date).getDays() + 1;
+    }
+
     private Utils() {
-    	// Prevent instantiation.
+        // Prevent instantiation.
     }
 }
