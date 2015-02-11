@@ -3,6 +3,7 @@ package org.msf.records.ui.patientcreation;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
@@ -98,7 +99,7 @@ final class PatientCreationController {
 
     public boolean createPatient(
             String id, String givenName, String familyName, String age, int ageUnits, int sex,
-            DateTime admissionDate, DateTime symptomsOnsetDate, String locationUuid) {
+            LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;

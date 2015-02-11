@@ -5,6 +5,8 @@ import android.content.ContentValues;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.base.BaseDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
@@ -32,8 +34,8 @@ public class AppPatientDelta {
     public Optional<Integer> gender = Optional.absent();
     public Optional<DateTime> birthdate = Optional.absent();
 
-    public Optional<DateTime> admissionDate = Optional.absent();
-    public Optional<DateTime> firstSymptomDate = Optional.absent();
+    public Optional<LocalDate> admissionDate = Optional.absent();
+    public Optional<LocalDate> firstSymptomDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();
 
     /**
@@ -65,14 +67,14 @@ public class AppPatientDelta {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
                 observation.put(Server.PATIENT_ANSWER_DATE,
-                        getDateTimeString(admissionDate.get()));
+                        getLocalDateString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(Server.PATIENT_ANSWER_DATE,
-                        getDateTimeString(firstSymptomDate.get()));
+                        getLocalDateString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {
@@ -124,10 +126,11 @@ public class AppPatientDelta {
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
+        // TODO: Either remove admission date here as it's no longer used from the database.
         if (admissionDate.isPresent()) {
             contentValues.put(
                     Contracts.Patients.ADMISSION_TIMESTAMP,
-                    getTimestamp(admissionDate.get()));
+                    getTimestamp(admissionDate.get().toDateTimeAtStartOfDay()));
         }
         if (assignedLocationUuid.isPresent()) {
             contentValues.put(
@@ -141,6 +144,10 @@ public class AppPatientDelta {
         JSONObject location = new JSONObject();
         location.put("uuid", assignedLocationUuid);
         return location;
+    }
+
+    private static String getLocalDateString(LocalDate localDate) {
+        return BIRTHDATE_FORMATTER.print(localDate);
     }
 
     private static String getDateTimeString(DateTime dateTime) {

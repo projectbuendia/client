@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.App;
@@ -117,7 +118,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         ButterKnife.inject(this);
 
         DateTime now = DateTime.now();
-        mAdmissionDateSetListener = new DateSetListener(mAdmissionDate);
+        mAdmissionDateSetListener = new DateSetListener(mAdmissionDate, LocalDate.now());
         mAdmissionDatePickerDialog = new DatePickerDialog(
                 this,
                 mAdmissionDateSetListener,
@@ -126,7 +127,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 now.getDayOfMonth());
         mAdmissionDatePickerDialog.setTitle(R.string.admission_date_picker_title);
         mAdmissionDatePickerDialog.getDatePicker().setCalendarViewShown(false);
-        mSymptomsOnsetDateSetListener = new DateSetListener(mSymptomsOnsetDate);
+        mSymptomsOnsetDateSetListener = new DateSetListener(mSymptomsOnsetDate, null);
         mSymptomsOnsetDatePickerDialog = new DatePickerDialog(
                 this,
                 mSymptomsOnsetDateSetListener,
@@ -295,13 +296,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         setUiEnabled(!mIsCreatePending);
     }
 
-    private DateTime getSymptomsOnsetDate() {
-        return mSymptomsOnsetDateSetListener.getDateTime();
+    private LocalDate getSymptomsOnsetDate() {
+        return mSymptomsOnsetDateSetListener.getDate();
     }
 
-    private DateTime getAdmissionDate() {
-        DateTime admissionDate = mAdmissionDateSetListener.getDateTime();
-        return admissionDate == null ? DateTime.now() : admissionDate;
+    private LocalDate getAdmissionDate() {
+        return mAdmissionDateSetListener.getDate();
     }
 
     @Override
@@ -458,25 +458,25 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private final class DateSetListener implements DatePickerDialog.OnDateSetListener {
         private final EditText mDateField;
-        private DateTime mDateTime;
+        private LocalDate mLocalDate;
 
-        public DateSetListener(final EditText dateField) {
+        public DateSetListener(final EditText dateField, @Nullable final LocalDate defaultDate) {
             mDateField = dateField;
+            mLocalDate = defaultDate;
         }
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            DateTime dt = new DateTime()
+            LocalDate date = new LocalDate()
                     .withYear(year)
                     .withMonthOfYear(monthOfYear + 1)
-                    .withDayOfMonth(dayOfMonth)
-                    .withTimeAtStartOfDay();
-            mDateField.setText(DATE_FORMAT.print(dt));
-            mDateTime = dt;
+                    .withDayOfMonth(dayOfMonth);
+            mDateField.setText(DATE_FORMAT.print(date));
+            mLocalDate = date;
         }
 
-        public DateTime getDateTime() {
-            return mDateTime;
+        public LocalDate getDate() {
+            return mLocalDate;
         }
     }
 }

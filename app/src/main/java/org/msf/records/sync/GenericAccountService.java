@@ -83,6 +83,7 @@ public class GenericAccountService extends Service {
 
     /** Starts an incremental update of observations.  No-op if incremental update is disabled. */
     static void triggerIncrementalObservationSync(SharedPreferences prefs) {
+        // TODO: Remove this setting and merge this function with forceIncrementalObservationSync.
         if (prefs.getBoolean("incremental_observation_update", true)) {
             forceIncrementalObservationSync();
         }
