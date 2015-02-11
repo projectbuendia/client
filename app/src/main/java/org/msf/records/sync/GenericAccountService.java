@@ -58,7 +58,7 @@ public class GenericAccountService extends Service {
      * but the user is not actively waiting for that data, you should omit this flag; this will give
      * the OS additional freedom in scheduling your sync request.
      */
-    static void triggerRefresh(SharedPreferences prefs) {
+    public static void triggerRefresh(SharedPreferences prefs) {
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -83,14 +83,20 @@ public class GenericAccountService extends Service {
 
     /** Starts an incremental update of observations.  No-op if incremental update is disabled. */
     static void triggerIncrementalObservationSync(SharedPreferences prefs) {
+        // TODO: Remove this setting and merge this function with forceIncrementalObservationSync.
         if (prefs.getBoolean("incremental_observation_update", true)) {
-            Bundle b = new Bundle();
-            b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-            b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-            b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-            b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
-            ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
+            forceIncrementalObservationSync();
         }
+    }
+
+    /** Starts (and forces) an incremental update of observations. */
+    public static void forceIncrementalObservationSync() {
+        Bundle b = new Bundle();
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 
     /**

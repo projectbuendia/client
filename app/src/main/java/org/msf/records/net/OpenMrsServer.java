@@ -101,6 +101,8 @@ public class OpenMrsServer implements Server {
             throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
         }
 
+        LOG.v("Adding patient from JSON: %s", json.toString());
+
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails,
                 "/patient",

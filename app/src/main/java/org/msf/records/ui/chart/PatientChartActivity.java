@@ -18,6 +18,7 @@ import com.joanzapata.android.iconify.Iconify;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
@@ -28,7 +29,7 @@ import org.msf.records.data.res.ResStatus;
 import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.inject.Qualifiers;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
@@ -154,6 +155,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
     @InjectView(R.id.attribute_admission_days) PatientAttributeView mPatientAdmissionDaysView;
+    @InjectView(R.id.attribute_symptoms_onset_days)
+    PatientAttributeView mPatientSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
 
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
@@ -416,29 +419,64 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
-            showObservation(mDiet, observations.get(Concept.FLUIDS_UUID));
-            showObservation(mHydration, observations.get(Concept.HYDRATION_UUID));
-            showObservation(mPulse, observations.get(Concept.PULSE_UUID));
-            showObservation(mRespiration, observations.get(Concept.RESPIRATION_UUID));
+            showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
+            showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
+            showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
+            showObservation(mRespiration, observations.get(Concepts.RESPIRATION_UUID));
 
             showObservationForViewGroup(
                     mResponsivenessParent, mResponsivenessName, mResponsiveness,
-                    observations.get(Concept.CONSCIOUS_STATE_UUID));
+                    observations.get(Concepts.CONSCIOUS_STATE_UUID));
             showObservationForViewGroup(
                     mMobilityParent, mMobilityName, mMobility,
-                    observations.get(Concept.MOBILITY_UUID));
+                    observations.get(Concepts.MOBILITY_UUID));
             showObservationForViewGroup(
-                    mPainParent, mPainName, mPain, observations.get(Concept.PAIN_UUID));
+                    mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
+
+            DateTime now = DateTime.now();
+            // Symptoms onset date
+            LocalizedObservation symptomsOnsetObservation =
+                    observations.get(Concepts.FIRST_SYMPTOM_DATE_UUID);
+            if (symptomsOnsetObservation != null
+                    && symptomsOnsetObservation.localizedValue != null) {
+                try {
+                    LocalDate symptomsOnsetDate =
+                            Utils.stringToLocalDate(symptomsOnsetObservation.localizedValue);
+                    int symptomsOnsetDays = Days
+                            .daysBetween(symptomsOnsetDate.toDateTimeAtStartOfDay(), now)
+                            .getDays() + 1;
+                    mPatientSymptomOnsetDaysView.setValue("Day " + symptomsOnsetDays);
+                } catch (Exception e) {
+                    LOG.w("Couldn't display symptoms onset date", e);
+                }
+            }
+
+            // Admission date
+            LocalizedObservation admissionDateObservation =
+                    observations.get(Concepts.ADMISSION_DATE_UUID);
+            if (admissionDateObservation != null
+                    && admissionDateObservation.localizedValue != null) {
+                try {
+                    LocalDate admissionDate =
+                            Utils.stringToLocalDate(admissionDateObservation.localizedValue);
+                    int admissionDays = Days
+                            .daysBetween(admissionDate.toDateTimeAtStartOfDay(), now)
+                            .getDays() + 1;
+                    mPatientAdmissionDaysView.setValue("Day " + admissionDays);
+                } catch (Exception e) {
+                    LOG.w("Couldn't display admission date", e);
+                }
+            }
 
             // General Condition
-            LocalizedObservation observation = observations.get(Concept.GENERAL_CONDITION_UUID);
+            LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
             if (observation != null) {
                 updatePatientGeneralConditionUi(observation.value);
             }
 
             // PCR
-            LocalizedObservation pcrLObservation = observations.get(Concept.PCR_L_UUID);
-            LocalizedObservation pcrNpObservation = observations.get(Concept.PCR_NP_UUID);
+            LocalizedObservation pcrLObservation = observations.get(Concepts.PCR_L_UUID);
+            LocalizedObservation pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
             mPcr.setIconDrawable(
                     new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                             .color(0x00000000)
@@ -491,13 +529,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // TODO: Localize all of this.
             List<String> specialLabels = new ArrayList<>();
 
-            observation = observations.get(Concept.PREGNANCY_UUID);
-            if (observation != null && Concept.YES_UUID.equals(observation.value)) {
+            observation = observations.get(Concepts.PREGNANCY_UUID);
+            if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
                 specialLabels.add("Pregnant");
             }
 
-            observation = observations.get(Concept.IV_UUID);
-            if (observation != null && Concept.YES_UUID.equals(observation.value)) {
+            observation = observations.get(Concepts.IV_UUID);
+            if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
                 specialLabels.add("IV fitted");
             }
 
@@ -517,7 +555,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralCondition.setText("–"); // en dash
                 mGeneralConditionNum.setText("–");
             } else {
-                ResStatus resStatus = Concept.getResStatus(generalConditionUuid);
+                ResStatus resStatus = Concepts.getResStatus(generalConditionUuid);
                 ResStatus.Resolved status = resStatus.resolve(getResources());
 
                 mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
@@ -531,16 +569,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void setObservationHistory(List<LocalizedObservation> observations) {
+        public void setObservationHistory(
+                List<LocalizedObservation> observations, LocalDate admissionDate) {
             if (mChartView != null) {
                 mRootView.removeView(mChartView);
             }
             if (useRecyclerView()) {
-                mChartView = getChartViewNew(observations);
+                mChartView = getChartViewNew(observations, admissionDate);
             } else {
                 // TODO(sdoerner): Remove this old implementation once the new chart grid has got
                 //                 some testing and feedback.
-                mChartView = getChartView(observations);
+                mChartView = getChartView(observations, admissionDate);
             }
             mChartView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -552,22 +591,26 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             return !"1".equalsIgnoreCase(getSystemProperty("debug.useOldChartGrid"));
         }
 
-        private View getChartView(List<LocalizedObservation> observations) {
+        private View getChartView(
+                List<LocalizedObservation> observations, LocalDate admissionDate) {
             return new DataGridView.Builder()
                     .setDoubleWidthColumnHeaders(true)
                     .setDataGridAdapter(
                             new LocalizedChartDataGridAdapter(
                                     PatientChartActivity.this,
                                     observations,
+                                    admissionDate,
                                     getLayoutInflater()))
                     .build(PatientChartActivity.this);
         }
 
-        private View getChartViewNew(List<LocalizedObservation> observations) {
+        private View getChartViewNew(
+                List<LocalizedObservation> observations, LocalDate admissionDate) {
             LocalizedChartDataGridAdapter dataGridAdapter =
                     new LocalizedChartDataGridAdapter(
                             PatientChartActivity.this,
                             observations,
+                            admissionDate,
                             getLayoutInflater());
             FastDataGridView dataGridView = new FastDataGridView(
                     PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
@@ -601,11 +644,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             labels.add(patient.birthdate == null
                     ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
-
-            int days = Days
-                    .daysBetween(patient.admissionDateTime, DateTime.now())
-                    .getDays() + 1;
-            mPatientAdmissionDaysView.setValue("Day " + days);
         }
 
         @Override

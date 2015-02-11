@@ -1,12 +1,8 @@
 package org.msf.records.ui;
 
-import android.accounts.Account;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
@@ -22,19 +18,17 @@ import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.sync.GenericAccountService;
-import org.msf.records.sync.SyncAdapter;
-import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.EventBusWrapper;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
+
+import java.util.concurrent.TimeUnit;
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {

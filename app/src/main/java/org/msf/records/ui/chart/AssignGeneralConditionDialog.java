@@ -10,7 +10,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import org.msf.records.R;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 
 import javax.annotation.Nullable;
 
@@ -60,7 +60,7 @@ public final class AssignGeneralConditionDialog
 
         if (mGridView != null) {
             mAdapter = new GeneralConditionAdapter(
-                    mContext, Concept.GENERAL_CONDITION_UUIDS, mCurrentConditionUuid);
+                    mContext, Concepts.GENERAL_CONDITION_UUIDS, mCurrentConditionUuid);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
             mGridView.setSelection(1);
