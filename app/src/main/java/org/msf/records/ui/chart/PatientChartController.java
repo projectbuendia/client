@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.google.common.base.Optional;
 
+import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
@@ -31,6 +32,7 @@ import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallbac
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -93,7 +95,8 @@ final class PatientChartController {
         void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
 
         /** Updates the UI showing the historic log of observation values for this patient. */
-        void setObservationHistory(List<LocalizedObservation> observations);
+        void setObservationHistory(
+                List<LocalizedObservation> observations, LocalDate admissionDate);
 
         /** Shows the last time a user interacted with this patient. */
         void setLatestEncounter(long latestEncounterTimeMillis);
@@ -337,6 +340,14 @@ final class PatientChartController {
                     observation.encounterTimeMillis);
         }
 
+        // Add in initial observation.
+        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
+                conceptsToLatestObservations.entrySet()) {
+            if (!observations.contains(recentObservation.getValue())) {
+                observations.add(recentObservation.getValue());
+            }
+        }*/
+
         if (DEBUG) {
             LOG.d("Showing " + observations.size() + " observations, and "
                     + conceptsToLatestObservations.size() + " latest observations");
@@ -344,7 +355,17 @@ final class PatientChartController {
 
         mUi.setLatestEncounter(mLastObservation);
         mUi.updatePatientVitalsUI(conceptsToLatestObservations);
-        mUi.setObservationHistory(observations);
+
+        LocalDate admissionDate = null;
+        if (conceptsToLatestObservations.containsKey(Concepts.ADMISSION_DATE_UUID)) {
+            LocalizedObservation admissionDateObservation =
+                    conceptsToLatestObservations.get(Concepts.ADMISSION_DATE_UUID);
+            String admissionDateString = admissionDateObservation.localizedValue;
+            if (admissionDateString != null) {
+                admissionDate = Utils.stringToLocalDate(admissionDateString);
+            }
+        }
+        mUi.setObservationHistory(observations, admissionDate);
     }
 
     /**

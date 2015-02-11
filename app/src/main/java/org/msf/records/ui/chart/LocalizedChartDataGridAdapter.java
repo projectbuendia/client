@@ -80,9 +80,11 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     public LocalizedChartDataGridAdapter(Context context,
                                          List<LocalizedObservation> observations,
+                                         LocalDate admissionDate,
                                          LayoutInflater layoutInflater) {
         mContext = context;
-        LocalizedChartHelper localizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
+        LocalizedChartHelper localizedChartHelper =
+                new LocalizedChartHelper(context.getContentResolver());
         mLayoutInflater = layoutInflater;
         Resources resources = context.getResources();
 
@@ -105,6 +107,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // Today should always be shown in the chart, as well as any days between the last
         // observation and today.
         days.add(today);
+        // Admission date should also always be present, as the left bound.
+        if (admissionDate != null) {
+            days.add(admissionDate);
+        }
         for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
@@ -121,7 +127,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             DateTime d = new DateTime(ob.encounterTimeMillis, chronology);
             LocalDate localDate = d.toLocalDate();
             days.add(localDate);
-            String amKey = toAmKey(todayString, localDate, days.first());
+            String amKey = toAmKey(todayString, localDate, admissionDate);
             String pmKey = toPmKey(amKey); // this is never displayed to the user
             String dateKey = d.getHourOfDay() < 12 ? amKey : pmKey;
 
@@ -157,7 +163,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         } else {
             // Fill in all the columns between start and end.
             for (LocalDate d = days.first(); !d.isAfter(days.last()); d = d.plus(Days.ONE)) {
-                String amKey = toAmKey(todayString, d, days.first());
+                String amKey = toAmKey(todayString, d, admissionDate);
                 String pmKey = toPmKey(amKey); // this is never displayed to the user
                 columnHeaders.add(amKey);
                 columnHeaders.add(pmKey);
@@ -175,15 +181,24 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
-    private String toAmKey(String todayString, LocalDate localDate, LocalDate earliestDate) {
+    private String toAmKey(String todayString, LocalDate localDate, LocalDate admissionDate) {
         // TODO: Localize.
-        String amKey;
-        int day = Days.daysBetween(earliestDate, localDate).getDays() + 1;
+        String localizedDateString = localDate.toString("dd MMM");
         int daysDiff = Days.daysBetween(localDate, today).getDays();
+        if (admissionDate == null) {
+            if (daysDiff == 0) {
+                return todayString + " (" + localizedDateString + ")";
+            } else {
+                return localizedDateString;
+            }
+        }
+
+        String amKey;
+        int day = Days.daysBetween(admissionDate, localDate).getDays() + 1;
         if (daysDiff == 0) {
-            amKey = todayString + " (Day " + day + ")\n" + localDate.toString("dd MMM");
+            amKey = todayString + " (Day " + day + ")\n" + localizedDateString;
         } else {
-            amKey = "Day " + day + "\n" + localDate.toString("dd MMM");
+            amKey = "Day " + day + "\n" + localizedDateString;
         }
         return amKey;
     }
