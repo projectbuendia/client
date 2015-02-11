@@ -70,8 +70,7 @@ final class TentSelectionController {
     private final SyncManager mSyncManager;
     private final PatientSearchController mPatientSearchController;
 
-    private boolean mLoadedLocationTree;
-    private boolean mWaitingForSync = false;
+    private boolean mWaitingForData = true;
     private long mLoadRequestTimeMs;
     @Nullable private AppLocationTree mAppLocationTree;
     @Nullable private AppLocation mTriageZone;
@@ -97,14 +96,12 @@ final class TentSelectionController {
         mCrudEventBus.register(mEventBusSubscriber);
 
         LOG.d("Controller inited. Loaded tree: %1$s. Tree: %2$s",
-                mLoadedLocationTree, mAppLocationTree);
+                mWaitingForData, mAppLocationTree);
 
         mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
-        mWaitingForSync = mSyncManager.isSyncing();
+        mWaitingForData = true;
 
-        LOG.d("Waiting for sync before showing tents? %b", mWaitingForSync);
-
-        if (!mLoadedLocationTree) {
+        if (!mWaitingForData) {
             mLoadRequestTimeMs = SystemClock.elapsedRealtime();
         }
         for (TentFragmentUi fragmentUi : mFragmentUis) {
@@ -133,7 +130,6 @@ final class TentSelectionController {
 
         if (mAppLocationTree != null) {
             mAppLocationTree.close();
-            mLoadedLocationTree = false;
         }
 
         mCrudEventBus.unregister(mEventBusSubscriber);
@@ -166,7 +162,7 @@ final class TentSelectionController {
     }
 
     private void populateFragmentUi(TentFragmentUi fragmentUi) {
-        if (mAppLocationTree != null && !mWaitingForSync) {
+        if (mAppLocationTree != null && !mWaitingForData) {
             int dischargedPatientCount = (mDischargedZone == null)
                     ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
             int totalPatientCount =
@@ -182,7 +178,7 @@ final class TentSelectionController {
             fragmentUi.setTriagePatientCount(
                     (mTriageZone == null) ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
         }
-        fragmentUi.showSpinner(!mLoadedLocationTree || mWaitingForSync);
+        fragmentUi.showSpinner(!mWaitingForData);
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
@@ -190,8 +186,6 @@ final class TentSelectionController {
 
         public void onEventMainThread(SyncSucceededEvent event) {
             mUi.showSyncFailedDialog(false);
-
-            mWaitingForSync = false;
 
             // Reload locations when a sync completes.
             mAppModel.fetchLocationTree(
@@ -210,15 +204,14 @@ final class TentSelectionController {
             mAppLocationTree = event.tree;
             if (mAppLocationTree == null || mAppLocationTree.getRoot() == null) {
                 LOG.w("Location tree was null or had null root.");
-                if (!mWaitingForSync) {
+                mWaitingForData = true;
+                if (!mSyncManager.isSyncing()) {
                     LOG.i("Forcing a new sync.");
-                    mWaitingForSync = true;
                     mSyncManager.forceSync();
                 }
-                mLoadedLocationTree = false;
                 return;
             }
-            mLoadedLocationTree = true;
+            mWaitingForData = false;
 
             ImmutableSet<AppLocation> zones =
                     mAppLocationTree.getChildren(mAppLocationTree.getRoot());
