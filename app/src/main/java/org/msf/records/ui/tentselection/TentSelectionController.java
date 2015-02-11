@@ -12,7 +12,6 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
-import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
@@ -134,6 +133,7 @@ final class TentSelectionController {
 
         if (mAppLocationTree != null) {
             mAppLocationTree.close();
+            mLoadedLocationTree = false;
         }
 
         mCrudEventBus.unregister(mEventBusSubscriber);
@@ -182,7 +182,7 @@ final class TentSelectionController {
             fragmentUi.setTriagePatientCount(
                     (mTriageZone == null) ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
         }
-        fragmentUi.showSpinner(!mLoadedLocationTree);
+        fragmentUi.showSpinner(!mLoadedLocationTree || mWaitingForSync);
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
