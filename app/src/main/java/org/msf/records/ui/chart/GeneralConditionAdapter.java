@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import org.msf.records.R;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -57,7 +57,7 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
 
         String conditionUuid = getItem(position);
         ResStatus.Resolved condition =
-                Concept.getResStatus(conditionUuid).resolve(getContext().getResources());
+                Concepts.getResStatus(conditionUuid).resolve(getContext().getResources());
 
         holder.mConditionNumber.setText(condition.getShortDescription());
         holder.mConditionNumber.setTextColor(condition.getForegroundColor());
