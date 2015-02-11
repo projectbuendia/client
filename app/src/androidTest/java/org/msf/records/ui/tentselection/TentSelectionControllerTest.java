@@ -168,6 +168,18 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         assertTrue(mFakeSyncManager.isSyncing());
     }
 
+    /** Tests that loading an empty location tree does not hide the sync failed dialog. */
+    public void testFetchingIncompleteLocationTree_retainsSyncFailedDialog() {
+        // GIVEN an initialized controller with a fragment attached
+        mController.init();
+        mController.attachFragmentUi(mMockFragmentUi);
+        // WHEN an empty location tree is loaded
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // THEN the loading dialog is not hidden
+        verify(mMockUi, times(0)).showSyncFailedDialog(false);
+    }
+
     /** Tests that loading an empty location tree does not hide the loading dialog. */
     public void testFetchingIncompleteLocationTree_retainsLoadingDialog() {
         // GIVEN an initialized controller with a fragment attached
@@ -177,7 +189,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the loading dialog is not hidden
-        verify(mMockUi, times(0)).showSyncFailedDialog(false);
+        verify(mMockFragmentUi).showSpinner(true);
     }
 
     /** Tests that loading a populated location tree does not result in a new sync. */
@@ -190,5 +202,51 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller does not start a new sync
         assertTrue(!mFakeSyncManager.isSyncing());
+    }
+
+    /**
+     * Tests that attaching a fragment UI shows the spinner if performing during a sync,
+     * even when locations are present.
+     */
+    public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsPresent() {
+        // GIVEN an initialized controller with a location tree, with a sync in progress
+        mFakeSyncManager.setSyncing(true);
+        mController.init();
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // WHEN a fragment is attached
+        mController.attachFragmentUi(mMockFragmentUi);
+        // THEN the loading dialog is displayed
+        verify(mMockFragmentUi).showSpinner(true);
+    }
+
+    /**
+     * Tests that attaching a fragment UI shows the spinner if performing during a sync,
+     * when location tree is empty.
+     */
+    public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationTreeEmpty() {
+        // GIVEN an initialized controller with a location tree, with a sync in progress
+        mFakeSyncManager.setSyncing(true);
+        mController.init();
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // WHEN a fragment is attached
+        mController.attachFragmentUi(mMockFragmentUi);
+        // THEN the loading dialog is displayed
+        verify(mMockFragmentUi).showSpinner(true);
+    }
+
+    /**
+     * Tests that attaching a fragment UI shows the spinner if performing during a sync,
+     * when location tree is not present.
+     */
+    public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsNotPresent() {
+        // GIVEN an initialized controller with a sync in progress and no location tree
+        mFakeSyncManager.setSyncing(true);
+        mController.init();
+        // WHEN a fragment is attached
+        mController.attachFragmentUi(mMockFragmentUi);
+        // THEN the loading dialog is displayed
+        verify(mMockFragmentUi).showSpinner(true);
     }
 }
