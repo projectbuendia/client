@@ -382,24 +382,14 @@ final class PatientChartController {
         return requestCode;
     }
 
-    public void showAssignGeneralConditionDialog(Context context, String generalConditionUuid) {
+    public void showAssignGeneralConditionDialog(
+            Context context, final String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
                 new AssignGeneralConditionDialog.ConditionSelectedCallback() {
 
                     @Override
                     public boolean onNewConditionSelected(String newConditionUuid) {
-                        AppEncounter appEncounter = new AppEncounter(
-                                mPatientUuid,
-                                null, // encounter UUID, which the server will generate
-                                DateTime.now(),
-                                new AppEncounter.AppObservation[] {
-                                        new AppEncounter.AppObservation(
-                                                Concepts.GENERAL_CONDITION_UUID,
-                                                newConditionUuid,
-                                                AppEncounter.AppObservation.Type.UUID)
-                                });
-                        mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
-                        LOG.v("Assigning general condition: %s", newConditionUuid);
+                        setCondition(newConditionUuid);
                         return false;
                     }
                 };
@@ -407,6 +397,21 @@ final class PatientChartController {
                 context, generalConditionUuid, callback);
 
         mAssignGeneralConditionDialog.show();
+    }
+
+    public void setCondition(String newConditionUuid) {
+        LOG.v("Assigning general condition: %s", newConditionUuid);
+        AppEncounter appEncounter = new AppEncounter(
+                mPatientUuid,
+                null, // encounter UUID, which the server will generate
+                DateTime.now(),
+                new AppEncounter.AppObservation[] {
+                        new AppEncounter.AppObservation(
+                                Concepts.GENERAL_CONDITION_UUID,
+                                newConditionUuid,
+                                AppEncounter.AppObservation.Type.UUID)
+                });
+        mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
     }
 
     public void showAssignLocationDialog(
