@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
@@ -20,6 +21,7 @@ import org.msf.records.data.odk.OdkConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
@@ -110,8 +112,8 @@ final class PatientChartController {
         /** Shows the patient's personal details. */
         void setPatient(AppPatient patient);
 
-        /** Displays an error. */
-        void showError(String errorMessage);
+        /** Displays an error with the given resource and optional substitution args. */
+        void showError(int errorResource, Object... args);
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
@@ -350,14 +352,6 @@ final class PatientChartController {
                     observation.encounterTimeMillis);
         }
 
-        // Add in initial observation.
-        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
-                conceptsToLatestObservations.entrySet()) {
-            if (!observations.contains(recentObservation.getValue())) {
-                observations.add(recentObservation.getValue());
-            }
-        }*/
-
         if (DEBUG) {
             LOG.d("Showing " + observations.size() + " observations, and "
                     + conceptsToLatestObservations.size() + " latest observations");
@@ -397,7 +391,7 @@ final class PatientChartController {
                         AppEncounter appEncounter = new AppEncounter(
                                 mPatientUuid,
                                 null, // encounter UUID, which the server will generate
-                                DateTime.now().minusSeconds(5), // TODO: We shouldn't need this.
+                                DateTime.now(),
                                 new AppEncounter.AppObservation[] {
                                         new AppEncounter.AppObservation(
                                                 Concepts.GENERAL_CONDITION_UUID,
@@ -482,13 +476,42 @@ final class PatientChartController {
             updatePatientUI();
         }
 
-        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+        public void onEventMainThread(EncounterAddFailedEvent event) {
             if (mAssignGeneralConditionDialog != null) {
                 mAssignGeneralConditionDialog.dismiss();
                 mAssignGeneralConditionDialog = null;
             }
 
-            mUi.showError(event.error);
+            int messageResource;
+            String exceptionMessage = event.exception.getMessage();
+            switch (event.reason) {
+                case FAILED_TO_AUTHENTICATE:
+                    messageResource = R.string.encounter_add_failed_to_authenticate;
+                    break;
+                case FAILED_TO_FETCH_SAVED_OBSERVATION:
+                    messageResource = R.string.encounter_add_failed_to_fetch_saved;
+                    break;
+                case FAILED_TO_SAVE_ON_SERVER:
+                    messageResource = R.string.encounter_add_failed_to_saved_on_server;
+                    break;
+                case FAILED_TO_VALIDATE:
+                    messageResource = R.string.encounter_add_failed_invalid_encounter;
+                    // Validation reason typically starts after the message below.
+                    exceptionMessage = exceptionMessage.replaceFirst(
+                            ".*failed to validate with reason: .*: ", "");
+                    break;
+                case INTERRUPTED:
+                    messageResource = R.string.encounter_add_failed_interrupted;
+                    break;
+                case INVALID_NUMBER_OF_OBSERVATIONS_SAVED: // Hard to communicate to the user.
+                case UNKNOWN_SERVER_ERROR:
+                    messageResource = R.string.encounter_add_failed_unknown_server_error;
+                    break;
+                case UNKNOWN:
+                default:
+                    messageResource = R.string.encounter_add_failed_unknown_reason;
+            }
+            mUi.showError(messageResource, exceptionMessage);
         }
 
         public void onEventMainThread(SingleItemFetchedEvent event) {

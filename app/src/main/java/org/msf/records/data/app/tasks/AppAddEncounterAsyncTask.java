@@ -79,13 +79,23 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
         try {
             encounter = encounterFuture.get();
         } catch (InterruptedException e) {
-            return new EncounterAddFailedEvent(EncounterAddFailedEvent.REASON_INTERRUPTED, e);
+            return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {
-            // TODO(dxchen): Parse the VolleyError to see exactly what kind of error was raised.
-            LOG.e("Server error while adding encounter", e);
+            LOG.e(e, "Server error while adding encounter");
+
+            EncounterAddFailedEvent.Reason reason =
+                    EncounterAddFailedEvent.Reason.UNKNOWN_SERVER_ERROR;
+            if (e.getCause() != null) {
+                String errorMessage = e.getCause().getMessage();
+                if (errorMessage.contains("failed to validate")) {
+                    reason = EncounterAddFailedEvent.Reason.FAILED_TO_VALIDATE;
+                } else if (errorMessage.contains("Privileges required")) {
+                    reason = EncounterAddFailedEvent.Reason.FAILED_TO_AUTHENTICATE;
+                }
+            }
             LOG.e("Error response: %s", ((VolleyError)e.getCause()).networkResponse);
-            return new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
+
+            return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
         }
 
         if (encounter.uuid == null) {
@@ -94,7 +104,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
                             + "return a UUID for that encounter. This indicates a server error.");
 
             return new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.REASON_SERVER, null /*exception*/);
+                    EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
         AppEncounter appEncounter = AppEncounter.fromNet(mPatient.uuid, encounter);
@@ -107,7 +117,8 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                         inserted, appEncounter.observations.length);
                 return new EncounterAddFailedEvent(
-                        EncounterAddFailedEvent.REASON_CLIENT, null /*exception*/);
+                        EncounterAddFailedEvent.Reason.INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
+                        null /*exception*/);
             }
         } else {
             LOG.w("Encounter was sent to the server but contained no observations.");
@@ -130,10 +141,10 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
         if (mUuid == null) {
             LOG.e(
                     "Although an encounter add ostensibly succeeded, no UUID was set for the newly-"
-                            + "added patient. This indicates a programming error.");
+                            + "added encounter. This indicates a programming error.");
 
             mBus.post(new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.REASON_UNKNOWN, null /*exception*/));
+                    EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
             return;
         }
 
@@ -161,7 +172,8 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {
             mBus.post(new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.REASON_CLIENT, new Exception(event.error)));
+                    EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
+                    new Exception(event.error)));
             mBus.unregister(this);
         }
     }

@@ -136,4 +136,11 @@
     <string name="user_sync_failed_dialog_message">An error occurred while retrieving the user list. Please check your OpenMRS settings or try again.</string>
     <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check settings or try again.</string>
     <string name="sync_failed_back">Back</string>
+    <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
+    <string name="encounter_add_failed_unknown_server_error">Unknown error occurred on server.</string>
+    <string name="encounter_add_failed_interrupted">Network request was interrupted.</string>
+    <string name="encounter_add_failed_to_authenticate">Username or password is invalid.</string>
+    <string name="encounter_add_failed_invalid_encounter">The server rejected the new observation(s). Reason: %s</string>
+    <string name="encounter_add_failed_to_fetch_saved">Observation(s) have been updated but local data may be temporarily out of sync.</string>
+    <string name="encounter_add_failed_to_saved_on_server">The server failed to process this update.</string>
 </resources>

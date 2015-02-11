@@ -647,8 +647,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void showError(String errorMessage) {
-            BigToast.show(PatientChartActivity.this, errorMessage);
+        public void showError(int errorMessageResource, Object... args) {
+            BigToast.show(PatientChartActivity.this, getString(errorMessageResource, args));
         }
 
         @Override

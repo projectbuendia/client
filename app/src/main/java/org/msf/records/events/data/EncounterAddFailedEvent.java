@@ -6,17 +6,21 @@ package org.msf.records.events.data;
  * <p>This event should only ever be posted on a {@link org.msf.records.events.DefaultCrudEventBus}.
  */
 public class EncounterAddFailedEvent {
+    public enum Reason {
+        UNKNOWN,
+        UNKNOWN_SERVER_ERROR,
+        INTERRUPTED,
+        FAILED_TO_VALIDATE,
+        FAILED_TO_AUTHENTICATE,
+        FAILED_TO_SAVE_ON_SERVER,
+        INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
+        FAILED_TO_FETCH_SAVED_OBSERVATION
+    }
 
-    public static final int REASON_UNKNOWN = 0;
-    public static final int REASON_INTERRUPTED = 1;
-    public static final int REASON_NETWORK = 2;
-    public static final int REASON_CLIENT = 3;
-    public static final int REASON_SERVER = 4;
-
-    public final int reason;
+    public final Reason reason;
     public final Exception exception;
 
-    public EncounterAddFailedEvent(int reason, Exception exception) {
+    public EncounterAddFailedEvent(Reason reason, Exception exception) {
         this.reason = reason;
         this.exception = exception;
     }
