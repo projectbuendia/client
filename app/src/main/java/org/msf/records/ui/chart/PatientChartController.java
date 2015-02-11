@@ -388,6 +388,7 @@ final class PatientChartController {
     }
 
     /**
+     *
      * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
      */
     private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {

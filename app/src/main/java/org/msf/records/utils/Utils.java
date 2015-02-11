@@ -180,7 +180,10 @@ public class Utils {
      * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
      */
     public static int dayNumberSince(LocalDate startDate, LocalDate date) {
-        return date == null ? -1 : Days.daysBetween(startDate, date).getDays() + 1;
+        if (startDate == null || date == null) {
+            return -1;
+        }
+        return Days.daysBetween(startDate, date).getDays() + 1;
     }
 
     private Utils() {
