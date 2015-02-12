@@ -46,20 +46,20 @@ public final class TentSelectionFragment extends ProgressFragment {
     }
 
     @OnItemClick(R.id.tent_selection_tents) void onTentGridClicked(int position) {
-    	mController.onTentSelected(mAdapter.getItem(position));
+        mController.onTentSelected(mAdapter.getItem(position));
     }
 
     @OnClick(R.id.tent_selection_all_patients) void onAllPatientsClicked(View v) {
-    	Intent listIntent = new Intent(getActivity(), PatientListActivity.class);
+        Intent listIntent = new Intent(getActivity(), PatientListActivity.class);
         startActivity(listIntent);
     }
 
     @OnClick(R.id.tent_selection_discharged) void onDischargedClicked(View v) {
-    	mController.onDischargedPressed();
+        mController.onDischargedPressed();
     }
 
     @OnClick(R.id.tent_selection_triage) void onTriageClicked(View v) {
-    	mController.onTriagePressed();
+        mController.onTriagePressed();
     }
 
     @Override
@@ -84,9 +84,9 @@ public final class TentSelectionFragment extends ProgressFragment {
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
-    	super.onViewStateRestored(savedInstanceState);
+        super.onViewStateRestored(savedInstanceState);
         mController = ((TentSelectionActivity) getActivity()).getController();
-    	mController.attachFragmentUi(mMyUi);
+        mController.attachFragmentUi(mMyUi);
     }
 
     @Override
@@ -96,37 +96,37 @@ public final class TentSelectionFragment extends ProgressFragment {
     }
 
     private final class MyUi implements TentSelectionController.TentFragmentUi {
-    	@Override
-    	public void setDischargedPatientCount(int patientCount) {
+        @Override
+        public void setDischargedPatientCount(int patientCount) {
             mDischargedButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
                             getActivity(), patientCount));
-    	}
+        }
 
-    	@Override
-    	public void setTriagePatientCount(int patientCount) {
+        @Override
+        public void setTriagePatientCount(int patientCount) {
             mTriageButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
                             getActivity(), patientCount));
-    	}
+        }
 
-    	@Override
+        @Override
         public void setPresentPatientCount(int patientCount) {
-    		mAllPatientsButton.setSubtitle(
+            mAllPatientsButton.setSubtitle(
                     PatientCountDisplay.getPatientCountSubtitle(
                             getActivity(), patientCount, true));
-    	}
+        }
 
-    	@Override
+        @Override
         public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
             mAdapter = new TentListAdapter(
                     getActivity(), tents, locationTree, Optional.<String>absent());
-    		mTentGrid.setAdapter(mAdapter);
-		}
+            mTentGrid.setAdapter(mAdapter);
+        }
 
-    	@Override
-    	public void setBusyLoading(boolean busy) {
-    		changeState(busy ? State.LOADING : State.LOADED);
+        @Override
+        public void setBusyLoading(boolean busy) {
+            changeState(busy ? State.LOADING : State.LOADED);
             if (mAlertDialog != null && busy != mAlertDialog.isShowing()) {
                 if (busy) {
                     mAlertDialog.show();
@@ -134,6 +134,6 @@ public final class TentSelectionFragment extends ProgressFragment {
                     mAlertDialog.hide();
                 }
             }
-    	}
+        }
     }
 }
