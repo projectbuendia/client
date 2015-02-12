@@ -125,10 +125,10 @@ public final class TentSelectionFragment extends ProgressFragment {
 		}
 
     	@Override
-    	public void showSpinner(boolean show) {
-    		changeState(show ? State.LOADING : State.LOADED);
-            if (mAlertDialog != null && show != mAlertDialog.isShowing()) {
-                if (show) {
+    	public void setBusyLoading(boolean busy) {
+    		changeState(busy ? State.LOADING : State.LOADED);
+            if (mAlertDialog != null && busy != mAlertDialog.isShowing()) {
+                if (busy) {
                     mAlertDialog.show();
                 } else {
                     mAlertDialog.hide();
