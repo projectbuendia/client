@@ -115,7 +115,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 public void onErrorResponse(VolleyError error) {
                     // TODO(nfortescue): design error handling properly
                     LOG.e(error, "failed to fetch file");
-                    EventBus.getDefault().post(new FetchXformFailedEvent());
+                    EventBus.getDefault().post(new FetchXformFailedEvent(
+                            FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
                 }
             });
         }

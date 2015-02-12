@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.msf.records.R;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.FetchXformFailedEvent;
@@ -127,9 +128,19 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // GIVEN controller is initialized
         mController.init();
         // WHEN an xform request fails
-        mFakeGlobalEventBus.post(new FetchXformFailedEvent());
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
         // THEN the controller re-enables xform fetch
         verify(mMockUi).reEnableFetch();
+    }
+
+    /** Tests that an error message is displayed when the xform fails to load. */
+    public void testXformLoadFailed_ShowsError() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request fails
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller displays an error message
+        verify(mMockUi).showError(R.string.fetch_xform_failed_unknown_reason);
     }
 
 	private final class FakeHandler implements MinimalHandler {

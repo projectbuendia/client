@@ -35,6 +35,7 @@ import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseLoggedInActivity;
+import org.msf.records.ui.BigToast;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
@@ -651,6 +652,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void reEnableFetch() {
             mIsFetchingXform = false;
+        }
+
+        @Override
+        public void showError(int errorMessageResource) {
+            BigToast.show(PatientChartActivity.this, errorMessageResource);
         }
     }
 

@@ -10,6 +10,7 @@ import com.google.common.base.Optional;
 
 import org.joda.time.LocalDate;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -113,6 +114,9 @@ final class PatientChartController {
 
         /** Re-enables fetching. */
         void reEnableFetch();
+
+        /** Displays an error message with the given resource id. */
+        void showError(int errorMessageResource);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -475,6 +479,28 @@ final class PatientChartController {
         }
 
         public void onEventMainThread(FetchXformFailedEvent event) {
+            int errorMessageResource = R.string.fetch_xform_failed_unknown_reason;
+            switch (event.reason) {
+                case NO_FORMS_FOUND:
+                    errorMessageResource = R.string.fetch_xform_failed_no_forms_found;
+                    break;
+                case SERVER_AUTH:
+                    errorMessageResource = R.string.fetch_xform_failed_server_auth;
+                    break;
+                case SERVER_BAD_ENDPOINT:
+                    errorMessageResource = R.string.fetch_xform_failed_server_bad_endpoint;
+                    break;
+                case SERVER_FAILED_TO_FETCH:
+                    errorMessageResource = R.string.fetch_xform_failed_server_failed_to_fetch;
+                    break;
+                case SERVER_UNKNOWN:
+                    errorMessageResource = R.string.fetch_xform_failed_server_unknown;
+                    break;
+                case UNKNOWN:
+                default:
+                    // Intentionally blank.
+            }
+            mUi.showError(errorMessageResource);
             mUi.reEnableFetch();
         }
     }
