@@ -18,6 +18,7 @@ import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.data.odk.OdkConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
@@ -117,6 +118,9 @@ final class PatientChartController {
 
         /** Displays an error message with the given resource id. */
         void showError(int errorMessageResource);
+
+        /** Shows or hides the form loading dialog. */
+        void showFormLoadingDialog(boolean show);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -299,6 +303,7 @@ final class PatientChartController {
 
         fields.targetGroup = targetGroup;
 
+        mUi.showFormLoadingDialog(true);
         mUi.fetchAndShowXform(
                 PatientChartActivity.XForm.ADD_OBSERVATION,
                 savePatientUuidForRequestCode(
@@ -319,6 +324,7 @@ final class PatientChartController {
             fields.clinicianName = user.fullName;
         }
 
+        mUi.showFormLoadingDialog(true);
         mUi.fetchAndShowXform(
                 PatientChartActivity.XForm.ADD_TEST_RESULTS,
                 savePatientUuidForRequestCode(
@@ -478,6 +484,11 @@ final class PatientChartController {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
         }
 
+        public void onEventMainThread(FetchXformSucceededEvent event) {
+            mUi.showFormLoadingDialog(false);
+            mUi.reEnableFetch();
+        }
+
         public void onEventMainThread(FetchXformFailedEvent event) {
             int errorMessageResource = R.string.fetch_xform_failed_unknown_reason;
             switch (event.reason) {
@@ -501,6 +512,7 @@ final class PatientChartController {
                     // Intentionally blank.
             }
             mUi.showError(errorMessageResource);
+            mUi.showFormLoadingDialog(false);
             mUi.reEnableFetch();
         }
     }

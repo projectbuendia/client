@@ -123,6 +123,39 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		verify(mMockUi).setPatient(patient);
 	}
 
+    /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
+    public void testAddObservation_showsLoadingDialog() {
+        // GIVEN patient is set, controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN 'add observation' is pressed
+        mController.onAddObservationPressed();
+        // THEN the controller displays the loading dialog
+        verify(mMockUi).showFormLoadingDialog(true);
+    }
+
+    /** Tests that requesting an xform through clicking on a vital shows loading dialog. */
+    public void testVitalClick_showsLoadingDialog() {
+        // GIVEN patient is set, controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN a vital is pressed
+        mController.onAddObservationPressed("foo");
+        // THEN the controller displays the loading dialog
+        verify(mMockUi).showFormLoadingDialog(true);
+    }
+
+    /** Tests that requesting an xform through clicking on test results shows loading dialog. */
+    public void testTestResultsClick_showsLoadingDialog() {
+        // GIVEN patient is set, controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN test results are pressed
+        mController.onAddTestResultsPressed();
+        // THEN the controller displays the loading dialog
+        verify(mMockUi).showFormLoadingDialog(true);
+    }
+
     /** Tests that the xform can be fetched again if the first fetch fails. */
     public void testXformLoadFailed_ReenablesXformFetch() {
         // GIVEN controller is initialized
@@ -141,6 +174,36 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
         // THEN the controller displays an error message
         verify(mMockUi).showError(R.string.fetch_xform_failed_unknown_reason);
+    }
+
+    /** Tests that a failed xform fetch hides the loading dialog. */
+    public void testXformLoadFailed_HidesLoadingDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request fails
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller hides the loading dialog
+        verify(mMockUi).showFormLoadingDialog(false);
+    }
+
+    /** Tests that the xform can be fetched again if the first fetch succeeds. */
+    public void testXformLoadSucceeded_ReenablesXformFetch() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request succeeds
+        mFakeGlobalEventBus.post(new FetchXformSucceededEvent());
+        // THEN the controller re-enables xform fetch
+        verify(mMockUi).reEnableFetch();
+    }
+
+    /** Tests that a successful xform fetch hides the loading dialog. */
+    public void testXformLoadSucceeded_HidesLoadingDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request succeeds
+        mFakeGlobalEventBus.post(new FetchXformSucceededEvent());
+        // THEN the controller hides the loading dialog
+        verify(mMockUi).showFormLoadingDialog(false);
     }
 
 	private final class FakeHandler implements MinimalHandler {

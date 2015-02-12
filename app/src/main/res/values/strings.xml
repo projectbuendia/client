@@ -140,5 +140,7 @@
     <string name="fetch_xform_failed_server_auth">Unable to access encounter form on server. Please confirm that your username and password are correct.</string>
     <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
     <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the encounter form from the server.</string>
-    <string name="fetch_xform_failed_server_unknown">An unknown error occurred on the server.</string>
+    <string name="fetch_xform_failed_server_unknown">Error retrieving the encounter form from the server.</string>
+    <string name="retrieving_encounter_form_title">Retrieving Form</string>
+    <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
 </resources>

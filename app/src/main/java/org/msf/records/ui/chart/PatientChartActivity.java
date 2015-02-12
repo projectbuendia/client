@@ -1,6 +1,7 @@
 package org.msf.records.ui.chart;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -138,6 +139,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ResVital.Resolved mVitalUnknown;
     private ResVital.Resolved mVitalKnown;
 
+    private ProgressDialog mFormLoadingDialog;
+
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -216,6 +219,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mHandler.post(runnable);
             }
         };
+
+        mFormLoadingDialog = new ProgressDialog(this);
+        mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
+        mFormLoadingDialog.setTitle(getString(R.string.retrieving_encounter_form_title));
+        mFormLoadingDialog.setMessage(getString(R.string.retrieving_encounter_form_message));
+        mFormLoadingDialog.setIndeterminate(true);
+        mFormLoadingDialog.setCancelable(false);
 
         mController = new PatientChartController(
                 mAppModel,
@@ -657,6 +667,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void showError(int errorMessageResource) {
             BigToast.show(PatientChartActivity.this, errorMessageResource);
+        }
+
+        @Override
+        public void showFormLoadingDialog(boolean show) {
+            if (show) {
+                mFormLoadingDialog.show();
+            } else {
+                mFormLoadingDialog.hide();
+            }
         }
     }
 
