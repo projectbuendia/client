@@ -1,8 +1,9 @@
-package org.msf.records.filter.matchers;
+package org.msf.records.filter.matchers.patient;
 
 import android.support.annotation.Nullable;
 
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.filter.matchers.MatchingFilter;
 
 /**
  * Filter that matches based on user-specified id.

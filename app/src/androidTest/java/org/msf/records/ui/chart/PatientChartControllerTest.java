@@ -7,12 +7,16 @@ import com.google.common.collect.ImmutableMap;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.msf.records.R;
+import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
@@ -23,6 +27,7 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -122,6 +127,20 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
 	}
+
+    /** Tests that selecting a new general condition results in adding a new encounter. */
+    public void testSetCondition_AddsEncounterForNewCondition() {
+        // GIVEN patient is set and controller is initalized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN a new general condition is set from the dialog
+        mController.setCondition(Concepts.GENERAL_CONDITION_PALLIATIVE_UUID);
+        // THEN a new encounter is added
+        verify(mMockAppModel).addEncounter(
+                any(CrudEventBus.class),
+                any(AppPatient.class),
+                any(AppEncounter.class));
+    }
 
     /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
     public void testAddObservation_showsLoadingDialog() {

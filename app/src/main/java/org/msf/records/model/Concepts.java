@@ -33,6 +33,19 @@ public class Concepts {
             "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
     public static final String GENERAL_CONDITION_CONFIRMED_DEAD =
             "160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
+            GENERAL_CONDITION_WELL_UUID,
+            GENERAL_CONDITION_UNWELL_UUID,
+            GENERAL_CONDITION_CRITICAL_UUID,
+            GENERAL_CONDITION_PALLIATIVE_UUID,
+            GENERAL_CONDITION_CONVALESCENT_UUID,
+            GENERAL_CONDITION_SUSPECTED_DEAD,
+            GENERAL_CONDITION_CONFIRMED_DEAD,
+            GENERAL_CONDITION_CURED,
+            GENERAL_CONDITION_DISCHARGED_NON_CASE
+    };
+
     /**
      * UUID for the (question) concept for the temperature.
      */

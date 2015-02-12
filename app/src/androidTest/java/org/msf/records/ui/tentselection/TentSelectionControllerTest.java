@@ -204,10 +204,10 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
     }
 
     /**
-     * Tests that attaching a fragment UI shows the spinner if performing during a sync,
-     * even when locations are present.
+     * Tests that attaching a fragment UI does not show the spinner when locations are present,
+     * even if a sync is occurring.
      */
-    public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsPresent() {
+    public void testAttachFragmentUi_doesNotShowSpinnerDuringSyncWhenLocationsPresent() {
         // GIVEN an initialized controller with a location tree, with a sync in progress
         mFakeSyncManager.setSyncing(true);
         mController.init();
@@ -215,8 +215,8 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
-        // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).setBusyLoading(true);
+        // THEN the loading dialog is not displayed
+        verify(mMockFragmentUi).setBusyLoading(false);
     }
 
     /**

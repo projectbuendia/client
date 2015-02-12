@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/condition_selection_parent"
+    android:layout_width="144dp"
+    android:layout_height="144dp"
+    android:background="@color/vital_unknown"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:gravity="center"
+        android:textColor="@color/vital_fg_dark"
+        android:textSize="56sp"
+        android:maxLines="1"
+        android:id="@+id/condition_selection_number"
+        android:text="–"
+        tools:text="5"/>
+
+    <TextView
+        android:id="@+id/condition_selection_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:gravity="center_horizontal|bottom"
+        android:textAllCaps="true"
+        android:textColor="@color/vital_fg_light"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:text="–"
+        tools:text="Palliative"/>
+
+</LinearLayout>
