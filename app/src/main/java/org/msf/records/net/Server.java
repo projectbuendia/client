@@ -3,8 +3,12 @@ package org.msf.records.net;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.RequestFuture;
 
+import org.msf.records.data.app.AppEncounter;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -19,6 +23,7 @@ import java.util.List;
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
+    public static final String PATIENT_UUID_KEY = "uuid";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
@@ -26,8 +31,10 @@ public interface Server {
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
     public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
     public static final String PATIENT_OBSERVATIONS_KEY = "observations";
+    public static final String PATIENT_OBSERVATIONS_TIMESTAMP = "timestamp";
     public static final String PATIENT_QUESTION_UUID = "question_uuid";
     public static final String PATIENT_ANSWER_DATE = "answer_date";
+    public static final String PATIENT_ANSWER_UUID = "answer_uuid";
 
     /**
      * Adds a patient.
@@ -54,6 +61,18 @@ public interface Server {
     public void addUser(
             NewUser user,
             Response.Listener<User> userListener,
+            Response.ErrorListener errorListener);
+
+    /**
+     * Creates a new encounter for a given patient.
+     *
+     * @param patient the patient being observed
+     * @param encounter the encounter to add
+     */
+    void addEncounter(
+            AppPatient patient,
+            AppEncounter encounter,
+            Response.Listener<Encounter> encounterListener,
             Response.ErrorListener errorListener);
 
     /**

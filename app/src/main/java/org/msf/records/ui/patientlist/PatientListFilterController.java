@@ -3,7 +3,7 @@ package org.msf.records.ui.patientlist;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
-import org.msf.records.filter.db.PatientDbFilters;
+import org.msf.records.filter.db.patient.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 
 /**

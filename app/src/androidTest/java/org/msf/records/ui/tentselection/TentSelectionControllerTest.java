@@ -14,7 +14,6 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.patientlist.PatientSearchController;
 
@@ -78,7 +77,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller hides the progress spinner
-        verify(mMockFragmentUi).showSpinner(false);
+        verify(mMockFragmentUi).setBusyLoading(false);
     }
 
     /** Tests that the spinner is not hidden if locations are loaded but a sync is in progress. */
@@ -91,7 +90,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller does not hide the progress spinner
-        verify(mMockFragmentUi).showSpinner(true);
+        verify(mMockFragmentUi).setBusyLoading(true);
     }
 
     /** Tests that the spinner is hidden if locations are loaded and a sync is completed. */
@@ -105,7 +104,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the progress spinner
-        verify(mMockFragmentUi).showSpinner(false);
+        verify(mMockFragmentUi).setBusyLoading(false);
     }
 
     /**
@@ -189,7 +188,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the loading dialog is not hidden
-        verify(mMockFragmentUi).showSpinner(true);
+        verify(mMockFragmentUi).setBusyLoading(true);
     }
 
     /** Tests that loading a populated location tree does not result in a new sync. */
@@ -205,10 +204,10 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
     }
 
     /**
-     * Tests that attaching a fragment UI shows the spinner if performing during a sync,
-     * even when locations are present.
+     * Tests that attaching a fragment UI does not show the spinner when locations are present,
+     * even if a sync is occurring.
      */
-    public void testAttachFragmentUi_showsSpinnerDuringSyncWhenLocationsPresent() {
+    public void testAttachFragmentUi_doesNotShowSpinnerDuringSyncWhenLocationsPresent() {
         // GIVEN an initialized controller with a location tree, with a sync in progress
         mFakeSyncManager.setSyncing(true);
         mController.init();
@@ -216,8 +215,8 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
-        // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).showSpinner(true);
+        // THEN the loading dialog is not displayed
+        verify(mMockFragmentUi).setBusyLoading(false);
     }
 
     /**
@@ -233,7 +232,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
         // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).showSpinner(true);
+        verify(mMockFragmentUi).setBusyLoading(true);
     }
 
     /**
@@ -247,6 +246,6 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
         // THEN the loading dialog is displayed
-        verify(mMockFragmentUi).showSpinner(true);
+        verify(mMockFragmentUi).setBusyLoading(true);
     }
 }

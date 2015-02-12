@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.data.app.AppPatient;
@@ -16,10 +15,11 @@ import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.filter.db.SimpleSelectionFilter;
-import org.msf.records.filter.db.UuidFilter;
+import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
 
@@ -124,7 +124,12 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
-                new UuidFilter(), mUuid, mConverters.patient, mBus);
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
+                new UuidFilter(),
+                mUuid,
+                mConverters.patient,
+                mBus);
         task.execute();
     }
 

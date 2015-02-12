@@ -79,6 +79,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // rounding errors).
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
+    // Note the general condition uuid when retrieved so that it can be passed to the controller.
+    private String mGeneralConditionUuid;
+
     /**
      * An enumeration of the XForms that can be launched from this activity.
      */
@@ -340,6 +343,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("The pain assessment field");
     }
 
+    @OnClick(R.id.patient_chart_general_condition_parent)
+    void onGeneralConditionPressed(View v) {
+        mController.showAssignGeneralConditionDialog(this, mGeneralConditionUuid);
+    }
+
     @OnClick({
             R.id.vital_diet,
             R.id.vital_food_drink,
@@ -347,12 +355,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             R.id.patient_chart_mobility_parent})
     void onOverallAssessmentPressed(View v) {
         mController.onAddObservationPressed("Overall Assessment");
-    }
-
-    @OnClick({
-            R.id.patient_chart_general_condition_parent})
-    void onGeneralConditionPressed(View v) {
-        mController.onAddObservationPressed("General condition section");
     }
 
     @OnClick({
@@ -477,25 +479,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             // General Condition
             LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
-            if (observation != null && observation.localizedValue != null) {
-                ResStatus resStatus = Concepts.getResStatus(observation.value);
-                ResStatus.Resolved status = resStatus.resolve(getResources());
-
-                mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
-                mGeneralCondition.setTextColor(status.getForegroundColor());
-                mGeneralConditionName.setTextColor(status.getForegroundColor());
-                mGeneralConditionNum.setTextColor(status.getForegroundColor());
-
-                mGeneralCondition.setText(status.getMessage());
-                mGeneralConditionNum.setText(status.getShortDescription());
-            } else {
-                mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-                mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
-                mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
-                mGeneralConditionNum.setTextColor(mVitalUnknown.getForegroundColor());
-
-                mGeneralCondition.setText("–"); // en dash
-                mGeneralConditionNum.setText("–");
+            if (observation != null) {
+                updatePatientGeneralConditionUi(observation.value);
             }
 
             // PCR
@@ -564,6 +549,32 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
+        }
+
+        @Override
+        public void updatePatientGeneralConditionUi(String generalConditionUuid) {
+            mGeneralConditionUuid = generalConditionUuid;
+            if (generalConditionUuid == null) {
+                mGeneralConditionUuid = null;
+                mGeneralConditionParent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
+                mGeneralCondition.setTextColor(mVitalUnknown.getForegroundColor());
+                mGeneralConditionName.setTextColor(mVitalUnknown.getForegroundColor());
+                mGeneralConditionNum.setTextColor(mVitalUnknown.getForegroundColor());
+
+                mGeneralCondition.setText("–"); // en dash
+                mGeneralConditionNum.setText("–");
+            } else {
+                ResStatus resStatus = Concepts.getResStatus(generalConditionUuid);
+                ResStatus.Resolved status = resStatus.resolve(getResources());
+
+                mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
+                mGeneralCondition.setTextColor(status.getForegroundColor());
+                mGeneralConditionName.setTextColor(status.getForegroundColor());
+                mGeneralConditionNum.setTextColor(status.getForegroundColor());
+
+                mGeneralCondition.setText(status.getMessage());
+                mGeneralConditionNum.setText(status.getShortDescription());
+            }
         }
 
         @Override
@@ -645,6 +656,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
+        public void showError(int errorMessageResource, Object... args) {
+            BigToast.show(PatientChartActivity.this, getString(errorMessageResource, args));
+        }
+
+        @Override
+        public void showError(int errorMessageResource) {
+            BigToast.show(PatientChartActivity.this, errorMessageResource);
+        }
+
+        @Override
         public synchronized void fetchAndShowXform(
                 XForm form,
                 int code,
@@ -662,11 +683,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void reEnableFetch() {
             mIsFetchingXform = false;
-        }
-
-        @Override
-        public void showError(int errorMessageResource) {
-            BigToast.show(PatientChartActivity.this, errorMessageResource);
         }
 
         @Override

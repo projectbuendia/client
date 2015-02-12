@@ -16,7 +16,10 @@ import com.google.gson.JsonParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.data.app.AppEncounter;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -193,6 +196,37 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
+    public void addEncounter(AppPatient patient,
+                             AppEncounter encounter,
+                             final Response.Listener<Encounter> encounterListener,
+                             final Response.ErrorListener errorListener) {
+        JSONObject json = new JSONObject();
+        if (!encounter.toJson(json)) {
+            throw new IllegalArgumentException("Unable to serialize the encounter to JSON.");
+        }
+
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/patientencounters",
+                json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            encounterListener.onResponse(encounterFromJson(response));
+                        } catch (JSONException e) {
+                            LOG.e(e, "Failed to parse response");
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(10000, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    @Override
     public void getPatient(String patientId,
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener) {
@@ -260,6 +294,12 @@ public class OpenMrsServer implements Server {
             patient.gender = "F";
         }
         return patient;
+    }
+
+    private Encounter encounterFromJson(JSONObject object) throws JSONException {
+        Encounter encounter = mGson.fromJson(object.toString(), Encounter.class);
+
+        return encounter;
     }
 
     @Override

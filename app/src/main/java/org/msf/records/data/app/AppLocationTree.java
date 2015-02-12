@@ -30,6 +30,8 @@ public class AppLocationTree implements AppModelObservable {
 
     /**
      * Creates a {@link AppLocationTree} from a {@link TypedCursor} of {@link AppLocation}s.
+     * If there are no locations in the local database, the location tree will have a null
+     * root node (i.e. getRoot() == null).
      *
      * <p>Callers must call {@link #close} when done with an instance of this class.
      *

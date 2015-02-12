@@ -14,7 +14,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
-import org.msf.records.filter.db.PatientDbFilters;
+import org.msf.records.filter.db.patient.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
