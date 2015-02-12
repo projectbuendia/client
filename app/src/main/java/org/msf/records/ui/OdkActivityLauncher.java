@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -24,7 +25,8 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
 import org.msf.records.App;
 import org.msf.records.events.FetchXformFailedEvent;
-import org.msf.records.events.FetchXformSucceededEvent;
+import org.msf.records.events.SubmitXformFailedEvent;
+import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.net.OdkDatabase;
 import org.msf.records.net.OdkXformSyncTask;
 import org.msf.records.net.OpenMrsXformIndexEntry;
@@ -187,6 +189,8 @@ public class OdkActivityLauncher {
         if (!context.getContentResolver().getType(uri).equals(
                 InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
             LOG.e("Tried to load a content URI of the wrong type: " + uri);
+            EventBus.getDefault().post(
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
             return;
         }
 
@@ -196,6 +200,8 @@ public class OdkActivityLauncher {
                     null, null, null, null);
             if (instanceCursor.getCount() != 1) {
                 LOG.e("The form that we tried to load did not exist: " + uri);
+                EventBus.getDefault().post(
+                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
                 return;
             }
             instanceCursor.moveToFirst();
@@ -203,6 +209,8 @@ public class OdkActivityLauncher {
                     instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
             if (instancePath == null) {
                 LOG.e("No file path for form instance: " + uri);
+                EventBus.getDefault().post(
+                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
                 return;
 
             }
@@ -210,6 +218,8 @@ public class OdkActivityLauncher {
                     .getColumnIndex(_ID);
             if (columnIndex == -1) {
                 LOG.e("No id to delete for after upload: " + uri);
+                EventBus.getDefault().post(
+                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
                 return;
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
@@ -234,7 +244,7 @@ public class OdkActivityLauncher {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            LOG.i("Created new patient successfully on server"
+                            LOG.i("Created new encounter successfully on server"
                                     + response.toString());
 
                             if (!keepFormInstancesLocally) {
@@ -244,10 +254,13 @@ public class OdkActivityLauncher {
                                         Collect.getInstance().getApplication().getContentResolver());
                                 dit.execute(idToDelete);
                             }
+                            EventBus.getDefault().post(new SubmitXformSucceededEvent());
                         }
                     });
         } catch (IOException e) {
             LOG.e(e, "Failed to read xml form into a String " + uri);
+            EventBus.getDefault().post(
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -416,12 +429,39 @@ public class OdkActivityLauncher {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         LOG.e(error, "Did not submit form to server successfully");
-                        if (error.networkResponse != null
-                                && error.networkResponse.statusCode == 500) {
-                            LOG.e("Internal error stack trace:\n");
-                            // TODO(dxchen): This could throw an NPE!
-                            LOG.e(new String(error.networkResponse.data, Charsets.UTF_8));
+
+                        SubmitXformFailedEvent.Reason reason =
+                                SubmitXformFailedEvent.Reason.UNKNOWN;
+                        if (error.networkResponse != null) {
+                            switch (error.networkResponse.statusCode) {
+                                case 401:
+                                case 403:
+                                    reason = SubmitXformFailedEvent.Reason.SERVER_AUTH;
+                                    break;
+                                case 404:
+                                    reason = SubmitXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                                    break;
+                                case 500:
+                                    if (error.networkResponse.data == null) {
+                                        LOG.e("No internal error stack trace available.");
+                                    } else {
+                                        LOG.e(new String(
+                                                error.networkResponse.data, Charsets.UTF_8));
+                                        LOG.e("Internal error stack trace:\n");
+                                    }
+                                    reason = SubmitXformFailedEvent.Reason.SERVER_UNKNOWN;
+                                    break;
+                                default:
+                                    reason = SubmitXformFailedEvent.Reason.SERVER_UNKNOWN;
+                                    break;
+                            }
                         }
+
+                        if (error instanceof TimeoutError) {
+                            reason = SubmitXformFailedEvent.Reason.SERVER_TIMEOUT;
+                        }
+
+                        EventBus.getDefault().post(new SubmitXformFailedEvent(reason, error));
                     }
                 });
     }

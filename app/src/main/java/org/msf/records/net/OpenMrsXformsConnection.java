@@ -165,6 +165,8 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
+        // Set a permissive timeout.
+        request.setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
