@@ -381,7 +381,16 @@ public class FormsProvider extends ContentProvider {
 
         long rowId;
         if (replace) {
-            rowId = db.replace(FORMS_TABLE_NAME, null, values);
+            // If we want this insert to always replace, then do a transactional delete followed
+            // by an insert. The primary key is _ID, which we can't know in advance.
+            try {
+                db.beginTransaction();
+                db.delete(FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?", new String[]{filePath});
+                rowId = db.insert(FORMS_TABLE_NAME, null, values);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
         } else {
             // first try to see if a record with this filename already exists...
             String[] projection = {FormsColumns._ID, FormsColumns.FORM_FILE_PATH};
