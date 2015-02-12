@@ -383,8 +383,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                         : (Concepts.YES_UUID.equals(rowData.datesToValues.get(dateKey)) ? 1 : 0);
                 textColor = Color.BLACK;
                 if (bleedingSiteCount >= 3) {
-                    textColor = Color.WHITE;
-                    backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
+                    textColor = Color.RED;
                 }
 
                 if (bleedingSiteCount != 0) {
