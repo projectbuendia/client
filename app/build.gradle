@@ -87,7 +87,7 @@ def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs';
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
 def openmrsRootUrlDefault = openmrsRootUrlEdison;
 def openmrsUserDefault = 'buendia';
-def openmrsPasswordDefault = 'mg123';
+def openmrsPasswordDefault = 'buendia';
 
 android {
     compileSdkVersion 21
