@@ -241,7 +241,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             Collections.sort(patients);
         }
 
-        new FetchObservationsTask().execute(patientUuids);
+        new FetchObservationsTask().doInBackground(patientUuids);
         notifyDataSetChanged();
     }
 
@@ -250,11 +250,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         protected Void doInBackground(String... params) {
             mObservations = mLocalizedChartHelper.getMostRecentObservationsBatch(params, "en");
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            notifyDataSetChanged();
         }
     }
 

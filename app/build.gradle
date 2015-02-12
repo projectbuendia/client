@@ -89,6 +89,10 @@ def openmrsRootUrlDefault = openmrsRootUrlEdison;
 def openmrsUserDefault = 'buendia';
 def openmrsPasswordDefault = 'buendia';
 
+def openmrsRootUrlDefault = openmrsRootUrlDev;
+def openmrsUserDefault = 'android';
+def openmrsPasswordDefault = 'Android123';
+
 android {
     compileSdkVersion 21
     buildToolsVersion "19.1.0"
