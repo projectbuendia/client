@@ -1,6 +1,7 @@
 package org.msf.records.ui.chart;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,7 +73,6 @@ import static org.msf.records.utils.Utils.getSystemProperty;
  * Activity displaying a patient's vitals and charts.
  */
 public final class PatientChartActivity extends BaseLoggedInActivity {
-
     private static final Logger LOG = Logger.create();
     // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
     // as it would be displayed as 40.0 (and values slightly below 40.0 may be the result of
@@ -141,6 +141,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private ResVital.Resolved mVitalUnknown;
     private ResVital.Resolved mVitalKnown;
+
+    private ProgressDialog mFormLoadingDialog;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -220,6 +222,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mHandler.post(runnable);
             }
         };
+
+        mFormLoadingDialog = new ProgressDialog(this);
+        mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
+        mFormLoadingDialog.setTitle(getString(R.string.retrieving_encounter_form_title));
+        mFormLoadingDialog.setMessage(getString(R.string.retrieving_encounter_form_message));
+        mFormLoadingDialog.setIndeterminate(true);
+        mFormLoadingDialog.setCancelable(false);
 
         mController = new PatientChartController(
                 mAppModel,
@@ -652,7 +661,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void fetchAndShowXform(
+        public void showError(int errorMessageResource) {
+            BigToast.show(PatientChartActivity.this, errorMessageResource);
+        }
+
+        @Override
+        public synchronized void fetchAndShowXform(
                 XForm form,
                 int code,
                 Patient patient,
@@ -669,6 +683,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void reEnableFetch() {
             mIsFetchingXform = false;
+        }
+
+        @Override
+        public void showFormLoadingDialog(boolean show) {
+            if (show) {
+                mFormLoadingDialog.show();
+            } else {
+                mFormLoadingDialog.hide();
+            }
         }
     }
 

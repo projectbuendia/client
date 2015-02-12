@@ -13,6 +13,7 @@ import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
 import org.msf.records.TestCleanupHelper;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -51,6 +52,8 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         // Even a 2-minute timeout proved to be flaky, so doubled to 4 minutes.
         IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
+        IdlingPolicies.setMasterPolicyTimeout(240, TimeUnit.SECONDS);
+
 
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
@@ -179,6 +182,15 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
+    }
+
+    /** Waits for the encounter chart to load. */
+    protected void waitForChartLoad() {
+        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
+                new EventBusIdlingResource<FetchXformSucceededEvent>(
+                        UUID.randomUUID().toString(),
+                        mEventBus);
+        Espresso.registerIdlingResources(xformIdlingResource);
     }
 
     private class SyncCounter {
