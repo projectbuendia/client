@@ -70,7 +70,7 @@ public class UserManager {
     private final Set<User> mKnownUsers = new HashSet<>();
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
-    private boolean mShouldInvalidateFormCache = false;
+    private boolean mIsDirty = false;
     @Nullable private AsyncTask mLastTask;
     @Nullable private User mActiveUser;
 
@@ -102,21 +102,18 @@ public class UserManager {
     }
 
     /**
-     * If true, forms should not be loaded directly from cache, because users may have changed since
-     * a particular form was cached. Users are embedded in the forms sent by the server as the
-     * 'clinician' field, and using a user that is not one of these embedded values would produce
-     * unspecified results.
+     * If true, users have been recently updated and any data relying on a specific view of users
+     * may be out of sync.
      */
-    public boolean shouldInvalidateFormCache() {
-        return mShouldInvalidateFormCache;
+    public boolean isDirty() {
+        return mIsDirty;
     }
 
     /**
-     * Sets whether or not subsequent forms should be loaded from the server rather than the local
-     * cache. For more information, see {@link #shouldInvalidateFormCache()}.
+     * Sets whether or not users have been recently updated.
      */
-    public void setShouldInvalidateFormCache(boolean shouldInvalidateFormCache) {
-        mShouldInvalidateFormCache = shouldInvalidateFormCache;
+    public void setDirty(boolean shouldInvalidateFormCache) {
+        mIsDirty = shouldInvalidateFormCache;
     }
 
     public boolean hasUsers() {
@@ -299,10 +296,9 @@ public class UserManager {
                         mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
             }
 
-            // If at least one user was added or deleted, we need to invalidate the form cache,
-            // or the form's view of existing users might be out of sync when next loaded.
+            // If at least one user was added or deleted, the set of known users has changed.
             if (!addedUsers.isEmpty() || !deletedUsers.isEmpty()) {
-                setShouldInvalidateFormCache(true);
+                setDirty(true);
             }
         }
     }
@@ -340,8 +336,8 @@ public class UserManager {
                 mKnownUsers.add(addedUser);
                 mEventBus.post(new UserAddedEvent(addedUser));
 
-                // Invalidate the form cache, as any cached form now has the wrong set of users.
-                setShouldInvalidateFormCache(true);
+                // Set of known users has changed.
+                setDirty(true);
             } else if (mAlreadyExists) {
                 mEventBus.post(new UserAddFailedEvent(
                         mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
@@ -380,8 +376,8 @@ public class UserManager {
                 mKnownUsers.remove(mUser);
                 mEventBus.post(new UserDeletedEvent(mUser));
 
-                // Invalidate the form cache, as any cached form now has the wrong set of users.
-                setShouldInvalidateFormCache(true);
+                // Set of known users has changed.
+                setDirty(true);
             } else {
                 mEventBus.post(
                         new UserDeleteFailedEvent(mUser, UserDeleteFailedEvent.REASON_UNKNOWN));

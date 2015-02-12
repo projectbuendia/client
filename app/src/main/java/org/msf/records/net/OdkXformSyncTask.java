@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -60,7 +59,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             Cursor cursor = null;
             boolean isNew;
             final boolean isUpdate;
-            final boolean usersHaveChanged = App.getUserManager().shouldInvalidateFormCache();
+            final boolean usersHaveChanged = App.getUserManager().isDirty();
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[]{
                         FormsProviderAPI.FormsColumns.DATE
@@ -236,7 +235,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }
             EventBus.getDefault().post(new FetchXformSucceededEvent());
 
-            App.getUserManager().setShouldInvalidateFormCache(false);
+            App.getUserManager().setDirty(false);
         }
     }
 
