@@ -71,7 +71,6 @@ import static org.msf.records.utils.Utils.getSystemProperty;
  * Activity displaying a patient's vitals and charts.
  */
 public final class PatientChartActivity extends BaseLoggedInActivity {
-
     private static final Logger LOG = Logger.create();
     // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
     // as it would be displayed as 40.0 (and values slightly below 40.0 may be the result of
@@ -635,7 +634,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void fetchAndShowXform(
+        public synchronized void fetchAndShowXform(
                 XForm form,
                 int code,
                 Patient patient,

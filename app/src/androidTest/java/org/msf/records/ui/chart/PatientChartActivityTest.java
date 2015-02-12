@@ -77,6 +77,19 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         screenshot("Patient Chart");
     }
 
+    /** Tests that the encounter form can be opened more than once. */
+    public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
+        initWithDemoPatient();
+        // Load the chart once
+        openEncounterForm();
+
+        // Dismiss
+        onView(withText("Discard")).perform(click());
+
+        // Load the chart again
+        openEncounterForm();
+    }
+
     /**
      * Tests that the admission date is correctly displayed in the header.
      * TODO: Currently disabled. Re-enable once date picker selection works.
@@ -239,5 +252,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         mDemoPatient.gender = Optional.of(Patient.GENDER_FEMALE);
         mDemoPatient.id = Optional.of(UUID.randomUUID().toString().substring(30));
         mDemoPatient.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
+    }
+
+    private void openEncounterForm() {
+        onView(withId(R.id.action_update_chart)).perform(click());
+        waitForChartLoad();
+        onView(withText("Encounter")).check(matches(isDisplayed()));
     }
 }

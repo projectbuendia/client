@@ -12,7 +12,14 @@ import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
+import org.msf.records.R;
 import org.msf.records.TestCleanupHelper;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.events.FetchXformSucceededEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -29,6 +36,17 @@ import java.util.UUID;
 import de.greenrobot.event.EventBus;
 
 import java.util.concurrent.TimeUnit;
+
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
+import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.equalTo;
+import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
@@ -51,6 +69,8 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         // Even a 2-minute timeout proved to be flaky, so doubled to 4 minutes.
         IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
+        IdlingPolicies.setMasterPolicyTimeout(240, TimeUnit.SECONDS);
+
 
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
@@ -179,6 +199,15 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
+    }
+
+    /** Waits for the encounter chart to load. */
+    protected void waitForChartLoad() {
+        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
+                new EventBusIdlingResource<FetchXformSucceededEvent>(
+                        UUID.randomUUID().toString(),
+                        mEventBus);
+        Espresso.registerIdlingResources(xformIdlingResource);
     }
 
     private class SyncCounter {

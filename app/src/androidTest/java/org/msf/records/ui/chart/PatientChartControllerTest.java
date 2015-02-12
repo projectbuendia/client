@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
@@ -43,6 +45,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private LocalizedChartHelper mMockObservationsProvider;
 	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
+    private FakeEventBus mFakeGlobalEventBus;
     private FakeHandler mFakeHandler;
 	
 	@Override
@@ -51,11 +54,11 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		MockitoAnnotations.initMocks(this);
 
 		mFakeCrudEventBus = new FakeEventBus();
-        FakeEventBus fakeEventBus = new FakeEventBus();
+        mFakeGlobalEventBus = new FakeEventBus();
 		mFakeHandler = new FakeHandler();
 		mController = new PatientChartController(
 				mMockAppModel,
-                fakeEventBus,
+                mFakeGlobalEventBus,
 				mFakeCrudEventBus,
 				mMockUi,
 				mMockOdkResultSender,
@@ -118,6 +121,16 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
 	}
+
+    /** Tests that the xform can be fetched again if the first fetch fails. */
+    public void testXformLoadFailed_ReenablesXformFetch() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request fails
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent());
+        // THEN the controller re-enables xform fetch
+        verify(mMockUi).reEnableFetch();
+    }
 
 	private final class FakeHandler implements MinimalHandler {
 	    private final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
