@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -14,6 +13,7 @@ import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
 import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.utils.Logger;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
@@ -59,6 +59,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             Cursor cursor = null;
             boolean isNew;
             final boolean isUpdate;
+            final boolean usersHaveChanged = App.getUserManager().isDirty();
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[]{
                         FormsProviderAPI.FormsColumns.DATE
@@ -76,10 +77,11 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     isNew = (existingTimestamp < formInfo.dateChanged);
                     isUpdate = true;
 
-                    if (isNew) {
-                        LOG.i("Form " + formInfo.uuid + " requires an update." +
-                                " (Local creation date: " + existingTimestamp +
-                                ", (Latest version: " + formInfo.dateChanged + ")");
+                    if (isNew || usersHaveChanged) {
+                        LOG.i("Form " + formInfo.uuid + " requires an update."
+                                + " (Local creation date: " + existingTimestamp
+                                + ", (Latest version: " + formInfo.dateChanged + ")"
+                                + ", (Invalidated by UserManager: " + usersHaveChanged + ")");
                     }
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");
@@ -92,11 +94,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 }
             }
 
-            if (!isNew) {
+            if (!isNew && !usersHaveChanged) {
                 LOG.i("Using form " + formInfo.uuid + " from local cache.");
                 if (formWrittenListener != null) {
                     formWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
+                EventBus.getDefault().post(new FetchXformSucceededEvent());
                 continue;
             }
 
@@ -113,7 +116,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO(nfortescue): design error handling properly
                     LOG.e(error, "failed to fetch file");
                     EventBus.getDefault().post(new FetchXformFailedEvent(
                             FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
@@ -231,6 +233,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             if (formWrittenListener != null && path != null) {
                 formWrittenListener.formWritten(path, mUuid);
             }
+            EventBus.getDefault().post(new FetchXformSucceededEvent());
+
+            App.getUserManager().setDirty(false);
         }
     }
 

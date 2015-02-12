@@ -70,6 +70,7 @@ public class UserManager {
     private final Set<User> mKnownUsers = new HashSet<>();
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
+    private boolean mIsDirty = false;
     @Nullable private AsyncTask mLastTask;
     @Nullable private User mActiveUser;
 
@@ -98,6 +99,21 @@ public class UserManager {
      */
     public void reset() {
         mSynced = false;
+    }
+
+    /**
+     * If true, users have been recently updated and any data relying on a specific view of users
+     * may be out of sync.
+     */
+    public boolean isDirty() {
+        return mIsDirty;
+    }
+
+    /**
+     * Sets whether or not users have been recently updated.
+     */
+    public void setDirty(boolean shouldInvalidateFormCache) {
+        mIsDirty = shouldInvalidateFormCache;
     }
 
     public boolean hasUsers() {
@@ -279,6 +295,11 @@ public class UserManager {
                 mEventBus.post(new ActiveUserUnsetEvent(
                         mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
             }
+
+            // If at least one user was added or deleted, the set of known users has changed.
+            if (!addedUsers.isEmpty() || !deletedUsers.isEmpty()) {
+                setDirty(true);
+            }
         }
     }
 
@@ -314,6 +335,9 @@ public class UserManager {
             if (addedUser != null) {
                 mKnownUsers.add(addedUser);
                 mEventBus.post(new UserAddedEvent(addedUser));
+
+                // Set of known users has changed.
+                setDirty(true);
             } else if (mAlreadyExists) {
                 mEventBus.post(new UserAddFailedEvent(
                         mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
@@ -351,6 +375,9 @@ public class UserManager {
             if (success) {
                 mKnownUsers.remove(mUser);
                 mEventBus.post(new UserDeletedEvent(mUser));
+
+                // Set of known users has changed.
+                setDirty(true);
             } else {
                 mEventBus.post(
                         new UserDeleteFailedEvent(mUser, UserDeleteFailedEvent.REASON_UNKNOWN));

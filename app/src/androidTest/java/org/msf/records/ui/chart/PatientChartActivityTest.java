@@ -168,6 +168,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * {@link #waitForProgressFragment()}.
      */
     private void initWithDemoPatient() {
+        waitForProgressFragment(); // Wait for tent selection screen to load.
+
         LOG.i("Adding patient: %s", mDemoPatient.toContentValues().toString());
 
         onView(withId(R.id.action_add)).perform(click());
