@@ -107,8 +107,6 @@ public class OdkActivityLauncher {
                                         fields);
                             }
                         }).execute(findUuid(response, uuidToShow));
-
-                        EventBus.getDefault().post(new FetchXformSucceededEvent());
                     }
                 }, new Response.ErrorListener() {
 

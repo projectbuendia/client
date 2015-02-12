@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
 import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.utils.Logger;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
@@ -99,6 +100,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 if (formWrittenListener != null) {
                     formWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
+                EventBus.getDefault().post(new FetchXformSucceededEvent());
                 continue;
             }
 
@@ -232,6 +234,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             if (formWrittenListener != null && path != null) {
                 formWrittenListener.formWritten(path, mUuid);
             }
+            EventBus.getDefault().post(new FetchXformSucceededEvent());
 
             App.getUserManager().setShouldInvalidateFormCache(false);
         }
