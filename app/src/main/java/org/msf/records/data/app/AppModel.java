@@ -131,7 +131,8 @@ public class AppModel {
     }
 
     /**
-     * Asynchronously adds an encounter to a patient, posting a TODO.
+     * Asynchronously adds an encounter to a patient, posting a
+     * {@link org.msf.records.events.data.SingleItemCreatedEvent}.
      */
     public void addEncounter(CrudEventBus bus, AppPatient appPatient, AppEncounter appEncounter) {
         AppAddEncounterAsyncTask task =
