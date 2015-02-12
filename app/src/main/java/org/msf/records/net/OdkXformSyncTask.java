@@ -79,10 +79,10 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     isUpdate = true;
 
                     if (isNew || usersHaveChanged) {
-                        LOG.i("Form " + formInfo.uuid + " requires an update." +
-                                " (Local creation date: " + existingTimestamp +
-                                ", (Latest version: " + formInfo.dateChanged + ")" +
-                                ", (Invalidated by UserManager: " + usersHaveChanged + ")");
+                        LOG.i("Form " + formInfo.uuid + " requires an update."
+                                + " (Local creation date: " + existingTimestamp
+                                + ", (Latest version: " + formInfo.dateChanged + ")"
+                                + ", (Invalidated by UserManager: " + usersHaveChanged + ")");
                     }
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");

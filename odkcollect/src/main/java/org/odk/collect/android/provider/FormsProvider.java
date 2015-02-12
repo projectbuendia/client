@@ -385,7 +385,9 @@ public class FormsProvider extends ContentProvider {
             // by an insert. The primary key is _ID, which we can't know in advance.
             try {
                 db.beginTransaction();
-                db.delete(FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?", new String[]{filePath});
+                db.delete(
+                        FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?",
+                        new String[]{filePath});
                 rowId = db.insert(FORMS_TABLE_NAME, null, values);
                 db.setTransactionSuccessful();
             } finally {
