@@ -13,7 +13,8 @@
     <string name="status_suspected_dead">Suspected Dead</string>
     <string name="status_confirmed_dead">Confirmed Dead</string>
 
-    <string name="app_name">MSF Medical Records</string>
+    <string name="app_name">Buendia</string>
+    <string name="title_user_login">Sign in</string>
     <string name="title_patient_list">Patients</string>
     <string name="title_patient_chart">Patient Chart</string>
     <string name="title_activity_patient_add">New Patient</string>
@@ -36,7 +37,7 @@
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
-    <string name="title_activity_tent_selection">MSF Medical Records</string>
+    <string name="title_activity_tent_selection">Locations</string>
     <string name="today">Today</string>
     <string name="add_user_unknown_error">Unknown error</string>
     <string name="add_user_invalid_user">Invalid user</string>

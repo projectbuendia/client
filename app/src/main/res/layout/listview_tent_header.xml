@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="Unknown Tent"
         android:textStyle="bold"
-        android:textSize="22sp"
+        android:textSize="28sp"
         tools:text="Probable 1 (10 patients)" />
 
 </LinearLayout>
