@@ -13,6 +13,7 @@ import com.android.volley.VolleyError;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
+import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.utils.Logger;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
@@ -21,6 +22,8 @@ import org.odk.collect.android.tasks.DiskSyncTask;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Synchronizes 1 or more OpenMRS provided forms into the ODK database storage. Very like
@@ -111,7 +114,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     // TODO(nfortescue): design error handling properly
-                    LOG.e("failed to fetch file");
+                    LOG.e(error, "failed to fetch file");
+                    EventBus.getDefault().post(new FetchXformFailedEvent(
+                            FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
                 }
             });
         }

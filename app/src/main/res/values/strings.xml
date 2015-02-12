@@ -135,4 +135,12 @@
     <string name="user_sync_failed_dialog_message">An error occurred while retrieving the user list. Please check your OpenMRS settings or try again.</string>
     <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check settings or try again.</string>
     <string name="sync_failed_back">Back</string>
+    <string name="fetch_xform_failed_unknown_reason">An unknown error occurred.</string>
+    <string name="fetch_xform_failed_no_forms_found">Encounter form was not found on the server.</string>
+    <string name="fetch_xform_failed_server_auth">Unable to access encounter form on server. Please confirm that your username and password are correct.</string>
+    <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
+    <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the encounter form from the server.</string>
+    <string name="fetch_xform_failed_server_unknown">Error retrieving the encounter form from the server.</string>
+    <string name="retrieving_encounter_form_title">Retrieving Form</string>
+    <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
 </resources>

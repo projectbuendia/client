@@ -10,6 +10,7 @@ import com.google.common.base.Optional;
 
 import org.joda.time.LocalDate;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -17,6 +18,7 @@ import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.data.odk.OdkConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
@@ -113,6 +115,12 @@ final class PatientChartController {
 
         /** Re-enables fetching. */
         void reEnableFetch();
+
+        /** Displays an error message with the given resource id. */
+        void showError(int errorMessageResource);
+
+        /** Shows or hides the form loading dialog. */
+        void showFormLoadingDialog(boolean show);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -295,6 +303,7 @@ final class PatientChartController {
 
         fields.targetGroup = targetGroup;
 
+        mUi.showFormLoadingDialog(true);
         mUi.fetchAndShowXform(
                 PatientChartActivity.XForm.ADD_OBSERVATION,
                 savePatientUuidForRequestCode(
@@ -315,6 +324,7 @@ final class PatientChartController {
             fields.clinicianName = user.fullName;
         }
 
+        mUi.showFormLoadingDialog(true);
         mUi.fetchAndShowXform(
                 PatientChartActivity.XForm.ADD_TEST_RESULTS,
                 savePatientUuidForRequestCode(
@@ -474,7 +484,35 @@ final class PatientChartController {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
         }
 
+        public void onEventMainThread(FetchXformSucceededEvent event) {
+            mUi.showFormLoadingDialog(false);
+            mUi.reEnableFetch();
+        }
+
         public void onEventMainThread(FetchXformFailedEvent event) {
+            int errorMessageResource = R.string.fetch_xform_failed_unknown_reason;
+            switch (event.reason) {
+                case NO_FORMS_FOUND:
+                    errorMessageResource = R.string.fetch_xform_failed_no_forms_found;
+                    break;
+                case SERVER_AUTH:
+                    errorMessageResource = R.string.fetch_xform_failed_server_auth;
+                    break;
+                case SERVER_BAD_ENDPOINT:
+                    errorMessageResource = R.string.fetch_xform_failed_server_bad_endpoint;
+                    break;
+                case SERVER_FAILED_TO_FETCH:
+                    errorMessageResource = R.string.fetch_xform_failed_server_failed_to_fetch;
+                    break;
+                case SERVER_UNKNOWN:
+                    errorMessageResource = R.string.fetch_xform_failed_server_unknown;
+                    break;
+                case UNKNOWN:
+                default:
+                    // Intentionally blank.
+            }
+            mUi.showError(errorMessageResource);
+            mUi.showFormLoadingDialog(false);
             mUi.reEnableFetch();
         }
     }
