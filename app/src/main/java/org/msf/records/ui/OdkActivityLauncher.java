@@ -417,7 +417,7 @@ public class OdkActivityLauncher {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        LOG.e("Did not submit form to server successfully", error);
+                        LOG.e(error, "Did not submit form to server successfully");
                         if (error.networkResponse != null
                                 && error.networkResponse.statusCode == 500) {
                             LOG.e("Internal error stack trace:\n");

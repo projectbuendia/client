@@ -59,6 +59,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             Cursor cursor = null;
             boolean isNew;
             final boolean isUpdate;
+            final boolean usersHaveChanged = App.getUserManager().shouldInvalidateFormCache();
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[]{
                         FormsProviderAPI.FormsColumns.DATE
@@ -76,10 +77,11 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     isNew = (existingTimestamp < formInfo.dateChanged);
                     isUpdate = true;
 
-                    if (isNew) {
+                    if (isNew || usersHaveChanged) {
                         LOG.i("Form " + formInfo.uuid + " requires an update." +
                                 " (Local creation date: " + existingTimestamp +
-                                ", (Latest version: " + formInfo.dateChanged + ")");
+                                ", (Latest version: " + formInfo.dateChanged + ")" +
+                                ", (Invalidated by UserManager: " + usersHaveChanged + ")");
                     }
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");
@@ -92,7 +94,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 }
             }
 
-            if (!isNew) {
+            if (!isNew && !usersHaveChanged) {
                 LOG.i("Using form " + formInfo.uuid + " from local cache.");
                 if (formWrittenListener != null) {
                     formWrittenListener.formWritten(proposedPath, formInfo.uuid);
@@ -113,7 +115,6 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO(nfortescue): design error handling properly
                     LOG.e(error, "failed to fetch file");
                     EventBus.getDefault().post(new FetchXformFailedEvent(
                             FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
@@ -231,6 +232,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             if (formWrittenListener != null && path != null) {
                 formWrittenListener.formWritten(path, mUuid);
             }
+
+            App.getUserManager().setShouldInvalidateFormCache(false);
         }
     }
 
