@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:fontFamily="sans-serif"
-            android:textSize="36sp"
+            android:textSize="45sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
             tools:text="106: Rosky Entocher"/>
@@ -73,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.25"
-            app:attributeName="Since symptom onset"
+            app:attributeName="Days since symptom onset"
             app:attributeValue="–"/>
 
         <org.msf.records.widget.PatientAttributeView
@@ -100,12 +100,11 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center">
+            android:layout_gravity="start">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textColor="@android:color/darker_gray"
                 android:textSize="17sp"
                 android:text="@string/chart_last_updated"
                 android:id="@+id/patient_chart_last_observation_label"

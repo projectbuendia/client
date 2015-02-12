@@ -14,6 +14,9 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 // @nolint - Third-party.
 
 // TODO(dxchen): License. From https://github.com/AndroidDeveloperLB/AutoFitTextView.
@@ -40,6 +43,7 @@ public class AutoResizeTextView extends TextView
     private boolean              _enableSizeCache    =true;
     private boolean              _initiallized       =false;
     private TextPaint            paint;
+    private int[]                _allowedTextSizes   =null;
 
     private interface SizeTester
     {
@@ -113,6 +117,13 @@ public class AutoResizeTextView extends TextView
             }
         };
         _initiallized=true;
+    }
+
+    public void setAllowedTextSizes(final int[] sizes) {
+        _allowedTextSizes = Arrays.copyOf(sizes, sizes.length);
+        Arrays.sort(_allowedTextSizes);
+        _textCachedSizes.clear();
+        adjustTextSize();
     }
 
     @Override
@@ -249,6 +260,15 @@ public class AutoResizeTextView extends TextView
         if(size!=0)
             return size;
         size=binarySearch(start,end,sizeTester,availableSpace);
+
+        if (_allowedTextSizes != null) {
+            for (int i = _allowedTextSizes.length - 1; i >= 0; i--) {
+                if (_allowedTextSizes[i] < size) {
+                    size = _allowedTextSizes[i];
+                    break;
+                }
+            }
+        }
         _textCachedSizes.put(key,size);
         return size;
     }

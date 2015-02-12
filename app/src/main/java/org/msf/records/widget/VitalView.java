@@ -18,6 +18,8 @@ import butterknife.InjectView;
  */
 public class VitalView extends LinearLayout {
 
+    final static int[] ALLOWED_TEXT_SIZES = {17, 22, 28, 36, 45};
+
     @InjectView(R.id.view_vital_name) TextView mNameView;
     @InjectView(R.id.view_vital_value) AutoResizeTextView mValueView;
 
@@ -52,6 +54,8 @@ public class VitalView extends LinearLayout {
         } finally {
             a.recycle();
         }
+
+        mValueView.setAllowedTextSizes(ALLOWED_TEXT_SIZES);
 
         mNameView.setTextColor(textColor);
         mNameView.setText(name);

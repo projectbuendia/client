@@ -54,7 +54,7 @@
     <!-- ActionBar -->
     <style name="Widget.Buendia.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
         <item name="android:height">@dimen/action_bar_height</item>
-        <item name="android:titleTextStyle">@style/TextAppearance.Buendia.Medium.Inverse</item>
+        <item name="android:titleTextStyle">@style/TextAppearance.Buendia.Large.Inverse</item>
     </style>
 
     <!-- TextView -->
