@@ -37,7 +37,6 @@ public class DiagnosticsModule {
             OpenMrsConnectionDetails connectionDetails) {
         return ImmutableSet.<HealthCheck>of(
                 new WifiHealthCheck(application),
-                new ServerReachableHealthCheck(application, openMrsRootUrl),
                 new BuendiaApiHealthCheck(application, connectionDetails));
     }
 

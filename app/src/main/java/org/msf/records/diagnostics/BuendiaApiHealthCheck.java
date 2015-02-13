@@ -145,10 +145,12 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                     }
                 } catch (UnknownHostException e) {
                     reportIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
+                    return;
                 } catch (IOException e) {
                     LOG.w(
                             "Could not perform OpenMRS health check using URL '%1$s'.",
                             uriString);
+                    return;
                 }
 
                 resolveAllIssues();
