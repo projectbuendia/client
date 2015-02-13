@@ -10,8 +10,7 @@ import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -39,7 +38,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     private final MyUi mMyUi = new MyUi();
     private TentListAdapter mAdapter;
 
-    private AlertDialog mAlertDialog;
+    private ProgressDialog mLoadingDialog;
 
     public TentSelectionFragment() {
         // Required empty public constructor
@@ -65,12 +64,12 @@ public final class TentSelectionFragment extends ProgressFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(getString(R.string.tent_selection_dialog_title))
-                .setMessage(R.string.tent_selection_dialog_message)
-                .setCancelable(false)
-                .create();
+        mLoadingDialog = new ProgressDialog(getActivity());
+        mLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
+        mLoadingDialog.setTitle(getString(R.string.tent_selection_dialog_title));
+        mLoadingDialog.setMessage(getString(R.string.tent_selection_dialog_message));
+        mLoadingDialog.setCancelable(false);
+        mLoadingDialog.setIndeterminate(true);
         setContentView(R.layout.fragment_tent_selection);
     }
 
@@ -127,11 +126,11 @@ public final class TentSelectionFragment extends ProgressFragment {
         @Override
         public void setBusyLoading(boolean busy) {
             changeState(busy ? State.LOADING : State.LOADED);
-            if (mAlertDialog != null && busy != mAlertDialog.isShowing()) {
+            if (mLoadingDialog != null && busy != mLoadingDialog.isShowing()) {
                 if (busy) {
-                    mAlertDialog.show();
+                    mLoadingDialog.show();
                 } else {
-                    mAlertDialog.hide();
+                    mLoadingDialog.hide();
                 }
             }
         }

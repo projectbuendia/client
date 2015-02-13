@@ -15,6 +15,8 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.FetchXformSucceededEvent;
+import org.msf.records.events.SubmitXformFailedEvent;
+import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
@@ -223,6 +225,41 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mFakeGlobalEventBus.post(new FetchXformSucceededEvent());
         // THEN the controller hides the loading dialog
         verify(mMockUi).showFormLoadingDialog(false);
+    }
+
+    // TODO: Test that starting an xform submission shows the submission dialog.
+
+    /** Tests that errors in xform submission are reported to the user. */
+    public void testXformSubmitFailed_ShowsErrorMessage() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform fails to submit
+        mFakeGlobalEventBus.post(new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller shows an error
+        verify(mMockUi).showError(R.string.submit_xform_failed_unknown_reason);
+    }
+
+    /** Tests that errors in xform submission hide the submission dialog. */
+    public void testXformSubmitFailed_HidesSubmissionDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform fails to submit
+        mFakeGlobalEventBus.post(new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller hides the submission dialog
+        verify(mMockUi).showFormSubmissionDialog(false);
+    }
+
+    /** Tests that successful xform submission hides the submission dialog. */
+    public void testXformSubmitSucceeded_EventuallyHidesSubmissionDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform submits successfully
+        mFakeGlobalEventBus.post(new SubmitXformSucceededEvent());
+        // THEN the controller hides the submission dialog
+        // TODO: When the handler UI updating hack in PatientChartController is removed, this can
+        // also be removed.
+        mFakeHandler.runUntilEmpty();
+        verify(mMockUi).showFormSubmissionDialog(false);
     }
 
 	private final class FakeHandler implements MinimalHandler {
