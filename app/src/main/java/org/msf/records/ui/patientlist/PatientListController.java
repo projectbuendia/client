@@ -1,13 +1,10 @@
 package org.msf.records.ui.patientlist;
 
-import android.support.v4.widget.SwipeRefreshLayout;
-
 import org.msf.records.diagnostics.HealthCheck;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.sync.SyncManager;
-import org.msf.records.ui.BigToast;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
 
@@ -39,7 +36,7 @@ public class PatientListController {
     private final SyncManager mSyncManager;
 
     @Inject
-    @Qualifiers.BuendiaModuleHealthCheck HealthCheck buendiaApiHealthCheck;
+    @Qualifiers.BuendiaModuleHealthCheck HealthCheck mBuendiaModuleHealthCheck;
 
     /** True if a full sync initiated by this activity is in progress. */
     private boolean mInitiatedFullSync;
@@ -84,7 +81,7 @@ public class PatientListController {
      * waiting for a previously initiated sync.
      */
     public void onRefreshRequested() {
-        if (buendiaApiHealthCheck.hasActiveIssues()) {
+        if (mBuendiaModuleHealthCheck.hasActiveIssues()) {
             mUi.showApiHealthProblem();
         } else if (!mInitiatedFullSync) {
             LOG.d("onRefreshRequested");
