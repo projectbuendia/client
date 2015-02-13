@@ -143,5 +143,10 @@ public final class TentSelectionFragment extends ProgressFragment {
                 setProgressLabel(label);
             }
         }
+
+        @Override
+        public void resetSyncProgress() {
+            switchToCircularProgressBar();
+        }
     }
 }

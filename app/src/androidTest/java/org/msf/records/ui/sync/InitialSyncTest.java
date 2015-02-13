@@ -25,7 +25,7 @@ public class InitialSyncTest extends SyncTestCase {
     public void testZonesAndTentsDisplayed() {
         screenshot("Before Sync Completed");
 
-        waitForInitialSync();
+        waitForProgressFragment();
 
         // Should be at tent selection screen
         onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
@@ -47,7 +47,7 @@ public class InitialSyncTest extends SyncTestCase {
     public void testSearchAfterSync() {
         screenshot("Before Sync Completed");
 
-        waitForInitialSync();
+        waitForProgressFragment();
 
         screenshot("After Sync Completed");
 

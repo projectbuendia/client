@@ -194,6 +194,13 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         }
     }
 
+    protected void switchToCircularProgressBar() {
+        if (mState == State.LOADING) {
+            mIndeterminateProgressBar.setVisibility(View.VISIBLE);
+            mProgressBarLayout.setVisibility(View.GONE);
+        }
+    }
+
     private void crossfade(View inView, final View outView) {
 
         // Set the content view to 0% opacity but visible, so that it is visible

@@ -60,7 +60,9 @@ final class TentSelectionController {
         void setBusyLoading(boolean busy);
 
         void showIncrementalSyncProgress(int progress, String label);
-	}
+
+        void resetSyncProgress();
+    }
 
     private final AppModel mAppModel;
     private final CrudEventBus mCrudEventBus;
@@ -202,6 +204,9 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
+            for (TentFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.resetSyncProgress();
+            }
             mUi.showSyncFailedDialog(true);
         }
 
