@@ -154,4 +154,6 @@
     <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the encounter.</string>
     <string name="submit_xform_failed_server_auth">Error submitting encounter: could not authenticate with server.</string>
     <string name="submit_xform_failed_server_timeout">Timed out while sending encounter to the server.</string>
+    <string name="submitting_encounter_form_title">Submitting Patient Encounter</string>
+    <string name="submitting_encounter_form_message">Please wait while patient encounter is submitted.</string>
 </resources>
