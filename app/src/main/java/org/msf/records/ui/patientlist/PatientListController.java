@@ -8,6 +8,8 @@ import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
 
+import javax.inject.Inject;
+
 /**
  * Controller for non-inherited parts of {@link PatientListFragment}.
  *
