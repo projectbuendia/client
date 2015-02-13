@@ -144,14 +144,16 @@
     <string name="encounter_add_failed_to_fetch_saved">Observation(s) have been updated but local data may be temporarily out of sync.</string>
     <string name="encounter_add_failed_to_saved_on_server">The server failed to process this update.</string>
     <string name="fetch_xform_failed_unknown_reason">An unknown error occurred.</string>
-    <string name="fetch_xform_failed_no_forms_found">Encounter form was not found on the server.</string>
-    <string name="fetch_xform_failed_server_auth">Unable to access encounter form on server. Please confirm that your username and password are correct.</string>
+    <string name="fetch_xform_failed_no_forms_found">Form was not found on the server.</string>
+    <string name="fetch_xform_failed_server_auth">Unable to access form on server. Please confirm that your username and password are correct.</string>
     <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
-    <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the encounter form from the server.</string>
-    <string name="fetch_xform_failed_server_unknown">Error retrieving the encounter form from the server.</string>
+    <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the form from the server.</string>
+    <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
     <string name="retrieving_encounter_form_title">Retrieving Form</string>
     <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
-    <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the encounter.</string>
-    <string name="submit_xform_failed_server_auth">Error submitting encounter: could not authenticate with server.</string>
-    <string name="submit_xform_failed_server_timeout">Timed out while sending encounter to the server.</string>
+    <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
+    <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
+    <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
+    <string name="submitting_encounter_form_title">Submitting Form</string>
+    <string name="submitting_encounter_form_message">Please wait while form is submitted.</string>
 </resources>

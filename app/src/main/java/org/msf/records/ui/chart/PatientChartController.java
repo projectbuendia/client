@@ -1,5 +1,6 @@
 package org.msf.records.ui.chart;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.SubmitXformFailedEvent;
+import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
@@ -131,6 +133,9 @@ final class PatientChartController {
 
         /** Shows or hides the form loading dialog. */
         void showFormLoadingDialog(boolean show);
+
+        /** Shows or hides the form submission dialog. */
+        void showFormSubmissionDialog(boolean show);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -260,6 +265,7 @@ final class PatientChartController {
             return;
         }
 
+        boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         switch (requestCode.form) {
             case ADD_OBSERVATION:
                 // This will fire a CreatePatientSucceededEvent.
@@ -273,8 +279,10 @@ final class PatientChartController {
                 LOG.e(
                         "Received an ODK result for a form that we do not know about: '%1$s'. This "
                                 + "indicates programmer error.", requestCode.form.toString());
+                shouldShowSubmissionDialog = false;
                 break;
         }
+        mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
     }
 
     /** Call when the user has indicated they want to add observation data. */
@@ -575,7 +583,18 @@ final class PatientChartController {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
         }
 
+        public void onEventMainThread(SubmitXformSucceededEvent event) {
+            mMainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updatePatientUI();
+                    mUi.showFormSubmissionDialog(false);
+                }
+            });
+        }
+
         public void onEventMainThread(SubmitXformFailedEvent event) {
+            mUi.showFormSubmissionDialog(false);
             int errorMessageResource;
             switch (event.reason) {
                 case SERVER_AUTH:
