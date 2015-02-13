@@ -220,14 +220,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             // onView(withId(R.id.patient_creation_button_change_location)).perform(click());
         }
 
+        EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>> resource =
+                new EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>>(
+                        UUID.randomUUID().toString(), mEventBus
+                );
+
         onView(withId(R.id.patient_creation_button_create)).perform(click());
 
         // Wait for patient to be created.
-        Espresso.registerIdlingResources(
-                new EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>>(
-                        UUID.randomUUID().toString(),
-                        mEventBus
-                ));
+        Espresso.registerIdlingResources(resource);
 
         // Open patient list.
         onView(withId(R.id.action_search)).perform(click());
