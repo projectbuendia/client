@@ -21,6 +21,7 @@ import org.msf.records.data.odk.OdkConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.FetchXformSucceededEvent;
+import org.msf.records.events.SubmitXformFailedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
@@ -572,6 +573,21 @@ final class PatientChartController {
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+        }
+
+        public void onEventMainThread(SubmitXformFailedEvent event) {
+            int errorMessageResource;
+            switch (event.reason) {
+                case SERVER_AUTH:
+                    errorMessageResource = R.string.submit_xform_failed_server_auth;
+                    break;
+                case SERVER_TIMEOUT:
+                    errorMessageResource = R.string.submit_xform_failed_server_timeout;
+                    break;
+                default:
+                    errorMessageResource = R.string.submit_xform_failed_unknown_reason;
+            }
+            mUi.showError(errorMessageResource);
         }
 
         public void onEventMainThread(FetchXformSucceededEvent event) {

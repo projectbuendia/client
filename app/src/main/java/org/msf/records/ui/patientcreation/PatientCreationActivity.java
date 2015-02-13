@@ -165,16 +165,34 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             // case, notify the user to try again.
             LOG.e("Location %s was selected but not found in location tree.", mLocationUuid);
             BigToast.show(this, R.string.error_setting_location);
-            return;
+
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
+                    " mLocationUuid=" + mLocationUuid +
+                    " location=" + location +
+                    " location.parentUuid=" + (location == null ? "<invalid>" : location.parentUuid)
+            );
+
+            //return;
         }
 
         ResZone resZone = Zone.getResZone(location.parentUuid);
 
         if (resZone == null) {
+
             // This should never happen. If it does, notify the user to try again.
             LOG.e("%s could not be resolved to a zone.", location.parentUuid);
             BigToast.show(this, R.string.error_setting_location);
-            return;
+
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
+                    " mLocationUuid=" + mLocationUuid +
+                    " location=" + location +
+                    " location.parentUuid=" + location.parentUuid +
+                    " resZone=" + resZone
+            );
+
+            // return;
         }
 
         ResZone.Resolved zone = resZone.resolve(getResources());

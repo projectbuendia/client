@@ -151,4 +151,7 @@
     <string name="fetch_xform_failed_server_unknown">Error retrieving the encounter form from the server.</string>
     <string name="retrieving_encounter_form_title">Retrieving Form</string>
     <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
+    <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the encounter.</string>
+    <string name="submit_xform_failed_server_auth">Error submitting encounter: could not authenticate with server.</string>
+    <string name="submit_xform_failed_server_timeout">Timed out while sending encounter to the server.</string>
 </resources>
