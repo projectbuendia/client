@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +42,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private MenuPopupWindow mPopupWindow;
 
     private boolean mIsCreated = false;
+    private boolean mIsMenuEnabled = false;
 
     /**
      * {@inheritDoc}
@@ -85,6 +85,11 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.base, menu);
 
         mPopupWindow = new MenuPopupWindow();
+
+        for (int i = 0; i < mMenu.size() - 1; i++) {
+            mMenu.getItem(i).setVisible(mIsMenuEnabled);
+        }
+
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
@@ -241,6 +246,17 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             Intent settingsIntent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
             settingsIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(settingsIntent);
+        }
+    }
+
+    /**
+     * Hides or shows all buttons in the menu except for login/logout functionality.
+     * @param shouldEnableMenu whether to show the menu items
+     */
+    protected void setMenuEnabled(boolean shouldEnableMenu) {
+        if (mIsMenuEnabled != shouldEnableMenu) {
+            mIsMenuEnabled = shouldEnableMenu;
+            invalidateOptionsMenu();
         }
     }
 }
