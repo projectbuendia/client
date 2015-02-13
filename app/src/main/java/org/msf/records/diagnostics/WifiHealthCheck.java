@@ -74,11 +74,12 @@ public class WifiHealthCheck extends HealthCheck {
         }
     }
 
+    @Override
     public boolean isApiUnavailable() {
         // We will get an event that lets us update the set of active issues whenever
         // the wifi state changes, so we can be confident that the API is definitely
         // unavailable whenever either of the wifi-related issues is active.
-        return mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
-                mActiveIssues.contains(HealthIssue.WIFI_DISABLED);
+        return mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED)
+                || mActiveIssues.contains(HealthIssue.WIFI_DISABLED);
     }
 }
