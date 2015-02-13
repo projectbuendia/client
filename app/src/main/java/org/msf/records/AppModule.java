@@ -54,6 +54,7 @@ import dagger.Provides;
                 BaseActivity.class,
                 PatientChartActivity.class,
                 PatientListActivity.class,
+                PatientListController.class,
                 PatientSearchActivity.class,
                 RoundActivity.class,
                 TentSelectionActivity.class,

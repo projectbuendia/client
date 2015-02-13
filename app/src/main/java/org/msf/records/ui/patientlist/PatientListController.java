@@ -1,6 +1,7 @@
 package org.msf.records.ui.patientlist;
 
 import org.msf.records.App;
+import org.msf.records.diagnostics.HealthMonitor;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.SyncManager;
@@ -32,6 +33,8 @@ public class PatientListController {
 
     private final SyncManager mSyncManager;
 
+    @Inject HealthMonitor mHealthMonitor;
+
     /** True if a full sync initiated by this activity is in progress. */
     private boolean mInitiatedFullSync;
 
@@ -60,6 +63,7 @@ public class PatientListController {
         mUi = ui;
         mSyncManager = syncManager;
         mEventBus = eventBus;
+        App.getInstance().inject(this);
     }
 
     public void init() {
@@ -75,7 +79,7 @@ public class PatientListController {
      * waiting for a previously initiated sync.
      */
     public void onRefreshRequested() {
-        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
+        if (mHealthMonitor.isApiUnavailable()) {
             mUi.stopRefreshAnimation();
             mUi.showApiHealthProblem();
         } else if (!mInitiatedFullSync) {
