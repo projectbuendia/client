@@ -5,9 +5,11 @@ import android.app.Application;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.prefs.StringPreference;
+import org.msf.records.utils.DateTimeDeserializer;
 
 import javax.inject.Singleton;
 
@@ -36,7 +38,7 @@ public class NetModule {
     }
 
     @Provides @Singleton RequestConfigurator provideRequestConfigurator() {
-        return new RequestConfigurator(5000 /*timeoutMs*/);
+        return new RequestConfigurator(10000 /*timeout*/, 2 /*retry attempts*/, 1 /*back-off*/);
     }
 
     @Provides @Singleton RequestFactory provideRequestFactory(RequestConfigurator configurator) {
@@ -46,6 +48,7 @@ public class NetModule {
     @Provides @Singleton Gson provideGson() {
         return new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateSerializer())
+                .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
                 .create();
     }
 

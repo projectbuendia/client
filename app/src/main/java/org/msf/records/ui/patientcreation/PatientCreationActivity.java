@@ -1,20 +1,27 @@
 package org.msf.records.ui.patientcreation;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.google.common.base.Optional;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
@@ -44,8 +51,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
 
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
+
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
+    private DatePickerDialog mAdmissionDatePickerDialog;
+    private DatePickerDialog mSymptomsOnsetDatePickerDialog;
 
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -56,6 +67,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_creation_text_age) EditText mAge;
     @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
+    @InjectView(R.id.patient_creation_admission_date) EditText mAdmissionDate;
+    @InjectView(R.id.patient_creation_symptoms_onset_date) EditText mSymptomsOnsetDate;
     @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
     @InjectView(R.id.patient_creation_button_create) Button mCreateButton;
     @InjectView(R.id.patient_creation_button_cancel) Button mCancelButton;
@@ -71,6 +84,9 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
     private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
     private static final int ALERT_DIALOG_PADDING = 32;
+
+    private DateSetListener mAdmissionDateSetListener;
+    private DateSetListener mSymptomsOnsetDateSetListener;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -101,6 +117,26 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         setContentView(R.layout.activity_patient_creation);
         ButterKnife.inject(this);
 
+        DateTime now = DateTime.now();
+        mAdmissionDateSetListener = new DateSetListener(mAdmissionDate, LocalDate.now());
+        mAdmissionDatePickerDialog = new DatePickerDialog(
+                this,
+                mAdmissionDateSetListener,
+                now.getYear(),
+                now.getMonthOfYear() - 1,
+                now.getDayOfMonth());
+        mAdmissionDatePickerDialog.setTitle(R.string.admission_date_picker_title);
+        mAdmissionDatePickerDialog.getDatePicker().setCalendarViewShown(false);
+        mSymptomsOnsetDateSetListener = new DateSetListener(mSymptomsOnsetDate, null);
+        mSymptomsOnsetDatePickerDialog = new DatePickerDialog(
+                this,
+                mSymptomsOnsetDateSetListener,
+                now.getYear(),
+                now.getMonthOfYear() - 1,
+                now.getDayOfMonth());
+        mSymptomsOnsetDatePickerDialog.setTitle(R.string.symptoms_onset_date_picker_title);
+        mSymptomsOnsetDatePickerDialog.getDatePicker().setCalendarViewShown(false);
+
         mTentSelectedCallback = new AssignLocationDialog.TentSelectedCallback() {
 
             @Override public boolean onNewTentSelected(String newTentUuid) {
@@ -109,6 +145,9 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 return true;
             }
         };
+
+        // Pre-populate admission date with today.
+        mAdmissionDate.setText(DATE_FORMAT.print(DateTime.now()));
     }
 
     private void updateLocationUi() {
@@ -204,6 +243,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         mAge.setEnabled(enable);
         mAgeUnits.setEnabled(enable);
         mSex.setEnabled(enable);
+        mAdmissionDate.setEnabled(enable);
+        mSymptomsOnsetDate.setEnabled(enable);
         mLocationText.setEnabled(enable);
         mCreateButton.setEnabled(enable);
         mCancelButton.setEnabled(enable);
@@ -238,6 +279,16 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
     }
 
+    @OnClick(R.id.patient_creation_admission_date)
+    void onAdmissionDateClick() {
+        mAdmissionDatePickerDialog.show();
+    }
+
+    @OnClick(R.id.patient_creation_symptoms_onset_date)
+    void onSymptomsOnsetDateClick() {
+        mSymptomsOnsetDatePickerDialog.show();
+    }
+
     @OnClick(R.id.patient_creation_button_cancel)
     void onCancelClick() {
         showAlertDialog();
@@ -257,8 +308,18 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 mAge.getText().toString(),
                 getAgeUnits(),
                 getSex(),
+                getAdmissionDate(),
+                getSymptomsOnsetDate(),
                 mLocationUuid);
         setUiEnabled(!mIsCreatePending);
+    }
+
+    private LocalDate getSymptomsOnsetDate() {
+        return mSymptomsOnsetDateSetListener.getDate();
+    }
+
+    private LocalDate getAdmissionDate() {
+        return mAdmissionDateSetListener.getDate();
     }
 
     @Override
@@ -356,6 +417,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 case PatientCreationController.Ui.FIELD_AGE:
                     mAge.setError(message);
                     break;
+                case PatientCreationController.Ui.FIELD_ADMISSION_DATE:
+                    mAdmissionDate.setError(message);
+                    break;
+                case PatientCreationController.Ui.FIELD_SYMPTOMS_ONSET_DATE:
+                    mSymptomsOnsetDate.setError(message);
+                    break;
                 case PatientCreationController.Ui.FIELD_LOCATION:
                     //TODO(mathewi) Using setError doesn't really work properly. Implement a better
                     // UI
@@ -387,10 +454,16 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void showErrorMessage(String error) {
+        public void showErrorMessage(int errorResource) {
+            showErrorMessage(getString(errorResource));
+        }
+
+        @Override
+        public void showErrorMessage(String errorString) {
             mIsCreatePending = false;
             setUiEnabled(true);
-            BigToast.show(PatientCreationActivity.this, R.string.patient_creation_error, error);
+            BigToast.show(
+                    PatientCreationActivity.this, R.string.patient_creation_error, errorString);
         }
 
         @Override
@@ -398,6 +471,30 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             mIsCreatePending = false;
             BigToast.show(PatientCreationActivity.this, R.string.patient_creation_success);
             finish();
+        }
+    }
+
+    private final class DateSetListener implements DatePickerDialog.OnDateSetListener {
+        private final EditText mDateField;
+        private LocalDate mLocalDate;
+
+        public DateSetListener(final EditText dateField, @Nullable final LocalDate defaultDate) {
+            mDateField = dateField;
+            mLocalDate = defaultDate;
+        }
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            LocalDate date = new LocalDate()
+                    .withYear(year)
+                    .withMonthOfYear(monthOfYear + 1)
+                    .withDayOfMonth(dayOfMonth);
+            mDateField.setText(DATE_FORMAT.print(date));
+            mLocalDate = date;
+        }
+
+        public LocalDate getDate() {
+            return mLocalDate;
         }
     }
 }

@@ -10,6 +10,7 @@ import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
+import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
@@ -35,13 +36,22 @@ final class UserLoginController {
 
         void showErrorToast(int stringResourceId);
 
-        void showUsers(List<User> users);
+        void showSyncFailedDialog(boolean show);
 
         void showTentSelectionScreen();
     }
 
+    public interface FragmentUi {
+
+        void showSpinner(boolean show);
+
+        void showUsers(List<User> users);
+    }
+
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
+    private final FragmentUi mFragmentUi;
+    private final DialogActivityUi mDialogUi = new DialogActivityUi();
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
@@ -49,14 +59,23 @@ final class UserLoginController {
     public UserLoginController(
             UserManager userManager,
             EventBusRegistrationInterface eventBus,
-            Ui ui) {
+            Ui ui,
+            FragmentUi fragmentUi) {
         mUserManager = userManager;
         mEventBus = eventBus;
         mUi = ui;
+        mFragmentUi = fragmentUi;
     }
 
     public void init() {
         mEventBus.register(mSubscriber);
+        mFragmentUi.showSpinner(true);
+        mUserManager.loadKnownUsers();
+    }
+
+    /** Attempts to reload users. */
+    public void onSyncRetry() {
+        mFragmentUi.showSpinner(true);
         mUserManager.loadKnownUsers();
     }
 
@@ -89,23 +108,41 @@ final class UserLoginController {
             mUsersSortedByName.clear();
             mUsersSortedByName
                     .addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
-            mUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
+            mUi.showSyncFailedDialog(false);
         }
 
         public void onEventMainThread(KnownUsersLoadFailedEvent event) {
             LOG.e("Failed to load list of users");
-            mUi.showErrorToast(R.string.error_occured);
+            // TODO(akalachman): Replace toast here with dialog a la tent selection.
+            mUi.showSyncFailedDialog(true);
         }
 
         public void onEventMainThread(UserAddedEvent event) {
+            mUi.showSyncFailedDialog(false);  // Just in case.
             LOG.d("User added");
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
-            mUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
         }
 
         public void onEventMainThread(UserAddFailedEvent event) {
             LOG.d("Failed to add user");
             mUi.showErrorToast(errorToStringId(event));
+            mFragmentUi.showSpinner(false);
+        }
+    }
+
+    public AddNewUserDialogFragment.ActivityUi getDialogUi() {
+        return mDialogUi;
+    }
+
+    public final class DialogActivityUi implements AddNewUserDialogFragment.ActivityUi {
+
+        @Override
+        public void showSpinner(boolean show) {
+            mFragmentUi.showSpinner(show);
         }
     }
 

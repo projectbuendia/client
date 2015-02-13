@@ -1,7 +1,9 @@
-package org.msf.records.filter.db;
+package org.msf.records.filter.db.patient;
 
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
+import org.msf.records.data.app.AppPatient;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.providers.Contracts;
 
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.List;
  * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to
  * that zone, tents within that zone, beds within those tents, etc.
  */
-public final class LocationUuidFilter implements SimpleSelectionFilter {
+public final class LocationUuidFilter implements SimpleSelectionFilter<AppPatient> {
 
     private final String mTentSelectionString;
     private final String[] mTentSelectionArgs;

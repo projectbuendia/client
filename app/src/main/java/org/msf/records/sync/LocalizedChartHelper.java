@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import org.msf.records.net.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.providers.Contracts;
 
 import com.google.common.collect.ImmutableSet;
@@ -27,21 +27,14 @@ public class LocalizedChartHelper {
     public static final String ENGLISH_LOCALE = "en";
 
     /**
-     * A uuid representing when a clinician fills in "Unknown".
-     */
-    public static final String UNKNOWN_VALUE = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /**
      * A set of uuids for concepts that represent an answer indicating everything is normal, and
      * there is no worrying symptom.
      */
     public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
-        "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // NO
-        "159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // Solid food
-        "95d50bc3-6281-4661-94ab-1a26455c40a2", // Normal pulse
-        "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // NORMAL
-        "db2ac5ad-cc64-4184-b4be-1324730e1882", // Can talk
-        Concept.NONE_UUID); // None
+            Concepts.NO_UUID, // NO
+            Concepts.SOLID_FOOD_UUID, // Solid food
+            Concepts.NORMAL_UUID, // NORMAL
+            Concepts.NONE_UUID); // None
 
     /**
      * A simple bean class representing an observation. All names and values have been localized.

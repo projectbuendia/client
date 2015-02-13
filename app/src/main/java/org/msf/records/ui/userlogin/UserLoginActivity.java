@@ -1,30 +1,24 @@
 package org.msf.records.ui.userlogin;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.net.model.User;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BigToast;
+import org.msf.records.ui.ProgressFragment;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
-import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Logger;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.GridView;
 import android.widget.Toast;
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnItemClick;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -32,25 +26,53 @@ import de.greenrobot.event.EventBus;
  */
 public class UserLoginActivity extends BaseActivity {
 
-    @Inject Colorizer mUserColorizer;
-    @InjectView(R.id.users) GridView mUserListView;
+    private static final Logger LOG = Logger.create();
     private UserLoginController mController;
-    private UserListAdapter mUserListAdapter;
+    private AlertDialog mSyncFailedDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
+        setContentView(R.layout.activity_user_login);
 
-        setContentView(R.layout.fragment_user_login);
-        ButterKnife.inject(this);
-
-        mUserListAdapter = new UserListAdapter(this, mUserColorizer);
-        mUserListView.setAdapter(mUserListAdapter);
+        UserLoginFragment fragment =
+                (UserLoginFragment)getSupportFragmentManager()
+                        .findFragmentById(R.id.fragment_user_login);
         mController = new UserLoginController(
         		App.getUserManager(),
         		new EventBusWrapper(EventBus.getDefault()),
-        		new MyUi());
+                new MyUi(),
+                fragment.getFragmentUi());
+
+        // TODO: Consider refactoring out some common code between here and tent selection.
+        mSyncFailedDialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(getString(R.string.sync_failed_dialog_title))
+                .setMessage(R.string.user_sync_failed_dialog_message)
+                .setNegativeButton(
+                        R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(
+                                        UserLoginActivity.this,SettingsActivity.class));
+                            }
+                        })
+                .setPositiveButton(
+                        R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mController.onSyncRetry();
+                            }
+                        })
+                .create();
+    }
+
+    /**
+     * Returns the {@link UserLoginController} used by this activity. After onCreate, this should
+     * never be null.
+     */
+    public UserLoginController getUserLoginController() {
+        return mController;
     }
 
     @Override
@@ -94,16 +116,12 @@ public class UserLoginActivity extends BaseActivity {
     	super.onPause();
     }
 
-    @OnItemClick(R.id.users)
-    void onUsersItemClick(int position) {
-    	mController.onUserSelected(mUserListAdapter.getItem(position));
-    }
-
     private final class MyUi implements UserLoginController.Ui {
     	@Override
     	public void showAddNewUserDialog() {
             FragmentManager fm = getSupportFragmentManager();
-            AddNewUserDialogFragment dialogFragment = AddNewUserDialogFragment.newInstance();
+            AddNewUserDialogFragment dialogFragment =
+                    AddNewUserDialogFragment.newInstance(mController.getDialogUi());
             dialogFragment.show(fm, null);
     	}
 
@@ -116,24 +134,27 @@ public class UserLoginActivity extends BaseActivity {
 
     	@Override
     	public void showErrorToast(int stringResourceId) {
-    		Toast toast = Toast.makeText(
-    				UserLoginActivity.this,
-    				getResources().getString(stringResourceId),
-    				Toast.LENGTH_SHORT);
-    		toast.show();
+            BigToast.show(UserLoginActivity.this, getString(stringResourceId));
     	}
 
-    	@Override
+        @Override
+        public void showSyncFailedDialog(boolean show) {
+            if (mSyncFailedDialog == null) {
+                return;
+            }
+
+            if (mSyncFailedDialog.isShowing() != show) {
+                if (show) {
+                    mSyncFailedDialog.show();
+                } else {
+                    mSyncFailedDialog.hide();
+                }
+            }
+        }
+
+        @Override
     	public void showTentSelectionScreen() {
             startActivity(new Intent(UserLoginActivity.this, TentSelectionActivity.class));
     	}
-
-    	@Override
-    	public void showUsers(List<User> users) {
-			mUserListAdapter.setNotifyOnChange(false);
-			mUserListAdapter.clear();
-			mUserListAdapter.addAll(users);
-			mUserListAdapter.notifyDataSetChanged();
-		}
     }
 }

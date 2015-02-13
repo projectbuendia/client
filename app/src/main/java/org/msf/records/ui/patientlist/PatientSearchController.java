@@ -11,15 +11,15 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.filter.db.PatientDbFilters;
+import org.msf.records.filter.db.patient.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilterGroup;
-import org.msf.records.filter.db.LocationUuidFilter;
+import org.msf.records.filter.db.patient.LocationUuidFilter;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.filter.matchers.FilteredCursorWrapper;
-import org.msf.records.filter.matchers.IdFilter;
+import org.msf.records.filter.matchers.patient.IdFilter;
 import org.msf.records.filter.matchers.MatchingFilter;
 import org.msf.records.filter.matchers.MatchingFilterGroup;
-import org.msf.records.filter.matchers.NameFilter;
+import org.msf.records.filter.matchers.patient.NameFilter;
 import org.msf.records.utils.EventBusRegistrationInterface;
 
 import java.util.HashSet;
@@ -239,6 +239,14 @@ public class PatientSearchController {
      */
     public void setFilter(SimpleSelectionFilter filter) {
         mFilter = filter;
+    }
+
+    /**
+     * Manually sets the locations for this controller, which is useful if locations have been
+     * updated from an outside context.
+     */
+    public void setLocations(AppLocationTree appLocationTree) {
+        mLocationTree = appLocationTree;
     }
 
     private SimpleSelectionFilter getLocationSubfilter() {

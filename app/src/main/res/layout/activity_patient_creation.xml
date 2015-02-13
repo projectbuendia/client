@@ -6,13 +6,16 @@
     <TableLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:padding="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:stretchColumns="1">
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -30,7 +33,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -48,7 +51,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -66,7 +69,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -90,7 +93,7 @@
                 <RadioGroup
                     android:id="@+id/patient_creation_radiogroup_age_units"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="horizontal">
 
                     <RadioButton
@@ -115,7 +118,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -147,7 +150,48 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/admission_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_admission_date"
+                android:focusable="false"
+                android:inputType="date"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <!-- TODO: Make symptoms onset date clearable. -->
+            <TextView
+                android:layout_height="85dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/symptoms_onset_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_symptoms_onset_date"
+                android:focusable="false"
+                android:inputType="date"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"

@@ -1,10 +1,12 @@
 package org.msf.records.filter.db;
 
+import org.msf.records.data.app.AppTypeBase;
+
 /**
  * SimpleSelectionFilter is a container for a filter string (part of an SQL WHERE
  * clause) and the arguments to insert into that filter string.
  */
-public interface SimpleSelectionFilter {
+public interface SimpleSelectionFilter<T extends AppTypeBase> {
     /**
      * A selection filter, with the syntax of a structured SQL WHERE clause.
      * For example, a selection filter could be "given_name=? AND family_name LIKE ?".

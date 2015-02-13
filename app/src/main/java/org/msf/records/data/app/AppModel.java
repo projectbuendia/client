@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
+import org.msf.records.data.app.tasks.AppAddEncounterAsyncTask;
 import org.msf.records.data.app.tasks.AppAddPatientAsyncTask;
 import org.msf.records.data.app.tasks.AppAsyncTaskFactory;
 import org.msf.records.data.app.tasks.AppUpdatePatientAsyncTask;
@@ -17,8 +18,9 @@ import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
 import org.msf.records.filter.db.SimpleSelectionFilter;
-import org.msf.records.filter.db.UuidFilter;
+import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 
@@ -86,7 +88,12 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
-                new UuidFilter(), uuid, mConverters.patient, bus);
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
+                new UuidFilter(),
+                uuid,
+                mConverters.patient,
+                bus);
         task.execute();
     }
 
@@ -120,6 +127,16 @@ public class AppModel {
             CrudEventBus bus, AppPatient originalPatient, AppPatientDelta patientDelta) {
         AppUpdatePatientAsyncTask task =
                 mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
+        task.execute();
+    }
+
+    /**
+     * Asynchronously adds an encounter to a patient, posting a
+     * {@link org.msf.records.events.data.SingleItemCreatedEvent}.
+     */
+    public void addEncounter(CrudEventBus bus, AppPatient appPatient, AppEncounter appEncounter) {
+        AppAddEncounterAsyncTask task =
+                mTaskFactory.newAddEncounterAsyncTask(appPatient, appEncounter, bus);
         task.execute();
     }
 

@@ -11,15 +11,14 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
-import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.events.sync.SyncFailedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
+import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.patientlist.PatientSearchController;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
-
-import android.os.SystemClock;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * Controller for {@link TentSelectionActivity}.
@@ -41,6 +40,8 @@ final class TentSelectionController {
         void launchActivityForLocation(AppLocation location);
 
         void showErrorMessage(int stringResourceId);
+
+        void showSyncFailedDialog(boolean show);
     }
 
     public interface TentFragmentUi {
@@ -53,7 +54,7 @@ final class TentSelectionController {
 
         void setDischargedPatientCount(int dischargedPatientCount);
 
-        void showSpinner(boolean show);
+        void setBusyLoading(boolean busy);
 	}
 
     private final AppModel mAppModel;
@@ -62,9 +63,9 @@ final class TentSelectionController {
     private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
+    private final SyncManager mSyncManager;
+    private final PatientSearchController mPatientSearchController;
 
-    private boolean mLoadedLocationTree;
-    private long mLoadRequestTimeMs;
     @Nullable private AppLocationTree mAppLocationTree;
     @Nullable private AppLocation mTriageZone;
     @Nullable private AppLocation mDischargedZone;
@@ -73,34 +74,44 @@ final class TentSelectionController {
             AppModel appModel,
             CrudEventBus crudEventBus,
             Ui ui,
-            EventBusRegistrationInterface eventBus) {
+            EventBusRegistrationInterface eventBus,
+            SyncManager syncManager,
+            PatientSearchController patientSearchController) {
         mAppModel = appModel;
         mCrudEventBus = crudEventBus;
         mUi = ui;
         mEventBus = eventBus;
+        mSyncManager = syncManager;
+        mPatientSearchController = patientSearchController;
     }
 
     public void init() {
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
+        LOG.d("init: isLocationTreeValid() = " + isLocationTreeValid());
 
-        LOG.d("Controller inited. Loaded tree: %1$s. Tree: %2$s",
-                mLoadedLocationTree, mAppLocationTree);
+        // Get or update mAppLocationTree from the local database.
+        mAppModel.fetchLocationTree(
+                mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
 
-        mAppModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
-
-        if (!mLoadedLocationTree) {
-            mLoadRequestTimeMs = SystemClock.elapsedRealtime();
-        }
         for (TentFragmentUi fragmentUi : mFragmentUis) {
-            populateFragmentUi(fragmentUi);
+            updateFragmentUi(fragmentUi);
         }
+    }
+
+    /** Returns true if a non-empty AppLocationTree has been loaded from the local database. */
+    private boolean isLocationTreeValid() {
+        return mAppLocationTree != null && mAppLocationTree.getRoot() != null;
+    }
+
+    public void onSyncRetry() {
+        mSyncManager.forceSync();
     }
 
     public void attachFragmentUi(TentFragmentUi fragmentUi) {
         LOG.d("Attached new fragment UI: " + fragmentUi);
         mFragmentUis.add(fragmentUi);
-        populateFragmentUi(fragmentUi);
+        updateFragmentUi(fragmentUi);
     }
 
     public void detachFragmentUi(TentFragmentUi fragmentUi) {
@@ -115,7 +126,6 @@ final class TentSelectionController {
         if (mAppLocationTree != null) {
             mAppLocationTree.close();
         }
-
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
 	}
@@ -145,9 +155,10 @@ final class TentSelectionController {
         mUi.launchActivityForLocation(tent);
     }
 
-    private void populateFragmentUi(TentFragmentUi fragmentUi) {
-        fragmentUi.showSpinner(!mLoadedLocationTree);
-        if (mAppLocationTree != null) {
+    private void updateFragmentUi(TentFragmentUi fragmentUi) {
+        fragmentUi.setBusyLoading(!isLocationTreeValid());
+
+        if (isLocationTreeValid()) {
             int dischargedPatientCount = (mDischargedZone == null)
                     ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
             int totalPatientCount =
@@ -168,10 +179,16 @@ final class TentSelectionController {
     @SuppressWarnings("unused") // Called by reflection from EventBus
     private final class EventBusSubscriber {
 
-        public void onEventMainThread(SyncFinishedEvent event) {
-            // Reload locations when a sync completes.
+        public void onEventMainThread(SyncSucceededEvent event) {
+            mUi.showSyncFailedDialog(false);
+
+            // Reload locations from the local datastore when a sync completes.
             mAppModel.fetchLocationTree(
                     mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
+        }
+
+        public void onEventMainThread(SyncFailedEvent event) {
+            mUi.showSyncFailedDialog(true);
         }
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
@@ -179,14 +196,15 @@ final class TentSelectionController {
                 mAppLocationTree.close();
             }
             mAppLocationTree = event.tree;
-            if (mAppLocationTree == null || mAppLocationTree.getRoot() == null) {
-                mLoadedLocationTree = false;
-            } else {
-                mLoadedLocationTree = true;
+            if (!isLocationTreeValid()) {
+                LOG.i("Found no locations in the local datastore; forcing a sync.");
+                mSyncManager.forceSync();
+                return;
             }
-            ImmutableSet<AppLocation> zones =
-                    mAppLocationTree.getChildren(mAppLocationTree.getRoot());
-            for (AppLocation zone : zones) {
+
+            LOG.i("Received a valid location tree.");
+            for (AppLocation zone :
+                    mAppLocationTree.getChildren(mAppLocationTree.getRoot())) {
                 switch (zone.uuid) {
                     case Zone.TRIAGE_ZONE_UUID:
                         mTriageZone = zone;
@@ -201,8 +219,12 @@ final class TentSelectionController {
             }
 
             for (TentFragmentUi fragmentUi : mFragmentUis) {
-                populateFragmentUi(fragmentUi);
+                updateFragmentUi(fragmentUi);
             }
+
+            // Update the search controller immediately -- it does not listen for location updates
+            // on this controller's bus and would otherwise be unaware of changes.
+            mPatientSearchController.setLocations(mAppLocationTree);
         }
     }
 }

@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -48,6 +47,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,7 +90,8 @@ public class OdkActivityLauncher {
                     public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                         if (response.isEmpty()) {
                             LOG.i("No forms found");
-                            EventBus.getDefault().post(new FetchXformFailedEvent());
+                            EventBus.getDefault().post(new FetchXformFailedEvent(
+                                    FetchXformFailedEvent.Reason.NO_FORMS_FOUND));
                             return;
                         }
                         // Cache all the forms into the ODK form cache
@@ -106,14 +107,29 @@ public class OdkActivityLauncher {
                                         fields);
                             }
                         }).execute(findUuid(response, uuidToShow));
-
-                        EventBus.getDefault().post(new FetchXformSucceededEvent());
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        EventBus.getDefault().post(new FetchXformFailedEvent());
+                        LOG.e(error, "Fetching xform list failed.");
+                        FetchXformFailedEvent.Reason reason =
+                                FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+                        if (error.networkResponse != null) {
+                            switch (error.networkResponse.statusCode) {
+                                case HttpURLConnection.HTTP_FORBIDDEN:
+                                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                                    reason = FetchXformFailedEvent.Reason.SERVER_AUTH;
+                                    break;
+                                case HttpURLConnection.HTTP_NOT_FOUND:
+                                    reason = FetchXformFailedEvent.Reason.SERVER_BAD_ENDPOINT;
+                                    break;
+                                case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                                default:
+                                    reason = FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
+                            }
+                        }
+                        EventBus.getDefault().post(new FetchXformFailedEvent(reason, error));
                     }
                 });
     }
@@ -399,7 +415,7 @@ public class OdkActivityLauncher {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        LOG.e("Did not submit form to server successfully", error);
+                        LOG.e(error, "Did not submit form to server successfully");
                         if (error.networkResponse != null
                                 && error.networkResponse.statusCode == 500) {
                             LOG.e("Internal error stack trace:\n");

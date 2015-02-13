@@ -20,6 +20,7 @@ import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.ui.patientlist.RoundFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
+import org.msf.records.ui.userlogin.UserLoginFragment;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;
@@ -56,7 +57,8 @@ import dagger.Provides;
                 RoundActivity.class,
                 TentSelectionActivity.class,
                 PatientListFragment.class,
-                RoundFragment.class
+                RoundFragment.class,
+                UserLoginFragment.class
         })
 public final class AppModule {
 

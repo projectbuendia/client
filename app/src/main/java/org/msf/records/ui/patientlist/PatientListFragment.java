@@ -15,6 +15,7 @@ import org.msf.records.data.app.TypedCursor;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.BigToast;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
 import org.msf.records.utils.EventBusWrapper;
@@ -184,6 +185,13 @@ public class PatientListFragment extends ProgressFragment implements
         @Override
         public void setRefreshing(boolean refreshing) {
             mSwipeToRefresh.setRefreshing(false);
+        }
+
+        @Override
+        public void showSyncError() {
+            BigToast.show(
+                    getActivity(),
+                    R.string.patient_list_fragment_sync_error);
         }
     }
 }
