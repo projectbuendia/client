@@ -15,6 +15,7 @@ import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListActivity;
+import org.msf.records.ui.patientlist.PatientListController;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;

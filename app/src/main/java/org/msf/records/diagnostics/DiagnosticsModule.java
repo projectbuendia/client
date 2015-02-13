@@ -8,7 +8,6 @@ import org.msf.records.inject.Qualifiers;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.prefs.StringPreference;
 
-import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -32,23 +31,14 @@ public class DiagnosticsModule {
 
     @Provides
     @Singleton
-    @Qualifiers.BuendiaModuleHealthCheck
-    HealthCheck provideBuendiaModuleHealthCheck(
-            Application application,
-            OpenMrsConnectionDetails connectionDetails) {
-        return new BuendiaModuleHealthCheck(application, connectionDetails);
-    }
-
-    @Provides
-    @Singleton
     ImmutableSet<HealthCheck> provideHealthChecks(
             Application application,
             @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
             OpenMrsConnectionDetails connectionDetails) {
         return ImmutableSet.<HealthCheck>of(
                 new WifiHealthCheck(application),
-                new HttpServerHealthCheck(application, openMrsRootUrl),
-                new BuendiaModuleHealthCheck(application, connectionDetails));
+                new ServerReachableHealthCheck(application, openMrsRootUrl),
+                new BuendiaApiHealthCheck(application, connectionDetails));
     }
 
     @Provides

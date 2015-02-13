@@ -15,9 +15,10 @@ import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A {@link HealthCheck} that checks the status of an HTTP server.
+ * A {@link HealthCheck} that checks whether the hostname in the "OpenMRS root URL"
+ * preference setting identifies an Internet host that is reachable on the network.
  */
-public class HttpServerHealthCheck extends HealthCheck {
+public class ServerReachableHealthCheck extends HealthCheck {
 
     private static final Logger LOG = Logger.create();
 
@@ -32,7 +33,7 @@ public class HttpServerHealthCheck extends HealthCheck {
     private Handler mHandler;
     private HttpServerHealthCheckRunnable mRunnable;
 
-    HttpServerHealthCheck(
+    ServerReachableHealthCheck(
             Application application,
             StringPreference openMrsRootUrl) {
         super(application);
@@ -44,7 +45,7 @@ public class HttpServerHealthCheck extends HealthCheck {
     protected void startImpl() {
         synchronized (mLock) {
             if (mHandlerThread == null) {
-                mHandlerThread = new HandlerThread("HTTP Server Health Check");
+                mHandlerThread = new HandlerThread("Server Reachable Health Check");
                 mHandlerThread.start();
                 mHandler = new Handler(mHandlerThread.getLooper());
             }
@@ -107,9 +108,9 @@ public class HttpServerHealthCheck extends HealthCheck {
                     address = InetAddress.getByName(uri.getHost());
                 } catch (UnknownHostException e) {
                     LOG.w(
-                            "The configured OpenMRS root URL '%1$s' has an unknown host.",
+                            "The hostname of the OpenMRS root URL '%1$s' could not be resolved.",
                             uriString);
-                    reportIssue(HealthIssue.SERVER_CONFIGURATION_INVALID);
+                    reportIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
                     return;
                 }
 

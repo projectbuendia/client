@@ -10,7 +10,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
 /**
- * A {@link HealthCheck} that checks wifi state.
+ * A {@link HealthCheck} that checks whether the current device is connected
+ * to a wifi network.
  */
 public class WifiHealthCheck extends HealthCheck {
 
@@ -67,10 +68,17 @@ public class WifiHealthCheck extends HealthCheck {
     }
 
     private class WifiChangeBroadcastReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             checkWifiState();
         }
+    }
+
+    public boolean isApiUnavailable() {
+        // We will get an event that lets us update the set of active issues whenever
+        // the wifi state changes, so we can be confident that the API is definitely
+        // unavailable whenever either of the wifi-related issues is active.
+        return mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
+                mActiveIssues.contains(HealthIssue.WIFI_DISABLED);
     }
 }

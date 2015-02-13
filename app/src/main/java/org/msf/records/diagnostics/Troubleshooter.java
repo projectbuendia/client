@@ -53,6 +53,14 @@ public class Troubleshooter {
         return mActiveIssues.isEmpty();
     }
 
+    /** Returns true if the API is known to be unavailable. */
+    public boolean isApiUnavailable() {
+        // For now, all known issues imply that the API is unavailable.
+        // If we add issue types in the future that can be active while the
+        // API is still reachable, we'll need to check for specific issues here.
+        return !mActiveIssues.isEmpty();
+    }
+
     /**
      * Called when a new health issue is discovered.
      */

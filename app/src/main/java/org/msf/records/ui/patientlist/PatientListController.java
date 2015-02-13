@@ -1,14 +1,11 @@
 package org.msf.records.ui.patientlist;
 
-import org.msf.records.diagnostics.HealthCheck;
+import org.msf.records.App;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.inject.Qualifiers;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
-
-import javax.inject.Inject;
 
 /**
  * Controller for non-inherited parts of {@link PatientListFragment}.
@@ -34,9 +31,6 @@ public class PatientListController {
     private final Ui mUi;
 
     private final SyncManager mSyncManager;
-
-    @Inject
-    @Qualifiers.BuendiaModuleHealthCheck HealthCheck mBuendiaModuleHealthCheck;
 
     /** True if a full sync initiated by this activity is in progress. */
     private boolean mInitiatedFullSync;
@@ -81,7 +75,8 @@ public class PatientListController {
      * waiting for a previously initiated sync.
      */
     public void onRefreshRequested() {
-        if (mBuendiaModuleHealthCheck.hasActiveIssues()) {
+        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
+            mUi.stopRefreshAnimation();
             mUi.showApiHealthProblem();
         } else if (!mInitiatedFullSync) {
             LOG.d("onRefreshRequested");

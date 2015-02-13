@@ -57,4 +57,14 @@ public class HealthMonitor {
     public void onEvent(HealthIssue.ResolvedEvent event) {
         mTroubleshooter.onResolved(event.getIssue());
     }
+
+    /** Returns true if the API is known for certain to be unavailable. */
+    public boolean isApiUnavailable() {
+        for (HealthCheck check : mHealthChecks) {
+            if (check.isApiUnavailable()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

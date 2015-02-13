@@ -31,6 +31,8 @@ public class App extends Application {
 
     private static Server sServer;
 
+    private static HealthMonitor sHealthMonitor;
+
     private static OpenMrsConnectionDetails sConnectionDetails;
 
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
@@ -52,10 +54,10 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-
             sUserManager = mUserManager; // TODO(dxchen): Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
             sServer = mServer; // TODO(dxchen): Remove when Daggered.
+            sHealthMonitor = mHealthMonitor;
         }
 
         mHealthMonitor.start();
@@ -84,6 +86,10 @@ public class App extends Application {
 
     public static synchronized Server getServer() {
         return sServer;
+    }
+
+    public static synchronized HealthMonitor getHealthMonitor() {
+        return sHealthMonitor;
     }
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
