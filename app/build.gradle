@@ -85,9 +85,9 @@ def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs';
 
 // Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlDev;
-def openmrsUserDefault = 'android';
-def openmrsPasswordDefault = 'Android123';
+def openmrsRootUrlDefault = openmrsRootUrlEdison;
+def openmrsUserDefault = 'buendia';
+def openmrsPasswordDefault = 'buendia';
 
 android {
     compileSdkVersion 21
