@@ -190,7 +190,7 @@ public class OdkActivityLauncher {
                 InstanceProviderAPI.InstanceColumns.CONTENT_ITEM_TYPE)) {
             LOG.e("Tried to load a content URI of the wrong type: " + uri);
             EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
             return;
         }
 
@@ -201,7 +201,7 @@ public class OdkActivityLauncher {
             if (instanceCursor.getCount() != 1) {
                 LOG.e("The form that we tried to load did not exist: " + uri);
                 EventBus.getDefault().post(
-                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
+                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
                 return;
             }
             instanceCursor.moveToFirst();
@@ -210,7 +210,7 @@ public class OdkActivityLauncher {
             if (instancePath == null) {
                 LOG.e("No file path for form instance: " + uri);
                 EventBus.getDefault().post(
-                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
+                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
                 return;
 
             }
@@ -219,7 +219,7 @@ public class OdkActivityLauncher {
             if (columnIndex == -1) {
                 LOG.e("No id to delete for after upload: " + uri);
                 EventBus.getDefault().post(
-                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
+                        new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
                 return;
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
@@ -260,7 +260,7 @@ public class OdkActivityLauncher {
         } catch (IOException e) {
             LOG.e(e, "Failed to read xml form into a String " + uri);
             EventBus.getDefault().post(
-                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_UNKNOWN));
+                    new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.CLIENT_ERROR));
         } finally {
             if (instanceCursor != null) {
                 instanceCursor.close();
@@ -443,16 +443,17 @@ public class OdkActivityLauncher {
                                     break;
                                 case 500:
                                     if (error.networkResponse.data == null) {
-                                        LOG.e("No internal error stack trace available.");
+                                        LOG.e("Server error, but no internal error stack trace "
+                                                + "available.");
                                     } else {
                                         LOG.e(new String(
                                                 error.networkResponse.data, Charsets.UTF_8));
-                                        LOG.e("Internal error stack trace:\n");
+                                        LOG.e("Server error. Internal error stack trace:\n");
                                     }
-                                    reason = SubmitXformFailedEvent.Reason.SERVER_UNKNOWN;
+                                    reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
                                     break;
                                 default:
-                                    reason = SubmitXformFailedEvent.Reason.SERVER_UNKNOWN;
+                                    reason = SubmitXformFailedEvent.Reason.SERVER_ERROR;
                                     break;
                             }
                         }

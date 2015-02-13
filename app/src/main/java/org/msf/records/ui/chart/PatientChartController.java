@@ -576,26 +576,16 @@ final class PatientChartController {
         }
 
         public void onEventMainThread(SubmitXformFailedEvent event) {
-            int errorMessageResource = R.string.submit_xform_failed_unknown_reason;
+            int errorMessageResource;
             switch (event.reason) {
-                case CLIENT_UNKNOWN:
-                    // Intentionally blank.
-                    break;
                 case SERVER_AUTH:
                     errorMessageResource = R.string.submit_xform_failed_server_auth;
-                    break;
-                case SERVER_BAD_ENDPOINT:
-                    // Intentionally blank.
                     break;
                 case SERVER_TIMEOUT:
                     errorMessageResource = R.string.submit_xform_failed_server_timeout;
                     break;
-                case SERVER_UNKNOWN:
-                    // Intentionally blank.
-                    break;
-                case UNKNOWN:
                 default:
-                    // Intentionally blank.
+                    errorMessageResource = R.string.submit_xform_failed_unknown_reason;
             }
             mUi.showError(errorMessageResource);
         }

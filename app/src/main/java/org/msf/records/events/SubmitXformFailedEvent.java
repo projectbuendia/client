@@ -11,8 +11,8 @@ public class SubmitXformFailedEvent {
         SERVER_AUTH,
         SERVER_BAD_ENDPOINT,
         SERVER_TIMEOUT,
-        SERVER_UNKNOWN,
-        CLIENT_UNKNOWN
+        SERVER_ERROR,
+        CLIENT_ERROR
     }
 
     public final Reason reason;
