@@ -12,6 +12,7 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
+import org.msf.records.events.sync.SyncProgressEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
@@ -57,6 +58,8 @@ final class TentSelectionController {
         void setDischargedPatientCount(int dischargedPatientCount);
 
         void setBusyLoading(boolean busy);
+
+        void showIncrementalSyncProgress(int progress, String label);
 	}
 
     private final AppModel mAppModel;
@@ -183,6 +186,12 @@ final class TentSelectionController {
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
     private final class EventBusSubscriber {
+
+        public void onEventMainThread(SyncProgressEvent event) {
+            for (TentFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
+            }
+        }
 
         public void onEventMainThread(SyncSucceededEvent event) {
             mUi.showSyncFailedDialog(false);

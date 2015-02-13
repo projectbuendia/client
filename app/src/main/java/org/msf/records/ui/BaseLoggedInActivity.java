@@ -42,7 +42,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private MenuPopupWindow mPopupWindow;
 
     private boolean mIsCreated = false;
-    private boolean mIsMenuEnabled = false;
+    private boolean mIsMenuEnabled = true;
 
     /**
      * {@inheritDoc}

@@ -13,6 +13,7 @@ import org.msf.records.widget.SubtitledButtonView;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -133,6 +134,14 @@ public final class TentSelectionFragment extends ProgressFragment {
                     mLoadingDialog.hide();
                 }
             }*/
+        }
+
+        @Override
+        public void showIncrementalSyncProgress(int progress, @Nullable String label) {
+            incrementProgressBy(progress);
+            if (label != null) {
+                setProgressLabel(label);
+            }
         }
     }
 }
