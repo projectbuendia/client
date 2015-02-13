@@ -23,7 +23,7 @@ import de.greenrobot.event.EventBus;
  * <p>Subclasses must stop checking (e.g., unregister {@link BroadcastReceiver}s or stop
  * background threads) when {@link #stopImpl} is called.
  */
-abstract class HealthCheck {
+public abstract class HealthCheck {
 
     private static final Logger LOG = Logger.create();
 
@@ -65,6 +65,11 @@ abstract class HealthCheck {
 
             stopImpl();
         }
+    }
+
+    /** Returns true if this health check has any active issues. */
+    public boolean hasActiveIssues() {
+        return !mActiveIssues.isEmpty();
     }
 
     protected abstract void startImpl();

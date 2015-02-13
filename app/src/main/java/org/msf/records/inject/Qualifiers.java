@@ -15,13 +15,17 @@ public class Qualifiers {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface HealthEventBus {}
 
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface BuendiaModuleHealthCheck {}
+
     // .events
 
     @Qualifier
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     public @interface CrudEventBusBuilder {}
-
 
     // .net
 

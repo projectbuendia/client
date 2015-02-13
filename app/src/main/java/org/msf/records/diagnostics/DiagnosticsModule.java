@@ -8,6 +8,7 @@ import org.msf.records.inject.Qualifiers;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.prefs.StringPreference;
 
+import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -27,6 +28,15 @@ public class DiagnosticsModule {
     @Qualifiers.HealthEventBus
     EventBus provideHealthEventBus() {
         return EventBus.builder().build();
+    }
+
+    @Provides
+    @Singleton
+    @Qualifiers.BuendiaModuleHealthCheck
+    HealthCheck provideBuendiaModuleHealthCheck(
+            Application application,
+            OpenMrsConnectionDetails connectionDetails) {
+        return new BuendiaModuleHealthCheck(application, connectionDetails);
     }
 
     @Provides

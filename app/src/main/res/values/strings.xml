@@ -135,6 +135,7 @@
     <string name="sync_failed_retry">Retry</string>
     <string name="user_sync_failed_dialog_message">An error occurred while retrieving the user list. Please check your OpenMRS settings or try again.</string>
     <string name="patient_list_fragment_sync_error">Error syncing patient data. Please check settings or try again.</string>
+    <string name="api_health_problem">Unable to contact the server.  Please see the bar along the bottom of the screen for more information about the problem.</string>
     <string name="sync_failed_back">Back</string>
     <string name="encounter_add_failed_unknown_reason">An unknown error occurred.</string>
     <string name="encounter_add_failed_unknown_server_error">Unknown error occurred on server.</string>
