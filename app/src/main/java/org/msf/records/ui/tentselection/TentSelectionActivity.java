@@ -184,7 +184,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
         @Override
         public void setBusyLoading(boolean busy) {
-            setMenuEnabled(!busy);
+            setOptionsMenuEnabled(!busy);
         }
 
         @Override

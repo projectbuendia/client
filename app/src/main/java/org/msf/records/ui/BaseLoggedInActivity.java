@@ -253,7 +253,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
      * Hides or shows all buttons in the menu except for login/logout functionality.
      * @param shouldEnableMenu whether to show the menu items
      */
-    protected void setMenuEnabled(boolean shouldEnableMenu) {
+    protected void setOptionsMenuEnabled(boolean shouldEnableMenu) {
         if (mIsMenuEnabled != shouldEnableMenu) {
             mIsMenuEnabled = shouldEnableMenu;
             invalidateOptionsMenu();

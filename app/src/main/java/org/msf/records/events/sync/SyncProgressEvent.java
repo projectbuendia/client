@@ -3,7 +3,7 @@ package org.msf.records.events.sync;
 import android.support.annotation.Nullable;
 
 /**
- * An event bus giving details on latest sync progress.
+ * An event bus event giving details on latest sync progress.
  */
 public class SyncProgressEvent {
     public int progress;
