@@ -65,7 +65,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         private final String mConceptUuid;
         private final String mName;
         private final HashMap<String, String> datesToValues = new HashMap<>();
-        private final HashMap<String, String> datesToLocalizedValues = new HashMap<>();
+        private final HashMap<String, String> mDatesToLocalizedValues = new HashMap<>();
 
         private Row(String conceptUuid, String name) {
             mConceptUuid = conceptUuid;
@@ -150,7 +150,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 row.datesToValues.put(dateKey, ob.value);
             }
 
-            row.datesToLocalizedValues.put(dateKey, ob.localizedValue);
+            row.mDatesToLocalizedValues.put(dateKey, ob.localizedValue);
         }
         if (days.isEmpty()) {
             // Just put today, with nothing there.
@@ -292,7 +292,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
         String value = rowData.datesToValues.get(dateKey);
-        String localizedValue = rowData.datesToLocalizedValues.get(dateKey);
+        String localizedValue = rowData.mDatesToLocalizedValues.get(dateKey);
 
         // TODO: Proper localization.
         switch (conceptUuid) {
@@ -359,8 +359,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concepts.BLEEDING_UUID:
-                if (rowData.datesToValues.containsKey(dateKey) ||
-                        mDatesWithAnyBleeding.contains(dateKey)) {
+                if (rowData.datesToValues.containsKey(dateKey)
+                        || mDatesWithAnyBleeding.contains(dateKey)) {
                     backgroundResource = R.drawable.chart_cell_active;
                 }
                 break;
