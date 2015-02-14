@@ -173,7 +173,8 @@ public class UpdateManager {
                 mDownloadId = mDownloadManager.enqueue(request);
                 return true;
             } catch (Exception e) {
-                LOG.e(e, "Failed to download application update from " + availableUpdateInfo.updateUri);
+                LOG.e(e, "Failed to download application update from "
+                        + availableUpdateInfo.updateUri);
                 return false;
             }
         }

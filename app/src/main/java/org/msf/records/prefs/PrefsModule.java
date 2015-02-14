@@ -72,6 +72,7 @@ public class PrefsModule {
                 "http://packages:9001");
         // TODO(kpy): Get the default value from an overridable resource.
     }
+
     @Provides
     @Singleton
     @Qualifiers.XformUpdateClientCache
