@@ -3,7 +3,9 @@ package org.msf.records.updater;
 import android.app.Application;
 
 import org.msf.records.App;
+import org.msf.records.inject.Qualifiers;
 import org.msf.records.net.VolleySingleton;
+import org.msf.records.prefs.StringPreference;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 
 import javax.inject.Singleton;
@@ -24,8 +26,10 @@ public class UpdateModule {
 
     @Provides
     @Singleton
-    UpdateServer provideUpdateServer(Application application) {
-        return new UpdateServer(VolleySingleton.getInstance(application), null /*rootUrl*/);
+    UpdateServer providePackageServer(
+            Application application,
+            @Qualifiers.PackageServerRootUrl StringPreference rootUrl) {
+        return new UpdateServer(VolleySingleton.getInstance(application), rootUrl);
     }
 
     @Provides

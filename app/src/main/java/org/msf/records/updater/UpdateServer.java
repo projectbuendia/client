@@ -1,12 +1,11 @@
 package org.msf.records.updater;
 
-import android.support.annotation.Nullable;
-
 import com.android.volley.Response;
 
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.net.GsonRequest;
 import org.msf.records.net.VolleySingleton;
+import org.msf.records.prefs.StringPreference;
 
 import java.util.List;
 
@@ -15,14 +14,24 @@ import java.util.List;
  */
 public class UpdateServer {
 
-    public static final String ROOT_URL = "http://packages.projectbuendia.org/";
+    /**
+     * The package server's module name for updates to this app.  A name of "foo"
+     * means the updates are named "foo-1.2.apk", "foo-1.3.apk", etc. and their
+     * index is available at "foo.json".
+     */
+    private static final String MODULE_NAME = "buendia-client";
 
     private final VolleySingleton mVolley;
-    private final String mRootUrl;
+    private final StringPreference mRootUrl;
 
-    public UpdateServer(VolleySingleton volley, @Nullable String rootUrl) {
+    public UpdateServer(VolleySingleton volley, StringPreference rootUrl) {
         mVolley = volley;
-        mRootUrl = rootUrl == null ? ROOT_URL : rootUrl;
+        mRootUrl = rootUrl;
+    }
+
+    /** Returns the package server root URL preference, with trailing slashes removed. */
+    public String getRootUrl() {
+        return mRootUrl.get().replaceAll("/*$", "");
     }
 
     /**
@@ -36,7 +45,7 @@ public class UpdateServer {
             Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
                 GsonRequest.withArrayResponse(
-                        mRootUrl + "android-client.json",
+                        getRootUrl() + "/" + MODULE_NAME + ".json",
                         UpdateInfo.class,
                         null /*headers*/,
                         listener,

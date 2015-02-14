@@ -119,6 +119,7 @@ android {
         resValue "string", "openmrs_root_url_default", project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
         resValue "string", "openmrs_user_default", project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
         resValue "string", "openmrs_password_default", project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
+        // TODO: Add a resValue for the package server root URL here.
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue "string", "sync_authority", applicationId + '.provider.records'
