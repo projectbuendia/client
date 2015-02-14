@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -38,11 +39,17 @@ public class UpdateManager {
     private static final Logger LOG = Logger.create();
 
     /**
-     * The frequency with which to check for updates, in hours.
+     * The update managers's module name for updates to this app.  A name of "foo"
+     * means the updates are saved as "foo-1.2.apk", "foo-1.3.apk" on disk.
+     */
+    private static final String MODULE_NAME = "buendia-client";
+
+    /**
+     * The period between checks for new updates, in seconds.
      *
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_FOR_UPDATE_FREQUENCY_HOURS = 1;
+    public static final int CHECK_FOR_UPDATE_PERIOD_SECONDS = 120;
 
     /**
      * The minimal version number.
@@ -115,11 +122,11 @@ public class UpdateManager {
      *     </li>
      * </ul>
      *
-     * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_FREQUENCY_HOURS}.
+     * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_PERIOD_SECONDS}.
      */
     public void checkForUpdate() {
         DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
+        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_FOR_UPDATE_PERIOD_SECONDS))) {
             if (!mIsDownloadInProgress) {
                 if (mLastDownloadedUpdateInfo.shouldInstall()) {
                     EventBus.getDefault()
@@ -155,18 +162,20 @@ public class UpdateManager {
             mApplication.registerReceiver(
                     new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
-            DownloadManager.Request request =
-                    new DownloadManager.Request(availableUpdateInfo.updateUri)
-                            .setDestinationInExternalPublicDir(
-                                    mDownloadDirectory,
-                                    "android-client-"
-                                            + availableUpdateInfo.availableVersion.toString()
-                                            + ".apk")
-                            .setNotificationVisibility(
-                                    DownloadManager.Request.VISIBILITY_VISIBLE);
-            mDownloadId = mDownloadManager.enqueue(request);
-
-            return true;
+            try {
+                DownloadManager.Request request =
+                        new DownloadManager.Request(availableUpdateInfo.updateUri)
+                                .setDestinationInExternalPublicDir(
+                                        mDownloadDirectory,
+                                        MODULE_NAME + availableUpdateInfo.availableVersion + ".apk")
+                                .setNotificationVisibility(
+                                        DownloadManager.Request.VISIBILITY_VISIBLE);
+                mDownloadId = mDownloadManager.enqueue(request);
+                return true;
+            } catch (Exception e) {
+                LOG.e(e, "Failed to download application update from " + availableUpdateInfo.updateUri);
+                return false;
+            }
         }
     }
 
@@ -392,7 +401,7 @@ public class UpdateManager {
                     LOG.w(
                             "The last update downloaded from the server is invalid. Update checks "
                                     + "will not occur for the next %1$d hour(s).",
-                            CHECK_FOR_UPDATE_FREQUENCY_HOURS);
+                            CHECK_FOR_UPDATE_PERIOD_SECONDS);
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.
@@ -410,7 +419,7 @@ public class UpdateManager {
                                     + "will not occur for the next %3$d hour(s).",
                             mLastAvailableUpdateInfo.availableVersion.toString(),
                             mLastDownloadedUpdateInfo.downloadedVersion.toString(),
-                            CHECK_FOR_UPDATE_FREQUENCY_HOURS);
+                            CHECK_FOR_UPDATE_PERIOD_SECONDS);
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.

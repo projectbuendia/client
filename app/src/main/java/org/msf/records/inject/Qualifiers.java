@@ -42,6 +42,11 @@ public class Qualifiers {
     @Qualifier
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
+    public @interface PackageServerRootUrl {}
+
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface XformUpdateClientCache {}
 
     @Qualifier

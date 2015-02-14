@@ -63,6 +63,17 @@ public class PrefsModule {
 
     @Provides
     @Singleton
+    @Qualifiers.PackageServerRootUrl
+    StringPreference providePackageServerRootUrlStringPreference(
+            SharedPreferences sharedPreferences, Resources resources) {
+        return new StringPreference(
+                sharedPreferences,
+                "package_server_root_url",
+                "http://packages:9001");
+        // TODO(kpy): Get the default value from an overridable resource.
+    }
+    @Provides
+    @Singleton
     @Qualifiers.XformUpdateClientCache
     BooleanPreference provideXformUpdateClientCache(
             SharedPreferences sharedPreferences, Resources resources) {
