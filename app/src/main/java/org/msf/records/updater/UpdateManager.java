@@ -11,14 +11,13 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateDownloadedEvent;
+import org.msf.records.events.UpdateReadyForInstallEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.utils.LexicographicVersion;
@@ -102,57 +101,51 @@ public class UpdateManager {
     }
 
     /**
-     * Asynchronously checks for available updates and posts the appropriate event.
-     *
-     * <p>The following events are posted:
-     * <ul>
-     *     <li>
-     *         {@link UpdateDownloadedEvent} - If an update has been downloaded and is as new as the
-     *         latest update available on the server. Note that if the update has not yet been
-     *         downloaded, this event is not fired.
-     *     </li>
-     *     <li>
-     *         {@link UpdateAvailableEvent} - If an update is available on the server and either no
-     *         update has been downloaded or the available update is newer than the downloaded
-     *         update.
-     *     </li>
-     *     <li>
-     *         {@link UpdateNotAvailableEvent} - If no update is available on the server and no
-     *         update has been downloaded.
-     *     </li>
-     * </ul>
-     *
+     * Initiates a background check for available updates and posts the appropriate events.
      * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_PERIOD_SECONDS}.
      */
     public void checkForUpdate() {
         DateTime now = DateTime.now();
         if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_FOR_UPDATE_PERIOD_SECONDS))) {
             if (!mIsDownloadInProgress) {
-                if (mLastDownloadedUpdateInfo.shouldInstall()) {
-                    EventBus.getDefault()
-                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
-                } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
-                    EventBus.getDefault()
-                            .post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
-                }
+                postEvents();
             }
-
             return;
         }
 
+        PackageIndexReceivedListener listener = new PackageIndexReceivedListener();
+        mServer.getPackageIndex(listener, listener);
         mLastCheckForUpdateTime = now;
-
-        CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener();
-        mServer.getAndroidUpdateInfo(listener, listener);
     }
 
     /**
-     * Asynchronously downloads an available update and posts an event indicating that the update is
-     * available.
-     *
-     * @return whether a download was started. {@code false} if a download is already in progress.
+     * Post events notifying of whether a file is available to be downloaded, or a
+     * file has been downloaded and is ready to install.  See {@link UpdateReadyForInstallEvent},
+     * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
-    public boolean downloadUpdate(AvailableUpdateInfo availableUpdateInfo) {
+    protected void postEvents() {
+        EventBus bus = EventBus.getDefault();
+        if (mLastDownloadedUpdateInfo.shouldInstall() &&
+                mLastDownloadedUpdateInfo.downloadedVersion
+                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
+            bus.postSticky(new UpdateReadyForInstallEvent(mLastDownloadedUpdateInfo));
+        } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
+            bus.removeStickyEvent(UpdateReadyForInstallEvent.class);
+            bus.postSticky(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+        } else {
+            bus.removeStickyEvent(UpdateReadyForInstallEvent.class);
+            bus.removeStickyEvent(UpdateAvailableEvent.class);
+            bus.post(new UpdateNotAvailableEvent());
+        }
+    }
+
+    /**
+     * Starts downloading an available update in the background, registering a DownloadUpdateReceiver
+     * to be invoked when the download is complete.
+     *
+     * @return whether a new download was started. {@code false} if a download is already in progress.
+     */
+    public boolean startDownload(AvailableUpdateInfo availableUpdateInfo) {
         synchronized (mDownloadLock) {
             if (mIsDownloadInProgress) {
                 return false;
@@ -270,9 +263,9 @@ public class UpdateManager {
     }
 
     /**
-     * A listener that handles check-for-update responses.
+     * A listener that receives the index of available .apk files from the package server.
      */
-    private class CheckForUpdateResponseListener
+    private class PackageIndexReceivedListener
             implements Response.Listener<List<UpdateInfo>>, Response.ErrorListener {
 
         @Override
@@ -280,24 +273,8 @@ public class UpdateManager {
             synchronized (mLock) {
                 mLastAvailableUpdateInfo =
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
-
                 mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
-
-                if (mLastDownloadedUpdateInfo.shouldInstall()
-                        && mLastDownloadedUpdateInfo.downloadedVersion
-                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
-                    // If there's already a downloaded update that is as recent as the available
-                    // update, post an UpdateDownloadedEvent.
-                    EventBus.getDefault()
-                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
-                } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
-                    // Else, if the latest available update is good, post an UpdateAvailableEvent.
-                    EventBus.getDefault()
-                            .post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
-                } else {
-                    // Else, post an UpdateNotAvailableEvent.
-                    EventBus.getDefault().post(new UpdateNotAvailableEvent());
-                }
+                postEvents();
             }
         }
 
@@ -401,7 +378,7 @@ public class UpdateManager {
                 if (!mLastDownloadedUpdateInfo.isValid) {
                     LOG.w(
                             "The last update downloaded from the server is invalid. Update checks "
-                                    + "will not occur for the next %1$d hour(s).",
+                                    + "will not occur for the next %1$d seconds.",
                             CHECK_FOR_UPDATE_PERIOD_SECONDS);
 
                     // Set the last available update info to an invalid value so as to prevent
@@ -417,7 +394,7 @@ public class UpdateManager {
                             "The last update downloaded from the server was reported to have "
                                     + "version '%1$s' but actually has version '%2$s'. This "
                                     + "indicates a server configuration problem. Update checks "
-                                    + "will not occur for the next %3$d hour(s).",
+                                    + "will not occur for the next %3$d seconds.",
                             mLastAvailableUpdateInfo.availableVersion.toString(),
                             mLastDownloadedUpdateInfo.downloadedVersion.toString(),
                             CHECK_FOR_UPDATE_PERIOD_SECONDS);
@@ -431,7 +408,7 @@ public class UpdateManager {
 
                 if (mLastDownloadedUpdateInfo.shouldInstall()) {
                     EventBus.getDefault()
-                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
+                            .post(new UpdateReadyForInstallEvent(mLastDownloadedUpdateInfo));
                 }
             }
         }

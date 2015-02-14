@@ -20,7 +20,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateDownloadedEvent;
+import org.msf.records.events.UpdateReadyForInstallEvent;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.chart.PatientChartActivity;
@@ -138,12 +138,12 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
             @Override public void onClick(View view) {
                 setStatusVisibility(View.GONE);
 
-                mUpdateManager.downloadUpdate(event.updateInfo);
+                mUpdateManager.startDownload(event.updateInfo);
             }
         });
     }
 
-    public void onEventMainThread(final UpdateDownloadedEvent event) {
+    public void onEventMainThread(final UpdateReadyForInstallEvent event) {
         setStatusVisibility(View.VISIBLE);
 
         mUpdateMessage.setText(R.string.snackbar_update_downloaded);
