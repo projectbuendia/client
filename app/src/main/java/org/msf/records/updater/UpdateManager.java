@@ -39,7 +39,7 @@ public class UpdateManager {
     private static final Logger LOG = Logger.create();
 
     /**
-     * The update managers's module name for updates to this app.  A name of "foo"
+     * The update manager's module name for updates to this app.  A name of "foo"
      * means the updates are saved as "foo-1.2.apk", "foo-1.3.apk" on disk.
      */
     private static final String MODULE_NAME = "buendia-client";
