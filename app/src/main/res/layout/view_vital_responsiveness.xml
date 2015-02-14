@@ -21,7 +21,7 @@
             android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
             android:textSize="16sp"
-            android:text="Conscious State" />
+            android:text="Consciousness" />
 
         <org.msf.records.widget.AutoResizeTextView
             android:id="@+id/patient_chart_vital_responsiveness"
@@ -32,7 +32,6 @@
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
             android:textSize="56sp"
-            android:maxLines="1"
             android:text="–"/>
 
     </RelativeLayout>

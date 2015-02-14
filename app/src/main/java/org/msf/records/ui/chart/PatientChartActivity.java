@@ -402,13 +402,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             valueView.setTextColor(mVitalKnown.getForegroundColor());
             nameView.setTextColor(mVitalKnown.getForegroundColor());
 
-            valueView.setText(observation.localizedValue);
+            // If the label begins with a one or two-character abbreviation
+            // followed by a period, display the abbreviation on its own line.
+            String text = observation.localizedValue;
+            int abbrevLength = text.indexOf('.');
+            if (abbrevLength == 1 || abbrevLength == 2) {
+                text = text.substring(0, abbrevLength) + "\n"
+                        + text.substring(abbrevLength + 1).trim();
+            }
+            valueView.setText(text);
         } else {
             parent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
             valueView.setTextColor(mVitalUnknown.getForegroundColor());
             nameView.setTextColor(mVitalUnknown.getForegroundColor());
 
             valueView.setText("–"); // en dash
+        }
+        if (observation != null) {
+            nameView.setText(observation.conceptName);
         }
     }
 
@@ -422,7 +433,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setLatestEncounter(long encounterTimeMilli) {
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTimeInMillis(encounterTimeMilli);
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US);
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("d MMM yyyy, HH:mm a", Locale.US);
 
             if (calendar.getTime().getTime() != 0) {
                 mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
