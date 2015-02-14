@@ -1,11 +1,9 @@
 package org.msf.records.ui.chart;
 
 import android.content.res.Resources;
-
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers;
+import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
@@ -26,19 +24,14 @@ import java.util.UUID;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.pressBack;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isDialog;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withClassName;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
@@ -74,7 +67,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /** Tests that the vital views are displayed in patient chart. */
     public void testPatientChart_VitalViewsDisplayed() {
         initWithDemoPatient();
-        onView(withText(equalToIgnoringCase("GENERAL CONDITION"))).check(matches(isDisplayed()));
+        onView(allOf(
+                withText(equalToIgnoringCase("CONDITION")),
+                withParent(withId(R.id.patient_chart_vitals))
+        )).check(matches(isDisplayed()));
         screenshot("Patient Chart");
     }
 
@@ -91,11 +87,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());
         screenshot("General Condition Dialog");
 
-        onView(withText(R.string.status_convalescent)).perform(click());
-        // Wait for a sync operation to update the chart.
         EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
                 new EventBusIdlingResource<SyncFinishedEvent>(
                         UUID.randomUUID().toString(), mEventBus);
+
+        onView(withText(R.string.status_convalescent)).perform(click());
+        // Wait for a sync operation to update the chart.
         Espresso.registerIdlingResources(syncFinishedIdlingResource);
 
         // Check for updated vital view.
