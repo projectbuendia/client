@@ -52,7 +52,6 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-
             sUserManager = mUserManager; // TODO(dxchen): Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
             sServer = mServer; // TODO(dxchen): Remove when Daggered.

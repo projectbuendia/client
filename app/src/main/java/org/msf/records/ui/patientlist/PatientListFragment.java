@@ -99,7 +99,12 @@ public class PatientListFragment extends ProgressFragment implements
         // The list view adapter will be set once locations are available.
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
-        mSwipeToRefresh.setOnRefreshListener(mListController.getOnRefreshListener());
+        mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mListController.onRefreshRequested();
+            }
+        });
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
@@ -183,15 +188,18 @@ public class PatientListFragment extends ProgressFragment implements
     private class ListUi implements PatientListController.Ui {
 
         @Override
-        public void setRefreshing(boolean refreshing) {
+        public void stopRefreshAnimation() {
             mSwipeToRefresh.setRefreshing(false);
         }
 
         @Override
-        public void showSyncError() {
-            BigToast.show(
-                    getActivity(),
-                    R.string.patient_list_fragment_sync_error);
+        public void showRefreshError() {
+            BigToast.show(getActivity(), R.string.patient_list_fragment_sync_error);
+        }
+
+        @Override
+        public void showApiHealthProblem() {
+            BigToast.show(getActivity(), R.string.api_health_problem);
         }
     }
 }

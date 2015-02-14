@@ -8,11 +8,11 @@ import android.test.ActivityInstrumentationTestCase2;
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.testrunner.Stage;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
+import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
-import org.msf.records.TestCleanupHelper;
 import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
@@ -30,6 +30,8 @@ import java.util.UUID;
 import de.greenrobot.event.EventBus;
 
 import java.util.concurrent.TimeUnit;
+
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
@@ -88,7 +90,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         // Remove activities from the stack until the app is closed.  If we don't do this, the test
         // runner sometimes has trouble launching the activity to start the next test.
         try {
-            TestCleanupHelper.closeAllActivities(getInstrumentation());
+            closeAllActivities();
         } catch (Exception e) {
             LOG.e("Error tearing down test case, test isolation may be broken.", e);
         }
@@ -202,6 +204,20 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
         public void onEventMainThread(SyncFinishedEvent event) {
             inProgressSyncCount--;
+        }
+    }
+
+    /**
+     * Closes all activities on the stack.
+     */
+    protected void closeAllActivities() throws Exception {
+        try {
+            for (int i = 0; i < 20; i++) {
+                pressBack();
+                Thread.sleep(100);
+            }
+        } catch (NoActivityResumedException | InterruptedException e) {
+            // nothing left to close
         }
     }
 }

@@ -22,7 +22,6 @@ public class Qualifiers {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface CrudEventBusBuilder {}
 
-
     // .net
 
     @Qualifier

@@ -23,14 +23,14 @@ import de.greenrobot.event.EventBus;
  * <p>Subclasses must stop checking (e.g., unregister {@link BroadcastReceiver}s or stop
  * background threads) when {@link #stopImpl} is called.
  */
-abstract class HealthCheck {
+public abstract class HealthCheck {
 
     private static final Logger LOG = Logger.create();
 
     private final Object mLock = new Object();
 
     protected final Application mApplication;
-    private final Set<HealthIssue> mActiveIssues;
+    protected final Set<HealthIssue> mActiveIssues;
 
     @Nullable private EventBus mHealthEventBus;
 
@@ -140,5 +140,17 @@ abstract class HealthCheck {
         if (wasIssueActive) {
             eventBus.post(healthIssue.resolved);
         }
+    }
+
+    /**
+     * Returns true if this HealthCheck knows for certain that the Buendia
+     * API is unavailable at this moment.  Implementations of this method
+     * should never return true unless they can guarantee that their knowledge
+     * of the system state is up to date; for example, if a HealthCheck decides
+     * to return true when the network is down, it is responsible for detecting
+     * any event that could cause the network to come back up.
+     */
+    public boolean isApiUnavailable() {
+        return false;
     }
 }

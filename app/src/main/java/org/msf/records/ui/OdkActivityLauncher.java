@@ -168,9 +168,9 @@ public class OdkActivityLauncher {
      * @param data the incoming intent
      */
     public static void sendOdkResultToServer(
-            Context context,
-            @Nullable String patientUuid,
-            boolean updateClientCache,
+            final Context context,
+            @Nullable final String patientUuid,
+            final boolean updateClientCache,
             int resultCode,
             Intent data) {
 
@@ -234,11 +234,7 @@ public class OdkActivityLauncher {
             byte[] fileBytes = FileUtils.getFileAsBytes(new File(instancePath));
 
             // get the root of the saved and template instances
-            TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
-
-            if (patientUuid != null && updateClientCache) { // Only locally cache new observations, not new patients
-                updateClientCache(patientUuid, savedRoot, context.getContentResolver());
-            }
+            final TreeElement savedRoot = XFormParser.restoreDataModel(fileBytes, null).getRoot();
 
             sendFormToServer(patientUuid, readFromPath(instancePath),
                     new Response.Listener<JSONObject>() {
@@ -246,6 +242,12 @@ public class OdkActivityLauncher {
                         public void onResponse(JSONObject response) {
                             LOG.i("Created new encounter successfully on server"
                                     + response.toString());
+
+                            // Only locally cache new observations, not new patients.
+                            if (patientUuid != null && updateClientCache) {
+                                updateClientCache(
+                                        patientUuid, savedRoot, context.getContentResolver());
+                            }
 
                             if (!keepFormInstancesLocally) {
                                 //Code largely copied from InstanceUploaderTask to delete on upload

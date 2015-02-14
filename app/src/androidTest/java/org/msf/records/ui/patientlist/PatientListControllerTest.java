@@ -33,7 +33,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN PatientListController is refreshed
-        mController.getOnRefreshListener().onRefresh();
+        mController.onRefreshRequested();
         // THEN SyncManager performs sync
         verify(mMockSyncManager).forceSync();
     }
@@ -43,8 +43,8 @@ public class PatientListControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN PatientListController is refreshed multiple times in quick succession
-        mController.getOnRefreshListener().onRefresh();
-        mController.getOnRefreshListener().onRefresh();
+        mController.onRefreshRequested();
+        mController.onRefreshRequested();
         // THEN SyncManager performs one, and only one, sync
         verify(mMockSyncManager, times(1)).forceSync();
     }
@@ -54,9 +54,9 @@ public class PatientListControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN PatientListController is refreshed successfully, then is later refreshed again
-        mController.getOnRefreshListener().onRefresh();
+        mController.onRefreshRequested();
         mFakeEventBus.post(new SyncSucceededEvent());
-        mController.getOnRefreshListener().onRefresh();
+        mController.onRefreshRequested();
         // THEN SyncManager performs sync each time
         verify(mMockSyncManager, times(2)).forceSync();
     }
@@ -66,9 +66,9 @@ public class PatientListControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientListController
         mController.init();
         // WHEN PatientListController fails to refresh, then is later refreshed again
-        mController.getOnRefreshListener().onRefresh();
+        mController.onRefreshRequested();
         mFakeEventBus.post(new SyncFailedEvent());
-        mController.getOnRefreshListener().onRefresh();
+        mController.onRefreshRequested();
         // THEN SyncManager performs sync each time
         verify(mMockSyncManager, times(2)).forceSync();
     }
@@ -98,12 +98,12 @@ public class PatientListControllerTest extends AndroidTestCase {
     public void testForcedSyncFailure_DisplaysSyncError() {
         // GIVEN initialized PatientListController with a forced sync
         mController.init();
-        mController.forceSync();
+        mController.onRefreshRequested();
         // WHEN a forced sync fails
         SyncFinishedEvent event = new SyncFailedEvent();
         mFakeEventBus.post(event);
         // THEN an error is shown
-        verify(mMockUi).showSyncError();
+        verify(mMockUi).showRefreshError();
     }
 
     /** Tests that a background sync does not result in a sync error being displayed. */
@@ -114,7 +114,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         SyncFinishedEvent event = new SyncFailedEvent();
         mFakeEventBus.post(event);
         // THEN no error is shown
-        verify(mMockUi, times(0)).showSyncError();
+        verify(mMockUi, times(0)).showRefreshError();
     }
 
     /** Tests that a successful sync hides the refresh indicator. */
@@ -125,7 +125,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         SyncFinishedEvent event = new SyncSucceededEvent();
         mFakeEventBus.post(event);
         // THEN the refresh indicator disappears
-        verify(mMockUi).setRefreshing(false);
+        verify(mMockUi).stopRefreshAnimation();
     }
 
     /** Tests that a failed sync hides the refresh indicator. */
@@ -136,6 +136,6 @@ public class PatientListControllerTest extends AndroidTestCase {
         SyncFinishedEvent event = new SyncFailedEvent();
         mFakeEventBus.post(event);
         // THEN the refresh indicator disappears
-        verify(mMockUi).setRefreshing(false);
+        verify(mMockUi).stopRefreshAnimation();
     }
 }

@@ -17,12 +17,15 @@ import org.msf.records.utils.Logger;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A {@link org.msf.records.diagnostics.HealthCheck} that checks the status of an HTTP server.
+ * A {@link org.msf.records.diagnostics.HealthCheck} that checks whether the
+ * Buendia API server is up and responding to HTTP requests at the URL in the
+ * "OpenMRS root URL" preference setting.
  */
-public class BuendiaModuleHealthCheck extends HealthCheck {
+public class BuendiaApiHealthCheck extends HealthCheck {
 
     private static final Logger LOG = Logger.create();
 
@@ -41,7 +44,7 @@ public class BuendiaModuleHealthCheck extends HealthCheck {
     private Handler mHandler;
     private BuendiaModuleHealthCheckRunnable mRunnable;
 
-    BuendiaModuleHealthCheck(
+    BuendiaApiHealthCheck(
             Application application,
             OpenMrsConnectionDetails connectionDetails) {
         super(application);
@@ -53,7 +56,7 @@ public class BuendiaModuleHealthCheck extends HealthCheck {
     protected void startImpl() {
         synchronized (mLock) {
             if (mHandlerThread == null) {
-                mHandlerThread = new HandlerThread("Buendia Server Module Health Check");
+                mHandlerThread = new HandlerThread("Buendia API Health Check");
                 mHandlerThread.start();
                 mHandler = new Handler(mHandlerThread.getLooper());
             }
@@ -140,10 +143,14 @@ public class BuendiaModuleHealthCheck extends HealthCheck {
                         }
                         return;
                     }
+                } catch (UnknownHostException e) {
+                    reportIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
+                    return;
                 } catch (IOException e) {
                     LOG.w(
                             "Could not perform OpenMRS health check using URL '%1$s'.",
                             uriString);
+                    return;
                 }
 
                 resolveAllIssues();
