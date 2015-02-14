@@ -14,15 +14,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
 import android.util.TimingLogger;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.common.primitives.Booleans;
 
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.model.Zone;
 import org.msf.records.net.OpenMrsChartServer;
 import org.msf.records.net.model.ChartStructure;
@@ -120,57 +123,84 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
+        int progressIncrement = 100 / countExtras(extras);
+
         LOG.i("Beginning network synchronization");
+        reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
         try {
             boolean specific = false;
             if (extras.getBoolean(SYNC_PATIENTS)) {
+                reportProgress(0, R.string.syncing_patients);
                 specific = true;
                 // default behaviour
                 updatePatientData(syncResult);
                 timings.addSplit("update patient data specified");
+                reportProgress(progressIncrement, R.string.syncing_patients);
             }
             if (extras.getBoolean(SYNC_CONCEPTS)) {
+                reportProgress(0, R.string.syncing_concepts);
                 specific = true;
                 updateConcepts(provider, syncResult);
                 timings.addSplit("update concepts specified");
+                reportProgress(progressIncrement, R.string.syncing_concepts);
             }
             if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
+                reportProgress(0, R.string.syncing_charts);
                 specific = true;
                 timings.addSplit("update chart specified");
                 updateChartStructure(provider, syncResult);
+                reportProgress(progressIncrement, R.string.syncing_charts);
             }
             if (extras.getBoolean(SYNC_OBSERVATIONS)) {
+                reportProgress(0, R.string.syncing_observations);
                 specific = true;
                 updateObservations(provider, syncResult, extras);
                 timings.addSplit("update observations specified");
+                reportProgress(progressIncrement, R.string.syncing_observations);
             }
             if (extras.getBoolean(SYNC_LOCATIONS)) {
+                reportProgress(0, R.string.syncing_locations);
                 specific = true;
                 updateLocations(provider, syncResult);
                 timings.addSplit("update locations specified");
+                reportProgress(progressIncrement, R.string.syncing_locations);
             }
             if (extras.getBoolean(SYNC_USERS)) {
+                reportProgress(0, R.string.syncing_users);
                 specific = true;
                 updateUsers(provider, syncResult);
                 timings.addSplit("update users specified");
+                reportProgress(progressIncrement, R.string.syncing_users);
             }
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
+                reportProgress(0, R.string.syncing_patients);
                 updatePatientData(syncResult);
                 timings.addSplit("update all (patients)");
+
+                reportProgress(progressIncrement, R.string.syncing_concepts);
                 updateConcepts(provider, syncResult);
                 timings.addSplit("update all (concepts)");
+
+                reportProgress(progressIncrement, R.string.syncing_charts);
                 updateChartStructure(provider, syncResult);
                 timings.addSplit("update all (chart)");
+
+                reportProgress(progressIncrement, R.string.syncing_observations);
                 updateObservations(provider, syncResult, extras);
                 timings.addSplit("update all (observations)");
+
+                reportProgress(progressIncrement, R.string.syncing_locations);
                 updateLocations(provider, syncResult);
                 timings.addSplit("update all (locations)");
+
+                reportProgress(progressIncrement, R.string.syncing_users);
                 updateUsers(provider, syncResult);
                 timings.addSplit("update all (users)");
             }
+            reportProgress(100, R.string.completing_sync);
         } catch (RemoteException e) {
             LOG.e(e, "Error in RPC");
             syncResult.stats.numIoExceptions++;
@@ -205,6 +235,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCompletedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.COMPLETED);
         getContext().sendBroadcast(syncCompletedIntent);
+    }
+
+    private void reportProgress(int progressIncrement, @Nullable String label) {
+        Intent syncProgressIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS, progressIncrement);
+        syncProgressIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.IN_PROGRESS);
+        if (label != null) {
+            syncProgressIntent.putExtra(SyncManager.SYNC_PROGRESS_LABEL, label);
+        }
+        getContext().sendBroadcast(syncProgressIntent);
+    }
+
+    private void reportProgress(int progressIncrement, int stringResource) {
+        reportProgress(progressIncrement, getContext().getResources().getString(stringResource));
+    }
+
+    private void reportProgress(int progressIncrement) {
+        reportProgress(progressIncrement, null);
+    }
+
+    private int countExtras(Bundle extras) {
+        return Booleans.countTrue(
+                extras.getBoolean(SYNC_PATIENTS),
+                extras.getBoolean(SYNC_CHART_STRUCTURE),
+                extras.getBoolean(SYNC_CONCEPTS),
+                extras.getBoolean(SYNC_LOCATIONS),
+                extras.getBoolean(SYNC_OBSERVATIONS),
+                extras.getBoolean(SYNC_USERS));
     }
 
     private void updatePatientData(SyncResult syncResult) throws InterruptedException, ExecutionException, RemoteException, OperationApplicationException {

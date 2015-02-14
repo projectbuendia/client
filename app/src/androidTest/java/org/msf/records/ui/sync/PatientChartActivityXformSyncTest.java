@@ -48,7 +48,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
     }
 
     private void loadChart() {
-        waitForInitialSync();
+        waitForProgressFragment();
         // Open patient list.
         onView(withId(R.id.action_search)).perform(click());
         waitForProgressFragment();

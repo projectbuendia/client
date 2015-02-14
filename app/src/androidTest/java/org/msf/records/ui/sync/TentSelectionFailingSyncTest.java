@@ -7,6 +7,7 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 
 /**
@@ -64,8 +65,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         onView(withText("OpenMRS base URL")).check(matches(isDisplayed()));
     }
 
-    /** Tests that clicking 'Retry' in sync failed dialog reshows the modal 'loading' dialog. */
-    public void testSyncFailedDialog_RetryButtonRetainsLoadingDialog() {
+    /** Tests that clicking 'Retry' in sync failed dialog reshows the progress bar. */
+    public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
         screenshot("Test Start");
         // TODO: Potentially flaky, as sync may finish before being force-failed.
         waitForInitialSync();
@@ -76,7 +77,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
         onView(withText(R.string.sync_failed_retry)).perform(click());
 
-        onView(withText(R.string.tent_selection_dialog_message)).check(matches(isDisplayed()));
+        onView(withId(R.id.progress_fragment_progress_bar)).check(matches(isDisplayed()));
         screenshot("After Retry Clicked");
     }
 
@@ -103,9 +104,9 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /**
      * Tests that clicking 'Settings' in sync failed dialog and returning to
-     * this activity results in the 'loading' dialog still being shown.
+     * this activity results in the progress bar still being shown
      */
-    public void testSyncFailedDialog_ReturningFromSettingsRetainsLoadingDialog() {
+    public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
         // TODO: Potentially flaky, as sync may finish before being force-failed.
         waitForInitialSync();
         failSync();
@@ -117,7 +118,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         screenshot("After Settings Clicked");
 
         pressBack();
-        onView(withText(R.string.tent_selection_dialog_message)).check(matches(isDisplayed()));
+        onView(withId(R.id.progress_fragment_progress_bar)).check(matches(isDisplayed()));
         screenshot("After Back Pressed");
     }
 }

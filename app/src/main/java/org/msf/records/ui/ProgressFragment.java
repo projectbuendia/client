@@ -20,6 +20,7 @@ import com.android.volley.VolleyError;
 import com.google.common.base.Charsets;
 
 import org.msf.records.App;
+import org.msf.records.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,15 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     protected View mContent;
 
     protected RelativeLayout mFrame;
-    protected ProgressBar mProgressBar;
     protected TextView mErrorTextView;
+
+    // Fancy progress bar.
+    protected View mProgressBarLayout;
+    protected ProgressBar mProgressBar;
+    protected TextView mProgressBarLabel;
+
+    // Indeterminate progress bar.
+    protected ProgressBar mIndeterminateProgressBar;
 
     protected int mShortAnimationDuration;
 
@@ -89,10 +97,15 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
         relativeLayout.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        mIndeterminateProgressBar = new ProgressBar(getActivity());
+        mIndeterminateProgressBar.setLayoutParams(relativeLayout);
 
-        mProgressBar = new ProgressBar(getActivity());
-        mProgressBar.setLayoutParams(relativeLayout);
-
+        mProgressBarLayout =
+                inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
+        mProgressBarLayout.setLayoutParams(relativeLayout);
+        mProgressBar =
+                (ProgressBar)mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
+        mProgressBarLabel = (TextView)mProgressBarLayout.findViewById(R.id.progress_fragment_label);
 
         RelativeLayout.LayoutParams fullLayout = new RelativeLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -103,7 +116,9 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         mErrorTextView.setGravity(Gravity.CENTER);
 
         mContent.setVisibility(View.GONE);
-        mFrame.addView(mProgressBar);
+        mProgressBarLayout.setVisibility(View.GONE);
+        mFrame.addView(mIndeterminateProgressBar);
+        mFrame.addView(mProgressBarLayout);
         mFrame.addView(mContent);
         mFrame.addView(mErrorTextView);
         return mFrame;
@@ -147,11 +162,42 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
      */
     public void changeState(State state) {
         mState = state;
-        mProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
+        // On state change, always start with the indeterminate loader.
+        mProgressBarLayout.setVisibility(View.GONE);
+        mIndeterminateProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
         mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);
         mErrorTextView.setVisibility(state == State.ERROR ? View.VISIBLE : View.GONE);
         for (ChangeStateSubscriber subscriber : mSubscribers) {
             subscriber.onChangeState(mState);
+        }
+    }
+
+    protected void incrementProgressBy(int progress) {
+        switchToHorizontalProgressBar();
+        mProgressBar.incrementProgressBy(progress);
+    }
+
+    protected void setProgress(int progress) {
+        switchToHorizontalProgressBar();
+        mProgressBar.setProgress(progress);
+    }
+
+    protected void setProgressLabel(String label) {
+        switchToHorizontalProgressBar();
+        mProgressBarLabel.setText(label);
+    }
+
+    protected void switchToHorizontalProgressBar() {
+        if (mState == State.LOADING) {
+            mIndeterminateProgressBar.setVisibility(View.GONE);
+            mProgressBarLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    protected void switchToCircularProgressBar() {
+        if (mState == State.LOADING) {
+            mIndeterminateProgressBar.setVisibility(View.VISIBLE);
+            mProgressBarLayout.setVisibility(View.GONE);
         }
     }
 

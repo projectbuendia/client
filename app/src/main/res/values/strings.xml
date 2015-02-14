@@ -152,6 +152,14 @@
     <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
     <string name="retrieving_encounter_form_title">Retrieving Form</string>
     <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
+    <string name="syncing_patients">Syncing patients...</string>
+    <string name="syncing_concepts">Syncing concepts...</string>
+    <string name="syncing_charts">Syncing charts...</string>
+    <string name="syncing_observations">Syncing observations...</string>
+    <string name="syncing_locations">Syncing locations...</string>
+    <string name="syncing_users">Syncing users...</string>
+    <string name="completing_sync">Completing sync...</string>
+    <string name="sync_in_progress">Starting sync...</string>
     <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
     <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
     <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>

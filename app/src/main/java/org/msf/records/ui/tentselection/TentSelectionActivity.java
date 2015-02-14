@@ -183,6 +183,11 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         }
 
         @Override
+        public void setBusyLoading(boolean busy) {
+            setOptionsMenuEnabled(!busy);
+        }
+
+        @Override
         public void launchActivityForLocation(AppLocation location) {
             Intent roundIntent =
                     new Intent(TentSelectionActivity.this, RoundActivity.class);
