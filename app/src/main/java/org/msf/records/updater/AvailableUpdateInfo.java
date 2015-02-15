@@ -54,7 +54,7 @@ public class AvailableUpdateInfo {
 
         LexicographicVersion version = latestUpdateInfo.getParsedVersion();
         if (version == null) {
-            LOG.w("Invalid version in 'version' field: " + version);
+            LOG.w("Invalid version in 'version' field: " + latestUpdateInfo.version);
             return getInvalid(currentVersion);
         }
 
