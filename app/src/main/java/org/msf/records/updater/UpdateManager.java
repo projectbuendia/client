@@ -17,7 +17,7 @@ import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateReadyForInstallEvent;
+import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.utils.LexicographicVersion;
@@ -44,11 +44,11 @@ public class UpdateManager {
     private static final String MODULE_NAME = "buendia-client";
 
     /**
-     * The period between checks for new updates, in seconds.
-     *
+     * The minimum period between checks for new updates, in seconds.  Repeated calls to
+     * checkForUpdate() within this period will have no effect.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_FOR_UPDATE_PERIOD_SECONDS = 120;
+    public static final int CHECK_PERIOD_SECONDS = 120;
 
     /**
      * The minimal version number.
@@ -101,13 +101,20 @@ public class UpdateManager {
     }
 
     /**
-     * Initiates a background check for available updates and posts the appropriate events.
-     * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_PERIOD_SECONDS}.
+     * Ensures that a check for available updates has been initiated within the last
+     * CHECK_PERIOD_SECONDS, or initiates one.  The check proceeds asynchronously in
+     * the background and eventually posts the relevant events (see @link postEvent()).
+     * Clients should call this method and then check for two sticky events:
+     * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
     public void checkForUpdate() {
         DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_FOR_UPDATE_PERIOD_SECONDS))) {
+        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_PERIOD_SECONDS))) {
             if (!mIsDownloadInProgress) {
+                // This immediate check just updates the event state to match any current
+                // knowledge of an available or downloaded update.  The more interesting
+                // calls to postEvents occur below in PackageIndexReceivedListener and
+                // DownloadReceiver.
                 postEvents();
             }
             return;
@@ -120,7 +127,7 @@ public class UpdateManager {
 
     /**
      * Post events notifying of whether a file is available to be downloaded, or a
-     * file has been downloaded and is ready to install.  See {@link UpdateReadyForInstallEvent},
+     * file has been downloaded and is ready to install.  See {@link org.msf.records.events.UpdateReadyToInstallEvent},
      * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
     protected void postEvents() {
@@ -128,12 +135,12 @@ public class UpdateManager {
         if (mLastDownloadedUpdateInfo.shouldInstall() &&
                 mLastDownloadedUpdateInfo.downloadedVersion
                 .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
-            bus.postSticky(new UpdateReadyForInstallEvent(mLastDownloadedUpdateInfo));
+            bus.postSticky(new UpdateReadyToInstallEvent(mLastDownloadedUpdateInfo));
         } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
-            bus.removeStickyEvent(UpdateReadyForInstallEvent.class);
+            bus.removeStickyEvent(UpdateReadyToInstallEvent.class);
             bus.postSticky(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
         } else {
-            bus.removeStickyEvent(UpdateReadyForInstallEvent.class);
+            bus.removeStickyEvent(UpdateReadyToInstallEvent.class);
             bus.removeStickyEvent(UpdateAvailableEvent.class);
             bus.post(new UpdateNotAvailableEvent());
         }
@@ -379,7 +386,7 @@ public class UpdateManager {
                     LOG.w(
                             "The last update downloaded from the server is invalid. Update checks "
                                     + "will not occur for the next %1$d seconds.",
-                            CHECK_FOR_UPDATE_PERIOD_SECONDS);
+                            CHECK_PERIOD_SECONDS);
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.
@@ -397,7 +404,7 @@ public class UpdateManager {
                                     + "will not occur for the next %3$d seconds.",
                             mLastAvailableUpdateInfo.availableVersion.toString(),
                             mLastDownloadedUpdateInfo.downloadedVersion.toString(),
-                            CHECK_FOR_UPDATE_PERIOD_SECONDS);
+                            CHECK_PERIOD_SECONDS);
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.
@@ -406,10 +413,7 @@ public class UpdateManager {
                     return;
                 }
 
-                if (mLastDownloadedUpdateInfo.shouldInstall()) {
-                    EventBus.getDefault()
-                            .post(new UpdateReadyForInstallEvent(mLastDownloadedUpdateInfo));
-                }
+                postEvents();
             }
         }
     }

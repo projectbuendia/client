@@ -20,7 +20,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateReadyForInstallEvent;
+import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.chart.PatientChartActivity;
@@ -127,36 +127,44 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         mSearchController.suspend();
     }
 
-    public void onEventMainThread(final UpdateAvailableEvent event) {
-        setStatusVisibility(View.VISIBLE);
-
-        mUpdateMessage.setText(R.string.snackbar_update_available);
-        mUpdateAction.setText(R.string.snackbar_action_download);
-
-        mUpdateAction.setOnClickListener(new View.OnClickListener() {
-
-            @Override public void onClick(View view) {
-                setStatusVisibility(View.GONE);
-
-                mUpdateManager.startDownload(event.updateInfo);
-            }
-        });
+    /**
+     * Updates the software update notifications in the UI according to the
+     * currently posted sticky events.
+     */
+    @Override
+    protected void updateSoftwareUpdateUi() {
+        EventBus bus = EventBus.getDefault();
+        final UpdateReadyToInstallEvent readyEvent = bus.getStickyEvent(UpdateReadyToInstallEvent.class);
+        final UpdateAvailableEvent availableEvent = bus.getStickyEvent(UpdateAvailableEvent.class);
+        if (readyEvent != null) {
+            setStatusVisibility(View.VISIBLE);
+            mUpdateMessage.setText(R.string.snackbar_update_downloaded);
+            mUpdateAction.setText(R.string.snackbar_action_install);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    mUpdateManager.installUpdate(readyEvent.updateInfo);
+                }
+            });
+        } else if (availableEvent != null) {
+            setStatusVisibility(View.VISIBLE);
+            mUpdateMessage.setText(R.string.snackbar_update_available);
+            mUpdateAction.setText(R.string.snackbar_action_download);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    mUpdateManager.startDownload(availableEvent.updateInfo);
+                }
+            });
+        } else {
+            setStatusVisibility(View.GONE);
+        }
     }
 
-    public void onEventMainThread(final UpdateReadyForInstallEvent event) {
-        setStatusVisibility(View.VISIBLE);
-
-        mUpdateMessage.setText(R.string.snackbar_update_downloaded);
-        mUpdateAction.setText(R.string.snackbar_action_install);
-
-        mUpdateAction.setOnClickListener(new View.OnClickListener() {
-
-            @Override public void onClick(View view) {
-                setStatusVisibility(View.GONE);
-
-                mUpdateManager.installUpdate(event.updateInfo);
-            }
-        });
+    public void onEventMainThread(UpdateReadyToInstallEvent event) {
+        updateSoftwareUpdateUi();
     }
 
     protected void setPatients(TypedCursor<AppPatient> patients) {

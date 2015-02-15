@@ -8,11 +8,11 @@ import org.msf.records.updater.DownloadedUpdateInfo;
  * higher than the currently running app and at least as high as the highest version
  * available on the package server.
  */
-public class UpdateReadyForInstallEvent {
+public class UpdateReadyToInstallEvent {
 
     public final DownloadedUpdateInfo updateInfo;
 
-    public UpdateReadyForInstallEvent(DownloadedUpdateInfo downloadedUpdateInfo) {
+    public UpdateReadyToInstallEvent(DownloadedUpdateInfo downloadedUpdateInfo) {
         updateInfo = downloadedUpdateInfo;
     }
 }
