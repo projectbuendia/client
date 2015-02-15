@@ -52,22 +52,8 @@ public abstract class HealthCheck {
         }
     }
 
-    /** Stops the health check without clearing the currently active issues. */
-    public final void pause() {
-        synchronized (mLock) {
-            pauseImpl();
-        }
-    }
-
-    /** Resumes the health check. */
-    public final void resume() {
-        synchronized (mLock) {
-            resumeImpl();
-        }
-    }
-
     /**
-     * Stops the health check.
+     * Stops the health check without clearing its issues.
      *
      * <p>{@link #start} may be called again to restart checks.
      */
@@ -78,6 +64,7 @@ public abstract class HealthCheck {
         }
     }
 
+    /** Clears all the issues for this health check. */
     public final void clear() {
         mActiveIssues.clear();
     }
@@ -85,14 +72,6 @@ public abstract class HealthCheck {
     protected abstract void startImpl();
 
     protected abstract void stopImpl();
-
-    protected void pauseImpl() {
-        stopImpl();
-    }
-
-    protected void resumeImpl() {
-        startImpl();
-    }
 
     /**
      * Reports an issue as being active.
@@ -116,7 +95,7 @@ public abstract class HealthCheck {
     }
 
     /**
-     * Marks as resolved all issues that have previously been reported.
+     * Marks as resolved all issues that are currently active.
      */
     protected final void resolveAllIssues() {
         EventBus eventBus;
