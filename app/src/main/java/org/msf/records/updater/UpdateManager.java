@@ -45,7 +45,7 @@ public class UpdateManager {
 
     /**
      * The minimum period between checks for new updates, in seconds.  Repeated calls to
-     * checkForUpdate() within this period will have no effect.
+     * checkForUpdate() within this period will not check the server for new updates.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
     public static final int CHECK_PERIOD_SECONDS = 120;
@@ -103,7 +103,8 @@ public class UpdateManager {
 
     /**
      * Ensures that a check for available updates has been initiated within the last
-     * CHECK_PERIOD_SECONDS, or initiates one.  The check proceeds asynchronously in
+     * CHECK_PERIOD_SECONDS, or initiates one.  May post events that update the UI
+     * even if no new server check is initiated.  The check proceeds asynchronously in
      * the background and eventually posts the relevant events (see @link postEvent()).
      * Clients should call this method and then check for two sticky events:
      * UpdateAvailableEvent and UpdateReadyToInstallEvent.
