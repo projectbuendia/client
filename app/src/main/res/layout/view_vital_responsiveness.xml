@@ -32,7 +32,6 @@
             android:gravity="center"
             android:textColor="@color/vital_fg_dark"
             android:textSize="56sp"
-            android:maxLines="1"
             android:text="–"/>
 
     </RelativeLayout>

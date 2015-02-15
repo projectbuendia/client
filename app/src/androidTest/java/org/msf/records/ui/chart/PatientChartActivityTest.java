@@ -51,9 +51,9 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.AnyOf.anyOf;
@@ -271,7 +271,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkVitalValueContains("Diet", "Fluids");
         checkVitalValueContains("Hydration", "Needs ORS");
         checkVitalValueContains("Condition", "5");
-        checkVitalValueContains("Pain Level", "Severe");
+        checkVitalValueContains("Pain level", "Severe");
 
         checkObservationValueEquals(0, "31.0", "Today"); // Temp
         checkObservationValueEquals(1, "90", "Today"); // Weight
@@ -282,7 +282,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals(6, "4", "Today"); // Vomiting
         checkObservationValueEquals(7, "6", "Today"); // Diarrhoea
         checkObservationValueEquals(8, "3", "Today"); // Pain level
-        checkObservationValueEquals(9, "1", "Today"); // Bleeding
+        checkObservationSet(9, "Today"); // Bleeding
         checkObservationValueEquals(10, "2", "Today"); // Weakness
         checkObservationSet(13, "Today"); // Hiccups
         checkObservationSet(14, "Today"); // Red eyes
@@ -382,7 +382,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 .perform(click());
 
         try {
-            Thread.sleep(3000);
+            // 4000 chosen as any less can be slightly flaky.
+            Thread.sleep(4000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -445,7 +446,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                         mEventBus);
         onView(withId(R.id.action_update_chart)).perform(click());
         Espresso.registerIdlingResources(xformIdlingResource);
-        //onView(withText("Encounter")).check(matches(isDisplayed()));
+
+        // Give the form time to be parsed on the client (this does not result in an event firing).
+        // TODO: Construct an idling resource that can do this.
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            LOG.w(e, "Couldn't sleep.");
+        }
     }
 
     protected void openPcrForm() {

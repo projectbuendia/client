@@ -27,8 +27,10 @@ import org.msf.records.widget.DataGridAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.Nullable;
@@ -63,6 +65,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         private final String mConceptUuid;
         private final String mName;
         private final HashMap<String, String> datesToValues = new HashMap<>();
+        private final HashMap<String, String> mDatesToLocalizedValues = new HashMap<>();
 
         private Row(String conceptUuid, String name) {
             mConceptUuid = conceptUuid;
@@ -70,7 +73,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         }
     }
 
-    private final HashMap<String, Integer> mDatesToBleedingSiteCount = new HashMap<>();
+    private final Set<String> mDatesWithAnyBleeding = new HashSet<>();
 
     private final LayoutInflater mLayoutInflater;
     private final LocalDate today;
@@ -119,8 +122,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 rows.add(row);
             }
 
-            if (ob.value == null || Concepts.UNKNOWN_UUID.equals(ob.value)) {
-                // Don't display any dots or handle dates if there are no positive observations.
+            if (ob.value == null || Concepts.UNKNOWN_UUID.equals(ob.value)
+                    || LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
+                // Don't display anything in the cell if there are no positive observations.
                 continue;
             }
 
@@ -131,29 +135,22 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             String pmKey = toPmKey(amKey); // this is never displayed to the user
             String dateKey = d.getHourOfDay() < 12 ? amKey : pmKey;
 
-            // Only display dots for positive symptoms.
-            if (!LocalizedChartHelper.NO_SYMPTOM_VALUES.contains(ob.value)) {
-                // If this is a bleeding site, updating bleeding site counts for this key.
-                if (Concepts.BLEEDING_SITES_NAME.equals(ob.groupName)
-                        && !row.datesToValues.containsKey(dateKey)) {
-                    int newCount = mDatesToBleedingSiteCount.containsKey(dateKey)
-                            ? mDatesToBleedingSiteCount.get(dateKey) + 1
-                            : 1;
-                    mDatesToBleedingSiteCount.put(dateKey, newCount);
-                }
-
-                // For notes, perform a concatenation rather than overwriting.
-                if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
-                    if (row.datesToValues.containsKey(dateKey)) {
-                        row.datesToValues.put(
-                                dateKey, row.datesToValues.get(dateKey) + '\n' + ob.value);
-                    } else {
-                        row.datesToValues.put(dateKey, ob.value);
-                    }
-                } else {
-                    row.datesToValues.put(dateKey, ob.value);
-                }
+            // If this is any bleeding site, also show a dot in the "any bleeding" row.
+            if (Concepts.BLEEDING_SITES_NAME.equals(ob.groupName)) {
+                mDatesWithAnyBleeding.add(dateKey);
             }
+
+            // For notes, perform a concatenation rather than overwriting.
+            if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
+                String oldText = row.datesToValues.get(dateKey);
+                String newText = (oldText == null ? "" : oldText + "\n—\n")
+                        + d.toString("d MMM, hh:mm a\n") + ob.value;
+                row.datesToValues.put(dateKey, newText);
+            } else {
+                row.datesToValues.put(dateKey, ob.value);
+            }
+
+            row.mDatesToLocalizedValues.put(dateKey, ob.localizedValue);
         }
         if (days.isEmpty()) {
             // Just put today, with nothing there.
@@ -183,7 +180,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     private String toAmKey(String todayString, LocalDate localDate, LocalDate admissionDate) {
         // TODO: Localize.
-        String localizedDateString = localDate.toString("dd MMM");
+        String localizedDateString = localDate.toString("d MMM");
         int daysDiff = Days.daysBetween(localDate, today).getDays();
         if (admissionDate == null) {
             if (daysDiff == 0) {
@@ -295,24 +292,11 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View.OnClickListener onClickListener = null;
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
+        String value = rowData.datesToValues.get(dateKey);
+        String localizedValue = rowData.mDatesToLocalizedValues.get(dateKey);
+
         // TODO: Proper localization.
         switch (conceptUuid) {
-            case Concepts.RESPONSIVENESS_UUID:
-                String responsivenessString = rowData.datesToValues.get(dateKey);
-                if (responsivenessString != null) {
-                    text = getLocalizedAvpuInitials(responsivenessString);
-                    textColor = Color.BLACK;
-                    useBigText = true;
-                }
-                break;
-            case Concepts.MOBILITY_UUID:
-                String mobilityString = rowData.datesToValues.get(dateKey);
-                if (mobilityString != null) {
-                    text = getLocalizedMobilityInitials(mobilityString);
-                    textColor = Color.BLACK;
-                    useBigText = true;
-                }
-                break;
             case Concepts.TEMPERATURE_UUID:
                 String temperatureString = rowData.datesToValues.get(dateKey);
                 if (temperatureString != null) {
@@ -344,11 +328,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             // Concepts with a discrete count value.
             case Concepts.DIARRHEA_UUID:
             case Concepts.VOMITING_UUID:
-                String valueString = rowData.datesToValues.get(dateKey);
-                if (valueString != null) {
+                if (value != null) {
                     try {
-                        int value = Integer.parseInt(valueString);
-                        text = String.format(Locale.US, "%d", value);
+                        int valueInt = Integer.parseInt(value);
+                        text = String.format(Locale.US, "%d", valueInt);
                         textColor = Color.BLACK;
                         useBigText = true;
                     } catch (NumberFormatException e) {
@@ -377,44 +360,27 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concepts.BLEEDING_UUID:
-                // Use the exact number of bleeding sites, if available. Otherwise, show one
-                // site if "Bleeding (Any)" is specified or 0 otherwise.
-                int bleedingSiteCount = mDatesToBleedingSiteCount.containsKey(dateKey)
-                        ? mDatesToBleedingSiteCount.get(dateKey)
-                        : (Concepts.YES_UUID.equals(rowData.datesToValues.get(dateKey)) ? 1 : 0);
-                textColor = Color.BLACK;
-                if (bleedingSiteCount >= 3) {
-                    textColor = Color.RED;
-                }
-
-                if (bleedingSiteCount != 0) {
-                    text = String.format(Locale.US, "%d", bleedingSiteCount);
-                    useBigText = true;
+                if (rowData.datesToValues.containsKey(dateKey)
+                        || mDatesWithAnyBleeding.contains(dateKey)) {
+                    backgroundResource = R.drawable.chart_cell_active;
                 }
                 break;
+            case Concepts.RESPONSIVENESS_UUID:
+            case Concepts.MOBILITY_UUID:
             case Concepts.PAIN_UUID:
             case Concepts.WEAKNESS_UUID:
-                String valueUuid = rowData.datesToValues.get(dateKey);
-                int value = 0;
-                if (Concepts.MILD_UUID.equals(valueUuid)) {
-                    value = 1;
-                    textColor = Color.BLACK;
-                    // backgroundColor = mContext.getResources().getColor(R.color.severity_mild);
-                } else if (Concepts.MODERATE_UUID.equals(valueUuid)) {
-                    value = 2;
-                    textColor = Color.BLACK;
-                    // backgroundColor =
-                    // mContext.getResources().getColor(R.color.severity_moderate);
-                } else if (Concepts.SEVERE_UUID.equals(valueUuid)) {
-                    value = 3;
-                    textColor = Color.RED;
-                    // backgroundColor = mContext.getResources().getColor(R.color.severity_severe);
-                }
-
-                if (value != 0) {
-                    text = String.format(Locale.US, "%d", value);
+                // If there is a dot after the first one or two characters, use those characters
+                // as the abbreviation for the table.  Otherwise just use the first two characters.
+                if (localizedValue != null) {
+                    int abbrevLength = localizedValue.indexOf('.');
+                    if (abbrevLength < 1 || abbrevLength > 2) {
+                        abbrevLength = 2;
+                    }
+                    text = localizedValue.substring(0, abbrevLength);
                     useBigText = true;
                 }
+                textColor = Concepts.SEVERE_UUID.equals(value)
+                        ? Color.RED : Color.BLACK;
                 break;
             case Concepts.NOTES_UUID: {
                 boolean isActive = rowData.datesToValues.containsKey(dateKey);
@@ -456,48 +422,5 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             textView.setOnClickListener(onClickListener);
         }
         return textView;
-    }
-
-    private String getLocalizedMobilityInitials(String mobilityUuid) {
-        int resId = R.string.mobility_unknown;
-        switch (mobilityUuid) {
-            case Concepts.MOBILITY_WALKING_UUID:
-                resId = R.string.mobility_walking;
-                break;
-            case Concepts.MOBILITY_WALKING_WITH_DIFFICULTY_UUID:
-                resId = R.string.mobility_walking_with_difficulty;
-                break;
-            case Concepts.MOBILITY_ASSISTED_UUID:
-                resId = R.string.mobility_assisted;
-                break;
-            case Concepts.MOBILITY_BED_BOUND_UUID:
-                resId = R.string.mobility_bed_bound;
-                break;
-            default:
-                LOG.e("Unrecognized mobility state UUID: %s", mobilityUuid);
-        }
-        return mContext.getResources().getString(resId);
-    }
-
-    private String getLocalizedAvpuInitials(String responsivenessUuid) {
-        int resId = R.string.avpu_unknown;
-        switch (responsivenessUuid) {
-            case Concepts.RESPONSIVENESS_ALERT_UUID:
-                resId = R.string.avpu_alert;
-                break;
-            case Concepts.RESPONSIVENESS_VOICE_UUID:
-                resId = R.string.avpu_voice;
-                break;
-            case Concepts.RESPONSIVENESS_PAIN_UUID:
-                resId = R.string.avpu_pain;
-                break;
-            case Concepts.RESPONSIVENESS_UNRESPONSIVE_UUID:
-                resId = R.string.avpu_unresponsive;
-                break;
-            default:
-                LOG.e("Unrecognized consciousness state UUID: %s", responsivenessUuid);
-        }
-
-        return mContext.getResources().getString(resId);
     }
 }

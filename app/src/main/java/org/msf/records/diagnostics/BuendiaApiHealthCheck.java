@@ -5,6 +5,9 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
@@ -18,6 +21,7 @@ import org.msf.records.utils.Logger;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.UnknownHostException;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,7 +33,19 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
     private static final Logger LOG = Logger.create();
 
-    private static final int CHECK_FREQUENCY_MS = 20000;
+    // Under normal conditions, make requests to the server with this frequency
+    // to check if it's reachable and responding.
+    private static final int CHECK_PERIOD_MS = 20000;
+
+    // During certain problem conditions, check more often so that when the problem
+    // is resolved, we can hide the snackbar more promptly.
+    private static final int FAST_CHECK_PERIOD_MS = 10000;
+
+    // These are the issues for which we use the faster checking period.
+    private static final Set<HealthIssue> FAST_CHECK_ISSUES = ImmutableSet.of(
+            HealthIssue.SERVER_HOST_UNREACHABLE,
+            HealthIssue.SERVER_NOT_RESPONDING
+    );
 
     // Retrieving a concept should be quick and ensures that the module is both running and has
     // database access.
@@ -86,6 +102,11 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
             mHandler = null;
         }
+    }
+
+    protected int getCheckPeriodMillis() {
+        return Sets.intersection(FAST_CHECK_ISSUES, mActiveIssues).isEmpty()
+                ? CHECK_PERIOD_MS : FAST_CHECK_PERIOD_MS;
     }
 
     private class BuendiaModuleHealthCheckRunnable implements Runnable {
@@ -155,7 +176,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
                 resolveAllIssues();
             } finally {
-                mHandler.postDelayed(this, CHECK_FREQUENCY_MS);
+                mHandler.postDelayed(this, getCheckPeriodMillis());
             }
         }
     }

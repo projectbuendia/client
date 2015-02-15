@@ -32,6 +32,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
         onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
         onView(withText(R.string.sync_failed_retry)).check(matches(isDisplayed()));
+        onView(withText("Back")).perform(click());
         screenshot("Test Finish");
     }
 
