@@ -128,7 +128,7 @@ public class UpdateManager {
 
     /**
      * Post events notifying of whether a file is available to be downloaded, or a
-     * file is downloaded and ready to install.  See {@link org.msf.records.events.UpdateReadyToInstallEvent},
+     * file is downloaded and ready to install.  See {@link UpdateReadyToInstallEvent},
      * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
     protected void postEvents() {
