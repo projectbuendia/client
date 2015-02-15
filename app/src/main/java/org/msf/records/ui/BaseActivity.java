@@ -313,7 +313,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
 
-        UpdateNotificationController mController = null;
         final TextView mUpdateMessage;
         final TextView mUpdateAction;
 
@@ -324,26 +323,18 @@ public abstract class BaseActivity extends FragmentActivity {
             mUpdateAction = (TextView) view.findViewById(R.id.status_bar_default_action);
         }
 
-        public void setController(UpdateNotificationController controller) {
-            mController = controller;
-        }
-
         @Override
         public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
             setStatusVisibility(View.VISIBLE);
             mUpdateMessage.setText(R.string.snackbar_update_available);
-            if (mController != null) {
-                mUpdateAction.setText(R.string.snackbar_action_download);
-                mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        setStatusVisibility(View.GONE);
-                        EventBus.getDefault().post(
-                                new DownloadRequestedEvent());
-                    }
-                });
-            }
-
+            mUpdateAction.setText(R.string.snackbar_action_download);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    EventBus.getDefault().post(new DownloadRequestedEvent());
+                }
+            });
         }
 
         @Override
@@ -355,8 +346,7 @@ public abstract class BaseActivity extends FragmentActivity {
                 @Override
                 public void onClick(View view) {
                     setStatusVisibility(View.GONE);
-                    EventBus.getDefault().post(
-                            new InstallationRequestedEvent());
+                    EventBus.getDefault().post(new InstallationRequestedEvent());
                 }
             });
         }
