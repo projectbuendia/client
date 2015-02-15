@@ -48,8 +48,21 @@ public abstract class HealthCheck {
     public final void start(EventBus healthEventBus) {
         synchronized (mLock) {
             mHealthEventBus = healthEventBus;
-
             startImpl();
+        }
+    }
+
+    /** Stops the health check without clearing the currently active issues. */
+    public final void pause() {
+        synchronized (mLock) {
+            pauseImpl();
+        }
+    }
+
+    /** Resumes the health check. */
+    public final void resume() {
+        synchronized (mLock) {
+            resumeImpl();
         }
     }
 
@@ -60,16 +73,26 @@ public abstract class HealthCheck {
      */
     public final void stop() {
         synchronized (mLock) {
-            mActiveIssues.clear();
             mHealthEventBus = null;
-
             stopImpl();
         }
+    }
+
+    public final void clear() {
+        mActiveIssues.clear();
     }
 
     protected abstract void startImpl();
 
     protected abstract void stopImpl();
+
+    protected void pauseImpl() {
+        stopImpl();
+    }
+
+    protected void resumeImpl() {
+        startImpl();
+    }
 
     /**
      * Reports an issue as being active.
