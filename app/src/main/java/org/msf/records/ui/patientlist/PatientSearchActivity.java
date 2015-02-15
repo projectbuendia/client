@@ -163,6 +163,10 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         }
     }
 
+    public void onEventMainThread(UpdateAvailableEvent event) {
+        updateSoftwareUpdateUi();
+    }
+
     public void onEventMainThread(UpdateReadyToInstallEvent event) {
         updateSoftwareUpdateUi();
     }

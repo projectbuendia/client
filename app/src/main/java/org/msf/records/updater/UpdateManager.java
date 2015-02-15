@@ -81,7 +81,8 @@ public class UpdateManager {
     private DownloadedUpdateInfo mLastDownloadedUpdateInfo = null;
 
     private final Object mDownloadLock = new Object();
-    private boolean mIsDownloadInProgress = false;
+
+    // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
 
     UpdateManager(Application application, UpdateServer updateServer) {
@@ -110,7 +111,7 @@ public class UpdateManager {
     public void checkForUpdate() {
         DateTime now = DateTime.now();
         if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_PERIOD_SECONDS))) {
-            if (!mIsDownloadInProgress) {
+            if (!isDownloadInProgress()) {
                 // This immediate check just updates the event state to match any current
                 // knowledge of an available or downloaded update.  The more interesting
                 // calls to postEvents occur below in PackageIndexReceivedListener and
@@ -150,14 +151,11 @@ public class UpdateManager {
      * Starts downloading an available update in the background, registering a DownloadUpdateReceiver
      * to be invoked when the download is complete.
      *
-     * @return whether a new download was started. {@code false} if a download is already in progress.
+     * @return whether a new download was started; {@code false} if the download failed to start.
      */
     public boolean startDownload(AvailableUpdateInfo availableUpdateInfo) {
         synchronized (mDownloadLock) {
-            if (mIsDownloadInProgress) {
-                return false;
-            }
-            mIsDownloadInProgress = true;
+            cancelDownload();
 
             mApplication.registerReceiver(
                     new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
@@ -180,9 +178,7 @@ public class UpdateManager {
         }
     }
 
-    /**
-     * Installs a downloaded update.
-     */
+    /** Installs the last downloaded update. */
     public void installUpdate(DownloadedUpdateInfo updateInfo) {
         Uri apkUri = Uri.parse(updateInfo.path);
         Intent installIntent = new Intent(Intent.ACTION_VIEW)
@@ -191,16 +187,22 @@ public class UpdateManager {
         mApplication.startActivity(installIntent);
     }
 
-    /**
-     * Returns whether a download is in progress.
-     */
+    /** Returns true if a download is in progress. */
     public boolean isDownloadInProgress() {
-        return mIsDownloadInProgress;
+        return mDownloadId >= 0;
     }
 
-    /**
-     * Returns the relative path to the directory in which updates will be downloaded.
-     */
+    /** Stops any currently running download. */
+    public boolean cancelDownload() {
+        if (isDownloadInProgress()) {
+            mDownloadManager.remove(mDownloadId);
+            mDownloadId = -1;
+            return true;
+        }
+        return false;
+    }
+
+    /** Returns the relative path to the directory in which updates will be downloaded. */
     private String getDownloadDirectory(Application application) {
         String externalStorageDirectory =
                 Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -211,9 +213,7 @@ public class UpdateManager {
         return downloadDirectory;
     }
 
-    /**
-     * Returns the version of the application.
-     */
+    /** Returns the version of the application. */
     private LexicographicVersion getCurrentVersion() {
         PackageInfo packageInfo;
         try {
@@ -312,7 +312,7 @@ public class UpdateManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mDownloadLock) {
-                if (!mIsDownloadInProgress) {
+                if (!isDownloadInProgress()) {
                     LOG.e(
                             "Received an ACTION_DOWNLOAD_COMPLETED intent when no download was in "
                                     + "progress. This indicates that this receiver was registered "
@@ -334,7 +334,7 @@ public class UpdateManager {
 
                 // We have received the intent for our download, so we'll call the download finished
                 // and unregister the receiver.
-                mIsDownloadInProgress = false;
+                mDownloadId = -1;
                 mApplication.unregisterReceiver(this);
 
                 Cursor cursor = null;
