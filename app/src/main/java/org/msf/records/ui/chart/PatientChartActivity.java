@@ -548,12 +548,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             observation = observations.get(Concepts.PREGNANCY_UUID);
             if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
-                specialLabels.add("Pregnant");
+                specialLabels.add(getString(R.string.pregnant));
             }
 
             observation = observations.get(Concepts.IV_UUID);
             if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
-                specialLabels.add("IV fitted");
+                specialLabels.add(getString(R.string.iv_fitted));
             }
 
             mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));

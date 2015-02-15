@@ -186,15 +186,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         Espresso.registerIdlingResources(syncSucceededResource);
     }
 
-    /** Waits for the encounter chart to load. */
-    protected void waitForChartLoad() {
-        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-                new EventBusIdlingResource<FetchXformSucceededEvent>(
-                        UUID.randomUUID().toString(),
-                        mEventBus);
-        Espresso.registerIdlingResources(xformIdlingResource);
-    }
-
     private class SyncCounter {
         public int inProgressSyncCount = 0;
 
