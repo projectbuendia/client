@@ -106,7 +106,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
      * Tests that clicking 'Settings' in sync failed dialog and returning to
      * this activity results in the progress bar still being shown
      */
-    public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
+    // TODO: Temporarily disabled.
+    /*public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
         // TODO: Potentially flaky, as sync may finish before being force-failed.
         waitForInitialSync();
         failSync();
@@ -120,5 +121,5 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         pressBack();
         onView(withId(R.id.progress_fragment_progress_bar)).check(matches(isDisplayed()));
         screenshot("After Back Pressed");
-    }
+    }*/
 }

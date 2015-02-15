@@ -49,6 +49,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         Espresso.registerIdlingResources(xformIdlingResource);
         onView(withText("Encounter")).check(matches(isDisplayed()));
         screenshot("Xform Loaded");
+        onView(withText(R.string.form_entry_discard)).perform(click());
     }
 
     private void loadChart() {

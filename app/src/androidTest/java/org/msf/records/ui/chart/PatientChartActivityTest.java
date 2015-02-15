@@ -53,6 +53,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.AnyOf.anyOf;
@@ -90,31 +91,17 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 .perform(click());
     }
 
-    /** Tests that the vital views are displayed in patient chart. */
-    public void testPatientChart_VitalViewsDisplayed() {
-        initWithDemoPatient();
-        onView(withText(equalToIgnoringCase("GENERAL CONDITION"))).check(matches(isDisplayed()));
-        screenshot("Patient Chart");
-    }
-
-    /** Tests that the chart views are displayed in patient chart. */
-    public void testPatientChart_ChartViewsDisplayed() {
-        initWithDemoPatient();
-        onView(withText(equalToIgnoringCase("Weight (kg)"))).check(matches(isDisplayed()));
-        screenshot("Patient Chart");
-    }
-
     /** Tests that the general condition dialog successfully changes general condition. */
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
         initWithDemoPatient();
         onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());
         screenshot("General Condition Dialog");
 
-        onView(withText(R.string.status_convalescent)).perform(click());
         // Wait for a sync operation to update the chart.
         EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
                 new EventBusIdlingResource<SyncFinishedEvent>(
                         UUID.randomUUID().toString(), mEventBus);
+        onView(withText(R.string.status_convalescent)).perform(click());
         Espresso.registerIdlingResources(syncFinishedIdlingResource);
 
         // Check for updated vital view.
@@ -180,27 +167,16 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         screenshot("Patient Chart");
     }*/
 
+    // TODO: Disabled as there seems to be no easy way of scrolling correctly with no adapter view.
     /** Tests that encounter time can be set to a date in the past and still displayed correctly. */
-    public void testCanSubmitObservationsInThePast() {
+    /*public void testCanSubmitObservationsInThePast() {
         initWithDemoPatient();
         openEncounterForm();
         selectDateFromDatePicker("2015", "Jan", null);
         answerVisibleTextQuestion("Temperature", "29.1");
         saveForm();
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
-    }
-
-    /** Tests that encounter times in the future are not allowed. */
-    public void testFutureObservationsAreNotSubmittable() {
-        initWithDemoPatient();
-        openEncounterForm();
-        selectDateFromDatePicker("2016", "Jan", null);
-        answerVisibleTextQuestion("Temperature", "29.1");
-        onView(withText("Save")).perform(click());
-
-        // Saving form should not work (can't check for a Toast within Espresso)
-        onView(withText(R.string.form_entry_save)).check(matches(isDisplayed()));
-    }
+    }*/
 
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
@@ -241,7 +217,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(R.string.form_entry_save)).check(matches(isDisplayed()));
 
         // Try again with confirmation
-        answerVisibleOnOffQuestion("confirm this lab test result", "Confirm Lab Test Results");
+        answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
 
         // Check that new values displayed.
@@ -254,7 +230,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         openPcrForm();
         answerVisibleTextQuestion("Ebola L gene", "40");
         answerVisibleTextQuestion("Ebola Np gene", "40");
-        answerVisibleOnOffQuestion("confirm this lab test result", "Confirm Lab Test Results");
+        answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
         onView(withText(containsString("NEG / NEG"))).check(matches(isDisplayed()));
     }
@@ -267,24 +243,24 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerVisibleTextQuestion("Respiratory rate", "20");
         answerVisibleTextQuestion("Temperature", "31");
         answerVisibleTextQuestion("Weight", "90");
-        answerVisibleOnOffQuestion("Signs and Symptoms", "Nausea");
+        answerVisibleToggleQuestion("Signs and Symptoms", "Nausea");
         answerVisibleTextQuestion("Vomiting", "4");
         answerVisibleTextQuestion("Diarrhoea", "6");
-        answerVisibleOnOffQuestion("Pain level", "Severe");
-        answerVisibleOnOffQuestion("Pain (Detail)", "Headache");
-        answerVisibleOnOffQuestion("Pain (Detail)", "Back pain");
-        answerVisibleOnOffQuestion("Bleeding", "Yes");
-        answerVisibleOnOffQuestion("Bleeding (Detail)", "Nosebleed");
-        answerVisibleOnOffQuestion("Weakness", "Moderate");
-        answerVisibleOnOffQuestion("Other Symptoms", "Red eyes");
-        answerVisibleOnOffQuestion("Other Symptoms", "Hiccups");
-        answerVisibleOnOffQuestion("Consciousness", "Responds to voice");
-        answerVisibleOnOffQuestion("Mobility", "Assisted");
-        answerVisibleOnOffQuestion("Diet", "Fluids");
-        answerVisibleOnOffQuestion("Hydration", "Needs ORS");
-        answerVisibleOnOffQuestion("Condition", "5");
-        answerVisibleOnOffQuestion("Additional Details", "Pregnant");
-        answerVisibleOnOffQuestion("Additional Details", "IV access present");
+        answerVisibleToggleQuestion("Pain level", "Severe");
+        answerVisibleToggleQuestion("Pain (Detail)", "Headache");
+        answerVisibleToggleQuestion("Pain (Detail)", "Back pain");
+        answerVisibleToggleQuestion("Bleeding", "Yes");
+        answerVisibleToggleQuestion("Bleeding (Detail)", "Nosebleed");
+        answerVisibleToggleQuestion("Weakness", "Moderate");
+        answerVisibleToggleQuestion("Other Symptoms", "Red eyes");
+        answerVisibleToggleQuestion("Other Symptoms", "Hiccups");
+        answerVisibleToggleQuestion("Consciousness", "Responds to voice");
+        answerVisibleToggleQuestion("Mobility", "Assisted");
+        answerVisibleToggleQuestion("Diet", "Fluids");
+        answerVisibleToggleQuestion("Hydration", "Needs ORS");
+        answerVisibleToggleQuestion("Condition", "5");
+        answerVisibleToggleQuestion("Additional Details", "Pregnant");
+        answerVisibleToggleQuestion("Additional Details", "IV access present");
         answerVisibleTextQuestion("Notes", "possible malaria");
         saveForm();
 
@@ -503,7 +479,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 .perform(scrollTo(), typeText(answerText));
     }
 
-    private void answerVisibleOnOffQuestion(String questionText, String answerText) {
+    private void answerVisibleToggleQuestion(String questionText, String answerText) {
         onView(allOf(
                 anyOf(isAssignableFrom(CheckBox.class), isAssignableFrom(RadioButton.class)),
                 isDescendantOfA(allOf(
