@@ -128,14 +128,14 @@ public class UpdateManager {
 
     /**
      * Post events notifying of whether a file is available to be downloaded, or a
-     * file has been downloaded and is ready to install.  See {@link org.msf.records.events.UpdateReadyToInstallEvent},
+     * file is downloaded and ready to install.  See {@link org.msf.records.events.UpdateReadyToInstallEvent},
      * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
     protected void postEvents() {
         EventBus bus = EventBus.getDefault();
-        if (mLastDownloadedUpdateInfo.shouldInstall() &&
-                mLastDownloadedUpdateInfo.downloadedVersion
-                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
+        if (mLastDownloadedUpdateInfo.shouldInstall()
+                && mLastDownloadedUpdateInfo.downloadedVersion.greaterThanOrEqualTo(
+                        mLastAvailableUpdateInfo.availableVersion)) {
             bus.postSticky(new UpdateReadyToInstallEvent(mLastDownloadedUpdateInfo));
         } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
             bus.removeStickyEvent(UpdateReadyToInstallEvent.class);
@@ -148,8 +148,8 @@ public class UpdateManager {
     }
 
     /**
-     * Starts downloading an available update in the background, registering a DownloadUpdateReceiver
-     * to be invoked when the download is complete.
+     * Starts downloading an available update in the background, registering a
+     * DownloadUpdateReceiver to be invoked when the download is complete.
      *
      * @return whether a new download was started; {@code false} if the download failed to start.
      */

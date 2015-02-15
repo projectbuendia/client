@@ -134,8 +134,10 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     @Override
     protected void updateSoftwareUpdateUi() {
         EventBus bus = EventBus.getDefault();
-        final UpdateReadyToInstallEvent readyEvent = bus.getStickyEvent(UpdateReadyToInstallEvent.class);
-        final UpdateAvailableEvent availableEvent = bus.getStickyEvent(UpdateAvailableEvent.class);
+        final UpdateReadyToInstallEvent readyEvent =
+                bus.getStickyEvent(UpdateReadyToInstallEvent.class);
+        final UpdateAvailableEvent availableEvent =
+                bus.getStickyEvent(UpdateAvailableEvent.class);
         if (readyEvent != null) {
             setStatusVisibility(View.VISIBLE);
             mUpdateMessage.setText(R.string.snackbar_update_downloaded);
