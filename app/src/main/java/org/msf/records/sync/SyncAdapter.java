@@ -123,7 +123,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
-        int progressIncrement = 100 / countExtras(extras);
+        int nExtras = countExtras(extras);
+        int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
 
         LOG.i("Beginning network synchronization");
         reportProgress(0, R.string.sync_in_progress);
