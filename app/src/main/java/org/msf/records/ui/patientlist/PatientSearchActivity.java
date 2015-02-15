@@ -23,6 +23,7 @@ import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
+import org.msf.records.ui.UpdateNotificationController;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.updater.UpdateManager;
 import org.msf.records.utils.EventBusWrapper;
@@ -40,16 +41,12 @@ import de.greenrobot.event.EventBus;
  */
 public abstract class PatientSearchActivity extends BaseLoggedInActivity {
 
-    @Inject UpdateManager mUpdateManager;
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
 
     private PatientSearchController mSearchController;
     private SearchView mSearchView;
-
-    @InjectView(R.id.status_bar_default_message) TextView mUpdateMessage;
-    @InjectView(R.id.status_bar_default_action)TextView mUpdateAction;
 
     // TODO(akalachman): Populate properly.
     protected final String mLocale = "en";
@@ -70,7 +67,10 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
                 mAppModel,
                 mLocale);
 
-        setStatusView(getLayoutInflater().inflate(R.layout.view_status_bar_default, null));
+        mUpdateNotificationController = new UpdateNotificationController(
+                new UpdateNotificationUi()
+        );
+
         ButterKnife.inject(this);
     }
 
@@ -125,52 +125,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     protected void onPauseImpl() {
         super.onPauseImpl();
         mSearchController.suspend();
-    }
-
-    /**
-     * Updates the software update notifications in the UI according to the
-     * currently posted sticky events.
-     */
-    @Override
-    protected void updateSoftwareUpdateUi() {
-        EventBus bus = EventBus.getDefault();
-        final UpdateReadyToInstallEvent readyEvent =
-                bus.getStickyEvent(UpdateReadyToInstallEvent.class);
-        final UpdateAvailableEvent availableEvent =
-                bus.getStickyEvent(UpdateAvailableEvent.class);
-        if (readyEvent != null) {
-            setStatusVisibility(View.VISIBLE);
-            mUpdateMessage.setText(R.string.snackbar_update_downloaded);
-            mUpdateAction.setText(R.string.snackbar_action_install);
-            mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    setStatusVisibility(View.GONE);
-                    mUpdateManager.installUpdate(readyEvent.updateInfo);
-                }
-            });
-        } else if (availableEvent != null) {
-            setStatusVisibility(View.VISIBLE);
-            mUpdateMessage.setText(R.string.snackbar_update_available);
-            mUpdateAction.setText(R.string.snackbar_action_download);
-            mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    setStatusVisibility(View.GONE);
-                    mUpdateManager.startDownload(availableEvent.updateInfo);
-                }
-            });
-        } else {
-            setStatusVisibility(View.GONE);
-        }
-    }
-
-    public void onEventMainThread(UpdateAvailableEvent event) {
-        updateSoftwareUpdateUi();
-    }
-
-    public void onEventMainThread(UpdateReadyToInstallEvent event) {
-        updateSoftwareUpdateUi();
     }
 
     protected void setPatients(TypedCursor<AppPatient> patients) {

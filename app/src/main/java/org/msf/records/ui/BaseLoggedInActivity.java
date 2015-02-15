@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import org.msf.records.App;
 import org.msf.records.R;
-import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
@@ -27,7 +26,6 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 
 /**
  * An activity that requires that there currently be a logged-in user.
@@ -37,7 +35,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
-    @Inject UpdateManager mUpdateManager;
 
     private User mLastActiveUser;
     private Menu mMenu;
@@ -45,6 +42,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private boolean mIsCreated = false;
     private boolean mIsMenuEnabled = true;
+
+    protected UpdateNotificationController mUpdateNotificationController = null;
 
     /**
      * {@inheritDoc}
@@ -132,17 +131,14 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         }
 
         onResumeImpl();
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.checkForUpdates();
+        }
     }
 
     protected void onResumeImpl() {
         super.onResume();
-
-        // Check for updates whenever a logged-in activity resumes.
-        mUpdateManager.checkForUpdate();
-        updateSoftwareUpdateUi();
     }
-
-    protected void updateSoftwareUpdateUi() { }
 
     @Override
     protected final void onPause() {
