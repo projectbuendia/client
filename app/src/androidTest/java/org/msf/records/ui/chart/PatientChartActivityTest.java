@@ -104,9 +104,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 .check(matches(isDisplayed()));
     }
 
-    // TODO: Re-enable when no long flaky.
     /** Tests that the encounter form can be opened more than once. */
-    /*@FlakyTest
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
         initWithDemoPatientChart();
         // Load the chart once
@@ -120,7 +118,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Dismiss
         onView(withText("Discard")).perform(click());
-    }*/
+    }
 
     /**
      * Tests that the admission date is correctly displayed in the header.
@@ -170,15 +168,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
 
-    // TODO: Re-enable once it isn't flaky.
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
-    /*@FlakyTest
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
         initWithDemoPatientChart();
         openEncounterForm();
         discardForm();
         onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
-    }*/
+    }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
     public void testDismissButtonShowsDialogWithChanges() {
@@ -215,7 +211,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
 
         // Check that new values displayed.
-        onView(withText(containsString("38.0 / 35.0"))).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText(containsString("38.0 / 35.0")));
     }
 
     /** Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified. */
@@ -226,7 +222,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerVisibleTextQuestion("Ebola Np gene", "40");
         answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
-        onView(withText(containsString("NEG / NEG"))).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText(containsString("NEG / NEG")));
     }
 
     /** Exercises all fields in the encounter form, except for encounter time. */
@@ -389,12 +385,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText("Set"))
                 .inRoot(isDialog())
                 .perform(click());
-
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     protected void selectDateFromDatePicker(
@@ -456,12 +446,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
-        // TODO: Construct an idling resource that can do this.
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            LOG.w(e, "Couldn't sleep.");
-        }
+        checkViewDisplayedSoon(withText("Encounter"));
     }
 
     protected void openPcrForm() {
@@ -473,12 +458,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
-        // TODO: Construct an idling resource that can do this.
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            LOG.w(e, "Couldn't sleep.");
-        }
+        checkViewDisplayedSoon(withText("Encounter"));
     }
 
     private void discardForm() {
