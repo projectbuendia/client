@@ -17,7 +17,6 @@ import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
-import org.msf.records.updater.UpdateManager;
 import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.Logger;
 
@@ -41,9 +40,10 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private MenuPopupWindow mPopupWindow;
 
     private boolean mIsCreated = false;
-    private boolean mIsMenuEnabled = true;
 
     protected UpdateNotificationController mUpdateNotificationController = null;
+
+    private LoadingState mLoadingState = LoadingState.LOADED;
 
     /**
      * {@inheritDoc}
@@ -86,10 +86,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.base, menu);
 
         mPopupWindow = new MenuPopupWindow();
-
-        for (int i = 0; i < mMenu.size() - 1; i++) {
-            mMenu.getItem(i).setVisible(mIsMenuEnabled);
-        }
 
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
@@ -251,14 +247,18 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     }
 
     /**
-     * Hides or shows all buttons in the menu except for login/logout functionality.
-     * @param shouldEnableMenu whether to show the menu items
+     * Changes the state of this activity, changing the set of available buttons if necessary.
+     * @param loadingState the new activity state
      */
-    protected void setOptionsMenuEnabled(boolean shouldEnableMenu) {
-        if (mIsMenuEnabled != shouldEnableMenu) {
-            mIsMenuEnabled = shouldEnableMenu;
+    protected void setLoadingState(LoadingState loadingState) {
+        if (mLoadingState != loadingState) {
+            mLoadingState = loadingState;
             invalidateOptionsMenu();
         }
+    }
+
+    protected LoadingState getLoadingState() {
+        return mLoadingState;
     }
 }
 

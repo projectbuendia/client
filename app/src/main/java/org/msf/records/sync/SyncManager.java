@@ -34,6 +34,15 @@ public class SyncManager {
     public static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
     /**
+     * Cancels an in-flight, non-periodic sync.
+     */
+    public void cancelOnDemandSync() {
+        ContentResolver.cancelSync(
+                GenericAccountService.getAccount(),
+                Contracts.CONTENT_AUTHORITY);
+    }
+
+    /**
      * Forces a sync to occur immediately.
      * TODO(kpy): Avoid triggering a new full sync if a full sync is already underway.
      */

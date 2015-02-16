@@ -16,6 +16,7 @@ import org.msf.records.events.sync.SyncProgressEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.LoadingState;
 import org.msf.records.ui.patientlist.PatientSearchController;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
@@ -44,7 +45,7 @@ final class TentSelectionController {
 
         void showSyncFailedDialog(boolean show);
 
-        void setBusyLoading(boolean busy);
+        void setLoadingState(LoadingState loadingState);
     }
 
     public interface TentFragmentUi {
@@ -162,7 +163,7 @@ final class TentSelectionController {
 
     private void updateUi() {
         boolean hasValidTree = isLocationTreeValid();
-        mUi.setBusyLoading(!hasValidTree);
+        updateLoadingState();
         for (TentFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.setBusyLoading(!hasValidTree);
 
@@ -184,6 +185,21 @@ final class TentSelectionController {
                                 ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
             }
         }
+    }
+
+    private void updateLoadingState() {
+        boolean hasLocationTree = isLocationTreeValid();
+        if (hasLocationTree) {
+            mUi.setLoadingState(LoadingState.LOADED);
+            return;
+        }
+
+        if (mSyncManager.isSyncing() || mSyncManager.isSyncPending()) {
+            mUi.setLoadingState(LoadingState.SYNCING);
+            return;
+        }
+
+        mUi.setLoadingState(LoadingState.LOADING);
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
