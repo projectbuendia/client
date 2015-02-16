@@ -71,8 +71,6 @@ public class UpdateManager {
     private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
 
-    private final String mDownloadDirectory;
-
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
 
@@ -94,9 +92,6 @@ public class UpdateManager {
                 (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
 
         mCurrentVersion = getCurrentVersion();
-
-        mDownloadDirectory = getDownloadDirectory(application);
-
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
         mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
     }
@@ -162,10 +157,15 @@ public class UpdateManager {
                     new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
             try {
+                String dir = getDownloadDirectory();
+                if (dir == null) {
+                    LOG.e("no external storage is available, can't start download");
+                    return false;
+                }
                 DownloadManager.Request request =
                         new DownloadManager.Request(availableUpdateInfo.updateUri)
                                 .setDestinationInExternalPublicDir(
-                                        mDownloadDirectory,
+                                        dir,
                                         MODULE_NAME + availableUpdateInfo.availableVersion + ".apk")
                                 .setNotificationVisibility(
                                         DownloadManager.Request.VISIBILITY_VISIBLE);
@@ -203,11 +203,18 @@ public class UpdateManager {
         return false;
     }
 
-    /** Returns the relative path to the directory in which updates will be downloaded. */
-    private String getDownloadDirectory(Application application) {
+    /**
+     * Returns the relative path to the directory in which updates will be downloaded,
+     * or null if storage is unavailable.
+     */
+    private String getDownloadDirectory() {
         String externalStorageDirectory =
                 Environment.getExternalStorageDirectory().getAbsolutePath();
-        String downloadDirectory = application.getExternalFilesDir(null).getAbsolutePath();
+        File externalFilesDir = mApplication.getExternalFilesDir(null);
+        if (externalFilesDir == null) {
+            return null;
+        }
+        String downloadDirectory = externalFilesDir.getAbsolutePath();
         if (downloadDirectory.startsWith(externalStorageDirectory)) {
             downloadDirectory = downloadDirectory.substring(externalStorageDirectory.length());
         }
@@ -240,8 +247,13 @@ public class UpdateManager {
     }
 
     private DownloadedUpdateInfo getLastDownloadedUpdateInfo() {
+        String dir = getDownloadDirectory();
+        if (dir == null) {
+            LOG.e("no external storage is available, no download directory for updates");
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
         File downloadDirectoryFile =
-                new File(Environment.getExternalStorageDirectory(), mDownloadDirectory);
+                new File(Environment.getExternalStorageDirectory(), dir);
         if (!downloadDirectoryFile.exists()) {
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
@@ -282,6 +294,7 @@ public class UpdateManager {
                 mLastAvailableUpdateInfo =
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
                 mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
+                LOG.i("received package index; lastAvailableUpdate: " + mLastAvailableUpdateInfo);
                 postEvents();
             }
         }
@@ -297,7 +310,7 @@ public class UpdateManager {
 
             LOG.w(
                     error,
-                    "Server failed with " + failure + " while downloading update. Retry will "
+                    "Server failed with " + failure + " while fetching package index.  Retry will "
                             + "occur shortly.");
             // assume no update is available
             EventBus.getDefault().post(new UpdateNotAvailableEvent());
@@ -382,6 +395,7 @@ public class UpdateManager {
 
                 mLastDownloadedUpdateInfo =
                         DownloadedUpdateInfo.fromUri(mCurrentVersion, uriString);
+                LOG.i("downloaded update: " + mLastDownloadedUpdateInfo);
 
                 if (!mLastDownloadedUpdateInfo.isValid) {
                     LOG.w(

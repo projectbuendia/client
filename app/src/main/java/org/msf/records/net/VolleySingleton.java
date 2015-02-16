@@ -7,11 +7,14 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import org.msf.records.utils.Logger;
+
 /**
  * Wrap Volley up in a Singleton object.
  */
 public class VolleySingleton {
 
+    private Logger LOG = Logger.create();
     private static VolleySingleton mInstance;
     private final RequestQueue mRequestQueue;
 
@@ -44,6 +47,7 @@ public class VolleySingleton {
      * handling and contexts correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
+        LOG.i("queueing request: " + req.getMethod() + " " + req.getUrl());
         getRequestQueue().add(req);
     }
 }

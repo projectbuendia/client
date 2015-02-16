@@ -132,7 +132,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         onResumeImpl();
         if (mUpdateNotificationController != null) {
-            mUpdateNotificationController.checkForUpdates();
+            mUpdateNotificationController.init();
         }
     }
 
@@ -148,6 +148,9 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.suspend();
+        }
         onPauseImpl();
     }
 

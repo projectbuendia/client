@@ -32,6 +32,13 @@ public class AvailableUpdateInfo {
                 UpdateManager.MINIMAL_VERSION,
                 null /*updateUri*/);
     }
+    
+    public String toString() {
+        return "AvailableUpdateInfo(isValid=" + isValid + ", "
+                + "currentVersion=" + currentVersion + ", "
+                + "availableVersion=" + availableVersion + ", "
+                + "updateUri=" + updateUri + ")";
+    }
 
     /**
      * Creates an instance of {@link AvailableUpdateInfo} from a server response.

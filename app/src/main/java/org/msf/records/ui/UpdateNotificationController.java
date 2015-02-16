@@ -36,7 +36,8 @@ public class UpdateNotificationController {
         App.getInstance().inject(this);
     }
 
-    public void checkForUpdates() {
+    public void init() {
+        EventBus.getDefault().register(this);
         mUpdateManager.checkForUpdate();
         updateAvailabilityNotifications();
     }
@@ -47,6 +48,10 @@ public class UpdateNotificationController {
 
     public void onEventMainThread(UpdateReadyToInstallEvent event) {
         updateAvailabilityNotifications();
+    }
+
+    public void suspend() {
+        EventBus.getDefault().unregister(this);
     }
 
     /**
@@ -74,14 +79,14 @@ public class UpdateNotificationController {
     }
 
     /** Starts a download of the last known available update. */
-    public void startDownload() {
+    public void onEventMainThread(BaseActivity.DownloadRequestedEvent event) {
         if (mAvailableUpdateInfo != null) {
             mUpdateManager.startDownload(mAvailableUpdateInfo);
         }
     }
 
     /** Installs the last downloaded update. */
-    public void installUpdate() {
+    public void onEventMainThread(BaseActivity.InstallationRequestedEvent event) {
         if (mDownloadedUpdateInfo != null) {
             mUpdateManager.installUpdate(mDownloadedUpdateInfo);
         }

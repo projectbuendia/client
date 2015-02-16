@@ -80,6 +80,13 @@ public class DownloadedUpdateInfo {
         this.path = uri;
     }
 
+    public String toString() {
+        return "DownloadedUpdateInfo(isValid=" + isValid + ", "
+                + "currentVersion=" + currentVersion + ", "
+                + "availableVersion=" + downloadedVersion + ", "
+                + "path=" + path + ")";
+    }
+
     public boolean shouldInstall() {
         return isValid && downloadedVersion.greaterThan(currentVersion);
     }

@@ -17,8 +17,6 @@ import android.widget.TextView;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.diagnostics.TroubleshootingAction;
-import org.msf.records.events.actions.DownloadRequestedEvent;
-import org.msf.records.events.actions.InstallationRequestedEvent;
 import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.updater.AvailableUpdateInfo;
 import org.msf.records.updater.DownloadedUpdateInfo;
@@ -356,5 +354,11 @@ public abstract class BaseActivity extends FragmentActivity {
             setStatusVisibility(View.GONE);
         }
     }
+
+    /** The user has requested a download of the last known available software update. */
+    public static class DownloadRequestedEvent { }
+
+    /** The user has requested installation of the last downloaded software update. */
+    public static class InstallationRequestedEvent { }
 }
 
