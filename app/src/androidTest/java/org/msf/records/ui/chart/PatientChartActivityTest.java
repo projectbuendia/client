@@ -115,8 +115,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 .check(matches(isDisplayed()));
     }
 
+    // TODO: Re-enable when no long flaky.
     /** Tests that the encounter form can be opened more than once. */
-    @FlakyTest
+    /*@FlakyTest
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
         initWithDemoPatient();
         // Load the chart once
@@ -130,7 +131,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Dismiss
         onView(withText("Discard")).perform(click());
-    }
+    }*/
 
     /**
      * Tests that the admission date is correctly displayed in the header.
@@ -180,14 +181,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
 
+    // TODO: Re-enable once it isn't flaky.
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
-    @FlakyTest
+    /*@FlakyTest
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
         initWithDemoPatient();
         openEncounterForm();
         discardForm();
         onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
-    }
+    }*/
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
     public void testDismissButtonShowsDialogWithChanges() {
