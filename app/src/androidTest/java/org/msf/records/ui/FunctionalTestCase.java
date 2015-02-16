@@ -206,6 +206,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
                 Thread.yield();
             }
         }
+        // Instead of throwing, let onView().check throw a nicely formatted error.
         onView(matcher).check(matches(isDisplayed()));
     }
 
