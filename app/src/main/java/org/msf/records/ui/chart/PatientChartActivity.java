@@ -545,11 +545,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                 mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
                 if (pcrObservationMillis > 0) {
+                    LocalDate today = LocalDate.now();
+                    LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
+                    String dateText = "invalid date";
+                    if (today.equals(obsDay)) {
+                        dateText = "today";
+                    } else if (obsDay.isBefore(today)) {
+                        int days = Days.daysBetween(obsDay, today).getDays();
+                        dateText = (days == 1) ? "1 day ago" : (days + " days ago");
+                    }
                     mPcr.setName(getResources().getString(
-                            R.string.latest_pcr_label_with_date,
-                            DATE_TIME_FORMATTER.format(
-                                    DateTime.now(),
-                                    new DateTime(pcrObservationMillis))));
+                            R.string.latest_pcr_label_with_date, dateText));
                 }
             }
 
