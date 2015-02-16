@@ -295,6 +295,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * {@link #waitForProgressFragment()}.
      */
     protected void initWithDemoPatientChart() {
+        waitForProgressFragment(); // Wait for tent selection screen to load.
+
         if (sDemoPatientId == null) {
             AppPatientDelta demoPatient = new AppPatientDelta();
             populateDemoPatient(demoPatient);
