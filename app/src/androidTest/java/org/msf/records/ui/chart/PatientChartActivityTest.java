@@ -23,6 +23,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.SubmitXformSucceededEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.net.model.Patient;
 import org.msf.records.ui.FunctionalTestCase;
@@ -91,24 +92,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         initWithDemoPatientChart();
         onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());
         screenshot("General Condition Dialog");
-
-        // Wait for a sync operation to update the chart.
-        /*
-        EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
-                new EventBusIdlingResource<SyncFinishedEvent>(
-                        UUID.randomUUID().toString(), mEventBus);
-        */
-        onView(withText(R.string.status_convalescent)).perform(click());
-        /*
-        Espresso.registerIdlingResources(syncFinishedIdlingResource);
-         */
+        onView(withText(R.string.status_well)).perform(click());
 
         // Check for updated vital view.
-        onView(withText(R.string.status_convalescent)).check(matches(isDisplayed()));
+        onView(withText(R.string.status_well)).check(matches(isDisplayed()));
 
         // Check for updated chart view.
         onView(allOf(
-                withText(R.string.status_short_desc_convalescent),
+                withText(R.string.status_short_desc_well),
                 not(withId(R.id.patient_chart_vital_general_condition_number))))
                 .check(matches(isDisplayed()));
     }
@@ -180,24 +171,20 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
 
-    /**
-     * Tests that dismissing a form immediately closes it if no changes have been made.
-     */
+    /** Tests that dismissing a form immediately closes it if no changes have been made. */
     @FlakyTest
-    public void disabled_testDismissButtonReturnsImmediatelyWithNoChanges() {
+    public void testDismissButtonReturnsImmediatelyWithNoChanges() {
         initWithDemoPatientChart();
         openEncounterForm();
         discardForm();
         onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
     }
 
-    /**
-     * Tests that dismissing a form results in a dialog if changes have been made.
-     */
-    public void disabled_testDismissButtonShowsDialogWithChanges() {
+    /** Tests that dismissing a form results in a dialog if changes have been made. */
+    public void testDismissButtonShowsDialogWithChanges() {
         initWithDemoPatientChart();
         openEncounterForm();
-        answerVisibleTextQuestion("Temperature", "29.1");
+        answerVisibleTextQuestion("Temperature", "29.2");
 
         // Try to discard and give up.
         discardForm();
@@ -211,9 +198,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
     }
 
-    /**
-     * Tests that PCR submission does not occur without confirmation being specified.
-     */
+    /** Tests that PCR submission does not occur without confirmation being specified. */
     public void testPcr_requiresConfirmation() {
         initWithDemoPatientChart();
         openPcrForm();
@@ -233,9 +218,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(containsString("38.0 / 35.0"))).check(matches(isDisplayed()));
     }
 
-    /**
-     * Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified.
-     */
+    /** Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified. */
     public void testPcr_showsNegFor40() {
         initWithDemoPatientChart();
         openPcrForm();
@@ -246,9 +229,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(containsString("NEG / NEG"))).check(matches(isDisplayed()));
     }
 
-    /**
-     * Exercises all fields in the encounter form, except for encounter time.
-     */
+    /** Exercises all fields in the encounter form, except for encounter time. */
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
         initWithDemoPatientChart();
         openEncounterForm();
@@ -384,18 +365,16 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             // TODO: Add support. A little tricky as we need to select by UUID.
             // onView(withId(R.id.patient_creation_button_change_location)).perform(click());
         }
-/*
+
         EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>> resource =
                 new EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>>(
                         UUID.randomUUID().toString(), mEventBus
                 );
-*/
+
         onView(withId(R.id.patient_creation_button_create)).perform(click());
-/*
+
         // Wait for patient to be created.
         Espresso.registerIdlingResources(resource);
-*/
-        onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
     }
 
     /** Selects a patient by ID from the patient list. */
@@ -469,12 +448,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     protected void openEncounterForm() {
-
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),
                         mEventBus);
-
         onView(withId(R.id.action_update_chart)).perform(click());
         Espresso.registerIdlingResources(xformIdlingResource);
 
@@ -485,7 +462,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         } catch (InterruptedException e) {
             LOG.w(e, "Couldn't sleep.");
         }
-        // onView(withText("Encounter date and time")).check(matches(isDisplayed()));
     }
 
     protected void openPcrForm() {
@@ -503,7 +479,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         } catch (InterruptedException e) {
             LOG.w(e, "Couldn't sleep.");
         }
-        // onView(withText("Encounter date and time")).check(matches(isDisplayed()));
     }
 
     private void discardForm() {
