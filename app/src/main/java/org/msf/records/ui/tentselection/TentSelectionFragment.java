@@ -148,5 +148,10 @@ public final class TentSelectionFragment extends ProgressFragment {
         public void resetSyncProgress() {
             switchToCircularProgressBar();
         }
+
+        @Override
+        public void showSyncCancelRequested() {
+            setProgressLabel(getString(R.string.cancelling_sync));
+        }
     }
 }

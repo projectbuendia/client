@@ -171,7 +171,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             mEventBus.post(new SyncCancelRequestedEvent());
-            finish();
             return true;
         }
     }

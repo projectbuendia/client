@@ -10,7 +10,9 @@ import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.actions.SyncCancelRequestedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.sync.SyncCanceledEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncProgressEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -46,6 +48,8 @@ final class TentSelectionController {
         void showSyncFailedDialog(boolean show);
 
         void setLoadingState(LoadingState loadingState);
+
+        void finish();
     }
 
     public interface TentFragmentUi {
@@ -63,6 +67,8 @@ final class TentSelectionController {
         void showIncrementalSyncProgress(int progress, String label);
 
         void resetSyncProgress();
+
+        void showSyncCancelRequested();
     }
 
     private final AppModel mAppModel;
@@ -204,6 +210,16 @@ final class TentSelectionController {
 
     @SuppressWarnings("unused") // Called by reflection from EventBus
     private final class EventBusSubscriber {
+
+        public void onEventMainThread(SyncCancelRequestedEvent event) {
+            for (TentFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.showSyncCancelRequested();
+            }
+        }
+
+        public void onEventMainThread(SyncCanceledEvent event) {
+            mUi.finish();
+        }
 
         public void onEventMainThread(SyncProgressEvent event) {
             for (TentFragmentUi fragmentUi : mFragmentUis) {

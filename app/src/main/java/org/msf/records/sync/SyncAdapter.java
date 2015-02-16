@@ -17,8 +17,6 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.TimingLogger;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.primitives.Booleans;
 
@@ -101,6 +99,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     private final ContentResolver mContentResolver;
 
+    /**
+     * Tracks whether the sync has been canceled.
+     */
+    private boolean mIsSyncCanceled = false;
+
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
@@ -109,6 +112,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         mContentResolver = context.getContentResolver();
+    }
+
+    @Override
+    public void onSyncCanceled() {
+        mIsSyncCanceled = true;
+        LOG.i("Detecting a sync cancellation, canceling sync soon.");
     }
 
     @Override
@@ -123,6 +132,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
+        Intent syncCanceledIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
+
+        if (mIsSyncCanceled) {
+            LOG.i("Sync was canceled before it started.");
+            getContext().sendBroadcast(syncCanceledIntent);
+            return;
+        }
+
         int nExtras = countExtras(extras);
         int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
 
@@ -132,6 +151,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             boolean specific = false;
             if (extras.getBoolean(SYNC_PATIENTS)) {
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before patient sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_patients);
                 specific = true;
                 // default behaviour
@@ -140,6 +164,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_patients);
             }
             if (extras.getBoolean(SYNC_CONCEPTS)) {
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before concept sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_concepts);
                 specific = true;
                 updateConcepts(provider, syncResult);
@@ -147,6 +176,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_concepts);
             }
             if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before chart sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_charts);
                 specific = true;
                 timings.addSplit("update chart specified");
@@ -154,6 +188,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_charts);
             }
             if (extras.getBoolean(SYNC_OBSERVATIONS)) {
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before observation sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_observations);
                 specific = true;
                 updateObservations(provider, syncResult, extras);
@@ -161,6 +200,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_observations);
             }
             if (extras.getBoolean(SYNC_LOCATIONS)) {
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before location sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_locations);
                 specific = true;
                 updateLocations(provider, syncResult);
@@ -168,6 +212,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_locations);
             }
             if (extras.getBoolean(SYNC_USERS)) {
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before user sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_users);
                 specific = true;
                 updateUsers(provider, syncResult);
@@ -177,26 +226,56 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before patient sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(0, R.string.syncing_patients);
                 updatePatientData(syncResult);
                 timings.addSplit("update all (patients)");
 
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before concept sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(progressIncrement, R.string.syncing_concepts);
                 updateConcepts(provider, syncResult);
                 timings.addSplit("update all (concepts)");
 
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before chart sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(progressIncrement, R.string.syncing_charts);
                 updateChartStructure(provider, syncResult);
                 timings.addSplit("update all (chart)");
 
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before observation sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(progressIncrement, R.string.syncing_observations);
                 updateObservations(provider, syncResult, extras);
                 timings.addSplit("update all (observations)");
 
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before location sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(progressIncrement, R.string.syncing_locations);
                 updateLocations(provider, syncResult);
                 timings.addSplit("update all (locations)");
 
+                if (mIsSyncCanceled) {
+                    LOG.i("Sync was canceled before user sync.");
+                    getContext().sendBroadcast(syncCanceledIntent);
+                    return;
+                }
                 reportProgress(progressIncrement, R.string.syncing_users);
                 updateUsers(provider, syncResult);
                 timings.addSplit("update all (users)");
@@ -230,6 +309,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
+
+        if (mIsSyncCanceled) {
+            LOG.i("Sync was canceled right before finishing.");
+            getContext().sendBroadcast(syncCanceledIntent);
+            return;
+        }
 
         // Fire a broadcast indicating that sync has completed.
         Intent syncCompletedIntent =

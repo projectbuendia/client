@@ -18,6 +18,7 @@ import org.msf.records.filter.db.patient.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.matchers.SimpleSelectionFilterMatchers;
 
@@ -31,6 +32,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
     private PatientSearchController mController;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
+    @Mock private SyncManager mSyncManager;
     @Mock private AppModel mMockAppModel;
     @Mock private PatientSearchController.Ui mMockUi;
     @Mock private PatientSearchController.FragmentUi mFragmentMockUi;
@@ -45,7 +47,8 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
         mController = new PatientSearchController(
-                mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel, LOCALE);
+                mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel,
+                mSyncManager, LOCALE);
         mController.attachFragmentUi(mFragmentMockUi);
         mController.init();
     }

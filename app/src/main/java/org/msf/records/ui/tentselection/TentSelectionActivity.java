@@ -189,6 +189,11 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         }
 
         @Override
+        public void finish() {
+            TentSelectionActivity.this.finish();
+        }
+
+        @Override
         public void launchActivityForLocation(AppLocation location) {
             Intent roundIntent =
                     new Intent(TentSelectionActivity.this, RoundActivity.class);
