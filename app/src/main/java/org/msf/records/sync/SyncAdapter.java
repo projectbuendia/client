@@ -32,8 +32,9 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
-import org.msf.records.net.model.User;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.sync.providers.MsfRecordsProvider;
+import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
@@ -43,7 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -99,6 +99,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
 
     /**
+     * Named used during the sync process for SQL savepoints.
+     */
+    private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
+
+    /**
      * Content resolver, for performing database operations.
      */
     private final ContentResolver mContentResolver;
@@ -124,6 +129,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("Detecting a sync cancellation, canceling sync soon.");
     }
 
+    /**
+     * Not thread-safe but, by default, this will never be called multiple times in parallel.
+     */
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         // Fire a broadcast indicating that sync has completed.
@@ -146,6 +154,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
 
         LOG.i("Beginning network synchronization");
+
+        MsfRecordsProvider msfRecordsProvider =
+                (MsfRecordsProvider)(provider.getLocalContentProvider());
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+                msfRecordsProvider.getDbTransactionHelper();
+        LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
+        dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
+
         reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
         try {
@@ -236,40 +252,52 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
             reportProgress(100, R.string.completing_sync);
         } catch (CancellationException e) {
+            rollbackSavepoint(dbTransactionHelper);
             // Reset canceled state so that it doesn't interfere with next sync.
             LOG.e(e, "Sync canceled");
-            mIsSyncCanceled = false;
             getContext().sendBroadcast(syncCanceledIntent);
             return;
         } catch (RemoteException e) {
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error in RPC");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (OperationApplicationException e) {
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error updating database");
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (InterruptedException e){
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error interruption");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (ExecutionException e){
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error failed to execute");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (Exception e){
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error reading from network");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (UserManager.UserSyncException e) {
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error syncing users");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
+            return;
+        } finally {
+            LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.close();
+            mIsSyncCanceled = false;
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
@@ -279,6 +307,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCompletedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.COMPLETED);
         getContext().sendBroadcast(syncCompletedIntent);
+    }
+
+    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
+        LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
+        dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
     }
 
     /**
@@ -465,8 +498,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("batch apply done");
         mContentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
         LOG.i("change notified");
-
-
 
         //TODO(giljulio) update the server as well as the client
     }
