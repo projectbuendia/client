@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 
 import org.msf.records.App;
-import org.msf.records.events.sync.InitialSyncStatusEvent;
 import org.msf.records.events.sync.SyncCanceledEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncProgressEvent;
@@ -36,21 +35,6 @@ public class SyncManager {
     public static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
     /**
-     * Utility function that returns the status of the most recent (or current) initial sync,
-     * or {@code SyncStatus.UNKNOWN} if no initial sync has been recently performed.
-     * @return
-     */
-    public InitialSyncStatusEvent.SyncStatus getInitialSyncState() {
-        InitialSyncStatusEvent event =
-                EventBus.getDefault().getStickyEvent(InitialSyncStatusEvent.class);
-        if (event == null) {
-            return InitialSyncStatusEvent.SyncStatus.UNKNOWN;
-        }
-
-        return event.status;
-    }
-
-    /**
      * Cancels an in-flight, non-periodic sync.
      */
     public void cancelOnDemandSync() {
@@ -67,8 +51,6 @@ public class SyncManager {
         LOG.d("In SyncManager#forceSync()");
         if (!isSyncing() && !isSyncPending()) {
             LOG.d("Forcing new sync");
-            EventBus.getDefault().postSticky(new InitialSyncStatusEvent(
-                    InitialSyncStatusEvent.SyncStatus.REQUESTED));
             GenericAccountService.triggerRefresh(
                     PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
         } else {
@@ -110,46 +92,20 @@ public class SyncManager {
      */
     public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
 
-        public void updateInitialSyncState(
-                InitialSyncStatusEvent.SyncStatus precondition,
-                InitialSyncStatusEvent.SyncStatus newStatus) {
-            InitialSyncStatusEvent event =
-                    EventBus.getDefault().getStickyEvent(InitialSyncStatusEvent.class);
-            if (event == null) {
-                return;
-            }
-
-            if (event.status == precondition) {
-                LOG.i("Updating initial sync status (%s => %s)",
-                        precondition.name(),
-                        newStatus.name());
-                EventBus.getDefault().postSticky(event);
-            }
-        }
-
         @Override
         public void onReceive(Context context, Intent intent) {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
                 case STARTED:
                     LOG.i("Sync started");
-                    updateInitialSyncState(
-                            InitialSyncStatusEvent.SyncStatus.REQUESTED,
-                            InitialSyncStatusEvent.SyncStatus.STARTED);
                     EventBus.getDefault().post(new SyncStartedEvent());
                     break;
                 case COMPLETED:
                     LOG.i("Sync completed");
-                    updateInitialSyncState(
-                            InitialSyncStatusEvent.SyncStatus.STARTED,
-                            InitialSyncStatusEvent.SyncStatus.SUCCEEDED);
                     EventBus.getDefault().post(new SyncSucceededEvent());
                     break;
                 case FAILED:
                     LOG.i("Sync failed");
-                    updateInitialSyncState(
-                            InitialSyncStatusEvent.SyncStatus.STARTED,
-                            InitialSyncStatusEvent.SyncStatus.FAILED);
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case IN_PROGRESS:
@@ -160,12 +116,6 @@ public class SyncManager {
                     break;
                 case CANCELED:
                     LOG.i("Sync was canceled.");
-                    updateInitialSyncState(
-                            InitialSyncStatusEvent.SyncStatus.REQUESTED,
-                            InitialSyncStatusEvent.SyncStatus.CANCELED);
-                    updateInitialSyncState(
-                            InitialSyncStatusEvent.SyncStatus.STARTED,
-                            InitialSyncStatusEvent.SyncStatus.CANCELED);
                     EventBus.getDefault().post(new SyncCanceledEvent());
                     break;
                 case -1:
