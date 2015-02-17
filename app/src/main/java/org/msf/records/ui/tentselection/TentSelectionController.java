@@ -250,6 +250,7 @@ final class TentSelectionController {
             if (!isLocationTreeValid()) {
                 LOG.i("Found no locations in the local datastore; forcing a sync.");
                 mSyncManager.forceSync();
+                updateUi(); // Ensure cancel button shows up.
                 return;
             }
 
