@@ -48,14 +48,9 @@ public class SyncManager {
      * TODO(kpy): Avoid triggering a new full sync if a full sync is already underway.
      */
     public void forceSync() {
-        LOG.d("In SyncManager#forceSync()");
-        if (!isSyncing() && !isSyncPending()) {
-            LOG.d("Forcing new sync");
-            GenericAccountService.triggerRefresh(
-                    PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
-        } else {
-            LOG.d("Not starting a new sync: another sync is already active or pending.");
-        }
+        LOG.d("Forcing new sync");
+        GenericAccountService.triggerRefresh(
+                PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
     }
 
     /**
