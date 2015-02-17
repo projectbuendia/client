@@ -423,14 +423,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     String patientAssignedLocationUuid =
                             patient.assigned_location == null
                                     ? null : patient.assigned_location.uuid;
-                    if (!Objects.equals(patient.given_name, givenName) ||
-                            !Objects.equals(patient.family_name, familyName) ||
-                            !Objects.equals(patient.uuid, uuid) ||
-                            !Objects.equals(patient.admission_timestamp, admissionTimestamp) ||
-                            !Objects.equals(patientAssignedLocationUuid, locationUuid) ||
-                            !Objects.equals(patient.birthdate, birthdate) ||
-                            !Objects.equals(patient.gender, gender) ||
-                            !Objects.equals(patient.id, id)) {
+                    if (!Objects.equals(patient.given_name, givenName)
+                            || !Objects.equals(patient.family_name, familyName)
+                            || !Objects.equals(patient.uuid, uuid)
+                            || !Objects.equals(patient.admission_timestamp, admissionTimestamp)
+                            || !Objects.equals(patientAssignedLocationUuid, locationUuid)
+                            || !Objects.equals(patient.birthdate, birthdate)
+                            || !Objects.equals(patient.gender, gender)
+                            || !Objects.equals(patient.id, id)) {
                         // Update existing record
                         LOG.i("Scheduling update: " + existingUri);
                         batch.add(ContentProviderOperation.newUpdate(existingUri)
