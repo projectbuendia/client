@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.RequestFuture;
 
 import net.sqlcipher.database.SQLiteException;
 
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A store for users.
@@ -35,7 +37,9 @@ public class UserStore {
     /**
      * Loads the known users from local store.
      */
-    public Set<User> loadKnownUsers() {
+    public Set<User> loadKnownUsers()
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
         Cursor cursor = null;
         ContentProviderClient client = null;
         try {
@@ -85,47 +89,27 @@ public class UserStore {
     /**
      * Syncs known users with the server.
      */
-    public Set<User> syncKnownUsers() {
+    public Set<User> syncKnownUsers()
+            throws ExecutionException, InterruptedException, RemoteException,
+            OperationApplicationException {
         LOG.i("Getting user list from server");
-        // Make an async call to the server and use a CountDownLatch to block until the result is
-        // returned.
-        final CountDownLatch latch = new CountDownLatch(1);
-        final Set<User> users = new HashSet<>();
-        App.getServer().listUsers(
-                null,
-                new Response.Listener<List<User>>() {
-                    @Override
-                    public void onResponse(List<User> response) {
-                        users.addAll(response);
-                        latch.countDown();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.e("Unexpected error loading user list", error);
-                        latch.countDown();
-                    }
-                });
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            LOG.e(e, "Interrupted while loading user list");
-        }
+        RequestFuture<List<User>> future = RequestFuture.newFuture();
+        App.getServer().listUsers(null, future, future);
+        List<User> users = future.get();
+        HashSet<User> userSet = new HashSet<>();
+        userSet.addAll(users);
 
         LOG.i("Updating user db with retrieved users");
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
                         Contracts.Users.CONTENT_URI);
         try {
-            client.applyBatch(RpcToDb.userSetFromRpcToDb(users, new SyncResult()));
-        } catch (RemoteException | OperationApplicationException e) {
-            LOG.e(e, "Failed to update database");
+            client.applyBatch(RpcToDb.userSetFromRpcToDb(userSet, new SyncResult()));
         } finally {
             client.release();
         }
 
-        return users;
+        return userSet;
     }
 
     /**

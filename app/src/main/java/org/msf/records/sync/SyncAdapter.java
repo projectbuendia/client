@@ -32,7 +32,9 @@ import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
+import org.msf.records.net.model.User;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.user.UserManager;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
@@ -41,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -263,6 +266,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
+        } catch (UserManager.UserSyncException e) {
+            LOG.e(e, "Error syncing users");
+            syncResult.stats.numIoExceptions++;
+            getContext().sendBroadcast(syncFailedIntent);
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
@@ -541,7 +548,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult,
                                     Bundle extras)
-            throws RemoteException {
+            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
 
         // Get call patients from the cache.
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
@@ -561,37 +568,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
-        try {
-            Instant lastSyncTime = getLastSyncTime(provider);
-            Instant newSyncTime;
-            checkCancellation("Sync was canceled before updating observations.");
-            if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
-                newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
-                        chartServer, listFuture, timingLogger);
-            } else {
-                newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
-                        timingLogger);
-            }
-            // This is completely unsafe as regards exceptions - if we fail to store sync time then
-            // we have added observations and not stored the sync time. However, getting this right
-            // transactionally through a content provider interface is not easy, we'd have to update
-            // everything through a single URL. As deletes and inserts aren't safe right now, this
-            // will do.
-            // TODO(nfortescue): make this transactionally safe.
-            storeLastSyncTime(provider, newSyncTime);
-        } catch (InterruptedException e) {
-            LOG.e(e, "Error interruption: ");
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (ExecutionException e) {
-            LOG.e(e, "Error failed to execute: ");
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (Exception e) {
-            LOG.e(e, "Error reading from network: ");
-            syncResult.stats.numIoExceptions++;
-            return;
+        Instant lastSyncTime = getLastSyncTime(provider);
+        Instant newSyncTime;
+        checkCancellation("Sync was canceled before updating observations.");
+        if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
+            newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
+                    chartServer, listFuture, timingLogger);
+        } else {
+            newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
+                    timingLogger);
         }
+        // This is completely unsafe as regards exceptions - if we fail to store sync time then
+        // we have added observations and not stored the sync time. However, getting this right
+        // transactionally through a content provider interface is not easy, we'd have to update
+        // everything through a single URL. As deletes and inserts aren't safe right now, this
+        // will do.
+        // TODO(nfortescue): make this transactionally safe.
+        storeLastSyncTime(provider, newSyncTime);
+
         checkCancellation("Sync was canceled before deleting temporary observations.");
         // Remove all temporary observations now we have the real ones
         provider.delete(Contracts.Observations.CONTENT_URI,
@@ -722,7 +716,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 patientChartList.snapshotTime.toInstant();
     }
 
-    private void updateUsers(final ContentProviderClient provider, SyncResult syncResult) {
-        App.getUserManager().syncKnownUsers();
+    private void updateUsers(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException, UserManager.UserSyncException {
+        App.getUserManager().syncKnownUsersSynchronously();
     }
 }
