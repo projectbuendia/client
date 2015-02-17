@@ -319,13 +319,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         final String[] projection = PatientProjection.getProjectionColumns();
 
-        LOG.d("Before network call");
+        LOG.d("Before network call to retrieve patients");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
 
         //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
         List<Patient> patients = future.get();
-        LOG.d("After network call");
+        LOG.d("After network call to retrieve patients");
+        checkCancellation("Sync was canceled before parsing retrieved patient data.");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
 
@@ -339,6 +340,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
+        checkCancellation("Sync was canceled before merging patient data.");
         LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
         LOG.i("Found " + patients.size() + " external entries. Computing merge solution...");
 
@@ -350,68 +352,83 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Long admissionTimestamp;
 
         //iterate through the list of patients
-        while(c.moveToNext()){
-            syncResult.stats.numEntries++;
+        try {
+            while (c.moveToNext()) {
+                checkCancellation("Sync was canceled while merging retrieved patient data.");
+                syncResult.stats.numEntries++;
 
-            id = c.getString(PatientProjection.COLUMN_ID);
-            givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
-            familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
-            uuid = c.getString(PatientProjection.COLUMN_UUID);
-            admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
-            locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
-            if (locationUuid == null) {
-                locationUuid = Zone.DEFAULT_LOCATION;
-            }
-            birthdate = Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
-            gender = c.getString(PatientProjection.COLUMN_GENDER);
-
-            Patient patient = patientsMap.get(id);
-            if (patient != null) {
-                // Entry exists. Remove from entry map to prevent insert later.
-                patientsMap.remove(id);
-                // Check to see if the entry needs to be updated
-                Uri existingUri = Contracts.Patients.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
-
-                //check if it needs updating
-                String patientAssignedLocationUuid =
-                        patient.assigned_location == null ? null : patient.assigned_location.uuid;
-                if (!Objects.equals(patient.given_name, givenName) ||
-                        !Objects.equals(patient.family_name, familyName) ||
-                        !Objects.equals(patient.uuid, uuid) ||
-                        !Objects.equals(patient.admission_timestamp, admissionTimestamp) ||
-                        !Objects.equals(patientAssignedLocationUuid, locationUuid) ||
-                        !Objects.equals(patient.birthdate, birthdate) ||
-                        !Objects.equals(patient.gender, gender) ||
-                        !Objects.equals(patient.id, id)) {
-                    // Update existing record
-                    LOG.i("Scheduling update: " + existingUri);
-                    batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(Contracts.Patients.GIVEN_NAME, patient.given_name)
-                            .withValue(Contracts.Patients.FAMILY_NAME, patient.family_name)
-                            .withValue(Contracts.Patients.UUID, patient.uuid)
-                            .withValue(Contracts.Patients.ADMISSION_TIMESTAMP, patient.admission_timestamp)
-                            .withValue(Contracts.Patients.LOCATION_UUID, patientAssignedLocationUuid)
-                            .withValue(Contracts.Patients.BIRTHDATE, Utils.localDateToString(patient.birthdate))
-                            .withValue(Contracts.Patients.GENDER, patient.gender)
-                            .withValue(Contracts.Patients._ID, patient.id)
-                            .build());
-                    syncResult.stats.numUpdates++;
-                } else {
-                    LOG.i("No action required for " + existingUri);
+                id = c.getString(PatientProjection.COLUMN_ID);
+                givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
+                familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
+                uuid = c.getString(PatientProjection.COLUMN_UUID);
+                admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+                locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
+                if (locationUuid == null) {
+                    locationUuid = Zone.DEFAULT_LOCATION;
                 }
-            } else {
-                // Entry doesn't exist. Remove it from the database.
-                Uri deleteUri = Contracts.Patients.CONTENT_URI.buildUpon()
-                        .appendPath(id).build();
-                LOG.i("Scheduling delete: " + deleteUri);
-                batch.add(ContentProviderOperation.newDelete(deleteUri).build());
-                syncResult.stats.numDeletes++;
+                birthdate =
+                        Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
+                gender = c.getString(PatientProjection.COLUMN_GENDER);
+
+                Patient patient = patientsMap.get(id);
+                if (patient != null) {
+                    // Entry exists. Remove from entry map to prevent insert later.
+                    patientsMap.remove(id);
+                    // Check to see if the entry needs to be updated
+                    Uri existingUri =
+                            Contracts.Patients.CONTENT_URI.buildUpon()
+                                    .appendPath(String.valueOf(id)).build();
+
+                    //check if it needs updating
+                    String patientAssignedLocationUuid =
+                            patient.assigned_location == null
+                                    ? null : patient.assigned_location.uuid;
+                    if (!Objects.equals(patient.given_name, givenName) ||
+                            !Objects.equals(patient.family_name, familyName) ||
+                            !Objects.equals(patient.uuid, uuid) ||
+                            !Objects.equals(patient.admission_timestamp, admissionTimestamp) ||
+                            !Objects.equals(patientAssignedLocationUuid, locationUuid) ||
+                            !Objects.equals(patient.birthdate, birthdate) ||
+                            !Objects.equals(patient.gender, gender) ||
+                            !Objects.equals(patient.id, id)) {
+                        // Update existing record
+                        LOG.i("Scheduling update: " + existingUri);
+                        batch.add(ContentProviderOperation.newUpdate(existingUri)
+                                .withValue(Contracts.Patients.GIVEN_NAME, patient.given_name)
+                                .withValue(Contracts.Patients.FAMILY_NAME, patient.family_name)
+                                .withValue(Contracts.Patients.UUID, patient.uuid)
+                                .withValue(
+                                        Contracts.Patients.ADMISSION_TIMESTAMP,
+                                        patient.admission_timestamp)
+                                .withValue(
+                                        Contracts.Patients.LOCATION_UUID,
+                                        patientAssignedLocationUuid)
+                                .withValue(
+                                        Contracts.Patients.BIRTHDATE,
+                                        Utils.localDateToString(patient.birthdate))
+                                .withValue(Contracts.Patients.GENDER, patient.gender)
+                                .withValue(Contracts.Patients._ID, patient.id)
+                                .build());
+                        syncResult.stats.numUpdates++;
+                    } else {
+                        LOG.i("No action required for " + existingUri);
+                    }
+                } else {
+                    // Entry doesn't exist. Remove it from the database.
+                    Uri deleteUri = Contracts.Patients.CONTENT_URI.buildUpon()
+                            .appendPath(id).build();
+                    LOG.i("Scheduling delete: " + deleteUri);
+                    batch.add(ContentProviderOperation.newDelete(deleteUri).build());
+                    syncResult.stats.numDeletes++;
+                }
             }
+        } finally {
+            c.close();
         }
-        c.close();
 
 
         for (Patient e : patientsMap.values()) {
+            checkCancellation("Sync was canceled while inserting new patient data.");
             LOG.i("Scheduling insert: entry_id=" + e.id);
             ContentProviderOperation.Builder builder =
                     ContentProviderOperation.newInsert(Contracts.Patients.CONTENT_URI)
@@ -436,6 +453,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numInserts++;
         }
         LOG.i("Merge solution ready. Applying batch update");
+        checkCancellation("Sync was canceled before completing patient merge operation.");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
         LOG.i("batch apply done");
         mContentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
@@ -455,6 +473,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
         for (Concept concept : conceptList.results) {
+            checkCancellation("Sync was canceled while determining concepts to insert.");
             // This is safe because we have implemented insert on the content provider
             // with replace.
             ContentValues conceptInsert = new ContentValues();
@@ -464,6 +483,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             conceptInserts.add(conceptInsert);
             syncResult.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
+                checkCancellation("Sync was canceled while determining concept names to insert.");
                 String locale = entry.getKey();
                 if (locale == null) {
                     LOG.e("null locale in concept name rpc for " + concept);
@@ -482,8 +502,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 syncResult.stats.numInserts++;
             }
         }
+        checkCancellation("Sync was canceled before inserting concepts.");
         provider.bulkInsert(Contracts.Concepts.CONTENT_URI,
                 conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
+        checkCancellation("Sync was canceled before inserting concept names.");
         provider.bulkInsert(Contracts.ConceptNames.CONTENT_URI,
                 conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
     }
@@ -492,6 +514,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> batch = RpcToDb.locationsRpcToDb(syncResult);
+        checkCancellation("Sync was canceled before applying location updates.");
         LOG.i("locations Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
@@ -508,8 +531,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<ChartStructure> future = RequestFuture.newFuture();
         chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
         ChartStructure conceptList = future.get();
+        checkCancellation("Sync was canceled before applying chart structure deletions.");
         // When we do a chart update, delete everything first.
         provider.delete(Contracts.Charts.CONTENT_URI, null, null);
+        checkCancellation("Sync was canceled before applying chart structure insertions.");
         syncResult.stats.numDeletes++;
         provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
     }
@@ -530,6 +555,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             c.close();
         }
 
+        checkCancellation("Sync was canceled before requesting observations.");
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
         RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
@@ -538,6 +564,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             Instant lastSyncTime = getLastSyncTime(provider);
             Instant newSyncTime;
+            checkCancellation("Sync was canceled before updating observations.");
             if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
                 newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
                         chartServer, listFuture, timingLogger);
@@ -565,6 +592,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numIoExceptions++;
             return;
         }
+        checkCancellation("Sync was canceled before deleting temporary observations.");
         // Remove all temporary observations now we have the real ones
         provider.delete(Contracts.Observations.CONTENT_URI,
                 Contracts.Observations.TEMP_CACHE + "!=0",
@@ -610,6 +638,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
+        checkCancellation("Sync was canceled before processing observation RPC results.");
         for (PatientChart patientChart : patientChartList.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting future");
@@ -625,8 +654,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             timingLogger.addSplit("added obs to list");
         }
         timingLogger.addSplit("making operations");
+        checkCancellation("Sync was canceled before bulk deleting observations.");
         bulkDelete(provider, toDelete);
         timingLogger.addSplit("bulk deletes");
+        checkCancellation("Sync was canceled before bulk inserting observations.");
         provider.bulkInsert(Contracts.Observations.CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
@@ -666,6 +697,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");
+        checkCancellation("Sync was canceled before processing observation RPC results.");
         for (PatientChart patientChart : patientChartList.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting incremental future");
@@ -681,6 +713,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         timingLogger.addSplit("making operations");
         if (toInsert.size() > 0) {
+            checkCancellation("Sync was canceled before inserting incremental observations.");
             provider.bulkInsert(Contracts.Observations.CONTENT_URI,
                     toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");
