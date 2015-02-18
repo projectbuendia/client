@@ -36,17 +36,10 @@ public class UpdateNotificationController {
         App.getInstance().inject(this);
     }
 
+    /** Activate the controller.  Called whenever user enters a new activity. */
     public void init() {
         EventBus.getDefault().register(this);
         mUpdateManager.checkForUpdate();
-        updateAvailabilityNotifications();
-    }
-
-    public void onEventMainThread(UpdateAvailableEvent event) {
-        updateAvailabilityNotifications();
-    }
-
-    public void onEventMainThread(UpdateReadyToInstallEvent event) {
         updateAvailabilityNotifications();
     }
 
@@ -76,6 +69,16 @@ public class UpdateNotificationController {
             mAvailableUpdateInfo = null;
             mUi.hideSoftwareUpdateNotifications();
         }
+    }
+
+    /** Updates the UI in response to updated knowledge of available .apks. */
+    public void onEventMainThread(UpdateAvailableEvent event) {
+        updateAvailabilityNotifications();
+    }
+
+    /** Updates the UI in response to completion of an .apk download. */
+    public void onEventMainThread(UpdateReadyToInstallEvent event) {
+        updateAvailabilityNotifications();
     }
 
     /** Starts a download of the last known available update. */

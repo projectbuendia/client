@@ -32,7 +32,8 @@ public class AvailableUpdateInfo {
                 UpdateManager.MINIMAL_VERSION,
                 null /*updateUri*/);
     }
-    
+
+    /** Converts the info as a string for display. */
     public String toString() {
         return "AvailableUpdateInfo(isValid=" + isValid + ", "
                 + "currentVersion=" + currentVersion + ", "
