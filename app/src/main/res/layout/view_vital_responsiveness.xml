@@ -21,7 +21,7 @@
             android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
             android:textSize="16sp"
-            android:text="Consciousness" />
+            android:text="@string/consciousness" />
 
         <org.msf.records.widget.AutoResizeTextView
             android:id="@+id/patient_chart_vital_responsiveness"

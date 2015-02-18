@@ -92,9 +92,8 @@
     <string name="latest_pcr_label">Ebola test</string>
     <string name="latest_pcr_label_with_date">Ebola test (%s)</string>
     <string name="action_add_test_result">Add test result</string>
-    <string name="pregnant_with_iv">(Pregnant, IV Fitted)</string>
-    <string name="pregnant">(Pregnant)</string>
-    <string name="iv_fitted">(IV Fitted)</string>
+    <string name="pregnant">Pregnant</string>
+    <string name="iv_fitted">IV Fitted</string>
     <string name="status_short_desc_unknown">-</string>
     <string name="status_short_desc_well">1</string>
     <string name="status_short_desc_unwell">2</string>
@@ -105,7 +104,7 @@
     <string name="status_short_desc_discharged_cured">7</string>
     <string name="status_short_desc_suspected_dead">6?</string>
     <string name="status_short_desc_confirmed_dead">6</string>
-    <string name="action_assign_condition">General Condition</string>
+    <string name="action_assign_condition">Condition</string>
     <string name="avpu_unknown">\?</string>
     <string name="avpu_alert">A</string>
     <string name="avpu_voice">V</string>
@@ -165,4 +164,6 @@
     <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
     <string name="submitting_encounter_form_title">Submitting Form</string>
     <string name="submitting_encounter_form_message">Please wait while form is submitted.</string>
+    <string name="consciousness">Consciousness</string>
+    <string name="condition">Condition</string>
 </resources>

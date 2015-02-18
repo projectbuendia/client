@@ -34,7 +34,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
     /** Adds a new user and logs in. */
     public void testAddUser() {
         screenshot("Test Start");
-        long n = new Date().getTime() % 1000;
+        long n = new Date().getTime() % 100000;
         String username = "test" + n;
         String given = "Testgiven" + n;
         String family = "Testfamily" + n;
