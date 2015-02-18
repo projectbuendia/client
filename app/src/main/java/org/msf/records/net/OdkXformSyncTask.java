@@ -194,10 +194,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         protected File doInBackground(FormToWrite[] params) {
             Preconditions.checkArgument(params.length != 0);
 
-            // really really hacky - fix the form problem, should be done server side
-            String form = params[0].form.replaceAll("&amp;", "&");
-
-
+            String form = params[0].form;
             File proposedPath = params[0].path;
             // Write file into OpenMRS forms directory.
             if (!writeStringToFile(form, proposedPath)) {
