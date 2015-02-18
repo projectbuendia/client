@@ -14,7 +14,7 @@ import org.msf.records.utils.Logger;
  */
 public class VolleySingleton {
 
-    private final Logger LOG = Logger.create();
+    private final static Logger LOG = Logger.create();
     private static VolleySingleton mInstance;
     private final RequestQueue mRequestQueue;
 
