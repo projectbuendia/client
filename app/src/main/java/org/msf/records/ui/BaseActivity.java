@@ -47,6 +47,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onResume();
 
         EventBus.getDefault().registerSticky(this);
+        App.getInstance().getHealthMonitor().start();
     }
 
     @Override
@@ -54,6 +55,7 @@ public abstract class BaseActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);
 
         super.onPause();
+        App.getInstance().getHealthMonitor().stop();
     }
 
     @Override
