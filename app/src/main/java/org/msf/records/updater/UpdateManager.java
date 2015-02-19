@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -17,8 +18,8 @@ import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
+import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.utils.LexicographicVersion;
 import org.msf.records.utils.Logger;
@@ -48,7 +49,7 @@ public class UpdateManager {
      * checkForUpdate() within this period will not check the server for new updates.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_PERIOD_SECONDS = 120;
+    public static final int CHECK_PERIOD_SECONDS = 60 * 60; // Default to 1hr.
 
     /**
      * The minimal version number.
@@ -70,8 +71,7 @@ public class UpdateManager {
     private final PackageManager mPackageManager;
     private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
-
-    private final String mDownloadDirectory;
+    private final SharedPreferences mSharedPreferences;
 
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
@@ -85,18 +85,16 @@ public class UpdateManager {
     // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
 
-    UpdateManager(Application application, UpdateServer updateServer) {
+    UpdateManager(Application application, UpdateServer updateServer,
+                  SharedPreferences sharedPreferences) {
         mApplication = application;
         mServer = updateServer;
 
         mPackageManager = application.getPackageManager();
         mDownloadManager =
                 (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
-
+        mSharedPreferences = sharedPreferences;
         mCurrentVersion = getCurrentVersion();
-
-        mDownloadDirectory = getDownloadDirectory(application);
-
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
         mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
     }
@@ -110,8 +108,9 @@ public class UpdateManager {
      * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
     public void checkForUpdate() {
+        int checkPeriodSeconds = getCheckPeriodSeconds();
         DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_PERIOD_SECONDS))) {
+        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(checkPeriodSeconds))) {
             if (!isDownloadInProgress()) {
                 // This immediate check just updates the event state to match any current
                 // knowledge of an available or downloaded update.  The more interesting
@@ -162,10 +161,15 @@ public class UpdateManager {
                     new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
             try {
+                String dir = getDownloadDirectory();
+                if (dir == null) {
+                    LOG.e("no external storage is available, can't start download");
+                    return false;
+                }
                 DownloadManager.Request request =
                         new DownloadManager.Request(availableUpdateInfo.updateUri)
                                 .setDestinationInExternalPublicDir(
-                                        mDownloadDirectory,
+                                        dir,
                                         MODULE_NAME + availableUpdateInfo.availableVersion + ".apk")
                                 .setNotificationVisibility(
                                         DownloadManager.Request.VISIBILITY_VISIBLE);
@@ -203,15 +207,32 @@ public class UpdateManager {
         return false;
     }
 
-    /** Returns the relative path to the directory in which updates will be downloaded. */
-    private String getDownloadDirectory(Application application) {
+    /**
+     * Returns the relative path to the directory in which updates will be downloaded,
+     * or null if storage is unavailable.
+     */
+    private String getDownloadDirectory() {
         String externalStorageDirectory =
                 Environment.getExternalStorageDirectory().getAbsolutePath();
-        String downloadDirectory = application.getExternalFilesDir(null).getAbsolutePath();
+        File externalFilesDir = mApplication.getExternalFilesDir(null);
+        if (externalFilesDir == null) {
+            return null;
+        }
+        String downloadDirectory = externalFilesDir.getAbsolutePath();
         if (downloadDirectory.startsWith(externalStorageDirectory)) {
             downloadDirectory = downloadDirectory.substring(externalStorageDirectory.length());
         }
         return downloadDirectory;
+    }
+
+    /**
+     * Get the time between updates from the shared preferences.
+     */
+    private int getCheckPeriodSeconds() {
+        if (mSharedPreferences == null) {
+            return CHECK_PERIOD_SECONDS;
+        }
+        return mSharedPreferences.getInt("apk_update_interval_secs", CHECK_PERIOD_SECONDS);
     }
 
     /** Returns the version of the application. */
@@ -240,8 +261,13 @@ public class UpdateManager {
     }
 
     private DownloadedUpdateInfo getLastDownloadedUpdateInfo() {
+        String dir = getDownloadDirectory();
+        if (dir == null) {
+            LOG.e("no external storage is available, no download directory for updates");
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
         File downloadDirectoryFile =
-                new File(Environment.getExternalStorageDirectory(), mDownloadDirectory);
+                new File(Environment.getExternalStorageDirectory(), dir);
         if (!downloadDirectoryFile.exists()) {
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
@@ -282,6 +308,7 @@ public class UpdateManager {
                 mLastAvailableUpdateInfo =
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
                 mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
+                LOG.i("received package index; lastAvailableUpdate: " + mLastAvailableUpdateInfo);
                 postEvents();
             }
         }
@@ -297,7 +324,7 @@ public class UpdateManager {
 
             LOG.w(
                     error,
-                    "Server failed with " + failure + " while downloading update. Retry will "
+                    "Server failed with " + failure + " while fetching package index.  Retry will "
                             + "occur shortly.");
             // assume no update is available
             EventBus.getDefault().post(new UpdateNotAvailableEvent());
@@ -371,9 +398,8 @@ public class UpdateManager {
                     }
                 }
 
-                Uri uri;
                 try {
-                    uri = Uri.parse(uriString);
+                    Uri.parse(uriString);
                 } catch (IllegalArgumentException e) {
                     LOG.w(e, "Path for downloaded file is invalid: %1$s.", uriString);
                     // TODO(dxchen): Consider firing an event.
@@ -382,6 +408,7 @@ public class UpdateManager {
 
                 mLastDownloadedUpdateInfo =
                         DownloadedUpdateInfo.fromUri(mCurrentVersion, uriString);
+                LOG.i("downloaded update: " + mLastDownloadedUpdateInfo);
 
                 if (!mLastDownloadedUpdateInfo.isValid) {
                     LOG.w(

@@ -33,6 +33,14 @@ public class AvailableUpdateInfo {
                 null /*updateUri*/);
     }
 
+    /** Converts the info as a string for display. */
+    public String toString() {
+        return "AvailableUpdateInfo(isValid=" + isValid + ", "
+                + "currentVersion=" + currentVersion + ", "
+                + "availableVersion=" + availableVersion + ", "
+                + "updateUri=" + updateUri + ")";
+    }
+
     /**
      * Creates an instance of {@link AvailableUpdateInfo} from a server response.
      */
