@@ -202,7 +202,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
             try {
                 onView(matcher).check(matches(isDisplayed()));
                 viewFound = true;
-            } catch (Exception e) {
+            } catch (Throwable t) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {

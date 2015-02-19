@@ -41,6 +41,13 @@ public class SyncManager {
         ContentResolver.cancelSync(
                 GenericAccountService.getAccount(),
                 Contracts.CONTENT_AUTHORITY);
+
+        // If sync was pending, it should now be idle and we can consider the sync immediately
+        // canceled.
+        if (!isSyncPending() && !isSyncing()) {
+            LOG.i("Sync was canceled before it began -- immediately firing SyncCanceledEvent.");
+            EventBus.getDefault().post(new SyncCanceledEvent());
+        }
     }
 
     /**
