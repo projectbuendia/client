@@ -10,12 +10,15 @@ import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.actions.SyncCancelRequestedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.sync.SyncCanceledEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncProgressEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.LoadingState;
 import org.msf.records.ui.patientlist.PatientSearchController;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
@@ -44,7 +47,9 @@ final class TentSelectionController {
 
         void showSyncFailedDialog(boolean show);
 
-        void setBusyLoading(boolean busy);
+        void setLoadingState(LoadingState loadingState);
+
+        void finish();
     }
 
     public interface TentFragmentUi {
@@ -62,6 +67,8 @@ final class TentSelectionController {
         void showIncrementalSyncProgress(int progress, String label);
 
         void resetSyncProgress();
+
+        void showSyncCancelRequested();
     }
 
     private final AppModel mAppModel;
@@ -162,7 +169,7 @@ final class TentSelectionController {
 
     private void updateUi() {
         boolean hasValidTree = isLocationTreeValid();
-        mUi.setBusyLoading(!hasValidTree);
+        updateLoadingState();
         for (TentFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.setBusyLoading(!hasValidTree);
 
@@ -186,8 +193,33 @@ final class TentSelectionController {
         }
     }
 
+    private void updateLoadingState() {
+        boolean hasLocationTree = isLocationTreeValid();
+        if (hasLocationTree) {
+            mUi.setLoadingState(LoadingState.LOADED);
+            return;
+        }
+
+        if (mSyncManager.isSyncing() || mSyncManager.isSyncPending()) {
+            mUi.setLoadingState(LoadingState.SYNCING);
+            return;
+        }
+
+        mUi.setLoadingState(LoadingState.LOADING);
+    }
+
     @SuppressWarnings("unused") // Called by reflection from EventBus
     private final class EventBusSubscriber {
+
+        public void onEventMainThread(SyncCancelRequestedEvent event) {
+            for (TentFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.showSyncCancelRequested();
+            }
+        }
+
+        public void onEventMainThread(SyncCanceledEvent event) {
+            mUi.finish();
+        }
 
         public void onEventMainThread(SyncProgressEvent event) {
             for (TentFragmentUi fragmentUi : mFragmentUis) {
@@ -218,6 +250,7 @@ final class TentSelectionController {
             if (!isLocationTreeValid()) {
                 LOG.i("Found no locations in the local datastore; forcing a sync.");
                 mSyncManager.forceSync();
+                mUi.setLoadingState(LoadingState.SYNCING); // Ensure cancel button shows up.
                 return;
             }
 

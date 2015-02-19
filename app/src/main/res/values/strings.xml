@@ -166,4 +166,7 @@
     <string name="submitting_encounter_form_message">Please wait while form is submitted.</string>
     <string name="consciousness">Consciousness</string>
     <string name="condition">Condition</string>
+    <string name="cancel_sync">Cancel Sync</string>
+    <string name="cancelling_sync">Cancelling sync...</string>
+    <string name="sync_starting">Starting sync...</string>
 </resources>

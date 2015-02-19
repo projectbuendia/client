@@ -20,6 +20,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.LoadingState;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListFragment;
@@ -183,8 +184,13 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         }
 
         @Override
-        public void setBusyLoading(boolean busy) {
-            setOptionsMenuEnabled(!busy);
+        public void setLoadingState(LoadingState loadingState) {
+            TentSelectionActivity.this.setLoadingState(loadingState);
+        }
+
+        @Override
+        public void finish() {
+            TentSelectionActivity.this.finish();
         }
 
         @Override

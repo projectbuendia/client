@@ -107,4 +107,12 @@ public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
 
         return registry;
     }
+
+    /**
+     * Provides an {@link SQLiteDatabaseTransactionHelper} for beginning and ending savepoints
+     * (nested transactions).
+     */
+    public SQLiteDatabaseTransactionHelper getDbTransactionHelper() {
+        return new SQLiteDatabaseTransactionHelper(getDatabaseHelper());
+    }
 }

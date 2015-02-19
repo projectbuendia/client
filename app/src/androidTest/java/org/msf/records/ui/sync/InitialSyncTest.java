@@ -1,7 +1,12 @@
 package org.msf.records.ui.sync;
 
+import com.google.android.apps.common.testing.ui.espresso.Espresso;
+
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.sync.SyncCanceledEvent;
+
+import java.util.UUID;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
@@ -63,5 +68,26 @@ public class InitialSyncTest extends SyncTestCase {
                 .perform(click());
 
         screenshot("Final State");
+    }
+
+    /** Tests the behavior of the sync cancel button. */
+    public void testSyncCancelButton() {
+        // Cancel the sync.
+        EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        onView(withId(R.id.action_cancel)).perform(click());
+        Espresso.registerIdlingResources(syncCanceledResource);
+
+        // Select guest user again.
+        checkViewDisplayedSoon(withText("Guest User"));
+        onView(withText("Guest User")).perform(click());
+
+        // Sync should start anew.
+        checkViewDisplayedSoon(withId(R.id.progress_fragment_progress_bar));
+
+        // The second sync should actually complete.
+        waitForProgressFragment();
+        checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
+        checkViewDisplayedSoon(withText("S1"));
     }
 }
