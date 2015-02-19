@@ -17,8 +17,6 @@ import android.widget.TextView;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.diagnostics.TroubleshootingAction;
-import org.msf.records.events.actions.DownloadRequestedEvent;
-import org.msf.records.events.actions.InstallationRequestedEvent;
 import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.updater.AvailableUpdateInfo;
 import org.msf.records.updater.DownloadedUpdateInfo;
@@ -49,6 +47,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onResume();
 
         EventBus.getDefault().registerSticky(this);
+        App.getInstance().getHealthMonitor().start();
     }
 
     @Override
@@ -56,6 +55,7 @@ public abstract class BaseActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);
 
         super.onPause();
+        App.getInstance().getHealthMonitor().stop();
     }
 
     @Override
@@ -313,7 +313,6 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
 
-        UpdateNotificationController mController = null;
         final TextView mUpdateMessage;
         final TextView mUpdateAction;
 
@@ -324,26 +323,18 @@ public abstract class BaseActivity extends FragmentActivity {
             mUpdateAction = (TextView) view.findViewById(R.id.status_bar_default_action);
         }
 
-        public void setController(UpdateNotificationController controller) {
-            mController = controller;
-        }
-
         @Override
         public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
             setStatusVisibility(View.VISIBLE);
             mUpdateMessage.setText(R.string.snackbar_update_available);
-            if (mController != null) {
-                mUpdateAction.setText(R.string.snackbar_action_download);
-                mUpdateAction.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        setStatusVisibility(View.GONE);
-                        EventBus.getDefault().post(
-                                new DownloadRequestedEvent());
-                    }
-                });
-            }
-
+            mUpdateAction.setText(R.string.snackbar_action_download);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    EventBus.getDefault().post(new DownloadRequestedEvent());
+                }
+            });
         }
 
         @Override
@@ -355,8 +346,7 @@ public abstract class BaseActivity extends FragmentActivity {
                 @Override
                 public void onClick(View view) {
                     setStatusVisibility(View.GONE);
-                    EventBus.getDefault().post(
-                            new InstallationRequestedEvent());
+                    EventBus.getDefault().post(new InstallationRequestedEvent());
                 }
             });
         }
@@ -366,5 +356,11 @@ public abstract class BaseActivity extends FragmentActivity {
             setStatusVisibility(View.GONE);
         }
     }
+
+    /** The user has requested a download of the last known available software update. */
+    public static class DownloadRequestedEvent { }
+
+    /** The user has requested installation of the last downloaded software update. */
+    public static class InstallationRequestedEvent { }
 }
 
