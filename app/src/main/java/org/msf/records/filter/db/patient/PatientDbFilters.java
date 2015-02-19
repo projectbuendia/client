@@ -21,7 +21,7 @@ public final class PatientDbFilters {
         // TODO(akalachman): Remove FilterGroup dep (only used for setName).
         new SimpleSelectionFilterGroup(
                 new ConceptFilter(Concepts.PREGNANCY_UUID, Concepts.YES_UUID)).setName("Pregnant"),
-        new SimpleSelectionFilterGroup(new AgeFilter(5)).setName("Children Under 5"),
+        new SimpleSelectionFilterGroup(new AgeFilter(5)).setName("Children under 5"),
         new SimpleSelectionFilterGroup(new AgeFilter(2)).setName("Children Under 2")
     };
 
