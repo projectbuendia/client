@@ -100,7 +100,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.registerIdlingResources(syncFinishedIdlingResource);
 
         // Check for updated vital view.
-        onView(withText(R.string.status_well)).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText(R.string.status_well));
 
         // Check for updated chart view.
         onView(allOf(
