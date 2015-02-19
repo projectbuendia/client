@@ -35,7 +35,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
-    @Inject UpdateManager mUpdateManager;
 
     private User mLastActiveUser;
     private Menu mMenu;
@@ -43,6 +42,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private boolean mIsCreated = false;
     private boolean mIsMenuEnabled = true;
+
+    protected UpdateNotificationController mUpdateNotificationController = null;
 
     /**
      * {@inheritDoc}
@@ -130,13 +131,13 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         }
 
         onResumeImpl();
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.init();
+        }
     }
 
     protected void onResumeImpl() {
         super.onResume();
-
-        // Check for updates whenever a logged-in activity resumes.
-        mUpdateManager.checkForUpdate();
     }
 
     @Override
@@ -147,6 +148,9 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.suspend();
+        }
         onPauseImpl();
     }
 

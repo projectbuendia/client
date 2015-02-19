@@ -18,6 +18,8 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.diagnostics.TroubleshootingAction;
 import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
+import org.msf.records.updater.AvailableUpdateInfo;
+import org.msf.records.updater.DownloadedUpdateInfo;
 import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
@@ -45,6 +47,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onResume();
 
         EventBus.getDefault().registerSticky(this);
+        App.getInstance().getHealthMonitor().start();
     }
 
     @Override
@@ -52,6 +55,7 @@ public abstract class BaseActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);
 
         super.onPause();
+        App.getInstance().getHealthMonitor().stop();
     }
 
     @Override
@@ -306,5 +310,57 @@ public abstract class BaseActivity extends FragmentActivity {
         mStatusContent =
                 (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
     }
+
+    protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
+
+        final TextView mUpdateMessage;
+        final TextView mUpdateAction;
+
+        public UpdateNotificationUi() {
+            View view = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
+            setStatusView(view);
+            mUpdateMessage = (TextView) view.findViewById(R.id.status_bar_default_message);
+            mUpdateAction = (TextView) view.findViewById(R.id.status_bar_default_action);
+        }
+
+        @Override
+        public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
+            setStatusVisibility(View.VISIBLE);
+            mUpdateMessage.setText(R.string.snackbar_update_available);
+            mUpdateAction.setText(R.string.snackbar_action_download);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    EventBus.getDefault().post(new DownloadRequestedEvent());
+                }
+            });
+        }
+
+        @Override
+        public void showUpdateReadyToInstall(DownloadedUpdateInfo updateInfo) {
+            setStatusVisibility(View.VISIBLE);
+            mUpdateMessage.setText(R.string.snackbar_update_downloaded);
+            mUpdateAction.setText(R.string.snackbar_action_install);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    EventBus.getDefault().post(new InstallationRequestedEvent());
+                }
+            });
+        }
+
+        @Override
+        public void hideSoftwareUpdateNotifications() {
+            setStatusVisibility(View.GONE);
+        }
+    }
+
+    /** The user has requested a download of the last known available software update. */
+    public static class DownloadRequestedEvent { }
+
+    /** The user has requested installation of the last downloaded software update. */
+    public static class InstallationRequestedEvent { }
 }
 

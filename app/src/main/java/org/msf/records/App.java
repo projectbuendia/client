@@ -88,4 +88,8 @@ public class App extends Application {
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
         return sConnectionDetails;
     }
+
+    public HealthMonitor getHealthMonitor() {
+        return mHealthMonitor;
+    }
 }

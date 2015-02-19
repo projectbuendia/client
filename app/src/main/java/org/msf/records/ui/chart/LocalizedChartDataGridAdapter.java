@@ -190,13 +190,14 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             }
         }
 
-        String amKey;
+        String amKey = "";
         int day = Days.daysBetween(admissionDate, localDate).getDays() + 1;
         if (daysDiff == 0) {
-            amKey = todayString + " (Day " + day + ")\n" + localizedDateString;
-        } else {
-            amKey = "Day " + day + "\n" + localizedDateString;
+            amKey = todayString + " (Day " + day + ")";
+        } else if (day > 0) {
+            amKey = "Day " + day;
         }
+        amKey += "\n" + localizedDateString;
         return amKey;
     }
 

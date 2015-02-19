@@ -37,8 +37,8 @@ public class BuendiaApiHealthCheck extends HealthCheck {
     // to check if it's reachable and responding.
     private static final int CHECK_PERIOD_MS = 20000;
 
-    // During certain problem conditions, check more often so that when the problem
-    // is resolved, we can hide the snackbar more promptly.
+    // During certain problem conditions, check more often so that when the
+    // problem is resolved, we can hide the snackbar more promptly.
     private static final int FAST_CHECK_PERIOD_MS = 10000;
 
     // These are the issues for which we use the faster checking period.
@@ -47,8 +47,8 @@ public class BuendiaApiHealthCheck extends HealthCheck {
             HealthIssue.SERVER_NOT_RESPONDING
     );
 
-    // Retrieving a concept should be quick and ensures that the module is both running and has
-    // database access.
+    // Retrieving a concept should be quick and ensures that the module is both
+    // running and has database access.
     private static final String HEALTH_CHECK_ENDPOINT =
             "/concept/" + Concepts.GENERAL_CONDITION_UUID;
 

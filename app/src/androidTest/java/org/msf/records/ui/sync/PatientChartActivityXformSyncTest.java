@@ -41,10 +41,15 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
     public void testXformRetrievedFromServer() {
         loadChart();
         screenshot("Patient Chart");
+        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
+                new EventBusIdlingResource<FetchXformSucceededEvent>(
+                        UUID.randomUUID().toString(),
+                        mEventBus);
         onView(withId(R.id.action_update_chart)).perform(click());
-        waitForChartLoad();
+        Espresso.registerIdlingResources(xformIdlingResource);
         onView(withText("Encounter")).check(matches(isDisplayed()));
         screenshot("Xform Loaded");
+        onView(withText(R.string.form_entry_discard)).perform(click());
     }
 
     private void loadChart() {

@@ -109,7 +109,7 @@ android {
         targetSdkVersion 19
 
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}" + (project.hasProperty('buildNumber') ? '.build' + project.buildNumber : '')
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}" + (project.hasProperty('buildNumber') ? '.' + project.buildNumber : '')
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
