@@ -51,7 +51,11 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
+    /**
+     * The formatting for dates when displayed in entry fields.  "d MMM yyyy" is probably the best
+     * option here, as it matches the ordering and style of the date as shown in the date picker.
+     */
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("d MMM yyyy");
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
