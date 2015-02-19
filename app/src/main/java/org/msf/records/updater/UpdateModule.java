@@ -1,8 +1,8 @@
 package org.msf.records.updater;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 
-import org.msf.records.App;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.net.VolleySingleton;
 import org.msf.records.prefs.StringPreference;
@@ -34,7 +34,8 @@ public class UpdateModule {
 
     @Provides
     @Singleton
-    UpdateManager provideUpdateManager(Application application, UpdateServer updateServer) {
-        return new UpdateManager(application, updateServer);
+    UpdateManager provideUpdateManager(Application application, UpdateServer updateServer,
+                                       SharedPreferences sharedPreferences) {
+        return new UpdateManager(application, updateServer, sharedPreferences);
     }
 }

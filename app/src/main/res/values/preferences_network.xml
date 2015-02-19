@@ -17,4 +17,12 @@
     <!-- The default value for whether observations should sync incrementally -->
     <bool name="incremental_observation_update">true</bool>
 
+    <!-- The title for the preference for choosing the OpenMRS user -->
+    <string name="pref_title_openmrs_user">OpenMRS username</string>
+    <!-- The title for the preference for choosing the OpenMRS password -->
+    <string name="pref_title_openmrs_password">OpenMRS password</string>
+    <!-- The title for the preference for choosing the URL for the package server -->
+    <string name="pref_title_package_server_url">Package server URL</string>
+    <!-- The title for the preference for choosing the URL for the package server -->
+    <string name="pref_title_apk_update_interval_secs">APK update interval (s)</string>
 </resources>
