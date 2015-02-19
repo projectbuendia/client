@@ -94,6 +94,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         screenshot("General Condition Dialog");
         onView(withText(R.string.status_well)).perform(click());
 
+        // Wait for a sync operation to update the chart.
+        EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncFinishedIdlingResource);
+
         // Check for updated vital view.
         onView(withText(R.string.status_well)).check(matches(isDisplayed()));
 
@@ -222,6 +227,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerVisibleTextQuestion("Ebola Np gene", "40");
         answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
+
         checkViewDisplayedSoon(withText(containsString("NEG / NEG")));
     }
 

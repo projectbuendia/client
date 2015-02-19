@@ -40,7 +40,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
     private static final Logger LOG = Logger.create();
-    private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 10000;
+    private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 20000;
 
     private SyncCounter mSyncCounter;
     private boolean mWaitForUserSync = true;
@@ -203,7 +203,12 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
                 onView(matcher).check(matches(isDisplayed()));
                 viewFound = true;
             } catch (Exception e) {
-                Thread.yield();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    LOG.w("Sleep interrupted, yielding instead.");
+                    Thread.yield();
+                }
             }
         }
         // Instead of throwing, let onView().check throw a nicely formatted error.
