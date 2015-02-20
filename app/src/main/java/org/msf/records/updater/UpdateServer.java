@@ -1,5 +1,6 @@
 package org.msf.records.updater;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.msf.records.model.UpdateInfo;
@@ -50,6 +51,6 @@ public class UpdateServer {
                         null /*headers*/,
                         listener,
                         errorListener
-                ));
+                ).setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f)));
     }
 }

@@ -88,6 +88,7 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -100,6 +101,7 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(60000, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 }
