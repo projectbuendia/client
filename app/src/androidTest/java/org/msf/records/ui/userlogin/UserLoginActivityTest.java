@@ -20,16 +20,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 
 public class UserLoginActivityTest extends FunctionalTestCase {
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        // We need to explicitly specify the ProgressFragment here since we can't check the current
-        // activity during setup. This works for UserLoginActivity because it is always returned
-        // by getActivity().
-        waitForProgressFragment(
-                (ProgressFragment)(
-                        getActivity().getSupportFragmentManager().getFragments().get(0)));
-    }
 
     /** Adds a new user and logs in. */
     public void testAddUser() {
