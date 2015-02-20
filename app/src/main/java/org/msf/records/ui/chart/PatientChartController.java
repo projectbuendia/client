@@ -87,6 +87,8 @@ final class PatientChartController {
     private AppLocationTree mLocationTree;
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
+    // The last set of observations received.
+    private List<LocalizedObservation> mPreviousObservations;
 
     // This value is incremented whenever the controller is activated or suspended.
     // A "phase" is a period of time between such transition points.
@@ -386,7 +388,11 @@ final class PatientChartController {
                 admissionDate = Utils.stringToLocalDate(admissionDateString);
             }
         }
-        mUi.setObservationHistory(observations, admissionDate);
+        // Avoid resetting observation history if nothing has changed.
+        if (!observations.equals(mPreviousObservations)) {
+            mUi.setObservationHistory(observations, admissionDate);
+            mPreviousObservations = observations;
+        }
     }
 
     /**
