@@ -4,6 +4,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.net.Common;
 import org.msf.records.net.GsonRequest;
 import org.msf.records.net.VolleySingleton;
 import org.msf.records.prefs.StringPreference;
@@ -51,6 +52,7 @@ public class UpdateServer {
                         null /*headers*/,
                         listener,
                         errorListener
-                ).setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f)));
+                ).setRetryPolicy(
+                        new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f)));
     }
 }

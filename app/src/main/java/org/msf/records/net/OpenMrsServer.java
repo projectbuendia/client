@@ -120,7 +120,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 wrapErrorListener(errorListener));
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -153,7 +153,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -193,7 +193,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -224,7 +224,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 wrapErrorListener(errorListener));
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -285,7 +285,8 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(120000, 1, 1f));
+        request.setRetryPolicy(
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_VERY_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -331,7 +332,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -373,7 +374,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -410,7 +411,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -424,7 +425,7 @@ public class OpenMrsServer implements Server {
                 null,
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(15000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -455,7 +456,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 

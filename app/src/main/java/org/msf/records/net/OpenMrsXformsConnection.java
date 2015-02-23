@@ -64,7 +64,7 @@ public class OpenMrsXformsConnection {
         );
         // Typical response times should be close to 10s, but as the number of users grows, this
         // number scales up quickly, so use a 30s timeout to be safe.
-        request.setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -116,7 +116,7 @@ public class OpenMrsXformsConnection {
                 },
                 errorListener
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -167,7 +167,7 @@ public class OpenMrsXformsConnection {
                 }, errorListener
         );
         // Set a permissive timeout.
-        request.setRetryPolicy(new DefaultRetryPolicy(30000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
