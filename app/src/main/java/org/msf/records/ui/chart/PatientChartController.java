@@ -353,7 +353,7 @@ final class PatientChartController {
     }
 
     /** Gets the latest observation values and displays them on the UI. */
-    private void updatePatientUI() {
+    private synchronized void updatePatientUI() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
