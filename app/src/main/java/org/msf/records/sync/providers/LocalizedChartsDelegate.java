@@ -77,7 +77,7 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
                 "names." + Contracts.ConceptNames.LOCALE + "=? AND " + // 3rd selection arg
                 "group_names." + Contracts.ConceptNames.LOCALE + "=?" + // 4th selection arg
 
-                " ORDER BY chart." + Contracts.Charts.CHART_ROW + ", obs." + Contracts.Observations.ENCOUNTER_TIME
+                " ORDER BY chart." + Contracts.Charts.CHART_ROW + ", obs." + Contracts.Observations._ID
                 ;
 
         return dbHelper.getReadableDatabase()

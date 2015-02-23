@@ -245,6 +245,7 @@ public class OdkActivityLauncher {
 
                             // Only locally cache new observations, not new patients.
                             if (patientUuid != null && updateClientCache) {
+                                LOG.i("Updating client cache with new encounter");
                                 updateClientCache(
                                         patientUuid, savedRoot, context.getContentResolver());
                             }
