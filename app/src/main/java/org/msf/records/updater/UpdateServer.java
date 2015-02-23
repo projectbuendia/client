@@ -53,6 +53,6 @@ public class UpdateServer {
                         listener,
                         errorListener
                 ).setRetryPolicy(
-                        new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_SECS_MEDIUM, 1, 1f)));
+                        new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f)));
     }
 }
