@@ -19,6 +19,8 @@ import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.User;
 import org.msf.records.sync.RpcToDb;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.sync.providers.MsfRecordsProvider;
+import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
@@ -33,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 public class UserStore {
 
     private static final Logger LOG = Logger.create();
+    private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
     /**
      * Loads the known users from local store.
@@ -103,9 +106,20 @@ public class UserStore {
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
                         Contracts.Users.CONTENT_URI);
+        MsfRecordsProvider msfRecordsProvider =
+                (MsfRecordsProvider)(client.getLocalContentProvider());
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+                msfRecordsProvider.getDbTransactionHelper();
         try {
+            LOG.i("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
             client.applyBatch(RpcToDb.userSetFromRpcToDb(userSet, new SyncResult()));
+        } catch (RemoteException | OperationApplicationException e) {
+            dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
+            throw e;
         } finally {
+            dbTransactionHelper.releaseNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.close();
             client.release();
         }
 
