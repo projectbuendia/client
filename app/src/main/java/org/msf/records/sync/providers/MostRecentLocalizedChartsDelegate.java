@@ -34,8 +34,7 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
 
         // This scary SQL statement joins the observations a subselect for the latest for each
         // concept with appropriate concept names to give localized output.
-        String query = "SELECT obs." + Contracts.Observations._ID + ", " +
-                "obs." + Contracts.Observations.ENCOUNTER_TIME + ", " +
+        String query = "SELECT obs.encounter_time," +
                 "obs.concept_uuid,names." + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name," +
                 // Localized value for concept values
                 "obs." + Contracts.Observations.VALUE +
@@ -48,12 +47,12 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
                 " INNER JOIN " +
 
                 "(SELECT " + Contracts.Charts.CONCEPT_UUID +
-                ", MAX(" + Contracts.Observations._ID + ") AS maxid " +
+                ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime " +
                 "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME +
                 " WHERE " + Contracts.Observations.PATIENT_UUID + "=? " + // 1st selection arg
                 "GROUP BY " + Contracts.Observations.CONCEPT_UUID + ") maxs " +
 
-                "ON obs." + Contracts.Observations._ID + " = maxs.maxid AND " +
+                "ON obs." + Contracts.Observations.ENCOUNTER_TIME + " = maxs.maxtime AND " +
                 "obs." + Contracts.Observations.CONCEPT_UUID + "=maxs." + Contracts.Observations.CONCEPT_UUID +
 
                 " INNER JOIN " +
