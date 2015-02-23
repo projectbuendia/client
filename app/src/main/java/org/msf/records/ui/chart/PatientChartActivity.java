@@ -145,6 +145,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
 
+    // The last set of observations received.
+    private List<LocalizedObservation> mPreviousObservations;
+
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -605,6 +608,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void setObservationHistory(
                 List<LocalizedObservation> observations, LocalDate admissionDate) {
+            // Avoid resetting observation history if nothing has changed.
+            if (observations.equals(mPreviousObservations)) {
+                return;
+            }
+            mPreviousObservations = observations;
+
             if (mChartView != null) {
                 mRootView.removeView(mChartView);
             }

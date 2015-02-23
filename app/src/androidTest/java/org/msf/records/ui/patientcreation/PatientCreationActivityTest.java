@@ -69,7 +69,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     public void testNewPatientWithLocation() {
         enterAddPatientScreen();
         screenshot("Test Start");
-        String id = "test" + new Date().getTime() % 100000;
+        String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
         onView(withId(R.id.patient_creation_button_change_location)).perform(click());
         screenshot("After Location Dialog Shown");
@@ -91,7 +91,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     public void testNewPatientWithoutLocation() {
         enterAddPatientScreen();
         screenshot("Test Start");
-        String id = "test" + new Date().getTime() % 100000;
+        String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
         screenshot("After Patient Populated");
         onView(withText("Create")).perform(click());
