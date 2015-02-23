@@ -30,7 +30,6 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
     private final Context mContext;
     private final AppLocationTree mLocationTree;
     private Optional<String> mSelectedLocationUuid;
-    private View mSelectedView;
 
     public TentListAdapter(
             Context context,
