@@ -308,12 +308,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             populateDemoPatient(demoPatient);
             addNewPatient(demoPatient);
             sDemoPatientId = demoPatient.id.get();
-            waitForProgressFragment();
+            //waitForProgressFragment();
         }
 
         // Open patient list.
         onView(withId(R.id.action_search)).perform(click());
-        waitForProgressFragment();
+        //waitForProgressFragment();
 
         // Select the patient.
         selectPatient(sDemoPatientId);
