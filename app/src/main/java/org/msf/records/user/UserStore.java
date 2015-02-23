@@ -115,9 +115,11 @@ public class UserStore {
             dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
             client.applyBatch(RpcToDb.userSetFromRpcToDb(userSet, new SyncResult()));
         } catch (RemoteException | OperationApplicationException e) {
+            LOG.i("Rolling back savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
             throw e;
         } finally {
+            LOG.i("Releasing savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.releaseNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.close();
             client.release();

@@ -337,7 +337,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void reportProgress(int progressIncrement, int stringResource) {
-        reportProgress(progressIncrement, getContext().getResources().getString(stringResource));
+        String progressString = getContext().getResources().getString(stringResource);
+        LOG.d("Sync progress checkpoint: +%d%%, %s", progressIncrement, progressString);
+        reportProgress(progressIncrement, progressString);
     }
 
     private void reportProgress(int progressIncrement) {

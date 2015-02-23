@@ -33,7 +33,7 @@ public class InitialSyncTest extends SyncTestCase {
         waitForProgressFragment();
 
         // Should be at tent selection screen
-        onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
 
         screenshot("After Sync Completed");
 

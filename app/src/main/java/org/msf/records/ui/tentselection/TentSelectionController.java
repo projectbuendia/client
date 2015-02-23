@@ -200,11 +200,6 @@ final class TentSelectionController {
             return;
         }
 
-        if (mSyncManager.isSyncing() || mSyncManager.isSyncPending()) {
-            mUi.setLoadingState(LoadingState.SYNCING);
-            return;
-        }
-
         mUi.setLoadingState(LoadingState.LOADING);
     }
 
