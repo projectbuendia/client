@@ -76,7 +76,8 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
-        request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
+        request.setRetryPolicy(
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -88,6 +89,7 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -100,6 +102,7 @@ public class OpenMrsChartServer {
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {
         };
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 }

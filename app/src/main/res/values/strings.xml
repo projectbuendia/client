@@ -117,12 +117,12 @@
     <string name="mobility_bed_bound">BB</string>
     <string name="pcr_negative">NEG</string>
     <string name="error_setting_location">An unknown error occurred while setting patient location. Please try again.</string>
-    <string name="tent_selection_dialog_title">Loading...</string>
+    <string name="tent_selection_dialog_title">Loading…</string>
     <string name="tent_selection_dialog_message">Please wait while patient and location data are retrieved. If this is the first time patient data has been loaded, this process may take a few minutes.</string>
-    <string name="admission_date_label">Admission Date</string>
-    <string name="symptoms_onset_date_label">Symptoms Onset Date</string>
-    <string name="symptoms_onset_date_picker_title">Set Estimated Symptoms Onset Date</string>
-    <string name="admission_date_picker_title">Set Admission Date</string>
+    <string name="admission_date_label">Admission date</string>
+    <string name="symptoms_onset_date_label">Symptom onset date</string>
+    <string name="symptoms_onset_date_picker_title">Estimated symptom onset date</string>
+    <string name="admission_date_picker_title">Set admission date</string>
     <string name="patient_creation_client_error">could not add patient to local database</string>
     <string name="patient_creation_network_error">Could not complete server request</string>
     <string name="patient_creation_server_error">Server did not properly return patient data</string>
@@ -151,14 +151,14 @@
     <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
     <string name="retrieving_encounter_form_title">Retrieving Form</string>
     <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
-    <string name="syncing_patients">Syncing patients...</string>
-    <string name="syncing_concepts">Syncing concepts...</string>
-    <string name="syncing_charts">Syncing charts...</string>
-    <string name="syncing_observations">Syncing observations...</string>
-    <string name="syncing_locations">Syncing locations...</string>
-    <string name="syncing_users">Syncing users...</string>
-    <string name="completing_sync">Completing sync...</string>
-    <string name="sync_in_progress">Starting sync...</string>
+    <string name="syncing_patients">Syncing patients…</string>
+    <string name="syncing_concepts">Syncing concepts…</string>
+    <string name="syncing_charts">Syncing charts…</string>
+    <string name="syncing_observations">Syncing observations…</string>
+    <string name="syncing_locations">Syncing locations…</string>
+    <string name="syncing_users">Syncing users…</string>
+    <string name="completing_sync">Completing sync…</string>
+    <string name="sync_in_progress">Starting sync…</string>
     <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
     <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
     <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
@@ -167,6 +167,38 @@
     <string name="consciousness">Consciousness</string>
     <string name="condition">Condition</string>
     <string name="cancel_sync">Cancel Sync</string>
-    <string name="cancelling_sync">Cancelling sync...</string>
-    <string name="sync_starting">Starting sync...</string>
+    <string name="cancelling_sync">Cancelling sync…</string>
+    <string name="sync_starting">Starting sync…</string>
+    <string name="troubleshoot_wifi_disabled">Wifi is disabled</string>
+    <string name="troubleshoot_wifi_disabled_action_enable">Enable</string>
+    <string name="troubleshoot_wifi_disconnected">Wifi is disconnected</string>
+    <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
+    <string name="troubleshoot_server_auth">Server username/password may be incorrect</string>
+    <string name="troubleshoot_server_auth_action_check">Check</string>
+    <string name="troubleshoot_server_address">Server address may be incorrect</string>
+    <string name="troubleshoot_server_address_action_check">Check</string>
+    <string name="troubleshoot_server_unreachable">Server unreachable</string>
+    <string name="troubleshoot_action_more_info">More Info</string>
+    <string name="troubleshoot_server_unreachable_details">
+        The server could not be reached. This may be because:
+        \n
+        \n • The wifi network is incorrect.
+        \n • The server URL is incorrect.
+        \n • The server is down.
+        \n
+        \nPlease contact an administrator.
+    </string>
+    <string name="troubleshoot_server_unstable">Server may be unstable</string>
+    <string name="troubleshoot_server_unstable_details">
+        The server is currently responding with error code 500, indicating that the server may be in an error state.
+        \n
+        \nPlease contact an administrator.</string>
+    <string name="troubleshoot_server_not_responding">Server not responding</string>
+    <string name="troubleshoot_server_not_responding_details">
+        The server is currently not responding to requests. This may be because:
+        \n
+        \n • The server is temporarily unavailable.
+        \n • The server is still starting up.
+        \n
+        \nPlease contact an administrator.</string>
 </resources>

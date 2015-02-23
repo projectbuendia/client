@@ -208,7 +208,7 @@ final class PatientCreationController {
                         mUi.showErrorMessage(event.exception.getMessage());
                     }
             }
-            LOG.e("Patient add failed", event.exception);
+            LOG.e(event.exception, "Patient add failed");
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {
