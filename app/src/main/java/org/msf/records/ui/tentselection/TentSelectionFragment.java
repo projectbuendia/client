@@ -10,7 +10,6 @@ import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -39,8 +38,6 @@ public final class TentSelectionFragment extends ProgressFragment {
     private final MyUi mMyUi = new MyUi();
     private TentListAdapter mAdapter;
 
-    //private ProgressDialog mLoadingDialog;
-
     public TentSelectionFragment() {
         // Required empty public constructor
     }
@@ -65,12 +62,6 @@ public final class TentSelectionFragment extends ProgressFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*mLoadingDialog = new ProgressDialog(getActivity());
-        mLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
-        mLoadingDialog.setTitle(getString(R.string.tent_selection_dialog_title));
-        mLoadingDialog.setMessage(getString(R.string.tent_selection_dialog_message));
-        mLoadingDialog.setCancelable(false);
-        mLoadingDialog.setIndeterminate(true);*/
         setContentView(R.layout.fragment_tent_selection);
     }
 
@@ -127,13 +118,6 @@ public final class TentSelectionFragment extends ProgressFragment {
         @Override
         public void setBusyLoading(boolean busy) {
             changeState(busy ? State.LOADING : State.LOADED);
-            /*if (mLoadingDialog != null && busy != mLoadingDialog.isShowing()) {
-                if (busy) {
-                    mLoadingDialog.show();
-                } else {
-                    mLoadingDialog.hide();
-                }
-            }*/
         }
 
         @Override

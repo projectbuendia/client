@@ -33,8 +33,6 @@ final class TentSelectionController {
 
     private static final Logger LOG = Logger.create();
 
-    private static final boolean DEBUG = true;
-
     public interface Ui {
 
         void switchToTentSelectionScreen();
@@ -42,8 +40,6 @@ final class TentSelectionController {
         void switchToPatientListScreen();
 
         void launchActivityForLocation(AppLocation location);
-
-        void showErrorMessage(int stringResourceId);
 
         void showSyncFailedDialog(boolean show);
 
