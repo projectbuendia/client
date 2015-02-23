@@ -308,12 +308,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             populateDemoPatient(demoPatient);
             addNewPatient(demoPatient);
             sDemoPatientId = demoPatient.id.get();
+            waitForProgressFragment();
         }
 
         // Open patient list.
-        //waitForProgressFragment();
         onView(withId(R.id.action_search)).perform(click());
-        //waitForProgressFragment();
+        waitForProgressFragment();
 
         // Select the patient.
         selectPatient(sDemoPatientId);
@@ -441,7 +441,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         delta.familyName = Optional.of("ChartActivity");
         delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
         delta.gender = Optional.of(Patient.GENDER_FEMALE);
-        delta.id = Optional.of(UUID.randomUUID().toString().substring(30));
+        delta.id = Optional.of(Long.toString(System.currentTimeMillis() % 100000));
         delta.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
     }
 
