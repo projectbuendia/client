@@ -1,40 +1,38 @@
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tent_selection_content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/tent_selection_layout"
     tools:context="org.msf.records.ui.tentselection.TentSelectionFragment">
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <org.msf.records.widget.SubtitledButtonView
+        android:id="@+id/tent_selection_all_patients"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/tent_selection_layout">
-        <org.msf.records.widget.SubtitledButtonView
-            android:id="@+id/tent_selection_all_patients"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="10dp"
-            android:clickable="true"
-            app:subtitledButtonTitle="ALL PRESENT PATIENTS"
-            app:subtitledButtonSubtitle="No patients"/>
-        <org.msf.records.widget.SubtitledButtonView
-            android:id="@+id/tent_selection_triage"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="10dp"
-            app:subtitledButtonTitle="Triage"
-            app:subtitledButtonSubtitle="No patients"/>
-        <include layout="@layout/tent_grid" />
-        <org.msf.records.widget.SubtitledButtonView
-            android:id="@+id/tent_selection_discharged"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="10dp"
-            app:subtitledButtonTitle="Discharged"
-            app:subtitledButtonSubtitle="No patients"/>
-    </LinearLayout>
-
-</FrameLayout>
+        android:layout_width="match_parent"
+        android:layout_margin="10dp"
+        android:clickable="true"
+        app:subtitledButtonTitle="ALL PRESENT PATIENTS"
+        app:subtitledButtonSubtitle="No patients"/>
+    <org.msf.records.widget.SubtitledButtonView
+        android:id="@+id/tent_selection_triage"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_margin="10dp"
+        app:subtitledButtonTitle="Triage"
+        app:subtitledButtonSubtitle="No patients"/>
+    <GridView
+        style="@style/TentGrid"
+        android:id="@+id/tent_selection_tents"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    <org.msf.records.widget.SubtitledButtonView
+        android:id="@+id/tent_selection_discharged"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_margin="10dp"
+        app:subtitledButtonTitle="Discharged"
+        app:subtitledButtonSubtitle="No patients"/>
+</LinearLayout>
