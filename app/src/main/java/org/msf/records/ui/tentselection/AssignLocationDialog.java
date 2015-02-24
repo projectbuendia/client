@@ -18,7 +18,9 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.model.Zone;
+import org.msf.records.ui.BigToast;
 import org.msf.records.utils.Logger;
 
 import java.util.ArrayList;
@@ -102,7 +104,24 @@ public final class AssignLocationDialog
     {
         mAdapter.setmSelectedLocationUuid(mCurrentLocationUuid);
 
-        Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ), Toast.LENGTH_SHORT ).show();
+        int errorMessageResource;
+        switch (reason) {
+            case PatientUpdateFailedEvent.REASON_INTERRUPTED:
+                errorMessageResource = R.string.patient_location_error_interrupted;
+                break;
+            case PatientUpdateFailedEvent.REASON_NETWORK:
+            case PatientUpdateFailedEvent.REASON_SERVER:
+                errorMessageResource = R.string.patient_location_error_network;
+                break;
+            case PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT:
+                errorMessageResource = R.string.patient_location_error_no_such_patient;
+                break;
+            case PatientUpdateFailedEvent.REASON_CLIENT:
+            default:
+                errorMessageResource = R.string.patient_location_error_unknown;
+                break;
+        }
+        BigToast.show(mContext, errorMessageResource);
         mProgressDialog.dismiss();
     }
 

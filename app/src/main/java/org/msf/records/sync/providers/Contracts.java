@@ -228,7 +228,8 @@ public class Contracts {
     }
 
     interface MiscColumns {
-
+        String FULL_SYNC_START_TIME = "full_sync_start_time";
+        String FULL_SYNC_END_TIME = "full_sync_end_time";
         String OBS_SYNC_TIME = "obs_sync_time";
     }
 

@@ -581,6 +581,7 @@ final class PatientChartController {
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+            LOG.e(event.exception, "Patient update failed.");
         }
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {

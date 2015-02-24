@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.AsyncTask;
 
+import org.joda.time.Instant;
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.data.app.tasks.AppAddEncounterAsyncTask;
@@ -23,6 +24,7 @@ import org.msf.records.net.Server;
 import org.msf.records.net.model.Encounter;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
@@ -36,6 +38,7 @@ import de.greenrobot.event.NoSubscriberEvent;
  * not need to worry about the implementation details of this.
  */
 public class AppModel {
+    private static final Logger LOG = Logger.create();
 
     private final ContentResolver mContentResolver;
     private final AppTypeConverters mConverters;
@@ -48,6 +51,39 @@ public class AppModel {
         mContentResolver = contentResolver;
         mConverters = converters;
         mTaskFactory = taskFactory;
+    }
+
+    /**
+     * Returns true iff the model has previously been fully downloaded from the server.
+     */
+    public boolean isFullModelAvailable() {
+        // The first thing stored during a full sync is always the start time. If this is available,
+        // then the full sync must have been committed, which means all data is available.
+        Cursor c = null;
+        try {
+            c = mContentResolver.query(
+                    Contracts.Misc.CONTENT_URI,
+                    new String[]{
+                            Contracts.Misc.FULL_SYNC_START_TIME,
+                            Contracts.Misc.FULL_SYNC_END_TIME,
+                            Contracts.Misc.OBS_SYNC_TIME
+                    },
+                    null,
+                    null,
+                    null);
+            LOG.d("Sync timing result count: %d", c.getCount());
+            if (c.moveToNext()) {
+                LOG.d("Sync timings -- FULL_SYNC_START(%d), FULL_SYNC_END(%d), OBS_SYNC_TIME(%d)",
+                        c.getLong(0), c.getLong(1), c.getLong(2));
+                return !c.isNull(0) && !c.isNull(1);
+            } else {
+                return false;
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
     /**
