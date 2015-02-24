@@ -190,24 +190,13 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        action.setEnabled(false);
-
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
-                        new AlertDialog.Builder(BaseActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .setTitle(R.string.troubleshoot_server_unreachable)
-                                .setMessage(R.string.troubleshoot_server_unreachable_details)
-                                .setNeutralButton(android.R.string.ok, null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface) {
-                                        action.setEnabled(true);
-                                    }
-                                })
-                                .create().show();
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_server_unreachable),
+                                getString(R.string.troubleshoot_server_unreachable_details));
                     }
                 });
                 break;
@@ -218,24 +207,13 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        action.setEnabled(false);
-
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
-                        new AlertDialog.Builder(BaseActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .setTitle(R.string.troubleshoot_server_unstable)
-                                .setMessage(R.string.troubleshoot_server_unstable_details)
-                                .setNeutralButton(android.R.string.ok, null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface) {
-                                        action.setEnabled(true);
-                                    }
-                                })
-                                .create().show();
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_server_unstable),
+                                getString(R.string.troubleshoot_server_unstable_details));
                     }
                 });
                 break;
@@ -246,24 +224,40 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        action.setEnabled(false);
-
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
-                        new AlertDialog.Builder(BaseActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .setTitle(R.string.troubleshoot_server_not_responding)
-                                .setMessage(R.string.troubleshoot_server_not_responding_details)
-                                .setNeutralButton(android.R.string.ok, null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface) {
-                                        action.setEnabled(true);
-                                    }
-                                })
-                                .create().show();
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_server_not_responding),
+                                getString(R.string.troubleshoot_server_not_responding_details));
+                    }
+                });
+                break;
+            case CHECK_UPDATE_SERVER_REACHABILITY:
+                message.setText(R.string.troubleshoot_update_server_unreachable);
+                action.setText(R.string.troubleshoot_action_more_info);
+                action.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_update_server_unreachable),
+                                getString(R.string.troubleshoot_update_server_unreachable_details));
+                    }
+                });
+                break;
+            case CHECK_UPDATE_SERVER_CONFIGURATION:
+                message.setText(R.string.troubleshoot_update_server_misconfigured);
+                action.setText(R.string.troubleshoot_action_more_info);
+                action.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_update_server_misconfigured),
+                                getString(
+                                        R.string.troubleshoot_update_server_misconfigured_details));
                     }
                 });
                 break;
@@ -274,6 +268,24 @@ public abstract class BaseActivity extends FragmentActivity {
 
         setStatusView(view);
         setStatusVisibility(View.VISIBLE);
+    }
+
+    private void showMoreInfoDialog(
+            final View triggeringView, String title, String message) {
+        triggeringView.setEnabled(false);
+
+        new AlertDialog.Builder(BaseActivity.this)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(android.R.string.ok, null)
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        triggeringView.setEnabled(true);
+                    }
+                })
+                .show();
     }
 
     private void initializeWrapperView() {

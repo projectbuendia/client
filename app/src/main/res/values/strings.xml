@@ -201,4 +201,19 @@
         \n • The server is still starting up.
         \n
         \nPlease contact an administrator.</string>
+    <string name="troubleshoot_update_server_unreachable">Update Server unreachable</string>
+    <string name="troubleshoot_update_server_unreachable_details">
+        The update server could not be reached. This may be because:
+        \n
+        \n • The server URL is incorrect.
+        \n • The server is down.
+        \n
+        \nPlease contact an administrator.
+    </string>
+    <string name="troubleshoot_update_server_misconfigured">Update Server not responding</string>
+    <string name="troubleshoot_update_server_misconfigured_details">
+        The update server is not responding.
+        \n
+        \nPlease contact an administrator.
+    </string>
 </resources>
