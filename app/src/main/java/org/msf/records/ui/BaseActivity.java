@@ -276,7 +276,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     private void showMoreInfoDialog(final View triggeringView, String title, String message,
-                                    boolean includeSettingsLink) {
+                                    boolean includeSettingsButton) {
         triggeringView.setEnabled(false);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this)
@@ -290,7 +290,7 @@ public abstract class BaseActivity extends FragmentActivity {
                         triggeringView.setEnabled(true);
                     }
                 });
-        if (includeSettingsLink) {
+        if (includeSettingsButton) {
             builder.setPositiveButton(R.string.troubleshoot_action_check_settings,
                     new DialogInterface.OnClickListener() {
                         @Override
