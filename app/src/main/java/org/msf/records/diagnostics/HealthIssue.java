@@ -21,7 +21,11 @@ enum HealthIssue {
 
     SERVER_INTERNAL_ISSUE,
 
-    SERVER_NOT_RESPONDING;
+    SERVER_NOT_RESPONDING,
+
+    UPDATE_SERVER_HOST_UNREACHABLE,
+
+    UPDATE_SERVER_INDEX_NOT_FOUND;
 
     /**
      * The event to be posted when a health issue is discovered.

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -162,11 +161,6 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                     .replace(R.id.tent_selection_container, new PatientListFragment())
                     .addToBackStack(null)
                     .commit();
-        }
-
-        @Override
-        public void showErrorMessage(int stringResourceId) {
-            Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
         }
 
         @Override
