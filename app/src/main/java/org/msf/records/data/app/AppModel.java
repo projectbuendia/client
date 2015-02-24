@@ -54,11 +54,18 @@ public class AppModel {
     }
 
     /**
-     * Returns true iff the model has previously been fully downloaded from the server.
+     * Returns true iff the model has previously been fully downloaded from the server--that is, if
+     * locations, patients, users, charts, and observations were all downloaded at some point. Note
+     * that this data may be out-of-date, but must be present in some form for proper operation of
+     * the app.
      */
     public boolean isFullModelAvailable() {
-        // The first thing stored during a full sync is always the start time. If this is available,
-        // then the full sync must have been committed, which means all data is available.
+        // The sync process is transactional, but in rare cases, a sync may complete without ever
+        // having started--this is the case if user data is cleared midsync, for example. To check
+        // that a sync actually completed, we look at the FULL_SYNC_START_TIME and
+        // FULL_SYNC_END_TIME columns in the Misc table, which are written to as the first and
+        // last operations of a complete sync. If both of these fields are present, then there has
+        // been a completed transaction in which the entire sync was performed.
         Cursor c = null;
         try {
             c = mContentResolver.query(
