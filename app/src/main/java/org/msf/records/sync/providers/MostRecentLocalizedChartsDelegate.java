@@ -71,7 +71,8 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
                 " WHERE obs." + Contracts.Observations.PATIENT_UUID + "=? AND " + // 3rd selection arg
                 "names." + Contracts.ConceptNames.LOCALE + "=? " + // 4th selection arg
 
-                " ORDER BY obs." + Contracts.Charts.CONCEPT_UUID;
+                " ORDER BY obs." + Contracts.Charts.CONCEPT_UUID +
+                ", obs." + Contracts.Observations._ID;
 
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, patientUuid, locale});
