@@ -196,7 +196,8 @@ public abstract class BaseActivity extends FragmentActivity {
                         showMoreInfoDialog(
                                 action,
                                 getString(R.string.troubleshoot_server_unreachable),
-                                getString(R.string.troubleshoot_server_unreachable_details));
+                                getString(R.string.troubleshoot_server_unreachable_details),
+                                true);
                     }
                 });
                 break;
@@ -213,7 +214,8 @@ public abstract class BaseActivity extends FragmentActivity {
                         showMoreInfoDialog(
                                 action,
                                 getString(R.string.troubleshoot_server_unstable),
-                                getString(R.string.troubleshoot_server_unstable_details));
+                                getString(R.string.troubleshoot_server_unstable_details),
+                                false);
                     }
                 });
                 break;
@@ -230,7 +232,8 @@ public abstract class BaseActivity extends FragmentActivity {
                         showMoreInfoDialog(
                                 action,
                                 getString(R.string.troubleshoot_server_not_responding),
-                                getString(R.string.troubleshoot_server_not_responding_details));
+                                getString(R.string.troubleshoot_server_not_responding_details),
+                                false);
                     }
                 });
                 break;
@@ -243,7 +246,8 @@ public abstract class BaseActivity extends FragmentActivity {
                         showMoreInfoDialog(
                                 action,
                                 getString(R.string.troubleshoot_update_server_unreachable),
-                                getString(R.string.troubleshoot_update_server_unreachable_details));
+                                getString(R.string.troubleshoot_update_server_unreachable_details),
+                                true);
                     }
                 });
                 break;
@@ -257,7 +261,8 @@ public abstract class BaseActivity extends FragmentActivity {
                                 action,
                                 getString(R.string.troubleshoot_update_server_misconfigured),
                                 getString(
-                                        R.string.troubleshoot_update_server_misconfigured_details));
+                                        R.string.troubleshoot_update_server_misconfigured_details),
+                                true);
                     }
                 });
                 break;
@@ -270,11 +275,11 @@ public abstract class BaseActivity extends FragmentActivity {
         setStatusVisibility(View.VISIBLE);
     }
 
-    private void showMoreInfoDialog(
-            final View triggeringView, String title, String message) {
+    private void showMoreInfoDialog(final View triggeringView, String title, String message,
+                                    boolean includeSettingsLink) {
         triggeringView.setEnabled(false);
 
-        new AlertDialog.Builder(BaseActivity.this)
+        AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setTitle(title)
                 .setMessage(message)
@@ -284,8 +289,17 @@ public abstract class BaseActivity extends FragmentActivity {
                     public void onDismiss(DialogInterface dialog) {
                         triggeringView.setEnabled(true);
                     }
-                })
-                .show();
+                });
+        if (includeSettingsLink) {
+            builder.setPositiveButton(R.string.troubleshoot_action_check_settings,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(BaseActivity.this, SettingsActivity.class));
+                        }
+                    });
+        }
+        builder.show();
     }
 
     private void initializeWrapperView() {
