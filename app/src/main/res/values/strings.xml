@@ -201,6 +201,10 @@
         \n • The server is still starting up.
         \n
         \nPlease contact an administrator.</string>
+    <string name="patient_location_error_unknown">An unknown error occurred while updating patient location. Please try again.</string>
+    <string name="patient_location_error_interrupted">Patient location update was interrupted. Please try again.</string>
+    <string name="patient_location_error_network">Error updating patient; please check that you are connected to the server.</string>
+    <string name="patient_location_error_no_such_patient">Error updating patient location: this patient does not exist on the server.</string>
     <string name="troubleshoot_update_server_unreachable">Package server unreachable</string>
     <string name="troubleshoot_update_server_unreachable_details">
         The package server could not be reached. This may be because:
