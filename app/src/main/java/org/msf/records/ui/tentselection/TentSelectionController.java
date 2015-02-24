@@ -15,6 +15,7 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.sync.SyncCanceledEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncProgressEvent;
+import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.sync.SyncManager;
@@ -234,6 +235,12 @@ final class TentSelectionController {
         public void onEventMainThread(SyncProgressEvent event) {
             for (TentFragmentUi fragmentUi : mFragmentUis) {
                 fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
+            }
+        }
+
+        public void onEventMainThread(SyncStartedEvent event) {
+            for (TentFragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.resetSyncProgress();
             }
         }
 
