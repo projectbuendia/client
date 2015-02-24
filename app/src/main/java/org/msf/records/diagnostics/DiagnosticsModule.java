@@ -34,10 +34,12 @@ public class DiagnosticsModule {
     ImmutableSet<HealthCheck> provideHealthChecks(
             Application application,
             @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
-            OpenMrsConnectionDetails connectionDetails) {
-        return ImmutableSet.<HealthCheck>of(
+            OpenMrsConnectionDetails connectionDetails,
+            @Qualifiers.PackageServerRootUrl StringPreference packageServerRootUrl) {
+        return ImmutableSet.of(
                 new WifiHealthCheck(application),
-                new BuendiaApiHealthCheck(application, connectionDetails));
+                new BuendiaApiHealthCheck(application, connectionDetails),
+                new UpdateServerHealthCheck(application, packageServerRootUrl));
     }
 
     @Provides
