@@ -25,6 +25,7 @@ public class PatientListActivityTest extends FunctionalTestCase {
         onView(withText("Guest User")).perform(click());
     }
 
+    /** Opens the patient list. */
     public void openPatientList() {
         waitForProgressFragment(); // Wait for tents.
         onView(withText("ALL PRESENT PATIENTS")).perform(click());

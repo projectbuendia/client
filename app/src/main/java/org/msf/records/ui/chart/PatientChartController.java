@@ -353,7 +353,7 @@ final class PatientChartController {
     }
 
     /** Gets the latest observation values and displays them on the UI. */
-    private synchronized void updatePatientUI() {
+    private synchronized void updatePatientUi() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
@@ -495,7 +495,7 @@ final class PatientChartController {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientUI();
+            updatePatientUi();
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -574,7 +574,7 @@ final class PatientChartController {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientUI();
+                    updatePatientUi();
                 }
             });
         }
@@ -588,7 +588,7 @@ final class PatientChartController {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientUI();
+                    updatePatientUi();
                     mUi.showFormSubmissionDialog(false);
                 }
             });

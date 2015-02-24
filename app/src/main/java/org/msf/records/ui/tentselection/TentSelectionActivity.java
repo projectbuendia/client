@@ -47,7 +47,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
 
-        if(Constants.OFFLINE_SUPPORT){
+        if (Constants.OFFLINE_SUPPORT) {
             // Create account, if needed
             GenericAccountService.registerSyncAccount(this);
         }
