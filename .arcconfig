@@ -1,0 +1,8 @@
+{
+  "phutil_libraries" : [
+    "tools/arc"
+  ],
+  "phabricator.uri" : "http://p.projectbuendia.org/",
+  "arc.land.onto.default" : "dev",
+  "history.immutable" : true
+}

@@ -1,6 +1,8 @@
 package org.msf.records.events;
 
 import org.msf.records.inject.Qualifiers;
+import org.msf.records.utils.EventBusInterface;
+import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Singleton;
 
@@ -14,21 +16,30 @@ import de.greenrobot.event.EventBusBuilder;
  */
 @Module(
         complete = false,
-        library = true
-)
+        library = true)
 public class EventsModule {
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     EventBus provideEventBus() {
         return EventBus.getDefault();
     }
 
-    @Provides @Singleton @Qualifiers.CrudEventBusBuilder
+    @Provides
+    @Singleton
+    EventBusInterface provideEventBusInterface(EventBus eventBus) {
+        return new EventBusWrapper(eventBus);
+    }
+
+    @Provides
+    @Singleton
+    @Qualifiers.CrudEventBusBuilder
     EventBusBuilder provideCrudEventBusBuilder() {
         return EventBus.builder();
     }
 
-    @Provides CrudEventBus provideCrudEventBus(
+    @Provides
+    CrudEventBus provideCrudEventBus(
             @Qualifiers.CrudEventBusBuilder EventBusBuilder crudEventBusBuilder) {
         return new DefaultCrudEventBus(crudEventBusBuilder.build());
     }

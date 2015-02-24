@@ -8,4 +8,8 @@
     <dimen name="padding_standard">16dp</dimen>
 
     <dimen name="text_size_title">24sp</dimen>
+
+    <!-- Padding for 'Create' and 'Cancel' buttons in FormEntryActivity, and similar buttons.
+    -->
+    <dimen name="action_button_padding">12dp</dimen>
 </resources>

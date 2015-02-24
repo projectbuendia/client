@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.msf.records" >
+    package="org.msf.records">
 
     <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -13,20 +14,24 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Required to check if there is a connection to the internet -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Required to check if there is a connection to the internet -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Required to fix wifi connectivity -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- Required to register a SyncStatusObserver to display a "syncing..." progress indicator. -->
     <uses-permission android:name="android.permission.READ_SYNC_STATS" />
     <!-- Required to enable our SyncAdapter after it's created. -->
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <!-- Required because we're manually creating a new account. -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-sdk android:minSdkVersion="14"/>
 
     <application
         android:name="org.msf.records.App"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
 
         <!-- Content Provider for ODK forms. -->
         <provider
@@ -44,14 +49,15 @@
 
         <!-- Content Provider for medical records. -->
         <provider
-            android:name="org.msf.records.sync.MsfRecordsProvider"
+            android:name=".sync.providers.MsfRecordsProvider"
             android:authorities="${applicationId}.provider.records"
             android:exported="false" />
 
         <activity
             android:name="org.msf.records.ui.userlogin.UserLoginActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait" >
+            android:theme="@style/AppThemeTextButtonActionBar"
+            android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <action android:name="android.intent.action.MAIN" />
@@ -67,7 +73,7 @@
         <activity
             android:name="org.msf.records.ui.tentselection.TentSelectionActivity"
             android:label="@string/title_activity_tent_selection"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
 
@@ -75,10 +81,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.PatientListActivity"
+            android:name="org.msf.records.ui.patientlist.PatientListActivity"
             android:label="@string/title_patient_list"
             android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
 
@@ -88,42 +94,36 @@
         <activity
             android:name="org.msf.records.ui.chart.PatientChartActivity"
             android:label="@string/title_patient_chart"
-            android:parentActivityName="org.msf.records.ui.PatientListActivity"
-            android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow"
-            android:exported="true" >
+            android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
+            android:screenOrientation="userPortrait"
+            android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.PatientListActivity" />
+                android:value="org.msf.records.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
             android:name="org.msf.records.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="org.msf.records.ui.PatientListActivity"
-            android:screenOrientation="portrait" >
+            android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
+            android:screenOrientation="userPortrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.PatientListActivity" />
-        </activity>
-        <activity
-            android:name="org.msf.records.ui.PatientAddActivity"
-            android:label="@string/title_activity_patient_add"
-            android:screenOrientation="portrait" >
+                android:value="org.msf.records.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
             android:name="org.msf.records.ui.patientcreation.PatientCreationActivity"
             android:label="@string/title_activity_patient_add"
-            android:screenOrientation="portrait"
+            android:screenOrientation="userPortrait"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name="org.msf.records.ui.RoundActivity"
+            android:name="org.msf.records.ui.patientlist.RoundActivity"
             android:label="@string/title_activity_round"
             android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
-            android:screenOrientation="portrait"  >
+            android:screenOrientation="userPortrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.msf.records.ui.tentselection.TentSelectionActivity" />
@@ -131,7 +131,7 @@
 
         <service
             android:name="org.msf.records.sync.SyncService"
-            android:exported="true" >
+            android:exported="false">
 
             <!--
             This intent filter is required. It allows the system to launch our sync service
@@ -145,7 +145,9 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-        <service android:name="org.msf.records.sync.GenericAccountService" >
+        <service
+            android:name="org.msf.records.sync.GenericAccountService"
+            android:exported="false">
 
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>

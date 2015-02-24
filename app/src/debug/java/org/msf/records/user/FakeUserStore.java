@@ -13,30 +13,29 @@ import java.util.Set;
  */
 public class FakeUserStore extends UserStore {
 
-    private Set<User> mServerKnownUsers;
+    private final Set<User> mServerKnownUsers;
     private Set<User> mLocalKnownUsers;
-    private int mNextId;
 
     public FakeUserStore() {
-        User akalachman = User.create("akalachman", "Adam Kalachman");
-        User cpritchard = User.create("cpritchard", "Corinne Pritchard");
-        User dan = User.create("dan", "Dan Cunningham");
-        User danielsjulio = User.create("danielsjulio", "Daniel Julio");
-        User dxchen = User.create("dxchen", "David Chen");
-        User gilsjulio = User.create("gilsjulio", "Gil Julio");
-        User gansha = User.create("gansha", "Ganesh Shankar");
-        User isabella = User.create("isabella", "Isabella Pighi");
-        User ivangayton = User.create("ivangayton", "Ivan Gayton");
-        User jonskeet = User.create("jonskeet", "Jon Skeet");
-        User kenk = User.create("kenk", "Ken Krieger");
-        User koen = User.create("koen", "Koen Vendrik");
-        User kpy = User.create("kpy", "Ka-Ping Yee");
-        User madhul = User.create("madhul", "Madhuwati Lagu");
-        User nfortescue = User.create("nfortescue", "Nick Fortescue");
-        User peteg = User.create("peteg", "Pete Gillin");
-        User pim = User.create("pim", "Pim de Witte");
-        User sanderlatour = User.create("sanderlatour", "Sander Latour");
-        User scrossan = User.create("scrossan", "Steve Crossan");
+        User akalachman = new User("akalachman", "Adam Kalachman");
+        User cpritchard = new User("cpritchard", "Corinne Pritchard");
+        User dan = new User("dan", "Dan Cunningham");
+        User danielsjulio = new User("danielsjulio", "Daniel Julio");
+        User dxchen = new User("dxchen", "David Chen");
+        User gilsjulio = new User("gilsjulio", "Gil Julio");
+        User gansha = new User("gansha", "Ganesh Shankar");
+        User isabella = new User("isabella", "Isabella Pighi");
+        User ivangayton = new User("ivangayton", "Ivan Gayton");
+        User jonskeet = new User("jonskeet", "Jon Skeet");
+        User kenk = new User("kenk", "Ken Krieger");
+        User koen = new User("koen", "Koen Vendrik");
+        User kpy = new User("kpy", "Ka-Ping Yee");
+        User madhul = new User("madhul", "Madhuwati Lagu");
+        User nfortescue = new User("nfortescue", "Nick Fortescue");
+        User peteg = new User("peteg", "Pete Gillin");
+        User pim = new User("pim", "Pim de Witte");
+        User sanderlatour = new User("sanderlatour", "Sander Latour");
+        User scrossan = new User("scrossan", "Steve Crossan");
 
         Set<User> allKnownUsers =
             Sets.newHashSet(akalachman, cpritchard, dan, danielsjulio, dxchen, gilsjulio,
@@ -51,7 +50,8 @@ public class FakeUserStore extends UserStore {
         mLocalKnownUsers = Sets.newHashSet(allKnownUsers);
         mLocalKnownUsers.remove(kpy);
 
-        mNextId = 1;
+        //noinspection UnusedAssignment
+        int nextId = 1;
     }
 
     @Override

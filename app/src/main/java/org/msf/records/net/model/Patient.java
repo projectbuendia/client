@@ -1,11 +1,13 @@
 package org.msf.records.net.model;
 
+import com.google.common.base.MoreObjects;
+
 import org.joda.time.LocalDate;
 
 import java.io.Serializable;
 
 /**
- * Created by Gil on 03/10/2014.
+ * An object that represents a patient.
  */
 public class Patient implements Serializable {
     public static final int GENDER_UNKNOWN = 0;
@@ -36,6 +38,23 @@ public class Patient implements Serializable {
     public Location assigned_location;
 
     public Patient() {}
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("uuid", uuid)
+                .add("id", id)
+                .add("given_name", given_name)
+                .add("family_name", family_name)
+                .add("important_information", important_information)
+                .add("gender", gender)
+                .add("birthdate", birthdate.toString())
+                .add("admission_timestamp", admission_timestamp)
+                .add("created_timestamp", created_timestamp)
+                .add("first_showed_symptoms_timestamp", first_showed_symptoms_timestamp)
+                .add("assigned_location", assigned_location)
+                .toString();
+    }
 
     /**
      * Overwrite the fields in this GSON object with everything non-null in the source.

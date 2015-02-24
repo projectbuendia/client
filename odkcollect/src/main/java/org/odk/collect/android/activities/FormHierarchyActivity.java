@@ -117,7 +117,8 @@ public class FormHierarchyActivity extends ListActivity {
                 @Override
                 public void run() {
                     int position = 0;
-                    for (int i = 0; i < getListAdapter().getCount(); i++) {
+                    int count = getListAdapter().getCount();
+                    for (int i = 0; i < count; i++) {
                         HierarchyElement he = (HierarchyElement) getListAdapter().getItem(i);
                         if (mStartIndex.equals(he.getFormIndex())) {
                             position = i;

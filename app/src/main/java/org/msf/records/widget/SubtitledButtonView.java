@@ -14,7 +14,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Created by akalachman on 11/30/14.
+ * A button with a subtitle.
  */
 public class SubtitledButtonView extends LinearLayout {
 
@@ -23,12 +23,6 @@ public class SubtitledButtonView extends LinearLayout {
     @InjectView(R.id.view_subtitled_button_title)
     TextView mTitleView;
 
-    private int mTextColor;
-    private int mSubtitleTextColor;
-    private String mTitle;
-    private float mTitleTextSize;
-    private String mSubtitle;
-    private String mSubtitleFormat;
     private boolean mIsSquare;
 
     public SubtitledButtonView(Context context) {
@@ -58,34 +52,39 @@ public class SubtitledButtonView extends LinearLayout {
                 R.bool.view_subtitled_button_is_square);
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.SubtitledButtonView, defStyleAttr, 0 /*defStyleRes*/);
+        String subtitle;
+        float titleTextSize;
+        String title;
+        int subtitleTextColor;
+        int textColor;
         try {
-            mTextColor = a.getColor(
+            textColor = a.getColor(
                     R.styleable.SubtitledButtonView_subtitledButtonTextColor, defaultTextColor);
-            mSubtitleTextColor = a.getColor(
+            subtitleTextColor = a.getColor(
                     R.styleable.SubtitledButtonView_subtitledButtonSubtitleTextColor,
                     defaultSubtitleTextColor);
-            mTitle = a.getString(R.styleable.SubtitledButtonView_subtitledButtonTitle);
-            mTitleTextSize = a.getDimension(
+            title = a.getString(R.styleable.SubtitledButtonView_subtitledButtonTitle);
+            titleTextSize = a.getDimension(
                     R.styleable.SubtitledButtonView_subtitledButtonTitleTextSize,
                     defaultTitleTextSize);
-            mSubtitle = a.getString(R.styleable.SubtitledButtonView_subtitledButtonSubtitle);
-            mSubtitleFormat = a.getString(
-                    R.styleable.SubtitledButtonView_subtitledButtonSubtitleFormat);
+            subtitle = a.getString(R.styleable.SubtitledButtonView_subtitledButtonSubtitle);
             mIsSquare = a.getBoolean(R.styleable.SubtitledButtonView_subtitledButtonIsSquare,
                     defaultIsSquare);
         } finally {
             a.recycle();
         }
 
-        mTitleView.setTextColor(mTextColor);
-        mTitleView.setTextSize(mTitleTextSize);
-        mTitleView.setText(mTitle);
-        mSubtitleView.setTextColor(mSubtitleTextColor);
-        mSubtitleView.setText(mSubtitle);
+        mTitleView.setTextColor(textColor);
+        mTitleView.setTextSize(titleTextSize);
+        mTitleView.setText(title);
+        mSubtitleView.setTextColor(subtitleTextColor);
+        mSubtitleView.setText(subtitle);
     }
 
-    public SubtitledButtonView setTextColor(int colorResource) {
-        int color = getContext().getResources().getColor(colorResource);
+    /**
+     * Sets the text color of both the title and the subtitle.
+     */
+    public SubtitledButtonView setTextColor(int color) {
         mTitleView.setTextColor(color);
         mSubtitleView.setTextColor(color);
 

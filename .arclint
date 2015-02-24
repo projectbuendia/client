@@ -1,0 +1,24 @@
+{
+  "linters" : {
+    "nolint" : {
+      "type" : "nolint",
+      "include" : "(.*)"
+    },
+    "spelling": {
+      "type": "spelling"
+    },
+    "filename" : {
+      "type" : "filename",
+      "include" : "(.*)"
+      },
+    "merge-conflict": {
+      "type": "merge-conflict"
+    },
+    "java-style" : {
+      "type" : "checkstyle",
+      "include" : "(\\.java$)",
+      "checkstyle.jar_path" : "tools/arc/lint/lib/checkstyle-6.2-all.jar",
+      "checkstyle.checks_path" : "tools/arc/lint/lib/client-style.xml"
+    }
+  }
+}

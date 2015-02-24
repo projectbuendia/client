@@ -1,21 +1,22 @@
 package org.msf.records.ui.patientcreation;
 
-import android.util.Log;
-
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.msf.records.R;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
-import org.msf.records.events.CreatePatientSucceededEvent;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientAddFailedEvent;
+import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
-import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.events.location.LocationsLoadedEvent;
-
-import de.greenrobot.event.EventBus;
+import org.msf.records.model.Zone;
+import org.msf.records.utils.LocaleSelector;
+import org.msf.records.utils.Logger;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -24,7 +25,7 @@ import de.greenrobot.event.EventBus;
  */
 final class PatientCreationController {
 
-	private static final String TAG = PatientCreationController.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     static final int AGE_UNKNOWN = 0;
     static final int AGE_YEARS = 1;
@@ -44,6 +45,10 @@ final class PatientCreationController {
         static final int FIELD_AGE_UNITS = 5;
         static final int FIELD_SEX = 6;
         static final int FIELD_LOCATION = 7;
+        static final int FIELD_ADMISSION_DATE = 8;
+        static final int FIELD_SYMPTOMS_ONSET_DATE = 9;
+
+        void setLocationTree(AppLocationTree locationTree);
 
         /** Adds a validation error message for a specific field. */
         void showValidationError(int field, String message);
@@ -52,48 +57,54 @@ final class PatientCreationController {
         void clearValidationErrors();
 
         /** Invoked when the server RPC to create a patient fails. */
-        void showErrorMessage(String error);
+        void showErrorMessage(int errorResource);
+
+        /** Invoked when the server RPC to create a patient fails. */
+        void showErrorMessage(String errorString);
 
         /** Invoked when the server RPC to create a patient succeeds. */
         void quitActivity();
     }
 
-	private final Ui mUi;
+    private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
-    private AppModel mModel;
+    private final AppModel mModel;
 
-    private final EventBus mEventBus;
     private final EventSubscriber mEventBusSubscriber;
 
-	public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
-		mUi = ui;
+    private AppLocationTree mLocationTree;
+
+    public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
+        mUi = ui;
         mCrudEventBus = crudEventBus;
         mModel = model;
 
         // TODO(dxchen): Inject this.
-        mEventBus = EventBus.getDefault();
         mEventBusSubscriber = new EventSubscriber();
     }
 
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
         mCrudEventBus.register(mEventBusSubscriber);
+        mModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
-        mEventBus.unregister(mEventBusSubscriber);
         mCrudEventBus.unregister(mEventBusSubscriber);
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
     }
 
     public boolean createPatient(
             String id, String givenName, String familyName, String age, int ageUnits, int sex,
-            String locationUuid) {
+            LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
         if (id == null || id.equals("")) {
-            mUi.showValidationError(Ui.FIELD_ID, "Please enter the new patient ID.");
+            mUi.showValidationError(Ui.FIELD_ID, "Please enter the patient ID.");
             hasValidationErrors = true;
         }
         if (givenName == null || givenName.equals("")) {
@@ -138,9 +149,10 @@ final class PatientCreationController {
         patientDelta.familyName = Optional.of(familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid =
-                locationUuid == null ? Optional.<String>absent() : Optional.of(locationUuid);
-        patientDelta.admissionDate = Optional.of(DateTime.now());
+        patientDelta.assignedLocationUuid = (locationUuid == null)
+                ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
+        patientDelta.admissionDate = Optional.of(admissionDate);
+        patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
 
@@ -162,23 +174,41 @@ final class PatientCreationController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
-        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-            // TODO(dxchen): This is a hack to trigger a location refresh. Once we deprecate
-            // location tree, remove this.
-            mEventBus.register(this);
-            mEventBus.post(new CreatePatientSucceededEvent());
-
+        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            mUi.setLocationTree(event.tree);
+            if (mLocationTree != null) {
+                mLocationTree.close();
+            }
+            mLocationTree = event.tree;
         }
 
-        public void onEventMainThread(LocationsLoadedEvent event) {
-            // TODO(dxchen): This is a hack. Once we deprecate location tree, have this happen
-            // immediately after the fetch finishes.
+        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             mUi.quitActivity();
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {
-            mUi.showErrorMessage(event.exception == null ? "unknown" : event.exception.getMessage());
-            Log.e(TAG, "Patient add failed", event.exception);
+            switch (event.reason) {
+                case PatientAddFailedEvent.REASON_CLIENT:
+                    mUi.showErrorMessage(R.string.patient_creation_client_error);
+                    break;
+                case PatientAddFailedEvent.REASON_NETWORK:
+                    mUi.showErrorMessage(R.string.patient_creation_network_error);
+                    break;
+                case PatientAddFailedEvent.REASON_SERVER:
+                    mUi.showErrorMessage(R.string.patient_creation_server_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INTERRUPTED:
+                    mUi.showErrorMessage(R.string.patient_creation_interrupted_error);
+                    break;
+                case PatientAddFailedEvent.REASON_UNKNOWN:
+                default:
+                    if (event.exception == null || event.exception.getMessage() == null) {
+                        mUi.showErrorMessage(R.string.patient_creation_unknown_error);
+                    } else {
+                        mUi.showErrorMessage(event.exception.getMessage());
+                    }
+            }
+            LOG.e(event.exception, "Patient add failed");
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {

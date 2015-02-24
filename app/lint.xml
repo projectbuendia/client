@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress ALL -->
+<lint>
+    <issue id="BooleanMethodIsAlwaysInverted" severity="ignore" />
+    <issue id="IconDensities" severity="ignore" /> <!-- We are designing only for one device. -->
+    <issue id="IconMissingDensityFolder" severity="ignore" /> <!-- We are designing only for one device. -->
+    <issue id="SpellCheckingInspection" severity="ignore" />
+
+    <issue id="AlwaysShowAction" severity="warning" />
+    <issue id="AppCompatResource" severity="warning" />
+    <issue id="ConstantConditions" severity="warning" />
+    <issue id="InvalidPackage" severity="warning" />
+    <issue id="OldTargetApi" severity="warning" />
+    <issue id="UnusedDeclaration" severity="warning" />
+</lint>

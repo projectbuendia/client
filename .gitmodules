@@ -1,0 +1,7 @@
+[submodule "client-libs"]
+  path = client-libs
+  url = ../client-libs
+
+[submodule "tools"]
+  path = tools
+  url = ../tools

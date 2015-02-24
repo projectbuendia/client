@@ -3,8 +3,12 @@ package org.msf.records.net;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
+import com.android.volley.toolbox.RequestFuture;
 
+import org.msf.records.data.app.AppEncounter;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -19,18 +23,18 @@ import java.util.List;
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
-    public static final String PATIENT_STATUS_KEY = "status";
+    public static final String PATIENT_UUID_KEY = "uuid";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
     public static final String PATIENT_FAMILY_NAME_KEY = "family_name";
-    @Deprecated public static final String PATIENT_DOB_YEARS_KEY = "age_years";
-    @Deprecated public static final String PATIENT_DOB_MONTHS_KEY = "age_months";
-    @Deprecated public static final String PATIENT_AGE_TYPE_KEY = "age_type";
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
-    public static final String PATIENT_IMPORTANT_INFORMATION_KEY = "important_information";
-    public static final String PATIENT_MOVEMENT_KEY = "movement";
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
     public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
+    public static final String PATIENT_OBSERVATIONS_KEY = "observations";
+    public static final String PATIENT_OBSERVATIONS_TIMESTAMP = "timestamp";
+    public static final String PATIENT_QUESTION_UUID = "question_uuid";
+    public static final String PATIENT_ANSWER_DATE = "answer_date";
+    public static final String PATIENT_ANSWER_UUID = "answer_uuid";
 
     /**
      * Adds a patient.
@@ -38,8 +42,7 @@ public interface Server {
     void addPatient(
             AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Updates a patient.
@@ -48,20 +51,29 @@ public interface Server {
             String patientId,
             AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Creates a new user.
      *
      * @param user the NewUser to add
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void addUser(
             NewUser user,
             Response.Listener<User> userListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
+
+    /**
+     * Creates a new encounter for a given patient.
+     *
+     * @param patient the patient being observed
+     * @param encounter the encounter to add
+     */
+    void addEncounter(
+            AppPatient patient,
+            AppEncounter encounter,
+            Response.Listener<Encounter> encounterListener,
+            Response.ErrorListener errorListener);
 
     /**
      * Get the patient record for an existing patient. Currently we are just using a String-String
@@ -69,13 +81,11 @@ public interface Server {
      * so it will probably need to be generalized in future.
      *
      * @param patientId the unique patient id representing the patients
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void getPatient(
             String patientId,
             Response.Listener<Patient> patientListener,
-            Response.ErrorListener errorListener,
-            String logTag);
+            Response.ErrorListener errorListener);
 
     /**
      * Update the location of a patient
@@ -87,23 +97,19 @@ public interface Server {
 
     /**
      * List all existing patients.
-     *
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void listPatients(@Nullable String filterState,
                              @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
-                             Response.ErrorListener errorListener, String logTag);
+                             Response.ErrorListener errorListener);
 
     /**
      * List all existing users.
-     *
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void listUsers(@Nullable String filterQueryTerm,
                           Response.Listener<List<User>> userListener,
-                          Response.ErrorListener errorListener, String logTag);
+                          Response.ErrorListener errorListener);
 
     /**
      * Add a new location to the server.
@@ -112,12 +118,10 @@ public interface Server {
      *                 name for at least one locale.
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void addLocation(Location location,
                             final Response.Listener<Location> locationListener,
-                            final Response.ErrorListener errorListener,
-                            final String logTag);
+                            final Response.ErrorListener errorListener);
 
     /**
      * Update the names for a location on the server.
@@ -126,33 +130,26 @@ public interface Server {
      *                 but ideally the other arguments should be correct
      * @param locationListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void updateLocation(Location location,
                                final Response.Listener<Location> locationListener,
-                               final Response.ErrorListener errorListener,
-                               final String logTag);
+                               final Response.ErrorListener errorListener);
 
     /**
      * Delete a given location from the server. The location should not be the EMC location or
      * one of the zones - just a client added location, tent or bed.
      */
     public void deleteLocation(String locationUuid,
-                               final Response.ErrorListener errorListener,
-                               final String logTag);
+                               final Response.ErrorListener errorListener);
 
     /**
      * List all locations.
-     *
-     * @param logTag a unique argument for tagging logs to aid debugging
      */
     public void listLocations(Response.Listener<List<Location>> locationListener,
-                              Response.ErrorListener errorListener,
-                              String logTag);
+                              Response.ErrorListener errorListener);
 
     /**
-     * Cancel all requests associated with the given tag.
-     * @param logTag
+     * Cancel all pending requests.
      */
-    public void cancelPendingRequests(String logTag);
+    public void cancelPendingRequests();
 }

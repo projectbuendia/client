@@ -10,10 +10,10 @@ import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
 import org.msf.records.events.user.UserAddedEvent;
 import org.msf.records.net.model.User;
+import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
-
-import android.util.Log;
+import org.msf.records.utils.Logger;
 
 import com.google.common.collect.Ordering;
 
@@ -24,49 +24,73 @@ import com.google.common.collect.Ordering;
  */
 final class UserLoginController {
 
-	private static final String TAG = UserLoginController.class.getSimpleName();
-	private static final boolean DEBUG = true;
+    private static final Logger LOG = Logger.create();
+
+    private static final boolean DEBUG = true;
 
     public interface Ui {
-    	void showAddNewUserDialog();
-    	void showSettings();
-    	void showErrorToast(int stringResourceId);
-    	void showUsers(List<User> users);
-    	void showTentSelectionScreen();
+
+        void showAddNewUserDialog();
+
+        void showSettings();
+
+        void showErrorToast(int stringResourceId);
+
+        void showSyncFailedDialog(boolean show);
+
+        void showTentSelectionScreen();
+    }
+
+    public interface FragmentUi {
+
+        void showSpinner(boolean show);
+
+        void showUsers(List<User> users);
     }
 
     private final EventBusRegistrationInterface mEventBus;
     private final Ui mUi;
+    private final FragmentUi mFragmentUi;
+    private final DialogActivityUi mDialogUi = new DialogActivityUi();
     private final UserManager mUserManager;
-    private final List<User> mUsersSortedByName = new ArrayList<User>();
-	private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
+    private final List<User> mUsersSortedByName = new ArrayList<>();
+    private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
 
     public UserLoginController(
-    		UserManager userManager,
-    		EventBusRegistrationInterface eventBus,
-    		Ui ui) {
-    	mUserManager = userManager;
-    	mEventBus = eventBus;
-    	mUi = ui;
+            UserManager userManager,
+            EventBusRegistrationInterface eventBus,
+            Ui ui,
+            FragmentUi fragmentUi) {
+        mUserManager = userManager;
+        mEventBus = eventBus;
+        mUi = ui;
+        mFragmentUi = fragmentUi;
     }
 
     public void init() {
-    	mEventBus.register(mSubscriber);
-    	mUserManager.loadKnownUsers();
+        mEventBus.register(mSubscriber);
+        mFragmentUi.showSpinner(true);
+        mUserManager.loadKnownUsers();
+    }
+
+    /** Attempts to reload users. */
+    public void onSyncRetry() {
+        mFragmentUi.showSpinner(true);
+        mUserManager.loadKnownUsers();
     }
 
     public void suspend() {
-    	mEventBus.unregister(mSubscriber);
+        mEventBus.unregister(mSubscriber);
     }
 
     /** Call when the user presses the 'add user' button. */
     public void onAddUserPressed() {
-    	mUi.showAddNewUserDialog();
+        mUi.showAddNewUserDialog();
     }
 
     /** Call when the user presses the settings button. */
     public void onSettingsPressed() {
-		mUi.showSettings();
+        mUi.showSettings();
     }
 
     /** Call when the user taps to select a user. */
@@ -77,34 +101,48 @@ final class UserLoginController {
 
     @SuppressWarnings("unused") // Called by reflection from event bus.
     private final class BusEventSubscriber {
-    	/** Updates the UI when the list of users is loaded. */
-    	public void onEventMainThread(KnownUsersLoadedEvent event) {
-    		if (DEBUG) {
-    			Log.d(TAG, "Loaded list of " + event. mKnownUsers.size() + " users");
-    		}
-    		mUsersSortedByName.clear();
-    		mUsersSortedByName.addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.mKnownUsers));
-    		mUi.showUsers(mUsersSortedByName);
+
+        /** Updates the UI when the list of users is loaded. */
+        public void onEventMainThread(KnownUsersLoadedEvent event) {
+            LOG.d("Loaded list of " + event.knownUsers.size() + " users");
+            mUsersSortedByName.clear();
+            mUsersSortedByName
+                    .addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
+            mUi.showSyncFailedDialog(false);
         }
 
-    	public void onEventMainThread(KnownUsersLoadFailedEvent event) {
-    		Log.e(TAG, "Failed to load list of users");
-    		mUi.showErrorToast(R.string.error_occured);
-    	}
+        public void onEventMainThread(KnownUsersLoadFailedEvent event) {
+            LOG.e("Failed to load list of users");
+            // TODO(akalachman): Replace toast here with dialog a la tent selection.
+            mUi.showSyncFailedDialog(true);
+        }
 
         public void onEventMainThread(UserAddedEvent event) {
-    		if (DEBUG) {
-    			Log.d(TAG, "User added");
-    		}
+            mUi.showSyncFailedDialog(false);  // Just in case.
+            LOG.d("User added");
             insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
-            mUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
         }
 
         public void onEventMainThread(UserAddFailedEvent event) {
-        	if (DEBUG) {
-    			Log.d(TAG, "Failed to add user");
-    		}
-        	mUi.showErrorToast(errorToStringId(event));
+            LOG.d("Failed to add user");
+            mUi.showErrorToast(errorToStringId(event));
+            mFragmentUi.showSpinner(false);
+        }
+    }
+
+    public AddNewUserDialogFragment.ActivityUi getDialogUi() {
+        return mDialogUi;
+    }
+
+    public final class DialogActivityUi implements AddNewUserDialogFragment.ActivityUi {
+
+        @Override
+        public void showSpinner(boolean show) {
+            mFragmentUi.showSpinner(show);
         }
     }
 
@@ -119,21 +157,25 @@ final class UserLoginController {
                 return R.string.add_user_user_exists_locally;
             case UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER:
                 return R.string.add_user_user_exists_on_server;
-            case UserAddFailedEvent.REASON_SERVER_ERROR:
-                return R.string.add_user_server_error;
+            case UserAddFailedEvent.REASON_CONNECTION_ERROR:
+                return R.string.add_user_connection_error;
             default:
                 return R.string.add_user_unknown_error;
         }
     }
 
-    /** Given a sorted list, inserts a new element in the correct position to maintain the sorted order. */
-    private static <T> void insertIntoSortedList(List<T> list, Comparator<T> comparator, T newItem) {
-    	 int i;
-         for (i = 0; i < list.size(); i++) {
-             if (comparator.compare(list.get(i),  newItem) == 1) {
-            	 break;
-             }
-         }
-         list.add(i, newItem);
+    /**
+     * Given a sorted list, inserts a new element in the correct position to maintain the sorted
+     * order.
+     */
+    private static <T> void insertIntoSortedList(
+            List<T> list, Comparator<T> comparator, T newItem) {
+        int index;
+        for (index = 0; index < list.size(); index++) {
+            if (comparator.compare(list.get(index), newItem) > 0) {
+                break;
+            }
+        }
+        list.add(index, newItem);
     }
 }

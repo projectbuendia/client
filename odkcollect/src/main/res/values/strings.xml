@@ -22,6 +22,7 @@
 <string name="advance">forward to\nnext\nprompt</string>
 <string name="altitude">Altitude</string>
 <string name="title_confirm_cancel">Confirm cancel</string>
+<string name="title_discard_observations">Discard these observations?</string>
 <string name="are_you_sure">This will discard all changes. Are you sure?</string>
 <string name="audio_file_error">No audio file was specified.</string>
 <string name="audio_file_invalid">File: %s is not a valid audio file.</string>
@@ -107,6 +108,7 @@
 <string name="no_items_display">Nothing available to display.</string>
 <string name="no_items_display_forms">Nothing available to display.\n\nTry getting and filling out a blank form.</string>
 <string name="no_items_display_instances">Nothing available to display.\n\nTry finalizing saved forms before sending.</string>
+<string name="observations_are_you_sure">Are you sure you want to discard these observations?</string>
 <string name="ok">OK</string>
 <string name="parse_error">Sorry, unable to parse form.</string>
 <string name="parse_legacy_formlist_failed">The server has not provided an available-forms document compatible with Aggregate 0.9.x. : %s</string>
@@ -330,4 +332,6 @@
 <string name="select_maps_account">You have selected Google Maps Engine as your server, please select a corresponding Google Account in the General Settings before continuing</string>
 <string name="get_project_IDs">Getting Project IDs</string>
 <string name="title_loading_form">Loading Form</string>
+<string name="form_entry_save">Save</string>
+<string name="form_entry_discard">Discard</string>
 </resources>

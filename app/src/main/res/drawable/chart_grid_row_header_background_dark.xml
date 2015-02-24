@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid
+        android:color="@color/chart_background_dark"/>
+    <stroke
+        android:color="@color/chart_grid_lines"
+        android:width="@dimen/chart_grid_padding"/>
+</shape>

@@ -6,15 +6,18 @@
     <TableLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:padding="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:stretchColumns="1">
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
                 android:text="@string/patient_creation_id_label" />
 
@@ -23,16 +26,16 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords" />
+                android:inputType="number" />
 
         </TableRow>
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
                 android:text="@string/patient_creation_given_name_label" />
 
@@ -41,16 +44,16 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords" />
+                android:inputType="textCapWords|textPersonName" />
 
         </TableRow>
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
                 android:text="@string/patient_creation_family_name_label" />
 
@@ -59,16 +62,16 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords" />
+                android:inputType="textCapWords|textPersonName" />
 
         </TableRow>
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
                 android:text="@string/patient_creation_age_label" />
 
@@ -81,16 +84,16 @@
                     android:id="@+id/patient_creation_text_age"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="24dp"
+                    android:layout_marginEnd="24dp"
                     android:minEms="3"
                     android:maxLength="3"
                     android:singleLine="true"
-                    android:numeric="signed" />
+                    android:inputType="number" />
 
                 <RadioGroup
                     android:id="@+id/patient_creation_radiogroup_age_units"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="horizontal">
 
                     <RadioButton
@@ -115,9 +118,9 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
                 android:text="@string/patient_creation_sex_label" />
 
@@ -147,9 +150,50 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/admission_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_admission_date"
+                android:focusable="false"
+                android:inputType="date"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <!-- TODO: Make symptoms onset date clearable. -->
+            <TextView
+                android:layout_height="85dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/symptoms_onset_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_symptoms_onset_date"
+                android:focusable="false"
+                android:inputType="date"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="85dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
                 android:text="@string/patient_creation_location_label" />
 
@@ -196,7 +240,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:background="@android:color/black">
+        android:background="@android:color/black"
+        style="?android:attr/buttonBarStyle">
 
         <Button
             android:layout_margin="10dp"
@@ -207,7 +252,9 @@
             android:text="@string/patient_creation_cancel"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_cancel_button"
-            android:padding="@dimen/action_button_padding"/>
+            android:drawableStart="@drawable/ic_action_cancel"
+            android:padding="@dimen/action_button_padding"
+            style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
             android:layout_margin="10dp"
@@ -218,7 +265,9 @@
             android:text="@string/patient_creation_create"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_create_button"
-            android:padding="@dimen/action_button_padding"/>
+            android:drawableStart="@drawable/ic_action_accept"
+            android:padding="@dimen/action_button_padding"
+            style="?android:attr/buttonBarButtonStyle"/>
 
     </LinearLayout>
 

@@ -1,25 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- Resources related to the network configuration. -->
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UnusedResources">
 
-    <!-- The root URLs for OpenMRS on each of our three different configurations: GCE, Edison on
-         LAN, and localhost emulator. It would have been nice to separate the host and path
-         components but you cannot concatenate string resources in XML. -->
-    <string name="openmrs_root_url_gce">
-        http://104.155.15.141:8080/openmrs/ws/rest/v1/projectbuendia
-    </string>
-    <string name="openmrs_root_url_edison">
-        http://10.0.0.198:8080/openmrs/ws/rest/v1/projectbuendia
-    </string>
-    <string name="openmrs_url_localhost">
-        http://10.0.2.2:8080/openmrs/ws/rest/v1/projectbuendia
-    </string>
-
-    <!-- The default values for OpenMRS options. -->
-    <string name="openmrs_root_url_default">@string/openmrs_root_url_gce</string>
-    <string name="openmrs_user_default">android</string>
-    <string name="openmrs_password_default">Android123</string>
+    <!-- See build.gradle for the default OpenMRS root URL, username, and password, -->
+    <!-- which can be set with parameters passed into Gradle at build time. -->
 
     <!-- The default value for whether to keep XForm instances locally. -->
     <bool name="keep_form_instances_locally_default">false</bool>
@@ -27,4 +14,15 @@
     <!-- The default value for whether Xform submission should update the client cache -->
     <bool name="xform_update_client_cache">true</bool>
 
+    <!-- The default value for whether observations should sync incrementally -->
+    <bool name="incremental_observation_update">true</bool>
+
+    <!-- The title for the preference for choosing the OpenMRS user -->
+    <string name="pref_title_openmrs_user">OpenMRS username</string>
+    <!-- The title for the preference for choosing the OpenMRS password -->
+    <string name="pref_title_openmrs_password">OpenMRS password</string>
+    <!-- The title for the preference for choosing the URL for the package server -->
+    <string name="pref_title_package_server_url">Package server URL</string>
+    <!-- The title for the preference for choosing the URL for the package server -->
+    <string name="pref_title_apk_update_interval_secs">APK update interval (s)</string>
 </resources>

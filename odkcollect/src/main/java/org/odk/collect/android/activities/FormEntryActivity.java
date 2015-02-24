@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -38,7 +39,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -78,9 +81,12 @@ import org.odk.collect.android.widgets.QuestionWidget;
 import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 //import android.view.GestureDetector;
 //import android.view.GestureDetector.OnGestureListener;
@@ -152,17 +158,22 @@ public class FormEntryActivity
 
 	// Tracks whether we are autosaving
 	public static final String KEY_AUTO_SAVED = "autosaved";
-	
+
 //	private static final int MENU_LANGUAGES = Menu.FIRST;
 //	private static final int MENU_HIERARCHY_VIEW = Menu.FIRST + 1;
-    private static final int MENU_CANCEL = Menu.FIRST;
-	private static final int MENU_SAVE = MENU_CANCEL + 1;
+//    private static final int MENU_CANCEL = Menu.FIRST;
+//	private static final int MENU_SAVE = MENU_CANCEL + 1;
 //	private static final int MENU_PREFERENCES = Menu.FIRST + 3;
 
 	private static final int PROGRESS_DIALOG = 1;
 	private static final int SAVING_DIALOG = 2;
-	
-	private boolean mAutoSaved;
+
+    // Alert dialog styling.
+    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
+    private static final int ALERT_DIALOG_PADDING = 32;
+
+    private boolean mAutoSaved;
 
 	// Random ID
 	private static final int DELETE_REPEAT = 654321;
@@ -180,6 +191,9 @@ public class FormEntryActivity
     private ImageButton mUpButton;
     private ImageButton mDownButton;
 
+    private Button mCancelButton;
+    private Button mDoneButton;
+
 	private AlertDialog mAlertDialog;
 	private ProgressDialog mProgressDialog;
 	private String mErrorMessage;
@@ -195,6 +209,15 @@ public class FormEntryActivity
 
     private String stepMessage = "";
     private ODKView mTargetView;
+    private Map<FormIndex, IAnswerData> mOriginalAnswerData;
+
+    private static final double MAX_SCROLL_FRACTION = 0.9; // fraction of mScrollView height
+    private View mBottomPaddingView;
+
+    // ScrollY values that we try to scroll to when paging up and down.
+    private List<Integer> mPageBreaks = new ArrayList<>();
+
+    private enum ScrollDirection {UP, DOWN}
 
 //	enum AnimationType {
 //		LEFT, RIGHT, FADE
@@ -210,7 +233,7 @@ public class FormEntryActivity
 		// must be at the beginning of any activity that can be called from an
 		// external intent
 		try {
-			Collect.createODKDirs();
+			Collect.getInstance().createODKDirs();
 		} catch (RuntimeException e) {
 			createErrorDialog(e.getMessage(), EXIT);
 			return;
@@ -228,8 +251,8 @@ public class FormEntryActivity
 //        mBeenSwiped = false;
 		mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(getString(R.string.title_confirm_cancel))
-                .setMessage(R.string.are_you_sure)
+                .setTitle(getString(R.string.title_discard_observations))
+                //.setMessage(R.string.observations_are_you_sure)
                 .setPositiveButton(
                         R.string.yes,
                         new DialogInterface.OnClickListener() {
@@ -242,6 +265,7 @@ public class FormEntryActivity
                 )
                 .setNegativeButton(R.string.no, null)
                 .create();
+
 		mCurrentView = null;
 //		mInAnimation = null;
 //		mOutAnimation = null;
@@ -249,23 +273,45 @@ public class FormEntryActivity
         mScrollView = (ScrollView) findViewById(R.id.question_holder_scroller);
 		mQuestionHolder = (LinearLayout) findViewById(R.id.questionholder);
 
-        mUpButton = (ImageButton) findViewById(R.id.button_up);
-        mUpButton.setOnClickListener(new View.OnClickListener() {
-
+        findViewById(R.id.button_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int height = mScrollView.getMeasuredHeight();
-                mScrollView.smoothScrollBy(0, (int) (-height * .8));
+                scrollPage(ScrollDirection.UP);
+            }
+        });
+        findViewById(R.id.button_down).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                scrollPage(ScrollDirection.DOWN);
             }
         });
 
-        mDownButton = (ImageButton) findViewById(R.id.button_down);
-        mDownButton.setOnClickListener(new View.OnClickListener() {
-
+        mCancelButton = (Button) findViewById(R.id.form_entry_button_cancel);
+        mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                int height = mScrollView.getMeasuredHeight();
-                mScrollView.smoothScrollBy(0, (int) (height * .8));
+            public void onClick(View v) {
+                if (allContentsUnchanged()) {
+                    finish();
+                } else {
+                    showAlertDialog();
+                }
+            }
+        });
+
+        mDoneButton = (Button) findViewById(R.id.form_entry_button_done);
+        mDoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Collect.getInstance()
+                        .getActivityLogger()
+                        .logInstanceAction(this, "onOptionsItemSelected",
+                                "MENU_SAVE");
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+
+                saveDataToDisk(EXIT, true /*complete*/, null);
             }
         });
 
@@ -465,7 +511,7 @@ public class FormEntryActivity
 									mFormPath.lastIndexOf('.'))
 									+ "_";
 							final String fileSuffix = ".xml.save";
-							File cacheDir = new File(Collect.CACHE_PATH);
+							File cacheDir = new File(Collect.getInstance().getCachePath());
 							File[] files = cacheDir.listFiles(new FileFilter() {
 								@Override
 								public boolean accept(File pathname) {
@@ -485,7 +531,7 @@ public class FormEntryActivity
 												candidate.getName().length()
 														- fileSuffix.length());
 								File instanceDir = new File(
-										Collect.INSTANCES_PATH + File.separator
+										Collect.getInstance().getInstancesPath() + File.separator
 												+ instanceDirName);
 								File instanceFile = new File(instanceDir,
 										instanceDirName + ".xml");
@@ -526,25 +572,115 @@ public class FormEntryActivity
                 .build();
         traverser.traverse(Collect.getInstance().getFormController());
 
-        View bottomPaddingView = new View(this);
-        bottomPaddingView.setLayoutParams(
-                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 60));
+        mBottomPaddingView = new View(this);
+        mBottomPaddingView.setLayoutParams(
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+        mQuestionHolder.addView(mBottomPaddingView);
 
-        mQuestionHolder.addView(bottomPaddingView);
+        // After the form elements have all been sized and laid out, figure out
+        // where (vertically) the up/down buttons should jump to.
+        mScrollView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        paginate();
+                    }
+                }
+        );
 
         if (mTargetView != null) {
             (new Handler(Looper.getMainLooper())).post(new Runnable() {
-
                 @Override
                 public void run() {
                     mScrollView.scrollTo(0, mTargetView.getTop());
                 }
             });
         }
+
+        // Store any pre-populated answers to enable performing a diff later on.
+        mOriginalAnswerData = getAnswers();
+    }
+
+    /**
+     * Determines the vertical positions that the up/down buttons will jump to.
+     * These positions are selected so that the height of each page is up to
+     * MAX_SCROLL_FRACTION of the ScrollView's height, and (if possible) each
+     * page break is at the top edge of a group or question.
+     */
+    private void paginate() {
+        // Gather a list of the top edges of the question groups and widgets.
+        List<Integer> edges = new ArrayList<>();
+        for (int i = 0; i < mQuestionHolder.getChildCount(); i++) {
+            View child = mQuestionHolder.getChildAt(i);
+            edges.add(child.getTop());
+            if (child instanceof ODKView) {
+                List<QuestionWidget> widgets = ((ODKView) child).getWidgets();
+                // Skip the first widget: it's better to land above the group title
+                // than between the group title and the first question widget.
+                for (int j = 1; j < widgets.size(); j++) {
+                    edges.add(child.getTop() + widgets.get(j).getTop());
+                }
+            }
+        }
+
+        // Select a subset of these edges to be the page breaks.  Dividing the
+        // form into fixed pages ensures that each question appears at a fixed
+        // vertical position on the screen within its page, which helps keep
+        // the user oriented.
+        int maxPageHeight = (int) (mScrollView.getMeasuredHeight() * MAX_SCROLL_FRACTION);
+        mPageBreaks.clear();
+        mPageBreaks.add(0);
+        int prevBreak = 0;
+        int nextBreak = prevBreak + maxPageHeight;
+        for (int y : edges) {
+            while (y > prevBreak + maxPageHeight) { // next edge won't land on this page
+                mPageBreaks.add(nextBreak);
+                prevBreak = nextBreak;
+                // Usually this initial value of nextBreak will be overwritten
+                // by a value from edges (nextBreak = y below); this value is
+                // just a fallback in case the nearest edge is too far away.
+                nextBreak = prevBreak + maxPageHeight;
+            }
+            if (y > prevBreak) {
+                nextBreak = y;
+            }
+        }
+
+        // Add enough padding so that when the form is scrolled all the way to
+        // the end, the last page break lands at the top of the ScrollView.
+        // This can sometimes be a lot of padding (e.g. most of a page), but
+        // we think the benefit of having a consistent n:1 relationship between
+        // questions and pages is worth the occasionally large wasted space.
+        int bottom = prevBreak + mScrollView.getMeasuredHeight();
+        int paddingHeight = bottom - mBottomPaddingView.getTop();
+        ViewGroup.LayoutParams params = mBottomPaddingView.getLayoutParams();
+        if (params.height != paddingHeight) {
+            // To avoid triggering an infinite loop, only invoke
+            // requestLayout() when the height actually changes.
+            params.height = paddingHeight;
+            mBottomPaddingView.requestLayout();
+        }
+    }
+
+    /**
+     * Scrolls the form up or down to the next page break.  To keep the user
+     * oriented, we always go to the nearest page break (even if it is nearby),
+     * giving a consistent set of pages with a consistent layout on each page.
+     */
+    private void scrollPage(ScrollDirection direction) {
+        int inc = direction == ScrollDirection.DOWN ? 1 : -1;
+        int y = mScrollView.getScrollY();
+        int n = mPageBreaks.size();
+        for (int i = (inc > 0) ? 0 : n - 1; i >= 0 && i < n; i += inc) {
+            int deltaY = mPageBreaks.get(i) - y;
+            if (inc * deltaY > 0) {
+                mScrollView.smoothScrollTo(0, y + deltaY);
+                break;
+            }
+        }
     }
 
     private class QuestionHolderFormVisitor implements FormVisitor {
-
         private final PrepopulatableFields mFields;
 
         public QuestionHolderFormVisitor(PrepopulatableFields fields) {
@@ -664,7 +800,7 @@ public class FormEntryActivity
                  */
                 // The intent is empty, but we know we saved the image to the temp
                 // file
-                File fi = new File(Collect.TMPFILE_PATH);
+                File fi = new File(Collect.getInstance().getTmpFilePath());
                 String mInstanceFolder = formController.getInstancePath()
                         .getParent();
                 String s = mInstanceFolder + File.separator
@@ -795,7 +931,7 @@ public class FormEntryActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK) {
-            mAlertDialog.show();
+            showAlertDialog();
             return true;
         }
         else {
@@ -809,13 +945,13 @@ public class FormEntryActivity
 				.logInstanceAction(this, "onCreateOptionsMenu", "show");
 		super.onCreateOptionsMenu(menu);
 
-        CompatibilityUtils.setShowAsAction(
-                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
-                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//        CompatibilityUtils.setShowAsAction(
+//                menu.add(0, MENU_CANCEL, 0, R.string.cancel),
+//                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
-		CompatibilityUtils.setShowAsAction(
-				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
-				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+//		CompatibilityUtils.setShowAsAction(
+//				menu.add(0, MENU_SAVE, 0, R.string.save_all_answers),
+//				MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
 //		CompatibilityUtils.setShowAsAction(
 //				menu.add(0, MENU_HIERARCHY_VIEW, 0, R.string.view_hierarchy)
@@ -885,21 +1021,21 @@ public class FormEntryActivity
 ////							"MENU_LANGUAGES");
 ////			createLanguageDialog();
 ////			return true;
-        case MENU_CANCEL:
-            mAlertDialog.show();
-            return true;
-		case MENU_SAVE:
-			Collect.getInstance()
-					.getActivityLogger()
-					.logInstanceAction(this, "onOptionsItemSelected",
-							"MENU_SAVE");
+//        case MENU_CANCEL:
+//            showAlertDialog();
+//            return true;
+//		case MENU_SAVE:
+//			Collect.getInstance()
+//					.getActivityLogger()
+//					.logInstanceAction(this, "onOptionsItemSelected",
+//							"MENU_SAVE");
 
-            InputMethodManager imm = (InputMethodManager)getSystemService(
-                    Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
+//            InputMethodManager imm = (InputMethodManager)getSystemService(
+//                    Context.INPUT_METHOD_SERVICE);
+//            imm.hideSoftInputFromWindow( findViewById(android.R.id.content).getWindowToken(), 0);
 
-			saveDataToDisk(EXIT, true /*complete*/, null);
-			return true;
+//			saveDataToDisk(EXIT, true /*complete*/, null);
+//			return true;
 //		case MENU_HIERARCHY_VIEW:
 //			Collect.getInstance()
 //					.getActivityLogger()
@@ -955,6 +1091,24 @@ public class FormEntryActivity
 	}
 
     /**
+     * Collects all answers in the form into a single map.
+     * @return a {@link java.util.LinkedHashMap} of all answers in the form.
+     */
+    private LinkedHashMap<FormIndex, IAnswerData> getAnswers() {
+        int childCount = mQuestionHolder.getChildCount();
+        LinkedHashMap<FormIndex, IAnswerData> answers = new LinkedHashMap<FormIndex, IAnswerData>();
+        for (int i = 0; i < childCount; i++) {
+            View view = mQuestionHolder.getChildAt(i);
+            if (!(view instanceof ODKView)) {
+                continue;
+            }
+            answers.putAll(((ODKView) view).getAnswers());
+        }
+
+        return answers;
+    }
+
+    /**
      * Saves all answers in the form.
      *
      * @return false if any error occurs while saving (constraint violated,
@@ -963,15 +1117,7 @@ public class FormEntryActivity
     private boolean saveAnswers(boolean evaluateConstraints) {
         FormController formController = Collect.getInstance().getFormController();
         int childCount = mQuestionHolder.getChildCount();
-        LinkedHashMap<FormIndex, IAnswerData> answers =
-                new LinkedHashMap<FormIndex, IAnswerData>();
-        for (int i = 0; i < childCount; i++) {
-            View view = mQuestionHolder.getChildAt(i);
-            if (!(view instanceof ODKView)) {
-                continue;
-            }
-            answers.putAll(((ODKView) view).getAnswers());
-        }
+        LinkedHashMap<FormIndex, IAnswerData> answers = getAnswers();
 
         try {
             FailedConstraint constraint = formController.saveAnswers(answers, evaluateConstraints);
@@ -1741,7 +1887,7 @@ public class FormEntryActivity
 //		}
 //		mAlertDialog.setCancelable(false);
 //		mBeenSwiped = false;
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -1781,7 +1927,7 @@ public class FormEntryActivity
 		};
 		mAlertDialog.setCancelable(false);
 		mAlertDialog.setButton(getString(R.string.ok), errorListener);
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 
 //	/**
@@ -1831,7 +1977,7 @@ public class FormEntryActivity
 //		mAlertDialog.setButton(getString(R.string.discard_group), quitListener);
 //		mAlertDialog.setButton2(getString(R.string.delete_repeat_no),
 //				quitListener);
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -1882,7 +2028,7 @@ public class FormEntryActivity
 
 		Collect.getInstance().getActivityLogger()
 				.logInstanceAction(this, "createQuitDialog", "show");
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 
 	/**
@@ -1999,7 +2145,7 @@ public class FormEntryActivity
 				.setButton(getString(R.string.discard_answer), quitListener);
 		mAlertDialog.setButton2(getString(R.string.clear_answer_no),
 				quitListener);
-		mAlertDialog.show();
+		showAlertDialog();
 	}
 //
 //	/**
@@ -2074,7 +2220,7 @@ public class FormEntryActivity
 //												"cancel");
 //							}
 //						}).create();
-//		mAlertDialog.show();
+//		showAlertDialog();
 //	}
 
 	/**
@@ -2452,7 +2598,7 @@ public class FormEntryActivity
 					Locale.ENGLISH).format(Calendar.getInstance().getTime());
 			String file = mFormPath.substring(mFormPath.lastIndexOf('/') + 1,
 					mFormPath.lastIndexOf('.'));
-			String path = Collect.INSTANCES_PATH + File.separator + file + "_"
+			String path = Collect.getInstance().getInstancesPath() + File.separator + file + "_"
 					+ time;
 			if (FileUtils.createFolder(path)) {
 				formController.setInstancePath(new File(path + File.separator
@@ -2806,5 +2952,111 @@ public class FormEntryActivity
         if (errorMessage != null && errorMessage.trim().length() > 0) {
             Toast.makeText(this, getString(R.string.save_point_error, errorMessage), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void showAlertDialog() {
+        if (mAlertDialog == null) {
+            return;
+        }
+
+        mAlertDialog.show();
+
+        // Increase text sizes in dialog, which must be done after the alert is shown when not
+        // specifying a custom alert dialog theme or layout.
+        TextView[] views = {
+                (TextView) mAlertDialog.findViewById(android.R.id.message),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
+                mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
+                mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+
+        };
+        for (TextView view : views) {
+            if (view != null) {
+                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
+                view.setPadding(
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+            }
+        }
+
+        // Title should be bigger than message and button text.
+        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
+        TextView title = (TextView)mAlertDialog.findViewById(alertTitleResource);
+        if (title != null) {
+            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
+            title.setPadding(
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+        }
+    }
+
+    /**
+     * Returns true iff no values in the form have changed from the
+     * pre-populated defaults. This will return true even if a value
+     * has been given and subsequently cleared.
+     *
+     * @return true iff no form values have changed, false otherwise
+     */
+    private boolean allContentsUnchanged() {
+        Map<FormIndex, IAnswerData> answers = getAnswers();
+
+        // Compare each individual answer to the original answers (after
+        // pre-population), returning false for any unmatched answer.
+        for (Map.Entry<FormIndex, IAnswerData> entry : answers.entrySet()) {
+            // Double-check the key even exists before continuing to avoid
+            // a NullPointerException, but this should never happen in
+            // practice.
+            if (!mOriginalAnswerData.containsKey(entry.getKey())) {
+                return false;
+            }
+
+            // Check for differences based on the display text of answers. This
+            // has the (rare) downside that different values may be considered
+            // equal if they have the same display text, but equals() is not
+            // reliable for IAnswerData objects.
+            String newText = getDisplayText(entry.getValue());
+            String oldText = getDisplayText(mOriginalAnswerData.get(entry.getKey()));
+            if (!equalOrBothNull(newText, oldText)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Retrieves the displayed text for an {@link IAnswerData} object.
+     *
+     * @param data the field
+     * @return the displayed text, or null if the data is null
+     */
+    @Nullable
+    private String getDisplayText(@Nullable IAnswerData data) {
+        if (data == null) {
+            return null;
+        }
+
+        return data.getDisplayText();
+    }
+
+    /**
+     * Checks if the given objects are both equal or both null (equivalent to Objects.equals,
+     * but without the requirement for API level 19).
+     * @param obj1 the first object to compare
+     * @param obj2 the second object to compare
+     * @return true if obj1 == obj2 or obj1 and obj2 are both null, false otherwise
+     */
+    private boolean equalOrBothNull(Object obj1, Object obj2) {
+        // Check if the Objects refer to the same Object or are both null.
+        if (obj1 == obj2) {
+            return true;
+        }
+
+        // If either Object is null, then the two cannot be equal.
+        if (obj1 == null || obj2 == null) {
+            return false;
+        }
+
+        return obj1.equals(obj2);
     }
 }

@@ -1,5 +1,2 @@
 include ':app'
-include ':autofittextview'
 include ':odkcollect'
-include ':snackbar'
-include ':ViewPagerIndicator'

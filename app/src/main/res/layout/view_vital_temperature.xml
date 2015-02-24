@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7A7A7A">
+    android:background="@color/vital_unknown">
 
     <RelativeLayout
         android:orientation="vertical"
@@ -22,21 +21,21 @@
             android:padding="8dp"
             android:gravity="center"
             android:textAllCaps="true"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/vital_fg_dark"
             android:textStyle="bold"
             android:textSize="16sp"
             android:text="Temperature" />
 
-        <me.grantland.widget.AutofitTextView
+        <org.msf.records.widget.AutoResizeTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/vital_name_temperature"
             android:padding="8dp"
             android:gravity="center"
-            android:textColor="#FFFFFF"
-            android:textSize="72sp"
+            android:textColor="@color/vital_fg_dark"
+            android:textSize="56sp"
             android:id="@+id/patient_chart_vital_temperature"
-            android:text="-"/>
+            android:text="–"/>
 
     </RelativeLayout>
 

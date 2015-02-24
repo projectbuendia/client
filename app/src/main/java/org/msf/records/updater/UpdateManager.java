@@ -6,25 +6,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+import android.os.Environment;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.github.zafarkhaja.semver.ParseException;
-import com.github.zafarkhaja.semver.Version;
 
 import org.joda.time.DateTime;
-import org.msf.records.App;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateDownloadedEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
+import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.model.UpdateInfo;
+import org.msf.records.utils.LexicographicVersion;
+import org.msf.records.utils.Logger;
 
 import java.io.File;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -35,23 +36,29 @@ import de.greenrobot.event.EventBus;
  */
 public class UpdateManager {
 
-    private static final String TAG = UpdateManager.class.getName();
+    private static final Logger LOG = Logger.create();
 
     /**
-     * The frequency with which to check for updates, in hours.
-     *
+     * The update manager's module name for updates to this app.  A name of "foo"
+     * means the updates are saved as "foo-1.2.apk", "foo-1.3.apk" on disk.
+     */
+    private static final String MODULE_NAME = "buendia-client";
+
+    /**
+     * The minimum period between checks for new updates, in seconds.  Repeated calls to
+     * checkForUpdate() within this period will not check the server for new updates.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_FOR_UPDATE_FREQUENCY_HOURS = 1;
+    public static final int CHECK_PERIOD_SECONDS = 60 * 60; // Default to 1hr.
 
     /**
-     * An invalid semantic version.
+     * The minimal version number.
      *
-     * <p>This value is smaller than any other semantic version. If the current application has this
-     * version, any valid update will be installed over it. If an update has this version, it will
+     * <p>This value is smaller than any other version. If the current application has this version,
+     * any non-minimal update will be installed over it. If an update has this version, it will
      * never be installed over any the current application.
      */
-    public static final Version INVALID_VERSION = Version.forIntegers(0);
+    public static final LexicographicVersion MINIMAL_VERSION = LexicographicVersion.parse("0");
 
     private static final IntentFilter sDownloadCompleteIntentFilter =
             new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
@@ -60,9 +67,11 @@ public class UpdateManager {
 
     private final Application mApplication;
     private final UpdateServer mServer;
+
     private final PackageManager mPackageManager;
-    private final Version mCurrentVersion;
+    private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
+    private final SharedPreferences mSharedPreferences;
 
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
@@ -72,168 +81,235 @@ public class UpdateManager {
     private DownloadedUpdateInfo mLastDownloadedUpdateInfo = null;
 
     private final Object mDownloadLock = new Object();
-    private boolean mIsDownloadInProgress = false;
+
+    // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
 
-    public UpdateManager(Application application, UpdateServer updateServer) {
+    UpdateManager(Application application, UpdateServer updateServer,
+                  SharedPreferences sharedPreferences) {
         mApplication = application;
         mServer = updateServer;
 
-        mPackageManager = mApplication.getPackageManager();
+        mPackageManager = application.getPackageManager();
         mDownloadManager =
-                (DownloadManager) mApplication.getSystemService(Context.DOWNLOAD_SERVICE);
-
+                (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
+        mSharedPreferences = sharedPreferences;
         mCurrentVersion = getCurrentVersion();
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
         mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
     }
 
     /**
-     * Asynchronously checks for available updates and posts the appropriate event.
-     *
-     * <p>The following events are posted:
-     * <ul>
-     *     <li>
-     *         {@link UpdateDownloadedEvent} - If an update has been downloaded and is as new as the
-     *         latest update available on the server. Note that if the update has not yet been
-     *         downloaded, this event is not fired.
-     *     </li>
-     *     <li>
-     *         {@link UpdateAvailableEvent} - If an update is available on the server and either no
-     *         update has been downloaded or the available update is newer than the downloaded
-     *         update.
-     *     </li>
-     *     <li>
-     *         {@link UpdateNotAvailableEvent} - If no update is available on the server and no
-     *         update has been downloaded.
-     *     </li>
-     * </ul>
-     *
-     * <p>The result of this method is cached for {@code CHECK_FOR_UPDATE_FREQUENCY_HOURS}.
+     * Ensures that a check for available updates has been initiated within the last
+     * CHECK_PERIOD_SECONDS, or initiates one.  May post events that update the UI
+     * even if no new server check is initiated.  The check proceeds asynchronously in
+     * the background and eventually posts the relevant events (see @link postEvent()).
+     * Clients should call this method and then check for two sticky events:
+     * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
     public void checkForUpdate() {
+        int checkPeriodSeconds = getCheckPeriodSeconds();
         DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusHours(CHECK_FOR_UPDATE_FREQUENCY_HOURS))) {
-            if (!mIsDownloadInProgress && mLastAvailableUpdateInfo.shouldUpdate()) {
-                EventBus.getDefault().post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(checkPeriodSeconds))) {
+            if (!isDownloadInProgress()) {
+                // This immediate check just updates the event state to match any current
+                // knowledge of an available or downloaded update.  The more interesting
+                // calls to postEvents occur below in PackageIndexReceivedListener and
+                // DownloadReceiver.
+                postEvents();
             }
-
             return;
         }
 
+        PackageIndexReceivedListener listener = new PackageIndexReceivedListener();
+        mServer.getPackageIndex(listener, listener);
         mLastCheckForUpdateTime = now;
-
-        CheckForUpdateResponseListener listener = new CheckForUpdateResponseListener();
-        mServer.getAndroidUpdateInfo(listener, listener, null /*tag*/);
     }
 
     /**
-     * Asynchronously downloads an available update and posts an event indicating that the update is
-     * available.
-     *
-     * @return whether a download was started. {@code false} if a download is already in progress.
+     * Post events notifying of whether a file is available to be downloaded, or a
+     * file is downloaded and ready to install.  See {@link UpdateReadyToInstallEvent},
+     * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
-    public boolean downloadUpdate(AvailableUpdateInfo availableUpdateInfo) {
-        synchronized (mDownloadLock) {
-            if (mIsDownloadInProgress) {
-                return false;
-            }
-            mIsDownloadInProgress = true;
-
-            App.getInstance().registerReceiver(
-                    new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
-
-            DownloadManager.Request request =
-                    new DownloadManager.Request(availableUpdateInfo.updateUri)
-                            .setTitle(
-                                    "Downloading update v"
-                                            + availableUpdateInfo.availableVersion.toString())
-                            .setDestinationInExternalFilesDir(
-                                    App.getInstance(),
-                                    null /*dirType*/,
-                                    "androidclient_"
-                                            + availableUpdateInfo.availableVersion.toString())
-                            .setNotificationVisibility(
-                                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            mDownloadId = mDownloadManager.enqueue(request);
-
-            return true;
+    protected void postEvents() {
+        EventBus bus = EventBus.getDefault();
+        if (mLastDownloadedUpdateInfo.shouldInstall()
+                && mLastDownloadedUpdateInfo.downloadedVersion.greaterThanOrEqualTo(
+                        mLastAvailableUpdateInfo.availableVersion)) {
+            bus.postSticky(new UpdateReadyToInstallEvent(mLastDownloadedUpdateInfo));
+        } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
+            bus.removeStickyEvent(UpdateReadyToInstallEvent.class);
+            bus.postSticky(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
+        } else {
+            bus.removeStickyEvent(UpdateReadyToInstallEvent.class);
+            bus.removeStickyEvent(UpdateAvailableEvent.class);
+            bus.post(new UpdateNotAvailableEvent());
         }
     }
 
     /**
-     * Installs a downloaded update.
+     * Starts downloading an available update in the background, registering a
+     * DownloadUpdateReceiver to be invoked when the download is complete.
+     *
+     * @return whether a new download was started; {@code false} if the download failed to start.
      */
+    public boolean startDownload(AvailableUpdateInfo availableUpdateInfo) {
+        synchronized (mDownloadLock) {
+            cancelDownload();
+
+            mApplication.registerReceiver(
+                    new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
+
+            try {
+                String dir = getDownloadDirectory();
+                if (dir == null) {
+                    LOG.e("no external storage is available, can't start download");
+                    return false;
+                }
+                DownloadManager.Request request =
+                        new DownloadManager.Request(availableUpdateInfo.updateUri)
+                                .setDestinationInExternalPublicDir(
+                                        dir,
+                                        MODULE_NAME + availableUpdateInfo.availableVersion + ".apk")
+                                .setNotificationVisibility(
+                                        DownloadManager.Request.VISIBILITY_VISIBLE);
+                mDownloadId = mDownloadManager.enqueue(request);
+                return true;
+            } catch (Exception e) {
+                LOG.e(e, "Failed to download application update from "
+                        + availableUpdateInfo.updateUri);
+                return false;
+            }
+        }
+    }
+
+    /** Installs the last downloaded update. */
     public void installUpdate(DownloadedUpdateInfo updateInfo) {
-        Uri apkUri = Uri.fromFile(new File(updateInfo.path));
+        Uri apkUri = Uri.parse(updateInfo.path);
         Intent installIntent = new Intent(Intent.ACTION_VIEW)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .setDataAndType(apkUri, "application/vnd.android.package-archive");
-        App.getInstance().startActivity(installIntent);
+        mApplication.startActivity(installIntent);
     }
 
-    /**
-     * Returns whether a download is in progress.
-     */
+    /** Returns true if a download is in progress. */
     public boolean isDownloadInProgress() {
-        return mIsDownloadInProgress;
+        return mDownloadId >= 0;
+    }
+
+    /** Stops any currently running download. */
+    public boolean cancelDownload() {
+        if (isDownloadInProgress()) {
+            mDownloadManager.remove(mDownloadId);
+            mDownloadId = -1;
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Returns the semantic version of the application.
+     * Returns the relative path to the directory in which updates will be downloaded,
+     * or null if storage is unavailable.
      */
-    private Version getCurrentVersion() {
+    private String getDownloadDirectory() {
+        String externalStorageDirectory =
+                Environment.getExternalStorageDirectory().getAbsolutePath();
+        File externalFilesDir = mApplication.getExternalFilesDir(null);
+        if (externalFilesDir == null) {
+            return null;
+        }
+        String downloadDirectory = externalFilesDir.getAbsolutePath();
+        if (downloadDirectory.startsWith(externalStorageDirectory)) {
+            downloadDirectory = downloadDirectory.substring(externalStorageDirectory.length());
+        }
+        return downloadDirectory;
+    }
+
+    /**
+     * Get the time between updates from the shared preferences.
+     */
+    private int getCheckPeriodSeconds() {
+        if (mSharedPreferences == null) {
+            return CHECK_PERIOD_SECONDS;
+        }
+        return mSharedPreferences.getInt("apk_update_interval_secs", CHECK_PERIOD_SECONDS);
+    }
+
+    /** Returns the version of the application. */
+    private LexicographicVersion getCurrentVersion() {
         PackageInfo packageInfo;
         try {
             packageInfo =
-                    mPackageManager.getPackageInfo(App.getInstance().getPackageName(), 0 /*flags*/);
+                    mPackageManager.getPackageInfo(mApplication.getPackageName(), 0 /*flags*/);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.wtf(
-                    TAG,
-                    "No package found with the name " + App.getInstance().getPackageName() + ". "
-                            + "This should never happen.",
-                    e);
-            return INVALID_VERSION;
+            LOG.e(
+                    e,
+                    "No package found with the name " + mApplication.getPackageName() + ". "
+                            + "This should never happen.");
+            return MINIMAL_VERSION;
         }
 
         try {
-            return Version.valueOf(packageInfo.versionName);
-        } catch (ParseException e) {
-            Log.e(
-                    TAG,
+            return LexicographicVersion.parse(packageInfo.versionName);
+        } catch (IllegalArgumentException e) {
+            LOG.e(
+                    e,
                     "Application has an invalid semantic version: " + packageInfo.versionName + ". "
-                            + "Please fix in build.gradle.",
-                    e);
-            return INVALID_VERSION;
+                            + "Please fix in build.gradle.");
+            return MINIMAL_VERSION;
+        }
+    }
+
+    private DownloadedUpdateInfo getLastDownloadedUpdateInfo() {
+        String dir = getDownloadDirectory();
+        if (dir == null) {
+            LOG.e("no external storage is available, no download directory for updates");
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
+        File downloadDirectoryFile =
+                new File(Environment.getExternalStorageDirectory(), dir);
+        if (!downloadDirectoryFile.exists()) {
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
+        if (!downloadDirectoryFile.isDirectory()) {
+            LOG.e(
+                    "The path in which updates are downloaded is not a directory: '%1$s'",
+                    downloadDirectoryFile.toString());
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        }
+
+        File[] files = downloadDirectoryFile.listFiles();
+        File latestApk = null;
+        for (File file : files) {
+            if (file.isFile()
+                    && file.getName().endsWith(".apk")
+                    && (latestApk == null || file.lastModified() > latestApk.lastModified())) {
+                latestApk = file;
+            }
+        }
+
+        if (latestApk == null) {
+            return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+        } else {
+            return DownloadedUpdateInfo
+                    .fromUri(mCurrentVersion, "file://" + latestApk.getAbsolutePath());
         }
     }
 
     /**
-     * A listener that handles check-for-update responses.
+     * A listener that receives the index of available .apk files from the package server.
      */
-    private class CheckForUpdateResponseListener
-            implements Response.Listener<UpdateInfo>, Response.ErrorListener {
+    private class PackageIndexReceivedListener
+            implements Response.Listener<List<UpdateInfo>>, Response.ErrorListener {
 
         @Override
-        public void onResponse(UpdateInfo response) {
+        public void onResponse(List<UpdateInfo> response) {
             synchronized (mLock) {
                 mLastAvailableUpdateInfo =
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
-
-                if (mLastDownloadedUpdateInfo.shouldInstall()
-                        && mLastDownloadedUpdateInfo.downloadedVersion
-                                .greaterThanOrEqualTo(mLastAvailableUpdateInfo.availableVersion)) {
-                    // If there's already a downloaded update that is as recent as the available
-                    // update, post an UpdateDownloadedEvent.
-                    EventBus.getDefault()
-                            .post(new UpdateDownloadedEvent(mLastDownloadedUpdateInfo));
-                } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
-                    // Else, if the latest available update is good, post an UpdateAvailableEvent.
-                    EventBus.getDefault().post(new UpdateAvailableEvent(mLastAvailableUpdateInfo));
-                } else {
-                    // Else, post an UpdateNotAvailableEvent.
-                    EventBus.getDefault().post(new UpdateNotAvailableEvent());
-                }
+                mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
+                LOG.i("received package index; lastAvailableUpdate: " + mLastAvailableUpdateInfo);
+                postEvents();
             }
         }
 
@@ -246,11 +322,12 @@ public class UpdateManager {
                 failure = String.valueOf(error.networkResponse.statusCode);
             }
 
-            Log.w(
-                    TAG,
-                    "Server failed with " + failure + " while downloading update. Retry will "
-                            + "occur shortly.",
-                    error);
+            LOG.w(
+                    error,
+                    "Server failed with " + failure + " while fetching package index.  Retry will "
+                            + "occur shortly.");
+            // assume no update is available
+            EventBus.getDefault().post(new UpdateNotAvailableEvent());
         }
     }
 
@@ -263,21 +340,19 @@ public class UpdateManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mDownloadLock) {
-                if (!mIsDownloadInProgress) {
-                    Log.wtf(
-                            TAG,
+                if (!isDownloadInProgress()) {
+                    LOG.e(
                             "Received an ACTION_DOWNLOAD_COMPLETED intent when no download was in "
                                     + "progress. This indicates that this receiver was registered "
                                     + "incorrectly. Unregistering receiver.");
-                    App.getInstance().unregisterReceiver(this);
+                    mApplication.unregisterReceiver(this);
                     return;
                 }
 
                 long receivedDownloadId =
                         intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (mDownloadId != receivedDownloadId) {
-                    Log.d(
-                            TAG,
+                    LOG.d(
                             "Received an ACTION_DOWNLOAD_COMPLETED intent with download ID "
                                     + receivedDownloadId + " when the expected download ID is "
                                     + mDownloadId + ". Download was probably initiated by another "
@@ -287,8 +362,8 @@ public class UpdateManager {
 
                 // We have received the intent for our download, so we'll call the download finished
                 // and unregister the receiver.
-                mIsDownloadInProgress = false;
-                App.getInstance().unregisterReceiver(this);
+                mDownloadId = -1;
+                mApplication.unregisterReceiver(this);
 
                 Cursor cursor = null;
                 final String uriString;
@@ -296,22 +371,24 @@ public class UpdateManager {
                     cursor = mDownloadManager.query(
                             new DownloadManager.Query().setFilterById(receivedDownloadId));
                     if (!cursor.moveToFirst()) {
-                        Log.w(TAG, "Received download ID " + receivedDownloadId + " does not exist.");
+                        LOG.w(
+                                "Received download ID " + receivedDownloadId + " does not exist.");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
 
-                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    int status = cursor.getInt(
+                            cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
                     if (status != DownloadManager.STATUS_SUCCESSFUL) {
-                        Log.w(TAG, "Update download failed with status " + status + ".");
+                        LOG.w("Update download failed with status " + status + ".");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
 
-                    uriString =
-                            cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                    uriString = cursor.getString(
+                            cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
                     if (uriString == null) {
-                        Log.w(TAG, "No path for a downloaded file exists.");
+                        LOG.w("No path for a downloaded file exists.");
                         // TODO(dxchen): Consider firing an event.
                         return;
                     }
@@ -320,18 +397,51 @@ public class UpdateManager {
                         cursor.close();
                     }
                 }
-                Uri uri;
+
                 try {
                     Uri.parse(uriString);
                 } catch (IllegalArgumentException e) {
-                    Log.w(TAG, "Path for downloaded file is invalid: " + uriString + ".", e);
+                    LOG.w(e, "Path for downloaded file is invalid: %1$s.", uriString);
                     // TODO(dxchen): Consider firing an event.
                     return;
                 }
 
-                // TODO(dxchen): Extract path from the local URI.
                 mLastDownloadedUpdateInfo =
-                        DownloadedUpdateInfo.fromPath(mCurrentVersion, uriString);
+                        DownloadedUpdateInfo.fromUri(mCurrentVersion, uriString);
+                LOG.i("downloaded update: " + mLastDownloadedUpdateInfo);
+
+                if (!mLastDownloadedUpdateInfo.isValid) {
+                    LOG.w(
+                            "The last update downloaded from the server is invalid. Update checks "
+                                    + "will not occur for the next %1$d seconds.",
+                            CHECK_PERIOD_SECONDS);
+
+                    // Set the last available update info to an invalid value so as to prevent
+                    // further download attempts.
+                    mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
+
+                    return;
+                }
+
+                if (!mLastAvailableUpdateInfo.availableVersion
+                        .greaterThanOrEqualTo(mLastDownloadedUpdateInfo.downloadedVersion)) {
+                    LOG.w(
+                            "The last update downloaded from the server was reported to have "
+                                    + "version '%1$s' but actually has version '%2$s'. This "
+                                    + "indicates a server configuration problem. Update checks "
+                                    + "will not occur for the next %3$d seconds.",
+                            mLastAvailableUpdateInfo.availableVersion.toString(),
+                            mLastDownloadedUpdateInfo.downloadedVersion.toString(),
+                            CHECK_PERIOD_SECONDS);
+
+                    // Set the last available update info to an invalid value so as to prevent
+                    // further download attempts.
+                    mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
+
+                    return;
+                }
+
+                postEvents();
             }
         }
     }

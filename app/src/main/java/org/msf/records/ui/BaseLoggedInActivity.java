@@ -1,9 +1,9 @@
 package org.msf.records.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +17,8 @@ import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
-import org.msf.records.utils.BigToast;
 import org.msf.records.utils.Colorizer;
+import org.msf.records.utils.Logger;
 
 import javax.inject.Inject;
 
@@ -29,7 +29,9 @@ import butterknife.OnClick;
 /**
  * An activity that requires that there currently be a logged-in user.
  */
-public class BaseLoggedInActivity extends BaseActivity {
+public abstract class BaseLoggedInActivity extends BaseActivity {
+
+    private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
 
@@ -38,6 +40,10 @@ public class BaseLoggedInActivity extends BaseActivity {
     private MenuPopupWindow mPopupWindow;
 
     private boolean mIsCreated = false;
+
+    protected UpdateNotificationController mUpdateNotificationController = null;
+
+    private LoadingState mLoadingState = LoadingState.LOADED;
 
     /**
      * {@inheritDoc}
@@ -80,6 +86,7 @@ public class BaseLoggedInActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.base, menu);
 
         mPopupWindow = new MenuPopupWindow();
+
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
@@ -120,6 +127,9 @@ public class BaseLoggedInActivity extends BaseActivity {
         }
 
         onResumeImpl();
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.init();
+        }
     }
 
     protected void onResumeImpl() {
@@ -134,6 +144,9 @@ public class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.suspend();
+        }
         onPauseImpl();
     }
 
@@ -164,7 +177,8 @@ public class BaseLoggedInActivity extends BaseActivity {
         User user = App.getUserManager().getActiveUser();
 
         if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            // TODO(dxchen): Handle a user switch.
+            LOG.w("The user has switched. I don't know how to deal with that right now");
+            // TODO(dxchen): Handle.
         }
         mLastActiveUser = user;
 
@@ -173,7 +187,7 @@ public class BaseLoggedInActivity extends BaseActivity {
                 .getActionView()
                 .findViewById(R.id.user_initials);
 
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.getId()));
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
         initials.setText(user.getInitials());
     }
 
@@ -189,7 +203,7 @@ public class BaseLoggedInActivity extends BaseActivity {
         @InjectView(R.id.button_settings) ImageButton mSettings;
         @InjectView(R.id.button_log_out) ImageButton mLogOut;
 
-        public MenuPopupWindow() {
+        @SuppressLint("InflateParams") public MenuPopupWindow() {
             super();
 
             mLayout = (LinearLayout) getLayoutInflater()
@@ -216,7 +230,7 @@ public class BaseLoggedInActivity extends BaseActivity {
                 return;
             }
 
-            mUserName.setText(App.getUserManager().getActiveUser().getFullName());
+            mUserName.setText(App.getUserManager().getActiveUser().fullName);
         }
 
         @OnClick(R.id.button_settings)
@@ -234,4 +248,20 @@ public class BaseLoggedInActivity extends BaseActivity {
             startActivity(settingsIntent);
         }
     }
+
+    /**
+     * Changes the state of this activity, changing the set of available buttons if necessary.
+     * @param loadingState the new activity state
+     */
+    protected void setLoadingState(LoadingState loadingState) {
+        if (mLoadingState != loadingState) {
+            mLoadingState = loadingState;
+            invalidateOptionsMenu();
+        }
+    }
+
+    protected LoadingState getLoadingState() {
+        return mLoadingState;
+    }
 }
+

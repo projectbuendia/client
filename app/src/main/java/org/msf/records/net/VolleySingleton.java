@@ -7,13 +7,14 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import org.msf.records.utils.Logger;
+
 /**
  * Wrap Volley up in a Singleton object.
  */
 public class VolleySingleton {
 
-    private static final String TAG = VolleySingleton.class.getSimpleName();
-
+    private static final Logger LOG = Logger.create();
     private static VolleySingleton mInstance;
     private final RequestQueue mRequestQueue;
 
@@ -45,15 +46,8 @@ public class VolleySingleton {
      * A convenience method for adding a request to the Volley request queue getting all singleton
      * handling and contexts correct.
      */
-    public <T> void addToRequestQueue(Request<T> req, String tag) {
-        // set the default tag if tag is empty
-        req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+    public <T> void addToRequestQueue(Request<T> req) {
+        LOG.i("queueing request: " + req.getMethod() + " " + req.getUrl());
         getRequestQueue().add(req);
-    }
-
-    public void cancelPendingRequests(Object tag) {
-        if (mRequestQueue != null) {
-            mRequestQueue.cancelAll(tag);
-        }
     }
 }

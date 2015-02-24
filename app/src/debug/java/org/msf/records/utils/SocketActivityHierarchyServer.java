@@ -260,6 +260,7 @@ public class SocketActivityHierarchyServer implements Runnable, ActivityHierarch
             // Don't close the stream
         }
 
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         public boolean equals(Object o) {
             return mStream.equals(o);
         }
@@ -290,7 +291,7 @@ public class SocketActivityHierarchyServer implements Runnable, ActivityHierarch
     }
 
     private class ViewServerWorker implements Runnable, WindowListener {
-        private Socket mClient;
+        private final Socket mClient;
         private boolean mNeedWindowListUpdate;
         private boolean mNeedFocusedWindowUpdate;
 

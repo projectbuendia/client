@@ -1,21 +1,19 @@
 package org.msf.records.data.app.converters;
 
 import android.database.Cursor;
-import android.util.Log;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.LocalDate;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.utils.Utils;
 
+import javax.annotation.concurrent.Immutable;
+
 /**
  * A {@link AppTypeConverter} that converts {@link AppPatient}s.
  */
+@Immutable
 public class AppPatientConverter implements AppTypeConverter<AppPatient> {
-
-    private static final String TAG = AppPatientConverter.class.getSimpleName();
 
     @Override
     public AppPatient fromCursor(Cursor cursor) {
@@ -35,12 +33,13 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
     }
 
     private static int getGenderFromString(String genderString) {
-        if ("M".equals(genderString)) {
-            return AppPatient.GENDER_MALE;
-        } else if ("F".equals(genderString)) {
-            return AppPatient.GENDER_FEMALE;
-        } else {
-            return AppPatient.GENDER_UNKNOWN;
+        switch (genderString) {
+            case "M":
+                return AppPatient.GENDER_MALE;
+            case "F":
+                return AppPatient.GENDER_FEMALE;
+            default:
+                return AppPatient.GENDER_UNKNOWN;
         }
     }
 }

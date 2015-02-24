@@ -2,6 +2,7 @@ package org.msf.records.data.app;
 
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.SparseArray;
 
 import org.msf.records.data.app.converters.AppTypeConverter;
@@ -11,8 +12,9 @@ import java.util.Iterator;
 /**
  * A {@link TypedCursor} that's backed by a {@link AppTypeConverter} and a {@link Cursor}.
  *
- * <p>This data structure is NOT thread-safe. It should only be accessed from one thread, generally
- * the main thread. Furthermore, only one {@link Iterator} should be created on it at a time.
+ * <p>This data structure is NOT thread-safe. It should only be accessed from one thread at a time,
+ * generally the main thread. Furthermore, only one {@link Iterator} should be created on it at a
+ * time.
  *
  * <p>This data structure does NOT notify anyone when the data set changes (i.e., it does not
  * provide a mechanism to access {@link Cursor#registerDataSetObserver}). This is because the
@@ -25,8 +27,6 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
     private final Cursor mCursor;
 
     private final SparseArray<T> mConvertedItems;
-
-    private boolean mIsClosed;
 
     public TypedConvertedCursor(U converter, Cursor cursor) {
         mConverter = converter;
@@ -43,7 +43,7 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
      */
     @Override
     public int getCount() {
-        if (mIsClosed) {
+        if (mCursor.isClosed()) {
             return 0;
         }
 
@@ -52,7 +52,7 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
 
     @Override
     public T get(int position) {
-        if (mIsClosed) {
+        if (mCursor.isClosed()) {
             return null;
         }
 
@@ -74,6 +74,11 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
     }
 
     @Override
+    public Uri getNotificationUri() {
+        return mCursor.isClosed() ? null : mCursor.getNotificationUri();
+    }
+
+    @Override
     public Iterator<T> iterator() {
         return new LazyConverterIterator();
     }
@@ -81,8 +86,6 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
     @Override
     public void close() {
         mCursor.close();
-
-        mIsClosed = true;
     }
 
     @Override
@@ -107,10 +110,13 @@ class TypedConvertedCursor<T, U extends AppTypeConverter<T>> implements TypedCur
             if (!mCursor.moveToNext()) {
                 throw new IllegalStateException("Cannot move cursor past its last entry.");
             }
+
             int position = mCursor.getPosition();
+
             T convertedItem = mConvertedItems.get(position);
             if (convertedItem == null) {
                 convertedItem = mConverter.fromCursor(mCursor);
+                mConvertedItems.put(position, convertedItem);
             }
 
             return convertedItem;

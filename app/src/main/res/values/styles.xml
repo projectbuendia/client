@@ -15,20 +15,23 @@
         <item name="android:radioButtonStyle">
             @style/Widget.Buendia.CompoundButton.RadioButton
         </item>
-
-        <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
     </style>
 
-    <style name="thick_ab_style" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:height">100dp</item>
+    <!-- Use if the activity has text buttons for the action bar -->
+    <style name="AppThemeTextButtonActionBar" parent="AppTheme">
+        <item name="android:actionButtonStyle">@style/ActionTextButtonStyle</item>
     </style>
+
     <style name="MenuActionBar" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Menu">
         <item name="android:textSize">20sp</item>
     </style>
 
     <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
-        <item name="android:paddingLeft">28dip</item>
-        <item name="android:paddingRight">28dip</item>
+        <item name="android:minWidth">@dimen/action_bar_height</item>
+    </style>
+
+    <style name="ActionTextButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+        <item name="android:minWidth">@dimen/action_bar_height_and_a_half</item>
     </style>
 
     <style name="row">
@@ -68,17 +71,6 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="CustomTabPageIndicator" >
-        <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/vpi__tab_indicator</item>
-        <item name="android:paddingTop">20dp</item>
-        <item name="android:paddingBottom">20dp</item>
-        <item name="android:textAppearance">@style/TextAppearance.TabPageIndicator</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:textColor">#FF555555</item>
-    </style>
-
     <style name="FormLabel">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -108,7 +100,7 @@
 
     <style name="button_large">
         <item name="android:minWidth">400dp</item>
-        <item name="android:textSize">30dp</item>
+        <item name="android:textSize">30sp</item>
         <item name="android:layout_gravity">center_horizontal|top</item>
         <item name="android:background">@drawable/button_selector</item>
         <item name="android:textColor">@drawable/white</item>

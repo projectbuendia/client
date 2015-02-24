@@ -24,12 +24,15 @@ package org.msf.records.sync;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import net.sqlcipher.database.SQLiteDatabase;
+
+import org.msf.records.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +46,7 @@ import java.util.Map;
  */
 public class SelectionBuilder {
 
-    private static final String TAG = SelectionBuilder.class.getSimpleName();
+    private static final Logger LOG = Logger.create();
 
     private String mTable = null;
     private final Map<String, String> mProjectionMap = Maps.newHashMap();
@@ -155,7 +158,7 @@ public class SelectionBuilder {
                         String having, String orderBy, String limit) {
         assertTable();
         if (columns != null) mapColumns(columns);
-        Log.v(TAG, "query(columns=" + Arrays.toString(columns) + ") " + this);
+        LOG.v("query(columns=" + Arrays.toString(columns) + ") " + this);
         return db.query(mTable, columns, getSelection(), getSelectionArgs(), groupBy, having,
                 orderBy, limit);
     }
@@ -165,7 +168,7 @@ public class SelectionBuilder {
      */
     public int update(SQLiteDatabase db, ContentValues values) {
         assertTable();
-        Log.v(TAG, "update() " + this);
+        LOG.v("update() " + this);
         return db.update(mTable, values, getSelection(), getSelectionArgs());
     }
 
@@ -174,7 +177,7 @@ public class SelectionBuilder {
      */
     public int delete(SQLiteDatabase db) {
         assertTable();
-        Log.v(TAG, "delete() " + this);
+        LOG.v("delete() " + this);
         return db.delete(mTable, getSelection(), getSelectionArgs());
     }
 }

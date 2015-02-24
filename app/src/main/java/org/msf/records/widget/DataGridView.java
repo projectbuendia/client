@@ -1,5 +1,6 @@
 package org.msf.records.widget;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import android.widget.TableRow;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+
+import org.msf.records.R;
 
 import java.util.Set;
 
@@ -29,6 +32,7 @@ import java.util.Set;
  *
  * TODO(dxchen): Figure out license.
  */
+@SuppressLint("ViewConstructor") // Never to be instantiated in XML.
 public class DataGridView extends RelativeLayout {
 
     public static class Builder {
@@ -82,24 +86,11 @@ public class DataGridView extends RelativeLayout {
         }
     }
 
-    private static final String TAG = DataGridView.class.getName();
-
-    private Context mContext;
+    private final Context mContext;
     private final DataGridAdapter mDataGridAdapter;
-    private View mCornerView;
     private final boolean mHasDoubleWidthColumnHeaders;
 
-    private TableLayout mColumnHeadersLayout;
-    private TableLayout mRowHeadersLayout;
-    private TableLayout mDataLayout;
-
-    private Linkage<LinkableHorizontalScrollView> mHorizontalScrollViewLinkage;
-    private HorizontalScrollView mColumnHeadersHorizontalScrollView;
-    private HorizontalScrollView mDataHorizontalScrollView;
-
-    private Linkage<LinkableScrollView> mVerticalScrollViewLinkage;
-    private ScrollView mRowHeadersScrollView;
-    private ScrollView mDataScrollView;
+    private final HorizontalScrollView mDataHorizontalScrollView;
 
     @SuppressWarnings("ResourceType")
     private DataGridView(
@@ -111,7 +102,6 @@ public class DataGridView extends RelativeLayout {
 
         mContext = context;
         mDataGridAdapter = dataGridAdapter;
-        mCornerView = cornerView;
         mHasDoubleWidthColumnHeaders = hasDoubleWidthColumnHeaders;
 
         if (mHasDoubleWidthColumnHeaders) {
@@ -121,64 +111,63 @@ public class DataGridView extends RelativeLayout {
         }
 
         // Create all the main layout components.
-        mColumnHeadersLayout = new TableLayout(mContext);
-        mColumnHeadersLayout.setBackgroundColor(0xFF999999);
-        mRowHeadersLayout = new TableLayout(mContext);
-        mRowHeadersLayout.setBackgroundColor(0xFF999999);
-        mDataLayout = new TableLayout(mContext);
-        mDataLayout.setBackgroundColor(0xFF999999);
+        TableLayout columnHeadersLayout = new TableLayout(mContext);
+        columnHeadersLayout.setBackgroundResource(R.color.chart_grid_lines);
+        TableLayout rowHeadersLayout = new TableLayout(mContext);
+        rowHeadersLayout.setBackgroundResource(R.color.chart_grid_lines);
+        TableLayout dataLayout = new TableLayout(mContext);
+        dataLayout.setBackgroundResource(R.color.chart_grid_lines);
 
-        mHorizontalScrollViewLinkage = new Linkage<LinkableHorizontalScrollView>();
-        mColumnHeadersHorizontalScrollView =
-                new LinkableHorizontalScrollView(mContext, mHorizontalScrollViewLinkage);
+        Linkage<LinkableHorizontalScrollView> horizontalScrollViewLinkage = new Linkage<>();
+        HorizontalScrollView columnHeadersHorizontalScrollView = new LinkableHorizontalScrollView(mContext, horizontalScrollViewLinkage);
         mDataHorizontalScrollView =
-                new LinkableHorizontalScrollView(mContext, mHorizontalScrollViewLinkage);
-        mColumnHeadersHorizontalScrollView.setHorizontalScrollBarEnabled(false);
+                new LinkableHorizontalScrollView(mContext, horizontalScrollViewLinkage);
+        columnHeadersHorizontalScrollView.setHorizontalScrollBarEnabled(false);
         mDataHorizontalScrollView.setHorizontalScrollBarEnabled(false);
 
-        mVerticalScrollViewLinkage = new Linkage<LinkableScrollView>();
-        mRowHeadersScrollView = new LinkableScrollView(mContext, mVerticalScrollViewLinkage);
-        mDataScrollView = new LinkableScrollView(mContext, mVerticalScrollViewLinkage);
-        mRowHeadersScrollView.setVerticalScrollBarEnabled(false);
-        mDataScrollView.setVerticalScrollBarEnabled(false);
+        Linkage<LinkableScrollView> verticalScrollViewLinkage = new Linkage<>();
+        ScrollView rowHeadersScrollView = new LinkableScrollView(mContext, verticalScrollViewLinkage);
+        ScrollView dataScrollView = new LinkableScrollView(mContext, verticalScrollViewLinkage);
+        rowHeadersScrollView.setVerticalScrollBarEnabled(false);
+        dataScrollView.setVerticalScrollBarEnabled(false);
 
         // Set resource IDs so that they can be referenced by RelativeLayout.
-        mCornerView.setId(1);
-        mColumnHeadersHorizontalScrollView.setId(2);
-        mRowHeadersScrollView.setId(3);
-        mDataScrollView.setId(4);
+        cornerView.setId(1);
+        columnHeadersHorizontalScrollView.setId(2);
+        rowHeadersScrollView.setId(3);
+        dataScrollView.setId(4);
 
         // Wrap the column headers in a horizontal scroll view.
-        mColumnHeadersHorizontalScrollView.addView(mColumnHeadersLayout);
+        columnHeadersHorizontalScrollView.addView(columnHeadersLayout);
 
         // Wrap the row headers in a vertical scroll view.
-        mRowHeadersScrollView.addView(mRowHeadersLayout);
+        rowHeadersScrollView.addView(rowHeadersLayout);
 
         // Wrap the data grid in both horizontal and vertical scroll views.
-        mDataScrollView.addView(mDataHorizontalScrollView);
-        mDataHorizontalScrollView.addView(mDataLayout);
+        dataScrollView.addView(mDataHorizontalScrollView);
+        mDataHorizontalScrollView.addView(dataLayout);
 
         // Add all the views to the main view.
-        addView(mCornerView);
+        addView(cornerView);
 
         RelativeLayout.LayoutParams columnHeadersParams = new RelativeLayout.LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        columnHeadersParams.addRule(RelativeLayout.RIGHT_OF, mCornerView.getId());
-        addView(mColumnHeadersHorizontalScrollView, columnHeadersParams);
+        columnHeadersParams.addRule(RelativeLayout.RIGHT_OF, cornerView.getId());
+        addView(columnHeadersHorizontalScrollView, columnHeadersParams);
 
         RelativeLayout.LayoutParams mRowHeadersParams = new RelativeLayout.LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        mRowHeadersParams.addRule(RelativeLayout.BELOW, mCornerView.getId());
-        addView(mRowHeadersScrollView, mRowHeadersParams);
+        mRowHeadersParams.addRule(RelativeLayout.BELOW, cornerView.getId());
+        addView(rowHeadersScrollView, mRowHeadersParams);
 
         RelativeLayout.LayoutParams mDataParams = new RelativeLayout.LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        mDataParams.addRule(RelativeLayout.RIGHT_OF, mRowHeadersScrollView.getId());
-        mDataParams.addRule(RelativeLayout.BELOW, mColumnHeadersHorizontalScrollView.getId());
-        addView(mDataScrollView, mDataParams);
+        mDataParams.addRule(RelativeLayout.RIGHT_OF, rowHeadersScrollView.getId());
+        mDataParams.addRule(RelativeLayout.BELOW, columnHeadersHorizontalScrollView.getId());
+        addView(dataScrollView, mDataParams);
 
         // Add the column headers.
-        mColumnHeadersLayout.addView(createColumnHeadersView());
+        columnHeadersLayout.addView(createColumnHeadersView());
 
         // Add the row headers.
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
@@ -186,7 +175,7 @@ public class DataGridView extends RelativeLayout {
             View view = mDataGridAdapter.getRowHeader(i, null /*convertView*/, row);
             row.addView(view);
 
-            mRowHeadersLayout.addView(row);
+            rowHeadersLayout.addView(row);
         }
 
         // Add the data cells.
@@ -198,7 +187,7 @@ public class DataGridView extends RelativeLayout {
                 row.addView(view);
             }
 
-            mDataLayout.addView(row);
+            dataLayout.addView(row);
         }
 
         // Measure the entire layout!
@@ -208,7 +197,7 @@ public class DataGridView extends RelativeLayout {
         int maxWidth = 0;
         if (!mHasDoubleWidthColumnHeaders) {
             for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-                int width = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                int width = ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
                         .getMeasuredWidth();
                 if (width > maxWidth) {
                     maxWidth = width;
@@ -218,7 +207,7 @@ public class DataGridView extends RelativeLayout {
             for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
                 int width =
                         divideRoundUp(
-                                ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                                ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
                                         .getMeasuredWidth(),
                                 2);
                 if (width > maxWidth) {
@@ -229,7 +218,7 @@ public class DataGridView extends RelativeLayout {
 
         // ... or data cell...
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) mDataLayout.getChildAt(i);
+            TableRow row = (TableRow) dataLayout.getChildAt(i);
             for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
                 int width = row.getChildAt(j).getMeasuredWidth();
                 if (width > maxWidth) {
@@ -242,7 +231,7 @@ public class DataGridView extends RelativeLayout {
         if (!mHasDoubleWidthColumnHeaders) {
             for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
                 ViewGroup.LayoutParams newParams =
-                        ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                        ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
                                 .getLayoutParams();
 
                 newParams.width = maxWidth;
@@ -250,7 +239,7 @@ public class DataGridView extends RelativeLayout {
         } else {
             for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
                 ViewGroup.LayoutParams newParams =
-                        ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                        ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
                                 .getLayoutParams();
 
                 newParams.width = maxWidth * 2;
@@ -259,7 +248,7 @@ public class DataGridView extends RelativeLayout {
 
         // ... then all of the data cells too.
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) mDataLayout.getChildAt(i);
+            TableRow row = (TableRow) dataLayout.getChildAt(i);
             for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
                 ViewGroup.LayoutParams newParams = row.getChildAt(j).getLayoutParams();
 
@@ -273,7 +262,7 @@ public class DataGridView extends RelativeLayout {
         // Find the tallest row header...
         int maxHeight = 0;
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            int height = ((TableRow) mRowHeadersLayout.getChildAt(i)).getChildAt(0)
+            int height = ((TableRow) rowHeadersLayout.getChildAt(i)).getChildAt(0)
                     .getMeasuredHeight();
             if (height > maxHeight) {
                 maxHeight = height;
@@ -282,7 +271,7 @@ public class DataGridView extends RelativeLayout {
 
         // ... or data cell...
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) mDataLayout.getChildAt(i);
+            TableRow row = (TableRow) dataLayout.getChildAt(i);
             for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
                 int height = row.getChildAt(j).getMeasuredHeight();
                 if (height > maxHeight) {
@@ -294,13 +283,13 @@ public class DataGridView extends RelativeLayout {
         // ... then set all of the row headers to that height...
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
             ViewGroup.LayoutParams newParams =
-                    ((TableRow) mRowHeadersLayout.getChildAt(i)).getChildAt(0).getLayoutParams();
+                    ((TableRow) rowHeadersLayout.getChildAt(i)).getChildAt(0).getLayoutParams();
             newParams.height = maxHeight;
         }
 
         // ... then all of the data cells too.
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) mDataLayout.getChildAt(i);
+            TableRow row = (TableRow) dataLayout.getChildAt(i);
             for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
                 ViewGroup.LayoutParams newParams = row.getChildAt(j).getLayoutParams();
 
@@ -315,7 +304,7 @@ public class DataGridView extends RelativeLayout {
         int maxColumnHeaderHeight = 0;
         if (!mHasDoubleWidthColumnHeaders) {
             for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-                int height = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                int height = ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
                         .getMeasuredHeight();
                 if (height > maxColumnHeaderHeight) {
                     maxColumnHeaderHeight = height;
@@ -323,7 +312,7 @@ public class DataGridView extends RelativeLayout {
             }
         } else {
             for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
-                int height = ((TableRow) mColumnHeadersLayout.getChildAt(0)).getChildAt(i)
+                int height = ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
                         .getMeasuredHeight();
                 if (height > maxColumnHeaderHeight) {
                     maxColumnHeaderHeight = height;
@@ -334,7 +323,7 @@ public class DataGridView extends RelativeLayout {
         // Find the widest row header.
         int maxRowHeaderWidth = 0;
         for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            int width = ((TableRow) mRowHeadersLayout.getChildAt(i)).getChildAt(0)
+            int width = ((TableRow) rowHeadersLayout.getChildAt(i)).getChildAt(0)
                     .getMeasuredWidth();
             if (width > maxRowHeaderWidth) {
                 maxRowHeaderWidth = width;
@@ -342,7 +331,7 @@ public class DataGridView extends RelativeLayout {
         }
 
         // Set the corner view's height and width.
-        ViewGroup.LayoutParams cornerParams = mCornerView.getLayoutParams();
+        ViewGroup.LayoutParams cornerParams = cornerView.getLayoutParams();
         cornerParams.height = maxColumnHeaderHeight;
         cornerParams.width = maxRowHeaderWidth;
     }
@@ -381,7 +370,7 @@ public class DataGridView extends RelativeLayout {
 
     private static class Linkage<T extends View> {
 
-        Set<T> mLinkedViews = Sets.newHashSet();
+        final Set<T> mLinkedViews = Sets.newHashSet();
 
         public void addLinkedView(T view) {
             mLinkedViews.add(view);
@@ -394,7 +383,7 @@ public class DataGridView extends RelativeLayout {
      */
     private static class LinkableHorizontalScrollView extends HorizontalScrollView {
 
-        private Linkage<LinkableHorizontalScrollView> mLinkage;
+        private final Linkage<LinkableHorizontalScrollView> mLinkage;
 
         public LinkableHorizontalScrollView(
                 Context context,
@@ -423,7 +412,7 @@ public class DataGridView extends RelativeLayout {
      */
     private static class LinkableScrollView extends ScrollView {
 
-        private Linkage<LinkableScrollView> mLinkage;
+        private final Linkage<LinkableScrollView> mLinkage;
 
         public LinkableScrollView(
                 Context context,

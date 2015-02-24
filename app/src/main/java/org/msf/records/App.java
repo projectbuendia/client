@@ -2,26 +2,21 @@ package org.msf.records;
 
 import android.app.Application;
 
-import org.msf.records.events.DefaultCrudEventBus;
-import org.msf.records.events.mvcmodels.ModelReadyEvent;
-import org.msf.records.mvcmodels.Models;
-import org.msf.records.mvcmodels.PatientChartModel;
+import net.sqlcipher.database.SQLiteDatabase;
+
+import org.msf.records.diagnostics.HealthMonitor;
 import org.msf.records.net.OpenMrsConnectionDetails;
-import org.msf.records.net.OpenMrsServer;
-import org.msf.records.net.OpenMrsXformsConnection;
 import org.msf.records.net.Server;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import dagger.ObjectGraph;
-import de.greenrobot.event.EventBus;
 
 /**
- * Created by Gil on 08/10/2014.\
+ * An {@link Application} the represents the Android Client.
  */
 public class App extends Application {
 
@@ -34,21 +29,22 @@ public class App extends Application {
 
     private static UserManager sUserManager;
 
-    private static Server mServer;
-    private static OpenMrsXformsConnection mOpenMrsXformsConnection;
+    private static Server sServer;
 
     private static OpenMrsConnectionDetails sConnectionDetails;
 
-    @Inject Application mApplication;
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
-    @Inject PatientChartModel mPatientChartModel;
+    @Inject Server mServer;
+    @Inject HealthMonitor mHealthMonitor;
 
     @Override
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
+        initializeSqlCipher();
 
         buildObjectGraphAndInject();
 
@@ -56,15 +52,16 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-
-            sUserManager = mUserManager; // TODO(dxchen): Remove once fully migrated to Dagger
+            sUserManager = mUserManager; // TODO(dxchen): Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
-
-            mServer = new OpenMrsServer(sConnectionDetails);
+            sServer = mServer; // TODO(dxchen): Remove when Daggered.
         }
 
-        // TODO(dxchen): Refactor this into the model classes.
-        EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
+        mHealthMonitor.start();
+    }
+
+    private void initializeSqlCipher() {
+        SQLiteDatabase.loadLibs(this);
     }
 
     public void buildObjectGraphAndInject() {
@@ -72,8 +69,8 @@ public class App extends Application {
         mObjectGraph.inject(this);
     }
 
-    public void inject(Object o) {
-        mObjectGraph.inject(o);
+    public void inject(Object obj) {
+        mObjectGraph.inject(obj);
     }
 
     public static synchronized App getInstance() {
@@ -85,10 +82,14 @@ public class App extends Application {
     }
 
     public static synchronized Server getServer() {
-        return mServer;
+        return sServer;
     }
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
         return sConnectionDetails;
+    }
+
+    public HealthMonitor getHealthMonitor() {
+        return mHealthMonitor;
     }
 }

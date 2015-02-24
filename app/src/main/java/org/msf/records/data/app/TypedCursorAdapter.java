@@ -83,7 +83,7 @@ public abstract class TypedCursorAdapter<T extends AppTypeBase> extends BaseAdap
      * Changes the attached {@link TypedCursor} to the specified value, closing the currently
      * attached {@link TypedCursor} if it exists.
      */
-    public void changeLazyArray(TypedCursor<T> newTypedCursor) {
+    public void changeTypedCursor(TypedCursor<T> newTypedCursor) {
         if (mTypedCursor == newTypedCursor) {
             return;
         }

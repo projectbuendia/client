@@ -2,7 +2,6 @@ package org.msf.records.net;
 
 import android.util.Base64;
 
-import org.msf.records.inject.Qualifiers;
 import org.msf.records.prefs.StringPreference;
 
 import java.util.HashMap;
@@ -23,8 +22,8 @@ public class OpenMrsConnectionDetails {
         return mVolley;
     }
 
-    public String getRootUrl() {
-        return mOpenMrsRootUrl.get();
+    public String getBuendiaApiUrl() {
+        return mOpenMrsRootUrl.get() + "/ws/rest/v1/projectbuendia";
     }
 
     public String getUserName() {

@@ -4,36 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- A dummy view to prevent auto-focusing on the first EditText. -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true" />
-
     <TableLayout
         android:padding="32dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:stretchColumns="1">
-
-        <TableRow>
-            <TextView
-                android:layout_marginEnd="50dp"
-                android:layout_marginRight="50dp"
-                android:gravity="center_vertical"
-                android:text="@string/username"
-                android:layout_column="0"
-                android:id="@+id/add_user_username_label" />
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="@string/add_user_example_username"
-                android:id="@+id/add_user_username_tv"
-                android:layout_column="1" />
-        </TableRow>
 
         <TableRow
             android:layout_width="fill_parent"
@@ -48,7 +24,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
+                android:inputType="textCapWords|textPersonName"
                 android:hint="@string/add_user_example_given_name"
                 android:ems="10"
                 android:id="@+id/add_user_given_name_tv"
@@ -69,7 +45,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textPersonName"
+                android:inputType="textCapWords|textPersonName"
                 android:hint="@string/add_user_example_family_name"
                 android:ems="10"
                 android:id="@+id/add_user_family_name_tv"

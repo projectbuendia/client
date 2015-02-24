@@ -5,11 +5,11 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import org.msf.records.App;
 import org.msf.records.R;
@@ -22,16 +22,34 @@ import butterknife.InjectView;
  * A {@link android.support.v4.app.DialogFragment} for adding a new user.
  */
 public class AddNewUserDialogFragment extends DialogFragment {
-    public static AddNewUserDialogFragment newInstance() {
+    /**
+     * Creates a new instance and registers the given UI, if specified.
+     */
+    public static AddNewUserDialogFragment newInstance(ActivityUi activityUi) {
         AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
+        fragment.setUi(activityUi);
         return fragment;
     }
 
-    @InjectView(R.id.add_user_username_tv) EditText mUsername;
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
     @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
 
     private LayoutInflater mInflater;
+    // Optional UI for exposing a spinner.
+    @Nullable private ActivityUi mActivityUi;
+
+    /**
+     * Delegate for the UI that will be shown when the dialog is closed, so that a spinner can be
+     * shown until the user has loaded.
+     */
+    public interface ActivityUi {
+
+        void showSpinner(boolean show);
+    }
+
+    public void setUi(ActivityUi activityUi) {
+        mActivityUi = activityUi;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,39 +83,26 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (mUsername.getText() == null
-                                                || mUsername.getText().toString().equals("")) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Username must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mUsername.invalidate();
+                                        if (isNullOrWhitespace(mGivenName)) {
+                                            setError(
+                                                    mGivenName,
+                                                    R.string.given_name_cannot_be_null);
                                             return;
                                         }
-                                        if (mGivenName.getText() == null
-                                                || mGivenName.getText().toString().equals("")) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Given name must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mGivenName.invalidate();
-                                            return;
-                                        }
-                                        if (mFamilyName.getText() == null
-                                                || mFamilyName.getText().toString().equals("")) {
-                                            Toast.makeText(
-                                                    getActivity(),
-                                                    "Family name must not be null",
-                                                    Toast.LENGTH_LONG).show();
-                                            mFamilyName.invalidate();
+                                        if (isNullOrWhitespace(mFamilyName)) {
+                                            setError(
+                                                    mFamilyName,
+                                                    R.string.family_name_cannot_be_null);
                                             return;
                                         }
 
-                                        App.getUserManager().addUser(NewUser.create(
-                                                mUsername.getText().toString(),
-                                                mGivenName.getText().toString(),
-                                                mFamilyName.getText().toString()
+                                        App.getUserManager().addUser(new NewUser(
+                                                mGivenName.getText().toString().trim(),
+                                                mFamilyName.getText().toString().trim()
                                         ));
+                                        if (mActivityUi != null) {
+                                            mActivityUi.showSpinner(true);
+                                        }
                                         dialog.dismiss();
                                     }
                                 });
@@ -105,5 +110,15 @@ public class AddNewUserDialogFragment extends DialogFragment {
         });
 
         return dialog;
+    }
+
+    private boolean isNullOrWhitespace(EditText field) {
+        return field.getText() == null || field.getText().toString().trim().isEmpty();
+    }
+
+    private void setError(EditText field, int resourceId) {
+        field.setError(getResources().getString(resourceId));
+        field.invalidate();
+        field.requestFocus();
     }
 }

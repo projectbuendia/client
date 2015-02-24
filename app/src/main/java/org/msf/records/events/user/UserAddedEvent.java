@@ -13,7 +13,6 @@ public class UserAddedEvent extends KnownUsersChangedEvent {
 
     public UserAddedEvent(User addedUser) {
         super(ImmutableSet.of(addedUser), ImmutableSet.<User>of());
-
         this.addedUser = addedUser;
     }
 }

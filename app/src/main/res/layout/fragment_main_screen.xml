@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:text="@string/action_new_patient"
         android:id="@+id/new_patient_button"
-        android:onClick="onButtonClicked"
         style="@style/button_large"/>
 
     <Button
@@ -22,7 +21,6 @@
         android:layout_height="wrap_content"
         android:text="@string/action_new_round"
         android:id="@+id/new_round_button"
-        android:onClick="onButtonClicked"
         android:visibility="invisible"
         style="@style/button_large" />
 
@@ -31,7 +29,6 @@
         android:layout_height="wrap_content"
         android:text="@string/action_view_round_archive"
         android:id="@+id/round_archive_button"
-        android:onClick="onButtonClicked"
         android:visibility="invisible"
         style="@style/button_large" />
 
@@ -40,7 +37,6 @@
         android:layout_height="wrap_content"
         android:text="@string/action_view_xform"
         android:id="@+id/view_xform_button"
-        android:onClick="onButtonClicked"
         android:visibility="invisible"
         style="@style/button_large" />
 </LinearLayout>

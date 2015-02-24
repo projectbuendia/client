@@ -3,6 +3,7 @@ package org.msf.records.net;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
+import org.joda.time.Instant;
 import org.msf.records.net.model.ChartStructure;
 import org.msf.records.net.model.ConceptList;
 import org.msf.records.net.model.CustomSerialization;
@@ -24,7 +25,6 @@ import java.util.HashMap;
  */
 public class OpenMrsChartServer {
 
-    private static final String TAG = "OpenMrsChartServer";
     private final OpenMrsConnectionDetails mConnectionDetails;
 
     public OpenMrsChartServer(OpenMrsConnectionDetails connectionDetails) {
@@ -35,46 +35,74 @@ public class OpenMrsChartServer {
                          Response.Listener<PatientChart> patientListener,
                          Response.ErrorListener errorListener) {
         GsonRequest<PatientChart> request = new GsonRequest<>(
-                mConnectionDetails.getRootUrl() + "/patientencounters/" + patientUuid,
+                mConnectionDetails.getBuendiaApiUrl() + "/patientencounters/" + patientUuid,
                 PatientChart.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     public void getAllCharts(Response.Listener<PatientChartList> patientListener,
                              Response.ErrorListener errorListener) {
+        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
+                patientListener, errorListener);
+    }
+
+    /**
+     * Get all observations that happened in an encounter after or on lastTime. Allows a client to
+     * do incremental cache updating.
+     *
+     * @param lastTime a joda instant representing the start time for new observations (inclusive)
+     * @param patientListener a listener to get the results on the event of success
+     * @param errorListener a (Volley) listener to get any errors
+     */
+    public void getIncrementalCharts(
+            Instant lastTime,
+            Response.Listener<PatientChartList> patientListener,
+            Response.ErrorListener errorListener) {
+        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() +
+                        "/patientencounters?sm=" + lastTime.getMillis(),
+                patientListener, errorListener);
+    }
+
+    private void doEncountersRequest(
+            String url,
+            Response.Listener<PatientChartList> patientListener,
+            Response.ErrorListener errorListener) {
         GsonRequest<PatientChartList> request = new GsonRequest<>(
-                mConnectionDetails.getRootUrl() + "/patientencounters",
+                url,
                 PatientChartList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 patientListener, errorListener);
         CustomSerialization.registerTo(request.getGson());
-        request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        request.setRetryPolicy(
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     public void getConcepts(Response.Listener<ConceptList> conceptListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<ConceptList> request = new GsonRequest<ConceptList>(
-                mConnectionDetails.getRootUrl() + "/concept",
+                mConnectionDetails.getBuendiaApiUrl() + "/concept",
                 ConceptList.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 conceptListener, errorListener) {
         };
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     public void getChartStructure(
             String uuid, Response.Listener<ChartStructure> chartListener,
             Response.ErrorListener errorListener) {
         GsonRequest<ChartStructure> request = new GsonRequest<ChartStructure>(
-                mConnectionDetails.getRootUrl() + "/chart/" + uuid + "?v=full",
+                mConnectionDetails.getBuendiaApiUrl() + "/chart/" + uuid + "?v=full",
                 ChartStructure.class, false,
                 mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
                 chartListener, errorListener) {
         };
-        mConnectionDetails.getVolley().addToRequestQueue(request, TAG);
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 }

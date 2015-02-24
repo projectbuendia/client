@@ -39,7 +39,7 @@ public class Colorizer {
         return new Colorizer(Arrays.copyOf(palette, palette.length));
     }
 
-    private final LruCache<Integer, Integer> mCache = new LruCache<Integer, Integer>(128);
+    private final LruCache<Integer, Integer> mCache = new LruCache<>(128);
 
     private final int[][] mPaletteBytes;
     private final int mInterpolations;

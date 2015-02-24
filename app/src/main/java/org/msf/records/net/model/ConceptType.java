@@ -3,7 +3,7 @@ package org.msf.records.net.model;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by nfortescue on 11/25/14.
+ * An enumeration of concept types.
  */
 public enum ConceptType {
 
@@ -13,6 +13,8 @@ public enum ConceptType {
     CODED,
     @SerializedName("text")
     TEXT,
+    @SerializedName("date")
+    DATE,
     @SerializedName("none")
     NONE,
 }

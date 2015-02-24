@@ -2,6 +2,10 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
+    dependencies {
+        classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
+    }
 }
 
 apply plugin: 'com.android.application'
@@ -11,35 +15,30 @@ def versionMinor = 2
 def versionPatch = 1
 
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
-def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
-
-def releaseRepoRoot = file('../../release/')
-
 dependencies {
     // Build plugins
-    provided 'com.github.frankiesardo:auto-parcel-processor:+' // Automatic Parcelables
+    // TODO(dxchen): Figure out why removing this causes a Dagger error.
+    provided 'com.github.frankiesardo:auto-parcel-processor:0.2' // Automatic Parcelables
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
+    // provided 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1' // Test multiplexing/selection
 
     // Local .jar dependencies
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':autofittextview')
     compile project(':odkcollect')
-    compile project(':snackbar')
-    compile project(':ViewPagerIndicator')
 
     // External dependencies
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.android.support:cardview-v7:+'
-    compile 'com.android.support:recyclerview-v7:+'
-    compile 'com.android.support:support-v4:20.0.0'
-    compile 'com.github.frankiesardo:auto-parcel:+' // Automatic Parcelables
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'com.android.support:support-v4:21.0.0'
     compile 'com.github.zafarkhaja:java-semver:0.8.0' // Semantic versioning
     compile 'com.google.code.gson:gson:2.3' // JSON parser
     compile 'com.google.guava:guava:18.0' // Google common libraries
     compile 'com.jakewharton:butterknife:5.1.2' // View injection
     compile 'com.mcxiaoke.volley:library:1.0.6' // HTTP framework
+    compile 'com.joanzapata.android:android-iconify:1.0.8' // Font-based icons
     compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
     compile 'de.greenrobot:eventbus:2.4.0' // The event bus
     compile 'joda-time:joda-time:2.5' // Better dates and times
@@ -52,12 +51,51 @@ dependencies {
         exclude group: 'com.squareup.dagger' // Provided by com.squareup.dagger
         exclude group: 'javax.inject' // Provided by com.squareup.dagger
     }
+    androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
+    compile files('libs/sqlcipher.jar')
 }
+
+apply plugin: 'spoon'
+
+spoon {
+    if (project.hasProperty('spoonClassName')) {
+        className = project.spoonClassName
+    }
+}
+
+// Consider spoon to always be "out-of-date" so that spoon tests will run (when requested) even
+// when no changes have been made to the build.
+tasks["spoon"].outputs.upToDateWhen { false }
+
+def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
+def releaseRepoRoot = file('../../release/')
+
+// OpenMRS instance for development (kept at tip of dev branch).
+def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs';
+
+// OpenMRS instance for integration testing server.
+def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/openmrs';
+
+// OpenMRS root URL for Edison on local network (default for dev tablets).
+def openmrsRootUrlEdison = 'http://server:9000/openmrs';
+
+// OpenMRS root URL for host machine when client runs in an emulator (AVD).
+def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs';
+
+// Just for development.  In production builds, these should be overridden
+// using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
+def openmrsRootUrlDefault = openmrsRootUrlEdison;
+def openmrsUserDefault = 'buendia';
+def openmrsPasswordDefault = 'buendia';
 
 android {
     compileSdkVersion 21
     buildToolsVersion "19.1.0"
+
+    sourceSets.main {
+        jniLibs.srcDir 'libs'
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -71,16 +109,22 @@ android {
         targetSdkVersion 19
 
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}" + (project.hasProperty('buildNumber') ? '.' + project.buildNumber : '')
+
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
         testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+
+        resValue "string", "openmrs_root_url_default", project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
+        resValue "string", "openmrs_user_default", project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
+        resValue "string", "openmrs_password_default", project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
+        // TODO: Add a resValue for the package server root URL here.
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue "string", "sync_authority", applicationId + '.provider.records'
         resValue "string", "account_type", applicationId
         buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}\""
-
         buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
     }
@@ -105,24 +149,27 @@ android {
     }
 
     lintOptions {
-        abortOnError false
+        lintConfig file('lint.xml')
+
+        htmlReport false
     }
 
     buildTypes {
         debug {
             applicationIdSuffix '.dev'
-            versionNameSuffix '-dev'
 
             resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
             resValue "string", "account_type", defaultConfig.applicationId + '.dev'
             buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // For release builds, it's useful to include the real build time.
+            // However, including the time would force recompilation on every run
+            // even when no code has changed; so for debug builds, use a constant.
+            buildConfigField "String", "BUILD_TIME", "\"[debug]\""
         }
 
         release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
+            // noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.release
         }
     }
@@ -131,7 +178,7 @@ android {
 gradle.taskGraph.whenReady {
     taskGraph ->
         if (taskGraph.hasTask(':app:assembleRelease')) {
-            def pass = ''
+            def pass
             if (!android.signingConfigs.release.storeFile.exists()) {
                 throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
             }

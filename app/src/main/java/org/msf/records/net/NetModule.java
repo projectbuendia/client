@@ -2,8 +2,14 @@ package org.msf.records.net;
 
 import android.app.Application;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.prefs.StringPreference;
+import org.msf.records.utils.DateTimeDeserializer;
 
 import javax.inject.Singleton;
 
@@ -31,8 +37,25 @@ public class NetModule {
         return new OpenMrsConnectionDetails(volley, openMrsRootUrl, openMrsUser, openMrsPassword);
     }
 
+    @Provides @Singleton RequestConfigurator provideRequestConfigurator() {
+        return new RequestConfigurator(10000 /*timeout*/, 2 /*retry attempts*/, 1 /*back-off*/);
+    }
+
+    @Provides @Singleton RequestFactory provideRequestFactory(RequestConfigurator configurator) {
+        return new RequestFactory(configurator);
+    }
+
+    @Provides @Singleton Gson provideGson() {
+        return new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateSerializer())
+                .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
+                .create();
+    }
+
     @Provides @Singleton Server provideServer(
-            OpenMrsConnectionDetails connectionDetails) {
-        return new OpenMrsServer(connectionDetails);
+            OpenMrsConnectionDetails connectionDetails,
+            RequestFactory requestFactory,
+            Gson gson) {
+        return new OpenMrsServer(connectionDetails, requestFactory, gson);
     }
 }

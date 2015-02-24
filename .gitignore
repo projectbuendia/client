@@ -9,6 +9,7 @@
 # Generated files
 bin/
 gen/
+crashlytics-build.properties
 
 # Gradle files
 .gradle/
@@ -38,5 +39,4 @@ proguard/
 .idea/vcs.xml
 
 # User-specific configurations
-*.iml
 *.apk

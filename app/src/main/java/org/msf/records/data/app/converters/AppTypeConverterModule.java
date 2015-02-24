@@ -1,9 +1,5 @@
 package org.msf.records.data.app.converters;
 
-import android.app.Application;
-
-import org.msf.records.data.app.AppModel;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -14,12 +10,14 @@ import dagger.Provides;
  */
 @Module(
         complete = false,
-        library = true
-)
+        library = true)
 public class AppTypeConverterModule {
 
-    @Provides @Singleton AppTypeConverters provideAppTypeConverters() {
+    @Provides
+    @Singleton
+    AppTypeConverters provideAppTypeConverters() {
         return new AppTypeConverters(
-                new AppPatientConverter());
+                new AppPatientConverter(),
+                new AppLocationConverter());
     }
 }

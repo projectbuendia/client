@@ -1,16 +1,23 @@
 package org.msf.records.sync;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import org.msf.records.model.Concepts;
+import org.msf.records.sync.providers.Contracts;
+
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import org.msf.records.net.model.Concept;
-
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
 
 /**
  * A simple helper method to get all observations for a patient in a nice java bean format.
@@ -18,34 +25,22 @@ import java.util.Set;
 public class LocalizedChartHelper {
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
-    public static final String KNOWN_PATIENT_UUID = "1802f573-6437-11e4-badf-42010af0dc15";
     public static final String ENGLISH_LOCALE = "en";
 
-    public static final String PULSE_UUID = "";
-    /**
-     * A uuid representing when a clinician fills in "Unknown".
-     */
-    public static final String UNKNOWN_VALUE = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     /**
      * A set of uuids for concepts that represent an answer indicating everything is normal, and
-     * there is no worrying symptom
+     * there is no worrying symptom.
      */
-    public static final Set<String> NO_SYMPTOM_VALUES = new HashSet<>();
-    static {
-        NO_SYMPTOM_VALUES.add("1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // NO
-        NO_SYMPTOM_VALUES.add("159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // Solid food
-        NO_SYMPTOM_VALUES.add("95d50bc3-6281-4661-94ab-1a26455c40a2"); // Normal pulse
-        NO_SYMPTOM_VALUES.add("160282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // Awake
-        NO_SYMPTOM_VALUES.add("1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // NORMAL
-        NO_SYMPTOM_VALUES.add("db2ac5ad-cc64-4184-b4be-1324730e1882"); // Can talk
-        NO_SYMPTOM_VALUES.add("c2a547f7-6329-4273-80c2-eae804897efd"); // Can walk
-        NO_SYMPTOM_VALUES.add(Concept.NONE_UUID); // None
-    }
+    public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
+            Concepts.NO_UUID, // NO
+            Concepts.SOLID_FOOD_UUID, // Solid food
+            Concepts.NORMAL_UUID, // NORMAL
+            Concepts.NONE_UUID); // None
 
     /**
      * A simple bean class representing an observation. All names and values have been localized.
      */
-    public static class LocalizedObservation {
+    public static final class LocalizedObservation {
         /**
          * The time of the encounter (hence the observation) in milliseconds since epoch.
          */
@@ -66,53 +61,85 @@ public class LocalizedChartHelper {
          * The value that was observed non-localized. For a numeric value it will be a number,
          * for a non-numeric value it will be a UUID of the response.
          */
-        public final String value;
+        // TODO(rjlothian): It's not clear in what situations this value can be null.
+        @Nullable public final String value;
 
         /**
          * The value that was observed, converted to a String, and localized in the case of
          * Coded (concept) observations.
          */
-        public final String localizedValue;
+        // TODO(rjlothian): It's not clear in what situations this value can be null.
+        @Nullable public final String localizedValue;
 
-        public LocalizedObservation(long encounterTimeMillis, String groupName, String conceptUuid,
-                                    String conceptName,
-                                    String value,
-                                    String localizedValue) {
+        public LocalizedObservation(
+                long encounterTimeMillis,
+                String groupName,
+                String conceptUuid,
+                String conceptName,
+                @Nullable String value,
+                @Nullable String localizedValue) {
             this.encounterTimeMillis = encounterTimeMillis;
-            this.groupName = groupName;
-            this.conceptUuid = conceptUuid;
-            this.conceptName = conceptName;
+            this.groupName = checkNotNull(groupName);
+            this.conceptUuid = checkNotNull(conceptUuid);
+            this.conceptName = checkNotNull(conceptName);
             this.value = value;
             this.localizedValue = localizedValue;
         }
 
         @Override
         public String toString() {
-            return "time=" + encounterTimeMillis + ",group=" + groupName + ",conceptUuid=" +
-                    conceptUuid + ",conceptName=" + conceptName + ",value=" + localizedValue;
+            return "time=" + encounterTimeMillis
+                    + ",group=" + groupName
+                    + ",conceptUuid=" + conceptUuid
+                    + ",conceptName=" + conceptName
+                    + ",value=" + localizedValue;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof LocalizedObservation)) {
+                return false;
+            }
+            LocalizedObservation o = (LocalizedObservation) other;
+            return encounterTimeMillis == o.encounterTimeMillis
+                    && Objects.equals(groupName, o.groupName)
+                    && Objects.equals(conceptUuid, o.conceptUuid)
+                    && Objects.equals(conceptName, o.conceptName)
+                    && Objects.equals(value, o.value)
+                    && Objects.equals(localizedValue, o.localizedValue);
         }
     }
 
+    private final ContentResolver mContentResolver;
+
+    public LocalizedChartHelper(
+            ContentResolver contentResolver) {
+        mContentResolver = checkNotNull(contentResolver);
+    }
     /**
      * Get all observations for a given patient from the local cache, localized to English.
      */
-    public static ArrayList<LocalizedObservation> getObservations(ContentResolver contentResolver,
-                                                                  String patientUuid) {
-        return getObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
+    public List<LocalizedObservation> getObservations(
+            String patientUuid) {
+        return getObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /**
      * Get all observations for a given patient.
+     *
      * @param locale the locale to return the results in, to match the server String
      */
-    public static ArrayList<LocalizedObservation> getObservations(ContentResolver contentResolver,
-                                                           String patientUuid, String locale) {
+    public List<LocalizedObservation> getObservations(
+            String patientUuid,
+            String locale) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(ChartProviderContract.makeLocalizedChartUri(
-                    KNOWN_CHART_UUID, patientUuid, locale), null, null, null, null);
+            cursor = mContentResolver.query(
+                    Contracts.LocalizedCharts.getLocalizedChartUri(
+                            KNOWN_CHART_UUID, patientUuid, locale),
+                    null, null, null, null);
 
-            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            List<LocalizedObservation> result = new ArrayList<>();
             while (cursor.moveToNext()) {
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
@@ -137,22 +164,29 @@ public class LocalizedChartHelper {
      * localized to English. Ordering will be by concept uuid, and there are not groups or other
      * chart based configurations.
      */
-    public static Map<String, LocalizedObservation> getMostRecentObservations(
-            ContentResolver contentResolver, String patientUuid) {
-        return getMostRecentObservations(contentResolver, patientUuid, ENGLISH_LOCALE);
+    public Map<String, LocalizedObservation> getMostRecentObservations(
+            String patientUuid) {
+        return getMostRecentObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /**
      * Get the most recent observations for each concept for a given patient from the local cache,
-     * Ordering will be by concept uuid, and there are not groups or other chart based configurations.
+     * Ordering will be by concept uuid, and there are not groups or other chart-based
+     * configurations.
+     *
      * @param locale the locale to return the results in, to match the server String
      */
-    public static Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
-            ContentResolver contentResolver, String patientUuid, String locale) {
+    public Map<String, LocalizedChartHelper.LocalizedObservation> getMostRecentObservations(
+            String patientUuid,
+            String locale) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(ChartProviderContract.makeMostRecentChartUri(
-                    patientUuid, locale), null, null, null, null);
+            cursor = mContentResolver.query(
+                    Contracts.MostRecentLocalizedCharts.getMostRecentChartUri(patientUuid, locale),
+                    null,
+                    null,
+                    null,
+                    null);
 
             Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newLinkedHashMap();
             while (cursor.moveToNext()) {
@@ -177,17 +211,41 @@ public class LocalizedChartHelper {
     }
 
     /**
-     * Get all observations for a given patient.
+     * Get the most recent observations for all concepts for a set of patients from the local
+     * cache. Ordering will be by concept uuid, and there are not groups or other chart-based
+     * configurations.
+     *
+     * @param patientUuids the uuids of patients to return data for
      * @param locale the locale to return the results in, to match the server String
      */
-    public static ArrayList<LocalizedObservation> getEmptyChart(
-            ContentResolver contentResolver, String locale) {
+    public Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>>
+            getMostRecentObservationsBatch(
+                    String[] patientUuids,
+                    String locale) {
+        Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> observations =
+                new HashMap<String, Map<String, LocalizedObservation>>();
+        for (String patientUuid : patientUuids) {
+            observations.put(patientUuid, getMostRecentObservations(patientUuid, locale));
+        }
+
+        return observations;
+    }
+
+
+    /**
+     * Get all observations for a given patient.
+     *
+     * @param locale the locale to return the results in, to match the server String
+     */
+    public List<LocalizedObservation> getEmptyChart(
+            String locale) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(ChartProviderContract.makeEmptyLocalizedChartUri(
-                    KNOWN_CHART_UUID, locale), null, null, null, null);
+            cursor = mContentResolver.query(
+                    Contracts.LocalizedCharts.getEmptyLocalizedChartUri(KNOWN_CHART_UUID, locale),
+                    null, null, null, null);
 
-            ArrayList<LocalizedObservation> result = new ArrayList<>();
+            List<LocalizedObservation> result = new ArrayList<>();
             while (cursor.moveToNext()) {
                 LocalizedObservation obs = new LocalizedObservation(
                         0L,

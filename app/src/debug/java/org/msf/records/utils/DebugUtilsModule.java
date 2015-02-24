@@ -2,7 +2,6 @@ package org.msf.records.utils;
 
 import org.msf.records.AppModule;
 
-import java.io.IOError;
 import java.io.IOException;
 
 import javax.inject.Singleton;
@@ -11,7 +10,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by dxchen on 12/8/14.
+ * A Dagger module that provides debug utilities.
  */
 @Module(
         addsTo = AppModule.class,
