@@ -99,7 +99,9 @@ public class UpdateServerHealthCheck extends HealthCheck {
             performCheck();
 
             synchronized (mLock) {
-                mHandler.postDelayed(this, CHECK_PERIOD_MS);
+                if (mHandler != null) {
+                    mHandler.postDelayed(this, CHECK_PERIOD_MS);
+                }
             }
         }
     };
