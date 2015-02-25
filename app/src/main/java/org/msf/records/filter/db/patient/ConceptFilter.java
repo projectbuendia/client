@@ -9,7 +9,7 @@ import org.msf.records.sync.providers.Contracts;
  * Returns only patients with a concept present and matching the given value for the
  * most recent observation.
  */
-public final class ConceptFilter implements SimpleSelectionFilter<AppPatient> {
+public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
     // WHERE subclause returning only patients that had the concept with the given value in
     // the latest observation.
     private static final String CONCEPT_SUBQUERY =
@@ -43,8 +43,10 @@ public final class ConceptFilter implements SimpleSelectionFilter<AppPatient> {
 
     private final String mConceptUuid;
     private final String mConceptValueUuid;
+    private final String mDescription;
 
-    public ConceptFilter(String conceptUuid, String conceptValueUuid) {
+    public ConceptFilter(String description, String conceptUuid, String conceptValueUuid) {
+        mDescription = description;
         mConceptUuid = conceptUuid;
         mConceptValueUuid = conceptValueUuid;
     }
@@ -57,5 +59,10 @@ public final class ConceptFilter implements SimpleSelectionFilter<AppPatient> {
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
         return new String[] { mConceptUuid, mConceptValueUuid };
+    }
+
+    @Override
+    public String getDescription() {
+        return mDescription;
     }
 }

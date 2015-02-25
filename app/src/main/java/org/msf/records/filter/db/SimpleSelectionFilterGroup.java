@@ -13,7 +13,7 @@ import java.util.List;
  * an optional name used for string representations.
  */
 public final class SimpleSelectionFilterGroup<T extends AppTypeBase>
-        implements SimpleSelectionFilter<T> {
+        extends SimpleSelectionFilter<T> {
     private static final String DEFAULT_FILTER_NAME = "";
 
     private final FilterType mFilterType;
@@ -92,6 +92,11 @@ public final class SimpleSelectionFilterGroup<T extends AppTypeBase>
         allArgs.toArray(allArgsArray);
 
         return allArgsArray;
+    }
+
+    @Override
+    public String getDescription() {
+        return mName;
     }
 
     /**

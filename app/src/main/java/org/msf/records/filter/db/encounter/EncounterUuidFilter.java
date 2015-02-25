@@ -7,7 +7,7 @@ import org.msf.records.sync.providers.Contracts;
 /**
  * Returns only the encounter with the given UUID.
  */
-public final class EncounterUuidFilter implements SimpleSelectionFilter<AppEncounter> {
+public final class EncounterUuidFilter extends SimpleSelectionFilter<AppEncounter> {
 
     @Override
     public String getSelectionString() {
@@ -17,5 +17,12 @@ public final class EncounterUuidFilter implements SimpleSelectionFilter<AppEncou
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
         return new String[] { constraint.toString() };
+    }
+
+    @Override
+    public String getDescription() {
+        // No expectation that description will be displayed to the user, so no need for
+        // localization.
+        return "Encounter with UUID";
     }
 }
