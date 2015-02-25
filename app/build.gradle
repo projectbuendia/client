@@ -12,7 +12,7 @@ apply plugin: 'com.android.application'
 
 def versionMajor = 0
 def versionMinor = 2
-def versionPatch = 1
+def versionPatch = 7
 
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
 dependencies {
