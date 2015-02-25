@@ -49,6 +49,9 @@ public class EventBusIdlingResource<T> implements IdlingResource {
     @Override
     public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
         mResourceCallback = resourceCallback;
+        if (isIdleNow()) {
+            mResourceCallback.onTransitionToIdle();
+        }
     }
 
     private class EventSubscriber {

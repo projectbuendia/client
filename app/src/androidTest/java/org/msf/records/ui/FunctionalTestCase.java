@@ -40,9 +40,8 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
     private static final Logger LOG = Logger.create();
-    private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 20000;
+    private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 30000;
 
-    private SyncCounter mSyncCounter;
     private boolean mWaitForUserSync = true;
 
     protected EventBusRegistrationInterface mEventBus;
@@ -64,9 +63,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
-        mSyncCounter = new SyncCounter();
-        mEventBus.register(mSyncCounter);
-
         // Wait for users to sync.
         if (mWaitForUserSync) {
             EventBusIdlingResource<KnownUsersLoadedEvent> resource =
@@ -84,14 +80,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void tearDown() {
-        // If a sync is in progress, let it complete before starting the next test, or it may
-        // break test isolation.
-        if (mSyncCounter.inProgressSyncCount > 0) {
-            waitForInitialSync();
-        }
-
-        mEventBus.unregister(mSyncCounter);
-
         // Remove activities from the stack until the app is closed.  If we don't do this, the test
         // runner sometimes has trouble launching the activity to start the next test.
         try {

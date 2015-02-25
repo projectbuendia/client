@@ -94,6 +94,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String INCREMENTAL_OBSERVATIONS_UPDATE = "INCREMENTAL_OBSERVATIONS_UPDATE";
 
     /**
+     * If this key is present with boolean value true, then the start and end times of this sync
+     * will be recorded.
+     */
+    public static final String FULL_SYNC = "FULL_SYNC";
+
+    /**
      * RPC timeout for getting observations.
      */
     private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
@@ -164,8 +170,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
+
         try {
             boolean specific = false;
+
+            if (extras.getBoolean(FULL_SYNC)) {
+                Instant syncStartTime = Instant.now();
+                LOG.i("Setting sync start time: " + syncStartTime);
+                storeFullSyncStartTime(provider, syncStartTime);
+            }
+
             if (extras.getBoolean(SYNC_PATIENTS)) {
                 checkCancellation("Sync was canceled before patient sync.");
                 reportProgress(0, R.string.syncing_patients);
@@ -250,6 +264,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 checkCancellation("Sync was canceled right before finishing.");
             }
+
+            if (extras.getBoolean(FULL_SYNC)) {
+                Instant syncEndTime = Instant.now();
+                LOG.i("Setting sync end time: " + syncEndTime);
+                storeFullSyncEndTime(provider, syncEndTime);
+            }
+
             reportProgress(100, R.string.completing_sync);
         } catch (CancellationException e) {
             rollbackSavepoint(dbTransactionHelper);
@@ -337,7 +358,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void reportProgress(int progressIncrement, int stringResource) {
-        reportProgress(progressIncrement, getContext().getResources().getString(stringResource));
+        String progressString = getContext().getResources().getString(stringResource);
+        LOG.d("Sync progress checkpoint: +%d%%, %s", progressIncrement, progressString);
+        reportProgress(progressIncrement, progressString);
     }
 
     private void reportProgress(int progressIncrement) {
@@ -629,7 +652,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private Instant getLastSyncTime(ContentProviderClient provider) throws RemoteException {
         Cursor c = null;
         try {
-            c = provider.query(Contracts.Misc.CONTENT_URI,
+            c = provider.query(
+                    Contracts.Misc.CONTENT_URI,
                     new String[]{Contracts.Misc.OBS_SYNC_TIME}, null, null, null);
             if (c.moveToNext()) {
                 return new Instant(c.getLong(0));
@@ -751,5 +775,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException, UserManager.UserSyncException {
         App.getUserManager().syncKnownUsersSynchronously();
+    }
+
+    private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
+            throws RemoteException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contracts.Misc.FULL_SYNC_START_TIME, syncStartTime.getMillis());
+        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
+    }
+
+    private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
+            throws RemoteException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contracts.Misc.FULL_SYNC_END_TIME, syncEndTime.getMillis());
+        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
     }
 }
