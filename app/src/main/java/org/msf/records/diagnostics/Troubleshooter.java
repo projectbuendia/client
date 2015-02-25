@@ -92,8 +92,9 @@ public class Troubleshooter {
 
             actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
             actionsBuilder.addAll(getConfigurationTroubleshootingActions());
+            actionsBuilder.addAll(getUpdateServerTroubleshootingActions());
 
-            ImmutableSet actions = actionsBuilder.build();
+            ImmutableSet<TroubleshootingAction> actions = actionsBuilder.build();
 
             if (mLastTroubleshootingActionsChangedEvent != null) {
                 // If nothing's changed since the last time we checked, don't post a new event.
@@ -137,6 +138,16 @@ public class Troubleshooter {
             actions.add(TroubleshootingAction.CHECK_SERVER_AUTH);
         }
 
+        return actions;
+    }
+
+    private Set<TroubleshootingAction> getUpdateServerTroubleshootingActions() {
+        Set<TroubleshootingAction> actions = new HashSet<>();
+        if (mActiveIssues.contains(HealthIssue.UPDATE_SERVER_HOST_UNREACHABLE)) {
+            actions.add(TroubleshootingAction.CHECK_UPDATE_SERVER_REACHABILITY);
+        } else if (mActiveIssues.contains(HealthIssue.UPDATE_SERVER_INDEX_NOT_FOUND)) {
+            actions.add(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION);
+        }
         return actions;
     }
 }

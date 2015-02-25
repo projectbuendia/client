@@ -63,6 +63,7 @@ public class GenericAccountService extends Service {
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b.putBoolean(SyncAdapter.FULL_SYNC, true);
         b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
         b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
         b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
@@ -75,6 +76,7 @@ public class GenericAccountService extends Service {
         if (prefs.getBoolean("incremental_observation_update", true)) {
             b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
         }
+        LOG.i("Requesting sync");
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
                 Contracts.CONTENT_AUTHORITY, // Content authority
@@ -136,6 +138,7 @@ public class GenericAccountService extends Service {
 
     private static Bundle getExtrasForPeriodicSync() {
         Bundle extras = new Bundle();
+        extras.putBoolean(SyncAdapter.FULL_SYNC, true);
         extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
         extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
         extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);

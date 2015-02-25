@@ -45,6 +45,12 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
+
+        if (Constants.OFFLINE_SUPPORT) {
+            // Create account, if needed
+            GenericAccountService.registerSyncAccount(this);
+        }
+
         mController = new TentSelectionController(
                 mAppModel,
                 mCrudEventBusProvider.get(),
@@ -87,11 +93,6 @@ public final class TentSelectionActivity extends PatientSearchActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.tent_selection_container, new TentSelectionFragment())
                     .commit();
-        }
-
-        if(Constants.OFFLINE_SUPPORT){
-            // Create account, if needed
-            GenericAccountService.registerSyncAccount(this);
         }
     }
 
