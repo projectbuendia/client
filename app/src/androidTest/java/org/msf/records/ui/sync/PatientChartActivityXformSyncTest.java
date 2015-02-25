@@ -48,7 +48,8 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
                         mEventBus);
         onView(withId(R.id.action_update_chart)).perform(click());
         Espresso.registerIdlingResources(xformIdlingResource);
-        onView(withText("Encounter")).check(matches(isDisplayed()));
+        // This check is known to be particularly flaky.
+        checkViewDisplayedWithin(withText("Encounter"), 45000);
         screenshot("Xform Loaded");
         onView(withText(R.string.form_entry_discard)).perform(click());
     }

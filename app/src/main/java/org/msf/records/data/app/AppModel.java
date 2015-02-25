@@ -64,8 +64,8 @@ public class AppModel {
         // having started--this is the case if user data is cleared midsync, for example. To check
         // that a sync actually completed, we look at the FULL_SYNC_START_TIME and
         // FULL_SYNC_END_TIME columns in the Misc table, which are written to as the first and
-        // last operations of a complete sync. If both of these fields are present, then there has
-        // been a completed transaction in which the entire sync was performed.
+        // last operations of a complete sync. If both of these fields are present, and the last
+        // end time is greater than the last start time, then a full sync must have completed.
         Cursor c = null;
         try {
             c = mContentResolver.query(
@@ -82,7 +82,7 @@ public class AppModel {
             if (c.moveToNext()) {
                 LOG.d("Sync timings -- FULL_SYNC_START(%d), FULL_SYNC_END(%d), OBS_SYNC_TIME(%d)",
                         c.getLong(0), c.getLong(1), c.getLong(2));
-                return !c.isNull(0) && !c.isNull(1);
+                return !c.isNull(0) && !c.isNull(1) && c.getLong(1) >= c.getLong(0);
             } else {
                 return false;
             }
