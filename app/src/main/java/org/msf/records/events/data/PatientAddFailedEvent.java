@@ -14,6 +14,10 @@ public class PatientAddFailedEvent {
     public static final int REASON_NETWORK = 2;
     public static final int REASON_CLIENT = 3;
     public static final int REASON_SERVER = 4;
+    public static final int REASON_INVALID_ID = 5;
+    public static final int REASON_INVALID_GIVEN_NAME = 6;
+    public static final int REASON_INVALID_FAMILY_NAME = 7;
+
 
     public final int reason;
     public final Exception exception;

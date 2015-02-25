@@ -194,6 +194,15 @@ final class PatientCreationController {
                 case PatientAddFailedEvent.REASON_NETWORK:
                     mUi.showErrorMessage(R.string.patient_creation_network_error);
                     break;
+                case PatientAddFailedEvent.REASON_INVALID_ID:
+                    mUi.showErrorMessage(R.string.patient_creation_invalid_id_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INVALID_FAMILY_NAME:
+                    mUi.showErrorMessage(R.string.patient_creation_invalid_family_name_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INVALID_GIVEN_NAME:
+                    mUi.showErrorMessage(R.string.patient_creation_invalid_given_name_error);
+                    break;
                 case PatientAddFailedEvent.REASON_SERVER:
                     mUi.showErrorMessage(R.string.patient_creation_server_error);
                     break;
