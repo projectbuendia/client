@@ -16,14 +16,13 @@ import java.util.List;
  * All available patient filters available to the user, categorized by filter type.
  */
 public final class PatientDbFilters {
-    private static final SimpleSelectionFilter[] OTHER_FILTERS =
-            new SimpleSelectionFilter[] {
-        new ConceptFilter(
+    private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
+            new ConceptFilter(
                 App.getInstance().getString(R.string.pregnant),
                 Concepts.PREGNANCY_UUID,
                 Concepts.YES_UUID),
-        new AgeFilter(5),
-        new AgeFilter(2)
+            new AgeFilter(5),
+            new AgeFilter(2)
     };
 
     private static final SimpleSelectionFilter DEFAULT_FILTER = new AllFilter();

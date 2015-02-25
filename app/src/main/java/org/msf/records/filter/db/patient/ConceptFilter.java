@@ -45,6 +45,13 @@ public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
     private final String mConceptValueUuid;
     private final String mDescription;
 
+    /**
+     * Creates a filter that filters by the given concept UUID, matching only patients that match
+     * the corresponding filter value.
+     * @param description localized description of this filter used for logging and display
+     * @param conceptUuid concept UUID to filter by
+     * @param conceptValueUuid constraint for the concept UUID value
+     */
     public ConceptFilter(String description, String conceptUuid, String conceptValueUuid) {
         mDescription = description;
         mConceptUuid = conceptUuid;
