@@ -135,6 +135,8 @@ public final class AssignLocationDialog
         if (mGridView != null) {
             List<AppLocation> locations = new ArrayList(
                     locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT));
+            AppLocation triageZone = locationTree.findByUuid(Zone.TRIAGE_ZONE_UUID);
+            locations.add(0, triageZone);
             AppLocation dischargedZone = locationTree.findByUuid(Zone.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
             mAdapter = new TentListAdapter(mContext, locations, locationTree, mCurrentLocationUuid);
