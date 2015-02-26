@@ -27,8 +27,6 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>WARNING: Syncing requires the transfer of large quantities of data, so {@link SyncTestCase}s
  * will almost always be very large tests.
- *
- * <p>TODO: Fix rare cause of flakiness in which clearing the database causes a fatal SQLException.
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
