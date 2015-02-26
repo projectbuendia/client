@@ -149,7 +149,7 @@ android {
         targetSdkVersion 19
 
         versionCode versionInteger
-        versionName versionString
+        versionName '0'.equals(versionString) ? gitSha : versionString;
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
