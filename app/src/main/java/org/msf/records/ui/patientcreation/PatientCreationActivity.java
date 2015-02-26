@@ -219,6 +219,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         super.onStopImpl();
     }
 
+    @OnClick(R.id.patient_creation_button_clear_symptoms_onset_date)
+    void onClearSymptomsOnsetDateClick() {
+        mSymptomsOnsetDateSetListener.mLocalDate = null;
+        mSymptomsOnsetDate.setText("");
+    }
+
     @OnClick(R.id.patient_creation_button_change_location)
     void onChangeLocationClick() {
         final View button = findViewById(R.id.patient_creation_button_change_location);

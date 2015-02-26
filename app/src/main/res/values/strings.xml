@@ -235,4 +235,5 @@
     <string name="patient_validation_select_gender">Please select Male or Female.</string>
     <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
     <string name="patient_validation_future_onset_date">Symptoms onset date cannot be in the future.</string>
+    <string name="patient_creation_clear_symptoms_onset_date">Clear</string>
 </resources>
