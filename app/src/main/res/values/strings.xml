@@ -125,9 +125,14 @@
     <string name="admission_date_picker_title">Set admission date</string>
     <string name="patient_creation_client_error">could not add patient to local database</string>
     <string name="patient_creation_network_error">Could not complete server request</string>
+    <string name="patient_creation_network_error_with_reason">Could not complete server request (reason: %s)</string>
     <string name="patient_creation_server_error">Server did not properly return patient data</string>
     <string name="patient_creation_interrupted_error">Server request was interrupted</string>
     <string name="patient_creation_unknown_error">unknown error</string>
+    <string name="patient_creation_invalid_id_error">patient ID is invalid</string>
+    <string name="patient_creation_duplicate_id_error">another patient exists with the same ID</string>
+    <string name="patient_creation_invalid_family_name_error">family name is invalid</string>
+    <string name="patient_creation_invalid_given_name_error">given name is invalid</string>
     <string name="sync_failed_dialog_title">Sync Error</string>
     <string name="sync_failed_dialog_message">An error occurred while retrieving data from the server. Please check your OpenMRS settings or try again.</string>
     <string name="sync_failed_settings">Settings</string>

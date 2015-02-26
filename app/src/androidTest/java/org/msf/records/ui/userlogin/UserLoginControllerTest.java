@@ -37,8 +37,6 @@ public class UserLoginControllerTest extends AndroidTestCase {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        // TODO: Create a fake event bus so we can check whether the controller
-        // unregistered its event handler.
         mFakeEventBus = new FakeEventBus();
         mController = new UserLoginController(
                 mMockUserManager,
