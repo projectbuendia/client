@@ -69,8 +69,7 @@ public class PrefsModule {
         return new StringPreference(
                 sharedPreferences,
                 "package_server_root_url",
-                "http://packages:9001");
-        // TODO(kpy): Get the default value from an overridable resource.
+                resources.getString(R.string.package_server_root_url_default));
     }
 
     @Provides
