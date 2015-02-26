@@ -1,9 +1,11 @@
 package org.msf.records.ui.patientcreation;
 
+import com.android.volley.VolleyError;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
@@ -192,7 +194,17 @@ final class PatientCreationController {
                     mUi.showErrorMessage(R.string.patient_creation_client_error);
                     break;
                 case PatientAddFailedEvent.REASON_NETWORK:
-                    mUi.showErrorMessage(R.string.patient_creation_network_error);
+                    // For network errors, include the VolleyError message, if available.
+                    if (event.exception != null
+                            && event.exception.getCause() != null
+                            && event.exception.getCause() instanceof VolleyError
+                            && event.exception.getCause().getMessage() != null) {
+                        mUi.showErrorMessage(App.getInstance().getString(
+                                R.string.patient_creation_network_error_with_reason,
+                                event.exception.getCause().getMessage()));
+                    } else {
+                        mUi.showErrorMessage(R.string.patient_creation_network_error);
+                    }
                     break;
                 case PatientAddFailedEvent.REASON_INVALID_ID:
                     mUi.showErrorMessage(R.string.patient_creation_invalid_id_error);
