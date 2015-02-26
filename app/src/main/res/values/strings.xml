@@ -129,6 +129,7 @@
     <string name="patient_creation_interrupted_error">Server request was interrupted</string>
     <string name="patient_creation_unknown_error">unknown error</string>
     <string name="patient_creation_invalid_id_error">patient id is invalid</string>
+    <string name="patient_creation_duplicate_id_error">another patient exists with the same id</string>
     <string name="patient_creation_invalid_family_name_error">family name is invalid</string>
     <string name="patient_creation_invalid_given_name_error">given name is invalid</string>
     <string name="sync_failed_dialog_title">Sync Error</string>

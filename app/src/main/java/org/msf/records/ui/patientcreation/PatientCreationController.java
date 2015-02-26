@@ -197,6 +197,9 @@ final class PatientCreationController {
                 case PatientAddFailedEvent.REASON_INVALID_ID:
                     mUi.showErrorMessage(R.string.patient_creation_invalid_id_error);
                     break;
+                case PatientAddFailedEvent.REASON_DUPLICATE_ID:
+                    mUi.showErrorMessage(R.string.patient_creation_duplicate_id_error);
+                    break;
                 case PatientAddFailedEvent.REASON_INVALID_FAMILY_NAME:
                     mUi.showErrorMessage(R.string.patient_creation_invalid_family_name_error);
                     break;
