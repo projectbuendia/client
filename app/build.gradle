@@ -11,6 +11,8 @@ buildscript {
 apply plugin: 'com.android.application'
 
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def gitTagVersionNumber = "git log -n 1 --format=format:%d | grep -o -w \\'v[0-9][0-9.]*\\' | tr -d v | head -1".execute([], project.rootDir).text.trim()
+
 dependencies {
     // Build plugins
     // TODO(dxchen): Figure out why removing this causes a Dagger error.
@@ -64,9 +66,10 @@ spoon {
 // when no changes have been made to the build.
 tasks["spoon"].outputs.upToDateWhen { false }
 
-// These values will be built into the apk.
-// The version number should be specified using -PversionNumber=1.2.3.
-def versionNumber = project.hasProperty('versionNumber') ? project.versionNumber : '0';
+// The following values will be built into the apk.
+// If the current commit is tagged with a release number, we'll use that.
+// The version number can also be overridden using -PversionNumber=1.2.3.
+def versionNumber = project.hasProperty('versionNumber') ? project.versionNumber : gitTagVersionNumber.equals('') ? '0' : gitTagVersionNumber;
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 
 // The version should have at most 3 numeric parts (e.g. 1, 1.2, or 1.2.3).
