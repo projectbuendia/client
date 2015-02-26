@@ -128,7 +128,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
         super.onResumeImpl();
         mSearchController.init();
         mSearchController.loadSearchResults();
-        // TODO(dxchen): Re-enable update checking and decide where it should belong.
     }
 
     @Override

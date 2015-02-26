@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.AsyncTask;
 
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.data.app.AppPatient;
@@ -72,8 +73,20 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         } catch (InterruptedException e) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {
-            // TODO(dxchen): Parse the VolleyError to see exactly what kind of error was raised.
-            return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_NETWORK, e);
+            int failureReason = PatientAddFailedEvent.REASON_NETWORK;
+            if (e.getCause() != null && e.getCause() instanceof VolleyError) {
+                String message = e.getCause().getMessage();
+                if (message.contains("could not insert: [org.openmrs.PatientIdentifier]")) {
+                    failureReason = PatientAddFailedEvent.REASON_INVALID_ID;
+                } else if (message.contains("already has the ID")) {
+                    failureReason = PatientAddFailedEvent.REASON_DUPLICATE_ID;
+                } else if (isValidationErrorMessageForField(message, "names[0].givenName")) {
+                    failureReason = PatientAddFailedEvent.REASON_INVALID_GIVEN_NAME;
+                } else if (isValidationErrorMessageForField(message, "names[0].familyName")) {
+                    failureReason = PatientAddFailedEvent.REASON_INVALID_FAMILY_NAME;
+                }
+            }
+            return new PatientAddFailedEvent(failureReason, e);
         }
 
         if (patient.uuid == null) {
@@ -131,6 +144,11 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
                 mConverters.patient,
                 mBus);
         task.execute();
+    }
+
+    private boolean isValidationErrorMessageForField(String message, String fieldName) {
+        return message.contains("'Patient#null' failed to validate with reason: "
+                + fieldName);
     }
 
     // After updating a patient, we fetch the patient from the database. The result of the fetch
