@@ -224,4 +224,15 @@
         Please check that the package server setting is correct or consult an administrator for help.
     </string>
     <string name="troubleshoot_action_check_settings">Check Settings</string>
+    <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
+    <string name="patient_validation_missing_age">Please enter the age.</string>
+    <string name="patient_validation_missing_family_name">Please enter the family name.</string>
+    <string name="patient_validation_missing_given_name">Please enter the given name.</string>
+    <string name="patient_validation_missing_id">Please enter the patient ID.</string>
+    <string name="patient_validation_missing_admission_date">Please enter the admission date.</string>
+    <string name="patient_validation_negative_age">Age should not be negative.</string>
+    <string name="patient_validation_select_years_or_months">Please select Years or Months.</string>
+    <string name="patient_validation_select_gender">Please select Male or Female.</string>
+    <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
+    <string name="patient_validation_future_onset_date">Symptoms onset date cannot be in the future.</string>
 </resources>
