@@ -238,8 +238,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testEncounter_latestEncounterIsAlwaysShown() {
         initWithDemoPatientChart();
 
-        // Update a vital and an observation 5 times, and verify that the latest observation is
-        // still visible.
+        // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
+        // count), and verify that the latest value is visible for each.
         for (int i = 0; i < 5; i++) {
             openEncounterForm();
 
