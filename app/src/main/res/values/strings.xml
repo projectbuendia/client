@@ -36,7 +36,7 @@
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
-    <string name="title_activity_tent_selection">Locations</string>
+    <string name="title_activity_tent_selection">Patients by Location</string>
     <string name="today">Today</string>
     <string name="add_user_unknown_error">Unknown error</string>
     <string name="add_user_invalid_user">Invalid user</string>
