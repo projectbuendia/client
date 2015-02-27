@@ -81,6 +81,8 @@ final class TentSelectionController {
     @Nullable private AppLocation mTriageZone;
     @Nullable private AppLocation mDischargedZone;
 
+    // True when the data model is unavailable and either a sync is already in progress or has been
+    // requested by this controller.
     private boolean mWaitingOnSync = false;
 
     public TentSelectionController(
