@@ -252,6 +252,10 @@ public class ODKView extends LinearLayout {
                         && qw.forceSetAnswer(fields.locationName)) {
                     continue;
                 }
+                // Because of a unicode encoding bug, clinician names may not always match up,
+                // causing the list of clinicians to appear in the xform, which is a confusing
+                // user experience. To avoid this issue, if the logged-in clinician is not found,
+                // select "Guest User" by default.
                 if (questionText.equals("clinician")
                         && (qw.forceSetAnswer(fields.clinicianName)
                         || qw.forceSetAnswer(GUEST_USER_NAME))) {
