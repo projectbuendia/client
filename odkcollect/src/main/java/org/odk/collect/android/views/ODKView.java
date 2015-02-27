@@ -73,6 +73,7 @@ public class ODKView extends LinearLayout {
     private final static int VIEW_ID = 12345;  
     
     private final static String t = "ODKView";
+    private static final Object GUEST_USER_NAME = "Guest User";
 
     private LinearLayout mView;
     private LinearLayout.LayoutParams mLayout;
@@ -251,8 +252,13 @@ public class ODKView extends LinearLayout {
                         && qw.forceSetAnswer(fields.locationName)) {
                     continue;
                 }
+                // Because of a unicode encoding bug, clinician names may not always match up,
+                // causing the list of clinicians to appear in the xform, which is a confusing
+                // user experience. To avoid this issue, if the logged-in clinician is not found,
+                // select "Guest User" by default.
                 if (questionText.equals("clinician")
-                        && qw.forceSetAnswer(fields.clinicianName)) {
+                        && (qw.forceSetAnswer(fields.clinicianName)
+                        || qw.forceSetAnswer(GUEST_USER_NAME))) {
                     continue;
                 }
             }

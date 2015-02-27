@@ -231,6 +231,32 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkViewDisplayedSoon(withText(containsString("NEG / NEG")));
     }
 
+    /**
+     * Tests that, when multiple encounters for the same encounter time are submitted within a short
+     * period of time, that only the latest encounter is present in the relevant column.
+     */
+    public void testEncounter_latestEncounterIsAlwaysShown() {
+        initWithDemoPatientChart();
+
+        // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
+        // count), and verify that the latest value is visible for each.
+        for (int i = 0; i < 5; i++) {
+            openEncounterForm();
+
+            String pulse = Integer.toString(i + 80);
+            String temp = Integer.toString(i + 35) + ".0";
+            String vomiting = Integer.toString(i);
+            answerVisibleTextQuestion("Pulse", pulse);
+            answerVisibleTextQuestion("Temperature", temp);
+            answerVisibleTextQuestion("Vomiting", vomiting);
+            saveForm();
+
+            checkVitalValueContains("Pulse", pulse);
+            checkObservationValueEquals(0 /*Temperature*/, temp, "Today");
+            checkObservationValueEquals(6 /*Vomiting*/, vomiting, "Today");
+        }
+    }
+
     /** Exercises all fields in the encounter form, except for encounter time. */
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
         initWithDemoPatientChart();
