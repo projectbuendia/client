@@ -74,10 +74,8 @@ def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone(
 // normalized to a string for the version name.  The string normalization drops
 // leading and trailing zeroes (e.g. '0.001.0' becomes '0.1').
 def versionParts = versionNumber.split('\\.').toList()
-assert versionParts.size >= 1
-assert versionParts.size <= 3
-versionParts.push('0')
-versionParts.push('0')
+assert versionParts.size >= 1 && versionParts.size() <= 3
+versionParts.addAll(['0', '0'])
 def versionMajor = versionParts[0].toInteger()
 def versionMinor = versionParts[1].toInteger()
 def versionPatch = versionParts[2].toInteger()
@@ -85,13 +83,10 @@ assert versionMajor < 100
 assert versionMinor < 100
 assert versionPatch < 10000
 def versionInteger = versionMajor * 1000000 + versionMinor * 10000 + versionPatch
-def versionString = '' + versionMajor
-if (versionMinor > 0) {
-    versionString += '.' + versionMinor
-}
-if (versionPatch > 0) {
-    versionString += '.' + versionPatch
-}
+def versionString = '' + versionMajor + '.' + versionMinor + '.' + versionPatch;
+versionString = versionString.replaceAll('\\.0$', '');
+versionString = versionString.replaceAll('\\.0$', '');
+
 logger.info("Version number: ${versionString}")
 logger.info("Version code: ${versionInteger}")
 
