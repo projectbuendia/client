@@ -81,6 +81,10 @@ final class TentSelectionController {
     @Nullable private AppLocation mTriageZone;
     @Nullable private AppLocation mDischargedZone;
 
+    // True when the data model is unavailable and either a sync is already in progress or has been
+    // requested by this controller.
+    private boolean mWaitingOnSync = false;
+
     public TentSelectionController(
             AppModel appModel,
             CrudEventBus crudEventBus,
@@ -104,11 +108,16 @@ final class TentSelectionController {
         // Get or update mAppLocationTree.
         if (mAppModel.isFullModelAvailable()) {
             LOG.i("Data model is available in init(); loading location tree from local DB");
+            mWaitingOnSync = false;
             mAppModel.fetchLocationTree(
                     mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
         } else {
-            LOG.i("Data model unavailable; forcing sync.");
-            onSyncRetry();
+            LOG.i("Data model unavailable; waiting on sync.");
+            mWaitingOnSync = true;
+            if (!mSyncManager.isSyncing() && !mSyncManager.isSyncPending()) {
+                LOG.i("No sync detected, forcing new sync.");
+                onSyncRetry();
+            }
         }
 
         updateUi();
@@ -120,6 +129,7 @@ final class TentSelectionController {
     }
 
     public void onSyncRetry() {
+        mWaitingOnSync = true;
         mUi.setLoadingState(LoadingState.SYNCING);
         for (TentFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.resetSyncProgress();
@@ -207,7 +217,7 @@ final class TentSelectionController {
             return;
         }
 
-        if (mSyncManager.isSyncing() || mSyncManager.isSyncPending()) {
+        if (mWaitingOnSync) {
             mUi.setLoadingState(LoadingState.SYNCING);
             return;
         }
@@ -229,8 +239,10 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
+            if (mWaitingOnSync) {
+                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                    fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
+                }
             }
         }
 
@@ -248,6 +260,7 @@ final class TentSelectionController {
                 LOG.i("Data model is available after sync; loading location tree.");
                 mAppModel.fetchLocationTree(
                         mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
+                mWaitingOnSync = false;
             } else if (!isLocationTreeValid()) {
                 LOG.i("Sync succeeded but was incomplete; forcing a new sync.");
                 onSyncRetry();
@@ -267,8 +280,7 @@ final class TentSelectionController {
             }
             mAppLocationTree = event.tree;
             if (!isLocationTreeValid()) {
-                LOG.i("Found no locations in the local datastore; waiting on sync.");
-                mUi.setLoadingState(LoadingState.SYNCING); // Ensure cancel button shows up.
+                LOG.i("Found no locations in the local datastore; continuing to wait on sync.");
                 return;
             }
 
