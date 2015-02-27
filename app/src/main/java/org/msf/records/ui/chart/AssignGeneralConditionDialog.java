@@ -103,6 +103,13 @@ public final class AssignGeneralConditionDialog
     }
 
     /**
+     * Returns true iff the dialog is currently displayed.
+     */
+    public boolean isShowing() {
+        return mDialog != null && mDialog.isShowing();
+    }
+
+    /**
      * Dismisses the dialog.
      */
     public void dismiss() {

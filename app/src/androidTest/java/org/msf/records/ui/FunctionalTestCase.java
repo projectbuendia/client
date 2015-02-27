@@ -52,14 +52,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void setUp() throws Exception {
-        // Make sure periodic sync doesn't interfere with testing.
-        GenericAccountService.removePeriodicSync();
-
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         // Even a 2-minute timeout proved to be flaky, so doubled to 4 minutes.
         IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
         IdlingPolicies.setMasterPolicyTimeout(240, TimeUnit.SECONDS);
-
 
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
