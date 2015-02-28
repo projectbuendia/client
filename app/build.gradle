@@ -152,6 +152,7 @@ android {
 
         versionCode versionInteger
         versionName versionString
+        resValue "string", "app_version", versionString
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
