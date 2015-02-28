@@ -46,7 +46,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onData(new UserMatchers.HasFullName(given + " " + family)).perform(click());
 
         // Should be logged in
-        onView(withText("Locations")).check(matches(isDisplayed()));
+        onView(withText(R.string.title_activity_tent_selection)).check(matches(isDisplayed()));
         screenshot("After User Selected");
         onView(withText("TT")).perform(click());
         onView(withText(given + " " + family)).check(matches(isDisplayed()));
@@ -61,7 +61,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onView(withText("Guest User")).perform(click());
 
         // Should be logged in; log out
-        onView(withText("Locations")).check(matches(isDisplayed()));
+        onView(withText(R.string.title_activity_tent_selection)).check(matches(isDisplayed()));
         screenshot("After Guest User Clicked");
         onView(withText("GU")).perform(click());
         onView(withText("Guest User")).check(matches(isDisplayed()));
