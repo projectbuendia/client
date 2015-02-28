@@ -1,10 +1,13 @@
 package org.msf.records.ui.sync;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import org.msf.records.App;
@@ -24,8 +27,6 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>WARNING: Syncing requires the transfer of large quantities of data, so {@link SyncTestCase}s
  * will almost always be very large tests.
- *
- * <p>TODO: Fix rare cause of flakiness in which clearing the database causes a fatal SQLException.
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
@@ -50,6 +51,13 @@ public class SyncTestCase extends FunctionalTestCase {
         super.setUp();
     }
 
+    /** Cleans up post-test wifi state. Won't work during tearDown(). */
+    public void cleanupWifi() {
+        setWifiEnabled(true);
+        // Wait until wifi connection has been re-established.
+        Espresso.registerIdlingResources(new WifiStateIdlingResource());
+    }
+
     /** Clears all contents of the database (note: this does not include ODK forms or instances). */
     public void clearDatabase() throws SQLException {
         PatientDatabase db = new PatientDatabase(App.getInstance().getApplicationContext());
@@ -63,23 +71,12 @@ public class SyncTestCase extends FunctionalTestCase {
     }
 
     /**
-     * Causes a sync to fail.
+     * Turns wifi on or off.
      */
-    protected void failSync() {
-        LOG.i("Triggering sync cancel.");
-        ContentResolver.cancelSync(GenericAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
-
-        // Also kill in-flight Volley requests in case sync has already gotten that far.
-        try {
-            VolleySingleton.getInstance(getCurrentActivity())
-                    .getRequestQueue().cancelAll(new RequestQueue.RequestFilter() {
-                        @Override
-                        public boolean apply(Request<?> request) {
-                            return true;
-                        }
-                    });
-        } catch (Throwable t) {
-            LOG.w("Failed to kill in-flight network requests as part of sync cancellation", t);
-        }
+    protected void setWifiEnabled(boolean enabled) {
+        LOG.i("Setting wifi state: %b", enabled);
+        WifiManager wifiManager =
+                (WifiManager)App.getInstance().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(enabled);
     }
 }

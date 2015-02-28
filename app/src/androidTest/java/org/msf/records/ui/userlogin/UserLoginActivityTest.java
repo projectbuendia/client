@@ -20,21 +20,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 
 public class UserLoginActivityTest extends FunctionalTestCase {
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        // We need to explicitly specify the ProgressFragment here since we can't check the current
-        // activity during setup. This works for UserLoginActivity because it is always returned
-        // by getActivity().
-        waitForProgressFragment(
-                (ProgressFragment)(
-                        getActivity().getSupportFragmentManager().getFragments().get(0)));
-    }
 
     /** Adds a new user and logs in. */
     public void testAddUser() {
         screenshot("Test Start");
-        long n = new Date().getTime() % 1000;
+        long n = new Date().getTime() % 100000;
         String username = "test" + n;
         String given = "Testgiven" + n;
         String family = "Testfamily" + n;
@@ -56,7 +46,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onData(new UserMatchers.HasFullName(given + " " + family)).perform(click());
 
         // Should be logged in
-        onView(withText("MSF Medical Records")).check(matches(isDisplayed()));
+        onView(withText("Locations")).check(matches(isDisplayed()));
         screenshot("After User Selected");
         onView(withText("TT")).perform(click());
         onView(withText(given + " " + family)).check(matches(isDisplayed()));
@@ -71,7 +61,7 @@ public class UserLoginActivityTest extends FunctionalTestCase {
         onView(withText("Guest User")).perform(click());
 
         // Should be logged in; log out
-        onView(withText("MSF Medical Records")).check(matches(isDisplayed()));
+        onView(withText("Locations")).check(matches(isDisplayed()));
         screenshot("After Guest User Clicked");
         onView(withText("GU")).perform(click());
         onView(withText("Guest User")).check(matches(isDisplayed()));

@@ -69,7 +69,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     public void testNewPatientWithLocation() {
         enterAddPatientScreen();
         screenshot("Test Start");
-        String id = "test" + new Date().getTime() % 100000;
+        String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
         onView(withId(R.id.patient_creation_button_change_location)).perform(click());
         screenshot("After Location Dialog Shown");
@@ -91,7 +91,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     public void testNewPatientWithoutLocation() {
         enterAddPatientScreen();
         screenshot("Test Start");
-        String id = "test" + new Date().getTime() % 100000;
+        String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
         screenshot("After Patient Populated");
         onView(withText("Create")).perform(click());
@@ -109,10 +109,9 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     /** Tests that the admission date is visible right after adding a patient. */
     public void testNewPatientHasDefaultAdmissionDate() {
         testNewPatientWithoutLocation();
-        onView(allOf(
+        checkViewDisplayedSoon(allOf(
                 isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 1")))
-                .check(matches(isDisplayed()));
+                withText("Day 1")));
     }
 
     /** Tests that symptoms onset is optional and not assigned a default value. */

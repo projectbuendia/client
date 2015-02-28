@@ -139,6 +139,15 @@ public class AppPatientDelta {
         return contentValues;
     }
 
+    @Override
+    public String toString() {
+        JSONObject jsonObject = new JSONObject();
+        if (toJson(jsonObject)) {
+            return jsonObject.toString();
+        }
+        return super.toString();
+    }
+
     private static JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {
         JSONObject location = new JSONObject();
         location.put("uuid", assignedLocationUuid);

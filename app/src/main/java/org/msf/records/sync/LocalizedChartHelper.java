@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -92,6 +93,20 @@ public class LocalizedChartHelper {
                     + ",conceptUuid=" + conceptUuid
                     + ",conceptName=" + conceptName
                     + ",value=" + localizedValue;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof LocalizedObservation)) {
+                return false;
+            }
+            LocalizedObservation o = (LocalizedObservation) other;
+            return encounterTimeMillis == o.encounterTimeMillis
+                    && Objects.equals(groupName, o.groupName)
+                    && Objects.equals(conceptUuid, o.conceptUuid)
+                    && Objects.equals(conceptName, o.conceptName)
+                    && Objects.equals(value, o.value)
+                    && Objects.equals(localizedValue, o.localizedValue);
         }
     }
 

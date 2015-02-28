@@ -51,7 +51,11 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
+    /**
+     * The formatting for dates when displayed in entry fields.  "d MMM yyyy" is probably the best
+     * option here, as it matches the ordering and style of the date as shown in the date picker.
+     */
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("d MMM yyyy");
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
@@ -165,16 +169,34 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             // case, notify the user to try again.
             LOG.e("Location %s was selected but not found in location tree.", mLocationUuid);
             BigToast.show(this, R.string.error_setting_location);
-            return;
+
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
+                    " mLocationUuid=" + mLocationUuid +
+                    " location=" + location +
+                    " location.parentUuid=" + (location == null ? "<invalid>" : location.parentUuid)
+            );
+
+            //return;
         }
 
         ResZone resZone = Zone.getResZone(location.parentUuid);
 
         if (resZone == null) {
+
             // This should never happen. If it does, notify the user to try again.
             LOG.e("%s could not be resolved to a zone.", location.parentUuid);
             BigToast.show(this, R.string.error_setting_location);
-            return;
+
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
+                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
+                    " mLocationUuid=" + mLocationUuid +
+                    " location=" + location +
+                    " location.parentUuid=" + location.parentUuid +
+                    " resZone=" + resZone
+            );
+
+            // return;
         }
 
         ResZone.Resolved zone = resZone.resolve(getResources());
@@ -195,6 +217,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
     protected void onStopImpl() {
         mController.suspend();
         super.onStopImpl();
+    }
+
+    @OnClick(R.id.patient_creation_button_clear_symptoms_onset_date)
+    void onClearSymptomsOnsetDateClick() {
+        mSymptomsOnsetDateSetListener.mLocalDate = null;
+        mSymptomsOnsetDate.setText("");
     }
 
     @OnClick(R.id.patient_creation_button_change_location)
@@ -385,7 +413,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void showValidationError(int field, String message) {
+        public void showValidationError(int field, int messageResource, String... messageArgs) {
+            String message = getString(messageResource, messageArgs);
             switch (field) {
                 case PatientCreationController.Ui.FIELD_ID:
                     mId.setError(message);
@@ -400,10 +429,14 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     mAge.setError(message);
                     break;
                 case PatientCreationController.Ui.FIELD_ADMISSION_DATE:
+                    // TODO: setError doesn't show a message because this field doesn't focus
                     mAdmissionDate.setError(message);
+                    BigToast.show(PatientCreationActivity.this, message);
                     break;
                 case PatientCreationController.Ui.FIELD_SYMPTOMS_ONSET_DATE:
+                    // TODO: Using setError doesn't work because this field doesn't request focus
                     mSymptomsOnsetDate.setError(message);
+                    BigToast.show(PatientCreationActivity.this, message);
                     break;
                 case PatientCreationController.Ui.FIELD_LOCATION:
                     //TODO(mathewi) Using setError doesn't really work properly. Implement a better
@@ -430,6 +463,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             mGivenName.setError(null);
             mFamilyName.setError(null);
             mAge.setError(null);
+            mAdmissionDate.setError(null);
+            mSymptomsOnsetDate.setError(null);
             // TODO(kpy): If the validation error indicators for age units
             // and for sex are also persistent like the error indicators
             // for the above four fields, they should be cleared as well.

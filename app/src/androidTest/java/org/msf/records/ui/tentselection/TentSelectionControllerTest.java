@@ -2,6 +2,7 @@ package org.msf.records.ui.tentselection;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.test.AndroidTestCase;
 
@@ -35,8 +36,6 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
-        // TODO: Create a fake event bus so we can check whether the controller
-        // unregistered its event handler.
         mFakeEventBus = new FakeEventBus();
         mFakeSyncManager = new FakeSyncManager();
         mController = new TentSelectionController(
@@ -48,13 +47,37 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
                 mMockSearchController);
 	}
 
-    /** Tests that locations are loaded during initialization. */
-    public void testInit_RequestsLoadLocations() {
-        // GIVEN the controller hasn't previously fetched the location tree
+    /** Tests that locations are loaded during initialization, when available. */
+    public void testInit_RequestsLoadLocationsWhenDataModelAvailable() {
+        // GIVEN initialized data model and the controller hasn't previously fetched the location
+        // tree
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller asks the location manager to provide the location tree
         verify(mMockAppModel).fetchLocationTree(mFakeEventBus, "en");
+    }
+
+    /** Tests that init does not result in a new sync if data model is available. */
+    public void testInit_DoesNotStartSyncWhenDataModelAvailable() {
+        // GIVEN initialized data model and the controller hasn't previously fetched the location
+        // tree
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
+        // WHEN the controller is initialized
+        mController.init();
+        // THEN the controller does not start a new sync
+        assertFalse(mFakeSyncManager.isSyncing());
+    }
+
+    /** Tests that init kicks off a sync if the data model is unavailable. */
+    public void testInit_StartsSyncWhenDataModelUnavailable() {
+        // GIVEN uninitialized data model and the controller hasn't previously fetched the location
+        // tree
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
+        // WHEN the controller is initialized
+        mController.init();
+        // THEN the controller requests a sync
+        assertTrue(mFakeSyncManager.isSyncing());
     }
 
     /** Tests that suspend() unregisters any subscribers from the event bus. */
@@ -194,6 +217,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
     /** Tests that loading a populated location tree does not result in a new sync. */
     public void testFetchingPopulatedLocationTree_doesNotCauseNewSync() {
         // GIVEN an initialized controller with a fragment attached
+        when(mMockAppModel.isFullModelAvailable()).thenReturn(true);
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN a populated location tree is loaded

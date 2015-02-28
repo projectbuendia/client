@@ -12,9 +12,11 @@ import org.msf.records.prefs.PrefsModule;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.UpdateNotificationController;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListActivity;
+import org.msf.records.ui.patientlist.PatientListController;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
@@ -53,11 +55,13 @@ import dagger.Provides;
                 BaseActivity.class,
                 PatientChartActivity.class,
                 PatientListActivity.class,
+                PatientListController.class,
                 PatientSearchActivity.class,
                 RoundActivity.class,
                 TentSelectionActivity.class,
                 PatientListFragment.class,
                 RoundFragment.class,
+                UpdateNotificationController.class,
                 UserLoginFragment.class
         })
 public final class AppModule {

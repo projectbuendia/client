@@ -1,5 +1,6 @@
 package org.msf.records.ui.chart;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +22,8 @@ import org.msf.records.data.odk.OdkConverter;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.FetchXformSucceededEvent;
+import org.msf.records.events.SubmitXformFailedEvent;
+import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
@@ -135,6 +138,9 @@ final class PatientChartController {
 
         /** Shows or hides the form loading dialog. */
         void showFormLoadingDialog(boolean show);
+
+        /** Shows or hides the form submission dialog. */
+        void showFormSubmissionDialog(boolean show);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -264,6 +270,7 @@ final class PatientChartController {
             return;
         }
 
+        boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         switch (requestCode.form) {
             case ADD_OBSERVATION:
                 // This will fire a CreatePatientSucceededEvent.
@@ -277,8 +284,10 @@ final class PatientChartController {
                 LOG.e(
                         "Received an ODK result for a form that we do not know about: '%1$s'. This "
                                 + "indicates programmer error.", requestCode.form.toString());
+                shouldShowSubmissionDialog = false;
                 break;
         }
+        mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
     }
 
     /** Call when the user has indicated they want to add observation data. */
@@ -292,6 +301,11 @@ final class PatientChartController {
      *                    with the "description" field in OpenMRS.
      */
     public void onAddObservationPressed(String targetGroup) {
+        // Don't acknowledge this action if a dialog is showing
+        if (dialogShowing()) {
+            return;
+        }
+
         PrepopulatableFields fields = new PrepopulatableFields();
 
         // TODO(dxchen): Re-enable this post v0.2.1.
@@ -355,7 +369,7 @@ final class PatientChartController {
     }
 
     /** Gets the latest observation values and displays them on the UI. */
-    private void updatePatientUI() {
+    private synchronized void updatePatientUi() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
@@ -494,7 +508,7 @@ final class PatientChartController {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientUI();
+            updatePatientUi();
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -573,13 +587,40 @@ final class PatientChartController {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientUI();
+                    updatePatientUi();
                 }
             });
         }
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+            LOG.e(event.exception, "Patient update failed.");
+        }
+
+        public void onEventMainThread(SubmitXformSucceededEvent event) {
+            mMainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updatePatientUi();
+                    mUi.showFormSubmissionDialog(false);
+                }
+            });
+        }
+
+        public void onEventMainThread(SubmitXformFailedEvent event) {
+            mUi.showFormSubmissionDialog(false);
+            int errorMessageResource;
+            switch (event.reason) {
+                case SERVER_AUTH:
+                    errorMessageResource = R.string.submit_xform_failed_server_auth;
+                    break;
+                case SERVER_TIMEOUT:
+                    errorMessageResource = R.string.submit_xform_failed_server_timeout;
+                    break;
+                default:
+                    errorMessageResource = R.string.submit_xform_failed_unknown_reason;
+            }
+            mUi.showError(errorMessageResource);
         }
 
         public void onEventMainThread(FetchXformSucceededEvent event) {
@@ -619,5 +660,10 @@ final class PatientChartController {
         if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
             mUi.updatePatientLocationUi(mLocationTree, mPatient);
         }
+    }
+
+    private boolean dialogShowing() {
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
+                || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
     }
 }

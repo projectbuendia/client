@@ -5,7 +5,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:textColor="@color/white"
-    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:textAppearance="@style/TextAppearance.Buendia.Large.Inverse"
     android:ellipsize="marquee"
     android:minEms="15"
     android:padding="20dp"/>

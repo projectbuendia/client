@@ -52,7 +52,6 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-
             sUserManager = mUserManager; // TODO(dxchen): Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
             sServer = mServer; // TODO(dxchen): Remove when Daggered.
@@ -88,5 +87,9 @@ public class App extends Application {
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
         return sConnectionDetails;
+    }
+
+    public HealthMonitor getHealthMonitor() {
+        return mHealthMonitor;
     }
 }

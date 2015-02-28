@@ -16,6 +16,7 @@ public class HealthMonitor {
     private final EventBus mHealthEventBus;
     private final ImmutableSet<HealthCheck> mHealthChecks;
     private final Troubleshooter mTroubleshooter;
+    private boolean mRunning = false;
 
     HealthMonitor(
             Application application,
@@ -28,25 +29,34 @@ public class HealthMonitor {
         mTroubleshooter = troubleshooter;
     }
 
-    /**
-     * Starts all health checks.
-     */
+    /** Starts all health checks. */
     public void start() {
-        mHealthEventBus.register(this);
+        if (!mRunning) {
+            mHealthEventBus.register(this);
 
-        for (HealthCheck check : mHealthChecks) {
-            check.start(mHealthEventBus);
+            for (HealthCheck check : mHealthChecks) {
+                check.start(mHealthEventBus);
+            }
+            mRunning = true;
         }
     }
 
-    /**
-     * Stops all health checks.
-     */
+    /** Stops all health checks. */
     public void stop() {
-        mHealthEventBus.unregister(this);
+        if (mRunning) {
+            mHealthEventBus.unregister(this);
 
+            for (HealthCheck check : mHealthChecks) {
+                check.stop();
+            }
+            mRunning = false;
+        }
+    }
+
+    /** Clears all issues for all health checks. */
+    public void clear() {
         for (HealthCheck check : mHealthChecks) {
-            check.stop();
+            check.clear();
         }
     }
 
@@ -56,5 +66,15 @@ public class HealthMonitor {
 
     public void onEvent(HealthIssue.ResolvedEvent event) {
         mTroubleshooter.onResolved(event.getIssue());
+    }
+
+    /** Returns true if the API is known for certain to be unavailable. */
+    public boolean isApiUnavailable() {
+        for (HealthCheck check : mHealthChecks) {
+            if (check.isApiUnavailable()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

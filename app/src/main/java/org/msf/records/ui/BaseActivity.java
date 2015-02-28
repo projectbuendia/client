@@ -18,6 +18,8 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.diagnostics.TroubleshootingAction;
 import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
+import org.msf.records.updater.AvailableUpdateInfo;
+import org.msf.records.updater.DownloadedUpdateInfo;
 import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
@@ -45,6 +47,7 @@ public abstract class BaseActivity extends FragmentActivity {
         super.onResume();
 
         EventBus.getDefault().registerSticky(this);
+        App.getInstance().getHealthMonitor().start();
     }
 
     @Override
@@ -52,6 +55,7 @@ public abstract class BaseActivity extends FragmentActivity {
         EventBus.getDefault().unregister(this);
 
         super.onPause();
+        App.getInstance().getHealthMonitor().stop();
     }
 
     @Override
@@ -127,8 +131,8 @@ public abstract class BaseActivity extends FragmentActivity {
 
         switch (troubleshootingAction) {
             case ENABLE_WIFI:
-                message.setText("Wifi is disabled");
-                action.setText("Enable");
+                message.setText(R.string.troubleshoot_wifi_disabled);
+                action.setText(R.string.troubleshoot_wifi_disabled_action_enable);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -141,8 +145,8 @@ public abstract class BaseActivity extends FragmentActivity {
                 });
                 break;
             case CONNECT_WIFI:
-                message.setText("Wifi is disconnected");
-                action.setText("Connect");
+                message.setText(R.string.troubleshoot_wifi_disconnected);
+                action.setText(R.string.troubleshoot_wifi_disconnected_action_connect);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -154,8 +158,8 @@ public abstract class BaseActivity extends FragmentActivity {
                 });
                 break;
             case CHECK_SERVER_AUTH:
-                message.setText("Server username/password may be incorrect");
-                action.setText("Check");
+                message.setText(R.string.troubleshoot_server_auth);
+                action.setText(R.string.troubleshoot_server_auth_action_check);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -167,8 +171,8 @@ public abstract class BaseActivity extends FragmentActivity {
                 });
                 break;
             case CHECK_SERVER_CONFIGURATION:
-                message.setText("Server address may be incorrect");
-                action.setText("Check");
+                message.setText(R.string.troubleshoot_server_address);
+                action.setText(R.string.troubleshoot_server_address_action_check);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -180,116 +184,122 @@ public abstract class BaseActivity extends FragmentActivity {
                 });
                 break;
             case CHECK_SERVER_REACHABILITY:
-                message.setText("Server unreachable");
-                action.setText("More Info");
+                message.setText(R.string.troubleshoot_server_unreachable);
+                action.setText(R.string.troubleshoot_action_more_info);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View view) {
-                        action.setEnabled(false);
-
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
-                        new AlertDialog.Builder(BaseActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .setTitle("Server unreachable")
-                                .setMessage(
-                                        "The server could not be reached. This may be because:\n"
-                                                + "\n"
-                                                + " • The wifi network is incorrect.\n"
-                                                + " • The server URL is incorrect.\n"
-                                                + " • The server is down.\n"
-                                                + "\n"
-                                                + "Please contact an administrator.")
-                                .setNeutralButton("Ok", null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface) {
-                                        action.setEnabled(true);
-                                    }
-                                })
-                                .create().show();
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_server_unreachable),
+                                getString(R.string.troubleshoot_server_unreachable_details),
+                                true);
                     }
                 });
                 break;
             case CHECK_SERVER_SETUP:
-                message.setText("Server may be unstable");
-                action.setText("More Info");
+                message.setText(R.string.troubleshoot_server_unstable);
+                action.setText(R.string.troubleshoot_action_more_info);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View view) {
-                        action.setEnabled(false);
-
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
-                        // TODO(akalachman): Localize, along with all other strings in this class.
-                        new AlertDialog.Builder(BaseActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .setTitle("Server may be unstable")
-                                .setMessage(
-                                        "The server is currently responding with error code 500, "
-                                                + "indicating that the server may be in an error "
-                                                + "state.\n"
-                                                + "Please contact an administrator.")
-                                .setNeutralButton("Ok", null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface) {
-                                        action.setEnabled(true);
-                                    }
-                                })
-                                .create().show();
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_server_unstable),
+                                getString(R.string.troubleshoot_server_unstable_details),
+                                false);
                     }
                 });
                 break;
             case CHECK_SERVER_STATUS:
-                message.setText("Server not responding");
-                action.setText("More Info");
+                message.setText(R.string.troubleshoot_server_not_responding);
+                action.setText(R.string.troubleshoot_action_more_info);
                 action.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View view) {
-                        action.setEnabled(false);
-
                         // TODO(dxchen): Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
-                        // TODO(akalachman): Localize, along with all other strings in this class.
-                        new AlertDialog.Builder(BaseActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_info)
-                                .setTitle("Server not responding")
-                                .setMessage(
-                                        "The server is currently not responding to requests. "
-                                                + "This may be because:\n"
-                                                + "\n"
-                                                + " • The server is temporarily unavailable.\n"
-                                                + " • The server is still starting up.\n"
-                                                + "\n"
-                                                + "Please contact an administrator.")
-                                .setNeutralButton("Ok", null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                                    @Override
-                                    public void onDismiss(DialogInterface dialogInterface) {
-                                        action.setEnabled(true);
-                                    }
-                                })
-                                .create().show();
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_server_not_responding),
+                                getString(R.string.troubleshoot_server_not_responding_details),
+                                false);
+                    }
+                });
+                break;
+            case CHECK_UPDATE_SERVER_REACHABILITY:
+                message.setText(R.string.troubleshoot_update_server_unreachable);
+                action.setText(R.string.troubleshoot_action_more_info);
+                action.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_update_server_unreachable),
+                                getString(R.string.troubleshoot_update_server_unreachable_details),
+                                true);
+                    }
+                });
+                break;
+            case CHECK_UPDATE_SERVER_CONFIGURATION:
+                message.setText(R.string.troubleshoot_update_server_misconfigured);
+                action.setText(R.string.troubleshoot_action_more_info);
+                action.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showMoreInfoDialog(
+                                action,
+                                getString(R.string.troubleshoot_update_server_misconfigured),
+                                getString(
+                                        R.string.troubleshoot_update_server_misconfigured_details),
+                                true);
                     }
                 });
                 break;
             default:
-                LOG.w("Troubleshooting action '%1$s' is unknown.");
+                LOG.w("Troubleshooting action '%1$s' is unknown.", troubleshootingAction);
                 return;
         }
 
         setStatusView(view);
         setStatusVisibility(View.VISIBLE);
+    }
+
+    private void showMoreInfoDialog(final View triggeringView, String title, String message,
+                                    boolean includeSettingsButton) {
+        triggeringView.setEnabled(false);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setTitle(title)
+                .setMessage(message)
+                .setNeutralButton(android.R.string.ok, null)
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        triggeringView.setEnabled(true);
+                    }
+                });
+        if (includeSettingsButton) {
+            builder.setPositiveButton(R.string.troubleshoot_action_check_settings,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(BaseActivity.this, SettingsActivity.class));
+                        }
+                    });
+        }
+        builder.show();
     }
 
     private void initializeWrapperView() {
@@ -306,5 +316,57 @@ public abstract class BaseActivity extends FragmentActivity {
         mStatusContent =
                 (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
     }
+
+    protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
+
+        final TextView mUpdateMessage;
+        final TextView mUpdateAction;
+
+        public UpdateNotificationUi() {
+            View view = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
+            setStatusView(view);
+            mUpdateMessage = (TextView) view.findViewById(R.id.status_bar_default_message);
+            mUpdateAction = (TextView) view.findViewById(R.id.status_bar_default_action);
+        }
+
+        @Override
+        public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
+            setStatusVisibility(View.VISIBLE);
+            mUpdateMessage.setText(R.string.snackbar_update_available);
+            mUpdateAction.setText(R.string.snackbar_action_download);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    EventBus.getDefault().post(new DownloadRequestedEvent());
+                }
+            });
+        }
+
+        @Override
+        public void showUpdateReadyToInstall(DownloadedUpdateInfo updateInfo) {
+            setStatusVisibility(View.VISIBLE);
+            mUpdateMessage.setText(R.string.snackbar_update_downloaded);
+            mUpdateAction.setText(R.string.snackbar_action_install);
+            mUpdateAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setStatusVisibility(View.GONE);
+                    EventBus.getDefault().post(new InstallationRequestedEvent());
+                }
+            });
+        }
+
+        @Override
+        public void hideSoftwareUpdateNotifications() {
+            setStatusVisibility(View.GONE);
+        }
+    }
+
+    /** The user has requested a download of the last known available software update. */
+    public static class DownloadRequestedEvent { }
+
+    /** The user has requested installation of the last downloaded software update. */
+    public static class InstallationRequestedEvent { }
 }
 

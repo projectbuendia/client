@@ -19,6 +19,7 @@ import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewA
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
@@ -41,17 +42,25 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
     public void testXformRetrievedFromServer() {
         loadChart();
         screenshot("Patient Chart");
+        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
+                new EventBusIdlingResource<FetchXformSucceededEvent>(
+                        UUID.randomUUID().toString(),
+                        mEventBus);
         onView(withId(R.id.action_update_chart)).perform(click());
-        waitForChartLoad();
-        onView(withText("Encounter")).check(matches(isDisplayed()));
+        Espresso.registerIdlingResources(xformIdlingResource);
+        // This check is known to be particularly flaky.
+        checkViewDisplayedWithin(withText("Encounter"), 45000);
         screenshot("Xform Loaded");
+        onView(withText(R.string.form_entry_discard)).perform(click());
     }
 
     private void loadChart() {
-        waitForInitialSync();
+        waitForProgressFragment();
         // Open patient list.
         onView(withId(R.id.action_search)).perform(click());
-        waitForProgressFragment();
+        // waitForProgressFragment() doesn't quite work here as we're actually waiting on the
+        // search button in the action bar to finish its loading task.
+        checkViewDisplayedSoon(withText(containsString("Triage (")));
         // Click first patient.
         onData(is(AppPatient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))

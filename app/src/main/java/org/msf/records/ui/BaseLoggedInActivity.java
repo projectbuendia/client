@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import org.msf.records.R;
 import org.msf.records.events.user.ActiveUserUnsetEvent;
 import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
-import org.msf.records.updater.UpdateManager;
 import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.Logger;
 
@@ -36,13 +34,16 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     private static final Logger LOG = Logger.create();
 
     @Inject Colorizer mUserColorizer;
-    @Inject UpdateManager mUpdateManager;
 
     private User mLastActiveUser;
     private Menu mMenu;
     private MenuPopupWindow mPopupWindow;
 
     private boolean mIsCreated = false;
+
+    protected UpdateNotificationController mUpdateNotificationController = null;
+
+    private LoadingState mLoadingState = LoadingState.LOADED;
 
     /**
      * {@inheritDoc}
@@ -85,6 +86,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.base, menu);
 
         mPopupWindow = new MenuPopupWindow();
+
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
@@ -125,13 +127,13 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         }
 
         onResumeImpl();
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.init();
+        }
     }
 
     protected void onResumeImpl() {
         super.onResume();
-
-        // Check for updates whenever a logged-in activity resumes.
-        mUpdateManager.checkForUpdate();
     }
 
     @Override
@@ -142,6 +144,9 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             return;
         }
 
+        if (mUpdateNotificationController != null) {
+            mUpdateNotificationController.suspend();
+        }
         onPauseImpl();
     }
 
@@ -242,6 +247,21 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             settingsIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(settingsIntent);
         }
+    }
+
+    /**
+     * Changes the state of this activity, changing the set of available buttons if necessary.
+     * @param loadingState the new activity state
+     */
+    protected void setLoadingState(LoadingState loadingState) {
+        if (mLoadingState != loadingState) {
+            mLoadingState = loadingState;
+            invalidateOptionsMenu();
+        }
+    }
+
+    protected LoadingState getLoadingState() {
+        return mLoadingState;
     }
 }
 

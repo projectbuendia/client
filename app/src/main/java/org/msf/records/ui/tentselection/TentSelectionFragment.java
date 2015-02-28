@@ -10,10 +10,9 @@ import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.widget.SubtitledButtonView;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,8 +38,6 @@ public final class TentSelectionFragment extends ProgressFragment {
     private final MyUi mMyUi = new MyUi();
     private TentListAdapter mAdapter;
 
-    private AlertDialog mAlertDialog;
-
     public TentSelectionFragment() {
         // Required empty public constructor
     }
@@ -65,12 +62,6 @@ public final class TentSelectionFragment extends ProgressFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(getString(R.string.tent_selection_dialog_title))
-                .setMessage(R.string.tent_selection_dialog_message)
-                .setCancelable(false)
-                .create();
         setContentView(R.layout.fragment_tent_selection);
     }
 
@@ -127,13 +118,24 @@ public final class TentSelectionFragment extends ProgressFragment {
         @Override
         public void setBusyLoading(boolean busy) {
             changeState(busy ? State.LOADING : State.LOADED);
-            if (mAlertDialog != null && busy != mAlertDialog.isShowing()) {
-                if (busy) {
-                    mAlertDialog.show();
-                } else {
-                    mAlertDialog.hide();
-                }
+        }
+
+        @Override
+        public void showIncrementalSyncProgress(int progress, @Nullable String label) {
+            incrementProgressBy(progress);
+            if (label != null) {
+                setProgressLabel(label);
             }
+        }
+
+        @Override
+        public void resetSyncProgress() {
+            switchToCircularProgressBar();
+        }
+
+        @Override
+        public void showSyncCancelRequested() {
+            setProgressLabel(getString(R.string.cancelling_sync));
         }
     }
 }

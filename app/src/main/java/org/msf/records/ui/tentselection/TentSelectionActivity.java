@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -20,6 +19,7 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.LoadingState;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListFragment;
@@ -45,6 +45,12 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
+
+        if (Constants.OFFLINE_SUPPORT) {
+            // Create account, if needed
+            GenericAccountService.registerSyncAccount(this);
+        }
+
         mController = new TentSelectionController(
                 mAppModel,
                 mCrudEventBusProvider.get(),
@@ -87,11 +93,6 @@ public final class TentSelectionActivity extends PatientSearchActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.tent_selection_container, new TentSelectionFragment())
                     .commit();
-        }
-
-        if(Constants.OFFLINE_SUPPORT){
-            // Create account, if needed
-            GenericAccountService.registerSyncAccount(this);
         }
     }
 
@@ -163,11 +164,6 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         }
 
         @Override
-        public void showErrorMessage(int stringResourceId) {
-            Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
         public void showSyncFailedDialog(boolean show) {
             if (mSyncFailedDialog == null) {
                 return;
@@ -180,6 +176,16 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                     mSyncFailedDialog.hide();
                 }
             }
+        }
+
+        @Override
+        public void setLoadingState(LoadingState loadingState) {
+            TentSelectionActivity.this.setLoadingState(loadingState);
+        }
+
+        @Override
+        public void finish() {
+            TentSelectionActivity.this.finish();
         }
 
         @Override

@@ -14,8 +14,8 @@ import net.sqlcipher.database.SQLiteOpenHelper;
 abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentProvider {
 
     private ProviderDelegateRegistry<T> mRegistry;
-    private ContentResolver mContentResolver;
-    private T mDatabaseHelper;
+    protected ContentResolver mContentResolver;
+    protected T mDatabaseHelper;
 
     @Override
     public boolean onCreate() {

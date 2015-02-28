@@ -4,16 +4,17 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.test.ActivityInstrumentationTestCase2;
+import android.view.View;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.testrunner.Stage;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
+import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
-import org.msf.records.TestCleanupHelper;
-import org.msf.records.events.FetchXformSucceededEvent;
+import org.hamcrest.Matcher;
 import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -31,11 +32,16 @@ import de.greenrobot.event.EventBus;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
+import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
+
 // All tests have to launch the UserLoginActivity first because the app expects a user to log in.
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
     private static final Logger LOG = Logger.create();
+    private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 30000;
 
-    private SyncCounter mSyncCounter;
     private boolean mWaitForUserSync = true;
 
     protected EventBusRegistrationInterface mEventBus;
@@ -46,19 +52,12 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void setUp() throws Exception {
-        // Make sure periodic sync doesn't interfere with testing.
-        GenericAccountService.removePeriodicSync();
-
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         // Even a 2-minute timeout proved to be flaky, so doubled to 4 minutes.
         IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
         IdlingPolicies.setMasterPolicyTimeout(240, TimeUnit.SECONDS);
 
-
         mEventBus = new EventBusWrapper(EventBus.getDefault());
-
-        mSyncCounter = new SyncCounter();
-        mEventBus.register(mSyncCounter);
 
         // Wait for users to sync.
         if (mWaitForUserSync) {
@@ -77,18 +76,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     @Override
     public void tearDown() {
-        // If a sync is in progress, let it complete before starting the next test, or it may
-        // break test isolation.
-        if (mSyncCounter.inProgressSyncCount > 0) {
-            waitForInitialSync();
-        }
-
-        mEventBus.unregister(mSyncCounter);
-
         // Remove activities from the stack until the app is closed.  If we don't do this, the test
         // runner sometimes has trouble launching the activity to start the next test.
         try {
-            TestCleanupHelper.closeAllActivities(getInstrumentation());
+            closeAllActivities();
         } catch (Exception e) {
             LOG.e("Error tearing down test case, test isolation may be broken.", e);
         }
@@ -184,14 +175,30 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         Espresso.registerIdlingResources(syncSucceededResource);
     }
 
-    /** Waits for the encounter chart to load. */
-    protected void waitForChartLoad() {
-        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-                new EventBusIdlingResource<FetchXformSucceededEvent>(
-                        UUID.randomUUID().toString(),
-                        mEventBus);
-        Espresso.registerIdlingResources(xformIdlingResource);
+    protected void checkViewDisplayedSoon(Matcher<View> matcher) {
+        checkViewDisplayedWithin(matcher, DEFAULT_VIEW_CHECKER_TIMEOUT);
     }
+
+    protected void checkViewDisplayedWithin(Matcher<View> matcher, int timeoutMs) {
+        long timeoutTime = System.currentTimeMillis() + timeoutMs;
+        boolean viewFound = false;
+        while (timeoutTime > System.currentTimeMillis() && !viewFound) {
+            try {
+                onView(matcher).check(matches(isDisplayed()));
+                viewFound = true;
+            } catch (Throwable t) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    LOG.w("Sleep interrupted, yielding instead.");
+                    Thread.yield();
+                }
+            }
+        }
+        // Instead of throwing, let onView().check throw a nicely formatted error.
+        onView(matcher).check(matches(isDisplayed()));
+    }
+
 
     private class SyncCounter {
         public int inProgressSyncCount = 0;
@@ -202,6 +209,20 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
         public void onEventMainThread(SyncFinishedEvent event) {
             inProgressSyncCount--;
+        }
+    }
+
+    /**
+     * Closes all activities on the stack.
+     */
+    protected void closeAllActivities() throws Exception {
+        try {
+            for (int i = 0; i < 20; i++) {
+                pressBack();
+                Thread.sleep(100);
+            }
+        } catch (NoActivityResumedException | InterruptedException e) {
+            // nothing left to close
         }
     }
 }

@@ -143,6 +143,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ResVital.Resolved mVitalKnown;
 
     private ProgressDialog mFormLoadingDialog;
+    private ProgressDialog mFormSubmissionDialog;
+
+    // The last set of observations received.
+    private List<LocalizedObservation> mPreviousObservations;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -229,6 +233,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormLoadingDialog.setMessage(getString(R.string.retrieving_encounter_form_message));
         mFormLoadingDialog.setIndeterminate(true);
         mFormLoadingDialog.setCancelable(false);
+
+        mFormSubmissionDialog = new ProgressDialog(this);
+        mFormSubmissionDialog.setIcon(android.R.drawable.ic_dialog_info);
+        mFormSubmissionDialog.setTitle(getString(R.string.submitting_encounter_form_title));
+        mFormSubmissionDialog.setMessage(getString(R.string.submitting_encounter_form_message));
+        mFormSubmissionDialog.setIndeterminate(true);
+        mFormSubmissionDialog.setCancelable(false);
 
         mController = new PatientChartController(
                 mAppModel,
@@ -394,13 +405,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             valueView.setTextColor(mVitalKnown.getForegroundColor());
             nameView.setTextColor(mVitalKnown.getForegroundColor());
 
-            valueView.setText(observation.localizedValue);
+            // If the label begins with a one or two-character abbreviation
+            // followed by a period, display the abbreviation on its own line.
+            String text = observation.localizedValue;
+            int abbrevLength = text.indexOf('.');
+            if (abbrevLength == 1 || abbrevLength == 2) {
+                text = text.substring(0, abbrevLength) + "\n"
+                        + text.substring(abbrevLength + 1).trim();
+            }
+            valueView.setText(text);
         } else {
             parent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
             valueView.setTextColor(mVitalUnknown.getForegroundColor());
             nameView.setTextColor(mVitalUnknown.getForegroundColor());
 
             valueView.setText("–"); // en dash
+        }
+        if (observation != null) {
+            nameView.setText(observation.conceptName);
         }
     }
 
@@ -414,7 +436,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setLatestEncounter(long encounterTimeMilli) {
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTimeInMillis(encounterTimeMilli);
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US);
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("d MMM yyyy, HH:mm a", Locale.US);
 
             if (calendar.getTime().getTime() != 0) {
                 mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
@@ -498,11 +520,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                 mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
                 if (pcrObservationMillis > 0) {
+                    LocalDate today = LocalDate.now();
+                    LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
+                    String dateText = "invalid date";
+                    if (today.equals(obsDay)) {
+                        dateText = "today";
+                    } else if (obsDay.isBefore(today)) {
+                        int days = Days.daysBetween(obsDay, today).getDays();
+                        dateText = (days == 1) ? "1 day ago" : (days + " days ago");
+                    }
                     mPcr.setName(getResources().getString(
-                            R.string.latest_pcr_label_with_date,
-                            DATE_TIME_FORMATTER.format(
-                                    DateTime.now(),
-                                    new DateTime(pcrObservationMillis))));
+                            R.string.latest_pcr_label_with_date, dateText));
                 }
             }
 
@@ -512,12 +540,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             observation = observations.get(Concepts.PREGNANCY_UUID);
             if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
-                specialLabels.add("Pregnant");
+                specialLabels.add(getString(R.string.pregnant));
             }
 
             observation = observations.get(Concepts.IV_UUID);
             if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
-                specialLabels.add("IV fitted");
+                specialLabels.add(getString(R.string.iv_fitted));
             }
 
             mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
@@ -554,6 +582,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 List<LocalizedObservation> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
+            // Avoid resetting observation history if nothing has changed.
+            if (observations.equals(mPreviousObservations)) {
+                return;
+            }
+            mPreviousObservations = observations;
+
             if (mChartView != null) {
                 mRootView.removeView(mChartView);
             }
@@ -671,6 +705,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mFormLoadingDialog.show();
             } else {
                 mFormLoadingDialog.hide();
+            }
+        }
+
+        @Override
+        public void showFormSubmissionDialog(boolean show) {
+            if (show) {
+                mFormSubmissionDialog.show();
+            } else {
+                mFormSubmissionDialog.hide();
             }
         }
     }
