@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -17,8 +18,8 @@ import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
 import org.msf.records.events.UpdateAvailableEvent;
-import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
+import org.msf.records.events.UpdateReadyToInstallEvent;
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.utils.LexicographicVersion;
 import org.msf.records.utils.Logger;
@@ -48,7 +49,7 @@ public class UpdateManager {
      * checkForUpdate() within this period will not check the server for new updates.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_PERIOD_SECONDS = 120;
+    public static final int CHECK_PERIOD_SECONDS = 60 * 60; // Default to 1hr.
 
     /**
      * The minimal version number.
@@ -70,6 +71,7 @@ public class UpdateManager {
     private final PackageManager mPackageManager;
     private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
+    private final SharedPreferences mSharedPreferences;
 
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
@@ -83,14 +85,15 @@ public class UpdateManager {
     // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
 
-    UpdateManager(Application application, UpdateServer updateServer) {
+    UpdateManager(Application application, UpdateServer updateServer,
+                  SharedPreferences sharedPreferences) {
         mApplication = application;
         mServer = updateServer;
 
         mPackageManager = application.getPackageManager();
         mDownloadManager =
                 (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
-
+        mSharedPreferences = sharedPreferences;
         mCurrentVersion = getCurrentVersion();
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
         mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
@@ -105,8 +108,9 @@ public class UpdateManager {
      * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
     public void checkForUpdate() {
+        int checkPeriodSeconds = getCheckPeriodSeconds();
         DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(CHECK_PERIOD_SECONDS))) {
+        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(checkPeriodSeconds))) {
             if (!isDownloadInProgress()) {
                 // This immediate check just updates the event state to match any current
                 // knowledge of an available or downloaded update.  The more interesting
@@ -219,6 +223,16 @@ public class UpdateManager {
             downloadDirectory = downloadDirectory.substring(externalStorageDirectory.length());
         }
         return downloadDirectory;
+    }
+
+    /**
+     * Get the time between updates from the shared preferences.
+     */
+    private int getCheckPeriodSeconds() {
+        if (mSharedPreferences == null) {
+            return CHECK_PERIOD_SECONDS;
+        }
+        return mSharedPreferences.getInt("apk_update_interval_secs", CHECK_PERIOD_SECONDS);
     }
 
     /** Returns the version of the application. */
@@ -384,9 +398,8 @@ public class UpdateManager {
                     }
                 }
 
-                Uri uri;
                 try {
-                    uri = Uri.parse(uriString);
+                    Uri.parse(uriString);
                 } catch (IllegalArgumentException e) {
                     LOG.w(e, "Path for downloaded file is invalid: %1$s.", uriString);
                     // TODO(dxchen): Consider firing an event.

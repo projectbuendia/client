@@ -46,7 +46,8 @@ public final class UserManagerTest extends InstrumentationTestCase {
         assertNull(mUserManager.getActiveUser());
     }
 
-    public void testLoadKnownUsers_GeneratesEventOnSucess() {
+    /** Tests that an event is posted when users are loaded successfully. */
+    public void testLoadKnownUsers_GeneratesEventOnSucess() throws Exception {
         // GIVEN the user store returns a set of users
         when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.of(USER));
         // WHEN loadKnownUsers is called and the async task is run
@@ -57,7 +58,8 @@ public final class UserManagerTest extends InstrumentationTestCase {
                 new KnownUsersLoadedEvent(ImmutableSet.of(USER))));
     }
 
-    public void testLoadKnownUsers_GeneratesEventOnFailure() {
+    /** Tests that an event is posted when users fail to load. */
+    public void testLoadKnownUsers_GeneratesEventOnFailure() throws Exception {
         // GIVEN the user store returns an empty set of users
         when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.<User>of());
         // WHEN loadKnownUsers is called and the async task is run

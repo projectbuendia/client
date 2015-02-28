@@ -17,8 +17,6 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.TimingLogger;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.primitives.Booleans;
 
@@ -35,6 +33,9 @@ import org.msf.records.net.model.Patient;
 import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.sync.providers.MsfRecordsProvider;
+import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
+import org.msf.records.user.UserManager;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -92,14 +94,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final String INCREMENTAL_OBSERVATIONS_UPDATE = "INCREMENTAL_OBSERVATIONS_UPDATE";
 
     /**
+     * If this key is present with boolean value true, then the start and end times of this sync
+     * will be recorded.
+     */
+    public static final String FULL_SYNC = "FULL_SYNC";
+
+    /**
      * RPC timeout for getting observations.
      */
     private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
 
     /**
+     * Named used during the sync process for SQL savepoints.
+     */
+    private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
+
+    /**
      * Content resolver, for performing database operations.
      */
     private final ContentResolver mContentResolver;
+
+    /**
+     * Tracks whether the sync has been canceled.
+     */
+    private boolean mIsSyncCanceled = false;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -112,6 +130,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @Override
+    public void onSyncCanceled() {
+        mIsSyncCanceled = true;
+        LOG.i("Detecting a sync cancellation, canceling sync soon.");
+    }
+
+    /**
+     * Not thread-safe but, by default, this will never be called multiple times in parallel.
+     */
+    @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         // Fire a broadcast indicating that sync has completed.
         Intent syncStartedIntent =
@@ -123,15 +150,38 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncFailedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.FAILED);
 
+        Intent syncCanceledIntent =
+                new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
+        syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
+
+        checkCancellation("Sync was canceled before it started.");
+
         int nExtras = countExtras(extras);
         int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
 
         LOG.i("Beginning network synchronization");
+
+        MsfRecordsProvider msfRecordsProvider =
+                (MsfRecordsProvider)(provider.getLocalContentProvider());
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+                msfRecordsProvider.getDbTransactionHelper();
+        LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
+        dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
+
         reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
+
         try {
             boolean specific = false;
+
+            if (extras.getBoolean(FULL_SYNC)) {
+                Instant syncStartTime = Instant.now();
+                LOG.i("Setting sync start time: " + syncStartTime);
+                storeFullSyncStartTime(provider, syncStartTime);
+            }
+
             if (extras.getBoolean(SYNC_PATIENTS)) {
+                checkCancellation("Sync was canceled before patient sync.");
                 reportProgress(0, R.string.syncing_patients);
                 specific = true;
                 // default behaviour
@@ -140,6 +190,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_patients);
             }
             if (extras.getBoolean(SYNC_CONCEPTS)) {
+                checkCancellation("Sync was canceled before concept sync.");
                 reportProgress(0, R.string.syncing_concepts);
                 specific = true;
                 updateConcepts(provider, syncResult);
@@ -147,6 +198,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_concepts);
             }
             if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
+                checkCancellation("Sync was canceled before chart sync.");
                 reportProgress(0, R.string.syncing_charts);
                 specific = true;
                 timings.addSplit("update chart specified");
@@ -154,6 +206,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_charts);
             }
             if (extras.getBoolean(SYNC_OBSERVATIONS)) {
+                checkCancellation("Sync was canceled before observation sync.");
                 reportProgress(0, R.string.syncing_observations);
                 specific = true;
                 updateObservations(provider, syncResult, extras);
@@ -161,6 +214,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_observations);
             }
             if (extras.getBoolean(SYNC_LOCATIONS)) {
+                checkCancellation("Sync was canceled before location sync.");
                 reportProgress(0, R.string.syncing_locations);
                 specific = true;
                 updateLocations(provider, syncResult);
@@ -168,6 +222,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(progressIncrement, R.string.syncing_locations);
             }
             if (extras.getBoolean(SYNC_USERS)) {
+                checkCancellation("Sync was canceled before user sync.");
                 reportProgress(0, R.string.syncing_users);
                 specific = true;
                 updateUsers(provider, syncResult);
@@ -177,56 +232,93 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (!specific) {
                 // If nothing is specified explicitly (such as from the android system menu),
                 // do everything.
+                checkCancellation("Sync was canceled before patient sync.");
                 reportProgress(0, R.string.syncing_patients);
                 updatePatientData(syncResult);
                 timings.addSplit("update all (patients)");
 
+                checkCancellation("Sync was canceled before concept sync.");
                 reportProgress(progressIncrement, R.string.syncing_concepts);
                 updateConcepts(provider, syncResult);
                 timings.addSplit("update all (concepts)");
 
+                checkCancellation("Sync was canceled before chart sync.");
                 reportProgress(progressIncrement, R.string.syncing_charts);
                 updateChartStructure(provider, syncResult);
                 timings.addSplit("update all (chart)");
 
+                checkCancellation("Sync was canceled before observation sync.");
                 reportProgress(progressIncrement, R.string.syncing_observations);
                 updateObservations(provider, syncResult, extras);
                 timings.addSplit("update all (observations)");
 
+                checkCancellation("Sync was canceled before location sync.");
                 reportProgress(progressIncrement, R.string.syncing_locations);
                 updateLocations(provider, syncResult);
                 timings.addSplit("update all (locations)");
 
+                checkCancellation("Sync was canceled before user sync.");
                 reportProgress(progressIncrement, R.string.syncing_users);
                 updateUsers(provider, syncResult);
                 timings.addSplit("update all (users)");
+
+                checkCancellation("Sync was canceled right before finishing.");
             }
+
+            if (extras.getBoolean(FULL_SYNC)) {
+                Instant syncEndTime = Instant.now();
+                LOG.i("Setting sync end time: " + syncEndTime);
+                storeFullSyncEndTime(provider, syncEndTime);
+            }
+
             reportProgress(100, R.string.completing_sync);
+        } catch (CancellationException e) {
+            rollbackSavepoint(dbTransactionHelper);
+            // Reset canceled state so that it doesn't interfere with next sync.
+            LOG.e(e, "Sync canceled");
+            getContext().sendBroadcast(syncCanceledIntent);
+            return;
         } catch (RemoteException e) {
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error in RPC");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (OperationApplicationException e) {
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error updating database");
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (InterruptedException e){
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error interruption");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (ExecutionException e){
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error failed to execute");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
         } catch (Exception e){
+            rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error reading from network");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
+        } catch (UserManager.UserSyncException e) {
+            rollbackSavepoint(dbTransactionHelper);
+            LOG.e(e, "Error syncing users");
+            syncResult.stats.numIoExceptions++;
+            getContext().sendBroadcast(syncFailedIntent);
+            return;
+        } finally {
+            LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
+            dbTransactionHelper.close();
+            mIsSyncCanceled = false;
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
@@ -236,6 +328,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCompletedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.COMPLETED);
         getContext().sendBroadcast(syncCompletedIntent);
+    }
+
+    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
+        LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
+        dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
+    }
+
+    /**
+     * Enforces sync cancellation, throwing a {@link CancellationException} if the sync has been
+     * canceled. It is the responsibility of the caller to perform any actual cancellation
+     * procedures.
+     */
+    private void checkCancellation(String message) throws CancellationException {
+        if (mIsSyncCanceled) {
+            throw new CancellationException(message);
+        }
     }
 
     private void reportProgress(int progressIncrement, @Nullable String label) {
@@ -250,7 +358,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void reportProgress(int progressIncrement, int stringResource) {
-        reportProgress(progressIncrement, getContext().getResources().getString(stringResource));
+        String progressString = getContext().getResources().getString(stringResource);
+        LOG.d("Sync progress checkpoint: +%d%%, %s", progressIncrement, progressString);
+        reportProgress(progressIncrement, progressString);
     }
 
     private void reportProgress(int progressIncrement) {
@@ -272,13 +382,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         final String[] projection = PatientProjection.getProjectionColumns();
 
-        LOG.d("Before network call");
+        LOG.d("Before network call to retrieve patients");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
 
         //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
         List<Patient> patients = future.get();
-        LOG.d("After network call");
+        LOG.d("After network call to retrieve patients");
+        checkCancellation("Sync was canceled before parsing retrieved patient data.");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
 
@@ -292,6 +403,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
+        checkCancellation("Sync was canceled before merging patient data.");
         LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
         LOG.i("Found " + patients.size() + " external entries. Computing merge solution...");
 
@@ -303,68 +415,83 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Long admissionTimestamp;
 
         //iterate through the list of patients
-        while(c.moveToNext()){
-            syncResult.stats.numEntries++;
+        try {
+            while (c.moveToNext()) {
+                checkCancellation("Sync was canceled while merging retrieved patient data.");
+                syncResult.stats.numEntries++;
 
-            id = c.getString(PatientProjection.COLUMN_ID);
-            givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
-            familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
-            uuid = c.getString(PatientProjection.COLUMN_UUID);
-            admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
-            locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
-            if (locationUuid == null) {
-                locationUuid = Zone.DEFAULT_LOCATION;
-            }
-            birthdate = Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
-            gender = c.getString(PatientProjection.COLUMN_GENDER);
-
-            Patient patient = patientsMap.get(id);
-            if (patient != null) {
-                // Entry exists. Remove from entry map to prevent insert later.
-                patientsMap.remove(id);
-                // Check to see if the entry needs to be updated
-                Uri existingUri = Contracts.Patients.CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
-
-                //check if it needs updating
-                String patientAssignedLocationUuid =
-                        patient.assigned_location == null ? null : patient.assigned_location.uuid;
-                if (!Objects.equals(patient.given_name, givenName) ||
-                        !Objects.equals(patient.family_name, familyName) ||
-                        !Objects.equals(patient.uuid, uuid) ||
-                        !Objects.equals(patient.admission_timestamp, admissionTimestamp) ||
-                        !Objects.equals(patientAssignedLocationUuid, locationUuid) ||
-                        !Objects.equals(patient.birthdate, birthdate) ||
-                        !Objects.equals(patient.gender, gender) ||
-                        !Objects.equals(patient.id, id)) {
-                    // Update existing record
-                    LOG.i("Scheduling update: " + existingUri);
-                    batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(Contracts.Patients.GIVEN_NAME, patient.given_name)
-                            .withValue(Contracts.Patients.FAMILY_NAME, patient.family_name)
-                            .withValue(Contracts.Patients.UUID, patient.uuid)
-                            .withValue(Contracts.Patients.ADMISSION_TIMESTAMP, patient.admission_timestamp)
-                            .withValue(Contracts.Patients.LOCATION_UUID, patientAssignedLocationUuid)
-                            .withValue(Contracts.Patients.BIRTHDATE, Utils.localDateToString(patient.birthdate))
-                            .withValue(Contracts.Patients.GENDER, patient.gender)
-                            .withValue(Contracts.Patients._ID, patient.id)
-                            .build());
-                    syncResult.stats.numUpdates++;
-                } else {
-                    LOG.i("No action required for " + existingUri);
+                id = c.getString(PatientProjection.COLUMN_ID);
+                givenName = c.getString(PatientProjection.COLUMN_GIVEN_NAME);
+                familyName = c.getString(PatientProjection.COLUMN_FAMILY_NAME);
+                uuid = c.getString(PatientProjection.COLUMN_UUID);
+                admissionTimestamp = c.getLong(PatientProjection.COLUMN_ADMISSION_TIMESTAMP);
+                locationUuid = c.getString(PatientProjection.COLUMN_LOCATION_UUID);
+                if (locationUuid == null) {
+                    locationUuid = Zone.DEFAULT_LOCATION;
                 }
-            } else {
-                // Entry doesn't exist. Remove it from the database.
-                Uri deleteUri = Contracts.Patients.CONTENT_URI.buildUpon()
-                        .appendPath(id).build();
-                LOG.i("Scheduling delete: " + deleteUri);
-                batch.add(ContentProviderOperation.newDelete(deleteUri).build());
-                syncResult.stats.numDeletes++;
+                birthdate =
+                        Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
+                gender = c.getString(PatientProjection.COLUMN_GENDER);
+
+                Patient patient = patientsMap.get(id);
+                if (patient != null) {
+                    // Entry exists. Remove from entry map to prevent insert later.
+                    patientsMap.remove(id);
+                    // Check to see if the entry needs to be updated
+                    Uri existingUri =
+                            Contracts.Patients.CONTENT_URI.buildUpon()
+                                    .appendPath(String.valueOf(id)).build();
+
+                    //check if it needs updating
+                    String patientAssignedLocationUuid =
+                            patient.assigned_location == null
+                                    ? null : patient.assigned_location.uuid;
+                    if (!Objects.equals(patient.given_name, givenName)
+                            || !Objects.equals(patient.family_name, familyName)
+                            || !Objects.equals(patient.uuid, uuid)
+                            || !Objects.equals(patient.admission_timestamp, admissionTimestamp)
+                            || !Objects.equals(patientAssignedLocationUuid, locationUuid)
+                            || !Objects.equals(patient.birthdate, birthdate)
+                            || !Objects.equals(patient.gender, gender)
+                            || !Objects.equals(patient.id, id)) {
+                        // Update existing record
+                        LOG.i("Scheduling update: " + existingUri);
+                        batch.add(ContentProviderOperation.newUpdate(existingUri)
+                                .withValue(Contracts.Patients.GIVEN_NAME, patient.given_name)
+                                .withValue(Contracts.Patients.FAMILY_NAME, patient.family_name)
+                                .withValue(Contracts.Patients.UUID, patient.uuid)
+                                .withValue(
+                                        Contracts.Patients.ADMISSION_TIMESTAMP,
+                                        patient.admission_timestamp)
+                                .withValue(
+                                        Contracts.Patients.LOCATION_UUID,
+                                        patientAssignedLocationUuid)
+                                .withValue(
+                                        Contracts.Patients.BIRTHDATE,
+                                        Utils.localDateToString(patient.birthdate))
+                                .withValue(Contracts.Patients.GENDER, patient.gender)
+                                .withValue(Contracts.Patients._ID, patient.id)
+                                .build());
+                        syncResult.stats.numUpdates++;
+                    } else {
+                        LOG.i("No action required for " + existingUri);
+                    }
+                } else {
+                    // Entry doesn't exist. Remove it from the database.
+                    Uri deleteUri = Contracts.Patients.CONTENT_URI.buildUpon()
+                            .appendPath(id).build();
+                    LOG.i("Scheduling delete: " + deleteUri);
+                    batch.add(ContentProviderOperation.newDelete(deleteUri).build());
+                    syncResult.stats.numDeletes++;
+                }
             }
+        } finally {
+            c.close();
         }
-        c.close();
 
 
         for (Patient e : patientsMap.values()) {
+            checkCancellation("Sync was canceled while inserting new patient data.");
             LOG.i("Scheduling insert: entry_id=" + e.id);
             ContentProviderOperation.Builder builder =
                     ContentProviderOperation.newInsert(Contracts.Patients.CONTENT_URI)
@@ -389,12 +516,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.stats.numInserts++;
         }
         LOG.i("Merge solution ready. Applying batch update");
+        checkCancellation("Sync was canceled before completing patient merge operation.");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
         LOG.i("batch apply done");
         mContentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
         LOG.i("change notified");
-
-
 
         //TODO(giljulio) update the server as well as the client
     }
@@ -408,6 +534,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
         for (Concept concept : conceptList.results) {
+            checkCancellation("Sync was canceled while determining concepts to insert.");
             // This is safe because we have implemented insert on the content provider
             // with replace.
             ContentValues conceptInsert = new ContentValues();
@@ -417,6 +544,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             conceptInserts.add(conceptInsert);
             syncResult.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
+                checkCancellation("Sync was canceled while determining concept names to insert.");
                 String locale = entry.getKey();
                 if (locale == null) {
                     LOG.e("null locale in concept name rpc for " + concept);
@@ -435,8 +563,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 syncResult.stats.numInserts++;
             }
         }
+        checkCancellation("Sync was canceled before inserting concepts.");
         provider.bulkInsert(Contracts.Concepts.CONTENT_URI,
                 conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
+        checkCancellation("Sync was canceled before inserting concept names.");
         provider.bulkInsert(Contracts.ConceptNames.CONTENT_URI,
                 conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
     }
@@ -445,6 +575,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> batch = RpcToDb.locationsRpcToDb(syncResult);
+        checkCancellation("Sync was canceled before applying location updates.");
         LOG.i("locations Merge solution ready. Applying batch update");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
@@ -461,15 +592,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<ChartStructure> future = RequestFuture.newFuture();
         chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
         ChartStructure conceptList = future.get();
+        checkCancellation("Sync was canceled before applying chart structure deletions.");
         // When we do a chart update, delete everything first.
         provider.delete(Contracts.Charts.CONTENT_URI, null, null);
+        checkCancellation("Sync was canceled before applying chart structure insertions.");
         syncResult.stats.numDeletes++;
         provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult,
                                     Bundle extras)
-            throws RemoteException {
+            throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
 
         // Get call patients from the cache.
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
@@ -483,41 +616,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             c.close();
         }
 
+        checkCancellation("Sync was canceled before requesting observations.");
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
         RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
-        try {
-            Instant lastSyncTime = getLastSyncTime(provider);
-            Instant newSyncTime;
-            if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
-                newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
-                        chartServer, listFuture, timingLogger);
-            } else {
-                newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
-                        timingLogger);
-            }
-            // This is completely unsafe as regards exceptions - if we fail to store sync time then
-            // we have added observations and not stored the sync time. However, getting this right
-            // transactionally through a content provider interface is not easy, we'd have to update
-            // everything through a single URL. As deletes and inserts aren't safe right now, this
-            // will do.
-            // TODO(nfortescue): make this transactionally safe.
-            storeLastSyncTime(provider, newSyncTime);
-        } catch (InterruptedException e) {
-            LOG.e(e, "Error interruption: ");
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (ExecutionException e) {
-            LOG.e(e, "Error failed to execute: ");
-            syncResult.stats.numIoExceptions++;
-            return;
-        } catch (Exception e) {
-            LOG.e(e, "Error reading from network: ");
-            syncResult.stats.numIoExceptions++;
-            return;
+        Instant lastSyncTime = getLastSyncTime(provider);
+        Instant newSyncTime;
+        checkCancellation("Sync was canceled before updating observations.");
+        if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
+            newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
+                    chartServer, listFuture, timingLogger);
+        } else {
+            newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
+                    timingLogger);
         }
+        // This is completely unsafe as regards exceptions - if we fail to store sync time then
+        // we have added observations and not stored the sync time. However, getting this right
+        // transactionally through a content provider interface is not easy, we'd have to update
+        // everything through a single URL. As deletes and inserts aren't safe right now, this
+        // will do.
+        // TODO(nfortescue): make this transactionally safe.
+        storeLastSyncTime(provider, newSyncTime);
+
+        checkCancellation("Sync was canceled before deleting temporary observations.");
         // Remove all temporary observations now we have the real ones
         provider.delete(Contracts.Observations.CONTENT_URI,
                 Contracts.Observations.TEMP_CACHE + "!=0",
@@ -529,7 +652,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private Instant getLastSyncTime(ContentProviderClient provider) throws RemoteException {
         Cursor c = null;
         try {
-            c = provider.query(Contracts.Misc.CONTENT_URI,
+            c = provider.query(
+                    Contracts.Misc.CONTENT_URI,
                     new String[]{Contracts.Misc.OBS_SYNC_TIME}, null, null, null);
             if (c.moveToNext()) {
                 return new Instant(c.getLong(0));
@@ -563,6 +687,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
+        checkCancellation("Sync was canceled before processing observation RPC results.");
         for (PatientChart patientChart : patientChartList.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting future");
@@ -578,8 +703,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             timingLogger.addSplit("added obs to list");
         }
         timingLogger.addSplit("making operations");
+        checkCancellation("Sync was canceled before bulk deleting observations.");
         bulkDelete(provider, toDelete);
         timingLogger.addSplit("bulk deletes");
+        checkCancellation("Sync was canceled before bulk inserting observations.");
         provider.bulkInsert(Contracts.Observations.CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
@@ -619,6 +746,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");
+        checkCancellation("Sync was canceled before processing observation RPC results.");
         for (PatientChart patientChart : patientChartList.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting incremental future");
@@ -634,6 +762,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         timingLogger.addSplit("making operations");
         if (toInsert.size() > 0) {
+            checkCancellation("Sync was canceled before inserting incremental observations.");
             provider.bulkInsert(Contracts.Observations.CONTENT_URI,
                     toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");
@@ -642,7 +771,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 patientChartList.snapshotTime.toInstant();
     }
 
-    private void updateUsers(final ContentProviderClient provider, SyncResult syncResult) {
-        App.getUserManager().syncKnownUsers();
+    private void updateUsers(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException, UserManager.UserSyncException {
+        App.getUserManager().syncKnownUsersSynchronously();
+    }
+
+    private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
+            throws RemoteException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contracts.Misc.FULL_SYNC_START_TIME, syncStartTime.getMillis());
+        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
+    }
+
+    private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
+            throws RemoteException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Contracts.Misc.FULL_SYNC_END_TIME, syncEndTime.getMillis());
+        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
     }
 }

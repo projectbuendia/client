@@ -23,6 +23,10 @@ public class PatientListActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
+    }
+
+    /** Opens the patient list. */
+    public void openPatientList() {
         waitForProgressFragment(); // Wait for tents.
         onView(withText("ALL PRESENT PATIENTS")).perform(click());
         waitForProgressFragment(); // Wait for patients.
@@ -30,6 +34,7 @@ public class PatientListActivityTest extends FunctionalTestCase {
 
     /** Looks for the filter menu. */
     public void testFilterMenu() {
+        openPatientList();
         screenshot("Test Start");
         onView(withText("All Present Patients")).perform(click());
         onView(withText("Triage")).check(matches(isDisplayed()));
@@ -39,6 +44,7 @@ public class PatientListActivityTest extends FunctionalTestCase {
 
     /** Looks for two zone headings and at least one patient. */
     public void testZoneAndPatientDisplayed() {
+        openPatientList();
         screenshot("Test Start");
         // There should be patients in both Triage and S1.
         onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))

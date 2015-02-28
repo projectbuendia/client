@@ -36,7 +36,7 @@
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
-    <string name="title_activity_tent_selection">Locations</string>
+    <string name="title_activity_tent_selection">Patients by Location</string>
     <string name="today">Today</string>
     <string name="add_user_unknown_error">Unknown error</string>
     <string name="add_user_invalid_user">Invalid user</string>
@@ -117,17 +117,22 @@
     <string name="mobility_bed_bound">BB</string>
     <string name="pcr_negative">NEG</string>
     <string name="error_setting_location">An unknown error occurred while setting patient location. Please try again.</string>
-    <string name="tent_selection_dialog_title">Loading...</string>
+    <string name="tent_selection_dialog_title">Loading…</string>
     <string name="tent_selection_dialog_message">Please wait while patient and location data are retrieved. If this is the first time patient data has been loaded, this process may take a few minutes.</string>
-    <string name="admission_date_label">Admission Date</string>
-    <string name="symptoms_onset_date_label">Symptoms Onset Date</string>
-    <string name="symptoms_onset_date_picker_title">Set Estimated Symptoms Onset Date</string>
-    <string name="admission_date_picker_title">Set Admission Date</string>
+    <string name="admission_date_label">Admission date</string>
+    <string name="symptoms_onset_date_label">Symptom onset date</string>
+    <string name="symptoms_onset_date_picker_title">Estimated symptom onset date</string>
+    <string name="admission_date_picker_title">Set admission date</string>
     <string name="patient_creation_client_error">could not add patient to local database</string>
     <string name="patient_creation_network_error">Could not complete server request</string>
+    <string name="patient_creation_network_error_with_reason">Could not complete server request (reason: %s)</string>
     <string name="patient_creation_server_error">Server did not properly return patient data</string>
     <string name="patient_creation_interrupted_error">Server request was interrupted</string>
     <string name="patient_creation_unknown_error">unknown error</string>
+    <string name="patient_creation_invalid_id_error">patient ID is invalid</string>
+    <string name="patient_creation_duplicate_id_error">another patient exists with the same ID</string>
+    <string name="patient_creation_invalid_family_name_error">family name is invalid</string>
+    <string name="patient_creation_invalid_given_name_error">given name is invalid</string>
     <string name="sync_failed_dialog_title">Sync Error</string>
     <string name="sync_failed_dialog_message">An error occurred while retrieving data from the server. Please check your OpenMRS settings or try again.</string>
     <string name="sync_failed_settings">Settings</string>
@@ -151,14 +156,14 @@
     <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
     <string name="retrieving_encounter_form_title">Retrieving Form</string>
     <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
-    <string name="syncing_patients">Syncing patients...</string>
-    <string name="syncing_concepts">Syncing concepts...</string>
-    <string name="syncing_charts">Syncing charts...</string>
-    <string name="syncing_observations">Syncing observations...</string>
-    <string name="syncing_locations">Syncing locations...</string>
-    <string name="syncing_users">Syncing users...</string>
-    <string name="completing_sync">Completing sync...</string>
-    <string name="sync_in_progress">Starting sync...</string>
+    <string name="syncing_patients">Syncing patients…</string>
+    <string name="syncing_concepts">Syncing concepts…</string>
+    <string name="syncing_charts">Syncing charts…</string>
+    <string name="syncing_observations">Syncing observations…</string>
+    <string name="syncing_locations">Syncing locations…</string>
+    <string name="syncing_users">Syncing users…</string>
+    <string name="completing_sync">Completing sync…</string>
+    <string name="sync_in_progress">Starting sync…</string>
     <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
     <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
     <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
@@ -166,4 +171,69 @@
     <string name="submitting_encounter_form_message">Please wait while form is submitted.</string>
     <string name="consciousness">Consciousness</string>
     <string name="condition">Condition</string>
+    <string name="cancel_sync">Cancel Sync</string>
+    <string name="cancelling_sync">Cancelling sync…</string>
+    <string name="sync_starting">Starting sync…</string>
+    <string name="troubleshoot_wifi_disabled">Wifi is disabled</string>
+    <string name="troubleshoot_wifi_disabled_action_enable">Enable</string>
+    <string name="troubleshoot_wifi_disconnected">Wifi is disconnected</string>
+    <string name="troubleshoot_wifi_disconnected_action_connect">Connect</string>
+    <string name="troubleshoot_server_auth">Server username/password may be incorrect</string>
+    <string name="troubleshoot_server_auth_action_check">Check</string>
+    <string name="troubleshoot_server_address">Server address may be incorrect</string>
+    <string name="troubleshoot_server_address_action_check">Check</string>
+    <string name="troubleshoot_server_unreachable">Server unreachable</string>
+    <string name="troubleshoot_action_more_info">More Info</string>
+    <string name="troubleshoot_server_unreachable_details">
+        The server could not be reached. This may be because:
+        \n
+        \n • The wifi network is incorrect.
+        \n • The server URL is incorrect.
+        \n • The server is down.
+        \n
+        \nPlease contact an administrator.
+    </string>
+    <string name="troubleshoot_server_unstable">Server may be unstable</string>
+    <string name="troubleshoot_server_unstable_details">
+        The server is currently responding with error code 500, indicating that the server may be in an error state.
+        \n
+        \nPlease contact an administrator.</string>
+    <string name="troubleshoot_server_not_responding">Server not responding</string>
+    <string name="troubleshoot_server_not_responding_details">
+        The server is currently not responding to requests. This may be because:
+        \n
+        \n • The server is temporarily unavailable.
+        \n • The server is still starting up.
+        \n
+        \nPlease contact an administrator.</string>
+    <string name="patient_location_error_unknown">An unknown error occurred while updating patient location. Please try again.</string>
+    <string name="patient_location_error_interrupted">Patient location update was interrupted. Please try again.</string>
+    <string name="patient_location_error_network">Error updating patient; please check that you are connected to the server.</string>
+    <string name="patient_location_error_no_such_patient">Error updating patient location: this patient does not exist on the server.</string>
+    <string name="troubleshoot_update_server_unreachable">Package server unreachable</string>
+    <string name="troubleshoot_update_server_unreachable_details">
+        The package server could not be reached. This may be because:
+        \n
+        \n • The server URL is incorrect.
+        \n • The server is down.
+        \n
+        \nPlease correct the package server setting or consult an administrator for help.
+    </string>
+    <string name="troubleshoot_update_server_misconfigured">Package server setting may be incorrect</string>
+    <string name="troubleshoot_update_server_misconfigured_details">
+        Please check that the package server setting is correct or consult an administrator for help.
+    </string>
+    <string name="troubleshoot_action_check_settings">Check Settings</string>
+    <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
+    <string name="patient_validation_missing_age">Please enter the age.</string>
+    <string name="patient_validation_missing_family_name">Please enter the family name.</string>
+    <string name="patient_validation_missing_given_name">Please enter the given name.</string>
+    <string name="patient_validation_missing_id">Please enter the patient ID.</string>
+    <string name="patient_validation_missing_admission_date">Please enter the admission date.</string>
+    <string name="patient_validation_negative_age">Age should not be negative.</string>
+    <string name="patient_validation_select_years_or_months">Please select Years or Months.</string>
+    <string name="patient_validation_select_gender">Please select Male or Female.</string>
+    <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
+    <string name="patient_validation_future_onset_date">Symptoms onset date cannot be in the future.</string>
+    <string name="patient_creation_clear_symptoms_onset_date">Clear</string>
 </resources>

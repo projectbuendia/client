@@ -296,6 +296,11 @@ final class PatientChartController {
      *                    with the "description" field in OpenMRS.
      */
     public void onAddObservationPressed(String targetGroup) {
+        // Don't acknowledge this action if a dialog is showing
+        if (dialogShowing()) {
+            return;
+        }
+
         PrepopulatableFields fields = new PrepopulatableFields();
 
         // TODO(dxchen): Re-enable this post v0.2.1.
@@ -353,7 +358,7 @@ final class PatientChartController {
     }
 
     /** Gets the latest observation values and displays them on the UI. */
-    private void updatePatientUI() {
+    private synchronized void updatePatientUi() {
         // Get the observations
         // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
         List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
@@ -495,7 +500,7 @@ final class PatientChartController {
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
-            updatePatientUI();
+            updatePatientUi();
         }
 
         public void onEventMainThread(EncounterAddFailedEvent event) {
@@ -574,20 +579,21 @@ final class PatientChartController {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientUI();
+                    updatePatientUi();
                 }
             });
         }
 
         public void onEventMainThread(PatientUpdateFailedEvent event) {
             mAssignLocationDialog.onPatientUpdateFailed(event.reason);
+            LOG.e(event.exception, "Patient update failed.");
         }
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updatePatientUI();
+                    updatePatientUi();
                     mUi.showFormSubmissionDialog(false);
                 }
             });
@@ -646,5 +652,10 @@ final class PatientChartController {
         if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
             mUi.updatePatientLocationUi(mLocationTree, mPatient);
         }
+    }
+
+    private boolean dialogShowing() {
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
+                || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
     }
 }
