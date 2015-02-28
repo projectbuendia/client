@@ -30,7 +30,7 @@ public class ProgressFragmentIdlingResource implements IdlingResource {
 
     @Override
     public boolean isIdleNow() {
-        return mProgressFragment.getState() != ProgressFragment.State.LOADING;
+        return mProgressFragment.getState() == ProgressFragment.State.LOADED;
     }
 
     @Override

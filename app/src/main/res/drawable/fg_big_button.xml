@@ -2,11 +2,11 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:drawable="@drawable/fg_button_assign_location_default"
+        android:drawable="@drawable/fg_big_button_default"
         android:state_pressed="false" />
 
     <item
-        android:drawable="@drawable/fg_button_assign_location_pressed"
+        android:drawable="@drawable/fg_big_button_pressed"
         android:state_pressed="true" />
 
 </selector>

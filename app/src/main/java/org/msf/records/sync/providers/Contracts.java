@@ -228,7 +228,28 @@ public class Contracts {
     }
 
     interface MiscColumns {
+        /**
+         * The start time of the last full sync operation. Since sync operations are transactional,
+         * this should only be set if this sync was completed successfully.
+         *
+         * <p>Updated at the very beginning of full sync operations.
+         */
+        String FULL_SYNC_START_TIME = "full_sync_start_time";
 
+        /**
+         * The end time of the last full sync operation. In rare cases, this may correspond to a
+         * sync that completed but downloaded incomplete data.
+         *
+         * <p>Updated at the very end of full sync operations.
+         */
+        String FULL_SYNC_END_TIME = "full_sync_end_time";
+
+        /**
+         * The encounter time of the last observation sync operation, allowing for an incremental
+         * update of observations.
+         *
+         * <p>Updated after observations are synced to the encounter time of the latest observation.
+         */
         String OBS_SYNC_TIME = "obs_sync_time";
     }
 

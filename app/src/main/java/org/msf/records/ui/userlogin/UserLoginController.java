@@ -115,7 +115,6 @@ final class UserLoginController {
 
         public void onEventMainThread(KnownUsersLoadFailedEvent event) {
             LOG.e("Failed to load list of users");
-            // TODO(akalachman): Replace toast here with dialog a la tent selection.
             mUi.showSyncFailedDialog(true);
         }
 

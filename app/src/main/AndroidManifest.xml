@@ -57,7 +57,7 @@
             android:name="org.msf.records.ui.userlogin.UserLoginActivity"
             android:label="@string/app_name"
             android:theme="@style/AppThemeTextButtonActionBar"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <action android:name="android.intent.action.MAIN" />
@@ -73,7 +73,7 @@
         <activity
             android:name="org.msf.records.ui.tentselection.TentSelectionActivity"
             android:label="@string/title_activity_tent_selection"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
 
@@ -84,7 +84,7 @@
             android:name="org.msf.records.ui.patientlist.PatientListActivity"
             android:label="@string/title_patient_list"
             android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
 
@@ -95,7 +95,7 @@
             android:name="org.msf.records.ui.chart.PatientChartActivity"
             android:label="@string/title_patient_chart"
             android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="userPortrait"
             android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
                 android:name="android.support.UI_OPTIONS"
@@ -108,7 +108,7 @@
             android:name="org.msf.records.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="userPortrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.msf.records.ui.patientlist.PatientListActivity" />
@@ -116,14 +116,14 @@
         <activity
             android:name="org.msf.records.ui.patientcreation.PatientCreationActivity"
             android:label="@string/title_activity_patient_add"
-            android:screenOrientation="portrait"
+            android:screenOrientation="userPortrait"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
             android:name="org.msf.records.ui.patientlist.RoundActivity"
             android:label="@string/title_activity_round"
             android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
-            android:screenOrientation="portrait"  >
+            android:screenOrientation="userPortrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.msf.records.ui.tentselection.TentSelectionActivity" />

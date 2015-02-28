@@ -31,7 +31,7 @@ public class TentSelectionActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         // Should be at tent selection screen
-        onView(withText("ALL PRESENT PATIENTS")).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
         screenshot("Test Start");
 
         // Zones and tents should be visible

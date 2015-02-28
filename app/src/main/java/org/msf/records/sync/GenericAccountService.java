@@ -25,7 +25,7 @@ public class GenericAccountService extends Service {
 
     private static final String ACCOUNT_TYPE = BuildConfig.ACCOUNT_TYPE;
     public static final String ACCOUNT_NAME = "sync";
-    private static final long SYNC_FREQUENCY = 5 * 60;  // 10 minutes (in seconds)
+    private static final long SYNC_FREQUENCY = 5 * 60;  // 5 minutes (in seconds)
     private static final String CONTENT_AUTHORITY = Contracts.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
     private Authenticator mAuthenticator;
@@ -63,6 +63,7 @@ public class GenericAccountService extends Service {
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b.putBoolean(SyncAdapter.FULL_SYNC, true);
         b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
         b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
         b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
@@ -75,6 +76,7 @@ public class GenericAccountService extends Service {
         if (prefs.getBoolean("incremental_observation_update", true)) {
             b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
         }
+        LOG.i("Requesting sync");
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
                 Contracts.CONTENT_AUTHORITY, // Content authority

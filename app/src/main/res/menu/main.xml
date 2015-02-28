@@ -11,4 +11,9 @@
         android:showAsAction="ifRoom|collapseActionView"
         android:id="@+id/action_add"
         android:title="Add Patient"/>
+
+    <item
+        android:showAsAction="ifRoom|collapseActionView"
+        android:id="@+id/action_cancel"
+        android:title="@string/cancel_sync"/>
 </menu>

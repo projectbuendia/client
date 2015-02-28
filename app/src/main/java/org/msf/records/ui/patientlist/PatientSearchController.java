@@ -8,6 +8,7 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.actions.SyncCancelRequestedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
@@ -20,6 +21,7 @@ import org.msf.records.filter.matchers.patient.IdFilter;
 import org.msf.records.filter.matchers.MatchingFilter;
 import org.msf.records.filter.matchers.MatchingFilterGroup;
 import org.msf.records.filter.matchers.patient.NameFilter;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 
 import java.util.HashSet;
@@ -59,6 +61,7 @@ public class PatientSearchController {
     private final CrudEventBus mCrudEventBus;
     private final EventBusRegistrationInterface mGlobalEventBus;
     private final AppModel mModel;
+    private final SyncManager mSyncManager;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
     private final String mLocale;
 
@@ -90,17 +93,21 @@ public class PatientSearchController {
      * @param globalEventBus a {@link EventBusRegistrationInterface} that will listen for sync
      *                       events
      * @param model an {@link AppModel} for fetching patient and location data
+     * @param syncManager a {@link SyncManager} for listening for canceling syncs
      * @param locale a language code/locale for presenting localized information (e.g. en)
      */
     public PatientSearchController(
             Ui ui,
             CrudEventBus crudEventBus,
             EventBusRegistrationInterface globalEventBus,
-            AppModel model, String locale) {
+            AppModel model,
+            SyncManager syncManager,
+            String locale) {
         mUi = ui;
         mCrudEventBus = crudEventBus;
         mGlobalEventBus = globalEventBus;
         mModel = model;
+        mSyncManager = syncManager;
         mLocale = locale;
 
         mFilter = PatientDbFilters.getDefaultFilter();
@@ -128,6 +135,10 @@ public class PatientSearchController {
     }
 
     private class SyncSubscriber {
+        public void onEventMainThread(SyncCancelRequestedEvent event) {
+            mSyncManager.cancelOnDemandSync();
+        }
+
         public void onEventMainThread(SyncSucceededEvent event) {
             // Load search results, but don't show the spinner, as the user may be in the middle
             // of performing an operation.

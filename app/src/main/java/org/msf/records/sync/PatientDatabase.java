@@ -145,6 +145,8 @@ public class PatientDatabase extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_MISC = CREATE_TABLE + MISC_TABLE_NAME + " ("
             + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
+            + Contracts.Misc.FULL_SYNC_START_TIME + TYPE_INTEGER + COMMA_SEP
+            + Contracts.Misc.FULL_SYNC_END_TIME + TYPE_INTEGER + COMMA_SEP
             + Contracts.Misc.OBS_SYNC_TIME + TYPE_INTEGER
             + ")";
 

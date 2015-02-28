@@ -10,11 +10,8 @@ buildscript {
 
 apply plugin: 'com.android.application'
 
-def versionMajor = 0
-def versionMinor = 2
-def versionPatch = 1
-
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+
 dependencies {
     // Build plugins
     // TODO(dxchen): Figure out why removing this causes a Dagger error.
@@ -68,26 +65,69 @@ spoon {
 // when no changes have been made to the build.
 tasks["spoon"].outputs.upToDateWhen { false }
 
+// The version number is set using -PversionNumber=1.2.3.  All its parts should
+// be numeric, and there should be at most 3 parts (e.g. 1, 1.2, or 1.2.3).
+def versionNumber = project.hasProperty('versionNumber') ? project.versionNumber : '0';
 def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
+
+// The version number is converted to an integer for the version code, and
+// normalized to a string for the version name.  The string normalization drops
+// leading and trailing zeroes (e.g. '0.001.0' becomes '0.1').
+def versionParts = versionNumber.split('\\.').toList()
+assert versionParts.size >= 1
+assert versionParts.size <= 3
+versionParts.push('0')
+versionParts.push('0')
+def versionMajor = versionParts[0].toInteger()
+def versionMinor = versionParts[1].toInteger()
+def versionPatch = versionParts[2].toInteger()
+assert versionMajor < 100
+assert versionMinor < 100
+assert versionPatch < 10000
+def versionInteger = versionMajor * 1000000 + versionMinor * 10000 + versionPatch
+def versionString = '' + versionMajor
+if (versionMinor > 0) {
+    versionString += '.' + versionMinor
+}
+if (versionPatch > 0) {
+    versionString += '.' + versionPatch
+}
+logger.info("Version number: ${versionString}")
+logger.info("Version code: ${versionInteger}")
+
+// This is where to look for the .apk signing key.
 def releaseRepoRoot = file('../../release/')
 
 // OpenMRS instance for development (kept at tip of dev branch).
-def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs';
+def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs'
 
 // OpenMRS instance for integration testing server.
-def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/openmrs';
+def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/openmrs'
 
-// OpenMRS root URL for Edison on local network.
-def openmrsRootUrlEdison = 'http://server:9000/openmrs';
+// OpenMRS root URL for Edison on local network (default for dev tablets).
+def openmrsRootUrlEdison = 'http://server:9000/openmrs'
 
 // OpenMRS root URL for host machine when client runs in an emulator (AVD).
-def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs';
+def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs'
 
 // Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
 def openmrsRootUrlDefault = openmrsRootUrlEdison;
-def openmrsUserDefault = 'buendia';
-def openmrsPasswordDefault = 'buendia';
+def openmrsUserDefault = 'buendia'
+def openmrsPasswordDefault = 'buendia'
+def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
+
+// Apply overrides such as -PopenmrsRootUrl=url etc.
+def openmrsRootUrl = project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
+def openmrsUser = project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
+def openmrsPassword = project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
+def packageServerRootUrl = project.hasProperty('packageServerRootUrl') ? project.packageServerRootUrl : packageServerRootUrlDefault
+
+logger.info("Default preference values:")
+logger.info("OpenMRS root URL: ${openmrsRootUrl}")
+logger.info("OpenMRS user: ${openmrsUser}")
+logger.info("OpenMRS password: ${openmrsPassword}")
+logger.info("Package server root URL: ${packageServerRootUrl}")
 
 android {
     compileSdkVersion 21
@@ -108,18 +148,18 @@ android {
         minSdkVersion 19
         targetSdkVersion 19
 
-        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}" + (project.hasProperty('buildNumber') ? '.' + project.buildNumber : '')
+        versionCode versionInteger
+        versionName '0'.equals(versionString) ? gitSha : versionString;
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
         testApplicationId 'org.msf.records.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
 
-        resValue "string", "openmrs_root_url_default", project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
-        resValue "string", "openmrs_user_default", project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
-        resValue "string", "openmrs_password_default", project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
-        // TODO: Add a resValue for the package server root URL here.
+        resValue "string", "openmrs_root_url_default", openmrsRootUrl
+        resValue "string", "openmrs_user_default", openmrsUser
+        resValue "string", "openmrs_password_default", openmrsPassword
+        resValue "string", "package_server_root_url_default", packageServerRootUrl
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue "string", "sync_authority", applicationId + '.provider.records'

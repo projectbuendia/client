@@ -94,8 +94,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         screenshot("General Condition Dialog");
         onView(withText(R.string.status_well)).perform(click());
 
+        // Wait for a sync operation to update the chart.
+        EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncFinishedIdlingResource);
+
         // Check for updated vital view.
-        onView(withText(R.string.status_well)).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText(R.string.status_well));
 
         // Check for updated chart view.
         onView(allOf(
@@ -222,7 +227,34 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerVisibleTextQuestion("Ebola Np gene", "40");
         answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
+
         checkViewDisplayedSoon(withText(containsString("NEG / NEG")));
+    }
+
+    /**
+     * Tests that, when multiple encounters for the same encounter time are submitted within a short
+     * period of time, that only the latest encounter is present in the relevant column.
+     */
+    public void testEncounter_latestEncounterIsAlwaysShown() {
+        initWithDemoPatientChart();
+
+        // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
+        // count), and verify that the latest value is visible for each.
+        for (int i = 0; i < 5; i++) {
+            openEncounterForm();
+
+            String pulse = Integer.toString(i + 80);
+            String temp = Integer.toString(i + 35) + ".0";
+            String vomiting = Integer.toString(i);
+            answerVisibleTextQuestion("Pulse", pulse);
+            answerVisibleTextQuestion("Temperature", temp);
+            answerVisibleTextQuestion("Vomiting", vomiting);
+            saveForm();
+
+            checkVitalValueContains("Pulse", pulse);
+            checkObservationValueEquals(0 /*Temperature*/, temp, "Today");
+            checkObservationValueEquals(6 /*Vomiting*/, vomiting, "Today");
+        }
     }
 
     /** Exercises all fields in the encounter form, except for encounter time. */
@@ -302,10 +334,10 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             populateDemoPatient(demoPatient);
             addNewPatient(demoPatient);
             sDemoPatientId = demoPatient.id.get();
+            //waitForProgressFragment();
         }
 
         // Open patient list.
-        //waitForProgressFragment();
         onView(withId(R.id.action_search)).perform(click());
         //waitForProgressFragment();
 
@@ -435,7 +467,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         delta.familyName = Optional.of("ChartActivity");
         delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
         delta.gender = Optional.of(Patient.GENDER_FEMALE);
-        delta.id = Optional.of(UUID.randomUUID().toString().substring(30));
+        delta.id = Optional.of(Long.toString(System.currentTimeMillis() % 100000));
         delta.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
     }
 
