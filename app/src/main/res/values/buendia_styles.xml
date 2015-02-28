@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Text appearance -->
+    <!-- Standard text appearances used throughout the app. -->
+    <!-- The sizes 17, 22, 28, 36, 45 form a geometric series with each size -->
+    <!-- larger than the preceding size by the square root of the golden ratio, -->
+    <!-- so that when text of different sizes appears, the text sizes will often -->
+    <!-- be in the golden ratio or the square root of the golden ratio. -->
 
     <style name="TextAppearance.Buendia" parent="TextAppearance.AppCompat">
         <item name="android:textSize">28sp</item>

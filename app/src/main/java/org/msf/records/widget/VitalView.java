@@ -18,6 +18,10 @@ import butterknife.InjectView;
  */
 public class VitalView extends LinearLayout {
 
+    // To keep the visual design calmer and less chaotic, the auto-sized text in
+    // each tile on the patient chart uses one of a small set of sizes that are
+    // used consistently across the entire app.  See res/values/buendia_styles.xml
+    // for the canonical set of sizes that this should match.
     final static int[] ALLOWED_TEXT_SIZES = {17, 22, 28, 36, 45};
 
     @InjectView(R.id.view_vital_name) TextView mNameView;
