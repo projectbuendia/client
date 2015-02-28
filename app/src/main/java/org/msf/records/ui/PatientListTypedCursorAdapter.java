@@ -11,11 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationComparator;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.data.res.ResStatus;
-import org.msf.records.location.LocationTree;
-import org.msf.records.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.utils.PatientCountDisplay;
 import org.msf.records.utils.Utils;
@@ -26,7 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -34,16 +35,16 @@ import butterknife.InjectView;
 /**
  * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link AppPatient}'s,
  * displaying these patients grouped by location and filtered by a specified
- * {@link org.msf.records.filter.SimpleSelectionFilter}.
+ * {@link org.msf.records.filter.db.SimpleSelectionFilter}.
  */
 public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
-    private final HashMap<LocationTree.LocationSubtree, List<AppPatient>> mPatientsByLocation;
-    private final LocationTree mLocationTree;
+    private final HashMap<AppLocation, List<AppPatient>> mPatientsByLocation;
+    private final AppLocationTree mLocationTree;
     private final LocalizedChartHelper mLocalizedChartHelper;
 
-    private LocationTree.LocationSubtree[] mLocations;
+    private AppLocation[] mLocations;
     private Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> mObservations;
 
     /**
@@ -51,13 +52,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      *
      * @param context an activity context
      */
-    public PatientListTypedCursorAdapter(Context context) {
+    public PatientListTypedCursorAdapter(Context context, AppLocationTree locationTree) {
         mContext = context;
 
-        mPatientsByLocation = new HashMap<LocationTree.LocationSubtree, List<AppPatient>>();
+        mPatientsByLocation = new HashMap<AppLocation, List<AppPatient>>();
 
-        // TODO(dxchen): Use injected location tree instead of singleton.
-        mLocationTree = LocationTree.singletonInstance;
+        mLocationTree = locationTree;
         mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
     }
 
@@ -108,8 +108,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(
             int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        LocationTree.LocationSubtree location =
-                (LocationTree.LocationSubtree)getGroup(groupPosition);
+        AppLocation location = (AppLocation)getGroup(groupPosition);
 
         int patientCount = getChildrenCount(groupPosition);
         String tentName = location.toString();
@@ -135,21 +134,21 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     public View getChildView(
             int groupPosition, int childPosition, boolean isLastChild, View convertView,
             ViewGroup parent) {
-        AppPatient patient = (AppPatient)getChild(groupPosition, childPosition);
+        AppPatient patient = (AppPatient) getChild(groupPosition, childPosition);
 
         // Show pregnancy status and condition if present.
         boolean pregnant = false;
         String condition = null;
         if (mObservations != null) {
-            Map<String, LocalizedChartHelper.LocalizedObservation> observationMap =
+            Map<String, LocalizedChartHelper.LocalizedObservation> obsMap =
                     mObservations.get(patient.uuid);
-            if (observationMap != null) {
-                pregnant = observationMap.containsKey(Concept.PREGNANCY_UUID)
-                        && observationMap.get(Concept.PREGNANCY_UUID).value.equals(
-                        Concept.YES_UUID);
-                if (observationMap.containsKey(Concept.GENERAL_CONDITION_UUID)) {
-                    condition = observationMap.get(Concept.GENERAL_CONDITION_UUID).value;
-                }
+            if (obsMap != null) {
+                LocalizedChartHelper.LocalizedObservation pregObs =
+                        obsMap.get(Concepts.PREGNANCY_UUID);
+                pregnant = pregObs == null ? false : Concepts.YES_UUID.equals(pregObs.value);
+                LocalizedChartHelper.LocalizedObservation condObs =
+                        obsMap.get(Concepts.GENERAL_CONDITION_UUID);
+                condition = condObs == null ? null : condObs.value;
             }
         }
 
@@ -158,7 +157,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         ResStatus.Resolved status =
-                Concept.getResStatus(condition).resolve(mContext.getResources());
+                Concepts.getResStatus(condition).resolve(mContext.getResources());
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(patient.givenName + " " + patient.familyName);
@@ -213,9 +212,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     /**
-     * Updates the adapter to show all patients from the given cursor.
-     *
-     * @param cursor a {@link TypedCursor} containing all patients to show
+     * Updates the adapter to show all patients from the given cursor.  (Does not
+     * take ownership; the original owner remains responsible for closing it.)
      */
     public void setPatients(TypedCursor<AppPatient> cursor) {
         mPatientsByLocation.clear();
@@ -223,31 +221,27 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             mObservations.clear();
         }
 
-        String[] patientUuids = new String[cursor.getCount()];
+        int count = cursor.getCount();
+        String[] patientUuids = new String[count];
 
         // Add all patients from cursor.
-        for (int i = 0; i < cursor.getCount(); i++) {
+        for (int i = 0; i < count; i++) {
             AppPatient patient = cursor.get(i);
             addPatient(patient);
             patientUuids[i] = patient.uuid;
         }
 
-        // Populate locations list accordingly.
-        mLocations = new LocationTree.LocationSubtree[mPatientsByLocation.size()];
+        // Produce a sorted list of all the locations that have patients.
+        mLocations = new AppLocation[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
-        Arrays.sort(mLocations);
+        Arrays.sort(mLocations, new AppLocationComparator(mLocationTree));
 
-        // Finalize cursor.
-        cursor.close();
-
-        // Sort each of the patient lists by the default patient comparator.
-        for (Map.Entry<LocationTree.LocationSubtree, List<AppPatient>> entry :
-                mPatientsByLocation.entrySet()) {
-            Collections.sort(entry.getValue());
+        // Sort the patient lists within each location using the default comparator.
+        for (List<AppPatient> patients : mPatientsByLocation.values()) {
+            Collections.sort(patients);
         }
 
         new FetchObservationsTask().execute(patientUuids);
-
         notifyDataSetChanged();
     }
 
@@ -266,20 +260,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     // Add a single patient to relevant data structures.
     private void addPatient(AppPatient patient) {
-        String locationUuid = patient.locationUuid;
-        LocationTree.LocationSubtree location = mLocationTree.getLocationByUuid(locationUuid);
-        // Skip any patients with no location. This case shouldn't happen, but better to hide
-        // the patient than cause a crash.
-        if (location == null) {
-            return;
+        AppLocation location = mLocationTree.findByUuid(patient.locationUuid);
+        if (location != null) {  // shouldn't be null, but better to be safe
+            if (!mPatientsByLocation.containsKey(location)) {
+                mPatientsByLocation.put(location, new ArrayList<AppPatient>());
+            }
+            mPatientsByLocation.get(location).add(patient);
         }
-
-        if (!mPatientsByLocation.containsKey(location)) {
-            mPatientsByLocation.put(location, new ArrayList<AppPatient>());
-        }
-        mPatientsByLocation.get(location).add(patient);
-
-        return;
     }
 
     static class ViewHolder {

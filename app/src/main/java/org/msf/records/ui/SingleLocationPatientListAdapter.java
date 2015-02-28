@@ -6,14 +6,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocationTree;
 
 /**
  * A {@link PatientListTypedCursorAdapter} that hides its group headings, as the group heading is
  * expected to be reflected in the title bar or by other information on the screen.
  */
 public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdapter {
-    public SingleLocationPatientListAdapter(Context context) {
-        super(context);
+    public SingleLocationPatientListAdapter(
+            Context context, AppLocationTree locationTree) {
+        super(context, locationTree);
     }
 
     @Override

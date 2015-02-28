@@ -6,13 +6,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.App;
+import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.utils.Logger;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.provider.FormsProviderAPI;
@@ -21,6 +22,8 @@ import org.odk.collect.android.tasks.DiskSyncTask;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Synchronizes 1 or more OpenMRS provided forms into the ODK database storage. Very like
@@ -56,6 +59,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             Cursor cursor = null;
             boolean isNew;
             final boolean isUpdate;
+            final boolean usersHaveChanged = App.getUserManager().isDirty();
             try {
                 cursor = getCursorForFormFile(proposedPath, new String[]{
                         FormsProviderAPI.FormsColumns.DATE
@@ -63,8 +67,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 boolean isInDatabase = cursor.getCount() > 0;
                 if (isInDatabase) {
                     if (cursor.getCount() != 1) {
-                        throw new IllegalArgumentException("Saw " + cursor.getCount()
-                                + " rows for " + proposedPath.getPath());
+                        LOG.e("Saw " + cursor.getCount() + " rows for " + proposedPath.getPath());
+                        // In a fail-fast environment we would crash here, but we will keep going
+                        // to lead the code more robust to errors in the field.
                     }
                     Preconditions.checkArgument(cursor.getColumnCount() == 1);
                     cursor.moveToNext();
@@ -72,10 +77,11 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                     isNew = (existingTimestamp < formInfo.dateChanged);
                     isUpdate = true;
 
-                    if (isNew) {
-                        LOG.i("Form " + formInfo.uuid + " requires an update." +
-                                " (Local creation date: " + existingTimestamp +
-                                ", (Latest version: " + formInfo.dateChanged + ")");
+                    if (isNew || usersHaveChanged) {
+                        LOG.i("Form " + formInfo.uuid + " requires an update."
+                                + " (Local creation date: " + existingTimestamp
+                                + ", (Latest version: " + formInfo.dateChanged + ")"
+                                + ", (Invalidated by UserManager: " + usersHaveChanged + ")");
                     }
                 } else {
                     LOG.i("Form " + formInfo.uuid + " not found in database.");
@@ -88,11 +94,12 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 }
             }
 
-            if (!isNew) {
+            if (!isNew && !usersHaveChanged) {
                 LOG.i("Using form " + formInfo.uuid + " from local cache.");
                 if (formWrittenListener != null) {
                     formWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
+                EventBus.getDefault().post(new FetchXformSucceededEvent());
                 continue;
             }
 
@@ -109,14 +116,23 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO(nfortescue): design error handling properly
-                    LOG.e("failed to fetch file");
+                    LOG.e(error, "failed to fetch file");
+                    EventBus.getDefault().post(new FetchXformFailedEvent(
+                            FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
                 }
             });
         }
         return null;
     }
 
+    /**
+     * Get a Cursor for the form from the filename. If there is more than one they are ordered
+     * descending by id, so most recent is first.
+     *
+     * @param proposedPath the path for the forms file
+     * @param projection a projection of fields to get
+     * @return the Cursor pointing to ideally one form.
+     */
     public static Cursor getCursorForFormFile(File proposedPath, String [] projection) {
         String[] selectionArgs = {
                 proposedPath.getAbsolutePath()
@@ -126,7 +142,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 .getApplication()
                 .getContentResolver()
                 .query(FormsProviderAPI.FormsColumns.CONTENT_URI, projection, selection,
-                        selectionArgs, null);
+                        selectionArgs, FormsProviderAPI.FormsColumns._ID + " DESC");
     }
 
     private static boolean writeStringToFile(String response, File proposedPath) {
@@ -178,10 +194,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         protected File doInBackground(FormToWrite[] params) {
             Preconditions.checkArgument(params.length != 0);
 
-            // really really hacky - fix the form problem, should be done server side
-            String form = params[0].form.replaceAll("&amp;", "&");
-
-
+            String form = params[0].form;
             File proposedPath = params[0].path;
             // Write file into OpenMRS forms directory.
             if (!writeStringToFile(form, proposedPath)) {
@@ -202,11 +215,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // insert into content provider
             try {
                 ContentResolver contentResolver = Collect.getInstance().getApplication().getContentResolver();
-                if (mUpdate) {
-                    contentResolver.update(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues, null, null);
-                } else {
-                    contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
-                }
+                // Always replace existing forms.
+                contentValues.put(FormsProviderAPI.SQL_INSERT_OR_REPLACE, true);
+                contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
             } catch (SQLException e) {
                 LOG.i(e, "failed to insert fetched file");
             }
@@ -219,6 +230,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             if (formWrittenListener != null && path != null) {
                 formWrittenListener.formWritten(path, mUuid);
             }
+            EventBus.getDefault().post(new FetchXformSucceededEvent());
+
+            App.getUserManager().setDirty(false);
         }
     }
 

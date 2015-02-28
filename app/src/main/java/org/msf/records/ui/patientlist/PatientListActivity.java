@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.msf.records.R;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;

@@ -64,13 +64,13 @@ public final class Logger {
 
     public void d(String message, Object... args) {
         if (BuildConfig.DEBUG) {
-            Log.v(tag, formatIfNeeded(message, args));
+            Log.d(tag, formatIfNeeded(message, args));
         }
     }
 
     public void d(Throwable t, String message, Object... args) {
         if (BuildConfig.DEBUG) {
-            Log.v(tag, formatIfNeeded(message, args), t);
+            Log.d(tag, formatIfNeeded(message, args), t);
         }
     }
 
@@ -104,7 +104,7 @@ public final class Logger {
 
     private static final String getTag() {
         String[] parts = new Throwable().getStackTrace()[2].getClassName().split("\\.");
-        return parts[parts.length - 1];
+        return "buendia/" + parts[parts.length - 1];
     }
 
     private static String formatIfNeeded(String message, Object... args) {

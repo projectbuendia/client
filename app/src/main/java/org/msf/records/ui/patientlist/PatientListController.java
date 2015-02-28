@@ -1,13 +1,14 @@
 package org.msf.records.ui.patientlist;
 
-import android.support.v4.widget.SwipeRefreshLayout;
-
-import org.msf.records.events.sync.SyncFinishedEvent;
+import org.msf.records.App;
+import org.msf.records.diagnostics.HealthMonitor;
+import org.msf.records.events.sync.SyncFailedEvent;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
 
-import de.greenrobot.event.EventBus;
+import javax.inject.Inject;
 
 /**
  * Controller for non-inherited parts of {@link PatientListFragment}.
@@ -18,24 +19,13 @@ public class PatientListController {
 
     private static final Logger LOG = Logger.create();
 
-    private final SwipeRefreshLayout.OnRefreshListener mRefreshListener =
-            new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    if (!mIsRefreshing) {
-                        LOG.d("onRefresh");
-
-                        //triggers app wide data refresh
-                        // TODO(nfortescue): Incremental sync.
-                        mSyncManager.forceSync();
-                        mIsRefreshing = true;
-                    }
-                }
-            };
-
     private final class SyncSubscriber {
-        public synchronized void onEventMainThread(SyncFinishedEvent event) {
-            stopRefreshing();
+        public synchronized void onEventMainThread(SyncSucceededEvent event) {
+            onSyncFinished(true);
+        }
+
+        public synchronized void onEventMainThread(SyncFailedEvent event) {
+            onSyncFinished(false);
         }
     }
 
@@ -45,12 +35,22 @@ public class PatientListController {
 
     private final SyncManager mSyncManager;
 
-    private boolean mIsRefreshing;
+    @Inject HealthMonitor mHealthMonitor;
+
+    /** True if a full sync initiated by this activity is in progress. */
+    private boolean mInitiatedFullSync;
 
     private EventBusRegistrationInterface mEventBus;
 
     public interface Ui {
-        void setRefreshing(boolean refreshing);
+        /** Stops the refresh-in-progress animation. */
+        void stopRefreshAnimation();
+
+        /** Notifies the user that the refresh failed. */
+        void showRefreshError();
+
+        /** Notifies the user that the API is unhealthy. */
+        void showApiHealthProblem();
     }
 
     /**
@@ -65,6 +65,7 @@ public class PatientListController {
         mUi = ui;
         mSyncManager = syncManager;
         mEventBus = eventBus;
+        App.getInstance().inject(this);
     }
 
     public void init() {
@@ -75,14 +76,26 @@ public class PatientListController {
         mEventBus.unregister(mSyncSubscriber);
     }
 
-    private void stopRefreshing() {
-        if (mIsRefreshing) {
-            mUi.setRefreshing(false);
-            mIsRefreshing = false;
+    /**
+     * Forces a new sync of all data from server, unless this activity is already
+     * waiting for a previously initiated sync.
+     */
+    public void onRefreshRequested() {
+        if (mHealthMonitor.isApiUnavailable()) {
+            mUi.stopRefreshAnimation();
+            mUi.showApiHealthProblem();
+        } else if (!mInitiatedFullSync) {
+            LOG.d("onRefreshRequested");
+            mSyncManager.forceSync();
+            mInitiatedFullSync = true;
         }
     }
 
-    public SwipeRefreshLayout.OnRefreshListener getOnRefreshListener() {
-        return mRefreshListener;
+    private void onSyncFinished(boolean success) {
+        mUi.stopRefreshAnimation();
+        if (mInitiatedFullSync && !success) {
+            mUi.showRefreshError();
+        }
+        mInitiatedFullSync = false;
     }
 }

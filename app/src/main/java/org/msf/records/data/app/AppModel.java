@@ -4,8 +4,10 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.AsyncTask;
 
+import org.joda.time.Instant;
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
+import org.msf.records.data.app.tasks.AppAddEncounterAsyncTask;
 import org.msf.records.data.app.tasks.AppAddPatientAsyncTask;
 import org.msf.records.data.app.tasks.AppAsyncTaskFactory;
 import org.msf.records.data.app.tasks.AppUpdatePatientAsyncTask;
@@ -16,11 +18,13 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
-import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.filter.UuidFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
@@ -34,6 +38,7 @@ import de.greenrobot.event.NoSubscriberEvent;
  * not need to worry about the implementation details of this.
  */
 public class AppModel {
+    private static final Logger LOG = Logger.create();
 
     private final ContentResolver mContentResolver;
     private final AppTypeConverters mConverters;
@@ -46,6 +51,46 @@ public class AppModel {
         mContentResolver = contentResolver;
         mConverters = converters;
         mTaskFactory = taskFactory;
+    }
+
+    /**
+     * Returns true iff the model has previously been fully downloaded from the server--that is, if
+     * locations, patients, users, charts, and observations were all downloaded at some point. Note
+     * that this data may be out-of-date, but must be present in some form for proper operation of
+     * the app.
+     */
+    public boolean isFullModelAvailable() {
+        // The sync process is transactional, but in rare cases, a sync may complete without ever
+        // having started--this is the case if user data is cleared midsync, for example. To check
+        // that a sync actually completed, we look at the FULL_SYNC_START_TIME and
+        // FULL_SYNC_END_TIME columns in the Misc table, which are written to as the first and
+        // last operations of a complete sync. If both of these fields are present, and the last
+        // end time is greater than the last start time, then a full sync must have completed.
+        Cursor c = null;
+        try {
+            c = mContentResolver.query(
+                    Contracts.Misc.CONTENT_URI,
+                    new String[]{
+                            Contracts.Misc.FULL_SYNC_START_TIME,
+                            Contracts.Misc.FULL_SYNC_END_TIME,
+                            Contracts.Misc.OBS_SYNC_TIME
+                    },
+                    null,
+                    null,
+                    null);
+            LOG.d("Sync timing result count: %d", c.getCount());
+            if (c.moveToNext()) {
+                LOG.d("Sync timings -- FULL_SYNC_START(%d), FULL_SYNC_END(%d), OBS_SYNC_TIME(%d)",
+                        c.getLong(0), c.getLong(1), c.getLong(2));
+                return !c.isNull(0) && !c.isNull(1) && c.getLong(1) >= c.getLong(0);
+            } else {
+                return false;
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
     /**
@@ -86,7 +131,12 @@ public class AppModel {
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
-                new UuidFilter(), uuid, mConverters.patient, bus);
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
+                new UuidFilter(),
+                uuid,
+                mConverters.patient,
+                bus);
         task.execute();
     }
 
@@ -120,6 +170,16 @@ public class AppModel {
             CrudEventBus bus, AppPatient originalPatient, AppPatientDelta patientDelta) {
         AppUpdatePatientAsyncTask task =
                 mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
+        task.execute();
+    }
+
+    /**
+     * Asynchronously adds an encounter to a patient, posting a
+     * {@link org.msf.records.events.data.SingleItemCreatedEvent}.
+     */
+    public void addEncounter(CrudEventBus bus, AppPatient appPatient, AppEncounter appEncounter) {
+        AppAddEncounterAsyncTask task =
+                mTaskFactory.newAddEncounterAsyncTask(appPatient, appEncounter, bus);
         task.execute();
     }
 

@@ -4,12 +4,15 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 
+import net.sqlcipher.database.SQLiteDatabase;
+
 import org.msf.records.sync.PatientDatabase;
 
 import java.util.List;
 
 /**
- * A {@link ItemProviderDelegate} that supports insertion.
+ * A {@link ItemProviderDelegate} that supports insertion. Insertion operations will be treated as
+ * upserts -- e.g. fields not explicitly overwritten from older entries will be retained.
  */
 public class InsertableItemProviderDelegate extends ItemProviderDelegate {
 
@@ -22,9 +25,23 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         values.put(mIdColumn, uri.getLastPathSegment());
-        long id = dbHelper.getWritableDatabase().replaceOrThrow(mTableName, null, values);
+        // Perform an upsert operation, not replacing any values of fields not being explicitly
+        // updated.
+        dbHelper.getWritableDatabase().updateWithOnConflict(
+                mTableName,
+                values,
+                mIdColumn + "=?",
+                new String[] {uri.getLastPathSegment()},
+                SQLiteDatabase.CONFLICT_IGNORE
+        );
+        dbHelper.getWritableDatabase().insertWithOnConflict(
+                mTableName,
+                null,
+                values,
+                SQLiteDatabase.CONFLICT_IGNORE
+        );
         contentResolver.notifyChange(uri, null, false);
-        return getPrefixUriBuilder(uri).appendPath(Long.toString(id)).build();
+        return getPrefixUriBuilder(uri).appendPath(uri.getLastPathSegment()).build();
     }
 
     private static Uri.Builder getPrefixUriBuilder(Uri uri) {

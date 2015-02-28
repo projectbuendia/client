@@ -63,6 +63,17 @@ public class PrefsModule {
 
     @Provides
     @Singleton
+    @Qualifiers.PackageServerRootUrl
+    StringPreference providePackageServerRootUrlStringPreference(
+            SharedPreferences sharedPreferences, Resources resources) {
+        return new StringPreference(
+                sharedPreferences,
+                "package_server_root_url",
+                resources.getString(R.string.package_server_root_url_default));
+    }
+
+    @Provides
+    @Singleton
     @Qualifiers.XformUpdateClientCache
     BooleanPreference provideXformUpdateClientCache(
             SharedPreferences sharedPreferences, Resources resources) {

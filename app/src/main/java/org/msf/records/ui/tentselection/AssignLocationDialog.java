@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
@@ -14,15 +13,17 @@ import android.widget.Toast;
 import com.google.common.base.Optional;
 
 import org.msf.records.R;
-import org.msf.records.events.location.LocationsLoadFailedEvent;
-import org.msf.records.events.location.LocationsLoadedEvent;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
+import org.msf.records.data.app.AppLocation;
+import org.msf.records.data.app.AppLocationTree;
+import org.msf.records.data.app.AppModel;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.data.PatientUpdateFailedEvent;
 import org.msf.records.model.Zone;
-import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.ui.BigToast;
 import org.msf.records.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -44,13 +45,16 @@ public final class AssignLocationDialog
     @Nullable private TentListAdapter mAdapter;
 
     private final Context mContext;
+    private final AppModel mAppModel;
+    private final String mLocale;
     private final Runnable mOnDismiss;
-    private final LocationManager mLocationManager;
-    private final EventBusRegistrationInterface mEventBus;
+    private final CrudEventBus mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final Optional<String> mCurrentLocationUuid;
     private final TentSelectedCallback mTentSelectedCallback;
     private ProgressDialog mProgressDialog;
+    private AppLocationTree mLocationTree;
+    private boolean mRegistered;
 
     // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
@@ -67,16 +71,26 @@ public final class AssignLocationDialog
 
     public AssignLocationDialog(
             Context context,
-            Runnable onDismiss, LocationManager locationManager,
-            EventBusRegistrationInterface eventBus,
+            AppModel appModel,
+            String locale,
+            Runnable onDismiss,
+            CrudEventBus eventBus,
             Optional<String> currentLocationUuid,
             TentSelectedCallback tentSelectedCallback) {
         mContext = checkNotNull(context);
+        mAppModel = checkNotNull(appModel);
+        mLocale = checkNotNull(locale);
         this.mOnDismiss = checkNotNull(onDismiss);
-        mLocationManager = checkNotNull(locationManager);
         mEventBus = checkNotNull(eventBus);
         mCurrentLocationUuid = currentLocationUuid;
         mTentSelectedCallback = checkNotNull(tentSelectedCallback);
+    }
+
+    /**
+     * Returns true iff the dialog is currently displayed.
+     */
+    public boolean isShowing() {
+        return mDialog != null && mDialog.isShowing();
     }
 
     public void show() {
@@ -95,23 +109,44 @@ public final class AssignLocationDialog
 
     public void onPatientUpdateFailed( int reason )
     {
-        mAdapter.setSelectedLocationUuid(mCurrentLocationUuid);
+        mAdapter.setmSelectedLocationUuid(mCurrentLocationUuid);
 
-        Toast.makeText( mContext, "Failed to update patient, reason: " + Integer.toString( reason ), Toast.LENGTH_SHORT ).show();
+        int errorMessageResource;
+        switch (reason) {
+            case PatientUpdateFailedEvent.REASON_INTERRUPTED:
+                errorMessageResource = R.string.patient_location_error_interrupted;
+                break;
+            case PatientUpdateFailedEvent.REASON_NETWORK:
+            case PatientUpdateFailedEvent.REASON_SERVER:
+                errorMessageResource = R.string.patient_location_error_network;
+                break;
+            case PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT:
+                errorMessageResource = R.string.patient_location_error_no_such_patient;
+                break;
+            case PatientUpdateFailedEvent.REASON_CLIENT:
+            default:
+                errorMessageResource = R.string.patient_location_error_unknown;
+                break;
+        }
+        BigToast.show(mContext, errorMessageResource);
         mProgressDialog.dismiss();
     }
 
     private void startListeningForLocations() {
+        mRegistered = true;
         mEventBus.register(mEventBusSubscriber);
-        mLocationManager.loadLocations();
+        mAppModel.fetchLocationTree(mEventBus, mLocale);
     }
 
-    private void setTents(LocationTree locationTree) {
+    private void setTents(AppLocationTree locationTree) {
         if (mGridView != null) {
-            List<LocationSubtree> locations = locationTree.getTents();
-            LocationSubtree dischargedZone = locationTree.getZoneForUuid(Zone.DISCHARGED_ZONE_UUID);
+            List<AppLocation> locations = new ArrayList(
+                    locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT));
+            AppLocation triageZone = locationTree.findByUuid(Zone.TRIAGE_ZONE_UUID);
+            locations.add(0, triageZone);
+            AppLocation dischargedZone = locationTree.findByUuid(Zone.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
-            mAdapter = new TentListAdapter(mContext, locations, mCurrentLocationUuid);
+            mAdapter = new TentListAdapter(mContext, locations, locationTree, mCurrentLocationUuid);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
             mGridView.setSelection(1);
@@ -121,8 +156,8 @@ public final class AssignLocationDialog
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        String newTentUuid = mAdapter.getItem(position).getLocation().uuid;
-        mAdapter.setSelectedLocationUuid(Optional.fromNullable(newTentUuid));
+        String newTentUuid = mAdapter.getItem(position).uuid;
+        mAdapter.setmSelectedLocationUuid(Optional.fromNullable(newTentUuid));
         mProgressDialog = ProgressDialog.show(mContext,
                 mContext.getResources().getString(R.string.title_updating_patient),
                 mContext.getResources().getString(R.string.please_wait), true);
@@ -135,6 +170,9 @@ public final class AssignLocationDialog
     }
 
     public void dismiss() {
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
         mProgressDialog.dismiss();
         mDialog.dismiss();
     }
@@ -147,20 +185,22 @@ public final class AssignLocationDialog
 
     @Override
     public void onDismiss(DialogInterface dialog) {
-        mEventBus.unregister(mEventBusSubscriber);
+        if (mRegistered) {
+            mEventBus.unregister(mEventBusSubscriber);
+        }
         mOnDismiss.run();
     }
 
     private final class EventBusSubscriber {
 
-        public void onEventMainThread(LocationsLoadFailedEvent event) {
-            if (DEBUG) {
-                LOG.d("Error loading location tree");
+        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            if (event.tree.getRoot() == null) {
+                LOG.d("AppLocationTree has a null root, suggesting something went wrong.");
+                return;
             }
-        }
 
-        public void onEventMainThread(LocationsLoadedEvent event) {
-            setTents(event.locationTree);
+            mLocationTree = event.tree;
+            setTents(event.tree);
         }
     }
 }

@@ -4,12 +4,9 @@ import android.app.Application;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
-import org.msf.records.events.mvcmodels.ModelReadyEvent;
-import org.msf.records.mvcmodels.Models;
-import org.msf.records.mvcmodels.PatientChartModel;
+import org.msf.records.diagnostics.HealthMonitor;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.Server;
-import org.msf.records.updater.UpdateManager;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
@@ -17,7 +14,6 @@ import org.odk.collect.android.application.Collect;
 import javax.inject.Inject;
 
 import dagger.ObjectGraph;
-import de.greenrobot.event.EventBus;
 
 /**
  * An {@link Application} the represents the Android Client.
@@ -37,18 +33,17 @@ public class App extends Application {
 
     private static OpenMrsConnectionDetails sConnectionDetails;
 
-    @Inject Application mApplication;
     @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
-    @Inject UpdateManager mUpdateManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
-    @Inject PatientChartModel mPatientChartModel;
     @Inject Server mServer;
+    @Inject HealthMonitor mHealthMonitor;
 
     @Override
     public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
+
         initializeSqlCipher();
 
         buildObjectGraphAndInject();
@@ -57,14 +52,12 @@ public class App extends Application {
 
         synchronized (App.class) {
             sInstance = this;
-
             sUserManager = mUserManager; // TODO(dxchen): Remove when Daggered.
             sConnectionDetails = mOpenMrsConnectionDetails; // TODO(dxchen): Remove when Daggered.
             sServer = mServer; // TODO(dxchen): Remove when Daggered.
         }
 
-        // TODO(dxchen): Refactor this into the model classes.
-        EventBus.getDefault().postSticky(new ModelReadyEvent(Models.OBSERVATIONS));
+        mHealthMonitor.start();
     }
 
     private void initializeSqlCipher() {
@@ -94,5 +87,9 @@ public class App extends Application {
 
     public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
         return sConnectionDetails;
+    }
+
+    public HealthMonitor getHealthMonitor() {
+        return mHealthMonitor;
     }
 }

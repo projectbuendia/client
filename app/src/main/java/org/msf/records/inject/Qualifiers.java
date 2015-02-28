@@ -8,13 +8,19 @@ import javax.inject.Qualifier;
 
 public class Qualifiers {
 
+    // .diagnostics
+
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface HealthEventBus {}
+
     // .events
 
     @Qualifier
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     public @interface CrudEventBusBuilder {}
-
 
     // .net
 
@@ -32,6 +38,11 @@ public class Qualifiers {
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
     public @interface OpenMrsPassword {}
+
+    @Qualifier
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface PackageServerRootUrl {}
 
     @Qualifier
     @Documented

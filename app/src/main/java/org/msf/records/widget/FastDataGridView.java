@@ -23,7 +23,6 @@ import org.msf.records.R;
  * layout is defined in XML, call {@code #createView} to trigger the actual inflation.
  */
 public class FastDataGridView {
-
     private final Context context;
     private final DataGridAdapter dataGridAdapter;
     private final LayoutInflater layoutInflater;
@@ -152,7 +151,7 @@ public class FastDataGridView {
             View view = mLayoutInflater.inflate(
                     R.layout.data_grid_cell_chart_text, parent, false /* attachToRoot */);
             ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
-            mDataGridAdapter.setCellBackgroundForViewType(view, viewType);
+            mDataGridAdapter.setCellBackgroundForViewType(view, CellType.CELL, viewType);
             return new CellViewHolder(view, viewStub);
         }
 
@@ -201,7 +200,7 @@ public class FastDataGridView {
             View view = mLayoutInflater.inflate(
                     R.layout.data_grid_row_header_chart, parent, false /* attachToRoot */);
             TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
-            mDataGridAdapter.setCellBackgroundForViewType(view, viewType);
+            mDataGridAdapter.setCellBackgroundForViewType(view, CellType.ROW_HEADER, viewType);
             return new ViewHolder(view, textView);
         }
 

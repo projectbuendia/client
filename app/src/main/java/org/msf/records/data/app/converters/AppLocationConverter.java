@@ -16,6 +16,7 @@ public class AppLocationConverter implements AppTypeConverter<AppLocation> {
         return new AppLocation(
                 cursor.getString(LocationProjection.LOCATION_LOCATION_UUID_COLUMN),
                 cursor.getString(LocationProjection.LOCATION_PARENT_UUID_COLUMN),
-                cursor.getString(2)); // The localized location name.
+                cursor.getString(2), // The localized location name.
+                cursor.getInt(3)); // The non-recursive patient count.
     }
 }

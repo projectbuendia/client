@@ -1,29 +1,37 @@
 package org.msf.records.ui.chart;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import android.test.AndroidTestCase;
 
-  import org.mockito.Mock;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import org.msf.records.R;
+import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.FetchXformFailedEvent;
+import org.msf.records.events.FetchXformSucceededEvent;
+import org.msf.records.events.SubmitXformFailedEvent;
+import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.mvcmodels.PatientModel;
-import org.msf.records.net.OpenMrsChartServer;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link PatientChartController}.
@@ -43,9 +51,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	@Mock private PatientChartController.Ui mMockUi;
 	@Mock private OdkResultSender mMockOdkResultSender;
 	@Mock private LocalizedChartHelper mMockObservationsProvider;
-	@Mock private PatientModel mMockPatientModel;
 	@Mock private SyncManager mMockSyncManager;
 	private FakeEventBus mFakeCrudEventBus;
+    private FakeEventBus mFakeGlobalEventBus;
     private FakeHandler mFakeHandler;
 	
 	@Override
@@ -54,17 +62,16 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		MockitoAnnotations.initMocks(this);
 
 		mFakeCrudEventBus = new FakeEventBus();
-        FakeEventBus fakeEventBus = new FakeEventBus();
+        mFakeGlobalEventBus = new FakeEventBus();
 		mFakeHandler = new FakeHandler();
 		mController = new PatientChartController(
 				mMockAppModel,
-                fakeEventBus,
+                mFakeGlobalEventBus,
 				mFakeCrudEventBus,
 				mMockUi,
 				mMockOdkResultSender,
 				mMockObservationsProvider,
 				null,
-				mMockPatientModel,
 				mMockSyncManager,
 				mFakeHandler);
 	}
@@ -108,7 +115,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// removed, this can also be removed.
 	    mFakeHandler.runUntilEmpty();
 		// THEN the controller puts observations on the UI
-		verify(mMockUi).setObservationHistory(allObservations);
+        verify(mMockUi).setObservationHistory(allObservations, null);
 		verify(mMockUi).updatePatientVitalsUI(recentObservations);
 	}
 
@@ -122,6 +129,138 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// THEN the controller updates the UI
 		verify(mMockUi).setPatient(patient);
 	}
+
+    /** Tests that selecting a new general condition results in adding a new encounter. */
+    public void testSetCondition_AddsEncounterForNewCondition() {
+        // GIVEN patient is set and controller is initalized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN a new general condition is set from the dialog
+        mController.setCondition(Concepts.GENERAL_CONDITION_PALLIATIVE_UUID);
+        // THEN a new encounter is added
+        verify(mMockAppModel).addEncounter(
+                any(CrudEventBus.class),
+                any(AppPatient.class),
+                any(AppEncounter.class));
+    }
+
+    /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
+    public void testAddObservation_showsLoadingDialog() {
+        // GIVEN patient is set, controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN 'add observation' is pressed
+        mController.onAddObservationPressed();
+        // THEN the controller displays the loading dialog
+        verify(mMockUi).showFormLoadingDialog(true);
+    }
+
+    /** Tests that requesting an xform through clicking on a vital shows loading dialog. */
+    public void testVitalClick_showsLoadingDialog() {
+        // GIVEN patient is set, controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN a vital is pressed
+        mController.onAddObservationPressed("foo");
+        // THEN the controller displays the loading dialog
+        verify(mMockUi).showFormLoadingDialog(true);
+    }
+
+    /** Tests that requesting an xform through clicking on test results shows loading dialog. */
+    public void testTestResultsClick_showsLoadingDialog() {
+        // GIVEN patient is set, controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN test results are pressed
+        mController.onAddTestResultsPressed();
+        // THEN the controller displays the loading dialog
+        verify(mMockUi).showFormLoadingDialog(true);
+    }
+
+    /** Tests that the xform can be fetched again if the first fetch fails. */
+    public void testXformLoadFailed_ReenablesXformFetch() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request fails
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller re-enables xform fetch
+        verify(mMockUi).reEnableFetch();
+    }
+
+    /** Tests that an error message is displayed when the xform fails to load. */
+    public void testXformLoadFailed_ShowsError() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request fails
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller displays an error message
+        verify(mMockUi).showError(R.string.fetch_xform_failed_unknown_reason);
+    }
+
+    /** Tests that a failed xform fetch hides the loading dialog. */
+    public void testXformLoadFailed_HidesLoadingDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request fails
+        mFakeGlobalEventBus.post(new FetchXformFailedEvent(FetchXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller hides the loading dialog
+        verify(mMockUi).showFormLoadingDialog(false);
+    }
+
+    /** Tests that the xform can be fetched again if the first fetch succeeds. */
+    public void testXformLoadSucceeded_ReenablesXformFetch() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request succeeds
+        mFakeGlobalEventBus.post(new FetchXformSucceededEvent());
+        // THEN the controller re-enables xform fetch
+        verify(mMockUi).reEnableFetch();
+    }
+
+    /** Tests that a successful xform fetch hides the loading dialog. */
+    public void testXformLoadSucceeded_HidesLoadingDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform request succeeds
+        mFakeGlobalEventBus.post(new FetchXformSucceededEvent());
+        // THEN the controller hides the loading dialog
+        verify(mMockUi).showFormLoadingDialog(false);
+    }
+
+    // TODO: Test that starting an xform submission shows the submission dialog.
+
+    /** Tests that errors in xform submission are reported to the user. */
+    public void testXformSubmitFailed_ShowsErrorMessage() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform fails to submit
+        mFakeGlobalEventBus.post(new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller shows an error
+        verify(mMockUi).showError(R.string.submit_xform_failed_unknown_reason);
+    }
+
+    /** Tests that errors in xform submission hide the submission dialog. */
+    public void testXformSubmitFailed_HidesSubmissionDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform fails to submit
+        mFakeGlobalEventBus.post(new SubmitXformFailedEvent(SubmitXformFailedEvent.Reason.UNKNOWN));
+        // THEN the controller hides the submission dialog
+        verify(mMockUi).showFormSubmissionDialog(false);
+    }
+
+    /** Tests that successful xform submission hides the submission dialog. */
+    public void testXformSubmitSucceeded_EventuallyHidesSubmissionDialog() {
+        // GIVEN controller is initialized
+        mController.init();
+        // WHEN an xform submits successfully
+        mFakeGlobalEventBus.post(new SubmitXformSucceededEvent());
+        // THEN the controller hides the submission dialog
+        // TODO: When the handler UI updating hack in PatientChartController is removed, this can
+        // also be removed.
+        mFakeHandler.runUntilEmpty();
+        verify(mMockUi).showFormSubmissionDialog(false);
+    }
 
 	private final class FakeHandler implements MinimalHandler {
 	    private final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();

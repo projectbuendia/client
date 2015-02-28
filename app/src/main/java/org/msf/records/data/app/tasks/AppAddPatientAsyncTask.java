@@ -3,7 +3,6 @@ package org.msf.records.data.app.tasks;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
@@ -16,10 +15,12 @@ import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.filter.SimpleSelectionFilter;
-import org.msf.records.filter.UuidFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
+import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
 
@@ -72,9 +73,20 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         } catch (InterruptedException e) {
             return new PatientAddFailedEvent(PatientAddFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {
-            // TODO(dxchen): Parse the VolleyError to see exactly what kind of error was raised.
-            return new PatientAddFailedEvent(
-                    PatientAddFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
+            int failureReason = PatientAddFailedEvent.REASON_NETWORK;
+            if (e.getCause() != null && e.getCause() instanceof VolleyError) {
+                String message = e.getCause().getMessage();
+                if (message.contains("could not insert: [org.openmrs.PatientIdentifier]")) {
+                    failureReason = PatientAddFailedEvent.REASON_INVALID_ID;
+                } else if (message.contains("already has the ID")) {
+                    failureReason = PatientAddFailedEvent.REASON_DUPLICATE_ID;
+                } else if (isValidationErrorMessageForField(message, "names[0].givenName")) {
+                    failureReason = PatientAddFailedEvent.REASON_INVALID_GIVEN_NAME;
+                } else if (isValidationErrorMessageForField(message, "names[0].familyName")) {
+                    failureReason = PatientAddFailedEvent.REASON_INVALID_FAMILY_NAME;
+                }
+            }
+            return new PatientAddFailedEvent(failureReason, e);
         }
 
         if (patient.uuid == null) {
@@ -89,6 +101,9 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         AppPatient appPatient = AppPatient.fromNet(patient);
         Uri uri = mContentResolver.insert(
                 Contracts.Patients.CONTENT_URI, appPatient.toContentValues());
+
+        // Perform incremental observation sync so we get admission date.
+        GenericAccountService.forceIncrementalObservationSync();
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(
@@ -122,8 +137,18 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
-                new UuidFilter(), mUuid, mConverters.patient, mBus);
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
+                new UuidFilter(),
+                mUuid,
+                mConverters.patient,
+                mBus);
         task.execute();
+    }
+
+    private boolean isValidationErrorMessageForField(String message, String fieldName) {
+        return message.contains("'Patient#null' failed to validate with reason: "
+                + fieldName);
     }
 
     // After updating a patient, we fetch the patient from the database. The result of the fetch

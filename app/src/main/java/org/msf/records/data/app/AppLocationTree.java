@@ -5,14 +5,16 @@ import android.support.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ImmutableSortedSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.msf.records.utils.Logger;
-
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.msf.records.utils.Logger;
 
 /**
  * A tree that contains all app model locations.
@@ -28,6 +30,8 @@ public class AppLocationTree implements AppModelObservable {
 
     /**
      * Creates a {@link AppLocationTree} from a {@link TypedCursor} of {@link AppLocation}s.
+     * If there are no locations in the local database, the location tree will have a null
+     * root node (i.e. getRoot() == null).
      *
      * <p>Callers must call {@link #close} when done with an instance of this class.
      *
@@ -135,36 +139,55 @@ public class AppLocationTree implements AppModelObservable {
     }
 
     /**
-     * Returns the descendants of the root location at the specified absolute depth.
+     * Returns the sorted descendants of the root location at the specified absolute depth.
      *
      * <p>The named values {@link #ABSOLUTE_DEPTH_ROOT}, {@link #ABSOLUTE_DEPTH_ZONE},
      * {@link #ABSOLUTE_DEPTH_TENT}, and {@link #ABSOLUTE_DEPTH_BED} can be used for the
      * {@code level} parameter.
      */
-    public ImmutableSet<AppLocation> getDescendantsAtDepth(int absoluteDepth) {
+    public ImmutableSortedSet<AppLocation> getDescendantsAtDepth(int absoluteDepth) {
         return getDescendantsAtDepth(mRoot, absoluteDepth);
     }
 
     /**
-     * Returns the descendants of the specified location at the specified depth relative to that
-     * location.
+     * Returns the sorted descendants of the specified location at the specified depth relative to
+     * that location.
      */
-    public ImmutableSet<AppLocation> getDescendantsAtDepth(
+    public ImmutableSortedSet<AppLocation> getDescendantsAtDepth(
             AppLocation location, int relativeDepth) {
         if (location == null) {
-            return ImmutableSet.of();
+            return ImmutableSortedSet.of();
         }
 
         if (relativeDepth == 0) {
-            return ImmutableSet.of(location);
+            ImmutableSortedSet.Builder<AppLocation> thisLocationSet =
+                    ImmutableSortedSet.orderedBy(new AppLocationComparator(this));
+            thisLocationSet.add(location);
+            return thisLocationSet.build();
         }
 
-        ImmutableSet.Builder<AppLocation> descendants = ImmutableSet.builder();
+        ImmutableSortedSet.Builder<AppLocation> descendants =
+                ImmutableSortedSet.orderedBy(new AppLocationComparator(this));
         for (AppLocation child : getChildren(location)) {
             descendants.addAll(getDescendantsAtDepth(child, relativeDepth - 1));
         }
 
         return descendants.build();
+    }
+
+    /**
+     * Returns a {@link List} representing a branch of {@link AppLocation}s starting at the root
+     * of the location tree and terminating at the given {@link AppLocation}.
+     */
+    public List<AppLocation> getAncestorsStartingFromRoot(AppLocation node) {
+        List<AppLocation> result = new ArrayList<>();
+        AppLocation current = node;
+        while (current != null) {
+            result.add(current);
+            current = getParent(current);
+        }
+        Collections.reverse(result);
+        return result;
     }
 
     @Nullable

@@ -2,10 +2,11 @@
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center"
     android:id="@+id/data_grid_header_text"
     android:layout_width="@dimen/chart_grid_column_header_width"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:textSize="24sp"
+    android:padding="8dp"
+    android:textSize="18sp"
     android:background="@drawable/chart_grid_background_white"
     tools:text="Heading" />

@@ -29,6 +29,14 @@ public class AvailableUpdateInfo {
         return new AvailableUpdateInfo(false, currentVersion, null, null);
     }
 
+    /** Converts the info as a string for display. */
+    public String toString() {
+        return "AvailableUpdateInfo(isValid=" + isValid + ", "
+                + "currentVersion=" + currentVersion + ", "
+                + "availableVersion=" + availableVersion + ", "
+                + "updateUri=" + updateUri + ")";
+    }
+
     /**
      * Creates an instance of {@link AvailableUpdateInfo} from a server response.
      */
@@ -44,29 +52,21 @@ public class AvailableUpdateInfo {
             return getInvalid(currentVersion);
         }
 
-        UpdateInfo latestUpdateInfo = response.get(0);
+        // The package server is responsible for sorting the index in
+        // order by increasing version number, so the last is the highest.
+        UpdateInfo latestUpdateInfo = response.get(response.size() - 1);
 
         LexicographicVersion version = latestUpdateInfo.getParsedVersion();
         if (version == null) {
-            LOG.w(
-                    "The latest update info is missing the version field or its version field is "
-                            + "not a valid semantic version.");
+            LOG.w("Invalid version in 'version' field: " + latestUpdateInfo.version);
             return getInvalid(currentVersion);
-        }
-
-        if (Strings.isNullOrEmpty(latestUpdateInfo.url)) {
-            LOG.w("The latest update info is missing the src field.");
         }
 
         Uri updateUri;
         try {
             updateUri = Uri.parse(latestUpdateInfo.url);
         } catch (IllegalArgumentException e) {
-            LOG.w(
-                    e,
-                    "The latest update info response src field is not a valid URI path segment: "
-                            + "'%1$s'.",
-                    latestUpdateInfo.url);
+            LOG.w(e, "Invalid URL in 'url' field: " + latestUpdateInfo.url);
             return getInvalid(currentVersion);
         }
 
@@ -85,7 +85,7 @@ public class AvailableUpdateInfo {
     }
 
     /**
-     * Returns whether this update is valid and is newer than current version.
+     * Returns true if this is a valid update with a higher version number.
      */
     public boolean shouldUpdate() {
         return isValid && LexicographicVersion.compare(availableVersion, currentVersion) > 0;

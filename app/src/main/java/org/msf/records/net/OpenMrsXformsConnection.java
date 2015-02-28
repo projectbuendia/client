@@ -1,7 +1,6 @@
 package org.msf.records.net;
 
-import android.util.Log;
-
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -61,6 +60,9 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
+        // Typical response times should be close to 10s, but as the number of users grows, this
+        // number scales up quickly, so use a 30s timeout to be safe.
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -112,6 +114,7 @@ public class OpenMrsXformsConnection {
                 },
                 errorListener
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -161,6 +164,8 @@ public class OpenMrsXformsConnection {
                     }
                 }, errorListener
         );
+        // Set a permissive timeout.
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 

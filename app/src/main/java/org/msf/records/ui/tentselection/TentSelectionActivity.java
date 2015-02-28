@@ -1,23 +1,26 @@
 package org.msf.records.ui.tentselection;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.location.LocationManager;
-import org.msf.records.location.LocationTree.LocationSubtree;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.LoadingState;
+import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
@@ -31,33 +34,65 @@ import de.greenrobot.event.EventBus;
  */
 public final class TentSelectionActivity extends PatientSearchActivity {
 
-	private TentSelectionController mController;
+    private TentSelectionController mController;
+    private AlertDialog mSyncFailedDialog;
 
-	@Inject LocationManager mLocationManager;
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject SyncManager mSyncManager;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
+
+        if (Constants.OFFLINE_SUPPORT) {
+            // Create account, if needed
+            GenericAccountService.registerSyncAccount(this);
+        }
+
         mController = new TentSelectionController(
-        		mLocationManager,
                 mAppModel,
                 mCrudEventBusProvider.get(),
         		new MyUi(),
-        		new EventBusWrapper(EventBus.getDefault()));
+                new EventBusWrapper(EventBus.getDefault()),
+                mSyncManager,
+                getSearchController());
+
+        mSyncFailedDialog = new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(getString(R.string.sync_failed_dialog_title))
+                .setMessage(R.string.sync_failed_dialog_message)
+                .setNegativeButton(
+                        R.string.sync_failed_back, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                .setNeutralButton(
+                        R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(
+                                        TentSelectionActivity.this,SettingsActivity.class));
+                            }
+                        })
+                .setPositiveButton(
+                        R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mController.onSyncRetry();
+                            }
+                        })
+                .setCancelable(false)
+                .create();
 
         setContentView(R.layout.activity_tent_selection);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.tent_selection_container, new TentSelectionFragment())
                     .commit();
-        }
-
-        if(Constants.OFFLINE_SUPPORT){
-            // Create account, if needed
-            GenericAccountService.registerSyncAccount(this);
         }
     }
 
@@ -66,15 +101,15 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     }
 
     @Override
-    protected void onStartImpl() {
-    	super.onStartImpl();
-    	mController.init();
+    public void onResumeImpl() {
+        super.onResumeImpl();
+        mController.init();
     }
 
     @Override
-    protected void onStopImpl() {
-    	mController.suspend();
-    	super.onStopImpl();
+    public void onPauseImpl() {
+        super.onPauseImpl();
+        mController.suspend();
     }
 
     @Override
@@ -115,35 +150,52 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     }
 
     private final class MyUi implements TentSelectionController.Ui {
-    	@Override
-		public void switchToTentSelectionScreen() {
+        @Override
+        public void switchToTentSelectionScreen() {
     		getSupportFragmentManager().popBackStack();
     	}
 
-    	@Override
-		public void switchToPatientListScreen() {
-        	getSupportFragmentManager().beginTransaction()
-    				.replace(R.id.tent_selection_container, new PatientListFragment())
-    				.addToBackStack(null)
-    				.commit();
-    	}
+        @Override
+        public void switchToPatientListScreen() {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.tent_selection_container, new PatientListFragment())
+                    .addToBackStack(null)
+                    .commit();
+        }
 
-    	@Override
-    	public void showErrorMessage(int stringResourceId) {
-    		Toast.makeText(TentSelectionActivity.this, stringResourceId, Toast.LENGTH_SHORT).show();
-    	}
+        @Override
+        public void showSyncFailedDialog(boolean show) {
+            if (mSyncFailedDialog == null) {
+                return;
+            }
 
-    	@Override
-    	public void launchActivityForLocation(LocationSubtree subtree) {
-			Intent roundIntent =
-					new Intent(TentSelectionActivity.this, RoundActivity.class);
-			roundIntent.putExtra(RoundActivity.LOCATION_NAME_KEY,
-					subtree.toString());
-			roundIntent.putExtra(RoundActivity.LOCATION_UUID_KEY,
-					subtree.getLocation().uuid);
-			roundIntent.putExtra(RoundActivity.LOCATION_PATIENT_COUNT_KEY,
-					subtree.getPatientCount());
-			startActivity(roundIntent);
-		}
+            if (show != mSyncFailedDialog.isShowing()) {
+                if (show) {
+                    mSyncFailedDialog.show();
+                } else {
+                    mSyncFailedDialog.hide();
+                }
+            }
+        }
+
+        @Override
+        public void setLoadingState(LoadingState loadingState) {
+            TentSelectionActivity.this.setLoadingState(loadingState);
+        }
+
+        @Override
+        public void finish() {
+            TentSelectionActivity.this.finish();
+        }
+
+        @Override
+        public void launchActivityForLocation(AppLocation location) {
+            Intent roundIntent =
+                    new Intent(TentSelectionActivity.this, RoundActivity.class);
+            roundIntent.putExtra(RoundActivity.LOCATION_NAME_KEY, location.name);
+            roundIntent.putExtra(RoundActivity.LOCATION_UUID_KEY, location.uuid);
+            roundIntent.putExtra(RoundActivity.LOCATION_PATIENT_COUNT_KEY, location.patientCount);
+            startActivity(roundIntent);
+        }
     }
 }

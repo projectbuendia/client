@@ -3,22 +3,31 @@ package org.msf.records.ui.patientlist;
 import android.util.Log;
 
 import org.msf.records.App;
-import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.actions.SyncCancelRequestedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
-import org.msf.records.events.location.LocationsLoadFailedEvent;
-import org.msf.records.filter.FilterGroup;
-import org.msf.records.filter.LocationUuidFilter;
-import org.msf.records.filter.PatientFilters;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.events.sync.SyncSucceededEvent;
+import org.msf.records.filter.db.patient.PatientDbFilters;
+import org.msf.records.filter.db.SimpleSelectionFilterGroup;
+import org.msf.records.filter.db.patient.LocationUuidFilter;
+import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.filter.matchers.FilteredCursorWrapper;
+import org.msf.records.filter.matchers.patient.IdFilter;
+import org.msf.records.filter.matchers.MatchingFilter;
+import org.msf.records.filter.matchers.MatchingFilterGroup;
+import org.msf.records.filter.matchers.patient.NameFilter;
+import org.msf.records.sync.SyncManager;
+import org.msf.records.utils.EventBusRegistrationInterface;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.msf.records.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
 /**
  * Controller for {@link PatientSearchActivity}.
@@ -41,6 +50,8 @@ public class PatientSearchController {
 
     public interface FragmentUi {
 
+        void setLocationTree(AppLocationTree locationTree);
+
         void setPatients(TypedCursor<AppPatient> patients);
 
         void showSpinner(boolean show);
@@ -48,8 +59,11 @@ public class PatientSearchController {
 
     private final Ui mUi;
     private final CrudEventBus mCrudEventBus;
+    private final EventBusRegistrationInterface mGlobalEventBus;
     private final AppModel mModel;
+    private final SyncManager mSyncManager;
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
+    private final String mLocale;
 
     private AppLocationTree mLocationTree;
     private String mRootLocationUuid;
@@ -59,35 +73,89 @@ public class PatientSearchController {
     private FilterSubscriber mFilterSubscriber;
     private final Object mFilterSubscriberLock = new Object();
 
+    private final LocationTreeUpdatedSubscriber mLocationTreeUpdatedSubscriber;
+
     private boolean mWaitingOnLocationTree = false;
+
+    private final MatchingFilter<AppPatient> mSearchFilter =
+            new MatchingFilterGroup<AppPatient>(OR, new IdFilter(), new NameFilter());
+    private TypedCursor<AppPatient> mPatientsCursor;
+    private final SyncSubscriber mSyncSubscriber;
 
     /**
      * Instantiates a {@link PatientSearchController} with the given UI implementation, event bus,
-     * app model, and locale.
+     * app model, and locale. The global event bus must also be passed in in order to reload results
+     * after a sync.
      *
      * @param ui a {@link Ui} that will respond to UI events
      * @param crudEventBus a {@link CrudEventBus} that will listen for patient and location fetch
      *                     events
+     * @param globalEventBus a {@link EventBusRegistrationInterface} that will listen for sync
+     *                       events
      * @param model an {@link AppModel} for fetching patient and location data
+     * @param syncManager a {@link SyncManager} for listening for canceling syncs
      * @param locale a language code/locale for presenting localized information (e.g. en)
      */
     public PatientSearchController(
-            Ui ui, CrudEventBus crudEventBus, AppModel model, String locale) {
+            Ui ui,
+            CrudEventBus crudEventBus,
+            EventBusRegistrationInterface globalEventBus,
+            AppModel model,
+            SyncManager syncManager,
+            String locale) {
         mUi = ui;
         mCrudEventBus = crudEventBus;
+        mGlobalEventBus = globalEventBus;
         mModel = model;
+        mSyncManager = syncManager;
+        mLocale = locale;
 
-        mCrudEventBus.register(new LocationTreeUpdatedSubscriber());
-        mModel.fetchLocationTree(mCrudEventBus, locale);
+        mFilter = PatientDbFilters.getDefaultFilter();
 
-        mFilter = PatientFilters.getDefaultFilter();
+        mSyncSubscriber = new SyncSubscriber();
+        mLocationTreeUpdatedSubscriber = new LocationTreeUpdatedSubscriber();
+    }
+
+    public void init() {
+        mGlobalEventBus.register(mSyncSubscriber);
+        mCrudEventBus.register(mLocationTreeUpdatedSubscriber);
+        mModel.fetchLocationTree(mCrudEventBus, mLocale);
+    }
+
+    public void suspend() {
+        mGlobalEventBus.unregister(mSyncSubscriber);
+        mCrudEventBus.unregister(mLocationTreeUpdatedSubscriber);
+        // Close any outstanding cursors. New results will be fetched when requested.
+        if (mPatientsCursor != null) {
+            mPatientsCursor.close();
+        }
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
+    }
+
+    private class SyncSubscriber {
+        public void onEventMainThread(SyncCancelRequestedEvent event) {
+            mSyncManager.cancelOnDemandSync();
+        }
+
+        public void onEventMainThread(SyncSucceededEvent event) {
+            // Load search results, but don't show the spinner, as the user may be in the middle
+            // of performing an operation.
+            loadSearchResults(false);
+        }
     }
 
     private class LocationTreeUpdatedSubscriber {
         public synchronized void onEventMainThread(AppLocationTreeFetchedEvent event) {
             synchronized (mFilterSubscriberLock) {
-                mCrudEventBus.unregister(this);
                 mFilterSubscriber = null;
+            }
+            for (FragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.setLocationTree(event.tree);
+            }
+            if (mLocationTree != null) {
+                mLocationTree.close();
             }
             mLocationTree = event.tree;
 
@@ -96,13 +164,6 @@ public class PatientSearchController {
             if (mWaitingOnLocationTree) {
                 mWaitingOnLocationTree = false;
                 loadSearchResults();
-            }
-        }
-
-        public synchronized void onEventMainThread(LocationsLoadFailedEvent event) {
-            mUi.showErrorMessage(R.string.location_load_error);
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showSpinner(false);
             }
         }
     }
@@ -116,6 +177,23 @@ public class PatientSearchController {
             Log.d(TAG, "Attached new fragment UI: " + fragmentUi);
         }
         mFragmentUis.add(fragmentUi);
+
+        // Initialize fragment with locations and patients, as necessary.
+        if (mLocationTree != null) {
+            fragmentUi.setLocationTree(mLocationTree);
+        }
+
+        if (mPatientsCursor != null) {
+            FilteredCursorWrapper<AppPatient> filteredCursorWrapper =
+                    new FilteredCursorWrapper<AppPatient>(
+                            mPatientsCursor, mSearchFilter, mFilterQueryTerm);
+            fragmentUi.setPatients(filteredCursorWrapper);
+        }
+
+        // If all data is loaded, no need for a spinner.
+        if (mLocationTree != null && mPatientsCursor != null) {
+            fragmentUi.showSpinner(false);
+        }
     }
 
     /**
@@ -145,8 +223,14 @@ public class PatientSearchController {
      */
     public void onQuerySubmitted(String constraint) {
         App.getServer().cancelPendingRequests();
+
         mFilterQueryTerm = constraint;
-        loadSearchResults();
+
+        if (mPatientsCursor == null) {
+            loadSearchResults();
+            return;
+        }
+        updatePatients();
     }
 
     /**
@@ -168,6 +252,14 @@ public class PatientSearchController {
         mFilter = filter;
     }
 
+    /**
+     * Manually sets the locations for this controller, which is useful if locations have been
+     * updated from an outside context.
+     */
+    public void setLocations(AppLocationTree appLocationTree) {
+        mLocationTree = appLocationTree;
+    }
+
     private SimpleSelectionFilter getLocationSubfilter() {
         SimpleSelectionFilter filter;
 
@@ -178,9 +270,10 @@ public class PatientSearchController {
             // Tack on a location filter to the filter to show only known locations in the subtree
             // of the current root.
             if (mRootLocationUuid == null) {
-                filter = new FilterGroup(new LocationUuidFilter(mLocationTree), mFilter);
+                filter = new SimpleSelectionFilterGroup(
+                        new LocationUuidFilter(mLocationTree), mFilter);
             } else {
-                filter = new FilterGroup(new LocationUuidFilter(
+                filter = new SimpleSelectionFilterGroup(new LocationUuidFilter(
                         mLocationTree, mLocationTree.findByUuid(mRootLocationUuid)), mFilter);
             }
         }
@@ -188,11 +281,16 @@ public class PatientSearchController {
         return filter;
     }
 
+    public void loadSearchResults() {
+        loadSearchResults(true); // By default, show spinner.
+    }
+
     /**
      * Asynchronously loads or reloads the search results based on previously specified filter and
      * root location. If no filter is specified, all results are shown be default.
+     * @param showSpinner whether or not to show a spinner until operation is complete
      */
-    public void loadSearchResults() {
+    public void loadSearchResults(boolean showSpinner) {
         // If a location filter is applied but no location tree is present, wait.
         if (mRootLocationUuid != null && mLocationTree == null) {
             mWaitingOnLocationTree = true;
@@ -207,23 +305,38 @@ public class PatientSearchController {
         }
         mFilterSubscriber = new FilterSubscriber();
 
-        // TODO(akalachman): Sub-filter on query term rather than re-filtering with each keypress.
-        for (FragmentUi fragmentUi : mFragmentUis) {
-            fragmentUi.showSpinner(true);
+        if (showSpinner) {
+            for (FragmentUi fragmentUi : mFragmentUis) {
+                fragmentUi.showSpinner(true);
+            }
         }
         mCrudEventBus.register(mFilterSubscriber);
         mModel.fetchPatients(mCrudEventBus, getLocationSubfilter(), mFilterQueryTerm);
     }
 
+    private void updatePatients() {
+        FilteredCursorWrapper<AppPatient> filteredCursorWrapper =
+                new FilteredCursorWrapper<AppPatient>(
+                        mPatientsCursor, mSearchFilter, mFilterQueryTerm);
+        mUi.setPatients(filteredCursorWrapper);
+        for (FragmentUi fragmentUi : mFragmentUis) {
+            fragmentUi.setPatients(filteredCursorWrapper);
+            fragmentUi.showSpinner(false);
+        }
+    }
+
     private final class FilterSubscriber {
         public void onEventMainThread(TypedCursorFetchedEvent<AppPatient> event) {
             mCrudEventBus.unregister(this);
-            mUi.setPatients(event.cursor);
-            for (FragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.setPatients(event.cursor);
-                fragmentUi.showSpinner(false);
+
+            // If a patient cursor was already open, close it.
+            if (mPatientsCursor != null) {
+                mPatientsCursor.close();
             }
-            event.cursor.close();
+
+            // Replace the patient cursor with the newly-fetched results.
+            mPatientsCursor = event.cursor;
+            updatePatients();
         }
     }
 }

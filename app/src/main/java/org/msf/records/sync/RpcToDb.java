@@ -117,8 +117,8 @@ public class RpcToDb {
         for (User user : response) {
             operations.add(ContentProviderOperation
                     .newInsert(Contracts.Users.CONTENT_URI)
-                    .withValue(Contracts.Users.UUID, user.getId())
-                    .withValue(Contracts.Users.FULL_NAME, user.getFullName())
+                    .withValue(Contracts.Users.UUID, user.id)
+                    .withValue(Contracts.Users.FULL_NAME, user.fullName)
                     .build());
             syncResult.stats.numInserts++;
         }
@@ -134,12 +134,7 @@ public class RpcToDb {
 
         LOG.d("Before network call");
         RequestFuture<List<Location>> future = RequestFuture.newFuture();
-        App.getServer().listLocations(future, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                LOG.d(error.toString());
-            }
-        });
+        App.getServer().listLocations(future, future);
 
         // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
         // background thread

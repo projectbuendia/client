@@ -6,13 +6,16 @@
     <TableLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:padding="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:stretchColumns="1">
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -23,14 +26,14 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapCharacters|textNoSuggestions" />
+                android:inputType="number" />
 
         </TableRow>
 
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -48,7 +51,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -66,7 +69,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -85,12 +88,12 @@
                     android:minEms="3"
                     android:maxLength="3"
                     android:singleLine="true"
-                    android:inputType="numberSigned" />
+                    android:inputType="number" />
 
                 <RadioGroup
                     android:id="@+id/patient_creation_radiogroup_age_units"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="horizontal">
 
                     <RadioButton
@@ -115,7 +118,7 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -147,7 +150,78 @@
         <TableRow>
 
             <TextView
-                android:layout_height="104dp"
+                android:layout_height="85dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/admission_date_label"/>
+
+            <EditText
+                android:id="@+id/patient_creation_admission_date"
+                android:focusable="false"
+                android:inputType="date"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text=""/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="85dp"
+                android:layout_width="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:gravity="center_vertical"
+                android:text="@string/symptoms_onset_date_label"/>
+
+            <LinearLayout
+                android:id="@+id/patient_creation_symptom_onset_date_outer_value_column"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="24dp"
+                android:layout_gravity="center_vertical">
+                <EditText
+                    android:id="@+id/patient_creation_symptoms_onset_date"
+                    android:focusable="false"
+                    android:inputType="date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:gravity="center_vertical"
+                    android:text=""
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical" />
+
+                <FrameLayout
+                    android:id="@+id/patient_creation_button_clear_symptoms_onset_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:foreground="@drawable/fg_big_button">
+
+                    <TextView
+                        android:id="@+id/patient_creation_text_clear_symptoms_onset_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:padding="4dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:layout_margin="5dp"
+                        android:gravity="center"
+                        android:background="#CCCCCC"
+                        android:text="@string/patient_creation_clear_symptoms_onset_date"/>
+
+                </FrameLayout>
+            </LinearLayout>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
@@ -172,7 +246,7 @@
                     android:id="@+id/patient_creation_button_change_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:foreground="@drawable/fg_button_assign_location">
+                    android:foreground="@drawable/fg_big_button">
 
                     <TextView
                         android:id="@+id/patient_creation_text_change_location"

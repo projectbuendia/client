@@ -5,34 +5,32 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 
 import org.msf.records.data.app.AppModelModule;
+import org.msf.records.diagnostics.DiagnosticsModule;
 import org.msf.records.events.EventsModule;
-import org.msf.records.location.LocationManager;
-import org.msf.records.mvcmodels.PatientChartModel;
-import org.msf.records.mvcmodels.PatientModel;
 import org.msf.records.net.NetModule;
 import org.msf.records.prefs.PrefsModule;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.PatientListTypedCursorAdapter;
-import org.msf.records.ui.SingleLocationPatientListAdapter;
+import org.msf.records.ui.UpdateNotificationController;
 import org.msf.records.ui.chart.PatientChartActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListActivity;
+import org.msf.records.ui.patientlist.PatientListController;
 import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.ui.patientlist.RoundFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
+import org.msf.records.ui.userlogin.UserLoginFragment;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
 import org.msf.records.utils.UtilsModule;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
-import de.greenrobot.event.EventBus;
-
-import javax.inject.Singleton;
 
 /**
  * A Dagger module that provides the top-level bindings for the app.
@@ -40,6 +38,7 @@ import javax.inject.Singleton;
 @Module(
         includes = {
                 AppModelModule.class,
+                DiagnosticsModule.class,
                 EventsModule.class,
                 NetModule.class,
                 PrefsModule.class,
@@ -56,11 +55,14 @@ import javax.inject.Singleton;
                 BaseActivity.class,
                 PatientChartActivity.class,
                 PatientListActivity.class,
+                PatientListController.class,
                 PatientSearchActivity.class,
                 RoundActivity.class,
                 TentSelectionActivity.class,
                 PatientListFragment.class,
-                RoundFragment.class
+                RoundFragment.class,
+                UpdateNotificationController.class,
+                UserLoginFragment.class
         })
 public final class AppModule {
 
@@ -92,32 +94,6 @@ public final class AppModule {
     @Singleton
     SyncManager provideSyncManager() {
         return new SyncManager();
-    }
-
-    @Provides
-    @Singleton
-    PatientChartModel providePatientChartModel(SyncManager syncManager) {
-        PatientChartModel patientChartModel =
-                new PatientChartModel(EventBus.getDefault(), syncManager);
-        patientChartModel.init();
-        return patientChartModel;
-    }
-
-    @Provides
-    @Singleton
-    PatientModel providePatientModel() {
-        return new PatientModel();
-    }
-
-    @Provides
-    @Singleton
-    LocationManager provideLocationManager(SyncManager syncManager) {
-        LocationManager locationManager = new LocationManager(
-                EventBus.getDefault(),
-                App.getInstance(),
-                syncManager);
-        locationManager.init();
-        return locationManager;
     }
 
     @Provides

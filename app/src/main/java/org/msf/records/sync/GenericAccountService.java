@@ -25,7 +25,7 @@ public class GenericAccountService extends Service {
 
     private static final String ACCOUNT_TYPE = BuildConfig.ACCOUNT_TYPE;
     public static final String ACCOUNT_NAME = "sync";
-    private static final long SYNC_FREQUENCY = 10 * 60;  // 10 minutes (in seconds)
+    private static final long SYNC_FREQUENCY = 5 * 60;  // 5 minutes (in seconds)
     private static final String CONTENT_AUTHORITY = Contracts.CONTENT_AUTHORITY;
     private static final String PREF_SETUP_COMPLETE = "setup_complete";
     private Authenticator mAuthenticator;
@@ -58,11 +58,12 @@ public class GenericAccountService extends Service {
      * but the user is not actively waiting for that data, you should omit this flag; this will give
      * the OS additional freedom in scheduling your sync request.
      */
-    static void triggerRefresh(SharedPreferences prefs) {
+    public static void triggerRefresh(SharedPreferences prefs) {
         Bundle b = new Bundle();
         // Disable sync backoff and ignore sync preferences. In other words...perform sync NOW!
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b.putBoolean(SyncAdapter.FULL_SYNC, true);
         b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
         b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
         b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
@@ -75,10 +76,29 @@ public class GenericAccountService extends Service {
         if (prefs.getBoolean("incremental_observation_update", true)) {
             b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
         }
+        LOG.i("Requesting sync");
         ContentResolver.requestSync(
                 getAccount(),      // Sync account
                 Contracts.CONTENT_AUTHORITY, // Content authority
                 b);                                      // Extras
+    }
+
+    /** Starts an incremental update of observations.  No-op if incremental update is disabled. */
+    static void triggerIncrementalObservationSync(SharedPreferences prefs) {
+        // TODO: Remove this setting and merge this function with forceIncrementalObservationSync.
+        if (prefs.getBoolean("incremental_observation_update", true)) {
+            forceIncrementalObservationSync();
+        }
+    }
+
+    /** Starts (and forces) an incremental update of observations. */
+    public static void forceIncrementalObservationSync() {
+        Bundle b = new Bundle();
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+        ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 
     /**
@@ -101,10 +121,8 @@ public class GenericAccountService extends Service {
             ContentResolver.setSyncAutomatically(account, CONTENT_AUTHORITY, true);
             // Recommend a schedule for automatic synchronization. The system may modify this based
             // on other scheduled syncs and network utilization.
-            Bundle extras = new Bundle();
-            extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
             ContentResolver.addPeriodicSync(
-                    account, CONTENT_AUTHORITY, extras,SYNC_FREQUENCY);
+                    account, CONTENT_AUTHORITY, getExtrasForPeriodicSync(), SYNC_FREQUENCY);
             newAccount = true;
         }
 
@@ -116,6 +134,28 @@ public class GenericAccountService extends Service {
             triggerRefresh(prefs);
             prefs.edit().putBoolean(PREF_SETUP_COMPLETE, true).commit();
         }
+    }
+
+    private static Bundle getExtrasForPeriodicSync() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
+        extras.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
+        extras.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
+        extras.putBoolean(SyncAdapter.SYNC_USERS, true);
+
+        return extras;
+    }
+
+    /**
+     * Removes the periodic sync that is started when this app registers its account.
+     */
+    public static void removePeriodicSync() {
+        ContentResolver.removePeriodicSync(
+                GenericAccountService.getAccount(),
+                Contracts.CONTENT_AUTHORITY,
+                getExtrasForPeriodicSync());
     }
 
     @Override

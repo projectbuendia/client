@@ -1,17 +1,23 @@
 package org.msf.records.ui.patientcreation;
 
-import android.util.Log;
-
+import com.android.volley.VolleyError;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.CrudEventBus;
+import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.model.Zone;
+import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 
 /**
@@ -41,15 +47,22 @@ final class PatientCreationController {
         static final int FIELD_AGE_UNITS = 5;
         static final int FIELD_SEX = 6;
         static final int FIELD_LOCATION = 7;
+        static final int FIELD_ADMISSION_DATE = 8;
+        static final int FIELD_SYMPTOMS_ONSET_DATE = 9;
+
+        void setLocationTree(AppLocationTree locationTree);
 
         /** Adds a validation error message for a specific field. */
-        void showValidationError(int field, String message);
+        void showValidationError(int field, int messageResource, String... messageArgs);
 
         /** Clears the validation error messages from all fields. */
         void clearValidationErrors();
 
         /** Invoked when the server RPC to create a patient fails. */
-        void showErrorMessage(String error);
+        void showErrorMessage(int errorResource);
+
+        /** Invoked when the server RPC to create a patient fails. */
+        void showErrorMessage(String errorString);
 
         /** Invoked when the server RPC to create a patient succeeds. */
         void quitActivity();
@@ -60,6 +73,8 @@ final class PatientCreationController {
     private final AppModel mModel;
 
     private final EventSubscriber mEventBusSubscriber;
+
+    private AppLocationTree mLocationTree;
 
     public PatientCreationController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
         mUi = ui;
@@ -73,52 +88,75 @@ final class PatientCreationController {
     /** Initializes the controller, setting async operations going to collect data required by the UI. */
     public void init() {
         mCrudEventBus.register(mEventBusSubscriber);
+        mModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
     }
 
     /** Releases any resources used by the controller. */
     public void suspend() {
         mCrudEventBus.unregister(mEventBusSubscriber);
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
     }
 
     public boolean createPatient(
             String id, String givenName, String familyName, String age, int ageUnits, int sex,
-            String locationUuid) {
+            LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
         if (id == null || id.equals("")) {
-            mUi.showValidationError(Ui.FIELD_ID, "Please enter the patient ID.");
+            mUi.showValidationError(Ui.FIELD_ID, R.string.patient_validation_missing_id);
             hasValidationErrors = true;
         }
         if (givenName == null || givenName.equals("")) {
-            mUi.showValidationError(Ui.FIELD_GIVEN_NAME, "Please enter the given name.");
+            mUi.showValidationError(
+                    Ui.FIELD_GIVEN_NAME, R.string.patient_validation_missing_given_name);
             hasValidationErrors = true;
         }
         if (familyName == null || familyName.equals("")) {
-            mUi.showValidationError(Ui.FIELD_FAMILY_NAME, "Please enter the family name.");
+            mUi.showValidationError(
+                    Ui.FIELD_FAMILY_NAME, R.string.patient_validation_missing_family_name);
             hasValidationErrors = true;
         }
         if (age == null || age.equals("")) {
-            mUi.showValidationError(Ui.FIELD_AGE, "Please enter the age.");
+            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_missing_age);
+            hasValidationErrors = true;
+        }
+        if (admissionDate == null) {
+            mUi.showValidationError(
+                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
             hasValidationErrors = true;
         }
         int ageInt = 0;
         try {
             ageInt = Integer.parseInt(age);
         } catch (NumberFormatException e) {
-            mUi.showValidationError(Ui.FIELD_AGE, "Age should be a whole number.");
+            mUi.showValidationError(
+                    Ui.FIELD_AGE, R.string.patient_validation_whole_number_age_required);
             hasValidationErrors = true;
         }
         if (ageInt < 0) {
-            mUi.showValidationError(Ui.FIELD_AGE, "Age should not be negative.");
+            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_negative_age);
             hasValidationErrors = true;
         }
         if (ageUnits != AGE_YEARS && ageUnits != AGE_MONTHS) {
-            mUi.showValidationError(Ui.FIELD_AGE_UNITS, "Please select Years or Months.");
+            mUi.showValidationError(
+                    Ui.FIELD_AGE_UNITS, R.string.patient_validation_select_years_or_months);
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
-            mUi.showValidationError(Ui.FIELD_SEX, "Please select Male or Female.");
+            mUi.showValidationError(Ui.FIELD_SEX, R.string.patient_validation_select_gender);
+            hasValidationErrors = true;
+        }
+        if (admissionDate != null && admissionDate.isAfter(LocalDate.now())) {
+            mUi.showValidationError(
+                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_future_admission_date);
+            hasValidationErrors = true;
+        }
+        if (symptomsOnsetDate != null && symptomsOnsetDate.isAfter(LocalDate.now())) {
+            mUi.showValidationError(
+                    Ui.FIELD_SYMPTOMS_ONSET_DATE, R.string.patient_validation_future_onset_date);
             hasValidationErrors = true;
         }
 
@@ -132,9 +170,10 @@ final class PatientCreationController {
         patientDelta.familyName = Optional.of(familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid =
-                locationUuid == null ? Optional.<String>absent() : Optional.of(locationUuid);
-        patientDelta.admissionDate = Optional.of(DateTime.now());
+        patientDelta.assignedLocationUuid = (locationUuid == null)
+                ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
+        patientDelta.admissionDate = Optional.of(admissionDate);
+        patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
 
@@ -156,13 +195,63 @@ final class PatientCreationController {
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class EventSubscriber {
 
+        public void onEventMainThread(AppLocationTreeFetchedEvent event) {
+            mUi.setLocationTree(event.tree);
+            if (mLocationTree != null) {
+                mLocationTree.close();
+            }
+            mLocationTree = event.tree;
+        }
+
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
             mUi.quitActivity();
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {
-            mUi.showErrorMessage(event.exception == null ? "unknown" : event.exception.getMessage());
-            LOG.e("Patient add failed", event.exception);
+            switch (event.reason) {
+                case PatientAddFailedEvent.REASON_CLIENT:
+                    mUi.showErrorMessage(R.string.patient_creation_client_error);
+                    break;
+                case PatientAddFailedEvent.REASON_NETWORK:
+                    // For network errors, include the VolleyError message, if available.
+                    if (event.exception != null
+                            && event.exception.getCause() != null
+                            && event.exception.getCause() instanceof VolleyError
+                            && event.exception.getCause().getMessage() != null) {
+                        mUi.showErrorMessage(App.getInstance().getString(
+                                R.string.patient_creation_network_error_with_reason,
+                                event.exception.getCause().getMessage()));
+                    } else {
+                        mUi.showErrorMessage(R.string.patient_creation_network_error);
+                    }
+                    break;
+                case PatientAddFailedEvent.REASON_INVALID_ID:
+                    mUi.showErrorMessage(R.string.patient_creation_invalid_id_error);
+                    break;
+                case PatientAddFailedEvent.REASON_DUPLICATE_ID:
+                    mUi.showErrorMessage(R.string.patient_creation_duplicate_id_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INVALID_FAMILY_NAME:
+                    mUi.showErrorMessage(R.string.patient_creation_invalid_family_name_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INVALID_GIVEN_NAME:
+                    mUi.showErrorMessage(R.string.patient_creation_invalid_given_name_error);
+                    break;
+                case PatientAddFailedEvent.REASON_SERVER:
+                    mUi.showErrorMessage(R.string.patient_creation_server_error);
+                    break;
+                case PatientAddFailedEvent.REASON_INTERRUPTED:
+                    mUi.showErrorMessage(R.string.patient_creation_interrupted_error);
+                    break;
+                case PatientAddFailedEvent.REASON_UNKNOWN:
+                default:
+                    if (event.exception == null || event.exception.getMessage() == null) {
+                        mUi.showErrorMessage(R.string.patient_creation_unknown_error);
+                    } else {
+                        mUi.showErrorMessage(event.exception.getMessage());
+                    }
+            }
+            LOG.e(event.exception, "Patient add failed");
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {

@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import org.msf.records.net.model.Concept;
+import org.msf.records.model.Concepts;
 import org.msf.records.sync.providers.Contracts;
 
 import com.google.common.collect.ImmutableSet;
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -27,23 +28,14 @@ public class LocalizedChartHelper {
     public static final String ENGLISH_LOCALE = "en";
 
     /**
-     * A uuid representing when a clinician fills in "Unknown".
-     */
-    public static final String UNKNOWN_VALUE = "1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-    /**
      * A set of uuids for concepts that represent an answer indicating everything is normal, and
      * there is no worrying symptom.
      */
     public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
-        "1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // NO
-        "159597AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // Solid food
-        "95d50bc3-6281-4661-94ab-1a26455c40a2", // Normal pulse
-        "160282AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // Awake
-        "1115AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", // NORMAL
-        "db2ac5ad-cc64-4184-b4be-1324730e1882", // Can talk
-        "c2a547f7-6329-4273-80c2-eae804897efd", // Can walk
-        Concept.NONE_UUID); // None
+            Concepts.NO_UUID, // NO
+            Concepts.SOLID_FOOD_UUID, // Solid food
+            Concepts.NORMAL_UUID, // NORMAL
+            Concepts.NONE_UUID); // None
 
     /**
      * A simple bean class representing an observation. All names and values have been localized.
@@ -101,6 +93,20 @@ public class LocalizedChartHelper {
                     + ",conceptUuid=" + conceptUuid
                     + ",conceptName=" + conceptName
                     + ",value=" + localizedValue;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof LocalizedObservation)) {
+                return false;
+            }
+            LocalizedObservation o = (LocalizedObservation) other;
+            return encounterTimeMillis == o.encounterTimeMillis
+                    && Objects.equals(groupName, o.groupName)
+                    && Objects.equals(conceptUuid, o.conceptUuid)
+                    && Objects.equals(conceptName, o.conceptName)
+                    && Objects.equals(value, o.value)
+                    && Objects.equals(localizedValue, o.localizedValue);
         }
     }
 

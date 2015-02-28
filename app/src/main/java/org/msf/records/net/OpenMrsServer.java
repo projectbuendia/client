@@ -1,7 +1,6 @@
 package org.msf.records.net;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -16,10 +15,10 @@ import com.google.gson.JsonParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.data.app.AppEncounter;
+import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
-import org.msf.records.location.LocationTree;
-import org.msf.records.location.LocationTree.LocationSubtree;
-import org.msf.records.model.Zone;
+import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
 import org.msf.records.net.model.Patient;
@@ -101,6 +100,8 @@ public class OpenMrsServer implements Server {
             throw new IllegalArgumentException("Unable to serialize the patient delta to JSON.");
         }
 
+        LOG.v("Adding patient from JSON: %s", json.toString());
+
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails,
                 "/patient",
@@ -118,6 +119,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -150,6 +152,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -160,10 +163,10 @@ public class OpenMrsServer implements Server {
             final Response.ErrorListener errorListener) {
         JSONObject requestBody = new JSONObject();
         try {
-            requestBody.put("user_name", user.getUsername());
-            requestBody.put("given_name", user.getGivenName());
-            requestBody.put("family_name", user.getFamilyName());
-            requestBody.put("password", user.getPassword());
+            requestBody.put("user_name", user.username);
+            requestBody.put("given_name", user.givenName);
+            requestBody.put("family_name", user.familyName);
+            requestBody.put("password", user.password);
 
         } catch (JSONException e) {
             // This is almost never recoverable, and should not happen in correctly functioning code
@@ -189,7 +192,38 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
-        request.setRetryPolicy(new DefaultRetryPolicy(100000, 1, 1f));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    @Override
+    public void addEncounter(AppPatient patient,
+                             AppEncounter encounter,
+                             final Response.Listener<Encounter> encounterListener,
+                             final Response.ErrorListener errorListener) {
+        JSONObject json = new JSONObject();
+        if (!encounter.toJson(json)) {
+            throw new IllegalArgumentException("Unable to serialize the encounter to JSON.");
+        }
+
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/patientencounters",
+                json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            encounterListener.onResponse(encounterFromJson(response));
+                        } catch (JSONException e) {
+                            LOG.e(e, "Failed to parse response");
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -243,33 +277,32 @@ public class OpenMrsServer implements Server {
                                 patients.add(patientFromJson(results.getJSONObject(i)));
                             }
                         } catch (JSONException e) {
-                            LOG.e("Failed to convert JSON response");
+                            LOG.e(e, "Failed to convert JSON response");
                         }
                         patientListener.onResponse(patients);
                     }
                 },
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     private Patient patientFromJson(JSONObject object) throws JSONException {
         Patient patient = mGson.fromJson(object.toString(), Patient.class);
 
-        // TODO(rjlothian): This shouldn't be done here.
-        if (patient.assigned_location == null && LocationTree.singletonInstance != null) {
-            LocationSubtree subtree =
-                    LocationTree.singletonInstance.getLocationByUuid(Zone.TRIAGE_ZONE_UUID);
-            if (subtree != null) {
-                patient.assigned_location = subtree.getLocation();
-            }
-        }
-
         if (!"M".equals(patient.gender) && !"F".equals(patient.gender)) {
             LOG.e("Invalid gender from server: " + patient.gender);
             patient.gender = "F";
         }
         return patient;
+    }
+
+    private Encounter encounterFromJson(JSONObject object) throws JSONException {
+        Encounter encounter = mGson.fromJson(object.toString(), Encounter.class);
+
+        return encounter;
     }
 
     @Override
@@ -298,11 +331,12 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     private User userFromJson(JSONObject object) throws JSONException {
-        return User.create(object.getString("user_id"), object.getString("full_name"));
+        return new User(object.getString("user_id"), object.getString("full_name"));
     }
 
     @Override
@@ -339,6 +373,7 @@ public class OpenMrsServer implements Server {
                     }
                 },
                 errorListener);
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -375,6 +410,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -388,6 +424,7 @@ public class OpenMrsServer implements Server {
                 null,
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
@@ -418,6 +455,7 @@ public class OpenMrsServer implements Server {
                 },
                 wrapErrorListener(errorListener)
         );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 

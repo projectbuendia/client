@@ -33,12 +33,17 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
             + "SELECT\n"
             + "  locations.location_uuid as location_uuid,\n"
             + "  locations.parent_uuid as parent_uuid,\n"
-            + "  location_names.name as name\n"
+            + "  location_names.name as name,\n"
+            + "  COUNT(patients.location_uuid) as patient_count\n"
             + "FROM locations\n"
             + "  INNER JOIN location_names\n"
             + "    ON locations.location_uuid = location_names.location_uuid\n"
+            + "  LEFT JOIN patients\n"
+            + "    ON locations.location_uuid = patients.location_uuid\n"
             + "WHERE\n"
-            + "  location_names.locale = ?\n";
+            + "  location_names.locale = ?\n"
+            + "GROUP BY\n"
+            + "  locations.location_uuid";
 
     @Override
     public String getType() {

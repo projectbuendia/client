@@ -38,9 +38,9 @@ final class UserListAdapter extends ArrayAdapter<User> {
         }
 
         User user = getItem(position);
-        holder.initials.setBackgroundColor(mColorizer.getColorArgb(user.getId()));
+        holder.initials.setBackgroundColor(mColorizer.getColorArgb(user.id));
         holder.initials.setText(user.getInitials());
-        holder.fullName.setText(user.getFullName());
+        holder.fullName.setText(user.fullName);
 
         return view;
     }

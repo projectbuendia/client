@@ -9,11 +9,13 @@ import android.widget.ListView;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.net.Constants;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
+import org.msf.records.ui.BigToast;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
 import org.msf.records.utils.EventBusWrapper;
@@ -92,14 +94,17 @@ public class PatientListFragment extends ProgressFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mPatientAdapter = getAdapterInstance();
-
         mListView = (ExpandableListView) view.findViewById(R.id.fragment_patient_list);
         mListView.setOnChildClickListener(this);
-        mListView.setAdapter(mPatientAdapter);
+        // The list view adapter will be set once locations are available.
 
         mSwipeToRefresh = (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
-        mSwipeToRefresh.setOnRefreshListener(mListController.getOnRefreshListener());
+        mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mListController.onRefreshRequested();
+            }
+        });
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
@@ -108,8 +113,8 @@ public class PatientListFragment extends ProgressFragment implements
         }
     }
 
-    public PatientListTypedCursorAdapter getAdapterInstance() {
-        return new PatientListTypedCursorAdapter(getActivity());
+    public PatientListTypedCursorAdapter getAdapterInstance(AppLocationTree locationTree) {
+        return new PatientListTypedCursorAdapter(getActivity(), locationTree);
     }
 
     @Override
@@ -162,8 +167,16 @@ public class PatientListFragment extends ProgressFragment implements
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
         @Override
+        public void setLocationTree(AppLocationTree locationTree) {
+            mPatientAdapter = getAdapterInstance(locationTree);
+            mListView.setAdapter(mPatientAdapter);
+        }
+
+        @Override
         public void setPatients(TypedCursor<AppPatient> patients) {
-            mPatientAdapter.setPatients(patients);
+            if (mPatientAdapter != null) {
+                mPatientAdapter.setPatients(patients);
+            }
         }
 
         @Override
@@ -175,8 +188,18 @@ public class PatientListFragment extends ProgressFragment implements
     private class ListUi implements PatientListController.Ui {
 
         @Override
-        public void setRefreshing(boolean refreshing) {
+        public void stopRefreshAnimation() {
             mSwipeToRefresh.setRefreshing(false);
+        }
+
+        @Override
+        public void showRefreshError() {
+            BigToast.show(getActivity(), R.string.patient_list_fragment_sync_error);
+        }
+
+        @Override
+        public void showApiHealthProblem() {
+            BigToast.show(getActivity(), R.string.api_health_problem);
         }
     }
 }

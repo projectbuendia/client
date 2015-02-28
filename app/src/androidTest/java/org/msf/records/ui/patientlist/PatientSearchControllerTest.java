@@ -14,9 +14,11 @@ import org.msf.records.events.CrudEventBus;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEventFactory;
-import org.msf.records.filter.PatientFilters;
-import org.msf.records.filter.SimpleSelectionFilter;
+import org.msf.records.filter.db.patient.PatientDbFilters;
+import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Zone;
+import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.matchers.SimpleSelectionFilterMatchers;
 
@@ -29,6 +31,8 @@ import static org.mockito.Mockito.verify;
 public class PatientSearchControllerTest extends AndroidTestCase {
     private PatientSearchController mController;
     private FakeEventBus mFakeCrudEventBus;
+    private FakeEventBus mFakeGlobalEventBus;
+    @Mock private SyncManager mSyncManager;
     @Mock private AppModel mMockAppModel;
     @Mock private PatientSearchController.Ui mMockUi;
     @Mock private PatientSearchController.FragmentUi mFragmentMockUi;
@@ -41,9 +45,31 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         MockitoAnnotations.initMocks(this);
 
         mFakeCrudEventBus = new FakeEventBus();
+        mFakeGlobalEventBus = new FakeEventBus();
         mController = new PatientSearchController(
-                mMockUi, mFakeCrudEventBus, mMockAppModel, LOCALE);
+                mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel,
+                mSyncManager, LOCALE);
         mController.attachFragmentUi(mFragmentMockUi);
+        mController.init();
+    }
+
+    /** Tests that results are reloaded when a sync event occurs. */
+    public void testSyncSubscriber_reloadsResults() {
+        // GIVEN initialized PatientSearchController
+        // WHEN a sync event completes
+        mFakeGlobalEventBus.post(new SyncSucceededEvent());
+        // THEN results should be reloaded
+        verify(mMockAppModel).fetchPatients(
+                any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
+    }
+
+    /** Tests that results are reloaded when a sync event occurs. */
+    public void testSyncSubscriber_doesNotShowSpinnerDuringReload() {
+        // GIVEN initialized PatientSearchController
+        // WHEN a sync event completes
+        mFakeGlobalEventBus.post(new SyncSucceededEvent());
+        // THEN the spinner is not shown
+        verify(mFragmentMockUi, times(0)).showSpinner(true);
     }
 
     /** Tests that patients are passed to fragment UI's after retrieval. */
@@ -51,12 +77,11 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
         // WHEN patients are retrieved
-        TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        AppPatient.class, getFakeAppPatientCursor());
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to fragment UI's
-        verify(mFragmentMockUi).setPatients(event.cursor);
+        verify(mFragmentMockUi).setPatients(any(TypedCursor.class));
     }
 
     /** Tests that patients are passed to the activity UI after retrieval. */
@@ -64,25 +89,66 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController
         mController.loadSearchResults();
         // WHEN patients are retrieved
-        TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        AppPatient.class, getFakeAppPatientCursor());
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to activity UI
-        verify(mMockUi).setPatients(event.cursor);
+        verify(mMockUi).setPatients(any(TypedCursor.class));
     }
 
-    /** Tests that the patient cursor is closed after patients are passed to UI's. */
-    public void testFilterSubscriber_closesPatientCursor() {
-        // GIVEN initialized PatientSearchController
+    /** Tests that any old patient cursor is closed after results are reloaded. */
+    public void testFilterSubscriber_closesExistingPatientCursor() {
+        // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
-        // WHEN patients are retrieved
-        TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        AppPatient.class, getFakeAppPatientCursor());
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
-        // THEN patients cursor is closed
-        assertTrue(((FakeTypedCursor<AppPatient>)event.cursor).isClosed());
+        // WHEN new results are retrieved
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent reloadEvent = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(reloadEvent);
+        // THEN old patients cursor is closed
+        assertTrue(((FakeTypedCursor<AppPatient>) event.cursor).isClosed());
+    }
+
+    /** Tests that retrieving a new cursor results in the closure of any existing cursor. */
+    public void testSuspend_closesExistingPatientCursor() {
+        // GIVEN initialized PatientSearchController with existing results
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(event);
+        // WHEN controller is suspended
+        mController.suspend();
+        // THEN patient cursor is closed
+        assertTrue(((FakeTypedCursor<AppPatient>) event.cursor).isClosed());
+    }
+
+    /** Tests that suspend() does not attempt to close a null cursor. */
+    public void testSuspend_ignoresNullPatientCursor() {
+        // GIVEN initialized PatientSearchController with no search results
+        // WHEN controller is suspended
+        mController.suspend();
+        // THEN nothing happens (no runtime exception thrown)
+    }
+
+    /** Tests that search results are loaded properly after a cycle of init() and suspend(). */
+    public void testLoadSearchResults_functionalAfterInitSuspendCycle() {
+        // GIVEN initialized PatientSearchController with existing results
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(event);
+        // WHEN a suspend()/init() cycle occurs
+        mController.suspend();
+        mController.init();
+        // THEN search results can be loaded successfully
+        mController.loadSearchResults();
+        TypedCursorFetchedEvent reloadEvent = TypedCursorFetchedEventFactory.createEvent(
+                AppPatient.class, getFakeAppPatientCursor());
+        mFakeCrudEventBus.post(reloadEvent);
+        verify(mFragmentMockUi, times(2)).setPatients(any(TypedCursor.class));
     }
 
     /**
@@ -129,6 +195,15 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         verify(mFragmentMockUi).showSpinner(true);
     }
 
+    /** Tests that the spinner is shown when loadSearchResults() is called. */
+    public void testLoadSearchResults_hidesSpinnerWhenRequested() {
+        // GIVEN initialized PatientSearchController
+        // WHEN search results are requested with no spinner
+        mController.loadSearchResults(false);
+        // THEN spinner is shown
+        verify(mFragmentMockUi, times(0)).showSpinner(true);
+    }
+
     /** Tests that the spinner is hidden after results are retrieved. */
     public void testFilterSubscriber_hidesSpinner() {
         // GIVEN initialized PatientSearchController
@@ -149,7 +224,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.onQuerySubmitted("foo");
         // THEN results are requested with that search term
         verify(mMockAppModel).fetchPatients(
-                mFakeCrudEventBus, PatientFilters.getDefaultFilter(), "foo");
+                mFakeCrudEventBus, PatientDbFilters.getDefaultFilter(), "foo");
     }
 
     /** Tests that the chart activity is launched for a patient when that patient is selected. */

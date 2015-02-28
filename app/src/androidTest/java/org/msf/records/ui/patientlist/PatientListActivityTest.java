@@ -1,8 +1,8 @@
 package org.msf.records.ui.patientlist;
 
 import org.msf.records.R;
+import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppPatient;
-import org.msf.records.location.LocationTree;
 import org.msf.records.ui.FunctionalTestCase;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
@@ -23,23 +23,34 @@ public class PatientListActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         onView(withText("Guest User")).perform(click());
-        onView(withText("ALL PATIENTS")).perform(click());
+    }
+
+    /** Opens the patient list. */
+    public void openPatientList() {
+        waitForProgressFragment(); // Wait for tents.
+        onView(withText("ALL PRESENT PATIENTS")).perform(click());
+        waitForProgressFragment(); // Wait for patients.
     }
 
     /** Looks for the filter menu. */
     public void testFilterMenu() {
-        onView(withText("All Patients")).perform(click());
+        openPatientList();
+        screenshot("Test Start");
+        onView(withText("All Present Patients")).perform(click());
         onView(withText("Triage")).check(matches(isDisplayed()));
         onView(withText("Pregnant")).check(matches(isDisplayed()));
+        screenshot("In Filter Menu");
     }
 
     /** Looks for two zone headings and at least one patient. */
     public void testZoneAndPatientDisplayed() {
+        openPatientList();
+        screenshot("Test Start");
         // There should be patients in both Triage and S1.
         onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))
                 .check(matches(isDisplayed()));
 
-        onData(allOf(is(LocationTree.LocationSubtree.class), hasToString(startsWith("S1"))))
+        onData(allOf(is(AppLocation.class), hasToString(startsWith("S1"))))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .check(matches(isDisplayed()));
 
@@ -48,5 +59,6 @@ public class PatientListActivityTest extends FunctionalTestCase {
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0)
                 .perform(click());
+        screenshot("After Patient Clicked");
     }
 }

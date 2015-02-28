@@ -11,14 +11,20 @@
     <color name="vital_known">#01579b</color>
 
     <!-- Statuses -->
-    <color name="status_good">#417505</color>
-    <color name="status_fair">#f5cd23</color>
-    <color name="status_poor">#d05802</color>
-    <color name="status_very_poor">#d0021b</color>
+    <color name="status_well">#417505</color>
+    <color name="status_unwell">#f5cd23</color>
+    <color name="status_critical">#d0021b</color>
+    <color name="status_palliative">#bd10e0</color>
+    <color name="status_convalescent">#30b2cf</color>
     <color name="status_discharged_non_case">#5eae00</color>
-    <color name="status_cured">#5eae00</color>
+    <color name="status_discharged_cured">#5eae00</color>
     <color name="status_suspected_dead">#807e7e</color>
     <color name="status_confirmed_dead">#000000</color>
+
+    <!-- Severity (pain, weakness, etc.) -->
+    <color name="severity_mild">#f5cd23</color>
+    <color name="severity_moderate">#d05802</color>
+    <color name="severity_severe">#d0021b</color>
 
     <!-- Temperature Ranges -->
     <color name="temperature_normal">#417505</color>
@@ -43,5 +49,6 @@
     <color name="chart_background_dark">#cccccc</color>
     <color name="chart_grid_lines">#999999</color>
     <color name="zone_tent_selected_padding">@android:color/black</color>
+    <color name="general_condition_selected_padding">@android:color/black</color>
 
 </resources>

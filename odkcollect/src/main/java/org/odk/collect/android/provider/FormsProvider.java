@@ -67,7 +67,7 @@ public class FormsProvider extends ContentProvider {
 		private static final String MODEL_VERSION = "modelVersion";
 
 		DatabaseHelper(String databaseName) {
-			super(Collect.METADATA_PATH, databaseName, null, DATABASE_VERSION);
+			super(Collect.getInstance().getMetadataPath(), databaseName, null, DATABASE_VERSION);
 		}
 
 		@Override
@@ -238,7 +238,7 @@ public class FormsProvider extends ContentProvider {
     private DatabaseHelper getDbHelper() {
         // wrapper to test and reset/set the dbHelper based upon the attachment state of the device.
         try {
-            Collect.createODKDirs();
+            Collect.getInstance().createODKDirs();
         } catch (RuntimeException e) {
         	mDbHelper = null;
             return null;
@@ -255,10 +255,7 @@ public class FormsProvider extends ContentProvider {
 	public boolean onCreate() {
         // must be at the beginning of any activity that can be called from an external intent
 		DatabaseHelper h = getDbHelper();
-        if ( h == null ) {
-        	return false;
-        }
-        return true;
+        return h != null;
 	}
 
 	@Override
@@ -316,7 +313,7 @@ public class FormsProvider extends ContentProvider {
 
 		ContentValues values;
 		if (initialValues != null) {
-			values = new ContentValues(initialValues);
+            values = new ContentValues(initialValues);
 		} else {
 			values = new ContentValues();
 		}
@@ -333,14 +330,23 @@ public class FormsProvider extends ContentProvider {
 		filePath = form.getAbsolutePath(); // normalized
 		values.put(FormsColumns.FORM_FILE_PATH, filePath);
 
-		Long now = Long.valueOf(System.currentTimeMillis());
+		Long now = System.currentTimeMillis();
 
-		// Make sure that the necessary fields are all set
-		if (values.containsKey(FormsColumns.DATE) == false) {
+        // Decide if we should do an insert or replace.
+        boolean replace = false;
+        if (values.containsKey(FormsProviderAPI.SQL_INSERT_OR_REPLACE)) {
+            replace = values.getAsBoolean(FormsProviderAPI.SQL_INSERT_OR_REPLACE);
+
+            // Remove the key, so we don't pass that on to db.insert() or db.replace()
+            values.remove(FormsProviderAPI.SQL_INSERT_OR_REPLACE);
+        }
+
+        // Make sure that the necessary fields are all set
+		if (!values.containsKey(FormsColumns.DATE)) {
 			values.put(FormsColumns.DATE, now);
 		}
 
-		if (values.containsKey(FormsColumns.DISPLAY_SUBTEXT) == false) {
+		if (!values.containsKey(FormsColumns.DISPLAY_SUBTEXT)) {
 			Date today = new Date();
 			String ts = new SimpleDateFormat(getContext().getString(
 					R.string.added_on_date_at_time), Locale.getDefault())
@@ -348,7 +354,7 @@ public class FormsProvider extends ContentProvider {
 			values.put(FormsColumns.DISPLAY_SUBTEXT, ts);
 		}
 
-		if (values.containsKey(FormsColumns.DISPLAY_NAME) == false) {
+		if (!values.containsKey(FormsColumns.DISPLAY_NAME)) {
 			values.put(FormsColumns.DISPLAY_NAME, form.getName());
 		}
 
@@ -359,12 +365,12 @@ public class FormsProvider extends ContentProvider {
 		String md5 = FileUtils.getMd5Hash(form);
 		values.put(FormsColumns.MD5_HASH, md5);
 
-		if (values.containsKey(FormsColumns.JRCACHE_FILE_PATH) == false) {
-			String cachePath = Collect.CACHE_PATH + File.separator + md5
+		if (!values.containsKey(FormsColumns.JRCACHE_FILE_PATH)) {
+			String cachePath = Collect.getInstance().getCachePath() + File.separator + md5
 					+ ".formdef";
 			values.put(FormsColumns.JRCACHE_FILE_PATH, cachePath);
 		}
-		if (values.containsKey(FormsColumns.FORM_MEDIA_PATH) == false) {
+		if (!values.containsKey(FormsColumns.FORM_MEDIA_PATH)) {
 			String pathNoExtension = filePath.substring(0,
 					filePath.lastIndexOf("."));
 			String mediaPath = pathNoExtension + "-media";
@@ -373,27 +379,43 @@ public class FormsProvider extends ContentProvider {
 
 		SQLiteDatabase db = getDbHelper().getWritableDatabase();
 
-		// first try to see if a record with this filename already exists...
-		String[] projection = { FormsColumns._ID, FormsColumns.FORM_FILE_PATH };
-		String[] selectionArgs = { filePath };
-		String selection = FormsColumns.FORM_FILE_PATH + "=?";
-		Cursor c = null;
-		try {
-			c = db.query(FORMS_TABLE_NAME, projection, selection,
-					selectionArgs, null, null, null);
-			if (c.getCount() > 0) {
-				// already exists
-				throw new SQLException("FAILED Insert into " + uri
-						+ " -- row already exists for form definition file: "
-						+ filePath);
-			}
-		} finally {
-			if (c != null) {
-				c.close();
-			}
-		}
+        long rowId;
+        if (replace) {
+            // If we want this insert to always replace, then do a transactional delete followed
+            // by an insert. The primary key is _ID, which we can't know in advance.
+            try {
+                db.beginTransaction();
+                db.delete(
+                        FORMS_TABLE_NAME, FormsColumns.FORM_FILE_PATH + "=?",
+                        new String[]{filePath});
+                rowId = db.insert(FORMS_TABLE_NAME, null, values);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        } else {
+            // first try to see if a record with this filename already exists...
+            String[] projection = {FormsColumns._ID, FormsColumns.FORM_FILE_PATH};
+            String[] selectionArgs = {filePath};
+            String selection = FormsColumns.FORM_FILE_PATH + "=?";
+            Cursor c = null;
+            try {
+                c = db.query(FORMS_TABLE_NAME, projection, selection,
+                        selectionArgs, null, null, null);
+                if (c.getCount() > 0) {
+                    // already exists
+                    throw new SQLException("FAILED Insert into " + uri
+                            + " -- row already exists for form definition file: "
+                            + filePath);
+                }
+            } finally {
+                if (c != null) {
+                    c.close();
+                }
+            }
+            rowId = db.insert(FORMS_TABLE_NAME, null, values);
+        }
 
-		long rowId = db.insert(FORMS_TABLE_NAME, null, values);
 		if (rowId > 0) {
 			Uri formUri = ContentUris.withAppendedId(FormsColumns.CONTENT_URI,
 					rowId);
@@ -592,7 +614,7 @@ public class FormsProvider extends ContentProvider {
 			}
 
 			// Make sure that the necessary fields are all set
-			if (values.containsKey(FormsColumns.DATE) == true) {
+			if (values.containsKey(FormsColumns.DATE)) {
 				Date today = new Date();
 				String ts = new SimpleDateFormat(getContext().getString(
 						R.string.added_on_date_at_time), Locale.getDefault())
@@ -655,7 +677,7 @@ public class FormsProvider extends ContentProvider {
 								.getMd5Hash(new File(formFile));
 						values.put(FormsColumns.MD5_HASH, newMd5);
 						values.put(FormsColumns.JRCACHE_FILE_PATH,
-								Collect.CACHE_PATH + File.separator + newMd5
+								Collect.getInstance().getCachePath() + File.separator + newMd5
 										+ ".formdef");
 					}
 
@@ -699,7 +721,7 @@ public class FormsProvider extends ContentProvider {
 		sUriMatcher.addURI(FormsProviderAPI.AUTHORITY, "forms", FORMS);
 		sUriMatcher.addURI(FormsProviderAPI.AUTHORITY, "forms/#", FORM_ID);
 
-		sFormsProjectionMap = new HashMap<String, String>();
+		sFormsProjectionMap = new HashMap<>();
 		sFormsProjectionMap.put(FormsColumns._ID, FormsColumns._ID);
 		sFormsProjectionMap.put(FormsColumns.DISPLAY_NAME,
 				FormsColumns.DISPLAY_NAME);

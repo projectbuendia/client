@@ -17,6 +17,7 @@ import org.msf.records.sync.SelectionBuilder;
  */
 class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
+    private static final String BULK_INSERT_SAVEPOINT = "GROUP_PROVIDER_DELEGATE_BULK_INSERT";
     private final String mType;
     private final String mTableName;
 
@@ -60,34 +61,42 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
             return 0;
         }
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+                new SQLiteDatabaseTransactionHelper(dbHelper);
 
         ContentValues first = allValues[0];
         String[] columns = first.keySet().toArray(new String[first.size()]);
         SQLiteStatement statement = makeInsertStatement(db, mTableName, columns);
-        db.beginTransaction();
-        Object[] bindings = new Object[first.size()];
-        for (ContentValues values : allValues) {
-            statement.clearBindings();
-            if (values.size() != first.size()) {
-                throw new AssertionError();
-            }
-            for (int i = 0; i < bindings.length; i++) {
-                Object value = values.get(columns[i]);
-                // This isn't super safe, but is in our context.
-                int bindingIndex = i + 1;
-                if (value instanceof String) {
-                    statement.bindString(bindingIndex, (String) value);
-                } else if ((value instanceof Long) || value instanceof Integer) {
-                    statement.bindLong(bindingIndex, ((Number) value).longValue());
-                } else if ((value instanceof Double) || value instanceof Float) {
-                    statement.bindDouble(bindingIndex, ((Number) value).doubleValue());
+        dbTransactionHelper.startNamedTransaction(BULK_INSERT_SAVEPOINT);
+        try {
+            Object[] bindings = new Object[first.size()];
+            for (ContentValues values : allValues) {
+                statement.clearBindings();
+                if (values.size() != first.size()) {
+                    throw new AssertionError();
                 }
-                bindings[i] = value;
+                for (int i = 0; i < bindings.length; i++) {
+                    Object value = values.get(columns[i]);
+                    // This isn't super safe, but is in our context.
+                    int bindingIndex = i + 1;
+                    if (value instanceof String) {
+                        statement.bindString(bindingIndex, (String) value);
+                    } else if ((value instanceof Long) || value instanceof Integer) {
+                        statement.bindLong(bindingIndex, ((Number) value).longValue());
+                    } else if ((value instanceof Double) || value instanceof Float) {
+                        statement.bindDouble(bindingIndex, ((Number) value).doubleValue());
+                    }
+                    bindings[i] = value;
+                }
+                statement.executeInsert();
             }
-            statement.executeInsert();
+        } catch (Throwable t) {
+            // If absolutely anything goes wrong, rollback to the savepoint.
+            dbTransactionHelper.rollbackNamedTransaction(BULK_INSERT_SAVEPOINT);
+        } finally {
+            statement.close();
         }
-        db.setTransactionSuccessful();
-        db.endTransaction();
+        dbTransactionHelper.releaseNamedTransaction(BULK_INSERT_SAVEPOINT);
         contentResolver.notifyChange(uri, null, false);
         return allValues.length;
     }

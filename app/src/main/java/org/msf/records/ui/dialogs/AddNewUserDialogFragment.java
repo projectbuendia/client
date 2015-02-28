@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +15,6 @@ import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
 
-import java.util.regex.Pattern;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -23,17 +22,34 @@ import butterknife.InjectView;
  * A {@link android.support.v4.app.DialogFragment} for adding a new user.
  */
 public class AddNewUserDialogFragment extends DialogFragment {
-    public static AddNewUserDialogFragment newInstance() {
-        return new AddNewUserDialogFragment();
+    /**
+     * Creates a new instance and registers the given UI, if specified.
+     */
+    public static AddNewUserDialogFragment newInstance(ActivityUi activityUi) {
+        AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
+        fragment.setUi(activityUi);
+        return fragment;
     }
 
-    private static final Pattern USER_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9.\\-_]{2,50}$");
-
-    @InjectView(R.id.add_user_username_tv) EditText mUsername;
     @InjectView(R.id.add_user_given_name_tv) EditText mGivenName;
     @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
 
     private LayoutInflater mInflater;
+    // Optional UI for exposing a spinner.
+    @Nullable private ActivityUi mActivityUi;
+
+    /**
+     * Delegate for the UI that will be shown when the dialog is closed, so that a spinner can be
+     * shown until the user has loaded.
+     */
+    public interface ActivityUi {
+
+        void showSpinner(boolean show);
+    }
+
+    public void setUi(ActivityUi activityUi) {
+        mActivityUi = activityUi;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,14 +83,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (isNullOrWhitespace(mUsername)) {
-                                            setError(mUsername, R.string.username_cannot_be_null);
-                                            return;
-                                        }
-                                        if (!isUsernameValid()) {
-                                            setError(mUsername, R.string.invalid_username);
-                                            return;
-                                        }
                                         if (isNullOrWhitespace(mGivenName)) {
                                             setError(
                                                     mGivenName,
@@ -88,11 +96,13 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                             return;
                                         }
 
-                                        App.getUserManager().addUser(NewUser.create(
-                                                mUsername.getText().toString().trim(),
+                                        App.getUserManager().addUser(new NewUser(
                                                 mGivenName.getText().toString().trim(),
                                                 mFamilyName.getText().toString().trim()
                                         ));
+                                        if (mActivityUi != null) {
+                                            mActivityUi.showSpinner(true);
+                                        }
                                         dialog.dismiss();
                                     }
                                 });
@@ -104,11 +114,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
 
     private boolean isNullOrWhitespace(EditText field) {
         return field.getText() == null || field.getText().toString().trim().isEmpty();
-    }
-
-    private boolean isUsernameValid() {
-        String username = mUsername.getText().toString().trim();
-        return USER_NAME_PATTERN.matcher(username).matches();
     }
 
     private void setError(EditText field, int resourceId) {
