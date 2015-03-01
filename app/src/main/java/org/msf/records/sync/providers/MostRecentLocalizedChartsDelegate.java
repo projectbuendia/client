@@ -34,44 +34,48 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
 
         // This scary SQL statement joins the observations a subselect for the latest for each
         // concept with appropriate concept names to give localized output.
-        String query = "SELECT obs.encounter_time," +
-                "obs.concept_uuid,names." + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name," +
+        String query = "SELECT obs." + Contracts.Observations._ID
+                + ", obs.encounter_time,"
+                + "obs.concept_uuid,names."
+                + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name,"
                 // Localized value for concept values
-                "obs." + Contracts.Observations.VALUE +
-                ",coalesce(value_names." + Contracts.ConceptNames.LOCALIZED_NAME + ", obs." + Contracts.Observations.VALUE + ") " +
-                "AS localized_value" +
+                + "obs." + Contracts.Observations.VALUE
+                + ",coalesce(value_names." + Contracts.ConceptNames.LOCALIZED_NAME
+                + ", obs." + Contracts.Observations.VALUE + ") "
+                + "AS localized_value"
 
-                " FROM " +
-                PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs " +
+                + " FROM "
+                + PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs "
 
-                " INNER JOIN " +
+                + " INNER JOIN "
 
-                "(SELECT " + Contracts.Charts.CONCEPT_UUID +
-                ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime " +
-                "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME +
-                " WHERE " + Contracts.Observations.PATIENT_UUID + "=? " + // 1st selection arg
-                "GROUP BY " + Contracts.Observations.CONCEPT_UUID + ") maxs " +
+                + "(SELECT " + Contracts.Charts.CONCEPT_UUID
+                + ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime "
+                + "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME
+                + " WHERE " + Contracts.Observations.PATIENT_UUID + "=? " // 1st selection arg
+                + "GROUP BY " + Contracts.Observations.CONCEPT_UUID + ") maxs "
 
-                "ON obs." + Contracts.Observations.ENCOUNTER_TIME + " = maxs.maxtime AND " +
-                "obs." + Contracts.Observations.CONCEPT_UUID + "=maxs." + Contracts.Observations.CONCEPT_UUID +
+                + "ON obs." + Contracts.Observations.ENCOUNTER_TIME + " = maxs.maxtime AND "
+                + "obs." + Contracts.Observations.CONCEPT_UUID
+                + "=maxs." + Contracts.Observations.CONCEPT_UUID
 
-                " INNER JOIN " +
-                PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names " +
-                "ON obs." + Contracts.Observations.CONCEPT_UUID + "=" +
-                "names." + Contracts.ConceptNames.CONCEPT_UUID +
+                + " INNER JOIN "
+                + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names "
+                + "ON obs." + Contracts.Observations.CONCEPT_UUID + "="
+                + "names." + Contracts.ConceptNames.CONCEPT_UUID
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
                 // To cope we will do a left join on the value and the name
-                " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names " +
-                "ON obs." + Contracts.Observations.VALUE + "=" +
-                "value_names." + Contracts.Charts.CONCEPT_UUID +
-                " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" + // 2nd selection arg
+                + " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names "
+                + "ON obs." + Contracts.Observations.VALUE + "="
+                + "value_names." + Contracts.Charts.CONCEPT_UUID
+                + " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" // 2nd selection arg
 
-                " WHERE obs." + Contracts.Observations.PATIENT_UUID + "=? AND " + // 3rd selection arg
-                "names." + Contracts.ConceptNames.LOCALE + "=? " + // 4th selection arg
+                + " WHERE obs." + Contracts.Observations.PATIENT_UUID + "=? AND " // 3rd sel. arg
+                + "names." + Contracts.ConceptNames.LOCALE + "=? " // 4th selection arg
 
-                " ORDER BY obs." + Contracts.Charts.CONCEPT_UUID
+                + " ORDER BY obs." + Contracts.Charts.CONCEPT_UUID
                 + ", obs." + Contracts.Observations._ID;
 
         return dbHelper.getReadableDatabase()

@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.provider.BaseColumns;
 
 import org.msf.records.model.Concepts;
 import org.msf.records.sync.providers.Contracts;
@@ -41,6 +42,7 @@ public class LocalizedChartHelper {
      * A simple bean class representing an observation. All names and values have been localized.
      */
     public static final class LocalizedObservation {
+        public final long id;
         /**
          * The time of the encounter (hence the observation) in milliseconds since epoch.
          */
@@ -72,12 +74,14 @@ public class LocalizedChartHelper {
         @Nullable public final String localizedValue;
 
         public LocalizedObservation(
+                long id,
                 long encounterTimeMillis,
                 String groupName,
                 String conceptUuid,
                 String conceptName,
                 @Nullable String value,
                 @Nullable String localizedValue) {
+            this.id = id;
             this.encounterTimeMillis = encounterTimeMillis;
             this.groupName = checkNotNull(groupName);
             this.conceptUuid = checkNotNull(conceptUuid);
@@ -88,7 +92,8 @@ public class LocalizedChartHelper {
 
         @Override
         public String toString() {
-            return "time=" + encounterTimeMillis
+            return "id=" + id
+                    + ",time=" + encounterTimeMillis
                     + ",group=" + groupName
                     + ",conceptUuid=" + conceptUuid
                     + ",conceptName=" + conceptName
@@ -142,6 +147,7 @@ public class LocalizedChartHelper {
             List<LocalizedObservation> result = new ArrayList<>();
             while (cursor.moveToNext()) {
                 LocalizedObservation obs = new LocalizedObservation(
+                        cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
@@ -193,6 +199,7 @@ public class LocalizedChartHelper {
                 String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
 
                 LocalizedObservation obs = new LocalizedObservation(
+                        cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         "", /* no group */
                         concept_uuid,
@@ -248,6 +255,7 @@ public class LocalizedChartHelper {
             List<LocalizedObservation> result = new ArrayList<>();
             while (cursor.moveToNext()) {
                 LocalizedObservation obs = new LocalizedObservation(
+                        cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                         0L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
