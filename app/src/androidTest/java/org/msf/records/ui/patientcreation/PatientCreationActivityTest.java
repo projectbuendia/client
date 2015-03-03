@@ -72,9 +72,9 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         screenshot("Test Start");
         String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
-        onView(withId(R.id.patient_creation_button_change_location)).perform(click());
+        onView(withId(R.id.patient_creation_button_change_location)).perform(scrollTo(), click());
         screenshot("After Location Dialog Shown");
-        onView(withText("S1")).perform(scrollTo(), click());
+        onView(withText("S1")).perform(click());
         screenshot("After Location Selected");
         onView(withText("Create")).perform(click());
         screenshot("After Create Pressed");
