@@ -85,9 +85,6 @@ public class InitialSyncTest extends SyncTestCase {
         checkViewDisplayedWithin(withText("Guest User"), 60000);
         onView(withText("Guest User")).perform(click());
 
-        // Sync should start anew.
-        checkViewDisplayedSoon(withId(R.id.progress_fragment_progress_bar));
-
         // The second sync should actually complete.
         waitForProgressFragment();
         checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
