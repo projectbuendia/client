@@ -520,6 +520,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     private void answerVisibleToggleQuestion(String questionText, String answerText) {
+        // Close the soft keyboard before answering any toggle questions -- on rare occasions,
+        // if Espresso answers one of these questions and is then instructed to type into another
+        // field, the input event will actually be generated as the keyboard is hiding and will be
+        // lost, but Espresso won't detect this case.
+        Espresso.closeSoftKeyboard();
         onView(allOf(
                 anyOf(isAssignableFrom(CheckBox.class), isAssignableFrom(RadioButton.class)),
                 isDescendantOfA(allOf(
