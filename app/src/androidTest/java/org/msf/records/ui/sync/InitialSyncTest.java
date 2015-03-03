@@ -80,8 +80,9 @@ public class InitialSyncTest extends SyncTestCase {
         onView(withId(R.id.action_cancel)).perform(click());
         Espresso.registerIdlingResources(syncCanceledResource);
 
-        // Select guest user again.
-        checkViewDisplayedSoon(withText("Guest User"));
+        // Select guest user again -- give plenty of time for cancellation to occur since canceling
+        // certain network operations can take an exceedingly long time.
+        checkViewDisplayedWithin(withText("Guest User"), 60000);
         onView(withText("Guest User")).perform(click());
 
         // Sync should start anew.

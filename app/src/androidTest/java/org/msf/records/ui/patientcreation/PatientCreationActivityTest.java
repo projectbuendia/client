@@ -110,9 +110,14 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     /** Tests that the admission date is visible right after adding a patient. */
     public void testNewPatientHasDefaultAdmissionDate() {
         testNewPatientWithoutLocation();
-        checkViewDisplayedSoon(allOf(
+        // TODO: This is a little flaky, but because of a real bug:
+        // We get observations by asking the SyncAdapter to sync incremental observations from the
+        // server, but this sync could be delayed if a sync (such as a periodic sync) is already
+        // occurring. These syncs are often slow, and the user has no feedback that there is a
+        // delay.
+        checkViewDisplayedWithin(allOf(
                 isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 1")));
+                withText("Day 1")), 60000);
     }
 
     /** Tests that symptoms onset is optional and not assigned a default value. */
