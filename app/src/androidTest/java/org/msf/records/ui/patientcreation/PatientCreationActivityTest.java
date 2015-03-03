@@ -9,6 +9,7 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 
@@ -73,7 +74,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         populateNewPatientFieldsExceptLocation(id);
         onView(withId(R.id.patient_creation_button_change_location)).perform(click());
         screenshot("After Location Dialog Shown");
-        onView(withText("S1")).perform(click());
+        onView(withText("S1")).perform(scrollTo(), click());
         screenshot("After Location Selected");
         onView(withText("Create")).perform(click());
         screenshot("After Create Pressed");
