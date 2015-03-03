@@ -78,6 +78,8 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
                 String message = e.getCause().getMessage();
                 if (message.contains("could not insert: [org.openmrs.PatientIdentifier]")) {
                     failureReason = PatientAddFailedEvent.REASON_INVALID_ID;
+                } else if (message.contains("already has the ID")) {
+                    failureReason = PatientAddFailedEvent.REASON_DUPLICATE_ID;
                 } else if (isValidationErrorMessageForField(message, "names[0].givenName")) {
                     failureReason = PatientAddFailedEvent.REASON_INVALID_GIVEN_NAME;
                 } else if (isValidationErrorMessageForField(message, "names[0].familyName")) {

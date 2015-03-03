@@ -43,7 +43,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	private static final String PATIENT_ID_1 = "id1";
 
 	private static final LocalizedChartHelper.LocalizedObservation OBSERVATION_A =
-			new LocalizedChartHelper.LocalizedObservation(0, "g", "c", "c", "val", "localizedVal");
+            new LocalizedChartHelper.LocalizedObservation(
+                    0, 0, "g", "c", "c", "val", "localizedVal");
 
 	private PatientChartController mController;
 

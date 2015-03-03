@@ -296,6 +296,11 @@ final class PatientChartController {
      *                    with the "description" field in OpenMRS.
      */
     public void onAddObservationPressed(String targetGroup) {
+        // Don't acknowledge this action if a dialog is showing
+        if (dialogShowing()) {
+            return;
+        }
+
         PrepopulatableFields fields = new PrepopulatableFields();
 
         // TODO(dxchen): Re-enable this post v0.2.1.
@@ -647,5 +652,10 @@ final class PatientChartController {
         if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
             mUi.updatePatientLocationUi(mLocationTree, mPatient);
         }
+    }
+
+    private boolean dialogShowing() {
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
+                || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
     }
 }
