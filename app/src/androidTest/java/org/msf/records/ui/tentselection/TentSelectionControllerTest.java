@@ -167,15 +167,14 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
     }
 
     /**
-     * Tests that loading an empty location tree results in a new sync if a sync is not
-     * already in progress.
+     * Tests that loading an empty location tree results in a new sync if sync has completed.
      */
     public void testFetchingIncompleteLocationTree_causesNewSync() {
-        // GIVEN an initialized controller with a fragment attached and no sync in progress
-        mFakeSyncManager.setSyncing(false);
+        // GIVEN an initialized controller with a fragment attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN an empty location tree is loaded
+        // WHEN an empty location tree is loaded after sync completed
+        mFakeEventBus.post(new SyncSucceededEvent());
         AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller starts a new sync
