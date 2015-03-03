@@ -90,8 +90,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     }*/
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
-    // TODO: Temporarily disabled due to flakiness.
-    /*public void testSyncFailedDialog_RetryButtonActuallyRetries() {
+    public void testSyncFailedDialog_RetryButtonActuallyRetries() {
         setWifiEnabled(false);
         waitForSyncFailure();
 
@@ -109,7 +108,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         onView(withText("S1")).check(matches(isDisplayed()));
 
         screenshot("After Sync Completed");
-    }*/
+    }
 
     /**
      * Tests that clicking 'Settings' in sync failed dialog and returning to

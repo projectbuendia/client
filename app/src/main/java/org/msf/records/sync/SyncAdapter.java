@@ -154,6 +154,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
+        // If we can't access the Buendia API, short-circuit.
+        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
+            LOG.e("Sync failed: Buendia API is unavailable.");
+            getContext().sendBroadcast(syncFailedIntent);
+        }
+
         try {
             checkCancellation("Sync was canceled before it started.");
         } catch (CancellationException e) {
@@ -175,7 +181,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
-
         try {
             boolean specific = false;
 
