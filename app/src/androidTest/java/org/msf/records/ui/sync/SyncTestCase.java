@@ -10,6 +10,8 @@ import com.android.volley.RequestQueue;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
+import net.sqlcipher.database.SQLiteException;
+
 import org.msf.records.App;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.net.VolleySingleton;
@@ -47,8 +49,8 @@ public class SyncTestCase extends FunctionalTestCase {
                 clearDatabase();
                 clearPreferences();
                 cleared = true;
-            } catch (SQLException e) {
-                Thread.sleep(100);
+            } catch (SQLiteException e) {
+                Thread.sleep(500);
                 retriesRemaining--;
             }
         }
