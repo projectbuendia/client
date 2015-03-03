@@ -71,6 +71,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         private final String mName;
         private final HashMap<String, String> mColumnIdsToValues = new HashMap<>();
         private final HashMap<String, String> mColumnIdsToLocalizedValues = new HashMap<>();
+
         public Row(String conceptUuid, String name) {
             mConceptUuid = conceptUuid;
             mName = name;
@@ -205,7 +206,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     @Override
     public int getRowCount() {
-      return mRows.size();
+        return mRows.size();
     }
 
     @Override

@@ -97,7 +97,7 @@ final class PatientChartController {
         void setTitle(String title);
 
         /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUI(
+        void updatePatientVitalsUi(
                 Map<String, LocalizedObservation> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate);
@@ -363,7 +363,8 @@ final class PatientChartController {
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
-    private LocalDate getObservedDate(Map<String, LocalizedObservation> observations, String conceptUuid) {
+    private LocalDate getObservedDate(
+            Map<String, LocalizedObservation> observations, String conceptUuid) {
         LocalizedObservation obs = observations.get(conceptUuid);
         return obs == null ? null : Utils.stringToLocalDate(obs.localizedValue);
     }
@@ -390,19 +391,21 @@ final class PatientChartController {
         }*/
 
         if (DEBUG) {
-            LOG.d("Showing " + observations.size() + " observations, and "
-                    + conceptsToLatestObservations.size() + " latest observations");
+            LOG.d("Showing " + observations.size() + " observations and "
+                    + conceptsToLatestObservations.size() + " latest obs");
         }
 
-        LocalDate admissionDate = getObservedDate(conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
-        LocalDate firstSymptomsDate = getObservedDate(conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
+        LocalDate admissionDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
+        LocalDate firstSymptomsDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
         mUi.setLatestEncounter(mLastObservation);
-        mUi.updatePatientVitalsUI(conceptsToLatestObservations, admissionDate, firstSymptomsDate);
+        mUi.updatePatientVitalsUi(
+                conceptsToLatestObservations, admissionDate, firstSymptomsDate);
         mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
     }
 
     /**
-     *
      * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
      */
     private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {

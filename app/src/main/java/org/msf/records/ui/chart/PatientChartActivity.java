@@ -449,7 +449,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations,
+        public void updatePatientVitalsUi(Map<String, LocalizedObservation> observations,
                                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
