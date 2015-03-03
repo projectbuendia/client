@@ -86,6 +86,13 @@ public final class AssignLocationDialog
         mTentSelectedCallback = checkNotNull(tentSelectedCallback);
     }
 
+    /**
+     * Returns true iff the dialog is currently displayed.
+     */
+    public boolean isShowing() {
+        return mDialog != null && mDialog.isShowing();
+    }
+
     public void show() {
         FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to just work
         View.inflate(mContext,R.layout.tent_grid, frameLayout);

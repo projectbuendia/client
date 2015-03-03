@@ -53,7 +53,7 @@ final class PatientCreationController {
         void setLocationTree(AppLocationTree locationTree);
 
         /** Adds a validation error message for a specific field. */
-        void showValidationError(int field, String message);
+        void showValidationError(int field, int messageResource, String... messageArgs);
 
         /** Clears the validation error messages from all fields. */
         void clearValidationErrors();
@@ -106,38 +106,57 @@ final class PatientCreationController {
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
         if (id == null || id.equals("")) {
-            mUi.showValidationError(Ui.FIELD_ID, "Please enter the patient ID.");
+            mUi.showValidationError(Ui.FIELD_ID, R.string.patient_validation_missing_id);
             hasValidationErrors = true;
         }
         if (givenName == null || givenName.equals("")) {
-            mUi.showValidationError(Ui.FIELD_GIVEN_NAME, "Please enter the given name.");
+            mUi.showValidationError(
+                    Ui.FIELD_GIVEN_NAME, R.string.patient_validation_missing_given_name);
             hasValidationErrors = true;
         }
         if (familyName == null || familyName.equals("")) {
-            mUi.showValidationError(Ui.FIELD_FAMILY_NAME, "Please enter the family name.");
+            mUi.showValidationError(
+                    Ui.FIELD_FAMILY_NAME, R.string.patient_validation_missing_family_name);
             hasValidationErrors = true;
         }
         if (age == null || age.equals("")) {
-            mUi.showValidationError(Ui.FIELD_AGE, "Please enter the age.");
+            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_missing_age);
+            hasValidationErrors = true;
+        }
+        if (admissionDate == null) {
+            mUi.showValidationError(
+                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
             hasValidationErrors = true;
         }
         int ageInt = 0;
         try {
             ageInt = Integer.parseInt(age);
         } catch (NumberFormatException e) {
-            mUi.showValidationError(Ui.FIELD_AGE, "Age should be a whole number.");
+            mUi.showValidationError(
+                    Ui.FIELD_AGE, R.string.patient_validation_whole_number_age_required);
             hasValidationErrors = true;
         }
         if (ageInt < 0) {
-            mUi.showValidationError(Ui.FIELD_AGE, "Age should not be negative.");
+            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_negative_age);
             hasValidationErrors = true;
         }
         if (ageUnits != AGE_YEARS && ageUnits != AGE_MONTHS) {
-            mUi.showValidationError(Ui.FIELD_AGE_UNITS, "Please select Years or Months.");
+            mUi.showValidationError(
+                    Ui.FIELD_AGE_UNITS, R.string.patient_validation_select_years_or_months);
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
-            mUi.showValidationError(Ui.FIELD_SEX, "Please select Male or Female.");
+            mUi.showValidationError(Ui.FIELD_SEX, R.string.patient_validation_select_gender);
+            hasValidationErrors = true;
+        }
+        if (admissionDate != null && admissionDate.isAfter(LocalDate.now())) {
+            mUi.showValidationError(
+                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_future_admission_date);
+            hasValidationErrors = true;
+        }
+        if (symptomsOnsetDate != null && symptomsOnsetDate.isAfter(LocalDate.now())) {
+            mUi.showValidationError(
+                    Ui.FIELD_SYMPTOMS_ONSET_DATE, R.string.patient_validation_future_onset_date);
             hasValidationErrors = true;
         }
 
