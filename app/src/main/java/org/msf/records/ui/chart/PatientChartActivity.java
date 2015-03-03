@@ -469,7 +469,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientAdmissionDaysView.setValue(day >= 1 ? "Day " + day : "–");
 
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
-            mPatientSymptomOnsetDaysView.setValue(day >= 1 ? "" + day : "—");
+            mPatientSymptomOnsetDaysView.setValue(day >= 1 ? "Day " + day : "—");
 
             // General Condition
             LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);

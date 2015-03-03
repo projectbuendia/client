@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +71,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         private final String mName;
         private final HashMap<String, String> mColumnIdsToValues = new HashMap<>();
         private final HashMap<String, String> mColumnIdsToLocalizedValues = new HashMap<>();
+        public Row(String conceptUuid, String name) {
             mConceptUuid = conceptUuid;
             mName = name;
         }
@@ -110,7 +113,6 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
         Row row = null;
         TreeSet<LocalDate> days = new TreeSet<>();
-        final String todayString = context.getResources().getString(R.string.today);
         mToday = LocalDate.now(mChronology);
         for (LocalizedObservation ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
@@ -130,11 +132,10 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             String columnId = toColumnId(obsDateTime);
             days.add(obsDateTime.toLocalDate());
 
-            LOG.v("Processing observation; Date Key: %s, Observation: %s",
-                    dateKey, ob.toString());
-            if (row.mDatesToLocalizedValues.containsKey(dateKey)) {
+            LOG.v("Column: %s, Observation: %s", columnId, ob.toString());
+            if (row.mColumnIdsToLocalizedValues.containsKey(columnId)) {
                 LOG.v("Overriding previous observation with value: %s",
-                        row.mDatesToLocalizedValues.get(dateKey));
+                        row.mColumnIdsToLocalizedValues.get(columnId));
             }
 
             // If this is any bleeding site, also show a dot in the "any bleeding" row.
@@ -146,13 +147,13 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
                 String oldText = row.mColumnIdsToValues.get(columnId);
                 String newText = (oldText == null ? "" : oldText + "\n—\n")
-                        + d.toString("d MMM, hh:mm a\n") + ob.value;
+                        + obsDateTime.toString("d MMM, hh:mm a\n") + ob.value;
                 row.mColumnIdsToValues.put(columnId, newText);
             } else {
                 row.mColumnIdsToValues.put(columnId, ob.value);
             }
 
-            row.mDatesToLocalizedValues.put(columnId, ob.localizedValue);
+            row.mColumnIdsToLocalizedValues.put(columnId, ob.localizedValue);
         }
 
         // Create the list of all the columns to show.  Today and the admission date should
@@ -186,17 +187,20 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         return dateTime.withTimeAtStartOfDay().withHourOfDay(hour).toString();
     }
 
-    private String formatColumnHeader(String columnId) {
-        final String todayString = mContext.getResources().getString(R.string.today);
+    private Spanned formatColumnHeader(String columnId) {
         DateTime dateTime = DateTime.parse(columnId).withChronology(mChronology);
         LocalDate date = dateTime.toLocalDate();
 
-        int admissionDay = Utils.dayNumberSince(mAdmissionDate, date);
-        int symptomsDay = Utils.dayNumberSince(mFirstSymptomsDate, date);
-        return (admissionDay >= 1 ? "Day " + admissionDay : "–") + "\n"
-                + (symptomsDay >= 1 ? symptomsDay : "–") + "\n"
-                + (date.equals(mToday) ? todayString + ", " : "")
+        int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+        String admitDayLabel = admitDay >= 1 ? "Day " + admitDay : "–";
+        int onsetDay = Utils.dayNumberSince(mFirstSymptomsDate, date);
+        String onsetDayLabel = onsetDay >= 1 ? "Day " + onsetDay : "–";
+        String dateLabel = (date.equals(mToday)
+                ? mContext.getResources().getString(R.string.today) + ", " : "")
                 + date.toString("d MMM");
+        return Html.fromHtml(admitDayLabel + "<br>"
+                + "<font color='#ff0000'>" + onsetDayLabel + "</font><br>"
+                + dateLabel);
     }
 
     @Override
@@ -276,7 +280,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             throw new IllegalArgumentException("Either viewStub or textView have to be set.");
         }
         final Row rowData = mRows.get(rowIndex);
-        final String dateKey = mColumnIds.get(columnIndex);
+        final String columnId = mColumnIds.get(columnIndex);
         String text = EMPTY_STRING;
         String textViewTag = null;
         int backgroundResource = 0;
@@ -286,13 +290,13 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         View.OnClickListener onClickListener = null;
 
         String conceptUuid = rowData.mConceptUuid == null ? "" : rowData.mConceptUuid;
-        String value = rowData.mColumnIdsToValues.get(dateKey);
-        String localizedValue = rowData.mDatesToLocalizedValues.get(dateKey);
+        String value = rowData.mColumnIdsToValues.get(columnId);
+        String localizedValue = rowData.mColumnIdsToLocalizedValues.get(columnId);
 
         // TODO: Proper localization.
         switch (conceptUuid) {
             case Concepts.TEMPERATURE_UUID:
-                String temperatureString = rowData.mColumnIdsToValues.get(dateKey);
+                String temperatureString = rowData.mColumnIdsToValues.get(columnId);
                 if (temperatureString != null) {
                     try {
                         double temperature = Double.parseDouble(temperatureString);
@@ -306,7 +310,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concepts.GENERAL_CONDITION_UUID:
-                String conditionUuid = rowData.mColumnIdsToValues.get(dateKey);
+                String conditionUuid = rowData.mColumnIdsToValues.get(columnId);
                 if (conditionUuid != null) {
                     ResStatus resStatus = Concepts.getResStatus(conditionUuid);
                     ResStatus.Resolved status = resStatus.resolve(mContext.getResources());
@@ -331,7 +335,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concepts.WEIGHT_UUID:
-                String weightString = rowData.mColumnIdsToValues.get(dateKey);
+                String weightString = rowData.mColumnIdsToValues.get(columnId);
                 if (weightString != null) {
                     try {
                         double weight = Double.parseDouble(weightString);
@@ -351,7 +355,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concepts.BLEEDING_UUID:
-                if (mColumnIdsWithAnyBleeding.contains(dateKey)) {
+                if (mColumnIdsWithAnyBleeding.contains(columnId)) {
                     backgroundResource = R.drawable.chart_cell_active;
                 }
                 break;
