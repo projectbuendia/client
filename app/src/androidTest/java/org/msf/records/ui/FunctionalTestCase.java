@@ -182,11 +182,13 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     protected void checkViewDisplayedWithin(Matcher<View> matcher, int timeoutMs) {
         long timeoutTime = System.currentTimeMillis() + timeoutMs;
         boolean viewFound = false;
+        Throwable viewAssertionError = null;
         while (timeoutTime > System.currentTimeMillis() && !viewFound) {
             try {
                 onView(matcher).check(matches(isDisplayed()));
                 viewFound = true;
             } catch (Throwable t) {
+                viewAssertionError = t;
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {
@@ -195,8 +197,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
                 }
             }
         }
-        // Instead of throwing, let onView().check throw a nicely formatted error.
-        onView(matcher).check(matches(isDisplayed()));
+
+        if (!viewFound) {
+            throw new RuntimeException(viewAssertionError);
+        }
     }
 
 

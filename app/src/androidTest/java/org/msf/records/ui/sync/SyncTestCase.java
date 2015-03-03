@@ -11,6 +11,7 @@ import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import org.msf.records.App;
+import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.net.VolleySingleton;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientDatabase;
@@ -19,6 +20,7 @@ import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.Logger;
 
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -78,5 +80,14 @@ public class SyncTestCase extends FunctionalTestCase {
         WifiManager wifiManager =
                 (WifiManager)App.getInstance().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(enabled);
+    }
+
+    /**
+     * Delays all ViewActions until sync has failed once.
+     */
+    protected void waitForSyncFailure() {
+        EventBusIdlingResource<SyncFailedEvent> syncFailedEventIdlingResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncFailedEventIdlingResource);
     }
 }

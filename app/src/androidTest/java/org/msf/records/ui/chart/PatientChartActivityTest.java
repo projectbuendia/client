@@ -338,6 +338,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         }
 
         // Open patient list.
+        // There may be a small delay before the search button becomes visible -- the button is
+        // not displayed while locations are loading.
+        checkViewDisplayedWithin(withId(R.id.action_search), 3000);
         onView(withId(R.id.action_search)).perform(click());
         //waitForProgressFragment();
 

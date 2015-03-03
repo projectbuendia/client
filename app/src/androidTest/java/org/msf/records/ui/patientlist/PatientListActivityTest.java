@@ -47,8 +47,7 @@ public class PatientListActivityTest extends FunctionalTestCase {
         openPatientList();
         screenshot("Test Start");
         // There should be patients in both Triage and S1.
-        onView(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")))
-                .check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText(matchesRegex("Triage \\((No|[0-9]+) patients?\\)")));
 
         onData(allOf(is(AppLocation.class), hasToString(startsWith("S1"))))
                 .inAdapterView(withId(R.id.fragment_patient_list))

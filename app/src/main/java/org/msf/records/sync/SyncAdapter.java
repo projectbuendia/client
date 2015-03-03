@@ -154,7 +154,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
-        checkCancellation("Sync was canceled before it started.");
+        try {
+            checkCancellation("Sync was canceled before it started.");
+        } catch (CancellationException e) {
+            getContext().sendBroadcast(syncCanceledIntent);
+            return;
+        }
 
         int nExtras = countExtras(extras);
         int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
@@ -318,7 +323,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.close();
-            mIsSyncCanceled = false;
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
@@ -340,8 +344,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * canceled. It is the responsibility of the caller to perform any actual cancellation
      * procedures.
      */
-    private void checkCancellation(String message) throws CancellationException {
+    private synchronized void checkCancellation(String message) throws CancellationException {
         if (mIsSyncCanceled) {
+            mIsSyncCanceled = false;
             throw new CancellationException(message);
         }
     }

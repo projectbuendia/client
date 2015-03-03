@@ -1,7 +1,5 @@
 package org.msf.records.ui.sync;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-
 import org.msf.records.R;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
@@ -9,7 +7,6 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 
 /**
@@ -27,6 +24,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     public void testSyncFailedDialogAppearsWhenSyncFails() {
         waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
         screenshot("After Sync Fails");
@@ -43,6 +41,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
         waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
 
@@ -59,6 +58,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
         waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_settings));
         screenshot("After Sync Fails");
@@ -97,6 +97,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
         waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");

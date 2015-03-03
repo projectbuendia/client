@@ -75,6 +75,8 @@ public class InitialSyncTest extends SyncTestCase {
         // Cancel the sync.
         EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        // There may be a slight delay before the cancel button appears.
+        checkViewDisplayedSoon(withId(R.id.action_cancel));
         onView(withId(R.id.action_cancel)).perform(click());
         Espresso.registerIdlingResources(syncCanceledResource);
 
