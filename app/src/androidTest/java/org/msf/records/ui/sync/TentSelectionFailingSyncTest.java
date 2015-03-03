@@ -22,7 +22,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
     public void testSyncFailedDialogAppearsWhenSyncFails() {
-        waitForInitialSync();
         setWifiEnabled(false);
         waitForSyncFailure();
 
@@ -39,7 +38,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that the back button in the sync failed dialog returns to user selection. */
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
-        waitForInitialSync();
         setWifiEnabled(false);
         waitForSyncFailure();
 
@@ -56,7 +54,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
-        waitForInitialSync();
         setWifiEnabled(false);
         waitForSyncFailure();
 
@@ -78,7 +75,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     // TODO(akalachman): Temporarily disabled: known issue that spinner is shown in this case.
     /*public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
         screenshot("Test Start");
-        waitForInitialSync();
         setWifiEnabled(false);
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
@@ -95,7 +91,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
-        waitForInitialSync();
         setWifiEnabled(false);
         waitForSyncFailure();
 
@@ -122,7 +117,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     // TODO: Temporarily disabled.
     /*public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
         // TODO: Potentially flaky, as sync may finish before being force-failed.
-        waitForInitialSync();
         setWifiEnabled(false);
 
         onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
