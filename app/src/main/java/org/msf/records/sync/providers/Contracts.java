@@ -203,7 +203,6 @@ public class Contracts {
         String FULL_NAME = "full_name";
     }
 
-    // TODO(dxchen): Implement.
     interface LocalizedLocationColumns {
 
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
@@ -211,6 +210,9 @@ public class Contracts {
         String PARENT_UUID = LocationColumns.PARENT_UUID;
 
         String LOCALIZED_NAME = LocaleColumns.LOCALIZED_NAME;
+
+        /** The patient count for a single location, not including child locations. */
+        String PATIENT_COUNT = "patient_count";
     }
 
     public static class Charts implements ChartColumns, BaseColumns {
