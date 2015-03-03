@@ -1,5 +1,7 @@
 package org.msf.records.filter.db.patient;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.model.Zone;
@@ -10,7 +12,7 @@ import org.msf.records.sync.providers.Contracts;
  * child locations of the Discharged zone, if any such location exists. This constraint allows
  * this filter to function even when locations have not been loaded.
  */
-public class PresentFilter implements SimpleSelectionFilter<AppPatient> {
+public class PresentFilter extends SimpleSelectionFilter<AppPatient> {
     private static final String SELECTION_STRING = Contracts.Patients.LOCATION_UUID + "!=?";
     private static final String[] SELECTION_ARGS = new String[] { Zone.DISCHARGED_ZONE_UUID };
 
@@ -25,7 +27,7 @@ public class PresentFilter implements SimpleSelectionFilter<AppPatient> {
     }
 
     @Override
-    public String toString() {
-        return "All Present Patients";
+    public String getDescription() {
+        return App.getInstance().getString(R.string.present_filter_description);
     }
 }

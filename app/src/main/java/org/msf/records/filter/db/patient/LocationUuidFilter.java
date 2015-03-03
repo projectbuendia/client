@@ -14,11 +14,12 @@ import java.util.List;
  * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to
  * that zone, tents within that zone, beds within those tents, etc.
  */
-public final class LocationUuidFilter implements SimpleSelectionFilter<AppPatient> {
+public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> {
 
     private final String mTentSelectionString;
     private final String[] mTentSelectionArgs;
     private final String mUuid;
+    private final String mDescription;
 
     /**
      * Creates a filter that returns all patients in a valid location.
@@ -35,6 +36,7 @@ public final class LocationUuidFilter implements SimpleSelectionFilter<AppPatien
             mTentSelectionString = "";
             mTentSelectionArgs = new String[0];
             mUuid = null;
+            mDescription = "";
             return;
         }
         List<AppLocation> allPossibleLocations = tree.locationsInSubtree(subroot);
@@ -58,6 +60,7 @@ public final class LocationUuidFilter implements SimpleSelectionFilter<AppPatien
         }
 
         mUuid = subroot.uuid;
+        mDescription = subroot.name;
     }
 
     /**
@@ -75,5 +78,10 @@ public final class LocationUuidFilter implements SimpleSelectionFilter<AppPatien
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
         return mTentSelectionArgs;
+    }
+
+    @Override
+    public String getDescription() {
+        return mDescription;
     }
 }
