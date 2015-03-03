@@ -75,8 +75,9 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 
     /** Tests that init kicks off a sync if the data model is unavailable. */
     public void testInit_StartsSyncWhenDataModelUnavailable() {
-        // GIVEN uninitialized data model and the controller hasn't previously fetched the location
-        // tree
+        // GIVEN uninitialized data model,the controller hasn't previously fetched the location
+        // tree, and no sync is already in progress
+        mFakeSyncManager.setSyncing(false);
         when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
         // WHEN the controller is initialized
         mController.init();
@@ -165,9 +166,13 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         verify(mMockUi).showSyncFailedDialog(false);
     }
 
-    /** Tests that loading an empty location tree results in a new sync. */
+    /**
+     * Tests that loading an empty location tree results in a new sync if a sync is not
+     * already in progress.
+     */
     public void testFetchingIncompleteLocationTree_causesNewSync() {
-        // GIVEN an initialized controller with a fragment attached
+        // GIVEN an initialized controller with a fragment attached and no sync in progress
+        mFakeSyncManager.setSyncing(false);
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location tree is loaded

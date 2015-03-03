@@ -32,7 +32,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
-    private static final int MAX_DATABASE_CLEAR_RETRIES = 3;
+    // The database may still be holding a lock after a test, so clearing the database may not
+    // be successful right away.
+    private static final int MAX_DATABASE_CLEAR_RETRIES = 10;
 
     @Override
     public void setUp() throws Exception {
@@ -46,6 +48,7 @@ public class SyncTestCase extends FunctionalTestCase {
                 clearPreferences();
                 cleared = true;
             } catch (SQLException e) {
+                Thread.sleep(100);
                 retriesRemaining--;
             }
         }
