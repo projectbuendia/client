@@ -193,15 +193,21 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         LocalDate date = dateTime.toLocalDate();
 
         int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
-        String admitDayLabel = admitDay >= 1 ? "Day " + admitDay : "–";
+        String admitDayHtml = admitDay >= 1 ? "Day " + admitDay : "–";
+        /*
+        // Showing both day numbers (since admission and since symptom onset)
+        // in the column headings was a UI feature we discussed but aren't
+        // enabling for now, pending feedback from the field on the importance
+        // of the day number since symptom onset to clinicians.
         int onsetDay = Utils.dayNumberSince(mFirstSymptomsDate, date);
-        String onsetDayLabel = onsetDay >= 1 ? "Day " + onsetDay : "–";
-        String dateLabel = (date.equals(mToday)
+        String onsetDayHtml = "<font color='#ff0000'>"
+                + (onsetDay >= 1 ? "Day " + onsetDay : "–")
+                + "</font>";
+        */
+        String dateHtml = (date.equals(mToday)
                 ? mContext.getResources().getString(R.string.today) + ", " : "")
                 + date.toString("d MMM");
-        return Html.fromHtml(admitDayLabel + "<br>"
-                + "<font color='#ff0000'>" + onsetDayLabel + "</font><br>"
-                + dateLabel);
+        return Html.fromHtml(admitDayHtml + "<br>" + dateHtml);
     }
 
     @Override
