@@ -240,12 +240,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
         // count), and verify that the latest value is visible for each.
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             openEncounterForm();
 
             String pulse = Integer.toString(i + 80);
             String temp = Integer.toString(i + 35) + ".0";
-            String vomiting = Integer.toString(i);
+            String vomiting = Integer.toString(5 - i);
             answerVisibleTextQuestion("Pulse", pulse);
             answerVisibleTextQuestion("Temperature", temp);
             answerVisibleTextQuestion("Vomiting", vomiting);
@@ -553,10 +553,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     private void checkVitalValueContains(String vitalName, String vitalValue) {
         // Check for updated vital view.
-        onView(allOf(
+        checkViewDisplayedSoon(allOf(
                 withText(containsString(vitalValue)),
-                hasSibling(withText(containsString(vitalName)))))
-                .check(matches(isDisplayed()));
+                hasSibling(withText(containsString(vitalName)))));
     }
 
     private IdlingResource getXformSubmissionIdlingResource() {

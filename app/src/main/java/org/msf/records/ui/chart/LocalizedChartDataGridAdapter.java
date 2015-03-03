@@ -130,6 +130,13 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             String columnId = toColumnId(obsDateTime);
             days.add(obsDateTime.toLocalDate());
 
+            LOG.v("Processing observation; Date Key: %s, Observation: %s",
+                    dateKey, ob.toString());
+            if (row.mDatesToLocalizedValues.containsKey(dateKey)) {
+                LOG.v("Overriding previous observation with value: %s",
+                        row.mDatesToLocalizedValues.get(dateKey));
+            }
+
             // If this is any bleeding site, also show a dot in the "any bleeding" row.
             if (Concepts.BLEEDING_SITES_NAME.equals(ob.groupName)) {
                 mColumnIdsWithAnyBleeding.add(columnId);
