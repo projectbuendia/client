@@ -15,11 +15,4 @@ public final class AllFilter<T extends AppTypeBase> extends SimpleSelectionFilte
     public String[] getSelectionArgs(CharSequence constraint) {
         return new String[0];
     }
-
-    @Override
-    public String getDescription() {
-        // No expectation that description will be displayed to the user, so no need for
-        // localization.
-        return "All Results";
-    }
 }

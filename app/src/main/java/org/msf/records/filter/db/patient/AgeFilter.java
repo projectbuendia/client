@@ -12,8 +12,6 @@ import org.msf.records.sync.providers.Contracts;
  * whose birth dates were later than the specified number of years ago.
  */
 final class AgeFilter extends SimpleSelectionFilter<AppPatient> {
-    private static final int OLDEST_CHILD_AGE = 13;
-
     private final int mYears;
 
     public AgeFilter(int years) {
@@ -33,10 +31,6 @@ final class AgeFilter extends SimpleSelectionFilter<AppPatient> {
 
     @Override
     public String getDescription() {
-        if (mYears < OLDEST_CHILD_AGE) {
-            return App.getInstance().getString(R.string.age_filter_description_child, mYears);
-        } else {
-            return App.getInstance().getString(R.string.age_filter_description_adult, mYears);
-        }
+        return App.getInstance().getString(R.string.age_filter_description, mYears);
     }
 }

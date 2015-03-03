@@ -18,11 +18,4 @@ public final class EncounterUuidFilter extends SimpleSelectionFilter<AppEncounte
     public String[] getSelectionArgs(CharSequence constraint) {
         return new String[] { constraint.toString() };
     }
-
-    @Override
-    public String getDescription() {
-        // No expectation that description will be displayed to the user, so no need for
-        // localization.
-        return "Encounter with UUID";
-    }
 }

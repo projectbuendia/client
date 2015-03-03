@@ -25,7 +25,9 @@ public abstract class SimpleSelectionFilter<T extends AppTypeBase> {
      * Returns a localized, human-readable description for this filter for logging and display
      * purposes.
      */
-    public abstract String getDescription();
+    public String getDescription() {
+        return getClass().getName();
+    }
 
     @Override
     public String toString() {

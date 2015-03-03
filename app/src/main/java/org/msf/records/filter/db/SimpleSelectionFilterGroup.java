@@ -2,6 +2,8 @@ package org.msf.records.filter.db;
 
 import com.google.common.collect.ImmutableList;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppTypeBase;
 
 import java.util.ArrayList;
@@ -14,7 +16,8 @@ import java.util.List;
  */
 public final class SimpleSelectionFilterGroup<T extends AppTypeBase>
         extends SimpleSelectionFilter<T> {
-    private static final String DEFAULT_FILTER_NAME = "";
+    private static final String DEFAULT_FILTER_NAME =
+            App.getInstance().getString(R.string.filter_group_default_name);
 
     private final FilterType mFilterType;
     private final ImmutableList<SimpleSelectionFilter> mFilters;

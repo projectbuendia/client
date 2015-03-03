@@ -18,11 +18,4 @@ public final class UuidFilter extends SimpleSelectionFilter<AppPatient> {
     public String[] getSelectionArgs(CharSequence constraint) {
         return new String[] { constraint.toString() };
     }
-
-    @Override
-    public String getDescription() {
-        // No expectation that description will be displayed to the user, so no need for
-        // localization.
-        return "Patient with UUID";
-    }
 }
