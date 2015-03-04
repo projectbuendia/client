@@ -16,7 +16,6 @@ import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.utils.EventBusWrapper;
-import org.msf.records.utils.Logger;
 
 import de.greenrobot.event.EventBus;
 
@@ -26,7 +25,6 @@ import de.greenrobot.event.EventBus;
  */
 public class UserLoginActivity extends BaseActivity {
 
-    private static final Logger LOG = Logger.create();
     private UserLoginController mController;
     private AlertDialog mSyncFailedDialog;
 
