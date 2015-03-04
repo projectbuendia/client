@@ -18,7 +18,9 @@ public class FakeSyncManager extends SyncManager {
     }
 
     @Override
-    public boolean isSyncPending() { return false; }
+    public boolean isSyncPending() {
+        return false;
+    }
 
     @Override
     public boolean isSyncing() {
