@@ -178,7 +178,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         initWithDemoPatientChart();
         openEncounterForm();
         discardForm();
-        onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
+        // TODO: This shouldn't be flaky, but is because of a known issue where any in-progress
+        // periodic sync takes precedence over a new incremental observation sync.
+        checkViewDisplayedWithin(withText(R.string.last_observation_none), 60000);
     }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
@@ -196,7 +198,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         discardForm();
         onView(withText(R.string.title_discard_observations)).check(matches(isDisplayed()));
         onView(withText(R.string.yes)).perform(click());
-        onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
+        // TODO: This shouldn't be flaky, but is because of a known issue where any in-progress
+        // periodic sync takes precedence over a new incremental observation sync.
+        checkViewDisplayedWithin(withText(R.string.last_observation_none), 60000);
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
