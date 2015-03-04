@@ -67,6 +67,24 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return mCursor.iterator();
+        return new Iterator<T>() {
+            private int mPosition = -1;
+
+            @Override
+            public boolean hasNext() {
+                return mPosition + 1 < getCount();
+            }
+
+            @Override
+            public T next() {
+                mPosition++;
+                return get(mPosition);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 }

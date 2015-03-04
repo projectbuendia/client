@@ -498,6 +498,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     protected void openEncounterForm() {
+        checkViewDisplayedSoon(withId(R.id.action_update_chart));
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),

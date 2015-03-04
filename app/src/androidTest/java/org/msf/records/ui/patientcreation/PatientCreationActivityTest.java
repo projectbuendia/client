@@ -110,9 +110,9 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     /** Tests that the admission date is visible right after adding a patient. */
     public void testNewPatientHasDefaultAdmissionDate() {
         testNewPatientWithoutLocation();
-        checkViewDisplayedSoon(allOf(
+        checkViewDisplayedWithin(allOf(
                 isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 1")));
+                withText("Day 1")), 60000);
     }
 
     /** Tests that symptoms onset is optional and not assigned a default value. */
