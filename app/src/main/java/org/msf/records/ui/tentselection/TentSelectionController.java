@@ -332,6 +332,7 @@ final class TentSelectionController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
+            // TODO: Remove -- should be unnecessary.
             mPatientSearchController.setLocations(mAppLocationTree);
         }
     }
