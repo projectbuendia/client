@@ -178,7 +178,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         initWithDemoPatientChart();
         openEncounterForm();
         discardForm();
-        checkViewDisplayedSoon(withText(R.string.last_observation_none));
     }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
