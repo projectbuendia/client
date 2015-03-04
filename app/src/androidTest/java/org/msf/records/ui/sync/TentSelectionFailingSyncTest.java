@@ -91,8 +91,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
-        setWifiEnabled(false);
         waitForSyncFailure();
+        setWifiEnabled(false);
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");

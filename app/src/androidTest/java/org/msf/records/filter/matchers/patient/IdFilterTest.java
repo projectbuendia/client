@@ -38,7 +38,7 @@ public class IdFilterTest extends InstrumentationTestCase {
 
     /** Tests that id matching supports unicode. */
     public void testMatches_allowsUnicode() {
-        assertTrue(mIdFilter.matches(getPatientWithId(""), ""));
+        assertTrue(mIdFilter.matches(getPatientWithId("ஐம்பது"), "ஐம்பது"));
     }
 
     /** Tests that id matching does not return false positives. */
