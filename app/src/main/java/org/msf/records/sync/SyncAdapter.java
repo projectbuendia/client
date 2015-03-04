@@ -102,7 +102,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * RPC timeout for getting observations.
      */
-    private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
+    private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
 
     /**
      * Named used during the sync process for SQL savepoints.
