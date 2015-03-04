@@ -9,7 +9,7 @@ import org.msf.records.R;
  */
 public enum ResVital implements Resolvable<ResVital.Resolved> {
 
-    UNKNOWN(R.color.vital_unknown, R.color.vital_fg_dark),
+    UNKNOWN(R.color.vital_unknown, R.color.vital_fg_unknown),
     KNOWN(R.color.vital_known, R.color.vital_fg_light);
 
     public final int backgroundColorId;
