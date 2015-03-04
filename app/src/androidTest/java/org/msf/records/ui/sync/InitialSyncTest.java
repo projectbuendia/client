@@ -82,7 +82,7 @@ public class InitialSyncTest extends SyncTestCase {
 
         // Select guest user again -- give plenty of time for cancellation to occur since canceling
         // certain network operations can take an exceedingly long time.
-        checkViewDisplayedWithin(withText("Guest User"), 60000);
+        checkViewDisplayedWithin(withText("Guest User"), 90000);
         onView(withText("Guest User")).perform(click());
 
         // The second sync should actually complete.
