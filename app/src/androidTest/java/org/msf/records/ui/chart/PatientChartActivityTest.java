@@ -195,7 +195,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         discardForm();
         onView(withText(R.string.title_discard_observations)).check(matches(isDisplayed()));
         onView(withText(R.string.yes)).perform(click());
-        checkViewDisplayedSoon(withText(R.string.last_observation_none));
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
