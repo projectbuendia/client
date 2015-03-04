@@ -97,11 +97,11 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");
 
+        setWifiEnabled(true);
         onView(withText(R.string.sync_failed_retry)).perform(click());
 
-        setWifiEnabled(true);
         waitForInitialSync();
-        waitForProgressFragment(); // Also make sure dialog disappears before checking anything.
+        waitForProgressFragment();
         screenshot("After Retry Clicked");
 
         // Should be at tent selection screen with tents available.

@@ -178,9 +178,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         initWithDemoPatientChart();
         openEncounterForm();
         discardForm();
-        // TODO: This shouldn't be flaky, but is because of a known issue where any in-progress
-        // periodic sync takes precedence over a new incremental observation sync.
-        checkViewDisplayedWithin(withText(R.string.last_observation_none), 60000);
+        checkViewDisplayedSoon(withText(R.string.last_observation_none));
     }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
@@ -198,9 +196,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         discardForm();
         onView(withText(R.string.title_discard_observations)).check(matches(isDisplayed()));
         onView(withText(R.string.yes)).perform(click());
-        // TODO: This shouldn't be flaky, but is because of a known issue where any in-progress
-        // periodic sync takes precedence over a new incremental observation sync.
-        checkViewDisplayedWithin(withText(R.string.last_observation_none), 60000);
+        checkViewDisplayedSoon(withText(R.string.last_observation_none));
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
@@ -259,6 +255,31 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             checkObservationValueEquals(0 /*Temperature*/, temp, "Today");
             checkObservationValueEquals(6 /*Vomiting*/, vomiting, "Today");
         }
+    }
+
+    /** Ensures that non-overlapping observations for the same encounter are combined. */
+    public void testCombinesNonOverlappingObservationsForSameEncounter() {
+        initWithDemoPatientChart();
+        // Enter first set of observations for this encounter.
+        openEncounterForm();
+        answerVisibleTextQuestion("Pulse", "74");
+        answerVisibleTextQuestion("Respiratory rate", "23");
+        answerVisibleTextQuestion("Temperature", "36");
+        saveForm();
+        // Enter second set of observations for this encounter.
+        openEncounterForm();
+        answerVisibleToggleQuestion("Signs and Symptoms", "Nausea");
+        answerVisibleTextQuestion("Vomiting", "2");
+        answerVisibleTextQuestion("Diarrhoea", "5");
+        saveForm();
+
+        // Check that all values are now visible.
+        checkVitalValueContains("Pulse", "74");
+        checkVitalValueContains("Respiration", "23");
+        checkObservationValueEquals(0, "36.0", "Today"); // Temp
+        checkObservationSet(5, "Today"); // Nausea
+        checkObservationValueEquals(6, "2", "Today"); // Vomiting
+        checkObservationValueEquals(7, "5", "Today"); // Diarrhoea
     }
 
     /** Exercises all fields in the encounter form, except for encounter time. */
