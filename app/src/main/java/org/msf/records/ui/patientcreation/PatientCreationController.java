@@ -16,6 +16,7 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
+import org.msf.records.model.PatientName;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
@@ -109,16 +110,6 @@ final class PatientCreationController {
             mUi.showValidationError(Ui.FIELD_ID, R.string.patient_validation_missing_id);
             hasValidationErrors = true;
         }
-        if (givenName == null || givenName.equals("")) {
-            mUi.showValidationError(
-                    Ui.FIELD_GIVEN_NAME, R.string.patient_validation_missing_given_name);
-            hasValidationErrors = true;
-        }
-        if (familyName == null || familyName.equals("")) {
-            mUi.showValidationError(
-                    Ui.FIELD_FAMILY_NAME, R.string.patient_validation_missing_family_name);
-            hasValidationErrors = true;
-        }
         if (age == null || age.equals("")) {
             mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_missing_age);
             hasValidationErrors = true;
@@ -166,8 +157,10 @@ final class PatientCreationController {
 
         AppPatientDelta patientDelta = new AppPatientDelta();
         patientDelta.id = Optional.of(id);
-        patientDelta.givenName = Optional.of(givenName);
-        patientDelta.familyName = Optional.of(familyName);
+        patientDelta.givenName = Optional.of(givenName == null || givenName.isEmpty()
+                ? PatientName.DEFAULT_GIVEN_NAME : givenName);
+        patientDelta.familyName = Optional.of(familyName == null || familyName.isEmpty()
+                ? PatientName.DEFAULT_FAMILY_NAME : familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid = (locationUuid == null)

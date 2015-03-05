@@ -44,7 +44,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords|textPersonName" />
+                android:inputType="textCapWords|textPersonName"
+                android:hint="@string/given_name_hint_unknown"/>
 
         </TableRow>
 
@@ -62,7 +63,8 @@
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:singleLine="true"
-                android:inputType="textCapWords|textPersonName" />
+                android:inputType="textCapWords|textPersonName"
+                android:hint="@string/family_name_hint_unknown" />
 
         </TableRow>
 

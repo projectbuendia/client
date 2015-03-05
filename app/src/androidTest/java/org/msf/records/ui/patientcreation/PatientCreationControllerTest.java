@@ -9,7 +9,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.msf.records.App;
 import org.msf.records.FakeAppLocationTreeFactory;
+import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -159,28 +161,36 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
     }
 
-    /** Tests that given name is treated as a required field. */
-    public void testCreatePatient_requiresGivenName() {
+    /** Tests that given name is replaced by a default if not specified */
+    public void testCreatePatient_givenNameDefaultsToUnknown() {
         // GIVEN an initialized controller
         mPatientCreationController.init();
         // WHEN all fields but given name are populated
         AppPatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.givenName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
-        // THEN controller fails to add the patient
-        verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
+        // THEN controller adds the patient with a default given name
+        patientDelta.givenName =
+                Optional.of(App.getInstance().getString(R.string.unknown_given_name));
+        verify(mMockAppModel).addPatient(
+                any(FakeEventBus.class),
+                argThat(matchesPatientDelta(patientDelta)));
     }
 
-    /** Tests that family name is treated as a required field. */
-    public void testCreatePatient_requiresFamilyName() {
+    /** Tests that family name is replaced by a default if not specified */
+    public void testCreatePatient_familyNameDefaultsToUnknown() {
         // GIVEN an initialized controller
         mPatientCreationController.init();
         // WHEN all fields but family name are populated
         AppPatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.familyName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
-        // THEN controller fails to add the patient
-        verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
+        // THEN controller adds the patient with a default family name
+        patientDelta.familyName =
+                Optional.of(App.getInstance().getString(R.string.unknown_family_name));
+        verify(mMockAppModel).addPatient(
+                any(FakeEventBus.class),
+                argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that negative ages are not allowed. */
