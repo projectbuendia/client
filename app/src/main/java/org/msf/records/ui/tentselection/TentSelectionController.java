@@ -24,6 +24,7 @@ import org.msf.records.ui.patientlist.PatientSearchController;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 /**
  * Controller for {@link TentSelectionActivity}.
@@ -151,26 +152,31 @@ final class TentSelectionController {
 
     /** Call when the user presses the search button. */
     public void onSearchPressed() {
+        Utils.logUserAction("search_pressed");
         mUi.switchToPatientListScreen();
     }
 
     /** Call when the user exits search mode. */
     public void onSearchCancelled() {
+        Utils.logUserAction("search_cancelled");
         mUi.switchToTentSelectionScreen();
     }
 
     /** Call when the user presses the discharged zone. */
     public void onDischargedPressed() {
+        Utils.logUserAction("location_pressed", "location", mDischargedZone.name);
         mUi.launchActivityForLocation(mDischargedZone);
     }
 
 	/** Call when the user presses the triage zone. */
     public void onTriagePressed() {
+        Utils.logUserAction("location_pressed", "location", mTriageZone.name);
         mUi.launchActivityForLocation(mTriageZone);
     }
 
     /** Call when the user presses a tent. */
     public void onTentSelected(AppLocation tent) {
+        Utils.logUserAction("location_pressed", "location", tent.name);
         mUi.launchActivityForLocation(tent);
     }
 

@@ -37,6 +37,14 @@ public interface Server {
     public static final String PATIENT_ANSWER_UUID = "answer_uuid";
 
     /**
+     * Logs an event by sending a dummy request to the server.  (The server logs
+     * can then be scanned later to produce analytics for the client app.)
+     * @param args An even number of arguments providing key-value pairs of
+     *             arbitrary data to record with the event.
+     */
+    void logToServer(List<String> pairs);
+
+    /**
      * Adds a patient.
      */
     void addPatient(

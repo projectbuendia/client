@@ -23,6 +23,7 @@ import org.msf.records.filter.matchers.MatchingFilterGroup;
 import org.msf.records.filter.matchers.patient.NameFilter;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
+import org.msf.records.utils.Utils;
 
 import java.util.HashSet;
 import java.util.Set;

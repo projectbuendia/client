@@ -14,6 +14,7 @@ import android.widget.EditText;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
+import org.msf.records.utils.Utils;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -83,22 +84,30 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (isNullOrWhitespace(mGivenName)) {
-                                            setError(
-                                                    mGivenName,
+                                        String givenName = mGivenName.getText() == null ? ""
+                                                : mGivenName.getText().toString().trim();
+                                        String familyName = mFamilyName.getText() == null ? ""
+                                                : mFamilyName.getText().toString().trim();
+                                        boolean valid = true;
+                                        if (givenName.isEmpty()) {
+                                            setError(mGivenName,
                                                     R.string.given_name_cannot_be_null);
-                                            return;
+                                            valid = false;
                                         }
-                                        if (isNullOrWhitespace(mFamilyName)) {
-                                            setError(
-                                                    mFamilyName,
+                                        if (familyName.isEmpty()) {
+                                            setError(mFamilyName,
                                                     R.string.family_name_cannot_be_null);
+                                            valid = false;
+                                        }
+                                        Utils.logUserAction("add_user_submitted",
+                                                "valid", "" + valid, "given_name", givenName,
+                                                "family_name", familyName);
+                                        if (!valid) {
                                             return;
                                         }
 
                                         App.getUserManager().addUser(new NewUser(
-                                                mGivenName.getText().toString().trim(),
-                                                mFamilyName.getText().toString().trim()
+                                                givenName, familyName
                                         ));
                                         if (mActivityUi != null) {
                                             mActivityUi.showSpinner(true);
@@ -110,10 +119,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
         });
 
         return dialog;
-    }
-
-    private boolean isNullOrWhitespace(EditText field) {
-        return field.getText() == null || field.getText().toString().trim().isEmpty();
     }
 
     private void setError(EditText field, int resourceId) {

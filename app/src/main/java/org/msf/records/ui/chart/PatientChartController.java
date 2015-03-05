@@ -268,10 +268,14 @@ final class PatientChartController {
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         switch (requestCode.form) {
             case ADD_OBSERVATION:
+                Utils.logUserAction("form_save_pressed", "form", "round",
+                        "patient_uuid", patientUuid);
                 // This will fire a CreatePatientSucceededEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
+                Utils.logUserAction("form_save_pressed", "form", "lab_test",
+                        "patient_uuid", patientUuid);
                 // This will fire a CreatePatientSucceededEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
@@ -303,6 +307,7 @@ final class PatientChartController {
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
+        Utils.logUserAction("form_opener_pressed", "form", "round", "group", targetGroup);
         if (user != null) {
             fields.clinicianName = user.fullName;
         }
@@ -339,6 +344,7 @@ final class PatientChartController {
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
+        Utils.logUserAction("form_opener_pressed", "form", "lab_test");
         if (user != null) {
             fields.clinicianName = user.fullName;
         }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
@@ -14,6 +15,7 @@ import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 import com.google.common.collect.Ordering;
 
@@ -96,6 +98,7 @@ final class UserLoginController {
     /** Call when the user taps to select a user. */
     public void onUserSelected(User user) {
         mUserManager.setActiveUser(user);
+        Utils.logUserAction("logged_in");
         mUi.showTentSelectionScreen();
     }
 

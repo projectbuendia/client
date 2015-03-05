@@ -19,6 +19,7 @@ import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 import javax.inject.Inject;
 
@@ -241,6 +242,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         @OnClick(R.id.button_log_out)
         public void onLogOutClick() {
+            Utils.logUserAction("logged_out");
+            User user = App.getUserManager().getActiveUser();
             App.getUserManager().setActiveUser(null);
 
             Intent settingsIntent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
