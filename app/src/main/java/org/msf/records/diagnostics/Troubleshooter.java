@@ -54,6 +54,15 @@ public class Troubleshooter {
     }
 
     /**
+     * Returns true if no ongoing issues preventing access to the Buendia server exist. Note that
+     * connectivity is still not guaranteed, just not ruled out.
+     */
+    public boolean isServerHealthy() {
+        return getNetworkConnectivityTroubleshootingActions().isEmpty() &&
+                getConfigurationTroubleshootingActions().isEmpty();
+    }
+
+    /**
      * Called when a new health issue is discovered.
      */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
