@@ -161,7 +161,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
     }
 
-    /** Tests that given name is replaced by a default if not specified */
+    /** Tests that given name is replaced by a default if not specified. */
     public void testCreatePatient_givenNameDefaultsToUnknown() {
         // GIVEN an initialized controller
         mPatientCreationController.init();
@@ -177,7 +177,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
                 argThat(matchesPatientDelta(patientDelta)));
     }
 
-    /** Tests that family name is replaced by a default if not specified */
+    /** Tests that family name is replaced by a default if not specified. */
     public void testCreatePatient_familyNameDefaultsToUnknown() {
         // GIVEN an initialized controller
         mPatientCreationController.init();
