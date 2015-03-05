@@ -58,8 +58,8 @@ public class Troubleshooter {
      * connectivity is still not guaranteed, just not ruled out.
      */
     public boolean isServerHealthy() {
-        return getNetworkConnectivityTroubleshootingActions().isEmpty() &&
-                getConfigurationTroubleshootingActions().isEmpty();
+        return getNetworkConnectivityTroubleshootingActions().isEmpty()
+                && getConfigurationTroubleshootingActions().isEmpty();
     }
 
     /**
