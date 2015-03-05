@@ -6,6 +6,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -100,21 +101,22 @@ public class OpenMrsServer implements Server {
         // Conveniently, extra data after ";" in the URL is included in request logs, but
         // ignored by the REST resource handler, which just returns the "Pulse" concept.
         final String urlPath = "/concept/" + Concepts.PULSE_UUID;
-        String params = "time=" + (new Date().getTime());
+        List<String> params = new ArrayList<>();
+        params.add("time=" + (new Date().getTime()));
         User user = App.getUserManager().getActiveUser();
         if (user != null) {
-            params += ";user_id=" + user.id;
+            params.add("user_id=" + user.id);
             if (user.isGuestUser()) {
-                params += ";guest_user=1";
+                params.add("guest_user=1");
             }
         }
         for (int i = 0; i + 1 < pairs.size(); i += 2) {
-            params += ";" + Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1));
+            params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
         }
 
         LOG.i("Logging to server: %s", params);
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-                mConnectionDetails, urlPath + ";" + params, null,
+                mConnectionDetails, urlPath + ";" + Joiner.on(";").join(params), null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) { }

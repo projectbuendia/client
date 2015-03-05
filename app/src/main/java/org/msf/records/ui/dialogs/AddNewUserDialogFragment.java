@@ -100,7 +100,8 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                             valid = false;
                                         }
                                         Utils.logUserAction("add_user_submitted",
-                                                "valid", "" + valid, "given_name", givenName,
+                                                "valid", "" + valid,
+                                                "given_name", givenName,
                                                 "family_name", familyName);
                                         if (!valid) {
                                             return;

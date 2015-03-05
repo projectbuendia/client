@@ -243,7 +243,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         @OnClick(R.id.button_log_out)
         public void onLogOutClick() {
             Utils.logUserAction("logged_out");
-            User user = App.getUserManager().getActiveUser();
             App.getUserManager().setActiveUser(null);
 
             Intent settingsIntent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);

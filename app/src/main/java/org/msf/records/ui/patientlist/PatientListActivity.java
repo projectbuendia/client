@@ -92,8 +92,8 @@ public class PatientListActivity extends PatientSearchActivity {
                 @Override
                 public boolean onNavigationItemSelected(int position, long id) {
                     getSearchController().setFilter(filters[position]);
-                    Utils.logUserAction("filter_selected", "filter",
-                            filters[position].getDescription());
+                    Utils.logUserAction("filter_selected",
+                            "filter", filters[position].toString());
                     getSearchController().loadSearchResults();
                     return true;
                 }

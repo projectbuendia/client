@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 /** Utility methods. */
 public class Utils {
     /** Converts objects with integer type to BigInteger. */
@@ -131,7 +133,7 @@ public class Utils {
     };
 
     /** URL-encodes a nullable string, catching the useless exception that never happens. */
-    public static String urlEncode(String s) {
+    public static String urlEncode(@Nullable String s) {
         if (s == null) {
             return "";
         }
@@ -144,12 +146,12 @@ public class Utils {
     }
 
     /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(LocalDate date) {
+    public static String localDateToString(@Nullable LocalDate date) {
         return date == null ? null : date.toString();
     }
 
     /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(String string) {
+    public static LocalDate stringToLocalDate(@Nullable String string) {
         try {
             return string == null ? null : LocalDate.parse(string);
         } catch (IllegalArgumentException e) {
