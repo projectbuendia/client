@@ -174,6 +174,7 @@ public class UpdateManager {
                                 .setNotificationVisibility(
                                         DownloadManager.Request.VISIBILITY_VISIBLE);
                 mDownloadId = mDownloadManager.enqueue(request);
+                LOG.i("Starting download: " + availableUpdateInfo.updateUri + " -> " + MODULE_NAME + availableUpdateInfo.availableVersion + ".apk" + " in " + dir);
                 return true;
             } catch (Exception e) {
                 LOG.e(e, "Failed to download application update from "
