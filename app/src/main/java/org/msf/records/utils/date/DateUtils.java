@@ -35,18 +35,17 @@ public class DateUtils {
     }
 
     /** Converts a nullable {@link DateTime} to a nullable String with day and month only. */
-    public static @Nullable
-    String dateTimeToShortDateString(@Nullable DateTime dateTime) {
+    public static String dateTimeToShortDateString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : SHORT_DATE_FORMATTER.print(dateTime);
     }
 
     /** Converts a nullable {@link DateTime} to a nullable String with day, month, and year. */
-    public static @Nullable String dateTimeToMediumDateString(@Nullable DateTime dateTime) {
+    public static String dateTimeToMediumDateString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : MEDIUM_DATE_FORMATTER.print(dateTime);
     }
 
     /** Converts a nullable {@link DateTime} to a nullable String with full date and time. */
-    public static @Nullable String dateTimeToLongDateString(@Nullable DateTime dateTime) {
+    public static String dateTimeToLongDateString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : LONG_DATE_FORMATTER.print(dateTime);
     }
 

@@ -429,8 +429,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if (locationUuid == null) {
                     locationUuid = Zone.DEFAULT_LOCATION;
                 }
-                birthdate =
-                        DateUtils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
+                birthdate = DateUtils.stringToLocalDate(
+                        c.getString(PatientProjection.COLUMN_BIRTHDATE));
                 gender = c.getString(PatientProjection.COLUMN_GENDER);
 
                 Patient patient = patientsMap.get(id);
@@ -499,8 +499,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(Contracts.Patients.GIVEN_NAME, e.given_name)
                             .withValue(Contracts.Patients.FAMILY_NAME, e.family_name)
                             .withValue(Contracts.Patients.UUID, e.uuid)
-                            .withValue(Contracts.Patients.ADMISSION_TIMESTAMP, e.admission_timestamp)
-                            .withValue(Contracts.Patients.BIRTHDATE, DateUtils.localDateToString(e.birthdate))
+                            .withValue(
+                                    Contracts.Patients.ADMISSION_TIMESTAMP,
+                                    e.admission_timestamp)
+                            .withValue(
+                                    Contracts.Patients.BIRTHDATE,
+                                    DateUtils.localDateToString(e.birthdate))
                             .withValue(Contracts.Patients.GENDER, e.gender);
 
             if (e.assigned_location == null) {
