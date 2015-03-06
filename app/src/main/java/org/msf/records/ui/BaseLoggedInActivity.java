@@ -63,7 +63,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             Intent intent = new Intent(this, UserLoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-
+            Utils.logEvent("redirected_to_login");
             return;
         }
 
@@ -236,18 +236,19 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         @OnClick(R.id.button_settings)
         public void onSettingsClick() {
-            Intent settingsIntent = new Intent(BaseLoggedInActivity.this, SettingsActivity.class);
-            startActivity(settingsIntent);
+            Utils.logUserAction("popup_settings_button_pressed");
+            Intent intent = new Intent(BaseLoggedInActivity.this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         @OnClick(R.id.button_log_out)
         public void onLogOutClick() {
-            Utils.logUserAction("logged_out");
+            Utils.logUserAction("popup_logout_button_pressed");
             App.getUserManager().setActiveUser(null);
 
-            Intent settingsIntent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
-            settingsIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(settingsIntent);
+            Intent intent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 

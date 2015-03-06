@@ -87,11 +87,13 @@ final class UserLoginController {
 
     /** Call when the user presses the 'add user' button. */
     public void onAddUserPressed() {
+        Utils.logEvent("add_user_button_pressed");
         mUi.showAddNewUserDialog();
     }
 
     /** Call when the user presses the settings button. */
     public void onSettingsPressed() {
+        Utils.logEvent("settings_button_pressed");
         mUi.showSettings();
     }
 

@@ -11,8 +11,10 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
+import org.msf.records.utils.Utils;
 
 // TODO(akalachman): Split RoundActivity from Triage and Discharged, which may behave differently.
+/** The list of patients for a selected tent or zone. */
 public class RoundActivity extends PatientSearchActivity {
     private String mLocationName;
     private String mLocationUuid;
@@ -48,6 +50,7 @@ public class RoundActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("add_patient_pressed");
                         startActivity(
                                 new Intent(RoundActivity.this, PatientCreationActivity.class));
 

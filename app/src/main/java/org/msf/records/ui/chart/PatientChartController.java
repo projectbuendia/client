@@ -266,16 +266,18 @@ final class PatientChartController {
         }
 
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
+        String action = (resultCode == Activity.RESULT_CANCELED)
+                ? "form_discard_pressed" : "form_save_pressed";
         switch (requestCode.form) {
             case ADD_OBSERVATION:
-                Utils.logUserAction("form_save_pressed",
+                Utils.logUserAction(action,
                         "form", "round",
                         "patient_uuid", patientUuid);
                 // This will fire a CreatePatientSucceededEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
-                Utils.logUserAction("form_save_pressed",
+                Utils.logUserAction(action,
                         "form", "lab_test",
                         "patient_uuid", patientUuid);
                 // This will fire a CreatePatientSucceededEvent.

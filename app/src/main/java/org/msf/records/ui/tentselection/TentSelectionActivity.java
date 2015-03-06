@@ -68,6 +68,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                         R.string.sync_failed_back, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Utils.logEvent("sync_failed_back_pressed");
                                 finish();
                             }
                         })
@@ -75,6 +76,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                         R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Utils.logEvent("sync_failed_settings_pressed");
                                 startActivity(new Intent(
                                         TentSelectionActivity.this,SettingsActivity.class));
                             }
@@ -125,6 +127,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logEvent("add_patient_pressed");
                         startActivity(new Intent(
                                 TentSelectionActivity.this,
                                 PatientCreationActivity.class));
