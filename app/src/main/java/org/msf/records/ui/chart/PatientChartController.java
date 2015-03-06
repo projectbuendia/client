@@ -417,6 +417,7 @@ final class PatientChartController {
                     @Override
                     public boolean onNewConditionSelected(String newConditionUuid) {
                         setCondition(newConditionUuid);
+                        Utils.logUserAction("condition_assigned");
                         return false;
                     }
                 };
@@ -453,6 +454,7 @@ final class PatientChartController {
                         patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
                         mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
+                        Utils.logUserAction("location_assigned");
                         return false;
                     }
                 };

@@ -265,6 +265,7 @@ final class TentSelectionController {
                 fragmentUi.resetSyncProgress();
             }
             mUi.showSyncFailedDialog(true);
+            Utils.logEvent("sync_failed_dialog_shown");
         }
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {

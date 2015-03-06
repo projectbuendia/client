@@ -26,6 +26,7 @@ import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Utils;
 
 import de.greenrobot.event.EventBus;
 
@@ -82,6 +83,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                         R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Utils.logEvent("sync_failed_retry_pressed");
                                 mController.onSyncRetry();
                             }
                         })
