@@ -166,15 +166,16 @@ public class UpdateManager {
                     LOG.e("no external storage is available, can't start download");
                     return false;
                 }
+                String filename = MODULE_NAME + "-"
+                        + availableUpdateInfo.availableVersion + ".apk";
                 DownloadManager.Request request =
                         new DownloadManager.Request(availableUpdateInfo.updateUri)
-                                .setDestinationInExternalPublicDir(
-                                        dir,
-                                        MODULE_NAME + availableUpdateInfo.availableVersion + ".apk")
+                                .setDestinationInExternalPublicDir(dir, filename)
                                 .setNotificationVisibility(
                                         DownloadManager.Request.VISIBILITY_VISIBLE);
                 mDownloadId = mDownloadManager.enqueue(request);
-                LOG.i("Starting download: " + availableUpdateInfo.updateUri + " -> " + MODULE_NAME + availableUpdateInfo.availableVersion + ".apk" + " in " + dir);
+                LOG.i("Starting download: " + availableUpdateInfo.updateUri
+                        + " -> " + filename + " in " + dir);
                 return true;
             } catch (Exception e) {
                 LOG.e(e, "Failed to download application update from "
