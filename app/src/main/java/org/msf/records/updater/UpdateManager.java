@@ -49,7 +49,7 @@ public class UpdateManager {
      * checkForUpdate() within this period will not check the server for new updates.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_PERIOD_SECONDS = 60 * 60; // Default to 1hr.
+    public static final int CHECK_PERIOD_SECONDS = 90; // default to 1.5 minutes.
 
     /**
      * The minimal version number.
