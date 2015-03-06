@@ -266,12 +266,20 @@ final class PatientChartController {
         }
 
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
+        String action = (resultCode == Activity.RESULT_CANCELED)
+                ? "form_discard_pressed" : "form_save_pressed";
         switch (requestCode.form) {
             case ADD_OBSERVATION:
+                Utils.logUserAction(action,
+                        "form", "round",
+                        "patient_uuid", patientUuid);
                 // This will fire a CreatePatientSucceededEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
+                Utils.logUserAction(action,
+                        "form", "lab_test",
+                        "patient_uuid", patientUuid);
                 // This will fire a CreatePatientSucceededEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
@@ -303,6 +311,9 @@ final class PatientChartController {
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
+        Utils.logUserAction("form_opener_pressed",
+                "form", "round",
+                "group", targetGroup);
         if (user != null) {
             fields.clinicianName = user.fullName;
         }
@@ -339,6 +350,7 @@ final class PatientChartController {
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
+        Utils.logUserAction("form_opener_pressed", "form", "lab_test");
         if (user != null) {
             fields.clinicianName = user.fullName;
         }
@@ -407,6 +419,7 @@ final class PatientChartController {
                     @Override
                     public boolean onNewConditionSelected(String newConditionUuid) {
                         setCondition(newConditionUuid);
+                        Utils.logUserAction("condition_assigned");
                         return false;
                     }
                 };
@@ -443,6 +456,7 @@ final class PatientChartController {
                         patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
                         mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
+                        Utils.logUserAction("location_assigned");
                         return false;
                     }
                 };

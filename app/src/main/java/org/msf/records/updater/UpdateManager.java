@@ -252,10 +252,7 @@ public class UpdateManager {
         try {
             return LexicographicVersion.parse(packageInfo.versionName);
         } catch (IllegalArgumentException e) {
-            LOG.e(
-                    e,
-                    "Application has an invalid semantic version: " + packageInfo.versionName + ". "
-                            + "Please fix in build.gradle.");
+            LOG.w("App has an invalid version (or is a dev build): " + packageInfo.versionName);
             return MINIMAL_VERSION;
         }
     }

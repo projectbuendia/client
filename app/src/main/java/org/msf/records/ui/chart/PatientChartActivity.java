@@ -308,6 +308,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
+                        Utils.logUserAction("location_button_pressed");
                         mController.showAssignLocationDialog(
                                 PatientChartActivity.this, assignLocation);
                         return true;
@@ -356,6 +357,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_chart_general_condition_parent)
     void onGeneralConditionPressed(View v) {
+        Utils.logUserAction("condition_pressed");
         mController.showAssignGeneralConditionDialog(this, mGeneralConditionUuid);
     }
 

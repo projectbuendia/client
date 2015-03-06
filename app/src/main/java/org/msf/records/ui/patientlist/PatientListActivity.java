@@ -11,6 +11,7 @@ import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
+import org.msf.records.utils.Utils;
 
 /**
  * An activity representing a list of Patients.
@@ -91,6 +92,8 @@ public class PatientListActivity extends PatientSearchActivity {
                 @Override
                 public boolean onNavigationItemSelected(int position, long id) {
                     getSearchController().setFilter(filters[position]);
+                    Utils.logUserAction("filter_selected",
+                            "filter", filters[position].toString());
                     getSearchController().loadSearchResults();
                     return true;
                 }
