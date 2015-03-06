@@ -1,25 +1,26 @@
-package org.msf.records.utils;
+package org.msf.records.utils.date;
 
 import android.test.InstrumentationTestCase;
 
-import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.msf.records.utils.date.RelativeLocalDateFormatter;
 
 /**
- * Test cases for {@link RelativeDateTimeFormatter}.
+ * Test cases for {@link org.msf.records.utils.date.RelativeLocalDateFormatter}.
  */
-public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
+public class RelativeLocalDateFormatterTest extends InstrumentationTestCase {
 
-    private RelativeDateTimeFormatter mFormatter;
-    private DateTime mNow;
+    private RelativeLocalDateFormatter mFormatter;
+    private LocalDate mNow;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mFormatter = RelativeDateTimeFormatter.builder()
-                .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
+        mFormatter = RelativeLocalDateFormatter.builder()
+                .withCasing(RelativeLocalDateFormatter.Casing.LOWER_CASE)
                 .build();
-        mNow = DateTime.parse("2000-01-01T12:00Z");
+        mNow = LocalDate.parse("2000-01-01T12:00Z");
     }
 
     public void testFormat_rightNow() throws Exception {
@@ -31,7 +32,7 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
     }
 
     public void testFormat_today() throws Exception {
-        assertEquals("today", mFormatter.format(mNow, mNow.minusHours(1)));
+        assertEquals("today", mFormatter.format(mNow, mNow));
     }
 
     public void testFormat_yesterday() throws Exception {

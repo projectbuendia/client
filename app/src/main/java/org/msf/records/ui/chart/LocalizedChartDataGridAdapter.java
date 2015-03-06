@@ -22,6 +22,7 @@ import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.date.DateUtils;
 import org.msf.records.widget.CellType;
 import org.msf.records.widget.DataGridAdapter;
 
@@ -151,7 +152,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
                 String oldText = row.datesToValues.get(dateKey);
                 String newText = (oldText == null ? "" : oldText + "\n—\n")
-                        + d.toString("d MMM, hh:mm a\n") + ob.value;
+                        + DateUtils.dateTimeToLongDateString(d) + "\n" + ob.value;
                 row.datesToValues.put(dateKey, newText);
             } else {
                 row.datesToValues.put(dateKey, ob.value);
@@ -186,8 +187,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     }
 
     private String toAmKey(String todayString, LocalDate localDate, LocalDate admissionDate) {
-        // TODO: Localize.
-        String localizedDateString = localDate.toString("d MMM");
+        // TODO: Localize heading construction.
+        String localizedDateString =
+                DateUtils.dateTimeToShortDateString(localDate.toDateTimeAtStartOfDay());
         int daysDiff = Days.daysBetween(localDate, today).getDays();
         if (admissionDate == null) {
             if (daysDiff == 0) {

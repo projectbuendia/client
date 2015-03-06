@@ -1,8 +1,5 @@
 package org.msf.records.utils;
 
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -16,6 +13,7 @@ import java.util.regex.Pattern;
 
 /** Utility methods. */
 public class Utils {
+
     /** Converts objects with integer type to BigInteger. */
     public static BigInteger toBigInteger(Object obj) {
         if (obj instanceof Integer) {
@@ -132,30 +130,6 @@ public class Utils {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError("UTF-8 should be supported in every JVM");
-        }
-    }
-
-    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(LocalDate date) {
-        return date == null ? null : date.toString();
-    }
-
-    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(String string) {
-        try {
-            return string == null ? null : LocalDate.parse(string);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate) {
-        Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 2) {
-            return "" + age.getYears() + " y";
-        } else {
-            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
         }
     }
 

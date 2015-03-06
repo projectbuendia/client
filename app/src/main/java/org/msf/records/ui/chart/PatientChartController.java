@@ -37,10 +37,10 @@ import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
+import org.msf.records.utils.date.DateUtils;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -388,7 +388,7 @@ final class PatientChartController {
                     conceptsToLatestObservations.get(Concepts.ADMISSION_DATE_UUID);
             String admissionDateString = admissionDateObservation.localizedValue;
             if (admissionDateString != null) {
-                admissionDate = Utils.stringToLocalDate(admissionDateString);
+                admissionDate = DateUtils.stringToLocalDate(admissionDateString);
             }
         }
         mUi.setObservationHistory(observations, admissionDate);

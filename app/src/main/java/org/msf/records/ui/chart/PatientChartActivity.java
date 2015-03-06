@@ -40,10 +40,10 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.utils.date.DateUtils;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.RelativeDateTimeFormatter;
-import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.RelativeLocalDateFormatter;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.PatientAttributeView;
@@ -51,11 +51,8 @@ import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -127,11 +124,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     public static final String PATIENT_UUID_KEY = "PATIENT_UUID";
     public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
     public static final String PATIENT_ID_KEY = "PATIENT_ID";
-
-    private static final RelativeDateTimeFormatter DATE_TIME_FORMATTER =
-            RelativeDateTimeFormatter.builder()
-                    .withCasing(RelativeDateTimeFormatter.Casing.SENTENCE_CASE)
-                    .build();
 
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
@@ -434,12 +426,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setLatestEncounter(long encounterTimeMilli) {
-            GregorianCalendar calendar = new GregorianCalendar();
-            calendar.setTimeInMillis(encounterTimeMilli);
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("d MMM yyyy, HH:mm a", Locale.US);
-
-            if (calendar.getTime().getTime() != 0) {
-                mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+            if (encounterTimeMilli != 0) {
+                mLastObservationTimeView.setText(
+                        DateUtils.dateTimeToLongDateString(new DateTime(encounterTimeMilli)));
                 mLastObservationLabel.setVisibility(View.VISIBLE);
             } else {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
@@ -472,7 +461,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     && symptomsOnsetObservation.localizedValue != null) {
                 try {
                     LocalDate symptomsOnsetDate =
-                            Utils.stringToLocalDate(symptomsOnsetObservation.localizedValue);
+                            DateUtils.stringToLocalDate(symptomsOnsetObservation.localizedValue);
                     int symptomsOnsetDays = Days
                             .daysBetween(symptomsOnsetDate.toDateTimeAtStartOfDay(), now)
                             .getDays() + 1;
@@ -489,7 +478,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     && admissionDateObservation.localizedValue != null) {
                 try {
                     LocalDate admissionDate =
-                            Utils.stringToLocalDate(admissionDateObservation.localizedValue);
+                            DateUtils.stringToLocalDate(admissionDateObservation.localizedValue);
                     int admissionDays = Days
                             .daysBetween(admissionDate.toDateTimeAtStartOfDay(), now)
                             .getDays() + 1;
@@ -550,13 +539,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 if (pcrObservationMillis > 0) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
-                    String dateText = "invalid date";
-                    if (today.equals(obsDay)) {
-                        dateText = "today";
-                    } else if (obsDay.isBefore(today)) {
-                        int days = Days.daysBetween(obsDay, today).getDays();
-                        dateText = (days == 1) ? "1 day ago" : (days + " days ago");
-                    }
+                    String dateText = RelativeLocalDateFormatter.builder()
+                            .withCasing(RelativeLocalDateFormatter.Casing.LOWER_CASE)
+                            .build()
+                            .format(today, obsDay);
                     mPcr.setName(getResources().getString(
                             R.string.latest_pcr_label_with_date, dateText));
                 }
@@ -685,7 +671,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+                    ? "age unknown" : DateUtils.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 

@@ -5,7 +5,7 @@ import android.database.Cursor;
 import org.joda.time.DateTime;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.sync.PatientProjection;
-import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.DateUtils;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -22,7 +22,7 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
                 .setUuid(cursor.getString(PatientProjection.COLUMN_UUID))
                 .setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
                 .setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
-                .setBirthdate(Utils.stringToLocalDate(
+                .setBirthdate(DateUtils.stringToLocalDate(
                         cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
                 .setGender(getGenderFromString(
                         cursor.getString(PatientProjection.COLUMN_GENDER)))

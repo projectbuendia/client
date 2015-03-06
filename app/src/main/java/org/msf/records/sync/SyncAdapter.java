@@ -36,8 +36,8 @@ import org.msf.records.sync.providers.Contracts;
 import org.msf.records.sync.providers.MsfRecordsProvider;
 import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.msf.records.user.UserManager;
+import org.msf.records.utils.date.DateUtils;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -430,7 +430,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     locationUuid = Zone.DEFAULT_LOCATION;
                 }
                 birthdate =
-                        Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
+                        DateUtils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
                 gender = c.getString(PatientProjection.COLUMN_GENDER);
 
                 Patient patient = patientsMap.get(id);
@@ -468,7 +468,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         patientAssignedLocationUuid)
                                 .withValue(
                                         Contracts.Patients.BIRTHDATE,
-                                        Utils.localDateToString(patient.birthdate))
+                                        DateUtils.localDateToString(patient.birthdate))
                                 .withValue(Contracts.Patients.GENDER, patient.gender)
                                 .withValue(Contracts.Patients._ID, patient.id)
                                 .build());
@@ -500,7 +500,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(Contracts.Patients.FAMILY_NAME, e.family_name)
                             .withValue(Contracts.Patients.UUID, e.uuid)
                             .withValue(Contracts.Patients.ADMISSION_TIMESTAMP, e.admission_timestamp)
-                            .withValue(Contracts.Patients.BIRTHDATE, Utils.localDateToString(e.birthdate))
+                            .withValue(Contracts.Patients.BIRTHDATE, DateUtils.localDateToString(e.birthdate))
                             .withValue(Contracts.Patients.GENDER, e.gender);
 
             if (e.assigned_location == null) {
