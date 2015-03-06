@@ -1,5 +1,6 @@
 package org.msf.records.utils.date;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
@@ -7,7 +8,7 @@ import org.joda.time.Period;
  * An object that pretty-prints Joda {@link LocalDate}s using relative phrases such as "4 days ago"
  * or "yesterday".
  */
-public class RelativeLocalDateFormatter {
+public class RelativeDateTimeFormatter {
 
     public enum Casing {
 
@@ -56,8 +57,8 @@ public class RelativeLocalDateFormatter {
             return this;
         }
 
-        public RelativeLocalDateFormatter build() {
-            return new RelativeLocalDateFormatter(mCasing);
+        public RelativeDateTimeFormatter build() {
+            return new RelativeDateTimeFormatter(mCasing);
         }
     }
 
@@ -67,14 +68,19 @@ public class RelativeLocalDateFormatter {
 
     private final Casing mCasing;
 
-    private RelativeLocalDateFormatter(Casing casing) {
+    private RelativeDateTimeFormatter(Casing casing) {
         mCasing = casing;
+    }
+
+    public String format(LocalDate now, LocalDate other) {
+        // Ensure DateTimes don't match so that we exclude the 'right now' case.
+        return format(now.toDateTimeAtStartOfDay().plusMinutes(1), other.toDateTimeAtStartOfDay());
     }
 
     /**
      * Returns a formatted representation of {@code other}, relative to {@code now}.
      */
-    public String format(LocalDate now, LocalDate other) {
+    public String format(DateTime now, DateTime other) {
         if (other.isEqual(now)) {
             return mCasing.rightNow;
         }

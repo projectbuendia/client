@@ -2,25 +2,25 @@ package org.msf.records.utils.date;
 
 import android.test.InstrumentationTestCase;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.msf.records.utils.date.RelativeLocalDateFormatter;
 
 /**
- * Test cases for {@link org.msf.records.utils.date.RelativeLocalDateFormatter}.
+ * Test cases for {@link RelativeDateTimeFormatter}.
  */
-public class RelativeLocalDateFormatterTest extends InstrumentationTestCase {
+public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
 
-    private RelativeLocalDateFormatter mFormatter;
-    private LocalDate mNow;
+    private RelativeDateTimeFormatter mFormatter;
+    private DateTime mNow;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mFormatter = RelativeLocalDateFormatter.builder()
-                .withCasing(RelativeLocalDateFormatter.Casing.LOWER_CASE)
+        mFormatter = RelativeDateTimeFormatter.builder()
+                .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
                 .build();
-        mNow = LocalDate.parse("2000-01-01T12:00Z");
+        mNow = DateTime.parse("2000-01-01T12:00Z");
     }
 
     public void testFormat_rightNow() throws Exception {
@@ -32,7 +32,7 @@ public class RelativeLocalDateFormatterTest extends InstrumentationTestCase {
     }
 
     public void testFormat_today() throws Exception {
-        assertEquals("today", mFormatter.format(mNow, mNow));
+        assertEquals("today", mFormatter.format(mNow, mNow.minusHours(1)));
     }
 
     public void testFormat_yesterday() throws Exception {
@@ -41,5 +41,10 @@ public class RelativeLocalDateFormatterTest extends InstrumentationTestCase {
 
     public void testFormat_daysAgo() throws Exception {
         assertEquals("2 days ago", mFormatter.format(mNow, mNow.minusDays(2)));
+    }
+
+    /** Tests that format produces 'today' for identical {@link LocalDate} objects. */
+    public void testFormatLocalDate_today() {
+        assertEquals("today", mFormatter.format(mNow.toLocalDate(), mNow.toLocalDate()));
     }
 }

@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.utils.LocaleSelector;
 
 import java.text.SimpleDateFormat;
@@ -13,12 +15,10 @@ import java.text.SimpleDateFormat;
  * Static utility functions for dealing with dates and timestamps.
  */
 public class DateUtils {
-    static final SimpleDateFormat SHORT_DATE_FORMATTER =
-            new SimpleDateFormat("d MMM", LocaleSelector.getCurrentLocale());
-    static final SimpleDateFormat MEDIUM_DATE_FORMATTER =
-            new SimpleDateFormat("d MMM yyyy", LocaleSelector.getCurrentLocale());
-    static final SimpleDateFormat LONG_DATE_FORMATTER =
-                    new SimpleDateFormat("d MMM yyyy, HH:mm a", LocaleSelector.getCurrentLocale());
+    static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
+    static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
+    static final DateTimeFormatter LONG_DATE_FORMATTER =
+            DateTimeFormat.forPattern("d MMM yyyy, HH:mm a");
 
     /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
     public static String localDateToString(LocalDate date) {
@@ -37,17 +37,17 @@ public class DateUtils {
     /** Converts a nullable {@link DateTime} to a nullable String with day and month only. */
     public static @Nullable
     String dateTimeToShortDateString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : SHORT_DATE_FORMATTER.format(dateTime);
+        return dateTime == null ? null : SHORT_DATE_FORMATTER.print(dateTime);
     }
 
     /** Converts a nullable {@link DateTime} to a nullable String with day, month, and year. */
     public static @Nullable String dateTimeToMediumDateString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : MEDIUM_DATE_FORMATTER.format(dateTime);
+        return dateTime == null ? null : MEDIUM_DATE_FORMATTER.print(dateTime);
     }
 
     /** Converts a nullable {@link DateTime} to a nullable String with full date and time. */
     public static @Nullable String dateTimeToLongDateString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : LONG_DATE_FORMATTER.format(dateTime);
+        return dateTime == null ? null : LONG_DATE_FORMATTER.print(dateTime);
     }
 
     /** Converts a birthdate to a string describing age in months or years. */

@@ -43,7 +43,7 @@ import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
 import org.msf.records.utils.date.DateUtils;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.date.RelativeLocalDateFormatter;
+import org.msf.records.utils.date.RelativeDateTimeFormatter;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.PatientAttributeView;
@@ -539,8 +539,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 if (pcrObservationMillis > 0) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
-                    String dateText = RelativeLocalDateFormatter.builder()
-                            .withCasing(RelativeLocalDateFormatter.Casing.LOWER_CASE)
+                    String dateText = RelativeDateTimeFormatter.builder()
+                            .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
                             .build()
                             .format(today, obsDay);
                     mPcr.setName(getResources().getString(
