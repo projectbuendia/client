@@ -7,9 +7,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.msf.records.utils.LocaleSelector;
-
-import java.text.SimpleDateFormat;
 
 /**
  * Static utility functions for dealing with dates and timestamps.
@@ -17,8 +14,7 @@ import java.text.SimpleDateFormat;
 public class DateUtils {
     static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
-    static final DateTimeFormatter LONG_DATE_FORMATTER =
-            DateTimeFormat.forPattern("d MMM yyyy, HH:mm a");
+    static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
 
     /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
     public static String localDateToString(LocalDate date) {
@@ -44,9 +40,12 @@ public class DateUtils {
         return dateTime == null ? null : MEDIUM_DATE_FORMATTER.print(dateTime);
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with full date and time. */
-    public static String dateTimeToLongDateString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : LONG_DATE_FORMATTER.print(dateTime);
+    /**
+     * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
+     * time zone.
+     */
+    public static String dateTimeToMediumDateTimeString(@Nullable DateTime dateTime) {
+        return dateTime == null ? null : MEDIUM_DATETIME_FORMATTER.print(dateTime);
     }
 
     /** Converts a birthdate to a string describing age in months or years. */
