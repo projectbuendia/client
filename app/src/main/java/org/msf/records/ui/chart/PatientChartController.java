@@ -495,10 +495,6 @@ final class PatientChartController {
             updatePatientLocationUi();
         }
 
-        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
-            mSyncManager.forceSync();
-        }
-
         public void onEventMainThread(SyncSucceededEvent event) {
             updatePatientUi();
         }
