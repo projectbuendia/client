@@ -414,7 +414,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
         @Override
         public void showValidationError(int field, int messageResource, String... messageArgs) {
-            String message = getString(messageResource, messageArgs);
+            String message = getString(messageResource, (Object[]) messageArgs);
             switch (field) {
                 case PatientCreationController.Ui.FIELD_ID:
                     mId.setError(message);
