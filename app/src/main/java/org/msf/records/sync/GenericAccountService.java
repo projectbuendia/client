@@ -93,6 +93,9 @@ public class GenericAccountService extends Service {
 
     /** Starts (and forces) an incremental update of observations. */
     public static void forceIncrementalObservationSync() {
+        // Start by canceling any existing syncs, which may delay this one.
+        ContentResolver.cancelSync(getAccount(), Contracts.CONTENT_AUTHORITY);
+
         Bundle b = new Bundle();
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);

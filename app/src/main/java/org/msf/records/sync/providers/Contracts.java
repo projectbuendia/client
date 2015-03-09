@@ -363,6 +363,7 @@ public class Contracts {
 
         public static final String ITEM_CONTENT_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-chart";
+        private static final String FAKE_PATIENT_UUID = "fake-patient";
 
         /**
          * Returns the content URI for a localized chart for a given chart UUID, patient UUID, and
@@ -385,6 +386,7 @@ public class Contracts {
             return CONTENT_URI.buildUpon()
                     .appendPath(chartUuid)
                     .appendPath(locale)
+                    .appendPath(FAKE_PATIENT_UUID) // Don't expect to match any real observations.
                     .build();
         }
 

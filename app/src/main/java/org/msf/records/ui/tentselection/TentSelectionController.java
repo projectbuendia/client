@@ -85,6 +85,12 @@ final class TentSelectionController {
     // requested by this controller.
     private boolean mWaitingOnSync = false;
 
+    // True when the user has explicitly requested that a sync be canceled (e.g. via the sync cancel
+    // button). Sync operations may be cancelled and rescheduled by Android without the user
+    // requesting a sync cancellation. In these cases, this flag will remain false.
+    private boolean mWaitingOnSyncCancel = false;
+    private Object mSyncCancelLock = new Object();
+
     public TentSelectionController(
             AppModel appModel,
             CrudEventBus crudEventBus,
@@ -101,6 +107,7 @@ final class TentSelectionController {
     }
 
     public void init() {
+        mWaitingOnSyncCancel = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         LOG.d("init: isLocationTreeValid() = " + isLocationTreeValid());
@@ -229,13 +236,29 @@ final class TentSelectionController {
     private final class EventBusSubscriber {
 
         public void onEventMainThread(SyncCancelRequestedEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showSyncCancelRequested();
+            if (mWaitingOnSync) {
+                synchronized (mSyncCancelLock) {
+                    mWaitingOnSyncCancel = true;
+                    for (TentFragmentUi fragmentUi : mFragmentUis) {
+                        fragmentUi.showSyncCancelRequested();
+                    }
+                }
             }
         }
 
         public void onEventMainThread(SyncCanceledEvent event) {
-            mUi.finish();
+            // If user-initiated cancellation occurred, close the activity even if we're no longer
+            // waiting on a sync (continuing to load the activity might be jarring).
+            synchronized (mSyncCancelLock) {
+                if (!mWaitingOnSyncCancel) {
+                    LOG.d("Detected non-user-initiated sync cancellation, ignoring.");
+                    return;
+                }
+
+                mWaitingOnSyncCancel = false;
+                LOG.d("Detected sync cancellation while waiting on sync, finishing activity.");
+                mUi.finish();
+            }
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
@@ -247,8 +270,10 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(SyncStartedEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.resetSyncProgress();
+            if (mWaitingOnSync) {
+                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                    fragmentUi.resetSyncProgress();
+                }
             }
         }
 
@@ -268,10 +293,12 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.resetSyncProgress();
+            if (mWaitingOnSync) {
+                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                    fragmentUi.resetSyncProgress();
+                }
+                mUi.showSyncFailedDialog(true);
             }
-            mUi.showSyncFailedDialog(true);
         }
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
@@ -283,6 +310,7 @@ final class TentSelectionController {
                 LOG.i("Found no locations in the local datastore; continuing to wait on sync.");
                 return;
             }
+            mWaitingOnSync = false;
 
             LOG.i("Received a valid location tree.");
             for (AppLocation zone :
@@ -304,6 +332,7 @@ final class TentSelectionController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
+            // TODO: Remove -- should be unnecessary.
             mPatientSearchController.setLocations(mAppLocationTree);
         }
     }

@@ -9,6 +9,7 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 
@@ -71,7 +72,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         screenshot("Test Start");
         String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
-        onView(withId(R.id.patient_creation_button_change_location)).perform(click());
+        onView(withId(R.id.patient_creation_button_change_location)).perform(scrollTo(), click());
         screenshot("After Location Dialog Shown");
         onView(withText("S1")).perform(click());
         screenshot("After Location Selected");
@@ -109,9 +110,10 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     /** Tests that the admission date is visible right after adding a patient. */
     public void testNewPatientHasDefaultAdmissionDate() {
         testNewPatientWithoutLocation();
-        checkViewDisplayedSoon(allOf(
+        // Flaky because of potential periodic syncs.
+        checkViewDisplayedWithin(allOf(
                 isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 1")));
+                withText("Day 1")), 90000);
     }
 
     /** Tests that symptoms onset is optional and not assigned a default value. */

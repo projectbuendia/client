@@ -1,7 +1,5 @@
 package org.msf.records.ui.sync;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-
 import org.msf.records.R;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
@@ -9,7 +7,6 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 
 /**
@@ -25,8 +22,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
     public void testSyncFailedDialogAppearsWhenSyncFails() {
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
         screenshot("After Sync Fails");
@@ -41,8 +38,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that the back button in the sync failed dialog returns to user selection. */
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
 
@@ -57,8 +54,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_settings));
         screenshot("After Sync Fails");
@@ -78,7 +75,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     // TODO(akalachman): Temporarily disabled: known issue that spinner is shown in this case.
     /*public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
         screenshot("Test Start");
-        waitForInitialSync();
         setWifiEnabled(false);
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
@@ -95,17 +91,17 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
-        waitForInitialSync();
+        waitForSyncFailure();
         setWifiEnabled(false);
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");
 
+        setWifiEnabled(true);
         onView(withText(R.string.sync_failed_retry)).perform(click());
 
-        setWifiEnabled(true);
         waitForInitialSync();
-        waitForProgressFragment(); // Also make sure dialog disappears before checking anything.
+        waitForProgressFragment();
         screenshot("After Retry Clicked");
 
         // Should be at tent selection screen with tents available.
@@ -121,7 +117,6 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     // TODO: Temporarily disabled.
     /*public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
         // TODO: Potentially flaky, as sync may finish before being force-failed.
-        waitForInitialSync();
         setWifiEnabled(false);
 
         onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
