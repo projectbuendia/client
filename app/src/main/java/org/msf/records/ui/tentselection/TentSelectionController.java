@@ -85,9 +85,9 @@ final class TentSelectionController {
     // requested by this controller.
     private boolean mWaitingOnSync = false;
 
-    // Sync operations may be cancelled and rescheduled by Android without the user actually
-    // requesting a sync cancellation. In these cases, we need to ensure there's no user-facing
-    // change.
+    // True when the user has explicitly requested that a sync be canceled (e.g. via the sync cancel
+    // button). Sync operations may be cancelled and rescheduled by Android without the user
+    // requesting a sync cancellation. In these cases, this flag will remain false.
     private boolean mWaitingOnSyncCancel = false;
     private Object mSyncCancelLock = new Object();
 
