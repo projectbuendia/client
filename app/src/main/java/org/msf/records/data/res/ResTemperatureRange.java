@@ -9,7 +9,7 @@ import org.msf.records.R;
  */
 public enum ResTemperatureRange implements Resolvable<ResTemperatureRange.Resolved> {
 
-    UNKNOWN(R.color.vital_unknown, R.color.vital_fg_dark),
+    UNKNOWN(R.color.vital_unknown, R.color.vital_fg_unknown),
     NORMAL(R.color.temperature_normal, R.color.vital_fg_light),
     HIGH(R.color.temperature_high, R.color.vital_fg_light);
 

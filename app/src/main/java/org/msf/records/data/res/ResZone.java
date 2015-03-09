@@ -9,7 +9,7 @@ import org.msf.records.R;
  */
 public enum ResZone implements Resolvable<ResZone.Resolved> {
 
-    UNKNOWN(R.color.vital_unknown, R.color.vital_fg_dark),
+    UNKNOWN(R.color.vital_unknown, R.color.vital_fg_unknown),
     SUSPECT(R.color.zone_suspect, R.color.vital_fg_dark),
     PROBABLE(R.color.zone_probable, R.color.vital_fg_light),
     CONFIRMED(R.color.zone_confirmed, R.color.vital_fg_light);

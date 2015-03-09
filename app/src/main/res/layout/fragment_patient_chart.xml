@@ -180,7 +180,7 @@
                 android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_dark"
+                app:textColor="@color/vital_fg_unknown"
                 app:vitalName="Pulse"
                 app:vitalValue="–"/>
 
@@ -190,7 +190,7 @@
                 android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_dark"
+                app:textColor="@color/vital_fg_unknown"
                 app:vitalName="Respiration"
                 app:vitalValue="–"/>
 
@@ -200,7 +200,7 @@
                 android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_dark"
+                app:textColor="@color/vital_fg_unknown"
                 app:vitalName="Tolerating Diet"
                 app:vitalValue="–"/>
 
@@ -210,7 +210,7 @@
                 android:layout_height="104dp"
                 android:layout_margin="4dp"
                 android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_dark"
+                app:textColor="@color/vital_fg_unknown"
                 app:vitalName="Hydration"
                 app:vitalValue="–"/>
 

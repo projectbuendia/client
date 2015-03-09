@@ -8,6 +8,4 @@
         android:id="@+id/tent_selection_tent"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"/>
-    <!--
-        app:subtitledButtonIsSquare="true" -->
 </LinearLayout>
