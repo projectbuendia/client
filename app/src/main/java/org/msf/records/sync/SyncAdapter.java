@@ -154,7 +154,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
-        // If we can't access the Buendia API, short-circuit.
+        // If we can't access the Buendia API, short-circuit. Before this check was added, sync
+        // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
+        // change, however, any user-requested sync will instantly fail until the HealthMonitor has
+        // made a determination that the server is definitely accessible.
         if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
             LOG.e("Sync failed: Buendia API is unavailable.");
             getContext().sendBroadcast(syncFailedIntent);
