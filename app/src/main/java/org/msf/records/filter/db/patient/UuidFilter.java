@@ -7,7 +7,7 @@ import org.msf.records.sync.providers.Contracts;
 /**
  * Returns only the patient with the given UUID.
  */
-public final class UuidFilter implements SimpleSelectionFilter<AppPatient> {
+public final class UuidFilter extends SimpleSelectionFilter<AppPatient> {
 
     @Override
     public String getSelectionString() {

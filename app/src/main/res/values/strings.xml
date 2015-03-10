@@ -224,6 +224,9 @@
         Please check that the package server setting is correct or consult an administrator for help.
     </string>
     <string name="troubleshoot_action_check_settings">Check Settings</string>
+    <string name="present_filter_description">All Present Patients</string>
+    <string name="age_filter_description">Under %d Years</string>
+    <string name="filter_group_default_name">Multiple Filters</string>
     <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
     <string name="patient_validation_missing_age">Please enter the age.</string>
     <string name="patient_validation_missing_family_name">Please enter the family name.</string>
