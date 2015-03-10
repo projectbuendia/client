@@ -53,7 +53,7 @@ public final class AssignLocationDialog
     private AppLocationTree mLocationTree;
     private boolean mRegistered;
 
-    // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
+    // TODO: Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
     public interface TentSelectedCallback {
         /**
@@ -164,9 +164,6 @@ public final class AssignLocationDialog
         if (isCurrentTent(newTentUuid) || mTentSelectedCallback.onNewTentSelected(newTentUuid)) {
             dismiss();
         }
-
-        // TODO(kpy): Show a progress spinner somewhere on the dialog.
-
     }
 
     public void dismiss() {
@@ -177,7 +174,7 @@ public final class AssignLocationDialog
         mDialog.dismiss();
     }
 
-    // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
+    // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentTent(String newTentUuid) {
         return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());

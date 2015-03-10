@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
-// TODO(dxchen): License (from U+2020).
+// TODO(dxchen): License.
 
 /** A "view server" adaptation which automatically hooks itself up to all activities. */
 public interface ActivityHierarchyServer extends Application.ActivityLifecycleCallbacks {

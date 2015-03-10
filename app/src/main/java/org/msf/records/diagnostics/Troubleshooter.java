@@ -61,7 +61,7 @@ public class Troubleshooter {
             mActiveIssues.add(healthIssue);
         }
 
-        // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
         postTroubleshootingEvents();
@@ -80,7 +80,7 @@ public class Troubleshooter {
             }
         }
 
-        // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
         postTroubleshootingEvents();

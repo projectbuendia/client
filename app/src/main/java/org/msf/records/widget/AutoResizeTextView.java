@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 // @nolint - Third-party.
 
-// TODO(dxchen): License. From https://github.com/AndroidDeveloperLB/AutoFitTextView.
+// TODO: License. From https://github.com/AndroidDeveloperLB/AutoFitTextView.
 
 /**
  * a textView that is able to self-adjust its font size depending on the min and max size of the font, and its own size.<br/>

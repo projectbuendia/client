@@ -30,7 +30,7 @@ import java.util.Set;
  * <p>Based on https://www.codeofaninja.com/2013/08/android-scroll-table-fixed-header-column.html.
  * License is unclear: https://www.codeofaninja.com/terms-of-use.
  *
- * TODO(dxchen): Figure out license.
+ * TODO: Figure out license.
  */
 @SuppressLint("ViewConstructor") // Never to be instantiated in XML.
 public class DataGridView extends RelativeLayout {

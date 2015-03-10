@@ -16,7 +16,7 @@ def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone(
 
 dependencies {
     // Build plugins
-    // TODO(dxchen): Figure out why removing this causes a Dagger error.
+    // TODO: Figure out why removing this causes a Dagger error.
     provided 'com.github.frankiesardo:auto-parcel-processor:0.2' // Automatic Parcelables
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
     // provided 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1' // Test multiplexing/selection

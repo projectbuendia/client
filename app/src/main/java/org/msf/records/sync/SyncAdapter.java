@@ -534,8 +534,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("batch apply done");
         mContentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
         LOG.i("change notified");
-
-        //TODO(giljulio) update the server as well as the client
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
@@ -594,8 +592,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
         mContentResolver.notifyChange(
                 Contracts.LocationNames.CONTENT_URI, null, false);
-
-        // TODO(akalachman): Update the server as well as the client
     }
 
     private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
@@ -645,12 +641,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
                     timingLogger);
         }
-        // This is completely unsafe as regards exceptions - if we fail to store sync time then
-        // we have added observations and not stored the sync time. However, getting this right
-        // transactionally through a content provider interface is not easy, we'd have to update
-        // everything through a single URL. As deletes and inserts aren't safe right now, this
-        // will do.
-        // TODO(nfortescue): make this transactionally safe.
+        // This is only safe transactionally if we can rely on the entire sync being transactional.
         storeLastSyncTime(provider, newSyncTime);
 
         checkCancellation("Sync was canceled before deleting temporary observations.");

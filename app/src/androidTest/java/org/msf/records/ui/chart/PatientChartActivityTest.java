@@ -127,7 +127,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the admission date is correctly displayed in the header.
-     * TODO: Currently disabled. Re-enable once date picker selection works.
+     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
+     * Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectAdmissionDate() {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
@@ -141,7 +142,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the patient chart shows the correct symptoms onset date.
-     * TODO: Currently disabled. Re-enable once date picker selection works.
+     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
+     * Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
         initWithDemoPatientChart();
@@ -154,7 +156,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the patient chart shows all days, even when no observations are present.
-     * TODO: Currently disabled. Re-enable once date picker selection works.
+     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
+     * Espresso 2.0).
      */
      /*public void testPatientChart_ShowsAllDaysInChartWhenNoObservations() {
         initWithDemoPatientChart();
@@ -282,6 +285,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Exercises all fields in the encounter form, except for encounter time. */
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
+        // TODO: Get rid of magic numbers in this test and other tests in this class.
         initWithDemoPatientChart();
         openEncounterForm();
         answerVisibleTextQuestion("Pulse", "80");
@@ -338,7 +342,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(containsString("Pregnant"))).check(matches(isDisplayed()));
         onView(withText(containsString("IV Fitted"))).check(matches(isDisplayed()));
 
-        // TODO: check notes
+        // TODO: check notes field
     }
 
     // TODO: Replace with more extensive, externalized demo data.

@@ -136,7 +136,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
-    // TODO(dxchen): Refactor.
+    // TODO: Refactor.
     private boolean mIsFetchingXform = false;
 
     private ResVital.Resolved mVitalUnknown;
@@ -450,6 +450,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
+            // TODO: Localize strings in this function.
             showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
             showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
@@ -563,7 +564,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             // Pregnancy & IV status
-            // TODO: Localize all of this.
             List<String> specialLabels = new ArrayList<>();
 
             observation = observations.get(Concepts.PREGNANCY_UUID);
@@ -620,8 +620,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (useRecyclerView()) {
                 mChartView = getChartViewNew(observations, admissionDate);
             } else {
-                // TODO(sdoerner): Remove this old implementation once the new chart grid has got
-                //                 some testing and feedback.
+                // TODO: Remove this old implementation.
                 mChartView = getChartView(observations, admissionDate);
             }
             mChartView.setLayoutParams(

@@ -47,7 +47,7 @@ public class OpenMrsServer implements Server {
             Gson gson) {
         mConnectionDetails = connectionDetails;
         mRequestFactory = requestFactory;
-        // TODO(kpy): Inject a Gson instance here.
+        // TODO: Inject a Gson instance here.
         mGson = gson;
     }
 
@@ -254,7 +254,7 @@ public class OpenMrsServer implements Server {
 
     @Override
     public void updatePatientLocation(String patientId, String newLocationId) {
-        // TODO(sdoerner): Implement.
+        // TODO: Implement or remove (currently handled by updatePatient).
     }
 
     @Override
@@ -465,7 +465,7 @@ public class OpenMrsServer implements Server {
 
     @Override
     public void cancelPendingRequests() {
-        // TODO(dxchen): Implement or deprecate. The way this was implemented before, where a string
+        // TODO: Implement or deprecate. The way this was implemented before, where a string
         // was the tag, is not safe. Only the class that initiated a request (and its delegates)
         // should be able to cancel that request.
     }
