@@ -188,26 +188,24 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         return dateTime.withTimeAtStartOfDay().withHourOfDay(hour).toString();
     }
 
-    private Spanned formatColumnHeader(String columnId) {
+    private String formatColumnHeader(String columnId) {
         DateTime dateTime = DateTime.parse(columnId).withChronology(mChronology);
         LocalDate date = dateTime.toLocalDate();
+        Resources res = mContext.getResources();
 
         int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
-        String admitDayHtml = admitDay >= 1 ? "Day " + admitDay : "–";
-        /*
-        // Showing both day numbers (since admission and since symptom onset)
-        // in the column headings was a UI feature we discussed but aren't
-        // enabling for now, pending feedback from the field on the importance
-        // of the day number since symptom onset to clinicians.
-        int onsetDay = Utils.dayNumberSince(mFirstSymptomsDate, date);
-        String onsetDayHtml = "<font color='#ff0000'>"
-                + (onsetDay >= 1 ? "Day " + onsetDay : "–")
-                + "</font>";
-        */
-        String dateHtml = (date.equals(mToday)
-                ? mContext.getResources().getString(R.string.today) + ", " : "")
-                + date.toString("d MMM");
-        return Html.fromHtml(admitDayHtml + "<br>" + dateHtml);
+        String admitDayLabel = (admitDay >= 1) ? res.getString(R.string.day_n, admitDay) : "–";
+
+        String dateString = date.toString("d MMM");
+        String dateLabel = date.equals(mToday)
+                ? res.getString(R.string.today_date, dateString) : dateString;
+
+        // The column header has two lines of text: the first line gives the day number since
+        // admission and the second line gives the calendar date.  Pending feedback from the field
+        // on its importance, the symptom onset day number could also be shown in the column
+        // header in a different colour.  This would be done by constructing HTML and using
+        // Html.fromHtml() to produce a Spanned object that will be rendered by the TextView.
+        return admitDayLabel + "\n" + dateLabel;
     }
 
     @Override
@@ -362,7 +360,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 }
                 break;
             case Concepts.BLEEDING_UUID:
-                if (mColumnIdsWithAnyBleeding.contains(columnId)) {
+                if (rowData.mColumnIdsToValues.containsKey(columnId)  // "any bleeding" option
+                        || mColumnIdsWithAnyBleeding.contains(columnId)  // specific bleeding options
+                ) {
                     backgroundResource = R.drawable.chart_cell_active;
                 }
                 break;

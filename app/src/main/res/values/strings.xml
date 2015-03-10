@@ -38,6 +38,8 @@
     <string name="action_search">Search</string>
     <string name="title_activity_tent_selection">Patients by Location</string>
     <string name="today">Today</string>
+    <string name="today_date">Today, %s</string>
+    <string name="day_n">Day %d</string>
     <string name="add_user_unknown_error">Unknown error</string>
     <string name="add_user_invalid_user">Invalid user</string>
     <string name="add_user_user_exists_locally">User already exists on tablet</string>
