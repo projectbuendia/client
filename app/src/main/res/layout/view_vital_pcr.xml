@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>uto-merging app/src/main/res/layout/view_vital_pain.xml
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,7 +20,7 @@
             android:padding="8dp"
             android:gravity="center"
             android:textAllCaps="true"
-            android:textColor="@color/vital_fg_dark"
+            android:textColor="@color/vital_fg_unknown"
             android:textStyle="bold"
             android:textSize="17sp"
             android:text="Latest Ebola Result" />
@@ -38,7 +38,7 @@
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 android:gravity="center"
-                android:textColor="@color/vital_fg_dark"
+                android:textColor="@color/vital_fg_unknown"
                 android:textSize="45sp"
                 android:maxLines="1"
                 android:id="@+id/patient_chart_vital_pcr"
@@ -51,7 +51,7 @@
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 android:gravity="center"
-                android:textColor="@color/vital_fg_dark"
+                android:textColor="@color/vital_fg_unknown"
                 android:textStyle="bold"
                 android:textSize="17sp"
                 android:visibility="gone"

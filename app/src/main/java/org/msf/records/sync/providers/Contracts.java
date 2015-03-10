@@ -203,7 +203,6 @@ public class Contracts {
         String FULL_NAME = "full_name";
     }
 
-    // TODO(dxchen): Implement.
     interface LocalizedLocationColumns {
 
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
@@ -211,6 +210,9 @@ public class Contracts {
         String PARENT_UUID = LocationColumns.PARENT_UUID;
 
         String LOCALIZED_NAME = LocaleColumns.LOCALIZED_NAME;
+
+        /** The patient count for a single location, not including child locations. */
+        String PATIENT_COUNT = "patient_count";
     }
 
     public static class Charts implements ChartColumns, BaseColumns {
@@ -361,6 +363,7 @@ public class Contracts {
 
         public static final String ITEM_CONTENT_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-chart";
+        private static final String FAKE_PATIENT_UUID = "fake-patient";
 
         /**
          * Returns the content URI for a localized chart for a given chart UUID, patient UUID, and
@@ -383,6 +386,7 @@ public class Contracts {
             return CONTENT_URI.buildUpon()
                     .appendPath(chartUuid)
                     .appendPath(locale)
+                    .appendPath(FAKE_PATIENT_UUID) // Don't expect to match any real observations.
                     .build();
         }
 

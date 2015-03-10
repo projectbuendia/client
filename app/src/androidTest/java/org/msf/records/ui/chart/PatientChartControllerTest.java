@@ -43,7 +43,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	private static final String PATIENT_ID_1 = "id1";
 
 	private static final LocalizedChartHelper.LocalizedObservation OBSERVATION_A =
-			new LocalizedChartHelper.LocalizedObservation(0, "g", "c", "c", "val", "localizedVal");
+            new LocalizedChartHelper.LocalizedObservation(
+                    0, 0, "g", "c", "c", "val", "localizedVal");
 
 	private PatientChartController mController;
 
@@ -55,7 +56,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 	private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
     private FakeHandler mFakeHandler;
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -115,8 +116,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 		// removed, this can also be removed.
 	    mFakeHandler.runUntilEmpty();
 		// THEN the controller puts observations on the UI
-        verify(mMockUi).setObservationHistory(allObservations, null);
-		verify(mMockUi).updatePatientVitalsUI(recentObservations);
+        verify(mMockUi).setObservationHistory(allObservations, null, null);
+		verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
 	}
 
 	public void testPatientDetailsLoaded_UpdatesUi() {

@@ -38,6 +38,8 @@
     <string name="action_search">Search</string>
     <string name="title_activity_tent_selection">Patients by Location</string>
     <string name="today">Today</string>
+    <string name="today_date">Today, %s</string>
+    <string name="day_n">Day %d</string>
     <string name="add_user_unknown_error">Unknown error</string>
     <string name="add_user_invalid_user">Invalid user</string>
     <string name="add_user_user_exists_locally">User already exists on tablet</string>
@@ -124,10 +126,10 @@
     <string name="symptoms_onset_date_picker_title">Estimated symptom onset date</string>
     <string name="admission_date_picker_title">Set admission date</string>
     <string name="patient_creation_client_error">could not add patient to local database</string>
-    <string name="patient_creation_network_error">Could not complete server request</string>
-    <string name="patient_creation_network_error_with_reason">Could not complete server request (reason: %s)</string>
-    <string name="patient_creation_server_error">Server did not properly return patient data</string>
-    <string name="patient_creation_interrupted_error">Server request was interrupted</string>
+    <string name="patient_creation_network_error">could not complete server request</string>
+    <string name="patient_creation_network_error_with_reason">could not complete server request (reason: %s)</string>
+    <string name="patient_creation_server_error">server did not properly return patient data</string>
+    <string name="patient_creation_interrupted_error">server request was interrupted</string>
     <string name="patient_creation_unknown_error">unknown error</string>
     <string name="patient_creation_invalid_id_error">patient ID is invalid</string>
     <string name="patient_creation_duplicate_id_error">another patient exists with the same ID</string>
@@ -224,6 +226,9 @@
         Please check that the package server setting is correct or consult an administrator for help.
     </string>
     <string name="troubleshoot_action_check_settings">Check Settings</string>
+    <string name="present_filter_description">All Present Patients</string>
+    <string name="age_filter_description">Under %d Years</string>
+    <string name="filter_group_default_name">Multiple Filters</string>
     <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
     <string name="patient_validation_missing_age">Please enter the age.</string>
     <string name="patient_validation_missing_family_name">Please enter the family name.</string>

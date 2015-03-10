@@ -18,7 +18,7 @@
             android:padding="8dp"
             android:gravity="center"
             android:textAllCaps="true"
-            android:textColor="@color/vital_fg_dark"
+            android:textColor="@color/vital_fg_unknown"
             android:textStyle="bold"
             android:textSize="17sp"
             android:text="Mobility" />
@@ -30,7 +30,7 @@
             android:layout_above="@id/vital_name_mobility"
             android:padding="8dp"
             android:gravity="center"
-            android:textColor="@color/vital_fg_dark"
+            android:textColor="@color/vital_fg_unknown"
             android:textSize="45sp"
             android:text="–"/>
 

@@ -6,10 +6,7 @@ import android.content.ContentValues;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.joda.time.DateTime;
@@ -129,8 +126,16 @@ public class RpcToDb {
             throws ExecutionException, InterruptedException {
         final ContentResolver contentResolver = App.getInstance().getContentResolver();
 
-        final String[] projection = LocationProjection.getLocationProjection();
-        final String[] namesProjection = LocationProjection.getLocationNamesProjection();
+        final String[] projection = new String[] {
+                Contracts.Locations.LOCATION_UUID,
+                Contracts.Locations.PARENT_UUID
+        };
+        final String[] namesProjection = new String[] {
+                Contracts.LocationNames._ID,
+                Contracts.LocationNames.LOCATION_UUID,
+                Contracts.LocationNames.LOCALE,
+                Contracts.LocationNames.LOCALIZED_NAME
+        };
 
         LOG.d("Before network call");
         RequestFuture<List<Location>> future = RequestFuture.newFuture();
@@ -166,9 +171,11 @@ public class RpcToDb {
                 new HashMap<>();
         while (namesCur.moveToNext()) {
             String locationId = namesCur.getString(
-                    LocationProjection.LOCATION_NAME_LOCATION_UUID_COLUMN);
-            String locale = namesCur.getString(LocationProjection.LOCATION_NAME_LOCALE_COLUMN);
-            String name = namesCur.getString(LocationProjection.LOCATION_NAME_NAME_COLUMN);
+                    namesCur.getColumnIndex(Contracts.LocationNames.LOCATION_UUID));
+            String locale = namesCur.getString(
+                    namesCur.getColumnIndex(Contracts.LocationNames.LOCALE));
+            String name = namesCur.getString(
+                    namesCur.getColumnIndex(Contracts.LocationNames.LOCALIZED_NAME));
             if (locationId == null || locale == null || name == null) {
                 continue;
             }
@@ -185,8 +192,8 @@ public class RpcToDb {
         while(c.moveToNext()){
             syncResult.stats.numEntries++;
 
-            id = c.getString(LocationProjection.LOCATION_LOCATION_UUID_COLUMN);
-            parentId = c.getString(LocationProjection.LOCATION_PARENT_UUID_COLUMN);
+            id = c.getString(c.getColumnIndex(Contracts.Locations.LOCATION_UUID));
+            parentId = c.getString(c.getColumnIndex(Contracts.Locations.PARENT_UUID));
 
             Location location = locationsMap.get(id);
             if (location != null) {

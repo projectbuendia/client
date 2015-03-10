@@ -38,7 +38,7 @@
             android:paddingTop="0dp"
             android:gravity="center"
             android:textAllCaps="true"
-            android:textColor="@color/vital_fg_dark"
+            android:textColor="@color/vital_fg_unknown"
             android:textStyle="bold"
             android:textSize="17sp"
             android:text="@string/condition" />
@@ -49,7 +49,7 @@
             android:layout_above="@+id/patient_chart_vital_general_condition"
             android:padding="8dp"
             android:gravity="center"
-            android:textColor="@color/vital_fg_dark"
+            android:textColor="@color/vital_fg_unknown"
             android:textSize="45sp"
             android:maxLines="2"
             android:id="@+id/patient_chart_vital_general_condition_number"

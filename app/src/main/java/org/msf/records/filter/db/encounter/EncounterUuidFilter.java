@@ -7,7 +7,7 @@ import org.msf.records.sync.providers.Contracts;
 /**
  * Returns only the encounter with the given UUID.
  */
-public final class EncounterUuidFilter implements SimpleSelectionFilter<AppEncounter> {
+public final class EncounterUuidFilter extends SimpleSelectionFilter<AppEncounter> {
 
     @Override
     public String getSelectionString() {

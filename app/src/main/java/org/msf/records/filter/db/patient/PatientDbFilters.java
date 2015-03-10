@@ -1,10 +1,11 @@
 package org.msf.records.filter.db.patient;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.filter.db.AllFilter;
 import org.msf.records.filter.db.SimpleSelectionFilter;
-import org.msf.records.filter.db.SimpleSelectionFilterGroup;
 import org.msf.records.model.Concepts;
 
 import java.util.ArrayList;
@@ -15,14 +16,13 @@ import java.util.List;
  * All available patient filters available to the user, categorized by filter type.
  */
 public final class PatientDbFilters {
-    private static final SimpleSelectionFilter[] OTHER_FILTERS =
-            new SimpleSelectionFilter[] {
-        // TODO(akalachman): Localize filter names and extract elsewhere.
-        // TODO(akalachman): Remove FilterGroup dep (only used for setName).
-        new SimpleSelectionFilterGroup(
-                new ConceptFilter(Concepts.PREGNANCY_UUID, Concepts.YES_UUID)).setName("Pregnant"),
-        new SimpleSelectionFilterGroup(new AgeFilter(5)).setName("Children under 5"),
-        new SimpleSelectionFilterGroup(new AgeFilter(2)).setName("Children under 2")
+    private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
+            new ConceptFilter(
+                App.getInstance().getString(R.string.pregnant),
+                Concepts.PREGNANCY_UUID,
+                Concepts.YES_UUID),
+            new AgeFilter(5),
+            new AgeFilter(2)
     };
 
     private static final SimpleSelectionFilter DEFAULT_FILTER = new AllFilter();
@@ -39,9 +39,7 @@ public final class PatientDbFilters {
 
         for (AppLocation zone :
                 locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_ZONE)) {
-            // TODO(akalachman): Remove FilterGroup dep (only used for setName).
-            filters.add(new SimpleSelectionFilterGroup(
-                    new LocationUuidFilter(locationTree, zone)).setName(zone.toString()));
+            filters.add(new LocationUuidFilter(locationTree, zone));
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
         filters.toArray(filterArray);

@@ -1,16 +1,5 @@
 package org.msf.records.ui.userlogin;
 
-import org.msf.records.App;
-import org.msf.records.R;
-import org.msf.records.ui.BaseActivity;
-import org.msf.records.ui.BigToast;
-import org.msf.records.ui.ProgressFragment;
-import org.msf.records.ui.SettingsActivity;
-import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
-import org.msf.records.ui.tentselection.TentSelectionActivity;
-import org.msf.records.utils.EventBusWrapper;
-import org.msf.records.utils.Logger;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,23 +7,35 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.ui.BaseActivity;
+import org.msf.records.ui.BigToast;
+import org.msf.records.ui.SettingsActivity;
+import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
+import org.msf.records.ui.tentselection.TentSelectionActivity;
+import org.msf.records.utils.EventBusWrapper;
+
 import de.greenrobot.event.EventBus;
 
 /**
- * Screen allowing the user to login by selecting their name.
+ * Activity where users log in by selecting their name from a list.
+ * This is the starting activity for the app.
  */
 public class UserLoginActivity extends BaseActivity {
 
-    private static final Logger LOG = Logger.create();
     private UserLoginController mController;
     private AlertDialog mSyncFailedDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_login);
 
+        // This is the starting activity for the app, so show the app name and version.
+        setTitle(getString(R.string.app_name) + " " + getString(R.string.app_version));
+
+        setContentView(R.layout.activity_user_login);
         UserLoginFragment fragment =
                 (UserLoginFragment)getSupportFragmentManager()
                         .findFragmentById(R.id.fragment_user_login);

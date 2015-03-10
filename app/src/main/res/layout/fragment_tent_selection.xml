@@ -1,17 +1,15 @@
-<FrameLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tent_selection_content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="org.msf.records.ui.tentselection.TentSelectionFragment">
-
+    android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:id="@+id/tent_selection_layout">
+        android:id="@+id/tent_selection_layout"
+        tools:context="org.msf.records.ui.tentselection.TentSelectionFragment">
         <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_all_patients"
             android:layout_height="wrap_content"
@@ -27,7 +25,11 @@
             android:layout_margin="10dp"
             app:subtitledButtonTitle="Triage"
             app:subtitledButtonSubtitle="No patients"/>
-        <include layout="@layout/tent_grid" />
+        <org.msf.records.widget.ScrollViewCompatibleGridView
+            style="@style/TentGrid"
+            android:id="@+id/tent_selection_tents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
         <org.msf.records.widget.SubtitledButtonView
             android:id="@+id/tent_selection_discharged"
             android:layout_height="wrap_content"
@@ -36,5 +38,4 @@
             app:subtitledButtonTitle="Discharged"
             app:subtitledButtonSubtitle="No patients"/>
     </LinearLayout>
-
-</FrameLayout>
+</ScrollView>
