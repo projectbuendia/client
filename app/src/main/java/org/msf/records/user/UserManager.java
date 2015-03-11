@@ -207,7 +207,7 @@ public class UserManager {
      */
     public void addUser(NewUser user) {
         checkNotNull(user);
-        // TODO(dxchen): Validate user.
+        // TODO: Validate user.
         mAsyncTaskRunner.runTask(new AddUserTask(user));
     }
 
@@ -219,7 +219,7 @@ public class UserManager {
      */
     public void deleteUser(User user) {
         checkNotNull(user);
-        // TODO(dxchen): Validate user.
+        // TODO: Validate user.
         mAsyncTaskRunner.runTask(new DeleteUserTask(user));
     }
 
@@ -242,7 +242,7 @@ public class UserManager {
         mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
 
         if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
-            // TODO(rjlothian): Should we clear mActiveUser here?
+            // TODO: Potentially clear mActiveUser here.
             mEventBus.post(new ActiveUserUnsetEvent(
                     mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
         }
@@ -269,7 +269,7 @@ public class UserManager {
             try {
                 return mUserStore.loadKnownUsers();
             } catch (Exception e) {
-                // TODO(dxchen): Figure out type of exception to throw.
+                // TODO: Figure out type of exception to throw.
                 LOG.e(e, "Load users task failed");
                 mEventBus.post(
                         new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
@@ -309,7 +309,7 @@ public class UserManager {
             try {
                 return mUserStore.syncKnownUsers();
             } catch (Exception e) {
-                // TODO(dxchen): Figure out the type of exception to throw.
+                // TODO: Figure out the type of exception to throw.
                 LOG.e(e, "User sync failed");
                 return null;
             }
@@ -392,7 +392,7 @@ public class UserManager {
             try {
                 mUserStore.deleteUser(mUser);
             } catch (Exception e) {
-                // TODO(dxchen): Figure out the type of exception to throw.
+                // TODO: Figure out the type of exception to throw.
                 LOG.e(e, "Failed to delete user");
                 return false;
             }

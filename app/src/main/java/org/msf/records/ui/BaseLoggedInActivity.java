@@ -178,7 +178,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
             LOG.w("The user has switched. I don't know how to deal with that right now");
-            // TODO(dxchen): Handle.
+            // TODO: Handle.
         }
         mLastActiveUser = user;
 
@@ -192,7 +192,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     }
 
     public void onEvent(ActiveUserUnsetEvent event) {
-        // TODO(dxchen): Implement this in one way or another!
+        // TODO: Implement this in one way or another!
     }
 
     class MenuPopupWindow extends PopupWindow {
@@ -226,7 +226,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
             User user = App.getUserManager().getActiveUser();
             if (user == null) {
-                // TODO(dxchen): Handle no user.
+                // TODO: Handle no user.
                 return;
             }
 

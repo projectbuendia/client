@@ -54,7 +54,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
 
     public ButtonsSelectOneWidget(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
-        // TODO(dxchen): Handle initial values.
+        // TODO: Handle initial values.
 
         super(context, prompt, appearance, forceReadOnly);
         LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -76,7 +76,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
             RadioButton radioButton =
                     (RadioButton) inflater.inflate(R.layout.template_radio_button_segmented, null);
 
-            // TODO(dxchen): Un-unscreamify once server work is done.
+            // TODO: Un-unscreamify once server work is done.
 
             radioButton.setText(prompt.getSelectChoiceText(choice));
             radioButton.setTag(i);

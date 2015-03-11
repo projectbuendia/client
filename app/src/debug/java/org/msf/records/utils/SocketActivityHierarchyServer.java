@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(dxchen): License (U+2020)
+// TODO: License (U+2020)
 
 package org.msf.records.utils;
 

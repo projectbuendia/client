@@ -50,7 +50,7 @@ import dagger.Provides;
         injects = {
                 App.class,
 
-                // TODO(dxchen): Move these into activity-specific modules.
+                // TODO: Move these into activity-specific modules.
                 // Activities
                 PatientCreationActivity.class,
                 BaseActivity.class,

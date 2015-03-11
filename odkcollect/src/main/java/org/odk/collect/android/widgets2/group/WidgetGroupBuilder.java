@@ -17,7 +17,7 @@ public interface WidgetGroupBuilder<
         T extends ViewGroup & WidgetGroup,
         U extends WidgetGroupBuilder<T, U>> {
 
-    // TODO(dxchen): Consider adding an onError callback to be invoked on add error.
+    // TODO: Consider adding an onError callback to be invoked on add error.
 
     /**
      * Creates and adds a widget for the given prompt to the widget group.

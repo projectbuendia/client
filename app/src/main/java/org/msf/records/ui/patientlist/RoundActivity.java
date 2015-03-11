@@ -12,7 +12,6 @@ import org.msf.records.data.app.TypedCursor;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
 
-// TODO(akalachman): Split RoundActivity from Triage and Discharged, which may behave differently.
 public class RoundActivity extends PatientSearchActivity {
     private String mLocationName;
     private String mLocationUuid;

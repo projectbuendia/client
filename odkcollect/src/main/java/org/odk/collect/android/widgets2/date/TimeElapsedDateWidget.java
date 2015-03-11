@@ -43,7 +43,7 @@ public class TimeElapsedDateWidget extends TypedWidget<DateData> {
 
     public TimeElapsedDateWidget(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
-        // TODO(dxchen): Handle initial values.
+        // TODO: Handle initial values.
 
         super(context, prompt, appearance, forceReadOnly);
         LayoutInflater inflater = LayoutInflater.from(getContext());
