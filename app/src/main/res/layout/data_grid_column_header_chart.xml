@@ -7,6 +7,6 @@
     android:layout_width="@dimen/chart_grid_column_header_width"
     android:layout_height="wrap_content"
     android:padding="8dp"
-    android:textSize="17sp"
+    android:textSize="16sp"
     android:background="@drawable/chart_grid_background_white"
     tools:text="Day 13" />

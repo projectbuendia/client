@@ -23,7 +23,7 @@
         android:paddingTop="0dp"
         android:paddingBottom="0dp"
         android:textColor="#000000"
-        android:textSize="36sp"
+        android:textSize="34sp"
         tools:text="Day 5"/>
 
     <!-- paddingStart="1dp" aligns left edge of view_attribute_name with view_attribute_value -->
@@ -38,7 +38,7 @@
         android:paddingTop="0dp"
         android:paddingBottom="0dp"
         android:textColor="#000000"
-        android:textSize="17sp"
+        android:textSize="16sp"
         tools:text="Since admission" />
 
 </RelativeLayout>

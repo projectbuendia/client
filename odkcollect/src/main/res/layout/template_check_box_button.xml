@@ -8,5 +8,5 @@
     android:padding="16dp"
     android:button="@null"
     android:background="@drawable/bg_radio_button"
-    android:textSize="36sp">
+    android:textSize="34sp">
 </CheckBox>

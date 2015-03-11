@@ -22,7 +22,7 @@
             android:textAllCaps="true"
             android:textColor="@color/vital_fg_unknown"
             android:textStyle="bold"
-            android:textSize="17sp"
+            android:textSize="16sp"
             android:text="Latest Ebola Result" />
 
         <LinearLayout
@@ -39,7 +39,7 @@
                 android:paddingEnd="8dp"
                 android:gravity="center"
                 android:textColor="@color/vital_fg_unknown"
-                android:textSize="45sp"
+                android:textSize="42sp"
                 android:maxLines="1"
                 android:id="@+id/patient_chart_vital_pcr"
                 android:text="–"/>
@@ -53,7 +53,7 @@
                 android:gravity="center"
                 android:textColor="@color/vital_fg_unknown"
                 android:textStyle="bold"
-                android:textSize="17sp"
+                android:textSize="16sp"
                 android:visibility="gone"
                 tools:text="4 days ago" />
 

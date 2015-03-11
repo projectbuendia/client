@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:fontFamily="sans-serif"
-            android:textSize="45sp"
+            android:textSize="42sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
             tools:text="106: Rosky Entocher"/>
@@ -33,7 +33,7 @@
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="36sp"
+                    android:textSize="34sp"
                     android:gravity="end"
                     android:fontFamily="sans-serif"
                     android:textColor="@android:color/black"
@@ -43,7 +43,7 @@
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="22sp"
+                    android:textSize="24sp"
                     android:gravity="end"
                     android:fontFamily="sans-serif"
                     android:textColor="@color/red"
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
-                android:textSize="17sp"
+                android:textSize="16sp"
                 android:text="@string/chart_last_updated"
                 android:id="@+id/patient_chart_last_observation_label"
                 tools:ignore="RelativeOverlap"/>
@@ -114,7 +114,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
+                android:textSize="16sp"
                 android:text="–"
                 android:layout_toEndOf="@id/patient_chart_last_observation_label"
                 android:id="@+id/patient_chart_last_observation_date_time"

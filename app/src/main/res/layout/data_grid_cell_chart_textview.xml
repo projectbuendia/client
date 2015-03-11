@@ -7,7 +7,7 @@
     android:layout_gravity="center"
     android:gravity="center"
     android:scaleType="fitXY"
-    android:textSize="17sp"
+    android:textSize="16sp"
     android:textStyle="bold"
     android:textColor="#ffffff"
     tools:background="@drawable/chart_cell_good"

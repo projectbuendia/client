@@ -22,7 +22,7 @@ public class VitalView extends LinearLayout {
     // each tile on the patient chart uses one of a small set of sizes that are
     // used consistently across the entire app.  See res/values/buendia_styles.xml
     // for the canonical set of sizes that this should match.
-    final static int[] ALLOWED_TEXT_SIZES = {17, 22, 28, 36, 45};
+    final static int[] ALLOWED_TEXT_SIZES = {16, 21, 26, 34, 42};
 
     @InjectView(R.id.view_vital_name) TextView mNameView;
     @InjectView(R.id.view_vital_value) AutoResizeTextView mValueView;

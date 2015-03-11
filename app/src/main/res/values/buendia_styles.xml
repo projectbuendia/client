@@ -2,33 +2,37 @@
 <resources>
 
     <!-- Standard text appearances used throughout the app. -->
-    <!-- The sizes 17, 22, 28, 36, 45 form a geometric series with each size -->
-    <!-- larger than the preceding size by the square root of the golden ratio, -->
-    <!-- so that when text of different sizes appears, the text sizes will often -->
-    <!-- be in the golden ratio or the square root of the golden ratio. -->
+
+    <!-- These sizes come from a combination of two golden-ratio scales: -->
+    <!-- the Fibonacci series 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, etc. and -->
+    <!-- twice the same series 2, 2, 4, 6, 10, 16, 26, 42, 68, 110, etc. -->
+    <!-- Using values from the combined scale ... 6, 8, 10, 13, 16, 21, -->
+    <!-- 26, 34, 42, 55, ... means that when different text sizes appear -->
+    <!-- together, they will often be in a 2:1 ratio, the golden ratio, -->
+    <!-- or an arithmetic series (phi*phi is halfway between 2 and 2*phi). -->
 
     <style name="TextAppearance.Buendia" parent="TextAppearance.AppCompat">
-        <item name="android:textSize">28sp</item>
+        <item name="android:textSize">26sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Tiny">
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Small">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">21sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Medium">
-        <item name="android:textSize">28sp</item>
+        <item name="android:textSize">26sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Large">
-        <item name="android:textSize">36sp</item>
+        <item name="android:textSize">34sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Huge">
-        <item name="android:textSize">45sp</item>
+        <item name="android:textSize">42sp</item>
     </style>
 
     <style name="TextAppearance.Buendia.Tiny.Inverse">
