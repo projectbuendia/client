@@ -32,10 +32,13 @@ public class AppPatientDelta {
     public Optional<String> familyName = Optional.absent();
     public Optional<Integer> gender = Optional.absent();
     public Optional<DateTime> birthdate = Optional.absent();
+    public Optional<String> assignedLocationUuid = Optional.absent();
 
+    // These are not patient attributes and thus do not correspond to members of
+    // AppPatient or to columns in the app's patient table.  When these fields are
+    // set on an AppPatientDelta, they are posted to the server as observations.
     public Optional<LocalDate> admissionDate = Optional.absent();
     public Optional<LocalDate> firstSymptomDate = Optional.absent();
-    public Optional<String> assignedLocationUuid = Optional.absent();
 
     /**
      * Serializes the fields changed in the delta to a {@link JSONObject}.
@@ -60,6 +63,11 @@ public class AppPatientDelta {
             if (birthdate.isPresent()) {
                 json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
             }
+            if (assignedLocationUuid.isPresent()) {
+                json.put(
+                        Server.PATIENT_ASSIGNED_LOCATION,
+                        getLocationObject(assignedLocationUuid.get()));
+            }
 
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
@@ -76,20 +84,12 @@ public class AppPatientDelta {
                         getLocalDateString(firstSymptomDate.get()));
                 observations.put(observation);
             }
-            if (observations != null) {
+            if (observations.length() > 0) {
                 json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
             }
-
-            if (assignedLocationUuid.isPresent()) {
-                json.put(
-                        Server.PATIENT_ASSIGNED_LOCATION,
-                        getLocationObject(assignedLocationUuid.get()));
-            }
-
             return true;
         } catch (JSONException e) {
             LOG.w(e, "Unable to serialize a patient delta to JSON.");
-
             return false;
         }
     }
@@ -124,12 +124,6 @@ public class AppPatientDelta {
             contentValues.put(
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
-        }
-        // TODO: Either remove admission date here as it's no longer used from the database.
-        if (admissionDate.isPresent()) {
-            contentValues.put(
-                    Contracts.Patients.ADMISSION_TIMESTAMP,
-                    getTimestamp(admissionDate.get().toDateTimeAtStartOfDay()));
         }
         if (assignedLocationUuid.isPresent()) {
             contentValues.put(

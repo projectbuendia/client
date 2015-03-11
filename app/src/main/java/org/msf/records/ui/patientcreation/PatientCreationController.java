@@ -176,7 +176,6 @@ final class PatientCreationController {
         patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
         mModel.addPatient(mCrudEventBus, patientDelta);
-
         return true;
     }
 

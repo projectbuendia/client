@@ -139,11 +139,6 @@ public class Contracts {
     interface PatientColumns {
 
         /**
-         * Admission timestamp.
-         */
-        String ADMISSION_TIMESTAMP = "admission_timestamp";
-        
-        /**
          * Family name.
          */
         String FAMILY_NAME = "family_name";

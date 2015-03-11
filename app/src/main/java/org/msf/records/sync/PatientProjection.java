@@ -13,7 +13,6 @@ public class PatientProjection {
             Contracts.Patients.GIVEN_NAME,
             Contracts.Patients.FAMILY_NAME,
             Contracts.Patients.UUID,
-            Contracts.Patients.ADMISSION_TIMESTAMP,
             Contracts.Patients.BIRTHDATE,
             Contracts.Patients.GENDER,
             Contracts.Patients.LOCATION_UUID
@@ -29,10 +28,9 @@ public class PatientProjection {
     public static final int COLUMN_GIVEN_NAME = 1;
     public static final int COLUMN_FAMILY_NAME = 2;
     public static final int COLUMN_UUID = 3;
-    public static final int COLUMN_ADMISSION_TIMESTAMP = 4;
-    public static final int COLUMN_BIRTHDATE = 5;
-    public static final int COLUMN_GENDER = 6;
-    public static final int COLUMN_LOCATION_UUID = 7;
+    public static final int COLUMN_BIRTHDATE = 4;
+    public static final int COLUMN_GENDER = 5;
+    public static final int COLUMN_LOCATION_UUID = 6;
 
     public static final int COUNTS_COLUMN_ID = 0;
     public static final int COUNTS_COLUMN_LOCATION_UUID = 1;

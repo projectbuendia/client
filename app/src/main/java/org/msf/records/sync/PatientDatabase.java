@@ -56,7 +56,6 @@ public class PatientDatabase extends SQLiteOpenHelper {
             + Contracts.Patients.FAMILY_NAME + TYPE_TEXT + COMMA_SEP
             + Contracts.Patients.UUID + TYPE_TEXT + COMMA_SEP
             + Contracts.Patients.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Patients.ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP
             + Contracts.Patients.BIRTHDATE + TYPE_TEXT + COMMA_SEP
             + Contracts.Patients.GENDER + TYPE_TEXT
             + ")";
