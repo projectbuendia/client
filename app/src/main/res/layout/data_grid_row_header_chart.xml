@@ -9,7 +9,7 @@
     android:layout_height="@dimen/chart_grid_row_height"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:paddingTop="12dp"
-    android:paddingBottom="8dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="6dp"
     android:textSize="21sp"
     tools:text="Temperature (°C)" />

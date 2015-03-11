@@ -257,7 +257,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mController.setPatient(patientUuid, patientName, patientId);
         if (patientName != null && patientId != null) {
-            setTitle(patientId + ": " + patientName);
+            setTitle(patientId + ". " + patientName);
         }
 
         mVitalUnknown = ResVital.UNKNOWN.resolve(getResources());
@@ -652,7 +652,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setPatient(AppPatient patient) {
             // TODO: Localize everything below.
             mPatientFullNameView.setText(
-                    patient.id + ": " + patient.givenName + " " + patient.familyName);
+                    patient.id + ". " + patient.givenName + " " + patient.familyName);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == AppPatient.GENDER_MALE) {

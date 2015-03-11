@@ -2621,7 +2621,7 @@ public class FormEntryActivity
 
         Patient patient = getIntent().getParcelableExtra("patient");
         if (patient != null) {
-            setTitle(patient.id + ": " + patient.givenName + " " + patient.familyName);
+            setTitle(patient.id + ". " + patient.givenName + " " + patient.familyName);
         } else {
             setTitle(formController.getFormTitle());
         }
