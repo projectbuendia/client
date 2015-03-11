@@ -151,7 +151,7 @@ public class AppModel {
         // Register for error events so that we can close cursors if we need to.
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
-        // TODO(dxchen): Asynchronously fetch users.
+        // TODO: Asynchronously fetch users or delete this function.
     }
 
     /**

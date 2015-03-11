@@ -76,7 +76,7 @@ public class UpdateManager {
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
 
-    // TODO(dxchen): Consider caching this in SharedPreferences OR standardizing the location of it
+    // TODO: Consider caching this in SharedPreferences OR standardizing the location of it
     // so that we can check for it on application launch.
     private DownloadedUpdateInfo mLastDownloadedUpdateInfo = null;
 
@@ -373,7 +373,7 @@ public class UpdateManager {
                     if (!cursor.moveToFirst()) {
                         LOG.w(
                                 "Received download ID " + receivedDownloadId + " does not exist.");
-                        // TODO(dxchen): Consider firing an event.
+                        // TODO: Consider firing an event.
                         return;
                     }
 
@@ -381,7 +381,7 @@ public class UpdateManager {
                             cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
                     if (status != DownloadManager.STATUS_SUCCESSFUL) {
                         LOG.w("Update download failed with status " + status + ".");
-                        // TODO(dxchen): Consider firing an event.
+                        // TODO: Consider firing an event.
                         return;
                     }
 
@@ -389,7 +389,7 @@ public class UpdateManager {
                             cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
                     if (uriString == null) {
                         LOG.w("No path for a downloaded file exists.");
-                        // TODO(dxchen): Consider firing an event.
+                        // TODO: Consider firing an event.
                         return;
                     }
                 } finally {
@@ -402,7 +402,7 @@ public class UpdateManager {
                     Uri.parse(uriString);
                 } catch (IllegalArgumentException e) {
                     LOG.w(e, "Path for downloaded file is invalid: %1$s.", uriString);
-                    // TODO(dxchen): Consider firing an event.
+                    // TODO: Consider firing an event.
                     return;
                 }
 

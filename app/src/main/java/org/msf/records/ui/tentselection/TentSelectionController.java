@@ -319,7 +319,6 @@ final class TentSelectionController {
                     case Zone.TRIAGE_ZONE_UUID:
                         mTriageZone = zone;
                         break;
-                    // TODO(akalachman): Revisit if discharged should be treated differently.
                     case Zone.DISCHARGED_ZONE_UUID:
                         mDischargedZone = zone;
                         break;
@@ -332,7 +331,7 @@ final class TentSelectionController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
-            // TODO: Remove -- should be unnecessary.
+            // TODO: Remove -- likely unnecessary.
             mPatientSearchController.setLocations(mAppLocationTree);
         }
     }

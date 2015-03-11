@@ -4,7 +4,8 @@ import java.util.Locale;
 
 /**
  * Selects a Locale object for use throughout the app.
- * TODO(akalachman): Replace with proper locale management.
+ * TODO: Replace with proper locale management.
+ * TODO: Remove any remaining instances of hardcoded locale throughout the app.
  */
 public class LocaleSelector {
     public static Locale getCurrentLocale() {

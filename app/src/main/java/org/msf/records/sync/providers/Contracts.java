@@ -14,7 +14,7 @@ import java.util.Locale;
 @SuppressWarnings("unused")
 public class Contracts {
 
-    // TODO(dxchen): The content authority should be defined somewhere else. It's not strictly
+    // TODO: The content authority should be defined somewhere else. It's not strictly
     // limited to ContentProviders.
     public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.records";
 

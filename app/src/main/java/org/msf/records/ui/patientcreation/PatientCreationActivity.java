@@ -367,7 +367,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
     }
 
-    // TODO(akalachman): This is very similar to FormEntryActivity. Some way to consolidate?
+    // TODO: This is very similar to FormEntryActivity; consolidate.
     private void showAlertDialog() {
         if (mAlertDialog == null) {
             return;
@@ -439,20 +439,19 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     BigToast.show(PatientCreationActivity.this, message);
                     break;
                 case PatientCreationController.Ui.FIELD_LOCATION:
-                    //TODO(mathewi) Using setError doesn't really work properly. Implement a better
-                    // UI
+                    //TODO: Using setError doesn't really work properly. Implement a better UI
                     // fallthrough
                 case PatientCreationController.Ui.FIELD_AGE_UNITS:
-                    //TODO(mathewi) implement errors for age unit
+                    //TODO: implement errors for age unit
                     // fallthrough
                 case PatientCreationController.Ui.FIELD_SEX:
-                    //TODO(mathewi) implement errors for sex
+                    //TODO: implement errors for sex
                     // fallthrough
                 default:
                     // A stopgap.  We have to do something visible or nothing
                     // will happen at all when the Create button is pressed.
                     BigToast.show(PatientCreationActivity.this, message);
-                    // TODO(dxchen): Handle.
+                    // TODO: Handle.
                     break;
             }
         }
@@ -465,9 +464,9 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             mAge.setError(null);
             mAdmissionDate.setError(null);
             mSymptomsOnsetDate.setError(null);
-            // TODO(kpy): If the validation error indicators for age units
+            // TODO: If the validation error indicators for age units
             // and for sex are also persistent like the error indicators
-            // for the above four fields, they should be cleared as well.
+            // for the above fields, they should be cleared as well.
         }
 
         @Override

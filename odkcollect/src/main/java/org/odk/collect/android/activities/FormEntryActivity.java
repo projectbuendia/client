@@ -376,7 +376,7 @@ public class FormEntryActivity
 							startingXPath, waitingXPath);
 					Collect.getInstance().getActivityLogger()
 							.logAction(this, "formReloaded", mFormPath);
-					// TODO: this doesn' work (dialog does not get removed):
+                    // TODO: this doesn't work (dialog does not get removed):
 					// showDialog(PROGRESS_DIALOG);
 					// show dialog before we execute...
 					mFormLoaderTask.execute(mFormPath);
@@ -1428,7 +1428,7 @@ public class FormEntryActivity
 //            WidgetGroupBuilder builder =
 //                    Widget2Factory.INSTANCE.createGroupBuilder(this, groups[groups.length - 1]);
 //            if (builder != null) {
-//                // TODO(dxchen): Use the builder.
+//                // TODO: Use the builder.
 //                break;
 //            }
 //

@@ -81,7 +81,7 @@ public class AppLocationTree implements AppModelObservable {
             }
             AppLocation parent = uuidsToLocations.get(location.parentUuid);
             if (parent == null) {
-                // TODO(dxchen): Consider making this a warning rather than an exception.
+                // TODO: Consider making this a warning rather than an exception.
                 throw new IllegalArgumentException(
                         "Unable to create tree because a location's parent does not exist. "
                                 + "Location '" + location.name + "' (UUID '" + location.uuid
