@@ -66,9 +66,9 @@ final class PatientChartController {
     /**
      * Period between observation syncs while the chart view is active.  It would be nice for
      * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
-     * each sync.  TODO: Try reducing this period to improve responsiveness, but only after
-     * we're able to prevent the table from scrolling to the top on sync, or when we're able to
-     * skip re-rendering for syncs that pull down no new patient or observation data.
+     * each sync, if any data has changed.
+     * TODO: Try reducing this period to improve responsiveness, but be wary of the table scrolling
+     * whenever data is refreshed.
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
@@ -307,9 +307,6 @@ final class PatientChartController {
         }
 
         PrepopulatableFields fields = new PrepopulatableFields();
-
-        // TODO(dxchen): Re-enable this post v0.2.1.
-//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -343,9 +340,6 @@ final class PatientChartController {
 
     public void onAddTestResultsPressed() {
         PrepopulatableFields fields = new PrepopulatableFields();
-
-        // TODO(dxchen): Re-enable this post v0.2.1.
-//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -372,8 +366,9 @@ final class PatientChartController {
     /** Gets the latest observation values and displays them on the UI. */
     private synchronized void updatePatientUi() {
         // Get the observations
-        // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
+        // TODO: Background thread this, or make this call async-like.
+        List<LocalizedObservation> observations =
+                mObservationsProvider.getObservations(mPatientUuid);
         Map<String, LocalizedObservation> conceptsToLatestObservations =
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
@@ -562,15 +557,6 @@ final class PatientChartController {
                     mAssignLocationDialog.dismiss();
                     mAssignLocationDialog = null;
                 }
-
-                // TODO(dxchen): Displaying the observations part of the UI takes a lot of
-                // main-thread time. This delays rendering of the rest of UI.
-                // To allow the rest of the UI to be displayed before we attempt to populate
-                // the observations, we delay the observation update slightly.
-                // We need this hack because we load observations on the main thread. We should
-                // change this to use a background thread. Either an async task or using
-                // CrudEventBus events.
-
             } else if (event.item instanceof AppEncounter) {
                 AppEncounter.AppObservation[] observations =
                         ((AppEncounter)event.item).observations;
@@ -587,6 +573,12 @@ final class PatientChartController {
                 }
             }
 
+            // TODO: Displaying the observations part of the UI takes a lot of main-thread time.
+            // This delays rendering of the rest of UI. To allow the rest of the UI to be displayed
+            // before we attempt to populate the observations, we delay the observation update
+            // slightly. We need this hack because we load observations on the main thread. We
+            // should change this to use a background thread. Either an async task or using
+            // CrudEventBus events.
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {

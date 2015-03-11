@@ -2,6 +2,7 @@ package org.msf.records.data.app;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.joda.time.Instant;
@@ -116,6 +117,8 @@ public class AppModel {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
         FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<>(
+                Contracts.Patients.CONTENT_URI,
+                PatientProjection.getProjectionColumns(),
                 AppPatient.class,
                 mContentResolver,
                 filter,
@@ -148,7 +151,7 @@ public class AppModel {
         // Register for error events so that we can close cursors if we need to.
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
 
-        // TODO(dxchen): Asynchronously fetch users.
+        // TODO: Asynchronously fetch users or delete this function.
     }
 
     /**
@@ -260,9 +263,11 @@ public class AppModel {
         }
     }
 
-    private static class FetchTypedCursorAsyncTask<T>
+    private static class FetchTypedCursorAsyncTask<T extends AppTypeBase>
             extends AsyncTask<Void, Void, TypedCursor<T>> {
 
+        private final Uri mContentUri;
+        private final String[] mProjection;
         private final Class<T> mClazz;
         private final ContentResolver mContentResolver;
         private final SimpleSelectionFilter mFilter;
@@ -271,12 +276,16 @@ public class AppModel {
         private final CrudEventBus mBus;
 
         public FetchTypedCursorAsyncTask(
+                Uri contentUri,
+                String[] projection,
                 Class<T> clazz,
                 ContentResolver contentResolver,
-                SimpleSelectionFilter filter,
+                SimpleSelectionFilter<T> filter,
                 String constraint,
                 AppTypeConverter<T> converter,
                 CrudEventBus bus) {
+            mContentUri = contentUri;
+            mProjection = projection;
             mClazz = clazz;
             mContentResolver = contentResolver;
             mFilter = filter;
@@ -287,13 +296,11 @@ public class AppModel {
 
         @Override
         protected TypedCursor<T> doInBackground(Void... voids) {
-            // TODO(dxchen): Refactor this (and possibly FilterQueryProviderFactory) to support
-            // different types of queries.
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(
-                        Contracts.Patients.CONTENT_URI,
-                        PatientProjection.getProjectionColumns(),
+                        mContentUri,
+                        mProjection,
                         mFilter.getSelectionString(),
                         mFilter.getSelectionArgs(mConstraint),
                         null);

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.diagnostics.Troubleshooter;
+import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
@@ -17,12 +20,14 @@ import org.msf.records.utils.Logger;
 
 import com.google.common.collect.Ordering;
 
+import javax.inject.Inject;
+
 /**
  * Controller for {@link UserLoginActivity}.
  *
  * <p>Don't add untestable dependencies to this class.
  */
-final class UserLoginController {
+public final class UserLoginController {
 
     private static final Logger LOG = Logger.create();
 
@@ -55,14 +60,17 @@ final class UserLoginController {
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
+    private final Troubleshooter mTroubleshooter;
 
     public UserLoginController(
             UserManager userManager,
             EventBusRegistrationInterface eventBus,
+            Troubleshooter troubleshooter,
             Ui ui,
             FragmentUi fragmentUi) {
         mUserManager = userManager;
         mEventBus = eventBus;
+        mTroubleshooter = troubleshooter;
         mUi = ui;
         mFragmentUi = fragmentUi;
     }
@@ -101,6 +109,13 @@ final class UserLoginController {
 
     @SuppressWarnings("unused") // Called by reflection from event bus.
     private final class BusEventSubscriber {
+        /** Restart user fetch if we have no users and the Buendia API just became available. */
+        public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
+            if (mUsersSortedByName.isEmpty() && mTroubleshooter.isServerHealthy()) {
+                LOG.d("Buendia API is available and users are not, retrying sync.");
+                onSyncRetry();
+            }
+        }
 
         /** Updates the UI when the list of users is loaded. */
         public void onEventMainThread(KnownUsersLoadedEvent event) {

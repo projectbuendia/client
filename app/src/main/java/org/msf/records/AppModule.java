@@ -22,6 +22,7 @@ import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.ui.patientlist.RoundFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
+import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.ui.userlogin.UserLoginFragment;
 import org.msf.records.updater.UpdateModule;
 import org.msf.records.user.UserModule;
@@ -49,7 +50,7 @@ import dagger.Provides;
         injects = {
                 App.class,
 
-                // TODO(dxchen): Move these into activity-specific modules.
+                // TODO: Move these into activity-specific modules.
                 // Activities
                 PatientCreationActivity.class,
                 BaseActivity.class,
@@ -62,6 +63,7 @@ import dagger.Provides;
                 PatientListFragment.class,
                 RoundFragment.class,
                 UpdateNotificationController.class,
+                UserLoginActivity.class,
                 UserLoginFragment.class
         })
 public final class AppModule {

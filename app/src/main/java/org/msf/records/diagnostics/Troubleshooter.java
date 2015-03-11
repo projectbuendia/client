@@ -54,6 +54,15 @@ public class Troubleshooter {
     }
 
     /**
+     * Returns true if no ongoing issues preventing access to the Buendia server exist. Note that
+     * connectivity is still not guaranteed, just not ruled out.
+     */
+    public boolean isServerHealthy() {
+        return getNetworkConnectivityTroubleshootingActions().isEmpty()
+                && getConfigurationTroubleshootingActions().isEmpty();
+    }
+
+    /**
      * Called when a new health issue is discovered.
      */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
@@ -61,7 +70,7 @@ public class Troubleshooter {
             mActiveIssues.add(healthIssue);
         }
 
-        // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
         postTroubleshootingEvents();
@@ -80,7 +89,7 @@ public class Troubleshooter {
             }
         }
 
-        // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
         postTroubleshootingEvents();

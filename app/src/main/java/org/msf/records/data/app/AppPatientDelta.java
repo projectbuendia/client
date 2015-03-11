@@ -125,7 +125,7 @@ public class AppPatientDelta {
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
-        // TODO: Either remove admission date here as it's no longer used from the database.
+        // TODO: Consider removing admission date here as it's no longer used from the database.
         if (admissionDate.isPresent()) {
             contentValues.put(
                     Contracts.Patients.ADMISSION_TIMESTAMP,

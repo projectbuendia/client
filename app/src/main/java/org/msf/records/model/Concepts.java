@@ -64,7 +64,7 @@ public class Concepts {
     public static final String BLEEDING_UUID = "147241AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     /**
      * Group name for Bleeding Sites section.
-     * TODO(akalachman): This may break localization.
+     * TODO: This may break localization.
      */
     public static final String BLEEDING_SITES_NAME = "Bleeding site";
     /**

@@ -143,7 +143,7 @@ public class OpenMrsXformsConnection {
         if (patientUuid != null) {
             post.addProperty("patient_uuid", patientUuid);
         }
-        // TODO(nfortescue): get the enterer from the user login
+        // TODO: get the enterer from the user login
         post.addProperty("enterer_id", 1);
 
         post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
