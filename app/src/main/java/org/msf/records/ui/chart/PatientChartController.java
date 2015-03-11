@@ -362,6 +362,8 @@ final class PatientChartController {
 
         // Update timestamp
         for (LocalizedObservation observation : observations) {
+            // TODO: This looks odd. Why do we do this? I'd expect this to be set by
+            // getMostRecentObservations instead.
             conceptsToLatestObservations.put(observation.conceptUuid, observation);
             mLastObservation = Math.max(
                     mLastObservation,
