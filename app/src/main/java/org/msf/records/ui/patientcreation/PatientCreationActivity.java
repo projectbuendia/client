@@ -429,30 +429,16 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     mAge.setError(message);
                     break;
                 case PatientCreationController.Ui.FIELD_ADMISSION_DATE:
-                    // TODO: setError doesn't show a message because this field doesn't focus
-                    mAdmissionDate.setError(message);
-                    BigToast.show(PatientCreationActivity.this, message);
-                    break;
                 case PatientCreationController.Ui.FIELD_SYMPTOMS_ONSET_DATE:
-                    // TODO: Using setError doesn't work because this field doesn't request focus
-                    mSymptomsOnsetDate.setError(message);
-                    BigToast.show(PatientCreationActivity.this, message);
-                    break;
                 case PatientCreationController.Ui.FIELD_LOCATION:
-                    //TODO(mathewi) Using setError doesn't really work properly. Implement a better
-                    // UI
-                    // fallthrough
                 case PatientCreationController.Ui.FIELD_AGE_UNITS:
-                    //TODO(mathewi) implement errors for age unit
-                    // fallthrough
                 case PatientCreationController.Ui.FIELD_SEX:
-                    //TODO(mathewi) implement errors for sex
-                    // fallthrough
                 default:
-                    // A stopgap.  We have to do something visible or nothing
+                    // A stopgap.  For these fields, setError() has no visible
+                    // effect.  We have to do something visible or nothing
                     // will happen at all when the Create button is pressed.
+                    // TODO: Try something better than a toast.
                     BigToast.show(PatientCreationActivity.this, message);
-                    // TODO(dxchen): Handle.
                     break;
             }
         }
@@ -463,11 +449,8 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             mGivenName.setError(null);
             mFamilyName.setError(null);
             mAge.setError(null);
-            mAdmissionDate.setError(null);
-            mSymptomsOnsetDate.setError(null);
-            // TODO(kpy): If the validation error indicators for age units
-            // and for sex are also persistent like the error indicators
-            // for the above four fields, they should be cleared as well.
+            // TODO(kpy): If we add persistent validation error indicators for
+            // the other fields, they should be cleared here as well.
         }
 
         @Override
