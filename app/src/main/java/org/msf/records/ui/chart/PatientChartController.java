@@ -97,7 +97,10 @@ final class PatientChartController {
         void setTitle(String title);
 
         /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
+        void updatePatientVitalsUi(
+                Map<String, LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate);
 
         /** Updates the general condition UI with the patient's current condition. */
         void updatePatientGeneralConditionUi(String generalConditionUuid);
@@ -107,7 +110,9 @@ final class PatientChartController {
 
         /** Updates the UI showing the historic log of observation values for this patient. */
         void setObservationHistory(
-                List<LocalizedObservation> observations, LocalDate admissionDate);
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate);
 
         /** Shows the last time a user interacted with this patient. */
         void setLatestEncounter(long latestEncounterTimeMillis);
@@ -357,6 +362,13 @@ final class PatientChartController {
                 fields);
     }
 
+    /** Retrieves the value of a date observation as a LocalDate. */
+    private LocalDate getObservedDate(
+            Map<String, LocalizedObservation> observations, String conceptUuid) {
+        LocalizedObservation obs = observations.get(conceptUuid);
+        return obs == null ? null : Utils.stringToLocalDate(obs.localizedValue);
+    }
+
     /** Gets the latest observation values and displays them on the UI. */
     private synchronized void updatePatientUi() {
         // Get the observations
@@ -366,32 +378,31 @@ final class PatientChartController {
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
-        for (LocalizedObservation observation : observations) {
-            // TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
-            conceptsToLatestObservations.put(observation.conceptUuid, observation);
-            mLastObservation = Math.max(
-                    mLastObservation,
-                    observation.encounterTimeMillis);
+        for (LocalizedObservation obs : observations) {
+            mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
         }
+
+        // Add in initial observation.
+        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
+                conceptsToLatestObservations.entrySet()) {
+            if (!observations.contains(recentObservation.getValue())) {
+                observations.add(recentObservation.getValue());
+            }
+        }*/
 
         if (DEBUG) {
-            LOG.d("Showing " + observations.size() + " observations, and "
-                    + conceptsToLatestObservations.size() + " latest observations");
+            LOG.d("Showing " + observations.size() + " observations and "
+                    + conceptsToLatestObservations.size() + " latest obs");
         }
 
+        LocalDate admissionDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
+        LocalDate firstSymptomsDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
         mUi.setLatestEncounter(mLastObservation);
-        mUi.updatePatientVitalsUI(conceptsToLatestObservations);
-
-        LocalDate admissionDate = null;
-        if (conceptsToLatestObservations.containsKey(Concepts.ADMISSION_DATE_UUID)) {
-            LocalizedObservation admissionDateObservation =
-                    conceptsToLatestObservations.get(Concepts.ADMISSION_DATE_UUID);
-            String admissionDateString = admissionDateObservation.localizedValue;
-            if (admissionDateString != null) {
-                admissionDate = Utils.stringToLocalDate(admissionDateString);
-            }
-        }
-        mUi.setObservationHistory(observations, admissionDate);
+        mUi.updatePatientVitalsUi(
+                conceptsToLatestObservations, admissionDate, firstSymptomsDate);
+        mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
     }
 
     /**

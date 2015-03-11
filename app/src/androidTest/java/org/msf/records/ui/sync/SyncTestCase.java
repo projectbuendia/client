@@ -10,7 +10,10 @@ import com.android.volley.RequestQueue;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
+import net.sqlcipher.database.SQLiteException;
+
 import org.msf.records.App;
+import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.net.VolleySingleton;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientDatabase;
@@ -19,6 +22,7 @@ import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.Logger;
 
 import java.sql.SQLException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,7 +34,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
-    private static final int MAX_DATABASE_CLEAR_RETRIES = 3;
+    // The database may still be holding a lock after a test, so clearing the database may not
+    // be successful right away.
+    private static final int MAX_DATABASE_CLEAR_RETRIES = 10;
 
     @Override
     public void setUp() throws Exception {
@@ -43,7 +49,8 @@ public class SyncTestCase extends FunctionalTestCase {
                 clearDatabase();
                 clearPreferences();
                 cleared = true;
-            } catch (SQLException e) {
+            } catch (SQLiteException e) {
+                Thread.sleep(500);
                 retriesRemaining--;
             }
         }
@@ -78,5 +85,14 @@ public class SyncTestCase extends FunctionalTestCase {
         WifiManager wifiManager =
                 (WifiManager)App.getInstance().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(enabled);
+    }
+
+    /**
+     * Delays all ViewActions until sync has failed once.
+     */
+    protected void waitForSyncFailure() {
+        EventBusIdlingResource<SyncFailedEvent> syncFailedEventIdlingResource =
+                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        Espresso.registerIdlingResources(syncFailedEventIdlingResource);
     }
 }

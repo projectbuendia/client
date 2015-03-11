@@ -102,7 +102,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * RPC timeout for getting observations.
      */
-    private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
+    private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
 
     /**
      * Named used during the sync process for SQL savepoints.
@@ -154,7 +154,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
-        checkCancellation("Sync was canceled before it started.");
+        // If we can't access the Buendia API, short-circuit. Before this check was added, sync
+        // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
+        // change, however, any user-requested sync will instantly fail until the HealthMonitor has
+        // made a determination that the server is definitely accessible.
+        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
+            LOG.e("Sync failed: Buendia API is unavailable.");
+            getContext().sendBroadcast(syncFailedIntent);
+        }
+
+        try {
+            checkCancellation("Sync was canceled before it started.");
+        } catch (CancellationException e) {
+            getContext().sendBroadcast(syncCanceledIntent);
+            return;
+        }
 
         int nExtras = countExtras(extras);
         int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
@@ -170,7 +184,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
-
         try {
             boolean specific = false;
 
@@ -318,7 +331,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.close();
-            mIsSyncCanceled = false;
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
@@ -340,8 +352,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * canceled. It is the responsibility of the caller to perform any actual cancellation
      * procedures.
      */
-    private void checkCancellation(String message) throws CancellationException {
+    private synchronized void checkCancellation(String message) throws CancellationException {
         if (mIsSyncCanceled) {
+            mIsSyncCanceled = false;
             throw new CancellationException(message);
         }
     }
