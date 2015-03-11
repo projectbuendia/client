@@ -199,6 +199,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
                 ImmutableSet.of(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION)));
         // THEN users are reloaded
+        // Note: already called once in init()
         verify(mMockUserManager, times(2)).loadKnownUsers();
     }
 
@@ -229,6 +230,8 @@ public class UserLoginControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
                 ImmutableSet.of(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION)));
         // THEN users are not reloaded
+        // Note: this function is called once during init(), so expect it to be called once, but
+        //       only once.
         verify(mMockUserManager, times(1)).loadKnownUsers();
     }
 }
