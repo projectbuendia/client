@@ -10,12 +10,15 @@ import android.view.MenuItem;
 
 import org.msf.records.App;
 import org.msf.records.R;
+import org.msf.records.diagnostics.Troubleshooter;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.utils.EventBusWrapper;
+
+import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
@@ -27,10 +30,12 @@ public class UserLoginActivity extends BaseActivity {
 
     private UserLoginController mController;
     private AlertDialog mSyncFailedDialog;
+    @Inject Troubleshooter mTroubleshooter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
 
         // This is the starting activity for the app, so show the app name and version.
         setTitle(getString(R.string.app_name) + " " + getString(R.string.app_version));
@@ -42,6 +47,7 @@ public class UserLoginActivity extends BaseActivity {
         mController = new UserLoginController(
         		App.getUserManager(),
         		new EventBusWrapper(EventBus.getDefault()),
+                mTroubleshooter,
                 new MyUi(),
                 fragment.getFragmentUi());
 
