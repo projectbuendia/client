@@ -14,7 +14,7 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
     UNKNOWN(
             R.string.status_unknown,
             R.color.white,
-            R.color.vital_fg_dark,
+            R.color.vital_fg_unknown,
             R.string.status_short_desc_unknown),
     WELL(
             R.string.status_well,

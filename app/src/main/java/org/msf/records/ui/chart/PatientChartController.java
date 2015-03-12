@@ -66,9 +66,9 @@ final class PatientChartController {
     /**
      * Period between observation syncs while the chart view is active.  It would be nice for
      * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
-     * each sync.  TODO: Try reducing this period to improve responsiveness, but only after
-     * we're able to prevent the table from scrolling to the top on sync, or when we're able to
-     * skip re-rendering for syncs that pull down no new patient or observation data.
+     * each sync, if any data has changed.
+     * TODO: Try reducing this period to improve responsiveness, but be wary of the table scrolling
+     * whenever data is refreshed.
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
@@ -97,7 +97,10 @@ final class PatientChartController {
         void setTitle(String title);
 
         /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
+        void updatePatientVitalsUi(
+                Map<String, LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate);
 
         /** Updates the general condition UI with the patient's current condition. */
         void updatePatientGeneralConditionUi(String generalConditionUuid);
@@ -107,7 +110,9 @@ final class PatientChartController {
 
         /** Updates the UI showing the historic log of observation values for this patient. */
         void setObservationHistory(
-                List<LocalizedObservation> observations, LocalDate admissionDate);
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate);
 
         /** Shows the last time a user interacted with this patient. */
         void setLatestEncounter(long latestEncounterTimeMillis);
@@ -302,9 +307,6 @@ final class PatientChartController {
         }
 
         PrepopulatableFields fields = new PrepopulatableFields();
-
-        // TODO(dxchen): Re-enable this post v0.2.1.
-//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -338,9 +340,6 @@ final class PatientChartController {
 
     public void onAddTestResultsPressed() {
         PrepopulatableFields fields = new PrepopulatableFields();
-
-        // TODO(dxchen): Re-enable this post v0.2.1.
-//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -357,41 +356,48 @@ final class PatientChartController {
                 fields);
     }
 
+    /** Retrieves the value of a date observation as a LocalDate. */
+    private LocalDate getObservedDate(
+            Map<String, LocalizedObservation> observations, String conceptUuid) {
+        LocalizedObservation obs = observations.get(conceptUuid);
+        return obs == null ? null : Utils.stringToLocalDate(obs.localizedValue);
+    }
+
     /** Gets the latest observation values and displays them on the UI. */
     private synchronized void updatePatientUi() {
         // Get the observations
-        // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
+        // TODO: Background thread this, or make this call async-like.
+        List<LocalizedObservation> observations =
+                mObservationsProvider.getObservations(mPatientUuid);
         Map<String, LocalizedObservation> conceptsToLatestObservations =
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
-        for (LocalizedObservation observation : observations) {
-            // TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
-            conceptsToLatestObservations.put(observation.conceptUuid, observation);
-            mLastObservation = Math.max(
-                    mLastObservation,
-                    observation.encounterTimeMillis);
+        for (LocalizedObservation obs : observations) {
+            mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
         }
+
+        // Add in initial observation.
+        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
+                conceptsToLatestObservations.entrySet()) {
+            if (!observations.contains(recentObservation.getValue())) {
+                observations.add(recentObservation.getValue());
+            }
+        }*/
 
         if (DEBUG) {
-            LOG.d("Showing " + observations.size() + " observations, and "
-                    + conceptsToLatestObservations.size() + " latest observations");
+            LOG.d("Showing " + observations.size() + " observations and "
+                    + conceptsToLatestObservations.size() + " latest obs");
         }
 
+        LocalDate admissionDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
+        LocalDate firstSymptomsDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
         mUi.setLatestEncounter(mLastObservation);
-        mUi.updatePatientVitalsUI(conceptsToLatestObservations);
-
-        LocalDate admissionDate = null;
-        if (conceptsToLatestObservations.containsKey(Concepts.ADMISSION_DATE_UUID)) {
-            LocalizedObservation admissionDateObservation =
-                    conceptsToLatestObservations.get(Concepts.ADMISSION_DATE_UUID);
-            String admissionDateString = admissionDateObservation.localizedValue;
-            if (admissionDateString != null) {
-                admissionDate = Utils.stringToLocalDate(admissionDateString);
-            }
-        }
-        mUi.setObservationHistory(observations, admissionDate);
+        mUi.updatePatientVitalsUi(
+                conceptsToLatestObservations, admissionDate, firstSymptomsDate);
+        mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
     }
 
     /**
@@ -547,15 +553,6 @@ final class PatientChartController {
                     mAssignLocationDialog.dismiss();
                     mAssignLocationDialog = null;
                 }
-
-                // TODO(dxchen): Displaying the observations part of the UI takes a lot of
-                // main-thread time. This delays rendering of the rest of UI.
-                // To allow the rest of the UI to be displayed before we attempt to populate
-                // the observations, we delay the observation update slightly.
-                // We need this hack because we load observations on the main thread. We should
-                // change this to use a background thread. Either an async task or using
-                // CrudEventBus events.
-
             } else if (event.item instanceof AppEncounter) {
                 AppEncounter.AppObservation[] observations =
                         ((AppEncounter)event.item).observations;
@@ -572,6 +569,12 @@ final class PatientChartController {
                 }
             }
 
+            // TODO: Displaying the observations part of the UI takes a lot of main-thread time.
+            // This delays rendering of the rest of UI. To allow the rest of the UI to be displayed
+            // before we attempt to populate the observations, we delay the observation update
+            // slightly. We need this hack because we load observations on the main thread. We
+            // should change this to use a background thread. Either an async task or using
+            // CrudEventBus events.
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {

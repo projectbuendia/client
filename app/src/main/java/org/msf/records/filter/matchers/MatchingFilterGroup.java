@@ -25,15 +25,6 @@ public class MatchingFilterGroup<T> implements MatchingFilter<T> {
         mFilterType = filterType;
     }
 
-    public MatchingFilterGroup(FilterType filterType, List<MatchingFilter> filters) {
-        mFilters = ImmutableList.copyOf(filters);
-        mFilterType = filterType;
-    }
-
-    public List<MatchingFilter> getFilters() {
-        return mFilters;
-    }
-
     @Override
     public boolean matches(T object, CharSequence constraint) {
         if (mFilterType == FilterType.OR) {

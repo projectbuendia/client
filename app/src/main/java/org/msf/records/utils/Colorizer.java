@@ -127,7 +127,7 @@ public class Colorizer {
             int[] startRgb = mPaletteBytes[basePaletteIndex];
             int[] endRgb = mPaletteBytes[(basePaletteIndex + 1) % mPaletteBytes.length];
 
-            // TODO(dxchen): Consider doing interpolations in another color space.
+            // TODO: Consider doing interpolations in another color space.
             rgb = new int[] {
                     (int) (startRgb[0] + offsetFraction * (endRgb[0] - startRgb[0])),
                     (int) (startRgb[1] + offsetFraction * (endRgb[1] - startRgb[1])),
@@ -165,7 +165,7 @@ public class Colorizer {
         return paletteBytes;
     }
 
-    // TODO(dxchen): License (MurmurHash).
+    // TODO: License (MurmurHash).
 
     /**
      * Mixes the specified value so that it is closer to being evenly distributed across all

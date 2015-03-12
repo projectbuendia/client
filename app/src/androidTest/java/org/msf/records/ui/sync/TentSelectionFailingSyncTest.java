@@ -25,8 +25,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
     public void testSyncFailedDialogAppearsWhenSyncFails() {
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
         screenshot("After Sync Fails");
@@ -41,8 +41,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that the back button in the sync failed dialog returns to user selection. */
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
 
@@ -57,8 +57,8 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
     public void testSyncFailedDialog_SettingsButtonLoadsSettings() {
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_settings));
         screenshot("After Sync Fails");
@@ -75,10 +75,12 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
     }
 
     /** Tests that clicking 'Retry' in sync failed dialog reshows the progress bar. */
-    // TODO(akalachman): Temporarily disabled: known issue that spinner is shown in this case.
+    // TODO: This test is flaky because of a real bug -- Volley is unresponsive to changes in
+    // connectivity state, so a sync may not fail for seconds or even minutes after wifi is turned
+    // off.
     /*public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
         screenshot("Test Start");
-        waitForInitialSync();
+        waitForSyncFailure();
         setWifiEnabled(false);
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
@@ -95,17 +97,17 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
-        waitForInitialSync();
+        waitForSyncFailure();
         setWifiEnabled(false);
 
         checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");
 
+        setWifiEnabled(true);
         onView(withText(R.string.sync_failed_retry)).perform(click());
 
-        setWifiEnabled(true);
         waitForInitialSync();
-        waitForProgressFragment(); // Also make sure dialog disappears before checking anything.
+        waitForProgressFragment();
         screenshot("After Retry Clicked");
 
         // Should be at tent selection screen with tents available.
@@ -118,20 +120,22 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
      * Tests that clicking 'Settings' in sync failed dialog and returning to
      * this activity results in the progress bar still being shown
      */
-    // TODO: Temporarily disabled.
+    // TODO: This test is flaky because of a real bug -- Volley is unresponsive to changes in
+    // connectivity state, so a sync may not fail for seconds or even minutes after wifi is turned
+    // off.
     /*public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
-        // TODO: Potentially flaky, as sync may finish before being force-failed.
-        waitForInitialSync();
         setWifiEnabled(false);
+        waitForSyncFailure();
 
-        onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withText(R.string.sync_failed_settings));
         screenshot("After Sync Failed");
 
         onView(withText(R.string.sync_failed_settings)).perform(click());
         screenshot("After Settings Clicked");
 
+        setWifiEnabled(true);
         pressBack();
-        onView(withId(R.id.progress_fragment_progress_bar)).check(matches(isDisplayed()));
+        checkViewDisplayedSoon(withId(R.id.progress_fragment_progress_bar));
         screenshot("After Back Pressed");
 
         cleanupWifi();

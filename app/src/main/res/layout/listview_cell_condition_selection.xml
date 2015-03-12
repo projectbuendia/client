@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:gravity="center"
-        android:textColor="@color/vital_fg_dark"
+        android:textColor="@color/vital_fg_unknown"
         android:textSize="56sp"
         android:maxLines="1"
         android:id="@+id/condition_selection_number"

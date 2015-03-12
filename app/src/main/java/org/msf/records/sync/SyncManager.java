@@ -52,7 +52,6 @@ public class SyncManager {
 
     /**
      * Forces a sync to occur immediately.
-     * TODO(kpy): Avoid triggering a new full sync if a full sync is already underway.
      */
     public void forceSync() {
         LOG.d("Forcing new sync");

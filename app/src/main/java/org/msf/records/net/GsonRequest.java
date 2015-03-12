@@ -45,7 +45,7 @@ public class GsonRequest<T> extends Request<T> {
             Map<String, String> headers,
             Response.Listener<List<T>> listener,
             Response.ErrorListener errorListener) {
-        // TODO(dxchen): This current class does not handle arrays well because it doesn't properly
+        // TODO: This current class does not handle arrays well because it doesn't properly
         // use Java generics. Until we can fix it, we'll just cast a lot to make Java happy.
         return (GsonRequest<List<T>>) new GsonRequest<>(
                 url, clazz, true, headers, (Response.Listener<T>) listener, errorListener);
@@ -95,7 +95,7 @@ public class GsonRequest<T> extends Request<T> {
         try {
             String json = new String(
                     response.data,
-                    HTTP.UTF_8);  // TODO(dxchen): HttpHeaderParser.parseCharset(response.headers).
+                    HTTP.UTF_8);  // TODO: HttpHeaderParser.parseCharset(response.headers).
             Gson gsonParser = gson.create();
             Log.d("SyncAdapter", "parsing response");
             if(array){

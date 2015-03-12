@@ -12,8 +12,12 @@ import org.msf.records.FakeAppLocationTreeFactory;
 import org.msf.records.FakeSyncManager;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
+import org.msf.records.events.actions.SyncCancelRequestedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
+import org.msf.records.events.sync.SyncCanceledEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
+import org.msf.records.events.sync.SyncProgressEvent;
+import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.patientlist.PatientSearchController;
@@ -71,8 +75,9 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 
     /** Tests that init kicks off a sync if the data model is unavailable. */
     public void testInit_StartsSyncWhenDataModelUnavailable() {
-        // GIVEN uninitialized data model and the controller hasn't previously fetched the location
-        // tree
+        // GIVEN uninitialized data model,the controller hasn't previously fetched the location
+        // tree, and no sync is already in progress
+        mFakeSyncManager.setSyncing(false);
         when(mMockAppModel.isFullModelAvailable()).thenReturn(false);
         // WHEN the controller is initialized
         mController.init();
@@ -131,23 +136,6 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
     }
 
     /**
-     * Tests that a sync failure causes the error dialog to appear even if locations have been
-     * properly loaded.
-     */
-    public void testSyncFailureShowsErrorDialog_withLocations() {
-        // GIVEN an initialized controller with a fragment attached
-        mController.init();
-        mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN the location tree is loaded BUT sync has failed
-        mFakeSyncManager.setSyncing(true);
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
-        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
-        mFakeEventBus.post(new SyncFailedEvent());
-        // THEN the controller shows the sync failure dialog
-        verify(mMockUi).showSyncFailedDialog(true);
-    }
-
-    /**
      * Tests that a sync failure causes the error dialog to appear when no locations are present.
      */
     public void testSyncFailureShowsErrorDialog_noLocations() {
@@ -178,12 +166,15 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         verify(mMockUi).showSyncFailedDialog(false);
     }
 
-    /** Tests that loading an empty location tree results in a new sync. */
+    /**
+     * Tests that loading an empty location tree results in a new sync if sync has completed.
+     */
     public void testFetchingIncompleteLocationTree_causesNewSync() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
-        // WHEN an empty location tree is loaded
+        // WHEN an empty location tree is loaded after sync completed
+        mFakeEventBus.post(new SyncSucceededEvent());
         AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller starts a new sync
@@ -271,5 +262,78 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
         mController.attachFragmentUi(mMockFragmentUi);
         // THEN the loading dialog is displayed
         verify(mMockFragmentUi).setBusyLoading(true);
+    }
+
+    /** Tests that user-initiated sync cancellation closes the activity. */
+    public void testSyncCancellation_closesActivityWhenUserInitiated() {
+        // GIVEN an initialized controller and no location tree
+        mController.init();
+        // WHEN user initiates and completes a sync cancellation
+        mFakeEventBus.post(new SyncCancelRequestedEvent());
+        mFakeEventBus.post(new SyncCanceledEvent());
+        // THEN the activity is closed
+        verify(mMockUi).finish();
+    }
+
+    /**
+     * Tests that user-initiated sync cancellation closes the activity even when the data model has
+     * become available since cancellation was requested.
+     */
+    public void testSyncCancellation_closesActivityWhenUserInitiatedAndDataModelAvailable() {
+        // GIVEN an initialized controller
+        mController.init();
+        // WHEN user initiates a sync cancellation right before the data model is fetched
+        mFakeEventBus.post(new SyncCancelRequestedEvent());
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        mFakeEventBus.post(new SyncCanceledEvent());
+        // THEN the activity is closed
+        verify(mMockUi).finish();
+    }
+
+    /** Tests that sync cancellations requested by the Android OS do not close the activity. */
+    public void testSyncCancellation_doesNotCloseActivityIfNotUserInitiated() {
+        // GIVEN an initialized controller and no location tree
+        mController.init();
+        // WHEN a sync is canceled, but not by the user
+        mFakeEventBus.post(new SyncCanceledEvent());
+        // THEN the activity is not closed
+        verify(mMockUi, times(0)).finish();
+    }
+
+    /** Tests that 'sync progress' messages are ignored when the data model is already available. */
+    public void testSyncProgress_ignoredWhenDataModelAvailable() {
+        // GIVEN an initialized controller with a location tree
+        mController.init();
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // WHEN a periodic sync reports progress
+        mFakeEventBus.post(new SyncProgressEvent(10, "Foo synced"));
+        // THEN the activity does not notify the UI
+        verify(mMockFragmentUi, times(0)).showIncrementalSyncProgress(10, "Foo synced");
+    }
+
+    /** Tests that 'sync failed' messages are ignored when the data model is already available. */
+    public void testSyncFailed_ignoredWhenDataModelAvailable() {
+        // GIVEN an initialized controller with a location tree
+        mController.init();
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // WHEN a periodic sync fails
+        mFakeEventBus.post(new SyncFailedEvent());
+        // THEN the activity does not notify the UI
+        verify(mMockUi, times(0)).showSyncFailedDialog(true);
+    }
+
+    /** Tests that 'sync started' messages are ignored when the data model is already available. */
+    public void testSyncStarted_ignoredWhenDataModelAvailable() {
+        // GIVEN an initialized controller with a location tree
+        mController.init();
+        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
+        // WHEN a periodic sync starts
+        mFakeEventBus.post(new SyncStartedEvent());
+        // THEN the activity does not notify the UI
+        verify(mMockFragmentUi, times(0)).resetSyncProgress();
     }
 }

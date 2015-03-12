@@ -5,7 +5,8 @@
 
     <!-- Vitals -->
     <color name="vital_fg_light">#ffffff</color>
-    <color name="vital_fg_dark">#757575</color>
+    <color name="vital_fg_dark">#000000</color>
+    <color name="vital_fg_unknown">#757575</color>
 
     <color name="vital_unknown">#b2cce1</color>
     <color name="vital_known">#01579b</color>

@@ -190,7 +190,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // TODO: Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
@@ -208,7 +208,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // TODO: Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
@@ -226,7 +226,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // TODO: Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(

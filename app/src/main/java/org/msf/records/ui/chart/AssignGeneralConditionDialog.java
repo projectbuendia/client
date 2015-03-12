@@ -31,7 +31,7 @@ public final class AssignGeneralConditionDialog
     private final ConditionSelectedCallback mConditionSelectedCallback;
     private ProgressDialog mProgressDialog;
 
-    // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
+    // TODO: Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
     public interface ConditionSelectedCallback {
         /**

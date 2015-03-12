@@ -16,7 +16,7 @@ import static android.provider.BaseColumns._ID;
  */
 public class PatientDatabase extends SQLiteOpenHelper {
 
-    // TODO(dxchen): This class currently uses providers.Contracts to define DB column names. This
+    // TODO: This class currently uses providers.Contracts to define DB column names. This
     // isn't strictly correct as those names are the ones used in the public interface of
     // ContentProviders. Just because a DB column name has the same name as a ContentProvider column
     // name doesn't mean that they should reference the exact same string.
@@ -29,7 +29,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
      * Having this hardcoded into the app is NOT secure. However, it does prevent idle browsing
      * from someone who has just stolen the tablet, and isn't willing to look at source code.
      *
-     * TODO(nfortescue): add something better. At the very minimum a server call and local storage
+     * TODO: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
      */
