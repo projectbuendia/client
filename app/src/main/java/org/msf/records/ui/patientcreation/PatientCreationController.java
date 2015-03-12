@@ -16,7 +16,6 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
-import org.msf.records.model.PatientName;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
@@ -158,9 +157,9 @@ final class PatientCreationController {
         AppPatientDelta patientDelta = new AppPatientDelta();
         patientDelta.id = Optional.of(id);
         patientDelta.givenName = Optional.of(givenName == null || givenName.isEmpty()
-                ? PatientName.DEFAULT_GIVEN_NAME : givenName);
+                ? App.getInstance().getString(R.string.unknown_given_name) : givenName);
         patientDelta.familyName = Optional.of(familyName == null || familyName.isEmpty()
-                ? PatientName.DEFAULT_FAMILY_NAME : familyName);
+                ? App.getInstance().getString(R.string.unknown_family_name) : familyName);
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid = (locationUuid == null)
