@@ -1,6 +1,5 @@
 package org.msf.records.data.app;
 
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 

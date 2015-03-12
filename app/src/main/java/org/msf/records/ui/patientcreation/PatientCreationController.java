@@ -80,8 +80,6 @@ final class PatientCreationController {
         mUi = ui;
         mCrudEventBus = crudEventBus;
         mModel = model;
-
-        // TODO(dxchen): Inject this.
         mEventBusSubscriber = new EventSubscriber();
     }
 

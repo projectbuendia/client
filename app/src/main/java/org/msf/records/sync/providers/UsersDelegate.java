@@ -49,7 +49,7 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
     public int bulkInsert(
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues[] values) {
-        // TODO(nfortescue): optimise this.
+        // TODO: optimise this.
         for (ContentValues value : values) {
             insert(dbHelper, contentResolver, uri, value);
         }

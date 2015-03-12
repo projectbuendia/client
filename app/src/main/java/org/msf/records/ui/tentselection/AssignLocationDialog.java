@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -38,8 +37,6 @@ public final class AssignLocationDialog
 
     private static final Logger LOG = Logger.create();
 
-    public static final boolean DEBUG = true;
-
     @Nullable private AlertDialog mDialog;
     @Nullable private GridView mGridView;
     @Nullable private TentListAdapter mAdapter;
@@ -56,7 +53,7 @@ public final class AssignLocationDialog
     private AppLocationTree mLocationTree;
     private boolean mRegistered;
 
-    // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
+    // TODO: Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
     public interface TentSelectedCallback {
         /**
@@ -94,14 +91,17 @@ public final class AssignLocationDialog
     }
 
     public void show() {
-        FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to just work
-        View.inflate(mContext,R.layout.tent_grid, frameLayout);
-        mGridView = (GridView) frameLayout.findViewById(R.id.tent_selection_tents);
+
+        // We have to do this backwards thing instead of just inflating the view directly into the
+        // AlertDialog because calling findViewById() before show() causes a crash. See
+        // http://stackoverflow.com/a/15572855/996592 for the gory details.
+        View contents = View.inflate(mContext, R.layout.dialog_assign_location, null);
+        mGridView = (GridView) contents.findViewById(R.id.tent_selection_tents);
         startListeningForLocations();
 
         mDialog = new AlertDialog.Builder(mContext)
                 .setTitle(R.string.action_assign_location)
-                .setView(frameLayout)
+                .setView(contents)
                 .setOnDismissListener(this)
                 .create();
         mDialog.show();
@@ -140,7 +140,7 @@ public final class AssignLocationDialog
 
     private void setTents(AppLocationTree locationTree) {
         if (mGridView != null) {
-            List<AppLocation> locations = new ArrayList(
+            List<AppLocation> locations = new ArrayList<>(
                     locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT));
             AppLocation triageZone = locationTree.findByUuid(Zone.TRIAGE_ZONE_UUID);
             locations.add(0, triageZone);
@@ -164,9 +164,6 @@ public final class AssignLocationDialog
         if (isCurrentTent(newTentUuid) || mTentSelectedCallback.onNewTentSelected(newTentUuid)) {
             dismiss();
         }
-
-        // TODO(kpy): Show a progress spinner somewhere on the dialog.
-
     }
 
     public void dismiss() {
@@ -177,7 +174,7 @@ public final class AssignLocationDialog
         mDialog.dismiss();
     }
 
-    // TODO(dxchen): Consider adding the ability to re-enable buttons if a server request fails.
+    // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
     private boolean isCurrentTent(String newTentUuid) {
         return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());

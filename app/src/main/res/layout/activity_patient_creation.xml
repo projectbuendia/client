@@ -2,9 +2,49 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
+    <LinearLayout
+        android:id="@+id/patient_creation_button_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@android:color/black"
+        style="?android:attr/buttonBarStyle">
 
-    <TableLayout
+        <Button
+            android:layout_margin="10dp"
+            android:id="@+id/patient_creation_button_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/patient_creation_cancel"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_cancel_button"
+            android:drawableStart="@drawable/ic_action_cancel"
+            android:padding="@dimen/action_button_padding"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button
+            android:layout_margin="10dp"
+            android:id="@+id/patient_creation_button_create"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/patient_creation_create"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_create_button"
+            android:drawableStart="@drawable/ic_action_accept"
+            android:padding="@dimen/action_button_padding"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+    </LinearLayout>
+
+    <ScrollView
         android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_above="@id/patient_creation_button_bar">
+    <TableLayout
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
@@ -266,41 +306,6 @@
 
         </TableRow>
     </TableLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:background="@android:color/black"
-        style="?android:attr/buttonBarStyle">
-
-        <Button
-            android:layout_margin="10dp"
-            android:id="@+id/patient_creation_button_cancel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/patient_creation_cancel"
-            android:textColor="@android:color/white"
-            android:background="@drawable/bg_cancel_button"
-            android:drawableStart="@drawable/ic_action_cancel"
-            android:padding="@dimen/action_button_padding"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-        <Button
-            android:layout_margin="10dp"
-            android:id="@+id/patient_creation_button_create"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/patient_creation_create"
-            android:textColor="@android:color/white"
-            android:background="@drawable/bg_create_button"
-            android:drawableStart="@drawable/ic_action_accept"
-            android:padding="@dimen/action_button_padding"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-    </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

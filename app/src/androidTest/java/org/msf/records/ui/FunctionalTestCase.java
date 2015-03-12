@@ -53,9 +53,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     @Override
     public void setUp() throws Exception {
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
-        // Even a 2-minute timeout proved to be flaky, so doubled to 4 minutes.
-        IdlingPolicies.setIdlingResourceTimeout(240, TimeUnit.SECONDS);
-        IdlingPolicies.setMasterPolicyTimeout(240, TimeUnit.SECONDS);
+        // Increased to 5 minutes as certain operations (like initial sync) may take an exceedingly
+        // long time.
+        IdlingPolicies.setIdlingResourceTimeout(300, TimeUnit.SECONDS);
+        IdlingPolicies.setMasterPolicyTimeout(300, TimeUnit.SECONDS);
 
         mEventBus = new EventBusWrapper(EventBus.getDefault());
 
@@ -182,11 +183,13 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     protected void checkViewDisplayedWithin(Matcher<View> matcher, int timeoutMs) {
         long timeoutTime = System.currentTimeMillis() + timeoutMs;
         boolean viewFound = false;
+        Throwable viewAssertionError = null;
         while (timeoutTime > System.currentTimeMillis() && !viewFound) {
             try {
                 onView(matcher).check(matches(isDisplayed()));
                 viewFound = true;
             } catch (Throwable t) {
+                viewAssertionError = t;
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e1) {
@@ -195,8 +198,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
                 }
             }
         }
-        // Instead of throwing, let onView().check throw a nicely formatted error.
-        onView(matcher).check(matches(isDisplayed()));
+
+        if (!viewFound) {
+            throw new RuntimeException(viewAssertionError);
+        }
     }
 
 

@@ -75,15 +75,15 @@ public class InitialSyncTest extends SyncTestCase {
         // Cancel the sync.
         EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+        // There may be a slight delay before the cancel button appears.
+        checkViewDisplayedSoon(withId(R.id.action_cancel));
         onView(withId(R.id.action_cancel)).perform(click());
         Espresso.registerIdlingResources(syncCanceledResource);
 
-        // Select guest user again.
-        checkViewDisplayedSoon(withText("Guest User"));
+        // Select guest user again -- give plenty of time for cancellation to occur since canceling
+        // certain network operations can take an exceedingly long time.
+        checkViewDisplayedWithin(withText("Guest User"), 90000);
         onView(withText("Guest User")).perform(click());
-
-        // Sync should start anew.
-        checkViewDisplayedSoon(withId(R.id.progress_fragment_progress_bar));
 
         // The second sync should actually complete.
         waitForProgressFragment();

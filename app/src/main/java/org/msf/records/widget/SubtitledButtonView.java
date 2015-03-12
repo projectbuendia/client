@@ -35,7 +35,7 @@ public class SubtitledButtonView extends LinearLayout {
 
     public SubtitledButtonView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        // TODO(akalachman): Find a way to maintain the border even when setting a bgcolor.
+        // TODO: Find a way to maintain the border even when setting a bgcolor.
         setBackgroundResource(R.drawable.border_grey_1dp);
 
         LayoutInflater.from(context).inflate(

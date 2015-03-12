@@ -67,7 +67,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
         } catch (InterruptedException e) {
             return new PatientUpdateFailedEvent(PatientUpdateFailedEvent.REASON_INTERRUPTED, e);
         } catch (ExecutionException e) {
-            // TODO(dxchen): Parse the VolleyError to see exactly what kind of error was raised.
+            // TODO: Parse the VolleyError to see exactly what kind of error was raised.
             return new PatientUpdateFailedEvent(
                     PatientUpdateFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
         }

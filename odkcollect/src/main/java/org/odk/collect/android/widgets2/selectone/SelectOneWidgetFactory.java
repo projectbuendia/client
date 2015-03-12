@@ -15,7 +15,7 @@ public class SelectOneWidgetFactory extends TypedWidgetFactory<SelectOneData> {
 
     public TypedWidget<SelectOneData> create(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
-        // TODO(dxchen): Uncomment this when ready!
+        // TODO: Uncomment this when ready!
 //
 //        if (appearance == null) {
 //            return null;

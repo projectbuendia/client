@@ -10,7 +10,7 @@ import android.widget.RadioGroup;
  *
  * <p>Based on http://stackoverflow.com/a/560958. License is CC-by-SA v2.5.
  *
- * TODO(dxchen): Figure out license.
+ * TODO: Figure out license.
  */
 public class FlowRadioGroup extends RadioGroup {
 
