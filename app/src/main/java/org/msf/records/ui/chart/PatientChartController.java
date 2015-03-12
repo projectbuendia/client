@@ -268,11 +268,11 @@ final class PatientChartController {
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         switch (requestCode.form) {
             case ADD_OBSERVATION:
-                // This will fire a CreatePatientSucceededEvent.
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
-                // This will fire a CreatePatientSucceededEvent.
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             default:
