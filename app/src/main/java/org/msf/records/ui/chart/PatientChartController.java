@@ -278,14 +278,14 @@ final class PatientChartController {
                 Utils.logUserAction(action,
                         "form", "round",
                         "patient_uuid", patientUuid);
-                // This will fire a CreatePatientSucceededEvent.
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
                 Utils.logUserAction(action,
                         "form", "lab_test",
                         "patient_uuid", patientUuid);
-                // This will fire a CreatePatientSucceededEvent.
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             default:
@@ -513,10 +513,6 @@ final class PatientChartController {
             }
             mLocationTree = event.tree;
             updatePatientLocationUi();
-        }
-
-        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
-            mSyncManager.forceSync();
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
