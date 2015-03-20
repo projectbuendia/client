@@ -49,7 +49,7 @@ public class UpdateManager {
      * checkForUpdate() within this period will not check the server for new updates.
      * <p>Note that if the application is relaunched, an update check will be performed.
      */
-    public static final int CHECK_PERIOD_SECONDS = 60 * 60; // Default to 1hr.
+    public static final int CHECK_PERIOD_SECONDS = 90; // default to 1.5 minutes.
 
     /**
      * The minimal version number.
@@ -166,14 +166,16 @@ public class UpdateManager {
                     LOG.e("no external storage is available, can't start download");
                     return false;
                 }
+                String filename = MODULE_NAME + "-"
+                        + availableUpdateInfo.availableVersion + ".apk";
                 DownloadManager.Request request =
                         new DownloadManager.Request(availableUpdateInfo.updateUri)
-                                .setDestinationInExternalPublicDir(
-                                        dir,
-                                        MODULE_NAME + availableUpdateInfo.availableVersion + ".apk")
+                                .setDestinationInExternalPublicDir(dir, filename)
                                 .setNotificationVisibility(
                                         DownloadManager.Request.VISIBILITY_VISIBLE);
                 mDownloadId = mDownloadManager.enqueue(request);
+                LOG.i("Starting download: " + availableUpdateInfo.updateUri
+                        + " -> " + filename + " in " + dir);
                 return true;
             } catch (Exception e) {
                 LOG.e(e, "Failed to download application update from "
@@ -252,10 +254,7 @@ public class UpdateManager {
         try {
             return LexicographicVersion.parse(packageInfo.versionName);
         } catch (IllegalArgumentException e) {
-            LOG.e(
-                    e,
-                    "Application has an invalid semantic version: " + packageInfo.versionName + ". "
-                            + "Please fix in build.gradle.");
+            LOG.w("App has an invalid version (or is a dev build): " + packageInfo.versionName);
             return MINIMAL_VERSION;
         }
     }

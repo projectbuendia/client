@@ -17,6 +17,7 @@ import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 import com.google.common.collect.Ordering;
 
@@ -93,17 +94,20 @@ public final class UserLoginController {
 
     /** Call when the user presses the 'add user' button. */
     public void onAddUserPressed() {
+        Utils.logEvent("add_user_button_pressed");
         mUi.showAddNewUserDialog();
     }
 
     /** Call when the user presses the settings button. */
     public void onSettingsPressed() {
+        Utils.logEvent("settings_button_pressed");
         mUi.showSettings();
     }
 
     /** Call when the user taps to select a user. */
     public void onUserSelected(User user) {
         mUserManager.setActiveUser(user);
+        Utils.logUserAction("logged_in");
         mUi.showTentSelectionScreen();
     }
 

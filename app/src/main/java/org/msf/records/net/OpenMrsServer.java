@@ -6,6 +6,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -15,9 +16,11 @@ import com.google.gson.JsonParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.App;
 import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.model.Concepts;
 import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
@@ -27,6 +30,7 @@ import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -88,6 +92,37 @@ public class OpenMrsServer implements Server {
                 errorListener.onErrorResponse(new VolleyError(message, error));
             }
         };
+    }
+
+    @Override
+    public void logToServer(List<String> pairs) {
+        // To avoid filling the server logs with big messy stack traces, let's make a dummy
+        // request that succeeds.  We assume "Pulse" will always be present on the server.
+        // Conveniently, extra data after ";" in the URL is included in request logs, but
+        // ignored by the REST resource handler, which just returns the "Pulse" concept.
+        final String urlPath = "/concept/" + Concepts.PULSE_UUID;
+        List<String> params = new ArrayList<>();
+        params.add("time=" + (new Date().getTime()));
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            params.add("user_id=" + user.id);
+            if (user.isGuestUser()) {
+                params.add("guest_user=1");
+            }
+        }
+        for (int i = 0; i + 1 < pairs.size(); i += 2) {
+            params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
+        }
+
+        LOG.i("Logging to server: %s", params);
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails, urlPath + ";" + Joiner.on(";").join(params), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) { }
+                } , null);
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 0, 1));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.PatientCountDisplay;
+import org.msf.records.utils.Utils;
 
 public class RoundActivity extends PatientSearchActivity {
     private String mLocationName;
@@ -47,6 +48,7 @@ public class RoundActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("add_patient_pressed");
                         startActivity(
                                 new Intent(RoundActivity.this, PatientCreationActivity.class));
 

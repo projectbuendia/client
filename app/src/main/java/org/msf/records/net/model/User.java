@@ -28,15 +28,11 @@ public class User implements Serializable, Comparable<User> {
         @Override
         public int compare(User a, User b) {
             // Special case: the guest account should always appear first if present.
-            if (a.fullName.equals(GUEST_ACCOUNT_NAME)) {
-                if (b.fullName.equals(GUEST_ACCOUNT_NAME)) {
-                    return 0;
-                }
-                return -1;
-            } else if (b.fullName.equals(GUEST_ACCOUNT_NAME)) {
-                return 1;
+            int aSection = a.isGuestUser() ? 1 : 2;
+            int bSection = b.isGuestUser() ? 1 : 2;
+            if (aSection != bSection) {
+                return aSection - bSection;
             }
-
             return a.fullName.compareTo(b.fullName);
         }
     };
@@ -81,5 +77,9 @@ public class User implements Serializable, Comparable<User> {
     @Override
     public int compareTo(User other) {
         return COMPARATOR_BY_ID.compare(this, other);
+    }
+
+    public final boolean isGuestUser() {
+        return GUEST_ACCOUNT_NAME.equals(fullName);
     }
 }

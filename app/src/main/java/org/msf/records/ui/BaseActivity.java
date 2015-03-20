@@ -21,6 +21,7 @@ import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.updater.AvailableUpdateInfo;
 import org.msf.records.updater.DownloadedUpdateInfo;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 import de.greenrobot.event.EventBus;
 
@@ -48,6 +49,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
         EventBus.getDefault().registerSticky(this);
         App.getInstance().getHealthMonitor().start();
+        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
     }
 
     @Override
@@ -319,24 +321,27 @@ public abstract class BaseActivity extends FragmentActivity {
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
 
+        final View mStatusView;
         final TextView mUpdateMessage;
         final TextView mUpdateAction;
 
         public UpdateNotificationUi() {
-            View view = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
-            setStatusView(view);
-            mUpdateMessage = (TextView) view.findViewById(R.id.status_bar_default_message);
-            mUpdateAction = (TextView) view.findViewById(R.id.status_bar_default_action);
+            mStatusView = getLayoutInflater().inflate(R.layout.view_status_bar_default, null);
+            mUpdateMessage = (TextView) mStatusView.findViewById(R.id.status_bar_default_message);
+            mUpdateAction = (TextView) mStatusView.findViewById(R.id.status_bar_default_action);
         }
 
         @Override
         public void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo) {
-            setStatusVisibility(View.VISIBLE);
             mUpdateMessage.setText(R.string.snackbar_update_available);
             mUpdateAction.setText(R.string.snackbar_action_download);
+            setStatusView(mStatusView);
+            setStatusVisibility(View.VISIBLE);
+
             mUpdateAction.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Utils.logEvent("download_update_button_pressed");
                     setStatusVisibility(View.GONE);
                     EventBus.getDefault().post(new DownloadRequestedEvent());
                 }
@@ -345,12 +350,15 @@ public abstract class BaseActivity extends FragmentActivity {
 
         @Override
         public void showUpdateReadyToInstall(DownloadedUpdateInfo updateInfo) {
-            setStatusVisibility(View.VISIBLE);
             mUpdateMessage.setText(R.string.snackbar_update_downloaded);
             mUpdateAction.setText(R.string.snackbar_action_install);
+            setStatusView(mStatusView);
+            setStatusVisibility(View.VISIBLE);
+
             mUpdateAction.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Utils.logEvent("install_update_button_pressed");
                     setStatusVisibility(View.GONE);
                     EventBus.getDefault().post(new InstallationRequestedEvent());
                 }

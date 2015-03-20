@@ -26,6 +26,7 @@ import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Utils;
 
 import de.greenrobot.event.EventBus;
 
@@ -67,6 +68,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                         R.string.sync_failed_back, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Utils.logEvent("sync_failed_back_pressed");
                                 finish();
                             }
                         })
@@ -74,6 +76,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                         R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Utils.logEvent("sync_failed_settings_pressed");
                                 startActivity(new Intent(
                                         TentSelectionActivity.this,SettingsActivity.class));
                             }
@@ -82,6 +85,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                         R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Utils.logEvent("sync_failed_retry_pressed");
                                 mController.onSyncRetry();
                             }
                         })
@@ -123,6 +127,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logEvent("add_patient_pressed");
                         startActivity(new Intent(
                                 TentSelectionActivity.this,
                                 PatientCreationActivity.class));

@@ -1,8 +1,12 @@
 package org.msf.records.utils;
 
 import org.joda.time.Days;
+import com.google.common.collect.Lists;
+
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.msf.records.App;
+import org.msf.records.net.Server;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -10,10 +14,13 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
@@ -126,8 +133,11 @@ public class Utils {
         }
     };
 
-    /** Encodes a URL parameter, catching the useless exception that never happens. */
-    public static String urlEncode(String s) {
+    /** URL-encodes a nullable string, catching the useless exception that never happens. */
+    public static String urlEncode(@Nullable String s) {
+        if (s == null) {
+            return "";
+        }
         try {
             // Oh Java, how you make the simplest operation a waste of millions of programmer-hours.
             return URLEncoder.encode(s, "UTF-8");
@@ -137,12 +147,12 @@ public class Utils {
     }
 
     /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(LocalDate date) {
+    public static String localDateToString(@Nullable LocalDate date) {
         return date == null ? null : date.toString();
     }
 
     /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(String string) {
+    public static LocalDate stringToLocalDate(@Nullable String string) {
         try {
             return string == null ? null : LocalDate.parse(string);
         } catch (IllegalArgumentException e) {
@@ -179,11 +189,45 @@ public class Utils {
      * Describes a given date as a number of days since a starting date, where the starting date
      * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
      */
-    public static int dayNumberSince(LocalDate startDate, LocalDate date) {
+    public static int dayNumberSince(@Nullable LocalDate startDate, @Nullable LocalDate date) {
         if (startDate == null || date == null) {
             return -1;
         }
         return Days.daysBetween(startDate, date).getDays() + 1;
+    }
+
+    /**
+     * Logs a user action by sending a dummy request to the server.  (The server
+     * logs can then be scanned later to produce analytics for the client app.)
+     * @param action An identifier for the user action; should describe a user-
+     *               initiated operation in the UI (e.g. "foo_button_pressed").
+     * @param pairs An even number of arguments providing key-value pairs of
+     *              arbitrary data to record with the event.
+     */
+    public static void logUserAction(String action, String... pairs) {
+        Server server = App.getInstance().getServer();
+        if (server != null) {
+            List<String> allPairs = Lists.newArrayList("action", action);
+            allPairs.addAll(Arrays.asList(pairs));
+            server.logToServer(allPairs);
+        }
+    }
+
+    /**
+     * Logs an event by sending a dummy request to the server.  (The server logs
+     * can then be scanned later to produce analytics for the client app.)
+     * @param event An identifier for an event that is not directly initiated by
+     *              the user (e.g. "form_submission_failed").
+     * @param pairs An even number of arguments providing key-value pairs of
+     *              arbitrary data to record with the event.
+     */
+    public static void logEvent(String event, String... pairs) {
+        Server server = App.getInstance().getServer();
+        if (server != null) {
+            List<String> allPairs = Lists.newArrayList("event", event);
+            allPairs.addAll(Arrays.asList(pairs));
+            server.logToServer(allPairs);
+        }
     }
 
     private Utils() {

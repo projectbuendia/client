@@ -19,6 +19,7 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
 import org.msf.records.ui.ProgressFragment;
 import org.msf.records.utils.EventBusWrapper;
+import org.msf.records.utils.Utils;
 
 import javax.inject.Inject;
 
@@ -102,6 +103,7 @@ public class PatientListFragment extends ProgressFragment implements
         mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Utils.logUserAction("refresh_requested");
                 mListController.onRefreshRequested();
             }
         });
@@ -144,8 +146,8 @@ public class PatientListFragment extends ProgressFragment implements
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
         AppPatient patient = (AppPatient)mPatientAdapter.getChild(groupPosition, childPosition);
+        Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
         mController.onPatientSelected(patient);
-
         return true;
     }
 

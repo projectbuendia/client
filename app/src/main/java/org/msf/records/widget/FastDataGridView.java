@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.google.common.base.Preconditions;
 
 import org.msf.records.R;
+import org.msf.records.utils.Utils;
 
 /**
  * A compound layout that displays a table of data with fixed column and row headers. Since the main
@@ -26,6 +27,11 @@ public class FastDataGridView {
     private final Context context;
     private final DataGridAdapter dataGridAdapter;
     private final LayoutInflater layoutInflater;
+
+    private int scrollX = 0;
+    private int scrollY = 0;
+    private int logNextScrollX = 40;
+    private int logNextScrollY = 40;
 
     public FastDataGridView(
             Context context, DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
@@ -60,6 +66,7 @@ public class FastDataGridView {
             @Override
             public void onInternalScrollBy(int dx, int dy) {
                 verticalScrollview.scrollBy(0, dy);
+                logScrollActions(0, dy);
             }
         });
 
@@ -73,6 +80,7 @@ public class FastDataGridView {
             @Override
             public void onInternalScrollBy(int dx, int dy) {
                 cells.scrollBy(dx, 0);
+                logScrollActions(dx, 0);
             }
         });
 
@@ -89,16 +97,33 @@ public class FastDataGridView {
             @Override
             public void onInternalScrollBy(int dx, int dy) {
                 columnHeaders.scrollBy(dx, 0);
+                logScrollActions(dx, 0);
             }
         });
         verticalScrollview.setInternalScrollListener(new OnInternalScrollListener() {
             @Override
             public void onInternalScrollBy(int dx, int dy) {
                 rowHeaders.scrollBy(0, dy);
+                logScrollActions(0, dy);
             }
         });
 
         return topLayout;
+    }
+
+    private void logScrollActions(int dx, int dy) {
+        scrollX += dx;
+        scrollY += dy;
+        int mx = Math.abs(scrollX);
+        int my = Math.abs(scrollY);
+        if (mx > logNextScrollX) {
+            Utils.logUserAction("chart_scrolled_left", "x", "" + scrollX);
+            logNextScrollX *= 2;
+        }
+        if (my > logNextScrollY) {
+            Utils.logUserAction("chart_scrolled_down", "y", "" + scrollY);
+            logNextScrollY *= 2;
+        }
     }
 
     /**
