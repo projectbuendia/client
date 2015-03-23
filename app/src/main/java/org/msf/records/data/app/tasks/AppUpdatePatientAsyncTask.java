@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 The Project Buendia Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.msf.records.data.app.tasks;
 
 import android.content.ContentResolver;
@@ -24,7 +40,11 @@ import org.msf.records.sync.providers.Contracts;
 import java.util.concurrent.ExecutionException;
 
 /**
- * An {@link AsyncTask} that updates a patient.
+ * An {@link AsyncTask} that updates a patient on a server.
+ *
+ * <p>If the operation succeeds, a {@link SingleItemUpdatedEvent} is posted on the given
+ * {@link CrudEventBus} with both the old and updated patient data. If the operation fails, a
+ * {@link PatientUpdateFailedEvent} is posted instead.
  */
 public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
 
