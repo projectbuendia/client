@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.tentselection;
 
 import android.app.AlertDialog;
@@ -16,7 +27,7 @@ import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.net.Constants;
+import org.msf.records.net.Common;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.LoadingState;
@@ -47,7 +58,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
 
-        if (Constants.OFFLINE_SUPPORT) {
+        if (Common.OFFLINE_SUPPORT) {
             // Create account, if needed
             GenericAccountService.registerSyncAccount(this);
         }
@@ -55,7 +66,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         mController = new TentSelectionController(
                 mAppModel,
                 mCrudEventBusProvider.get(),
-        		new MyUi(),
+                new MyUi(),
                 new EventBusWrapper(EventBus.getDefault()),
                 mSyncManager,
                 getSearchController());
@@ -101,7 +112,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     }
 
     TentSelectionController getController() {
-    	return mController;
+        return mController;
     }
 
     @Override
@@ -142,14 +153,14 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-            	mController.onSearchPressed();
-            	return true;
+                mController.onSearchPressed();
+                return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-            	mController.onSearchCancelled();
-            	return true;
+                mController.onSearchCancelled();
+                return true;
             }
         });
     }
@@ -157,8 +168,8 @@ public final class TentSelectionActivity extends PatientSearchActivity {
     private final class MyUi implements TentSelectionController.Ui {
         @Override
         public void switchToTentSelectionScreen() {
-    		getSupportFragmentManager().popBackStack();
-    	}
+            getSupportFragmentManager().popBackStack();
+        }
 
         @Override
         public void switchToPatientListScreen() {

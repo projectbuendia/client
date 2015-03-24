@@ -1,14 +1,24 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net.model;
 
 import java.util.Map;
 
 /**
- * Like patient location, but doesn't carry hierarchy strings within the representation.
- * Eventually we should deprecate patient location and use this.
+ * A simple Java bean representing a location which can be used for JSON/GSON decoding/encoding.
  */
 public class Location {
 
-	// Note: this class is constructed by reflection by Gson.
+    // Note: this class is constructed by reflection by Gson.
 
     public String uuid;
     public String parent_uuid;

@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import android.util.Log;
@@ -28,12 +39,12 @@ import javax.annotation.Nullable;
  */
 public class GsonRequest<T> extends Request<T> {
 
-    private final GsonBuilder gson = new GsonBuilder();
-    private final Class<T> clazz;
-    private final Map<String, String> headers;
-    private final Response.Listener<T> listener;
-    private final boolean array;
-    private Map<String,String> body = null;
+    private final GsonBuilder mGson = new GsonBuilder();
+    private final Class<T> mClazz;
+    private final Map<String, String> mHeaders;
+    private final Response.Listener<T> mListener;
+    private final boolean mIsArray;
+    private Map<String,String> mBody = null;
 
     /**
      * Creates an instance of {@link GsonRequest} that expects an array of Gson objects as a
@@ -52,42 +63,56 @@ public class GsonRequest<T> extends Request<T> {
     }
 
     /**
-     * Make a GET request and return a parsed object from JSON.
+     * Makes a GET request and returns a parsed object from JSON.
      *
      * @param url URL of the request to make
      * @param clazz Relevant class object, for Gson's reflection
      * @param headers Map of request headers
+     * @param listener a {@link Response.Listener} that handles successful requests
+     * @param errorListener a {@link Response.ErrorListener} that handles failed requests
      */
     public GsonRequest(String url, Class<T> clazz, boolean array, Map<String, String> headers,
                        Response.Listener<T> listener, Response.ErrorListener errorListener) {
         this(Method.GET, null, url, clazz, array, headers, listener, errorListener);
     }
 
+    /**
+     * Makes a request using an arbitrary HTTP method and returns a parsed object from JSON.
+     *
+     * @param method the request method
+     * @param body the request body
+     * @param url URL of the request to make
+     * @param clazz Relevant class object, for Gson's reflection
+     * @param isArray true if the response is expected to contain an array of items
+     * @param headers Map of request headers
+     * @param listener a {@link Response.Listener} that handles successful requests
+     * @param errorListener a {@link Response.ErrorListener} that handles failed requests
+     */
     public GsonRequest(int method,
                        @Nullable Map<String, String> body,
-                       String url, Class<T> clazz, boolean array, Map<String, String> headers,
+                       String url, Class<T> clazz, boolean isArray, Map<String, String> headers,
                        Response.Listener<T> listener, Response.ErrorListener errorListener) {
         super(method, url, errorListener);
-        this.body = body;
-        this.clazz = clazz;
-        this.headers = headers;
-        this.listener = listener;
-        this.array = array;
+        this.mBody = body;
+        this.mClazz = clazz;
+        this.mHeaders = headers;
+        this.mListener = listener;
+        this.mIsArray = isArray;
     }
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        return headers != null ? headers : super.getHeaders();
+        return mHeaders != null ? mHeaders : super.getHeaders();
     }
 
     @Override
     protected void deliverResponse(T response) {
-        listener.onResponse(response);
+        mListener.onResponse(response);
     }
 
     @Override
-    protected Map<String,String> getParams(){
-        return body;
+    protected Map<String,String> getParams() {
+        return mBody;
     }
 
     @Override
@@ -95,32 +120,34 @@ public class GsonRequest<T> extends Request<T> {
         try {
             String json = new String(
                     response.data,
-                    HTTP.UTF_8);  // TODO: HttpHeaderParser.parseCharset(response.headers).
-            Gson gsonParser = gson.create();
+                    HTTP.UTF_8);  // TODO: HttpHeaderParser.parseCharset(response.mHeaders).
+            Gson gsonParser = mGson.create();
             Log.d("SyncAdapter", "parsing response");
-            if(array){
+            if (mIsArray) {
                 JsonParser parser = new JsonParser();
                 JsonArray array = (JsonArray) parser.parse(json);
                 ArrayList<T> elements = new ArrayList<>();
                 for (int i = 0; i < array.size(); i++) {
-                    elements.add(gsonParser.fromJson(array.get(i).toString(), clazz));
+                    elements.add(gsonParser.fromJson(array.get(i).toString(), mClazz));
                 }
-                return (Response<T>) Response.success(elements, HttpHeaderParser.parseCacheHeaders(response));
+                return (Response<T>) Response.success(
+                        elements,
+                        HttpHeaderParser.parseCacheHeaders(response));
             } else {
                 return Response.success(
-                        gsonParser.fromJson(json, clazz),
+                        gsonParser.fromJson(json, mClazz),
                         HttpHeaderParser.parseCacheHeaders(response));
             }
         } catch (UnsupportedEncodingException e) {
             return Response.error(new ParseError(e));
         } catch (JsonSyntaxException e) {
             return Response.error(new ParseError(e));
-        } catch (Exception e){
+        } catch (Exception e) {
             return Response.error(new ParseError(e));
         }
     }
 
     public GsonBuilder getGson() {
-        return gson;
+        return mGson;
     }
 }

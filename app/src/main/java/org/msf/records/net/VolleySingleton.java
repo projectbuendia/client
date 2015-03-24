@@ -1,7 +1,6 @@
 package org.msf.records.net;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -10,12 +9,12 @@ import com.android.volley.toolbox.Volley;
 import org.msf.records.utils.Logger;
 
 /**
- * Wrap Volley up in a Singleton object.
+ * Wraps Volley up in a singleton object.
  */
 public class VolleySingleton {
 
     private static final Logger LOG = Logger.create();
-    private static VolleySingleton mInstance;
+    private static VolleySingleton sInstance;
     private final RequestQueue mRequestQueue;
 
     private VolleySingleton(Context context) {
@@ -32,10 +31,10 @@ public class VolleySingleton {
      * @return the Singleton for accessing Volley.
      */
     public static synchronized VolleySingleton getInstance(Context context) {
-        if (mInstance == null) {
-            mInstance = new VolleySingleton(context);
+        if (sInstance == null) {
+            sInstance = new VolleySingleton(context);
         }
-        return mInstance;
+        return sInstance;
     }
 
     public RequestQueue getRequestQueue() {

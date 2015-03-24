@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import android.content.ContentResolver;
@@ -27,23 +38,21 @@ import de.greenrobot.event.EventBus;
 
 /**
  * Synchronizes 1 or more OpenMRS provided forms into the ODK database storage. Very like
- * {@see org.odk.collect.android.tasks.DiskSyncTask} or
- * {@see org.odk.collect.android.tasks.DownloadFormsTask}
+ * {@link org.odk.collect.android.tasks.DiskSyncTask} or
+ * {@link org.odk.collect.android.tasks.DownloadFormsTask}
  *
- * Takes the UUID, if it doesn't exist in ODK storage fetches it from OpenMRS, then creates
- * {$uuid}.xml in storage. Finally inserts into ODK local metadata DB.
- *
- * @author nfortescue@google.com
+ * <p>Takes the UUID and, if the form doesn't exist in ODK storage, fetches it from OpenMRS, then
+ * creates {$uuid}.xml in storage. Finally, the form is inserted into ODK's local metadata DB.
  */
 public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Void> {
 
     private static final Logger LOG = Logger.create();
 
     @Nullable
-    private final FormWrittenListener formWrittenListener;
+    private final FormWrittenListener mFormWrittenListener;
 
     public OdkXformSyncTask(@Nullable FormWrittenListener formWrittenListener) {
-        this.formWrittenListener = formWrittenListener;
+        this.mFormWrittenListener = formWrittenListener;
     }
 
     @Override
@@ -96,8 +105,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             if (!isNew && !usersHaveChanged) {
                 LOG.i("Using form " + formInfo.uuid + " from local cache.");
-                if (formWrittenListener != null) {
-                    formWrittenListener.formWritten(proposedPath, formInfo.uuid);
+                if (mFormWrittenListener != null) {
+                    mFormWrittenListener.formWritten(proposedPath, formInfo.uuid);
                 }
                 EventBus.getDefault().post(new FetchXformSucceededEvent());
                 continue;
@@ -110,7 +119,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Override
                 public void onResponse(String response) {
                     LOG.i("adding form to db " + response);
-                    new AddFormToDbAsyncTask(formWrittenListener, formInfo.uuid, isUpdate)
+                    new AddFormToDbAsyncTask(mFormWrittenListener, formInfo.uuid, isUpdate)
                             .execute(new FormToWrite(response, proposedPath));
                 }
             }, new Response.ErrorListener() {
@@ -177,7 +186,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
     private static class AddFormToDbAsyncTask extends AsyncTask<FormToWrite, Void, File> {
 
-        private final FormWrittenListener formWrittenListener;
+        private final FormWrittenListener mFormWrittenListener;
         private final String mUuid;
         private final boolean mUpdate;
 
@@ -185,7 +194,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 @Nullable FormWrittenListener formWrittenListener,
                 String uuid,
                 boolean update) {
-            this.formWrittenListener = formWrittenListener;
+            mFormWrittenListener = formWrittenListener;
             mUuid = uuid;
             mUpdate = update;
         }
@@ -207,14 +216,16 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             ContentValues contentValues;
             try {
                 contentValues = DiskSyncTask.buildContentValues(proposedPath);
-            } catch (IllegalArgumentException e) { // yuck, but this is what it throws on a bad parse
+            } catch (IllegalArgumentException e) {
+                // yuck, but this is what it throws on a bad parse
                 LOG.e(e, "Failed to parse: " + proposedPath);
                 return null;
             }
 
             // insert into content provider
             try {
-                ContentResolver contentResolver = Collect.getInstance().getApplication().getContentResolver();
+                ContentResolver contentResolver =
+                        Collect.getInstance().getApplication().getContentResolver();
                 // Always replace existing forms.
                 contentValues.put(FormsProviderAPI.SQL_INSERT_OR_REPLACE, true);
                 contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
@@ -227,8 +238,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         @Override
         protected void onPostExecute(File path) {
             super.onPostExecute(path);
-            if (formWrittenListener != null && path != null) {
-                formWrittenListener.formWritten(path, mUuid);
+            if (mFormWrittenListener != null && path != null) {
+                mFormWrittenListener.formWritten(path, mUuid);
             }
             EventBus.getDefault().post(new FetchXformSucceededEvent());
 

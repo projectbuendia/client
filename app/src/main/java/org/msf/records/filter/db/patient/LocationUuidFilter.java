@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.filter.db.patient;
 
 import org.msf.records.data.app.AppLocation;
@@ -9,9 +20,9 @@ import org.msf.records.sync.providers.Contracts;
 import java.util.List;
 
 /**
- * LocationUuidFilter returns all patients who reside in the specified subtree of locations.
+ * LocationUuidFilter matches all patients who reside in the specified subtree of locations.
  *
- * <p>For example, a LocationUuidFilter given a uuid of a zone will return all patients assigned to
+ * <p>For example, a LocationUuidFilter given a UUID of a zone will return all patients assigned to
  * that zone, tents within that zone, beds within those tents, etc.
  */
 public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> {
@@ -44,8 +55,8 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> 
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.
         StringBuilder sb = new StringBuilder()
-        		.append(Contracts.Patients.LOCATION_UUID)
-        		.append(" IN (");
+                .append(Contracts.Patients.LOCATION_UUID)
+                .append(" IN (");
         String prefix = "";
         for (int i = 0; i < allPossibleLocations.size(); i++) {
             sb.append(prefix).append("?");

@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import android.support.annotation.Nullable;
@@ -34,8 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Implementation of Server RPCs that will talk to OpenMRS.
- * Currently no other implementations.
+ * Implementation of {@link Server} that sends RPC's to OpenMRS.
  */
 public class OpenMrsServer implements Server {
 
@@ -45,6 +55,13 @@ public class OpenMrsServer implements Server {
     private final RequestFactory mRequestFactory;
     private final Gson mGson;
 
+    /**
+     * Constructs an interface to the OpenMRS server.
+     * @param connectionDetails an {@link OpenMrsConnectionDetails} instance for communicating with
+     *                          the server
+     * @param requestFactory a {@link RequestFactory} for generating requests to OpenMRS
+     * @param gson a {@link Gson} instance for serialization/deserialization
+     */
     public OpenMrsServer(
             OpenMrsConnectionDetails connectionDetails,
             RequestFactory requestFactory,
@@ -60,7 +77,7 @@ public class OpenMrsServer implements Server {
      * content of a response, if possible.
      * @param errorListener An error listener.
      * @return A new error listener that tries to pass a more meaningful message
-     * to the original errorListener.
+     *     to the original errorListener.
      */
     private Response.ErrorListener wrapErrorListener(
             final Response.ErrorListener errorListener) {
@@ -69,8 +86,8 @@ public class OpenMrsServer implements Server {
             public void onErrorResponse(VolleyError error) {
                 String message = error.getMessage();
                 try {
-                    if (error.networkResponse != null &&
-                        error.networkResponse.data != null) {
+                    if (error.networkResponse != null
+                            && error.networkResponse.data != null) {
                         String text = new String(error.networkResponse.data);
                         JsonObject result = new JsonParser().parse(text).getAsJsonObject();
                         if (result.has("error")) {
@@ -308,7 +325,7 @@ public class OpenMrsServer implements Server {
                         ArrayList<Patient> patients = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");
-                            for (int i=0; i<results.length(); i++) {
+                            for (int i = 0; i < results.length(); i++) {
                                 patients.add(patientFromJson(results.getJSONObject(i)));
                             }
                         } catch (JSONException e) {
@@ -355,7 +372,7 @@ public class OpenMrsServer implements Server {
                         ArrayList<User> users = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");
-                            for (int i=0; i<results.length(); i++) {
+                            for (int i = 0; i < results.length(); i++) {
                                 users.add(userFromJson(results.getJSONObject(i)));
                             }
                         } catch (JSONException e) {
@@ -477,7 +494,7 @@ public class OpenMrsServer implements Server {
                         ArrayList<Location> result = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");
-                            for (int i=0; i<results.length(); i++) {
+                            for (int i = 0; i < results.length(); i++) {
                                 Location location =
                                         parseLocationJson(results.getJSONObject(i));
                                 result.add(location);
