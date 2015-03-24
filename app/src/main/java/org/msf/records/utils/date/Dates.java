@@ -69,7 +69,7 @@ public class Dates {
      * Describes a given date as a number of days since a starting date, where the starting date
      * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
      */
-    public static int dayNumberSince(@javax.annotation.Nullable LocalDate startDate, @javax.annotation.Nullable LocalDate date) {
+    public static int dayNumberSince(@Nullable LocalDate startDate, @Nullable LocalDate date) {
         if (startDate == null || date == null) {
             return -1;
         }
