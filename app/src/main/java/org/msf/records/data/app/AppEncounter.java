@@ -1,18 +1,13 @@
-/*
- * Copyright 2015 The Project Buendia Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
 
 package org.msf.records.data.app;
 
@@ -44,7 +39,7 @@ import javax.annotation.concurrent.Immutable;
  *
  * <p>NOTE: Because of lack of typing info from the server, {@link AppEncounter} attempts to
  * determine the most appropriate type, but this typing is not guaranteed to succeed; also,
- * currently only <code>DATE</code> and <code>UUID (coded)</code> types are supported.
+ * currently only <code>DATE</code> and <code>UUID</code> (coded) types are supported.
  */
 @Immutable
 public class AppEncounter extends AppTypeBase<String> {
