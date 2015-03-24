@@ -19,6 +19,7 @@ import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 /**
  * Controller for {@link PatientCreationActivity}.
@@ -80,8 +81,6 @@ final class PatientCreationController {
         mUi = ui;
         mCrudEventBus = crudEventBus;
         mModel = model;
-
-        // TODO(dxchen): Inject this.
         mEventBusSubscriber = new EventSubscriber();
     }
 
@@ -160,6 +159,7 @@ final class PatientCreationController {
             hasValidationErrors = true;
         }
 
+        Utils.logUserAction("add_patient_submitted", "valid", "" + !hasValidationErrors);
         if (hasValidationErrors) {
             return false;
         }
@@ -204,6 +204,7 @@ final class PatientCreationController {
         }
 
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
+            Utils.logEvent("add_patient_succeeded");
             mUi.quitActivity();
         }
 
@@ -252,6 +253,7 @@ final class PatientCreationController {
                     }
             }
             LOG.e(event.exception, "Patient add failed");
+            Utils.logEvent("add_patient_failed", "reason", "" + event.reason);
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {

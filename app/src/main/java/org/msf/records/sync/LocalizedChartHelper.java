@@ -63,14 +63,14 @@ public class LocalizedChartHelper {
          * The value that was observed non-localized. For a numeric value it will be a number,
          * for a non-numeric value it will be a UUID of the response.
          */
-        // TODO(rjlothian): It's not clear in what situations this value can be null.
+        // TODO: It's not clear in what situations this value can be null.
         @Nullable public final String value;
 
         /**
          * The value that was observed, converted to a String, and localized in the case of
          * Coded (concept) observations.
          */
-        // TODO(rjlothian): It's not clear in what situations this value can be null.
+        // TODO: It's not clear in what situations this value can be null.
         @Nullable public final String localizedValue;
 
         public LocalizedObservation(

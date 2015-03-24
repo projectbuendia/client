@@ -73,6 +73,6 @@
     <org.msf.records.widget.EditIntegerPreference
         android:key="apk_update_interval_secs"
         android:title="@string/pref_title_apk_update_interval_secs"
-        android:defaultValue="3600"/> <!-- default to one hour -->
+        android:defaultValue="90"/> <!-- default to 1.5 minutes -->
 
 </PreferenceScreen>

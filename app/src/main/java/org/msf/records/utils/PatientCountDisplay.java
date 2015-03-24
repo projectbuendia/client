@@ -29,7 +29,7 @@ public class PatientCountDisplay {
                 R.string.string_with_paren, prefix, getPatientCountSubtitle(context, patientCount));
     }
 
-    // TODO(akalachman): Switch to built in support for plurals in Android.
+    // TODO: Switch to built in support for plurals in Android.
     private static int resourceForPatientCount(int patientCount, boolean usePresentResource) {
         int resource;
         if (patientCount < 1) {

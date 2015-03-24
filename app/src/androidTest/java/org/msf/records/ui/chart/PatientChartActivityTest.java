@@ -127,7 +127,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the admission date is correctly displayed in the header.
-     * TODO: Currently disabled. Re-enable once date picker selection works.
+     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
+     * Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectAdmissionDate() {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
@@ -141,7 +142,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the patient chart shows the correct symptoms onset date.
-     * TODO: Currently disabled. Re-enable once date picker selection works.
+     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
+     * Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
         initWithDemoPatientChart();
@@ -154,7 +156,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the patient chart shows all days, even when no observations are present.
-     * TODO: Currently disabled. Re-enable once date picker selection works.
+     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
+     * Espresso 2.0).
      */
      /*public void testPatientChart_ShowsAllDaysInChartWhenNoObservations() {
         initWithDemoPatientChart();
@@ -178,7 +181,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         initWithDemoPatientChart();
         openEncounterForm();
         discardForm();
-        onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
     }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
@@ -196,7 +198,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         discardForm();
         onView(withText(R.string.title_discard_observations)).check(matches(isDisplayed()));
         onView(withText(R.string.yes)).perform(click());
-        onView(withText(R.string.last_observation_none)).check(matches(isDisplayed()));
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
@@ -257,8 +258,34 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         }
     }
 
+    /** Ensures that non-overlapping observations for the same encounter are combined. */
+    public void testCombinesNonOverlappingObservationsForSameEncounter() {
+        initWithDemoPatientChart();
+        // Enter first set of observations for this encounter.
+        openEncounterForm();
+        answerVisibleTextQuestion("Pulse", "74");
+        answerVisibleTextQuestion("Respiratory rate", "23");
+        answerVisibleTextQuestion("Temperature", "36");
+        saveForm();
+        // Enter second set of observations for this encounter.
+        openEncounterForm();
+        answerVisibleToggleQuestion("Signs and Symptoms", "Nausea");
+        answerVisibleTextQuestion("Vomiting", "2");
+        answerVisibleTextQuestion("Diarrhoea", "5");
+        saveForm();
+
+        // Check that all values are now visible.
+        checkVitalValueContains("Pulse", "74");
+        checkVitalValueContains("Respiration", "23");
+        checkObservationValueEquals(0, "36.0", "Today"); // Temp
+        checkObservationSet(5, "Today"); // Nausea
+        checkObservationValueEquals(6, "2", "Today"); // Vomiting
+        checkObservationValueEquals(7, "5", "Today"); // Diarrhoea
+    }
+
     /** Exercises all fields in the encounter form, except for encounter time. */
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
+        // TODO: Get rid of magic numbers in this test and other tests in this class.
         initWithDemoPatientChart();
         openEncounterForm();
         answerVisibleTextQuestion("Pulse", "80");
@@ -315,7 +342,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(containsString("Pregnant"))).check(matches(isDisplayed()));
         onView(withText(containsString("IV Fitted"))).check(matches(isDisplayed()));
 
-        // TODO: check notes
+        // TODO: check notes field
     }
 
     // TODO: Replace with more extensive, externalized demo data.
@@ -338,6 +365,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         }
 
         // Open patient list.
+        // There may be a small delay before the search button becomes visible -- the button is
+        // not displayed while locations are loading.
+        checkViewDisplayedWithin(withId(R.id.action_search), 3000);
         onView(withId(R.id.action_search)).perform(click());
         //waitForProgressFragment();
 
@@ -472,6 +502,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     protected void openEncounterForm() {
+        checkViewDisplayedSoon(withId(R.id.action_update_chart));
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),
@@ -517,6 +548,11 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     private void answerVisibleToggleQuestion(String questionText, String answerText) {
+        // Close the soft keyboard before answering any toggle questions -- on rare occasions,
+        // if Espresso answers one of these questions and is then instructed to type into another
+        // field, the input event will actually be generated as the keyboard is hiding and will be
+        // lost, but Espresso won't detect this case.
+        Espresso.closeSoftKeyboard();
         onView(allOf(
                 anyOf(isAssignableFrom(CheckBox.class), isAssignableFrom(RadioButton.class)),
                 isDescendantOfA(allOf(

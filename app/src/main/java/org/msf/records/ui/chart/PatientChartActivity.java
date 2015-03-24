@@ -18,7 +18,6 @@ import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.R;
@@ -40,7 +39,8 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
-import org.msf.records.utils.date.DateUtils;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.date.RelativeDateTimeFormatter;
@@ -128,7 +128,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
-    // TODO(dxchen): Refactor.
+    // TODO: Refactor.
     private boolean mIsFetchingXform = false;
 
     private ResVital.Resolved mVitalUnknown;
@@ -300,6 +300,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
+                        Utils.logUserAction("location_button_pressed");
                         mController.showAssignLocationDialog(
                                 PatientChartActivity.this, assignLocation);
                         return true;
@@ -348,6 +349,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_chart_general_condition_parent)
     void onGeneralConditionPressed(View v) {
+        Utils.logUserAction("condition_pressed");
         mController.showAssignGeneralConditionDialog(this, mGeneralConditionUuid);
     }
 
@@ -428,7 +430,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setLatestEncounter(long encounterTimeMilli) {
             if (encounterTimeMilli != 0) {
                 mLastObservationTimeView.setText(
-                        DateUtils.dateTimeToMediumDateTimeString(new DateTime(encounterTimeMilli)));
+                        Dates.dateTimeToMediumDateTimeString(new DateTime(encounterTimeMilli)));
                 mLastObservationLabel.setVisibility(View.VISIBLE);
             } else {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
@@ -438,7 +440,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
+        public void updatePatientVitalsUi(Map<String, LocalizedObservation> observations,
+                                          LocalDate admissionDate, LocalDate firstSymptomsDate) {
+            // TODO: Localize strings in this function.
             showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
             showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
@@ -453,40 +457,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             showObservationForViewGroup(
                     mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
 
-            DateTime now = DateTime.now();
-            // Symptoms onset date
-            LocalizedObservation symptomsOnsetObservation =
-                    observations.get(Concepts.FIRST_SYMPTOM_DATE_UUID);
-            if (symptomsOnsetObservation != null
-                    && symptomsOnsetObservation.localizedValue != null) {
-                try {
-                    LocalDate symptomsOnsetDate =
-                            DateUtils.stringToLocalDate(symptomsOnsetObservation.localizedValue);
-                    int symptomsOnsetDays = Days
-                            .daysBetween(symptomsOnsetDate.toDateTimeAtStartOfDay(), now)
-                            .getDays() + 1;
-                    mPatientSymptomOnsetDaysView.setValue("Day " + symptomsOnsetDays);
-                } catch (Exception e) {
-                    LOG.w("Couldn't display symptoms onset date", e);
-                }
-            }
-
-            // Admission date
-            LocalizedObservation admissionDateObservation =
-                    observations.get(Concepts.ADMISSION_DATE_UUID);
-            if (admissionDateObservation != null
-                    && admissionDateObservation.localizedValue != null) {
-                try {
-                    LocalDate admissionDate =
-                            DateUtils.stringToLocalDate(admissionDateObservation.localizedValue);
-                    int admissionDays = Days
-                            .daysBetween(admissionDate.toDateTimeAtStartOfDay(), now)
-                            .getDays() + 1;
-                    mPatientAdmissionDaysView.setValue("Day " + admissionDays);
-                } catch (Exception e) {
-                    LOG.w("Couldn't display admission date", e);
-                }
-            }
+            int day = Dates.dayNumberSince(admissionDate, LocalDate.now());
+            mPatientAdmissionDaysView.setValue(
+                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+            day = Dates.dayNumberSince(firstSymptomsDate, LocalDate.now());
+            mPatientSymptomOnsetDaysView.setValue(
+                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
             // General Condition
             LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
@@ -549,7 +525,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
 
             // Pregnancy & IV status
-            // TODO: Localize all of this.
             List<String> specialLabels = new ArrayList<>();
 
             observation = observations.get(Concepts.PREGNANCY_UUID);
@@ -593,7 +568,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setObservationHistory(
-                List<LocalizedObservation> observations, LocalDate admissionDate) {
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate) {
             // Avoid resetting observation history if nothing has changed.
             if (observations.equals(mPreviousObservations)) {
                 return;
@@ -604,11 +581,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mRootView.removeView(mChartView);
             }
             if (useRecyclerView()) {
-                mChartView = getChartViewNew(observations, admissionDate);
+                mChartView = getChartViewNew(observations, admissionDate, firstSymptomsDate);
             } else {
-                // TODO(sdoerner): Remove this old implementation once the new chart grid has got
-                //                 some testing and feedback.
-                mChartView = getChartView(observations, admissionDate);
+                // TODO: Remove this old implementation.
+                mChartView = getChartView(observations, admissionDate, firstSymptomsDate);
             }
             mChartView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -621,7 +597,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         private View getChartView(
-                List<LocalizedObservation> observations, LocalDate admissionDate) {
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate) {
             return new DataGridView.Builder()
                     .setDoubleWidthColumnHeaders(true)
                     .setDataGridAdapter(
@@ -629,17 +607,21 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                                     PatientChartActivity.this,
                                     observations,
                                     admissionDate,
+                                    firstSymptomsDate,
                                     getLayoutInflater()))
                     .build(PatientChartActivity.this);
         }
 
         private View getChartViewNew(
-                List<LocalizedObservation> observations, LocalDate admissionDate) {
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate) {
             LocalizedChartDataGridAdapter dataGridAdapter =
                     new LocalizedChartDataGridAdapter(
                             PatientChartActivity.this,
                             observations,
                             admissionDate,
+                            firstSymptomsDate,
                             getLayoutInflater());
             FastDataGridView dataGridView = new FastDataGridView(
                     PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
@@ -671,7 +653,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                    ? "age unknown" : DateUtils.birthdateToAge(patient.birthdate));
+                    ? "age unknown" : Dates.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 

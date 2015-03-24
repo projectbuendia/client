@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app;
 
 import android.content.ContentValues;
@@ -13,11 +24,11 @@ import org.msf.records.model.Concepts;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
-import org.msf.records.utils.date.DateUtils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
 
 /**
- * An object that represents the data to write to a new patient or the data to update on a patient.
+ * Represents the data to write to a new patient or the data to update on a patient.
  */
 public class AppPatientDelta {
 
@@ -56,7 +67,7 @@ public class AppPatientDelta {
             if (birthdate.isPresent()) {
                 json.put(
                         Server.PATIENT_BIRTHDATE_KEY,
-                        DateUtils.localDateToString(birthdate.get().toLocalDate()));
+                        Dates.localDateToString(birthdate.get().toLocalDate()));
             }
 
             JSONArray observations = new JSONArray();
@@ -65,7 +76,7 @@ public class AppPatientDelta {
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
                 observation.put(
                         Server.PATIENT_ANSWER_DATE,
-                        DateUtils.localDateToString(admissionDate.get()));
+                        Dates.localDateToString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
@@ -73,7 +84,7 @@ public class AppPatientDelta {
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(
                         Server.PATIENT_ANSWER_DATE,
-                        DateUtils.localDateToString(firstSymptomDate.get()));
+                        Dates.localDateToString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {
@@ -125,7 +136,7 @@ public class AppPatientDelta {
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
-        // TODO: Either remove admission date here as it's no longer used from the database.
+        // TODO: Consider removing admission date here as it's no longer used from the database.
         if (admissionDate.isPresent()) {
             contentValues.put(
                     Contracts.Patients.ADMISSION_TIMESTAMP,

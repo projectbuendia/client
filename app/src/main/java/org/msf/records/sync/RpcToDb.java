@@ -110,7 +110,7 @@ public class RpcToDb {
         // Delete all users before inserting.
         operations.add(
                 ContentProviderOperation.newDelete(Contracts.Users.CONTENT_URI).build());
-        // TODO(akalachman): Update syncResult delete counts.
+        // TODO: Update syncResult delete counts.
         for (User user : response) {
             operations.add(ContentProviderOperation
                     .newInsert(Contracts.Users.CONTENT_URI)

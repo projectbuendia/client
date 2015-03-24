@@ -3,6 +3,7 @@ package org.msf.records.utils.date;
 import android.support.annotation.Nullable;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
@@ -11,7 +12,7 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * Static utility functions for dealing with dates and timestamps.
  */
-public class DateUtils {
+public class Dates {
     static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
     static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
@@ -50,11 +51,23 @@ public class DateUtils {
 
     /** Converts a birthdate to a string describing age in months or years. */
     public static String birthdateToAge(LocalDate birthdate) {
+        // TODO: Localization
         Period age = new Period(birthdate, LocalDate.now());
         if (age.getYears() >= 2) {
             return "" + age.getYears() + " y";
         } else {
             return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
         }
+    }
+
+    /**
+     * Describes a given date as a number of days since a starting date, where the starting date
+     * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
+     */
+    public static int dayNumberSince(@javax.annotation.Nullable LocalDate startDate, @javax.annotation.Nullable LocalDate date) {
+        if (startDate == null || date == null) {
+            return -1;
+        }
+        return Days.daysBetween(startDate, date).getDays() + 1;
     }
 }

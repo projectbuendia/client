@@ -19,7 +19,7 @@ import org.msf.records.data.app.TypedCursor;
 import org.msf.records.data.res.ResStatus;
 import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
-import org.msf.records.utils.date.DateUtils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.PatientCountDisplay;
 
 import java.util.ArrayList;
@@ -166,7 +166,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
 
         holder.mPatientAge.setText(
-                patient.birthdate == null ? "" : DateUtils.birthdateToAge(patient.birthdate));
+                patient.birthdate == null ? "" : Dates.birthdateToAge(patient.birthdate));
 
         holder.mPatientGender.setVisibility(
                 patient.gender == AppPatient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);

@@ -24,6 +24,7 @@ import org.msf.records.ui.patientlist.PatientSearchController;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 /**
  * Controller for {@link TentSelectionActivity}.
@@ -85,6 +86,12 @@ final class TentSelectionController {
     // requested by this controller.
     private boolean mWaitingOnSync = false;
 
+    // True when the user has explicitly requested that a sync be canceled (e.g. via the sync cancel
+    // button). Sync operations may be cancelled and rescheduled by Android without the user
+    // requesting a sync cancellation. In these cases, this flag will remain false.
+    private boolean mWaitingOnSyncCancel = false;
+    private Object mSyncCancelLock = new Object();
+
     public TentSelectionController(
             AppModel appModel,
             CrudEventBus crudEventBus,
@@ -101,6 +108,7 @@ final class TentSelectionController {
     }
 
     public void init() {
+        mWaitingOnSyncCancel = false;
         mEventBus.register(mEventBusSubscriber);
         mCrudEventBus.register(mEventBusSubscriber);
         LOG.d("init: isLocationTreeValid() = " + isLocationTreeValid());
@@ -161,26 +169,31 @@ final class TentSelectionController {
 
     /** Call when the user presses the search button. */
     public void onSearchPressed() {
+        Utils.logUserAction("search_pressed");
         mUi.switchToPatientListScreen();
     }
 
     /** Call when the user exits search mode. */
     public void onSearchCancelled() {
+        Utils.logUserAction("search_cancelled");
         mUi.switchToTentSelectionScreen();
     }
 
     /** Call when the user presses the discharged zone. */
     public void onDischargedPressed() {
+        Utils.logUserAction("location_pressed", "location", mDischargedZone.name);
         mUi.launchActivityForLocation(mDischargedZone);
     }
 
 	/** Call when the user presses the triage zone. */
     public void onTriagePressed() {
+        Utils.logUserAction("location_pressed", "location", mTriageZone.name);
         mUi.launchActivityForLocation(mTriageZone);
     }
 
     /** Call when the user presses a tent. */
     public void onTentSelected(AppLocation tent) {
+        Utils.logUserAction("location_pressed", "location", tent.name);
         mUi.launchActivityForLocation(tent);
     }
 
@@ -229,13 +242,29 @@ final class TentSelectionController {
     private final class EventBusSubscriber {
 
         public void onEventMainThread(SyncCancelRequestedEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.showSyncCancelRequested();
+            if (mWaitingOnSync) {
+                synchronized (mSyncCancelLock) {
+                    mWaitingOnSyncCancel = true;
+                    for (TentFragmentUi fragmentUi : mFragmentUis) {
+                        fragmentUi.showSyncCancelRequested();
+                    }
+                }
             }
         }
 
         public void onEventMainThread(SyncCanceledEvent event) {
-            mUi.finish();
+            // If user-initiated cancellation occurred, close the activity even if we're no longer
+            // waiting on a sync (continuing to load the activity might be jarring).
+            synchronized (mSyncCancelLock) {
+                if (!mWaitingOnSyncCancel) {
+                    LOG.d("Detected non-user-initiated sync cancellation, ignoring.");
+                    return;
+                }
+
+                mWaitingOnSyncCancel = false;
+                LOG.d("Detected sync cancellation while waiting on sync, finishing activity.");
+                mUi.finish();
+            }
         }
 
         public void onEventMainThread(SyncProgressEvent event) {
@@ -247,8 +276,10 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(SyncStartedEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.resetSyncProgress();
+            if (mWaitingOnSync) {
+                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                    fragmentUi.resetSyncProgress();
+                }
             }
         }
 
@@ -268,10 +299,13 @@ final class TentSelectionController {
         }
 
         public void onEventMainThread(SyncFailedEvent event) {
-            for (TentFragmentUi fragmentUi : mFragmentUis) {
-                fragmentUi.resetSyncProgress();
+            if (mWaitingOnSync) {
+                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                    fragmentUi.resetSyncProgress();
+                }
+                mUi.showSyncFailedDialog(true);
+                Utils.logEvent("sync_failed_dialog_shown");
             }
-            mUi.showSyncFailedDialog(true);
         }
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
@@ -283,6 +317,7 @@ final class TentSelectionController {
                 LOG.i("Found no locations in the local datastore; continuing to wait on sync.");
                 return;
             }
+            mWaitingOnSync = false;
 
             LOG.i("Received a valid location tree.");
             for (AppLocation zone :
@@ -291,7 +326,6 @@ final class TentSelectionController {
                     case Zone.TRIAGE_ZONE_UUID:
                         mTriageZone = zone;
                         break;
-                    // TODO(akalachman): Revisit if discharged should be treated differently.
                     case Zone.DISCHARGED_ZONE_UUID:
                         mDischargedZone = zone;
                         break;
@@ -304,6 +338,7 @@ final class TentSelectionController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
+            // TODO: Remove -- likely unnecessary.
             mPatientSearchController.setLocations(mAppLocationTree);
         }
     }
