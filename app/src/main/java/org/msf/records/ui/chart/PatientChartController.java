@@ -27,7 +27,6 @@ import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
-import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Concepts;
@@ -37,10 +36,11 @@ import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -372,7 +372,7 @@ final class PatientChartController {
     private LocalDate getObservedDate(
             Map<String, LocalizedObservation> observations, String conceptUuid) {
         LocalizedObservation obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.stringToLocalDate(obs.localizedValue);
+        return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
     }
 
     /** Gets the latest observation values and displays them on the UI. */

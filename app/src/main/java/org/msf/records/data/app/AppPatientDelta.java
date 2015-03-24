@@ -17,8 +17,6 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +24,7 @@ import org.msf.records.model.Concepts;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
 
 /**
@@ -34,9 +33,6 @@ import org.msf.records.utils.Logger;
 public class AppPatientDelta {
 
     private static final Logger LOG = Logger.create();
-
-    private static final DateTimeFormatter BIRTHDATE_FORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd");
 
     public Optional<String> id = Optional.absent();
     public Optional<String> givenName = Optional.absent();
@@ -69,22 +65,26 @@ public class AppPatientDelta {
                         Server.PATIENT_GENDER_KEY, gender.get() == Patient.GENDER_MALE ? "M" : "F");
             }
             if (birthdate.isPresent()) {
-                json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
+                json.put(
+                        Server.PATIENT_BIRTHDATE_KEY,
+                        Dates.toString(birthdate.get().toLocalDate()));
             }
 
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
-                observation.put(Server.PATIENT_ANSWER_DATE,
-                        getLocalDateString(admissionDate.get()));
+                observation.put(
+                        Server.PATIENT_ANSWER_DATE,
+                        Dates.toString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(Server.PATIENT_ANSWER_DATE,
-                        getLocalDateString(firstSymptomDate.get()));
+                observation.put(
+                        Server.PATIENT_ANSWER_DATE,
+                        Dates.toString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {
@@ -163,14 +163,6 @@ public class AppPatientDelta {
         JSONObject location = new JSONObject();
         location.put("uuid", assignedLocationUuid);
         return location;
-    }
-
-    private static String getLocalDateString(LocalDate localDate) {
-        return BIRTHDATE_FORMATTER.print(localDate);
-    }
-
-    private static String getDateTimeString(DateTime dateTime) {
-        return BIRTHDATE_FORMATTER.print(dateTime);
     }
 
     private static long getTimestamp(DateTime dateTime) {

@@ -1,4 +1,4 @@
-package org.msf.records.utils;
+package org.msf.records.utils.date;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

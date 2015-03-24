@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.prefs.StringPreference;
-import org.msf.records.utils.DateTimeDeserializer;
+import org.msf.records.utils.date.DateTimeDeserializer;
 
 import javax.inject.Singleton;
 

@@ -17,6 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
@@ -95,7 +96,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 gender == Patient.GENDER_MALE ? "M" : "F");
         contentValues.put(
                 Contracts.Patients.BIRTHDATE,
-                Utils.localDateToString(birthdate));
+                Dates.toString(birthdate));
         contentValues.put(
                 Contracts.Patients.ADMISSION_TIMESTAMP,
                 admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);

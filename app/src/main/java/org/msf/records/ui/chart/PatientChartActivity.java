@@ -18,7 +18,6 @@ import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.R;
@@ -40,10 +39,11 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.RelativeDateTimeFormatter;
-import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.RelativeDateTimeFormatter;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.PatientAttributeView;
@@ -51,11 +51,8 @@ import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -127,11 +124,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     public static final String PATIENT_UUID_KEY = "PATIENT_UUID";
     public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
     public static final String PATIENT_ID_KEY = "PATIENT_ID";
-
-    private static final RelativeDateTimeFormatter DATE_TIME_FORMATTER =
-            RelativeDateTimeFormatter.builder()
-                    .withCasing(RelativeDateTimeFormatter.Casing.SENTENCE_CASE)
-                    .build();
 
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
@@ -436,12 +428,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setLatestEncounter(long encounterTimeMilli) {
-            GregorianCalendar calendar = new GregorianCalendar();
-            calendar.setTimeInMillis(encounterTimeMilli);
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("d MMM yyyy, HH:mm a", Locale.US);
-
-            if (calendar.getTime().getTime() != 0) {
-                mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+            if (encounterTimeMilli != 0) {
+                mLastObservationTimeView.setText(
+                        Dates.toMediumString(new DateTime(encounterTimeMilli)));
                 mLastObservationLabel.setVisibility(View.VISIBLE);
             } else {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
@@ -468,10 +457,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             showObservationForViewGroup(
                     mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
 
-            int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
+            int day = Dates.dayNumberSince(admissionDate, LocalDate.now());
             mPatientAdmissionDaysView.setValue(
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
-            day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
+            day = Dates.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mPatientSymptomOnsetDaysView.setValue(
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
@@ -526,13 +515,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 if (pcrObservationMillis > 0) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
-                    String dateText = "invalid date";
-                    if (today.equals(obsDay)) {
-                        dateText = "today";
-                    } else if (obsDay.isBefore(today)) {
-                        int days = Days.daysBetween(obsDay, today).getDays();
-                        dateText = (days == 1) ? "1 day ago" : (days + " days ago");
-                    }
+                    String dateText = RelativeDateTimeFormatter.builder()
+                            .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
+                            .build()
+                            .format(today, obsDay);
                     mPcr.setName(getResources().getString(
                             R.string.latest_pcr_label_with_date, dateText));
                 }
@@ -667,7 +653,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+                    ? "age unknown" : Dates.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 

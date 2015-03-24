@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.text.Html;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +23,7 @@ import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.widget.CellType;
 import org.msf.records.widget.DataGridAdapter;
 
@@ -148,7 +146,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
                 String oldText = row.mColumnIdsToValues.get(columnId);
                 String newText = (oldText == null ? "" : oldText + "\n—\n")
-                        + obsDateTime.toString("d MMM, hh:mm a\n") + ob.value;
+                        + Dates.toMediumString(obsDateTime) + "\n" + ob.value;
                 row.mColumnIdsToValues.put(columnId, newText);
             } else {
                 row.mColumnIdsToValues.put(columnId, ob.value);
@@ -193,7 +191,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         LocalDate date = dateTime.toLocalDate();
         Resources res = mContext.getResources();
 
-        int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
+        int admitDay = Dates.dayNumberSince(mAdmissionDate, date);
         String admitDayLabel = (admitDay >= 1) ? res.getString(R.string.day_n, admitDay) : "–";
 
         String dateString = date.toString("d MMM");
