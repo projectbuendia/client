@@ -372,7 +372,7 @@ final class PatientChartController {
     private LocalDate getObservedDate(
             Map<String, LocalizedObservation> observations, String conceptUuid) {
         LocalizedObservation obs = observations.get(conceptUuid);
-        return obs == null ? null : Dates.stringToLocalDate(obs.localizedValue);
+        return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
     }
 
     /** Gets the latest observation values and displays them on the UI. */

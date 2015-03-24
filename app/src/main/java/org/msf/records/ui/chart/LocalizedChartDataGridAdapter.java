@@ -146,7 +146,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
             if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
                 String oldText = row.mColumnIdsToValues.get(columnId);
                 String newText = (oldText == null ? "" : oldText + "\n—\n")
-                        + Dates.dateTimeToMediumDateTimeString(obsDateTime) + "\n" + ob.value;
+                        + Dates.toMediumString(obsDateTime) + "\n" + ob.value;
                 row.mColumnIdsToValues.put(columnId, newText);
             } else {
                 row.mColumnIdsToValues.put(columnId, ob.value);

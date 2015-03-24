@@ -33,7 +33,7 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
                 .setUuid(cursor.getString(PatientProjection.COLUMN_UUID))
                 .setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
                 .setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
-                .setBirthdate(Dates.stringToLocalDate(
+                .setBirthdate(Dates.toLocalDate(
                         cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
                 .setGender(getGenderFromString(
                         cursor.getString(PatientProjection.COLUMN_GENDER)))

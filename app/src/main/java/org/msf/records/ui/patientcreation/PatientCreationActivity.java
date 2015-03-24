@@ -144,7 +144,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         };
 
         // Pre-populate admission date with today.
-        mAdmissionDate.setText(Dates.dateTimeToMediumDateString(DateTime.now()));
+        mAdmissionDate.setText(Dates.toMediumString(DateTime.now().toLocalDate()));
     }
 
     private void updateLocationUi() {
@@ -498,7 +498,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     .withYear(year)
                     .withMonthOfYear(monthOfYear + 1)
                     .withDayOfMonth(dayOfMonth);
-            mDateField.setText(Dates.dateTimeToMediumDateString(date.toDateTimeAtStartOfDay()));
+            mDateField.setText(Dates.toMediumString(date.toDateTimeAtStartOfDay().toLocalDate()));
             mLocalDate = date;
         }
 

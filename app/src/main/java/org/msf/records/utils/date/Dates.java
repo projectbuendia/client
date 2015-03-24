@@ -17,13 +17,15 @@ public class Dates {
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
     static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
 
-    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(LocalDate date) {
+    /** Converts a LocalDate to a yyyy-mm-dd String. */
+    @Nullable
+    public static String toString(@Nullable LocalDate date) {
         return date == null ? null : date.toString();
     }
 
-    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(String string) {
+    /** Converts a yyyy-mm-dd String to a LocalDate. */
+    @Nullable
+    public static LocalDate toLocalDate(@Nullable String string) {
         try {
             return string == null ? null : LocalDate.parse(string);
         } catch (IllegalArgumentException e) {
@@ -31,21 +33,24 @@ public class Dates {
         }
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with day and month only. */
-    public static String dateTimeToShortDateString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : SHORT_DATE_FORMATTER.print(dateTime);
+    /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
+    @Nullable
+    public static String toShortString(@Nullable LocalDate localDate) {
+        return localDate == null ? null : SHORT_DATE_FORMATTER.print(localDate);
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with day, month, and year. */
-    public static String dateTimeToMediumDateString(@Nullable DateTime dateTime) {
-        return dateTime == null ? null : MEDIUM_DATE_FORMATTER.print(dateTime);
+    /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
+    @Nullable
+    public static String toMediumString(@Nullable LocalDate localDate) {
+        return localDate == null ? null : MEDIUM_DATE_FORMATTER.print(localDate);
     }
 
     /**
      * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
      * time zone.
      */
-    public static String dateTimeToMediumDateTimeString(@Nullable DateTime dateTime) {
+    @Nullable
+    public static String toMediumString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : MEDIUM_DATETIME_FORMATTER.print(dateTime);
     }
 

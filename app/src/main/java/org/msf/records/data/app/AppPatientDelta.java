@@ -67,7 +67,7 @@ public class AppPatientDelta {
             if (birthdate.isPresent()) {
                 json.put(
                         Server.PATIENT_BIRTHDATE_KEY,
-                        Dates.localDateToString(birthdate.get().toLocalDate()));
+                        Dates.toString(birthdate.get().toLocalDate()));
             }
 
             JSONArray observations = new JSONArray();
@@ -76,7 +76,7 @@ public class AppPatientDelta {
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
                 observation.put(
                         Server.PATIENT_ANSWER_DATE,
-                        Dates.localDateToString(admissionDate.get()));
+                        Dates.toString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
@@ -84,7 +84,7 @@ public class AppPatientDelta {
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(
                         Server.PATIENT_ANSWER_DATE,
-                        Dates.localDateToString(firstSymptomDate.get()));
+                        Dates.toString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {

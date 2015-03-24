@@ -430,7 +430,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void setLatestEncounter(long encounterTimeMilli) {
             if (encounterTimeMilli != 0) {
                 mLastObservationTimeView.setText(
-                        Dates.dateTimeToMediumDateTimeString(new DateTime(encounterTimeMilli)));
+                        Dates.toMediumString(new DateTime(encounterTimeMilli)));
                 mLastObservationLabel.setVisibility(View.VISIBLE);
             } else {
                 mLastObservationTimeView.setText(R.string.last_observation_none);

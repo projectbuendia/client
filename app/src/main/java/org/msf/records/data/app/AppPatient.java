@@ -96,7 +96,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 gender == Patient.GENDER_MALE ? "M" : "F");
         contentValues.put(
                 Contracts.Patients.BIRTHDATE,
-                Dates.localDateToString(birthdate));
+                Dates.toString(birthdate));
         contentValues.put(
                 Contracts.Patients.ADMISSION_TIMESTAMP,
                 admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
