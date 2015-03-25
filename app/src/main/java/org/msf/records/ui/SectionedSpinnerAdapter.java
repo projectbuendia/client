@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.content.Context;
@@ -7,9 +18,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 /**
- * SectionSpinnerAdapter is an ArrayAdapter that uses null values to
- * indicate 'section' boundaries. Section boundaries are represented by
- * an arbitrary resource and are not clickable.
+ * An {@link ArrayAdapter} that uses null values to indicate 'section' boundaries. Section
+ * boundaries are represented by an arbitrary resource (such as a horizontal divider) and are not
+ * clickable.
  */
 public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
     private final T[] mItems;
@@ -20,6 +31,17 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         SECTION_BORDER, LIST_ITEM
     }
 
+    /**
+     * Instantiates a {@link SectionedSpinnerAdapter} with the given resources and contents.
+     * @param context the Application or Activity context
+     * @param collapsedResource the {@link android.graphics.drawable.Drawable} used to display the
+     *                          selected adapter item when the list is collapsed
+     * @param dropDownResource the {@link android.graphics.drawable.Drawable} used to display an
+     *                         adapter item when the list is expanded
+     * @param sectionBorderResource the {@link android.graphics.drawable.Drawable} used to display
+     *                              section dividers (null items)
+     * @param items the contents of the list
+     */
     public SectionedSpinnerAdapter(
             Context context, int collapsedResource, int dropDownResource,
             int sectionBorderResource, T[] items) {
@@ -73,10 +95,15 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         return 2;
     }
 
+    /**
+     * Returns the type for the view at the given position, where valid types are ordinal values of
+     * the {@link ViewType} enum.
+     * @param position the position of the view in the adapter
+     */
     public int getItemViewType(int position) {
-        return isSectionBorder(position) ?
-                ViewType.SECTION_BORDER.ordinal() :
-                ViewType.LIST_ITEM.ordinal();
+        return isSectionBorder(position)
+                ? ViewType.SECTION_BORDER.ordinal()
+                : ViewType.LIST_ITEM.ordinal();
     }
 
     private boolean isSectionBorder(int position) {

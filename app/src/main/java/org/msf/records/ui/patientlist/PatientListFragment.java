@@ -37,7 +37,7 @@ import javax.inject.Inject;
 import de.greenrobot.event.EventBus;
 
 /**
- * A list fragment representing a filterable list of Patients.
+ * A fragment showing a filterable list of patients.
  */
 public class PatientListFragment extends ProgressFragment implements
         ExpandableListView.OnChildClickListener {

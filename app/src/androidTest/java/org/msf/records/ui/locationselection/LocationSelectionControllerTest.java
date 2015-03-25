@@ -1,4 +1,4 @@
-package org.msf.records.ui.tentselection;
+package org.msf.records.ui.locationselection;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,16 +23,16 @@ import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.patientlist.PatientSearchController;
 
 /**
- * Tests for {@link TentSelectionController}.
+ * Tests for {@link LocationSelectionController}.
  */
-public final class TentSelectionControllerTest extends AndroidTestCase {
+public final class LocationSelectionControllerTest extends AndroidTestCase {
 
-    private TentSelectionController mController;
+    private LocationSelectionController mController;
     private FakeEventBus mFakeEventBus;
     private FakeSyncManager mFakeSyncManager;
     @Mock private AppModel mMockAppModel;
-    @Mock private TentSelectionController.Ui mMockUi;
-    @Mock private TentSelectionController.TentFragmentUi mMockFragmentUi;
+    @Mock private LocationSelectionController.Ui mMockUi;
+    @Mock private LocationSelectionController.LocationFragmentUi mMockFragmentUi;
     @Mock private PatientSearchController mMockSearchController;
 
     @Override
@@ -42,14 +42,14 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 
         mFakeEventBus = new FakeEventBus();
         mFakeSyncManager = new FakeSyncManager();
-        mController = new TentSelectionController(
+        mController = new LocationSelectionController(
                 mMockAppModel,
                 mFakeEventBus,
                 mMockUi,
                 mFakeEventBus,
                 mFakeSyncManager,
                 mMockSearchController);
-	}
+    }
 
     /** Tests that locations are loaded during initialization, when available. */
     public void testInit_RequestsLoadLocationsWhenDataModelAvailable() {
@@ -151,7 +151,7 @@ public final class TentSelectionControllerTest extends AndroidTestCase {
 
     /**
      * Tests that if, for some reason, a sync succeeds while the sync dialog is showing, the
-     * sync dialog disappears and the tents are usable.
+     * sync dialog disappears and the locations are usable.
      */
     public void testSyncSuccessHidesSyncDialog() {
         // GIVEN an initialized controller with a fragment attached and a failed sync

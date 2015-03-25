@@ -1,4 +1,15 @@
-package org.msf.records.ui.tentselection;
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
+package org.msf.records.ui.locationselection;
 
 import java.util.List;
 
@@ -26,43 +37,47 @@ import butterknife.OnClick;
 import butterknife.OnItemClick;
 
 /**
- * Displays a list of all tents.
+ * Displays a list of all locations.
  */
-public final class TentSelectionFragment extends ProgressFragment {
-    @InjectView(R.id.tent_selection_tents) GridView mTentGrid;
-    @InjectView(R.id.tent_selection_all_patients) SubtitledButtonView mAllPatientsButton;
-    @InjectView(R.id.tent_selection_triage) SubtitledButtonView mTriageButton;
-    @InjectView(R.id.tent_selection_discharged) SubtitledButtonView mDischargedButton;
+public final class LocationSelectionFragment extends ProgressFragment {
+    @InjectView(R.id.location_selection_locations) GridView mLocationGrid;
+    @InjectView(R.id.location_selection_all_patients) SubtitledButtonView mAllPatientsButton;
+    @InjectView(R.id.location_selection_triage) SubtitledButtonView mTriageButton;
+    @InjectView(R.id.location_selection_discharged) SubtitledButtonView mDischargedButton;
 
-    private TentSelectionController mController;
+    private LocationSelectionController mController;
     private final MyUi mMyUi = new MyUi();
-    private TentListAdapter mAdapter;
+    private LocationListAdapter mAdapter;
 
-    public TentSelectionFragment() {
+    public LocationSelectionFragment() {
         // Required empty public constructor
     }
 
-    @OnItemClick(R.id.tent_selection_tents) void onTentGridClicked(int position) {
-        mController.onTentSelected(mAdapter.getItem(position));
+    @OnItemClick(R.id.location_selection_locations)
+    void onLocationGridClicked(int position) {
+        mController.onLocationSelected(mAdapter.getItem(position));
     }
 
-    @OnClick(R.id.tent_selection_all_patients) void onAllPatientsClicked(View v) {
+    @OnClick(R.id.location_selection_all_patients)
+    void onAllPatientsClicked(View v) {
         Intent listIntent = new Intent(getActivity(), PatientListActivity.class);
         startActivity(listIntent);
     }
 
-    @OnClick(R.id.tent_selection_discharged) void onDischargedClicked(View v) {
+    @OnClick(R.id.location_selection_discharged)
+    void onDischargedClicked(View v) {
         mController.onDischargedPressed();
     }
 
-    @OnClick(R.id.tent_selection_triage) void onTriageClicked(View v) {
+    @OnClick(R.id.location_selection_triage)
+    void onTriageClicked(View v) {
         mController.onTriagePressed();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_tent_selection);
+        setContentView(R.layout.fragment_location_selection);
     }
 
     @Override
@@ -76,7 +91,7 @@ public final class TentSelectionFragment extends ProgressFragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        mController = ((TentSelectionActivity) getActivity()).getController();
+        mController = ((LocationSelectionActivity) getActivity()).getController();
         mController.attachFragmentUi(mMyUi);
     }
 
@@ -86,7 +101,7 @@ public final class TentSelectionFragment extends ProgressFragment {
         super.onDestroyView();
     }
 
-    private final class MyUi implements TentSelectionController.TentFragmentUi {
+    private final class MyUi implements LocationSelectionController.LocationFragmentUi {
         @Override
         public void setDischargedPatientCount(int patientCount) {
             mDischargedButton.setSubtitle(
@@ -109,10 +124,10 @@ public final class TentSelectionFragment extends ProgressFragment {
         }
 
         @Override
-        public void setTents(AppLocationTree locationTree, List<AppLocation> tents) {
-            mAdapter = new TentListAdapter(
-                    getActivity(), tents, locationTree, Optional.<String>absent());
-            mTentGrid.setAdapter(mAdapter);
+        public void setLocations(AppLocationTree locationTree, List<AppLocation> locations) {
+            mAdapter = new LocationListAdapter(
+                    getActivity(), locations, locationTree, Optional.<String>absent());
+            mLocationGrid.setAdapter(mAdapter);
         }
 
         @Override

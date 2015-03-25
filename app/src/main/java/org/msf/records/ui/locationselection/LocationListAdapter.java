@@ -1,4 +1,15 @@
-package org.msf.records.ui.tentselection;
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
+package org.msf.records.ui.locationselection;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -23,23 +34,23 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Adapter for displaying a list of tents (locations).
+ * {@link ArrayAdapter} for displaying a list of locations.
  */
-final class TentListAdapter extends ArrayAdapter<AppLocation> {
+final class LocationListAdapter extends ArrayAdapter<AppLocation> {
 
     private final Context mContext;
     private final AppLocationTree mLocationTree;
     private Optional<String> mSelectedLocationUuid;
 
-    public TentListAdapter(
+    public LocationListAdapter(
             Context context,
-            List<AppLocation> tents,
+            List<AppLocation> locations,
             AppLocationTree locationTree,
-            Optional<String> selectedTent) {
-        super(context, R.layout.listview_cell_tent_selection, tents);
+            Optional<String> selectedLocation) {
+        super(context, R.layout.listview_cell_location_selection, locations);
         mContext = context;
         mLocationTree = locationTree;
-        mSelectedLocationUuid = Preconditions.checkNotNull(selectedTent);
+        mSelectedLocationUuid = Preconditions.checkNotNull(selectedLocation);
     }
 
     public Optional<String> getSelectedLocationUuid() {
@@ -53,16 +64,18 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
         View view;
         ViewHolder holder;
         if (convertView != null) {
-        	view = convertView;
+            view = convertView;
             holder = (ViewHolder) convertView.getTag();
         } else {
-        	view = inflater.inflate(
-                R.layout.listview_cell_tent_selection, parent, false);
+            view = inflater.inflate(
+                R.layout.listview_cell_location_selection, parent, false);
             holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
         AppLocation location = getItem(position);
+        // TODO: Make this more robust. Currently, this line only works if 'location' is a tent;
+        // otherwise zone is ResZone.UNKNOWN
         ResZone.Resolved zone = Zone.getResZone(
                 location.parentUuid).resolve(mContext.getResources());
 
@@ -75,15 +88,15 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
 
         if (mSelectedLocationUuid.isPresent()
                 && mSelectedLocationUuid.get().equals(location.uuid)) {
-            view.setBackgroundResource(R.color.zone_tent_selected_padding);
+            view.setBackgroundResource(R.color.zone_location_selected_padding);
         } else {
-            view.setBackgroundResource(R.drawable.tent_selector);
+            view.setBackgroundResource(R.drawable.location_selector);
         }
 
         return view;
     }
 
-    public void setmSelectedLocationUuid(Optional<String> locationUuid) {
+    public void setSelectedLocationUuid(Optional<String> locationUuid) {
         mSelectedLocationUuid = locationUuid;
 
         notifyDataSetChanged();
@@ -91,7 +104,7 @@ final class TentListAdapter extends ArrayAdapter<AppLocation> {
 
     static class ViewHolder {
 
-        @InjectView(R.id.tent_selection_tent) SubtitledButtonView mButton;
+        @InjectView(R.id.location_selection_location) SubtitledButtonView mButton;
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);

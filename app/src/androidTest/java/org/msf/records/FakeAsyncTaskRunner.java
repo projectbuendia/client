@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -11,6 +22,9 @@ import org.msf.records.utils.AsyncTaskRunner;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 
+/**
+ * A fake {@link AsyncTaskRunner} for use in tests.
+ */
 public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
     private final ArrayDeque<Pair<AsyncTask<Object, Object, Object>, Object[]>>
             mQueuedTasks = new ArrayDeque<>();
@@ -21,13 +35,16 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
         mInstrumentation = checkNotNull(instrumentation);
     }
 
-    private final Executor EXECUTOR = new Executor() {
+    private static final Executor EXECUTOR = new Executor() {
         @Override
         public void execute(Runnable command) {
             command.run();
         }
     };
 
+    /**
+     * Blocks until all queued and running {@link AsyncTask}s are complete.
+     */
     public void runUntilEmpty() {
         while (!mQueuedTasks.isEmpty()) {
             Pair<AsyncTask<Object, Object, Object>, Object[]> queuedTask = mQueuedTasks.pop();
@@ -40,8 +57,8 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <Params, Progress, Result> void runTask(
-            AsyncTask<Params, Progress, Result> asyncTask, Params... params) {
+    public <ParamsT, ProgressT, ResultT> void runTask(
+            AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params) {
         mQueuedTasks.add(Pair.create(
                 (AsyncTask<Object, Object, Object>) asyncTask,
                 (Object[]) params));

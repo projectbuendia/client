@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.app.AlertDialog;
@@ -38,7 +49,7 @@ import java.util.TreeSet;
 import javax.annotation.Nullable;
 
 /**
- * Attach the local cache of chart data into the necessary view for the chart history.
+ * Adapter that populates a grid view with the local cache of a patient's chart history.
  */
 final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
@@ -50,7 +61,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private static final Logger LOG = Logger.create();
 
     private static final String EMPTY_STRING = "";
-    private static final View.OnClickListener notesOnClickListener =
+    private static final View.OnClickListener sNotesOnClickListener =
             new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -276,7 +287,8 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     }
 
     @Override
-    public @Nullable TextView fillCell(
+    @Nullable
+    public TextView fillCell(
             int rowIndex, int columnIndex, View view,
             @Nullable ViewStub viewStub, @Nullable TextView textView) {
         if (viewStub == null && textView == null) {
@@ -359,7 +371,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 break;
             case Concepts.BLEEDING_UUID:
                 if (rowData.mColumnIdsToValues.containsKey(columnId)  // "any bleeding" option
-                        || mColumnIdsWithAnyBleeding.contains(columnId)  // specific bleeding options
+                        || mColumnIdsWithAnyBleeding.contains(columnId) // specific bleeding options
                 ) {
                     backgroundResource = R.drawable.chart_cell_active;
                 }
@@ -385,7 +397,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
                 if (value != null) {
                     backgroundResource = R.drawable.chart_cell_active_pressable;
                     textViewTag = rowData.mColumnIdsToValues.get(columnId);
-                    onClickListener = notesOnClickListener;
+                    onClickListener = sNotesOnClickListener;
                 }
                 break;
             default:

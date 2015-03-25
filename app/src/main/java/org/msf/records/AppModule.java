@@ -14,6 +14,7 @@ import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.UpdateNotificationController;
 import org.msf.records.ui.chart.PatientChartActivity;
+import org.msf.records.ui.locationselection.LocationSelectionActivity;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.ui.patientlist.PatientListActivity;
 import org.msf.records.ui.patientlist.PatientListController;
@@ -21,7 +22,6 @@ import org.msf.records.ui.patientlist.PatientListFragment;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 import org.msf.records.ui.patientlist.RoundActivity;
 import org.msf.records.ui.patientlist.RoundFragment;
-import org.msf.records.ui.tentselection.TentSelectionActivity;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.ui.userlogin.UserLoginFragment;
 import org.msf.records.updater.UpdateModule;
@@ -59,7 +59,7 @@ import dagger.Provides;
                 PatientListController.class,
                 PatientSearchActivity.class,
                 RoundActivity.class,
-                TentSelectionActivity.class,
+                LocationSelectionActivity.class,
                 PatientListFragment.class,
                 RoundFragment.class,
                 UpdateNotificationController.class,

@@ -1,36 +1,40 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.sync;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
-import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
 
 import net.sqlcipher.database.SQLiteException;
 
 import org.msf.records.App;
 import org.msf.records.events.sync.SyncFailedEvent;
-import org.msf.records.net.VolleySingleton;
-import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.PatientDatabase;
-import org.msf.records.sync.providers.Contracts;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.Logger;
 
 import java.sql.SQLException;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link FunctionalTestCase} that clears the application database as part of set up, allowing for
- * sync behavior to be tested more easily. This class does NOT currently clear ODK forms.
+ * sync behavior to be tested more easily. This class does NOT currently clear ODK forms, which are
+ * stored separately as flat files.
  *
- * <p>WARNING: Syncing requires the transfer of large quantities of data, so {@link SyncTestCase}s
- * will almost always be very large tests.
+ * <p>WARNING: Syncing may require the transfer of large quantities of data, so {@link SyncTestCase}
+ * tests will almost always be very large tests.
  */
 public class SyncTestCase extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();

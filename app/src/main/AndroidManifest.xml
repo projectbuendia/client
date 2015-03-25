@@ -71,7 +71,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.tentselection.TentSelectionActivity"
+            android:name=".ui.locationselection.LocationSelectionActivity"
             android:label="@string/title_activity_tent_selection"
             android:screenOrientation="userPortrait" >
             <intent-filter>
@@ -83,7 +83,7 @@
         <activity
             android:name="org.msf.records.ui.patientlist.PatientListActivity"
             android:label="@string/title_patient_list"
-            android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
+            android:parentActivityName=".ui.locationselection.LocationSelectionActivity"
             android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -122,11 +122,11 @@
         <activity
             android:name="org.msf.records.ui.patientlist.RoundActivity"
             android:label="@string/title_activity_round"
-            android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
+            android:parentActivityName=".ui.locationselection.LocationSelectionActivity"
             android:screenOrientation="userPortrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.tentselection.TentSelectionActivity" />
+                android:value=".ui.locationselection.LocationSelectionActivity" />
         </activity>
 
         <service

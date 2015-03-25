@@ -1,4 +1,15 @@
-package org.msf.records.ui.tentselection;
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
+package org.msf.records.ui.locationselection;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,17 +38,22 @@ import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
 /**
- * Controller for {@link TentSelectionActivity}.
- *
- * Avoid adding untestable dependencies to this class.
+ * Controller for {@link LocationSelectionActivity}.
  */
-final class TentSelectionController {
+final class LocationSelectionController {
 
     private static final Logger LOG = Logger.create();
 
+    // TODO/feature: Allow LOCATIONS_DEPTH to be specified.
+    /**
+     * The depth of locations to display. Only locations at this depth in the location tree will be
+     * displayed.
+     */
+    private static final int LOCATIONS_DEPTH = AppLocationTree.ABSOLUTE_DEPTH_TENT;
+
     public interface Ui {
 
-        void switchToTentSelectionScreen();
+        void switchToLocationSelectionScreen();
 
         void switchToPatientListScreen();
 
@@ -50,9 +66,9 @@ final class TentSelectionController {
         void finish();
     }
 
-    public interface TentFragmentUi {
+    public interface LocationFragmentUi {
 
-        void setTents(AppLocationTree locationTree, List<AppLocation> tents);
+        void setLocations(AppLocationTree locationTree, List<AppLocation> locations);
 
         void setPresentPatientCount(int patientCount);
 
@@ -72,7 +88,7 @@ final class TentSelectionController {
     private final AppModel mAppModel;
     private final CrudEventBus mCrudEventBus;
     private final Ui mUi;
-    private final Set<TentFragmentUi> mFragmentUis = new HashSet<>();
+    private final Set<LocationFragmentUi> mFragmentUis = new HashSet<>();
     private final EventBusRegistrationInterface mEventBus;
     private final EventBusSubscriber mEventBusSubscriber = new EventBusSubscriber();
     private final SyncManager mSyncManager;
@@ -92,7 +108,7 @@ final class TentSelectionController {
     private boolean mWaitingOnSyncCancel = false;
     private Object mSyncCancelLock = new Object();
 
-    public TentSelectionController(
+    public LocationSelectionController(
             AppModel appModel,
             CrudEventBus crudEventBus,
             Ui ui,
@@ -139,19 +155,19 @@ final class TentSelectionController {
     public void onSyncRetry() {
         mWaitingOnSync = true;
         mUi.setLoadingState(LoadingState.SYNCING);
-        for (TentFragmentUi fragmentUi : mFragmentUis) {
+        for (LocationFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.resetSyncProgress();
         }
         mSyncManager.forceSync();
     }
 
-    public void attachFragmentUi(TentFragmentUi fragmentUi) {
+    public void attachFragmentUi(LocationFragmentUi fragmentUi) {
         LOG.d("Attached new fragment UI: " + fragmentUi);
         mFragmentUis.add(fragmentUi);
         updateUi();
     }
 
-    public void detachFragmentUi(TentFragmentUi fragmentUi) {
+    public void detachFragmentUi(LocationFragmentUi fragmentUi) {
         LOG.d("Detached fragment UI: " + fragmentUi);
         mFragmentUis.remove(fragmentUi);
     }
@@ -165,7 +181,7 @@ final class TentSelectionController {
         }
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
-	}
+    }
 
     /** Call when the user presses the search button. */
     public void onSearchPressed() {
@@ -176,7 +192,7 @@ final class TentSelectionController {
     /** Call when the user exits search mode. */
     public void onSearchCancelled() {
         Utils.logUserAction("search_cancelled");
-        mUi.switchToTentSelectionScreen();
+        mUi.switchToLocationSelectionScreen();
     }
 
     /** Call when the user presses the discharged zone. */
@@ -185,22 +201,22 @@ final class TentSelectionController {
         mUi.launchActivityForLocation(mDischargedZone);
     }
 
-	/** Call when the user presses the triage zone. */
+    /** Call when the user presses the triage zone. */
     public void onTriagePressed() {
         Utils.logUserAction("location_pressed", "location", mTriageZone.name);
         mUi.launchActivityForLocation(mTriageZone);
     }
 
-    /** Call when the user presses a tent. */
-    public void onTentSelected(AppLocation tent) {
-        Utils.logUserAction("location_pressed", "location", tent.name);
-        mUi.launchActivityForLocation(tent);
+    /** Call when the user presses a location. */
+    public void onLocationSelected(AppLocation location) {
+        Utils.logUserAction("location_pressed", "location", location.name);
+        mUi.launchActivityForLocation(location);
     }
 
     private void updateUi() {
         boolean hasValidTree = isLocationTreeValid();
         updateLoadingState();
-        for (TentFragmentUi fragmentUi : mFragmentUis) {
+        for (LocationFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.setBusyLoading(!hasValidTree);
 
             if (hasValidTree) {
@@ -208,10 +224,9 @@ final class TentSelectionController {
                         ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
                 int totalPatientCount =
                         mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot());
-                fragmentUi.setTents(
+                fragmentUi.setLocations(
                         mAppLocationTree,
-                        mAppLocationTree.getDescendantsAtDepth(
-                                AppLocationTree.ABSOLUTE_DEPTH_TENT).asList());
+                        mAppLocationTree.getDescendantsAtDepth(LOCATIONS_DEPTH).asList());
                 fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
                 fragmentUi.setDischargedPatientCount(
                         (mDischargedZone == null)
@@ -245,7 +260,7 @@ final class TentSelectionController {
             if (mWaitingOnSync) {
                 synchronized (mSyncCancelLock) {
                     mWaitingOnSyncCancel = true;
-                    for (TentFragmentUi fragmentUi : mFragmentUis) {
+                    for (LocationFragmentUi fragmentUi : mFragmentUis) {
                         fragmentUi.showSyncCancelRequested();
                     }
                 }
@@ -269,7 +284,7 @@ final class TentSelectionController {
 
         public void onEventMainThread(SyncProgressEvent event) {
             if (mWaitingOnSync) {
-                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                for (LocationFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.showIncrementalSyncProgress(event.progress, event.label);
                 }
             }
@@ -277,7 +292,7 @@ final class TentSelectionController {
 
         public void onEventMainThread(SyncStartedEvent event) {
             if (mWaitingOnSync) {
-                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                for (LocationFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.resetSyncProgress();
                 }
             }
@@ -300,7 +315,7 @@ final class TentSelectionController {
 
         public void onEventMainThread(SyncFailedEvent event) {
             if (mWaitingOnSync) {
-                for (TentFragmentUi fragmentUi : mFragmentUis) {
+                for (LocationFragmentUi fragmentUi : mFragmentUis) {
                     fragmentUi.resetSyncProgress();
                 }
                 mUi.showSyncFailedDialog(true);
@@ -338,7 +353,7 @@ final class TentSelectionController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
-            // TODO: Remove -- likely unnecessary.
+            // TODO/deprecate: Remove -- likely unnecessary.
             mPatientSearchController.setLocations(mAppLocationTree);
         }
     }

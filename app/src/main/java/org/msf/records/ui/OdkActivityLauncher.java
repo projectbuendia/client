@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.app.Activity;
@@ -74,18 +85,24 @@ public class OdkActivityLauncher {
 
     private static final Logger LOG = Logger.create();
 
-    public static void fetchAndShowXform(final Activity callingActivity, final String uuidToShow,
-                                         final int requestCode) {
-        fetchAndShowXform(
-                callingActivity, uuidToShow, requestCode, null /*patient*/, null /*fields*/);
-    }
-
+    /**
+     * Fetches all xforms from the server, caches them, and launches ODK using the requested form.
+     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
+     *                        will be returned to this activity
+     * @param uuidToShow UUID of the form to show
+     * @param requestCode if >= 0, this code will be returned in onActivityResult() when the
+     *                    activity exits
+     * @param patient the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                correspond to
+     * @param fields a {@link PrepopulatableFields} object with any form fields that should be
+     *               pre-populated
+     */
     public static void fetchAndShowXform(
             final Activity callingActivity,
             final String uuidToShow,
             final int requestCode,
-            final org.odk.collect.android.model.Patient patient,
-            final PrepopulatableFields fields) {
+            @Nullable final org.odk.collect.android.model.Patient patient,
+            @Nullable final PrepopulatableFields fields) {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
                 new Response.Listener<List<OpenMrsXformIndexEntry>>() {
                     @Override
@@ -136,16 +153,24 @@ public class OdkActivityLauncher {
                 });
     }
 
-    public static void showOdkCollect(Activity callingActivity, int requestCode, long formId) {
-        showOdkCollect(callingActivity, requestCode, formId, null /*patient*/, null /*fields*/);
-    }
-
+    /**
+     * Shows the form with the given id in ODK collect.
+     * @param callingActivity the {@link Activity} requesting the xform; when ODK closes, the user
+     *                        will be returned to this activity
+     * @param requestCode if >= 0, this code will be returned in onActivityResult() when the
+     *                    activity exits
+     * @param formId the id of the form to fetch
+     * @param patient the {@link org.odk.collect.android.model.Patient} that this form entry will
+     *                correspond to
+     * @param fields a {@link PrepopulatableFields} object with any form fields that should be
+     *               pre-populated
+     */
     public static void showOdkCollect(
             Activity callingActivity,
             int requestCode,
             long formId,
-            org.odk.collect.android.model.Patient patient,
-            PrepopulatableFields fields) {
+            @Nullable org.odk.collect.android.model.Patient patient,
+            @Nullable PrepopulatableFields fields) {
         Intent intent = new Intent(callingActivity, FormEntryActivity.class);
         Uri formUri = ContentUris.withAppendedId(FormsProviderAPI.FormsColumns.CONTENT_URI, formId);
         intent.setData(formUri);
@@ -164,7 +189,8 @@ public class OdkActivityLauncher {
      *
      * @param patientUuid the patient to add an observation to, or null to create a new patient
      * @param resultCode the result code sent from Android activity transition
-     * @param updateClientCache true if we should update the client database with temporary observations
+     * @param updateClientCache true if we should update the client database with temporary
+     *                          observations
      * @param data the incoming intent
      */
     public static void sendOdkResultToServer(
@@ -253,7 +279,8 @@ public class OdkActivityLauncher {
                                 //Code largely copied from InstanceUploaderTask to delete on upload
                                 DeleteInstancesTask dit = new DeleteInstancesTask();
                                 dit.setContentResolver(
-                                        Collect.getInstance().getApplication().getContentResolver());
+                                        Collect.getInstance().getApplication()
+                                                .getContentResolver());
                                 dit.execute(idToDelete);
                             }
                             EventBus.getDefault().post(new SubmitXformSucceededEvent());
@@ -275,10 +302,17 @@ public class OdkActivityLauncher {
         // id, fill in auto
         // patient uuid: context
         // encounter uuid: make one up
-        // encounter time: <encounter><encounter.encounter_datetime>2014-12-15T13:33:00.000Z</encounter.encounter_datetime>
-        // concept uuid: <vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM"> <- 5088
-        // value: 	<vitals><temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
-        //              <value>36.0</value>
+        // encounter time:
+        //   <encounter>
+        //     <encounter.encounter_datetime>2014-12-15T13:33:00.000Z</encounter.encounter_datetime>
+        // concept uuid:
+        //   <vitals>
+        //     <!-- Concept UUID is 5088 -->
+        //     <temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
+        // value:
+        //   <vitals>
+        //     <temperature_c openmrs_concept="5088^Temperature (C)^99DCT" openmrs_datatype="NM">
+        //       <value>36.0</value>
         // temp_cache: true
 
         // or for coded
@@ -317,12 +351,12 @@ public class OdkActivityLauncher {
 
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         HashSet<Integer> xformConceptIds = new HashSet<>();
-        for (int i=0; i<savedRoot.getNumChildren(); i++) {
+        for (int i = 0; i < savedRoot.getNumChildren(); i++) {
             TreeElement group = savedRoot.getChildAt(i);
             if (group.getNumChildren() == 0) {
                 continue;
             }
-            for (int j=0; j< group.getNumChildren(); j++) {
+            for (int j = 0; j < group.getNumChildren(); j++) {
                 TreeElement question = group.getChildAt(j);
                 TreeElement openmrsConcept = question.getAttribute(null, "openmrs_concept");
                 TreeElement openmrsDatatype = question.getAttribute(null, "openmrs_datatype");
@@ -389,7 +423,8 @@ public class OdkActivityLauncher {
                 toInsert.toArray(new ContentValues[toInsert.size()]));
     }
 
-    private static boolean mapIdToUuid(HashMap<String, String> idToUuid, ContentValues values, String key) {
+    private static boolean mapIdToUuid(
+            HashMap<String, String> idToUuid, ContentValues values, String key) {
         String id = (String) values.get(key);
         String uuid = idToUuid.get(id);
         if (uuid == null) {
@@ -481,7 +516,8 @@ public class OdkActivityLauncher {
 
     // Out of a list of OpenMRS Xform entries, find the form that matches the given uuid, or
     // return null if no xform is found.
-    private static OpenMrsXformIndexEntry findUuid(List<OpenMrsXformIndexEntry> allEntries, String uuid) {
+    private static OpenMrsXformIndexEntry findUuid(
+            List<OpenMrsXformIndexEntry> allEntries, String uuid) {
         for (OpenMrsXformIndexEntry entry : allEntries) {
             if (entry.uuid.equals(uuid)) {
                 return entry;
@@ -531,7 +567,8 @@ public class OdkActivityLauncher {
             instanceUri =
                     ContentUris.withAppendedId(CONTENT_URI,
                             instanceCursor.getLong(instanceCursor.getColumnIndex(_ID)));
-            instancePath = instanceCursor.getString(instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
+            instancePath =
+                    instanceCursor.getString(instanceCursor.getColumnIndex(INSTANCE_FILE_PATH));
             jrFormId = instanceCursor.getString(instanceCursor.getColumnIndex(JR_FORM_ID));
         } finally {
             if (instanceCursor != null) {
@@ -557,7 +594,8 @@ public class OdkActivityLauncher {
                 return;
             }
             if (formCursor.getCount() != 1) {
-                LOG.e("Loading forms for displaying instance, expected only 1. Got multiple so using first.");
+                LOG.e("Loading forms for displaying instance, expected only 1. "
+                        + "Got multiple so using first.");
             }
             formCursor.moveToFirst();
             formPath = formCursor.getString(

@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.animation.Animator;
@@ -26,7 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
+ * A {@link Fragment} that shows a spinner or progress bar when fragment content is not ready to
+ * be displayed.
  */
 public abstract class ProgressFragment extends Fragment implements  Response.ErrorListener {
 
@@ -72,7 +84,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     }
 
     @Override
-    public void onErrorResponse(VolleyError error){
+    public void onErrorResponse(VolleyError error) {
         changeErrorState(error.toString());
         Log.e("server", new String(error.networkResponse.data, Charsets.UTF_8));
     }
@@ -84,7 +96,10 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(
+            LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
         mFrame = new RelativeLayout(getActivity());
@@ -148,11 +163,11 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         return mState;
     }
 
-    protected void setContentView(int layout){
+    protected void setContentView(int layout) {
         mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
     }
 
-    protected void changeErrorState(String message){
+    protected void changeErrorState(String message) {
         mErrorTextView.setText(message);
         changeState(State.ERROR);
     }
@@ -218,7 +233,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         // Animate the loading view to 0% opacity. After the animation ends,
         // set its visibility to GONE as an optimization step (it won't
         // participate in layout passes, etc.)
-        if(outView != null) {
+        if (outView != null) {
             outView.animate()
                     .alpha(0f)
                     .setDuration(mShortAnimationDuration)
