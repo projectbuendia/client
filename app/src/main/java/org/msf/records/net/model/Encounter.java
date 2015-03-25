@@ -27,7 +27,7 @@ public class Encounter {
      */
     public String uuid;
     public DateTime timestamp;
-    public String enterer_id;
+    public String enterer_id; // @nolint
     /**
      * Keys are uuid strings for the concept representing the concept observed. Values are the
      * value observed. To find out what the type is the type in the concept dictionary must be

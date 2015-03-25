@@ -45,7 +45,7 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.sync.providers.MsfRecordsProvider;
-import org.msf.records.sync.providers.SqliteDatabaseTransactionHelper;
+import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
@@ -193,7 +193,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         MsfRecordsProvider msfRecordsProvider =
                 (MsfRecordsProvider)(provider.getLocalContentProvider());
-        SqliteDatabaseTransactionHelper dbTransactionHelper =
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
                 msfRecordsProvider.getDbTransactionHelper();
         LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
@@ -358,7 +358,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         getContext().sendBroadcast(syncCompletedIntent);
     }
 
-    private void rollbackSavepoint(SqliteDatabaseTransactionHelper dbTransactionHelper) {
+    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
         LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
     }

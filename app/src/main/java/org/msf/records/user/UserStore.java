@@ -30,7 +30,7 @@ import org.msf.records.net.model.User;
 import org.msf.records.sync.RpcToDb;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.sync.providers.MsfRecordsProvider;
-import org.msf.records.sync.providers.SqliteDatabaseTransactionHelper;
+import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
@@ -118,7 +118,7 @@ public class UserStore {
                         Contracts.Users.CONTENT_URI);
         MsfRecordsProvider msfRecordsProvider =
                 (MsfRecordsProvider)(client.getLocalContentProvider());
-        SqliteDatabaseTransactionHelper dbTransactionHelper =
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
                 msfRecordsProvider.getDbTransactionHelper();
         try {
             LOG.i("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);

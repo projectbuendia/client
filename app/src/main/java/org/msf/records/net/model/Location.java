@@ -21,7 +21,7 @@ public class Location {
     // Note: this class is constructed by reflection by Gson.
 
     public String uuid;
-    public String parent_uuid;
+    public String parent_uuid; // @nolint
 
     /**
      * Map from locales to the name of the location in that locale.

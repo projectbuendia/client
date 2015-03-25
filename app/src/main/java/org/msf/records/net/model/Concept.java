@@ -24,7 +24,7 @@ public class Concept {
      * The server side id. Prefer the UUID for sending to the server, but this is needed for some
      * xforms tasks.
      */
-    public Integer xform_id;
+    public Integer xform_id; // @nolint
     public ConceptType type;
 
     /**

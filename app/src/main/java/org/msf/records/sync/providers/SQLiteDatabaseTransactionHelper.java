@@ -18,10 +18,10 @@ import org.msf.records.sync.PatientDatabase;
 /**
  * Provides helper functions for dealing with savepoints in SQLite databases.
  */
-public final class SqliteDatabaseTransactionHelper {
+public final class SQLiteDatabaseTransactionHelper {
     private final PatientDatabase mDbHelper;
 
-    SqliteDatabaseTransactionHelper(PatientDatabase dbHelper) {
+    SQLiteDatabaseTransactionHelper(PatientDatabase dbHelper) {
         mDbHelper = dbHelper;
     }
 

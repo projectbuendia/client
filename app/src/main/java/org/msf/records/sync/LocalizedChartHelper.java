@@ -221,18 +221,18 @@ public class LocalizedChartHelper {
 
             Map<String, LocalizedChartHelper.LocalizedObservation> result = Maps.newLinkedHashMap();
             while (cursor.moveToNext()) {
-                String concept_uuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
+                String conceptUuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
 
                 LocalizedObservation obs = new LocalizedObservation(
                         cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                         cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
                         "", /* no group */
-                        concept_uuid,
+                        conceptUuid,
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
-                result.put(concept_uuid, obs);
+                result.put(conceptUuid, obs);
             }
             return result;
         } finally {

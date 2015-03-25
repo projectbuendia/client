@@ -29,8 +29,8 @@ public class Patient implements Serializable {
     public String uuid;
     // User-specified identifier.
     public String id;
-    public String given_name;
-    public String family_name;
+    public String given_name; // @nolint
+    public String family_name; // @nolint
 
     public String important_information;
 
@@ -38,11 +38,11 @@ public class Patient implements Serializable {
     public LocalDate birthdate;
 
     // All timestamps are in seconds since 1970-01-01 00:00 UTC.
-    public Long admission_timestamp;
-    public Long created_timestamp;
-    public Long first_showed_symptoms_timestamp;
+    public Long admission_timestamp; // @nolint
+    public Long created_timestamp; // @nolint
+    public Long first_showed_symptoms_timestamp; // @nolint
 
-    public Location assigned_location;
+    public Location assigned_location; // @nolint
 
     public Patient() {}
 
