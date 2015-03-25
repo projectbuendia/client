@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.widget;
 
 import android.content.Context;
@@ -8,8 +19,8 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 
 /**
- * Extension of LinearLayoutManager that wraps its contents by measuring settings its size to the
- * maximum of all its children.
+ * Extension of {@link LinearLayoutManager} that wraps its contents by measuring settings its size
+ * to the maximum of all its children.
  * See https://code.google.com/p/android/issues/detail?id=74772
  */
 public class WrapContentLinearLayoutManager extends LinearLayoutManager {
@@ -63,8 +74,9 @@ public class WrapContentLinearLayoutManager extends LinearLayoutManager {
             int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
                     getPaddingTop() + getPaddingBottom(), p.height);
             view.measure(childWidthSpec, childHeightSpec);
-            int result = orientation ==
-                    VERTICAL ? view.getMeasuredWidth() : view.getMeasuredHeight();
+            int result = (orientation == VERTICAL)
+                    ? view.getMeasuredWidth()
+                    : view.getMeasuredHeight();
             recycler.recycleView(view);
             return result;
         } else {

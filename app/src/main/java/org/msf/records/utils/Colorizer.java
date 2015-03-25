@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.utils;
 
 import android.support.v4.util.LruCache;
@@ -18,22 +29,22 @@ public class Colorizer {
     /**
      * A {@link Colorizer} that has 12 colors.
      */
-    public static final Colorizer _12 = new Colorizer(0);
+    public static final Colorizer C_12 = new Colorizer(0);
 
     /**
      * A {@link Colorizer} that has 24 colors.
      */
-    public static final Colorizer _24 = new Colorizer(1);
+    public static final Colorizer C_24 = new Colorizer(1);
 
     /**
      * A {@link Colorizer} that has 48 colors.
      */
-    public static final Colorizer _48 = new Colorizer(2);
+    public static final Colorizer C_48 = new Colorizer(2);
 
     /**
      * A {@link Colorizer} that has 96 colors.
      */
-    public static final Colorizer _96 = new Colorizer(3);
+    public static final Colorizer C_96 = new Colorizer(3);
 
     public static Colorizer withPalette(int... palette) {
         return new Colorizer(Arrays.copyOf(palette, palette.length));
