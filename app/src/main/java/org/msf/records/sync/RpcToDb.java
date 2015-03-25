@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync;
 
 import android.content.ContentProviderOperation;
@@ -29,7 +40,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * A helper class for turning the Java beans that are the result of chart RPC calls into
- * appropriate ContentProviderOperations for inserting into the DB.
+ * appropriate {@link ContentProviderOperation}s for inserting into the DB.
  */
 public class RpcToDb {
 
@@ -122,6 +133,10 @@ public class RpcToDb {
         return operations;
     }
 
+    /**
+     * Requests locations from the server and transforms the response into an {@link ArrayList} of
+     * {@link ContentProviderOperation}s for updating the database.
+     */
     public static ArrayList<ContentProviderOperation> locationsRpcToDb(SyncResult syncResult)
             throws ExecutionException, InterruptedException {
         final ContentResolver contentResolver = App.getInstance().getContentResolver();
@@ -164,7 +179,8 @@ public class RpcToDb {
         LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
         LOG.i("Found " + locations.size() + " external entries. Computing merge solution...");
 
-        String id, parentId;
+        String id;
+        String parentId;
 
         // Build map of location names from the database.
         HashMap<String, HashMap<String, String>> dbLocationNames =
@@ -189,7 +205,7 @@ public class RpcToDb {
         namesCur.close();
 
         // Iterate through the list of locations
-        while(c.moveToNext()){
+        while (c.moveToNext()) {
             syncResult.stats.numEntries++;
 
             id = c.getString(c.getColumnIndex(Contracts.Locations.LOCATION_UUID));
@@ -218,8 +234,8 @@ public class RpcToDb {
                     LOG.i("No action required for " + existingUri);
                 }
 
-                if (location.names != null &&
-                        (locationNames == null || !location.names.equals(locationNames))) {
+                if (location.names != null
+                        && (locationNames == null || !location.names.equals(locationNames))) {
                     Uri existingNamesUri = namesUri.buildUpon().appendPath(
                             String.valueOf(id)).build();
                     // Update location names by deleting any existing location names and
@@ -243,10 +259,11 @@ public class RpcToDb {
             } else {
                 // Entry doesn't exist. Remove it from the database.
                 Uri deleteUri = uri.buildUpon().appendPath(id).build();
-                Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
                 LOG.i("Scheduling delete: " + deleteUri);
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
+
+                Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
                 LOG.i("Scheduling delete: " + namesDeleteUri);
                 batch.add(ContentProviderOperation.newDelete(namesDeleteUri).build());
                 syncResult.stats.numDeletes++;
@@ -264,20 +281,20 @@ public class RpcToDb {
             syncResult.stats.numInserts++;
 
             if (location.names != null) {
-	            for (String locale : location.names.keySet()) {
-	                Uri existingNamesUri = namesUri.buildUpon().appendPath(
-	                        String.valueOf(location.uuid)).build();
-	                batch.add(ContentProviderOperation.newInsert(existingNamesUri)
-	                        .withValue(
+                for (String locale : location.names.keySet()) {
+                    Uri existingNamesUri = namesUri.buildUpon().appendPath(
+                            String.valueOf(location.uuid)).build();
+                    batch.add(ContentProviderOperation.newInsert(existingNamesUri)
+                            .withValue(
                                     Contracts.LocationNames.LOCATION_UUID, location.uuid)
-	                        .withValue(
+                            .withValue(
                                     Contracts.LocationNames.LOCALE, locale)
-	                        .withValue(
+                            .withValue(
                                     Contracts.LocationNames.LOCALIZED_NAME,
-	                                location.names.get(locale))
-	                        .build());
-	                syncResult.stats.numInserts++;
-	            }
+                                    location.names.get(locale))
+                            .build());
+                    syncResult.stats.numInserts++;
+                }
             }
         }
 

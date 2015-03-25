@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync;
 
 import android.accounts.Account;
@@ -34,7 +45,7 @@ import org.msf.records.net.model.PatientChart;
 import org.msf.records.net.model.PatientChartList;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.sync.providers.MsfRecordsProvider;
-import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
+import org.msf.records.sync.providers.SqliteDatabaseTransactionHelper;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
@@ -139,7 +150,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * Not thread-safe but, by default, this will never be called multiple times in parallel.
      */
     @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+    public void onPerformSync(
+            Account account,
+            Bundle extras,
+            String authority,
+            ContentProviderClient provider,
+            SyncResult syncResult) {
         // Fire a broadcast indicating that sync has completed.
         Intent syncStartedIntent =
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
@@ -177,7 +193,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         MsfRecordsProvider msfRecordsProvider =
                 (MsfRecordsProvider)(provider.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+        SqliteDatabaseTransactionHelper dbTransactionHelper =
                 msfRecordsProvider.getDbTransactionHelper();
         LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
@@ -303,19 +319,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error interruption");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (ExecutionException e){
+        } catch (ExecutionException e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error failed to execute");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (Exception e){
+        } catch (Exception e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error reading from network");
             syncResult.stats.numIoExceptions++;
@@ -342,7 +358,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         getContext().sendBroadcast(syncCompletedIntent);
     }
 
-    private void rollbackSavepoint(SQLiteDatabaseTransactionHelper dbTransactionHelper) {
+    private void rollbackSavepoint(SqliteDatabaseTransactionHelper dbTransactionHelper) {
         LOG.i("Rolling back savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.rollbackNamedTransaction(SYNC_SAVEPOINT_NAME);
     }
@@ -390,7 +406,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 extras.getBoolean(SYNC_USERS));
     }
 
-    private void updatePatientData(SyncResult syncResult) throws InterruptedException, ExecutionException, RemoteException, OperationApplicationException {
+    private void updatePatientData(SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
         final ContentResolver contentResolver = getContext().getContentResolver();
 
         final String[] projection = PatientProjection.getProjectionColumns();
@@ -399,7 +417,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
 
-        //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
+        // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
+        // background thread
         List<Patient> patients = future.get();
         LOG.d("After network call to retrieve patients");
         checkCancellation("Sync was canceled before parsing retrieved patient data.");
@@ -422,7 +441,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, locationUuid;
+        String givenName;
+        String familyName;
+        String uuid;
+        String locationUuid;
         String gender;
         LocalDate birthdate;
         Long admissionTimestamp;
@@ -545,7 +567,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<ConceptList> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
-        ConceptList conceptList = future.get();
+        final ConceptList conceptList = future.get();
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
         for (Concept concept : conceptList.results) {
@@ -604,7 +626,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<ChartStructure> future = RequestFuture.newFuture();
         chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
-        ChartStructure conceptList = future.get();
+        final ChartStructure conceptList = future.get();
         checkCancellation("Sync was canceled before applying chart structure deletions.");
         // When we do a chart update, delete everything first.
         provider.delete(Contracts.Charts.CONTENT_URI, null, null);
@@ -691,7 +713,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
-        PatientChartList patientChartList =
+        final PatientChartList patientChartList =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
@@ -750,7 +772,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
-        PatientChartList patientChartList =
+        final PatientChartList patientChartList =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");

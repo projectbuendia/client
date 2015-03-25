@@ -6,7 +6,6 @@ import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -20,7 +19,7 @@ import org.msf.records.net.model.User;
 import org.msf.records.sync.RpcToDb;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.sync.providers.MsfRecordsProvider;
-import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
+import org.msf.records.sync.providers.SqliteDatabaseTransactionHelper;
 import org.msf.records.utils.Logger;
 
 import java.util.HashSet;
@@ -108,7 +107,7 @@ public class UserStore {
                         Contracts.Users.CONTENT_URI);
         MsfRecordsProvider msfRecordsProvider =
                 (MsfRecordsProvider)(client.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+        SqliteDatabaseTransactionHelper dbTransactionHelper =
                 msfRecordsProvider.getDbTransactionHelper();
         try {
             LOG.i("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
