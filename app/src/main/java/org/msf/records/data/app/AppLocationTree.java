@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app;
 
 import android.database.ContentObserver;
@@ -17,7 +28,8 @@ import java.util.Map;
 import org.msf.records.utils.Logger;
 
 /**
- * A tree that contains all app model locations.
+ * A tree containing a hierarchy of {@link AppLocation} objects, where the root is assumed to be a
+ * single medical center.
  */
 public class AppLocationTree implements AppModelObservable {
 
@@ -120,8 +132,11 @@ public class AppLocationTree implements AppModelObservable {
         return mRoot;
     }
 
+    /**
+     * Returns the parent of a given {@link AppLocation}.
+     */
     @Nullable
-    public AppLocation getParent(AppLocation location) {
+    public AppLocation getParent(@Nullable AppLocation location) {
         if (location == null) {
             return null;
         }
@@ -129,7 +144,11 @@ public class AppLocationTree implements AppModelObservable {
         return mUuidsToParents.get(location.uuid);
     }
 
-    public ImmutableSet<AppLocation> getChildren(AppLocation location) {
+    /**
+     * Returns all immediate children of a given {@link AppLocation}, or an empty set if the
+     * {@link AppLocation} is null or has no children.
+     */
+    public ImmutableSet<AppLocation> getChildren(@Nullable AppLocation location) {
         if (location == null) {
             return ImmutableSet.of();
         }

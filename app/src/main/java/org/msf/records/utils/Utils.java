@@ -1,10 +1,7 @@
 package org.msf.records.utils;
 
-import org.joda.time.Days;
 import com.google.common.collect.Lists;
 
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.msf.records.App;
 import org.msf.records.net.Server;
 
@@ -24,6 +21,7 @@ import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
+
     /** Converts objects with integer type to BigInteger. */
     public static BigInteger toBigInteger(Object obj) {
         if (obj instanceof Integer) {
@@ -146,30 +144,6 @@ public class Utils {
         }
     }
 
-    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(@Nullable LocalDate date) {
-        return date == null ? null : date.toString();
-    }
-
-    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(@Nullable String string) {
-        try {
-            return string == null ? null : LocalDate.parse(string);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate) {
-        Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 2) {
-            return "" + age.getYears() + " y";
-        } else {
-            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
-        }
-    }
-
     /**
      * Returns the value for a system property. System properties need to start with "debug." and
      * can be set using "adb shell setprop $propertyName $value".
@@ -183,17 +157,6 @@ public class Utils {
         } catch (Exception e) {  // should never happen
             return null;
         }
-    }
-
-    /**
-     * Describes a given date as a number of days since a starting date, where the starting date
-     * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
-     */
-    public static int dayNumberSince(@Nullable LocalDate startDate, @Nullable LocalDate date) {
-        if (startDate == null || date == null) {
-            return -1;
-        }
-        return Days.daysBetween(startDate, date).getDays() + 1;
     }
 
     /**

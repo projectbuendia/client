@@ -20,8 +20,6 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
@@ -36,6 +34,7 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.tentselection.AssignLocationDialog;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.date.Dates;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -50,12 +49,6 @@ import butterknife.OnClick;
 public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
-
-    /**
-     * The formatting for dates when displayed in entry fields.  "d MMM yyyy" is probably the best
-     * option here, as it matches the ordering and style of the date as shown in the date picker.
-     */
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("d MMM yyyy");
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
@@ -151,7 +144,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         };
 
         // Pre-populate admission date with today.
-        mAdmissionDate.setText(DATE_FORMAT.print(DateTime.now()));
+        mAdmissionDate.setText(Dates.toMediumString(DateTime.now().toLocalDate()));
     }
 
     private void updateLocationUi() {
@@ -505,7 +498,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     .withYear(year)
                     .withMonthOfYear(monthOfYear + 1)
                     .withDayOfMonth(dayOfMonth);
-            mDateField.setText(DATE_FORMAT.print(date));
+            mDateField.setText(Dates.toMediumString(date.toDateTimeAtStartOfDay().toLocalDate()));
             mLocalDate = date;
         }
 

@@ -1,8 +1,9 @@
-package org.msf.records.utils;
+package org.msf.records.utils.date;
 
 import android.test.InstrumentationTestCase;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 /**
  * Test cases for {@link RelativeDateTimeFormatter}.
@@ -40,5 +41,10 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
 
     public void testFormat_daysAgo() throws Exception {
         assertEquals("2 days ago", mFormatter.format(mNow, mNow.minusDays(2)));
+    }
+
+    /** Tests that format produces 'today' for identical {@link LocalDate} objects. */
+    public void testFormatLocalDate_today() {
+        assertEquals("today", mFormatter.format(mNow.toLocalDate(), mNow.toLocalDate()));
     }
 }
