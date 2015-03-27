@@ -16,6 +16,8 @@ import android.support.annotation.Nullable;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.matchers.MatchingFilter;
 
+import java.util.regex.Pattern;
+
 /**
  * Filters by name.
  *
@@ -23,6 +25,8 @@ import org.msf.records.filter.matchers.MatchingFilter;
  * words in the given name or family name, even if in a different order.
  */
 public final class NameFilter implements MatchingFilter<AppPatient> {
+    private static final Pattern DASH_REGEX = Pattern.compile("^\\p{Pd}*$");
+
     @Override
     public boolean matches(@Nullable AppPatient patient, CharSequence constraint) {
         if (patient == null) {
@@ -39,11 +43,14 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
         String[] searchTerms = constraint.toString().toLowerCase().split(" ");
 
         // Loop through each of the search terms checking if there is a prefix match
-        // for it in any word of the name
+        // for it in any word of the name.
         for (String searchTerm : searchTerms) {
             boolean termMatched = false;
             for (String namePart : nameParts) {
-                if (namePart.startsWith(searchTerm)) {
+                // If both the search name and a name are dashes, use a more permissive matcher
+                // that allows for an arbitrary type of dash. This makes it simpler to search for
+                // patients with an unknown name, which is represented by a dash.
+                if (namePart.startsWith(searchTerm) || areBothDashes(namePart, searchTerm)) {
                     termMatched = true;
                     break;  // no need to keep checking for this term
                 }
@@ -58,5 +65,13 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
         // If we've been through all the search terms without returning false,
         // then we must have found a match for all of them
         return true;
+    }
+
+    private boolean areBothDashes(String string1, String string2) {
+        return isDash(string1) && isDash(string2);
+    }
+
+    private boolean isDash(String str) {
+        return DASH_REGEX.matcher(str).matches();
     }
 }

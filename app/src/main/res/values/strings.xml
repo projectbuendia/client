@@ -254,8 +254,9 @@
     <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
     <string name="patient_validation_future_onset_date">Symptoms onset date cannot be in the future.</string>
     <string name="patient_creation_clear_symptoms_onset_date">Clear</string>
-    <string name="family_name_hint_unknown">Unknown</string>
-    <string name="given_name_hint_unknown">Unknown</string>
-    <string name="unknown_family_name">Unknown</string>
-    <string name="unknown_given_name">Unknown</string>
+    <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
+    <string name="family_name_hint_unknown">–</string>
+    <string name="given_name_hint_unknown">–</string>
+    <string name="unknown_family_name">–</string>
+    <string name="unknown_given_name">–</string>
 </resources>
