@@ -47,7 +47,7 @@ public final class NameFilter implements MatchingFilter<AppPatient> {
         for (String searchTerm : searchTerms) {
             boolean termMatched = false;
             for (String namePart : nameParts) {
-                // If both the search name and a name are dashes, use a more permissive matcher
+                // If both the search term and a name are dashes, use a more permissive matcher
                 // that allows for an arbitrary type of dash. This makes it simpler to search for
                 // patients with an unknown name, which is represented by a dash.
                 if (namePart.startsWith(searchTerm) || areBothDashes(namePart, searchTerm)) {
