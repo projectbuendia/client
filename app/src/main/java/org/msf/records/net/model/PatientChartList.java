@@ -13,9 +13,7 @@ package org.msf.records.net.model;
 
 import org.joda.time.DateTime;
 
-/**
- * Simple wrapper bean to help in parsing results for multiple patients.
- */
+/** Simple wrapper bean to help in parsing results for multiple patients. */
 public class PatientChartList {
     public PatientChart [] results;
     public DateTime snapshotTime;

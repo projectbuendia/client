@@ -23,24 +23,20 @@ import java.io.File;
  */
 public class OpenMrsXformIndexEntry {
 
-    /**
-     * The uuid of the form.
-     */
+    /** The uuid of the form. */
     public final String uuid;
-    /**
-     * The name of the form.
-     */
+
+    /** The name of the form. */
     public final String name;
-    /**
-     * Milliseconds since epoch since the form was last changed on the server.
-     */
+
+    /** Milliseconds since epoch when the form was last changed on the server. */
     public final long dateChanged;
 
     /**
      * Constructs an Xform index entry.
      * @param uuid UUID of the xform
      * @param name name of the xform
-     * @param dateChanged milliseconds since epoch since the form was last changed on the server
+     * @param dateChanged milliseconds since epoch when the form was last changed on the server
      */
     public OpenMrsXformIndexEntry(String uuid, String name, long dateChanged) {
         this.uuid = Preconditions.checkNotNull(uuid);
@@ -48,9 +44,7 @@ public class OpenMrsXformIndexEntry {
         this.dateChanged = dateChanged;
     }
 
-    /**
-     * Returns the unique file path in the ODK file system for storing this form.
-     */
+    /** Returns the unique file path in the ODK file system for storing this form. */
     public File makeFileForForm() {
         return new File(Collect.getInstance().getFormsPath() + File.separator + uuid + ".xml");
     }

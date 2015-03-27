@@ -24,9 +24,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides bindings for update-related classes.
- */
+/** A Dagger module that provides bindings for update-related classes. */
 @Module(
         injects = {
                 PatientSearchActivity.class

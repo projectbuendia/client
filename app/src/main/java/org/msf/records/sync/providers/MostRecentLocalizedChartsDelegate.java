@@ -20,9 +20,7 @@ import org.msf.records.sync.PatientDatabase;
 
 import java.util.List;
 
-/**
- * A {@link ProviderDelegate} that provides query access to all localized locations.
- */
+/** A {@link ProviderDelegate} that provides query access to all localized locations. */
 public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override

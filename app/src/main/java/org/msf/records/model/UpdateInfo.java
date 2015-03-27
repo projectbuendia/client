@@ -15,9 +15,7 @@ import com.google.gson.annotations.SerializedName;
 
 import org.msf.records.utils.LexicographicVersion;
 
-/**
- * A GSON object that represents an available update.
- */
+/** A Gson object that represents an available update. */
 public class UpdateInfo {
 
     @SerializedName("url")

@@ -56,9 +56,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * permission.</p>
  */
 public class SocketActivityHierarchyServer implements Runnable, ActivityHierarchyServer {
-    /**
-     * The default port used to start view servers.
-     */
+    /** The default port used to start view servers. */
     private static final int VIEW_SERVER_DEFAULT_PORT = 4939;
     private static final int VIEW_SERVER_MAX_CONNECTIONS = 10;
 

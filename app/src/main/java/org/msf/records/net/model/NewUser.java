@@ -26,9 +26,7 @@ public class NewUser implements Serializable {
     public String familyName;
     public String password;
 
-    /**
-     * Creates a user with generated username and a default password.
-     */
+    /** Creates a user with generated username and a default password. */
     public NewUser() {
         this.password = DEFAULT_PASSWORD;
         this.username = generateUsername();

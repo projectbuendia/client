@@ -34,9 +34,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-/**
- * A {@link Request} with a JSON response parsed by {@link Gson}.
- */
+/** A {@link Request} with a JSON response parsed by {@link Gson}. */
 public class GsonRequest<T> extends Request<T> {
 
     private final GsonBuilder mGson = new GsonBuilder();

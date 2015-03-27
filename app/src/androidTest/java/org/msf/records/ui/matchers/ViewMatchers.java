@@ -18,9 +18,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.mockito.ArgumentMatcher;
 
-/**
- * Matchers for {@link View} objects.
- */
+/** Matchers for {@link View} objects. */
 public class ViewMatchers {
 
     /**
@@ -77,9 +75,7 @@ public class ViewMatchers {
         };
     }
 
-    /**
-     * Provides a {@link Matcher} that matches any view with the given background drawable.
-     */
+    /** Provides a {@link Matcher} that matches any view with the given background drawable. */
     public static ArgumentMatcher<View> hasBackground(final Drawable background) {
         return new ArgumentMatcher<View>() {
 

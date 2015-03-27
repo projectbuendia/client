@@ -15,9 +15,7 @@ import net.sqlcipher.database.SQLiteStatement;
 
 import org.msf.records.sync.PatientDatabase;
 
-/**
- * Provides helper functions for dealing with savepoints in SQLite databases.
- */
+/** Provides helper functions for dealing with savepoints in SQLite databases. */
 public final class SQLiteDatabaseTransactionHelper { // @nolint
     private final PatientDatabase mDbHelper;
 
@@ -25,9 +23,7 @@ public final class SQLiteDatabaseTransactionHelper { // @nolint
         mDbHelper = dbHelper;
     }
 
-    /**
-     * Closes the database resources in use by this object.
-     */
+    /** Closes the database resources in use by this object. */
     public void close() {
         mDbHelper.getWritableDatabase().close();
     }

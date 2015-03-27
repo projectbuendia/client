@@ -60,9 +60,7 @@ public class FastDataGridView {
                 "If using double-width column headers, the number of columns must be even.");
     }
 
-    /**
-     * Inflates and returns the chart view.
-     */
+    /** Inflates and returns the chart view. */
     public View createView() {
         // Assemble top-level views.
         TableLayout topLayout =
@@ -146,9 +144,7 @@ public class FastDataGridView {
         }
     }
 
-    /**
-     * ViewHolder class for RowHeaders, ColumnHeaders and Cells.
-     */
+    /** ViewHolder class for RowHeaders, ColumnHeaders and Cells. */
     private static final class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView textView;
 
@@ -309,9 +305,7 @@ public class FastDataGridView {
                 public void onInternalScrollBy(int dx, int dy) {}
             };
 
-    /**
-     * A {@link ScrollView} whose scrolling can be linked to other instances of this class.
-     */
+    /** A {@link ScrollView} whose scrolling can be linked to other instances of this class. */
     public static class LinkableScrollView extends ScrollView {
 
         private OnInternalScrollListener mInternalScrollListener = DO_NOTHING_LISTENER;

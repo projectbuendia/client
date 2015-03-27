@@ -72,9 +72,7 @@ import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 import static org.msf.records.ui.matchers.ViewMatchers.hasBackground;
 import static org.msf.records.ui.matchers.ViewMatchers.inRow;
 
-/**
- * Functional test for {@link PatientChartActivity}.
- */
+/** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
 public class PatientChartActivityTest extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
@@ -95,9 +93,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText("Guest User")).perform(click());
     }
 
-    /**
-     * Tests that the general condition dialog successfully changes general condition.
-     */
+    /** Tests that the general condition dialog successfully changes general condition. */
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
         initWithDemoPatientChart();
         onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());

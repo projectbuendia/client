@@ -27,9 +27,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides bindings for network-related classes.
- */
+/** A Dagger module that provides bindings for network-related classes. */
 @Module(complete = false,
         library = true)
 public class NetModule {

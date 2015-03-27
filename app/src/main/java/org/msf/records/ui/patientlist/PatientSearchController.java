@@ -40,9 +40,7 @@ import java.util.Set;
 
 import static org.msf.records.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
-/**
- * Controller for {@link PatientSearchActivity}.
- */
+/** Controller for {@link PatientSearchActivity}. */
 public class PatientSearchController {
 
     private static final String TAG = PatientSearchController.class.getSimpleName();
@@ -135,9 +133,7 @@ public class PatientSearchController {
         mModel.fetchLocationTree(mCrudEventBus, mLocale);
     }
 
-    /**
-     * Releases resources required by this controller.
-     */
+    /** Releases resources required by this controller. */
     public void suspend() {
         mGlobalEventBus.unregister(mSyncSubscriber);
         mCrudEventBus.unregister(mLocationTreeUpdatedSubscriber);

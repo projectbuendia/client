@@ -39,9 +39,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * A dialog that allows users to assign or change a patient's location.
- */
+/** A dialog that allows users to assign or change a patient's location. */
 public final class AssignLocationDialog
         implements DialogInterface.OnDismissListener, AdapterView.OnItemClickListener {
 
@@ -104,16 +102,12 @@ public final class AssignLocationDialog
         mLocationSelectedCallback = checkNotNull(locationSelectedCallback);
     }
 
-    /**
-     * Returns true iff the dialog is currently displayed.
-     */
+    /** Returns true iff the dialog is currently displayed. */
     public boolean isShowing() {
         return mDialog != null && mDialog.isShowing();
     }
 
-    /**
-     * Displays the dialog.
-     */
+    /** Displays the dialog. */
     public void show() {
 
         // We have to do this backwards thing instead of just inflating the view directly into the
@@ -196,9 +190,7 @@ public final class AssignLocationDialog
         }
     }
 
-    /**
-     * Dismisses the dialog and releases all dialog resources.
-     */
+    /** Dismisses the dialog and releases all dialog resources. */
     public void dismiss() {
         if (mLocationTree != null) {
             mLocationTree.close();

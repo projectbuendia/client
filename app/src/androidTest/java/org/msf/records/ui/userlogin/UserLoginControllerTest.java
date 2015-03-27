@@ -36,9 +36,7 @@ import android.test.AndroidTestCase;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-/**
- * Tests for {@link UserLoginController}.
- */
+/** Tests for {@link UserLoginController}. */
 public class UserLoginControllerTest extends AndroidTestCase {
 
     private UserLoginController mController;

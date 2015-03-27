@@ -53,9 +53,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-/**
- * A {@link BaseLoggedInActivity} that allows users to create a new patient.
- */
+/** A {@link BaseLoggedInActivity} that allows users to create a new patient. */
 public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
@@ -268,9 +266,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         showKeyboard(mId, mGivenName, mFamilyName, mAge);
     }
 
-    /**
-     * Gives focus to the first of the given views that has an error.
-     */
+    /** Gives focus to the first of the given views that has an error. */
     private void setFocus(TextView... views) {
         for (TextView v : views) {
             if (v.getError() != null) {

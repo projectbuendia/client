@@ -16,9 +16,7 @@ import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.util.Comparator;
 
-/**
- * A simple Java bean representing a user, which can be used for JSON/GSON encoding/decoding.
- */
+/** A simple Java bean representing a user, which can be used for JSON/Gson encoding/decoding. */
 public class User implements Serializable, Comparable<User> {
     private static final String GUEST_ACCOUNT_NAME = "Guest User";
 
@@ -47,16 +45,12 @@ public class User implements Serializable, Comparable<User> {
     public String id;
     public String fullName;
 
-    /**
-     * Default constructor for serialization.
-     */
+    /** Default constructor for serialization. */
     public User() {
         // Intentionally blank.
     }
 
-    /**
-     * Creates a user with the given unique id and full name.
-     */
+    /** Creates a user with the given unique id and full name. */
     public User(String id, String fullName) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(fullName);
@@ -69,9 +63,7 @@ public class User implements Serializable, Comparable<User> {
         return new User(newUser.username, fullName);
     }
 
-    /**
-     * Returns the user's initials, using the first letter of each word of the user's full name.
-     */
+    /** Returns the user's initials, using the first letter of each word of the user's full name. */
     public String getInitials() {
         String[] parts = fullName.split("\\s+");
         switch (parts.length) {

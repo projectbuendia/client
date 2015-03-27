@@ -15,9 +15,7 @@ import android.test.InstrumentationTestCase;
 
 import org.msf.records.data.app.AppPatient;
 
-/**
- * Tests for {@link NameFilter}.
- */
+/** Tests for {@link NameFilter}. */
 public class NameFilterTest extends InstrumentationTestCase {
     private NameFilter mNameFilter;
 

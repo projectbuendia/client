@@ -19,9 +19,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides bindings for utilities.
- */
+/** A Dagger module that provides bindings for utilities. */
 @Module(
         injects = {
                 BaseActivity.class,

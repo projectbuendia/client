@@ -60,9 +60,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-/**
- * Controller for {@link PatientChartActivity}.
- */
+/** Controller for {@link PatientChartActivity}. */
 final class PatientChartController {
 
     private static final Logger LOG = Logger.create();
@@ -426,9 +424,7 @@ final class PatientChartController {
         mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
     }
 
-    /**
-     * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
-     */
+    /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
     private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {
         mPatientUuids[mNextIndex] = patientUuid;
         int requestCode = new PatientChartActivity.RequestCode(form, mNextIndex).getCode();

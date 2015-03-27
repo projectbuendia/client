@@ -32,16 +32,12 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> 
     private final String mUuid;
     private final String mDescription;
 
-    /**
-     * Creates a filter that returns all patients in a valid location.
-     */
+    /** Creates a filter that returns all patients in a valid location. */
     public LocationUuidFilter(AppLocationTree tree) {
         this(tree, tree == null ? null : tree.getRoot());
     }
 
-    /**
-     * Creates a filter returning only patients under a subroot of the given location tree.
-     */
+    /** Creates a filter returning only patients under a subroot of the given location tree. */
     public LocationUuidFilter(AppLocationTree tree, AppLocation subroot) {
         if (tree == null || subroot == null) {
             mTentSelectionString = "";
@@ -74,9 +70,7 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<AppPatient> 
         mDescription = subroot.name;
     }
 
-    /**
-     * Returns the UUID of the root location used for filtering.
-     */
+    /** Returns the UUID of the root location used for filtering. */
     public String getFilterRootUuid() {
         return mUuid;
     }

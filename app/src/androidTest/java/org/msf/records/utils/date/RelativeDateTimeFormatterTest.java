@@ -16,9 +16,7 @@ import android.test.InstrumentationTestCase;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
-/**
- * Test cases for {@link RelativeDateTimeFormatter}.
- */
+/** Test cases for {@link RelativeDateTimeFormatter}. */
 public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
 
     private RelativeDateTimeFormatter mFormatter;

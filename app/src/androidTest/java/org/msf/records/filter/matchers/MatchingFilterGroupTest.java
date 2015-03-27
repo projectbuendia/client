@@ -13,9 +13,7 @@ package org.msf.records.filter.matchers;
 
 import android.test.InstrumentationTestCase;
 
-/**
- * Tests for {@link MatchingFilterGroup}.
- */
+/** Tests for {@link MatchingFilterGroup}. */
 public class MatchingFilterGroupTest extends InstrumentationTestCase {
     private static final MatchingFilter<String> PREFIX_FILTER = new MatchingFilter<String>() {
         @Override

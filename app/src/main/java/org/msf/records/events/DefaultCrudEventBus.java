@@ -16,9 +16,7 @@ import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * An {@link EventBus} wrapper to be used by asynchronous CRUD operations on the data model.
- */
+/** An {@link EventBus} wrapper to be used by asynchronous CRUD operations on the data model. */
 public final class DefaultCrudEventBus implements CrudEventBus {
 
     private final Object mSubscribersLock = new Object();
@@ -26,9 +24,7 @@ public final class DefaultCrudEventBus implements CrudEventBus {
     private final EventBus mWrapped;
     private final Set<Object> mSubscribers;
 
-    /**
-     * Creates a new {@link DefaultCrudEventBus} that wraps the specified {@link EventBus}.
-     */
+    /** Creates a new {@link DefaultCrudEventBus} that wraps the specified {@link EventBus}. */
     DefaultCrudEventBus(EventBus wrapped) {
         mWrapped = wrapped;
         mSubscribers = new HashSet<>();

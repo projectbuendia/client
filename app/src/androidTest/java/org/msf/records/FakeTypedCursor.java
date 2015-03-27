@@ -20,9 +20,7 @@ import org.msf.records.data.app.TypedCursor;
 
 import java.util.Iterator;
 
-/**
- * A {@link TypedCursor} that takes its contents as input for ease of testing.
- */
+/** A {@link TypedCursor} that takes its contents as input for ease of testing. */
 public class FakeTypedCursor<T> implements TypedCursor<T> {
     private final T[] mObjects;
     private boolean mIsClosed = false;
@@ -46,23 +44,17 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
         return mObjects[position];
     }
 
-    /**
-     * Returns {@code null}.
-     */
+    /** Returns {@code null}. */
     @Override
     public Uri getNotificationUri() {
         return null;
     }
 
-    /**
-     * No-op.
-     */
+    /** No-op. */
     @Override
     public void registerContentObserver(ContentObserver observer) {}
 
-    /**
-     * No-op.
-     */
+    /** No-op. */
     @Override
     public void unregisterContentObserver(ContentObserver observer) {}
 

@@ -22,9 +22,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
-/**
- * Test case for {@link RoundActivity}.
- */
+/** Test case for {@link RoundActivity}. */
 public class RoundActivityTest extends FunctionalTestCase {
     /**
      * Initializes the test by entering the Round view for Triage.

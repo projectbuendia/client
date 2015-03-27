@@ -15,9 +15,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.providers.Contracts;
 
-/**
- * Matches only the patient with the given patient UUID.
- */
+/** Matches only the patient with the given patient UUID. */
 public final class UuidFilter extends SimpleSelectionFilter<AppPatient> {
 
     @Override

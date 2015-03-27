@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * All available patient filters available to the user, categorized by filter type.
- */
+/** All available patient filters available to the user, categorized by filter type. */
 public final class PatientDbFilters {
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
             new ConceptFilter(
@@ -42,9 +40,7 @@ public final class PatientDbFilters {
         return DEFAULT_FILTER;
     }
 
-    /**
-     * Returns an array of {@link SimpleSelectionFilter}'s, each representing a zone.
-     */
+    /** Returns an array of {@link SimpleSelectionFilter}'s, each representing a zone. */
     public static SimpleSelectionFilter[] getZoneFilters(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
 

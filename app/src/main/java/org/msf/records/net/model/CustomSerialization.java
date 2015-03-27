@@ -25,7 +25,7 @@ import org.joda.time.DateTime;
 import java.lang.reflect.Type;
 
 /**
- * GSON serializer for custom types like Joda DateTime. Largely copied from
+ * Gson serializer for custom types like Joda DateTime. Largely copied from
  * https://sites.google.com/site/gson/gson-user-guide#TOC-Serializing-and-Deserializing-Generic-Types
  */
 public class CustomSerialization {

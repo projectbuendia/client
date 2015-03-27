@@ -44,9 +44,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link PatientChartController}.
- */
+/** Tests for {@link PatientChartController}. */
 public final class PatientChartControllerTest extends AndroidTestCase {
 
     private static final String PATIENT_UUID_1 = "uuid1";

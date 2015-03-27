@@ -33,9 +33,7 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * {@link ArrayAdapter} for displaying a list of locations.
- */
+/** {@link ArrayAdapter} for displaying a list of locations. */
 final class LocationListAdapter extends ArrayAdapter<AppLocation> {
 
     private final Context mContext;
@@ -74,8 +72,8 @@ final class LocationListAdapter extends ArrayAdapter<AppLocation> {
         }
 
         AppLocation location = getItem(position);
-        // TODO: Make this more robust. Currently, this line only works if 'location' is a tent;
-        // otherwise zone is ResZone.UNKNOWN
+        // TODO/generalize: Make this more robust. Currently, this line only works if 'location' is
+        // a tent; otherwise zone is ResZone.UNKNOWN
         ResZone.Resolved zone = Zone.getResZone(
                 location.parentUuid).resolve(mContext.getResources());
 

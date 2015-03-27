@@ -16,9 +16,7 @@ import android.support.annotation.Nullable;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.matchers.MatchingFilter;
 
-/**
- * Matches based on user-specified patient id.
- */
+/** Matches based on user-specified patient id. */
 public final class IdFilter implements MatchingFilter<AppPatient> {
     @Override
     public boolean matches(@Nullable AppPatient object, CharSequence constraint) {

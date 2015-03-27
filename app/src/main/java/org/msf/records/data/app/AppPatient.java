@@ -22,9 +22,7 @@ import org.msf.records.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-/**
- * A patient in the app model.
- */
+/** A patient in the app model. */
 @Immutable
 public final class AppPatient extends AppTypeBase<String> implements Comparable<AppPatient> {
 
@@ -55,9 +53,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         return new Builder();
     }
 
-    /**
-     * Creates an instance of {@link AppPatient} from a network {@link Patient} object.
-     */
+    /** Creates an instance of {@link AppPatient} from a network {@link Patient} object. */
     public static AppPatient fromNet(Patient patient) {
         return builder()
                 .setId(patient.id)

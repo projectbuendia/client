@@ -32,9 +32,7 @@ import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
-/**
- * Controller for {@link PatientCreationActivity}.
- */
+/** Controller for {@link PatientCreationActivity}. */
 final class PatientCreationController {
 
     private static final Logger LOG = Logger.create();

@@ -22,9 +22,7 @@ import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.ui.FakeEventBus;
 import org.msf.records.ui.patientlist.PatientSearchController;
 
-/**
- * Tests for {@link LocationSelectionController}.
- */
+/** Tests for {@link LocationSelectionController}. */
 public final class LocationSelectionControllerTest extends AndroidTestCase {
 
     private LocationSelectionController mController;
@@ -166,9 +164,7 @@ public final class LocationSelectionControllerTest extends AndroidTestCase {
         verify(mMockUi).showSyncFailedDialog(false);
     }
 
-    /**
-     * Tests that loading an empty location tree results in a new sync if sync has completed.
-     */
+    /** Tests that loading an empty location tree results in a new sync if sync has completed. */
     public void testFetchingIncompleteLocationTree_causesNewSync() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();

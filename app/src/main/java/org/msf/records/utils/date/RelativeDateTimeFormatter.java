@@ -88,9 +88,7 @@ public class RelativeDateTimeFormatter {
         return format(now.toDateTimeAtStartOfDay().plusMinutes(1), other.toDateTimeAtStartOfDay());
     }
 
-    /**
-     * Returns a formatted representation of {@code other}, relative to {@code now}.
-     */
+    /** Returns a formatted representation of {@code other}, relative to {@code now}. */
     public String format(DateTime now, DateTime other) {
         if (other.isEqual(now)) {
             return mCasing.rightNow;

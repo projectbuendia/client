@@ -26,16 +26,12 @@ import javax.inject.Inject;
 
 import dagger.ObjectGraph;
 
-/**
- * An {@link Application} the represents the Android Client.
- */
+/** An {@link Application} the represents the Android Client. */
 public class App extends Application {
 
     private ObjectGraph mObjectGraph;
 
-    /**
-     * The current instance of the application.
-     */
+    /** The current instance of the application. */
     private static App sInstance;
 
     private static UserManager sUserManager;

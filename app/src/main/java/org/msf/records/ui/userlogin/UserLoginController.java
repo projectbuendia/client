@@ -31,9 +31,7 @@ import org.msf.records.utils.Utils;
 
 import com.google.common.collect.Ordering;
 
-/**
- * Controller for {@link UserLoginActivity}.
- */
+/** Controller for {@link UserLoginActivity}. */
 public final class UserLoginController {
 
     private static final Logger LOG = Logger.create();
@@ -92,8 +90,8 @@ public final class UserLoginController {
     }
 
     /**
-     * Requests any necessary resources. Note that some resources may be fetch asynchronously after
-     * this function returns.
+     * Requests any necessary resources. Note that some resources may be fetched asynchronously
+     * after this function returns.
      */
     public void init() {
         mEventBus.register(mSubscriber);

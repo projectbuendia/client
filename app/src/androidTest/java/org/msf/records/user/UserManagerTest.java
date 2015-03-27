@@ -25,9 +25,7 @@ import org.msf.records.ui.FakeEventBus;
 
 import com.google.common.collect.ImmutableSet;
 
-/**
- * Tests for {@link UserManager}.
- */
+/** Tests for {@link UserManager}. */
 public final class UserManagerTest extends InstrumentationTestCase {
 
     private static final User USER = new User("id", "name");

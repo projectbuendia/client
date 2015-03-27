@@ -18,9 +18,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.providers.Contracts;
 
-/**
- * Matches only patients below a specified age in years.
- */
+/** Matches only patients below a specified age in years. */
 final class AgeFilter extends SimpleSelectionFilter<AppPatient> {
     private final int mYears;
 

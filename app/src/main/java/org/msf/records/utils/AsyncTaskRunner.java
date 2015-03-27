@@ -15,9 +15,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
-/**
- * Runs async tasks in a unit-testable way.
- */
+/** Runs async tasks in a unit-testable way. */
 public interface AsyncTaskRunner {
 
     public static final AsyncTaskRunner DEFAULT = new AsyncTaskRunner() {

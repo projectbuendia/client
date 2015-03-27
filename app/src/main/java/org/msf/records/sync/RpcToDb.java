@@ -46,9 +46,7 @@ public class RpcToDb {
 
     private static final Logger LOG = Logger.create();
 
-    /**
-     * Convert a ChartStructure response into appropriate inserts in the chart table.
-     */
+    /** Converts a ChartStructure response into appropriate inserts in the chart table. */
     public static ArrayList<ContentProviderOperation> chartStructureRpcToDb(
             ChartStructure response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();
@@ -78,9 +76,7 @@ public class RpcToDb {
         return operations;
     }
 
-    /**
-     * Convert a ChartStructure response into appropriate inserts in the chart table.
-     */
+    /** Converts a ChartStructure response into appropriate inserts in the chart table. */
     public static void observationsRpcToDb(
             PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
         final String patientUuid = response.uuid;
@@ -112,9 +108,7 @@ public class RpcToDb {
         }
     }
 
-    /**
-     * Given a set of users, replaces the current set of users with users from that set.
-     */
+    /** Given a set of users, replaces the current set of users with users from that set. */
     public static ArrayList<ContentProviderOperation> userSetFromRpcToDb(
             Set<User> response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();

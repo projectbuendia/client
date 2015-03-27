@@ -19,9 +19,7 @@ import android.net.Uri;
 import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.SelectionBuilder;
 
-/**
- * A {@link ProviderDelegate} that provides read-write access to users.
- */
+/** A {@link ProviderDelegate} that provides read-write access to users. */
 class UsersDelegate implements ProviderDelegate<PatientDatabase> {
 
     public static final String NAME = "users";

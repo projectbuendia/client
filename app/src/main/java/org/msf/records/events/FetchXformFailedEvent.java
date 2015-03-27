@@ -13,9 +13,7 @@ package org.msf.records.events;
 
 import android.support.annotation.Nullable;
 
-/**
- * An event bus event indicating that fetching an Xform failed.
- */
+/** An event bus event indicating that fetching an Xform failed. */
 public class FetchXformFailedEvent {
     public enum Reason {
         UNKNOWN,

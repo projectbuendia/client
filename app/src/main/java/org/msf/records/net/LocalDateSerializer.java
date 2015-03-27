@@ -23,9 +23,7 @@ import org.joda.time.LocalDate;
 
 import java.lang.reflect.Type;
 
-/**
- * Provides custom GSON serialization for {@link LocalDate} objects.
- */
+/** Provides custom Gson serialization for {@link LocalDate} objects. */
 public class LocalDateSerializer implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
 
     @Override

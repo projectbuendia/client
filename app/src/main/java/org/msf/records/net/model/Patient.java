@@ -18,7 +18,7 @@ import org.joda.time.LocalDate;
 import java.io.Serializable;
 
 /**
- * A simple Java bean for representing a patient which can be used for JSON/GSON encoding/decoding.
+ * A simple Java bean for representing a patient which can be used for JSON/Gson encoding/decoding.
  */
 public class Patient implements Serializable {
     public static final int GENDER_UNKNOWN = 0;

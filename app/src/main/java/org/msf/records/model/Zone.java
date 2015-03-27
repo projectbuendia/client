@@ -54,9 +54,7 @@ public class Zone {
         return Integer.compare(ORDERED_ZONES.indexOf(a.uuid), ORDERED_ZONES.indexOf(b.uuid));
     }
 
-    /**
-     * Returns the {@link ResZone} for the specified zone UUID.
-     */
+    /** Returns the {@link ResZone} for the specified zone UUID. */
     public static ResZone getResZone(String uuid) {
         switch (uuid) {
             case SUSPECT_ZONE_UUID:

@@ -21,9 +21,7 @@ import org.msf.records.utils.Logger;
 
 import javax.inject.Inject;
 
-/**
- * Controller for non-inherited parts of {@link PatientListFragment}.
- */
+/** Controller for non-inherited parts of {@link PatientListFragment}. */
 public class PatientListController {
 
     private static final Logger LOG = Logger.create();

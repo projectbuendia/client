@@ -36,9 +36,7 @@ import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * A fragment showing a filterable list of patients.
- */
+/** A fragment showing a filterable list of patients. */
 public class PatientListFragment extends ProgressFragment implements
         ExpandableListView.OnChildClickListener {
 
@@ -56,9 +54,7 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Inject SyncManager mSyncManager;
 
-    /**
-     * The current activated item position. Only used on tablets.
-     */
+    /** The current activated item position. Only used on tablets. */
     private int mActivatedPosition = ListView.INVALID_POSITION;
 
     private ExpandableListView mListView;

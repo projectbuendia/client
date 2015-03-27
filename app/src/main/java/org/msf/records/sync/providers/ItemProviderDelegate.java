@@ -30,9 +30,7 @@ public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
     protected final String mType;
     protected final String mIdColumn;
 
-    /**
-     * Creates an instance of {@link ItemProviderDelegate}.
-     */
+    /** Creates an instance of {@link ItemProviderDelegate}. */
     public ItemProviderDelegate(String name, String tableName, String idColumn) {
         mName = name;
         mTableName = tableName;

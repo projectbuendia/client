@@ -17,15 +17,11 @@ import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
-/**
- * An object that represents a version consisting of any number of numbers separated by dots.
- */
+/** An object that represents a version consisting of any number of numbers separated by dots. */
 @Immutable
 public class LexicographicVersion implements Comparable<LexicographicVersion> {
 
-    /**
-     * Returns an instance of {@link LexicographicVersion} parsed from the specified string.
-     */
+    /** Returns an instance of {@link LexicographicVersion} parsed from the specified string. */
     public static LexicographicVersion parse(String raw) {
         Preconditions.checkNotNull(raw);
         Preconditions.checkArgument(!raw.equals(""));

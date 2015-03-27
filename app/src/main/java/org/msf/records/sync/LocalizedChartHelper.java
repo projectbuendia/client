@@ -31,9 +31,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-/**
- * A simple helper class for retrieving localized patient charts.
- */
+/** A simple helper class for retrieving localized patient charts. */
 public class LocalizedChartHelper {
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
@@ -54,22 +52,20 @@ public class LocalizedChartHelper {
      */
     public static final class LocalizedObservation {
         public final long id;
-        /**
-         * The time of the encounter (hence the observation) in milliseconds since epoch.
-         */
+        /** The time of the encounter (hence the observation) in milliseconds since epoch. */
         public final long encounterTimeMillis;
-        /**
-         * The localized name to the group/section the observation should be displayed in.
-         */
+
+        /** The localized name to the group/section the observation should be displayed in. */
         public final String groupName;
+
         /**
          * The UUID of the concept, unique and guaranteed to be stable, so suitable as a map key.
          */
         public final String conceptUuid;
-        /**
-         * The localized name of the concept that was observed.
-         */
+
+        /** The localized name of the concept that was observed. */
         public final String conceptName;
+
         /**
          * The value that was observed non-localized. For a numeric value it will be a number,
          * for a non-numeric value it will be a UUID of the response.
@@ -146,9 +142,8 @@ public class LocalizedChartHelper {
             ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
     }
-    /**
-     * Get all observations for a given patient from the local cache, localized to English.
-     */
+
+    /** Get all observations for a given patient from the local cache, localized to English. */
     public List<LocalizedObservation> getObservations(
             String patientUuid) {
         return getObservations(patientUuid, ENGLISH_LOCALE);

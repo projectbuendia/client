@@ -26,9 +26,7 @@ import org.msf.records.net.model.User;
 
 import java.util.List;
 
-/**
- * An interface abstracting the idea of an RPC to a server.
- */
+/** An interface abstracting the idea of an RPC to a server. */
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
@@ -53,17 +51,13 @@ public interface Server {
      */
     void logToServer(List<String> pairs);
 
-    /**
-     * Adds a patient.
-     */
+    /** Adds a patient. */
     void addPatient(
             AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener);
 
-    /**
-     * Updates a patient.
-     */
+    /** Updates a patient. */
     public void updatePatient(
             String patientId,
             AppPatientDelta patientDelta,
@@ -112,18 +106,14 @@ public interface Server {
      */
     public void updatePatientLocation(String patientId, String newLocationId);
 
-    /**
-     * Lists all existing patients.
-     */
+    /** Lists all existing patients. */
     public void listPatients(@Nullable String filterState,
                              @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener);
 
-    /**
-     * Lists all existing users.
-     */
+    /** Lists all existing users. */
     public void listUsers(@Nullable String filterQueryTerm,
                           Response.Listener<List<User>> userListener,
                           Response.ErrorListener errorListener);
@@ -159,14 +149,10 @@ public interface Server {
     public void deleteLocation(String locationUuid,
                                final Response.ErrorListener errorListener);
 
-    /**
-     * Lists all locations.
-     */
+    /** Lists all locations. */
     public void listLocations(Response.Listener<List<Location>> locationListener,
                               Response.ErrorListener errorListener);
 
-    /**
-     * Cancels all pending requests.
-     */
+    /** Cancels all pending requests. */
     public void cancelPendingRequests();
 }

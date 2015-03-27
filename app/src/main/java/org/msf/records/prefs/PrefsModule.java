@@ -24,9 +24,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides bindings for preferences.
- */
+/** A Dagger module that provides bindings for preferences. */
 @Module(complete = false,
         library = true)
 public class PrefsModule {

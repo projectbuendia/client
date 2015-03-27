@@ -22,9 +22,7 @@ import java.util.Map;
  * <p>Must call {@link CustomSerialization#registerTo(com.google.gson.GsonBuilder)} before use.
  */
 public class Encounter {
-    /**
-     * The uuid of the encounter.
-     */
+    /** The uuid of the encounter. */
     public String uuid;
     public DateTime timestamp;
     public String enterer_id; // @nolint

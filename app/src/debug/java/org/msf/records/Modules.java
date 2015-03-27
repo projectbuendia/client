@@ -11,9 +11,7 @@
 
 package org.msf.records;
 
-/**
- * The modules used for injection in a debug build.
- */
+/** The modules used for injection in a debug build. */
 final class Modules {
 
     static Object[] list(App app) {

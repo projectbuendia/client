@@ -25,9 +25,7 @@ import org.msf.records.ui.matchers.SimpleSelectionFilterMatchers;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link PatientListFilterController}.
- */
+/** Tests for {@link PatientListFilterController}. */
 public class PatientListFilterControllerTest  extends AndroidTestCase {
     private PatientListFilterController mController;
     private FakeEventBus mFakeCrudEventBus;

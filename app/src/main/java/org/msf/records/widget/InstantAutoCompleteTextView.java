@@ -17,9 +17,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.AutoCompleteTextView;
 
-/**
- * An {@link AutoCompleteTextView} that immediately shows a dropdown when it gains focus.
- */
+/** An {@link AutoCompleteTextView} that immediately shows a dropdown when it gains focus. */
 public class InstantAutoCompleteTextView extends AutoCompleteTextView {
 
     public InstantAutoCompleteTextView(Context context) {

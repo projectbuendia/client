@@ -230,9 +230,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         }
     }
 
-    /**
-     * Closes all activities on the stack.
-     */
+    /** Closes all activities on the stack. */
     protected void closeAllActivities() throws Exception {
         try {
             for (int i = 0; i < 20; i++) {

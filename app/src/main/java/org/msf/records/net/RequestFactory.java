@@ -15,9 +15,7 @@ import com.android.volley.Response;
 
 import org.json.JSONObject;
 
-/**
- * A factory that creates Volley requests configured with a {@link RequestConfigurator}.
- */
+/** A factory that creates Volley requests configured with a {@link RequestConfigurator}. */
 public class RequestFactory {
 
     private final RequestConfigurator mConfigurator;

@@ -22,9 +22,7 @@ import org.msf.records.utils.AsyncTaskRunner;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 
-/**
- * A fake {@link AsyncTaskRunner} for use in tests.
- */
+/** A fake {@link AsyncTaskRunner} for use in tests. */
 public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
     private final ArrayDeque<Pair<AsyncTask<Object, Object, Object>, Object[]>>
             mQueuedTasks = new ArrayDeque<>();
@@ -42,9 +40,7 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
         }
     };
 
-    /**
-     * Blocks until all queued and running {@link AsyncTask}s are complete.
-     */
+    /** Blocks until all queued and running {@link AsyncTask}s are complete. */
     public void runUntilEmpty() {
         while (!mQueuedTasks.isEmpty()) {
             Pair<AsyncTask<Object, Object, Object>, Object[]> queuedTask = mQueuedTasks.pop();

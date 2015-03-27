@@ -13,17 +13,12 @@ package org.msf.records.filter.matchers;
 
 import com.google.common.collect.ImmutableList;
 
-/**
- * A matcher that acts as a container for multiple filters or filter groups.
- */
+/** A matcher that acts as a container for multiple filters or filter groups. */
 public class MatchingFilterGroup<T> implements MatchingFilter<T> {
     private final FilterType mFilterType;
     private final ImmutableList<MatchingFilter> mFilters;
 
-    /**
-     * Specifies whether filters in this group will be AND'd or OR'd in the
-     * selection.
-     */
+    /** Specifies whether filters in this group will be AND'd or OR'd in the selection. */
     public enum FilterType {
         OR,
         AND

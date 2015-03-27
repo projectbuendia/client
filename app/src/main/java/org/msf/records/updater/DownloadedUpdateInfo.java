@@ -32,17 +32,13 @@ public class DownloadedUpdateInfo {
     public final LexicographicVersion downloadedVersion;
     public final String path;
 
-    /**
-     * Creates an instance of {@link DownloadedUpdateInfo} for an invalid update.
-     */
+    /** Creates an instance of {@link DownloadedUpdateInfo} for an invalid update. */
     public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
         return new DownloadedUpdateInfo(
                 false /*isValid*/, currentVersion, UpdateManager.MINIMAL_VERSION, null /*path*/);
     }
 
-    /**
-     * Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk.
-     */
+    /** Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk. */
     public static DownloadedUpdateInfo fromUri(LexicographicVersion currentVersion, String uri) {
         if (uri == null || uri.equals("") || !uri.startsWith("file://")) {
             LOG.w("URI was not specified or invalid.");

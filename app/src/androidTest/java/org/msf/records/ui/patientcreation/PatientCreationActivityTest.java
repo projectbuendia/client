@@ -34,9 +34,7 @@ import static org.hamcrest.core.AllOf.allOf;
 
 import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 
-/**
- * Tests for {@link PatientCreationActivity}.
- */
+/** Tests for {@link PatientCreationActivity}. */
 public class PatientCreationActivityTest extends FunctionalTestCase {
     /**
      * Sets up the test by logging in as a guest user. This set up process does NOT open the

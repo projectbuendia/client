@@ -37,9 +37,7 @@ import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
-/**
- * Controller for {@link LocationSelectionActivity}.
- */
+/** Controller for {@link LocationSelectionActivity}. */
 final class LocationSelectionController {
 
     private static final Logger LOG = Logger.create();

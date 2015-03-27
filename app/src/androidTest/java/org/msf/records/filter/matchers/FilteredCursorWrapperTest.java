@@ -20,9 +20,7 @@ import org.msf.records.data.app.TypedCursor;
 
 import java.util.Iterator;
 
-/**
- * Tests for {@link FilteredCursorWrapper}.
- */
+/** Tests for {@link FilteredCursorWrapper}. */
 public class FilteredCursorWrapperTest extends InstrumentationTestCase {
     private static final MatchingFilter<String> SUBSTRING_FILTER = new MatchingFilter<String>() {
         @Override

@@ -22,9 +22,7 @@ import org.msf.records.prefs.StringPreference;
 
 import java.util.List;
 
-/**
- * Encapsulates requests to the update server.
- */
+/** Encapsulates requests to the update server. */
 public class UpdateServer {
 
     /**

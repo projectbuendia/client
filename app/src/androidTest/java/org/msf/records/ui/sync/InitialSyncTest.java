@@ -28,9 +28,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
-/**
- * Test case for behavior during and immediately after an initial sync.
- */
+/** Test case for behavior during and immediately after an initial sync. */
 public class InitialSyncTest extends SyncTestCase {
 
     @Override

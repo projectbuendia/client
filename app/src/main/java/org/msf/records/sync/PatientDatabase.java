@@ -56,9 +56,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String NOTNULL = "  NOT NULL";
     private static final String COMMA_SEP = ",";
 
-    /**
-     * Table name where records are stored for "patient" resources.
-     */
+    /** Table name where records are stored for "patient" resources. */
     public static final String PATIENTS_TABLE_NAME = "patients";
 
     /** SQL statement to create "patient" table. */

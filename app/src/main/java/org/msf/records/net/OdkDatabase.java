@@ -19,9 +19,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.File;
 
-/**
- * A wrapper around basic ODK database operations.
- */
+/** A wrapper around basic ODK database operations. */
 public class OdkDatabase {
     private static final String TAG = OdkDatabase.class.getSimpleName();
 

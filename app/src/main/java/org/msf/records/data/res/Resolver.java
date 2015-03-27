@@ -18,9 +18,7 @@ import org.msf.records.utils.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Resolves resource-backed enumerations against an instance of {@link Resources}.
- */
+/** Resolves resource-backed enumerations against an instance of {@link Resources}. */
 class Resolver {
 
     private static final Logger LOG = Logger.create();

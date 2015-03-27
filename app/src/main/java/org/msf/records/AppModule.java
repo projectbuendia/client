@@ -44,9 +44,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides the top-level bindings for the app.
- */
+/** A Dagger module that provides the top-level bindings for the app. */
 @Module(
         includes = {
                 AppModelModule.class,

@@ -78,9 +78,7 @@ import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColum
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.JR_FORM_ID;
 
-/**
- * Convenience class for launching ODK to display an Xform.
- */
+/** Convenience class for launching ODK to display an Xform. */
 public class OdkActivityLauncher {
 
     private static final Logger LOG = Logger.create();

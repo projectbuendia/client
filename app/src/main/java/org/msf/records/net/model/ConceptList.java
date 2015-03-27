@@ -11,9 +11,7 @@
 
 package org.msf.records.net.model;
 
-/**
- * A list of concepts provided by the server.
- */
+/** A list of concepts provided by the server. */
 public class ConceptList {
     public Concept [] results;
 }

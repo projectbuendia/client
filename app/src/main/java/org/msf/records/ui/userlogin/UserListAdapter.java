@@ -24,9 +24,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * {@link ArrayAdapter} for a grid of users.
- */
+/** {@link ArrayAdapter} for a grid of users. */
 final class UserListAdapter extends ArrayAdapter<User> {
 
     private final Colorizer mColorizer;

@@ -13,9 +13,7 @@ package org.msf.records.net.model;
 
 import java.util.Map;
 
-/**
- * A simple Java bean representing a location which can be used for JSON/GSON decoding/encoding.
- */
+/** A simple Java bean representing a location which can be used for JSON/Gson decoding/encoding. */
 public class Location {
 
     // Note: this class is constructed by reflection by Gson.

@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * A single medical concept, usually a question or answer in an observation for a patient, which can
- * be used for GSON/JSON encoding/decoding. Stores localization and type information.
+ * be used for Gson/JSON encoding/decoding. Stores localization and type information.
  */
 public class Concept {
 
@@ -27,8 +27,6 @@ public class Concept {
     public Integer xform_id; // @nolint
     public ConceptType type;
 
-    /**
-     * A map from locales to the name in that locale. Eg en->heart, fr->couer, ...
-     */
+    /** A map from locales to the name in that locale. Eg en->heart, fr->couer, ... */
     public Map<String, String> names;
 }

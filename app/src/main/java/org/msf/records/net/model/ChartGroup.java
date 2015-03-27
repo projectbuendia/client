@@ -11,14 +11,10 @@
 
 package org.msf.records.net.model;
 
-/**
- * Represents a group of related concepts in a chart (a 'Section' in OpenMRS).
- */
+/** Represents a group of related concepts in a chart (a 'Section' in OpenMRS). */
 public class ChartGroup {
 
-    /**
-     * Used to look up the localized name in the concept dictionary.
-     */
+    /** Used to look up the localized name in the concept dictionary. */
     public String uuid;
 
     /**

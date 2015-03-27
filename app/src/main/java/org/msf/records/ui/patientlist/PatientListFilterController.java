@@ -17,9 +17,7 @@ import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.filter.db.patient.PatientDbFilters;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 
-/**
- * A controller for setting up user-selectable filters in a patient list.
- */
+/** A controller for setting up user-selectable filters in a patient list. */
 public class PatientListFilterController {
     private final AppModel mAppModel;
     private final CrudEventBus mCrudEventBus;
@@ -47,9 +45,7 @@ public class PatientListFilterController {
         mLocale = locale;
     }
 
-    /**
-     * Asynchronously adds filters to the action bar based on location data.
-     */
+    /** Asynchronously adds filters to the action bar based on location data. */
     public void setupActionBarAsync() {
         mCrudEventBus.register(new AppLocationTreeFetchedSubscriber());
         mAppModel.fetchLocationTree(mCrudEventBus, mLocale);

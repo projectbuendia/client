@@ -15,9 +15,7 @@ import android.support.v4.util.LruCache;
 
 import java.util.Arrays;
 
-/**
- * A class that generates aesthetically pleasing colors based on a color wheel.
- */
+/** A class that generates aesthetically pleasing colors based on a color wheel. */
 public class Colorizer {
 
     private static final int[] sDefaultPalette = new int[] {
@@ -26,24 +24,16 @@ public class Colorizer {
 
     private static final int[][] sDefaultPaletteBytes = getPaletteBytes(sDefaultPalette);
 
-    /**
-     * A {@link Colorizer} that has 12 colors.
-     */
+    /** A {@link Colorizer} that has 12 colors. */
     public static final Colorizer C_12 = new Colorizer(0);
 
-    /**
-     * A {@link Colorizer} that has 24 colors.
-     */
+    /** A {@link Colorizer} that has 24 colors. */
     public static final Colorizer C_24 = new Colorizer(1);
 
-    /**
-     * A {@link Colorizer} that has 48 colors.
-     */
+    /** A {@link Colorizer} that has 48 colors. */
     public static final Colorizer C_48 = new Colorizer(2);
 
-    /**
-     * A {@link Colorizer} that has 96 colors.
-     */
+    /** A {@link Colorizer} that has 96 colors. */
     public static final Colorizer C_96 = new Colorizer(3);
 
     public static Colorizer withPalette(int... palette) {
@@ -113,9 +103,7 @@ public class Colorizer {
         return new Colorizer(this, -shade);
     }
 
-    /**
-     * Gets an ARGB color value for the specified integer.
-     */
+    /** Gets an ARGB color value for the specified integer. */
     public int getColorArgb(int i) {
         Integer cachedValue = mCache.get(i);
         if (cachedValue != null) {
@@ -156,9 +144,7 @@ public class Colorizer {
         return value;
     }
 
-    /**
-     * Gets an ARGB value for the specified object.
-     */
+    /** Gets an ARGB value for the specified object. */
     public int getColorArgb(Object o) {
         return getColorArgb(mix(o == null ? 0 : o.hashCode()));
     }

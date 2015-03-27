@@ -19,9 +19,7 @@ import dagger.Provides;
 
 import javax.inject.Singleton;
 
-/**
- * A Dagger module that provides bindings for user-related classes.
- */
+/** A Dagger module that provides bindings for user-related classes. */
 @Module(
         complete = false,
         library = true)

@@ -20,9 +20,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides debug utilities.
- */
+/** A Dagger module that provides debug utilities. */
 @Module(
         addsTo = AppModule.class,
         complete = false,

@@ -16,9 +16,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppUser;
 import org.msf.records.data.app.TypedCursor;
 
-/**
- * A factory that creates instances of subclasses of {@link TypedCursorFetchedEvent}.
- */
+/** A factory that creates instances of subclasses of {@link TypedCursorFetchedEvent}. */
 public class TypedCursorFetchedEventFactory {
 
     /**

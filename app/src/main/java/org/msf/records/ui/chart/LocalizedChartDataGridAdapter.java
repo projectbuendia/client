@@ -48,9 +48,7 @@ import java.util.TreeSet;
 
 import javax.annotation.Nullable;
 
-/**
- * Adapter that populates a grid view with the local cache of a patient's chart history.
- */
+/** Adapter that populates a grid view with the local cache of a patient's chart history. */
 final class LocalizedChartDataGridAdapter implements DataGridAdapter {
 
     public static final int TEXT_SIZE_LARGE = 26;

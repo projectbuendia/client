@@ -37,9 +37,7 @@ public class AppAsyncTaskFactory {
     private final Server mServer;
     private final ContentResolver mContentResolver;
 
-    /**
-     * Creates a new {@link AppAsyncTaskFactory}.
-     */
+    /** Creates a new {@link AppAsyncTaskFactory}. */
     public AppAsyncTaskFactory(
             AppTypeConverters converters, Server server, ContentResolver contentResolver) {
         mConverters = converters;
@@ -47,36 +45,28 @@ public class AppAsyncTaskFactory {
         mContentResolver = contentResolver;
     }
 
-    /**
-     * Creates a new {@link AppAddPatientAsyncTask}.
-     */
+    /** Creates a new {@link AppAddPatientAsyncTask}. */
     public AppAddPatientAsyncTask newAddPatientAsyncTask(
             AppPatientDelta patientDelta, CrudEventBus bus) {
         return new AppAddPatientAsyncTask(
                 this, mConverters, mServer, mContentResolver, patientDelta, bus);
     }
 
-    /**
-     * Creates a new {@link AppUpdatePatientAsyncTask}.
-     */
+    /** Creates a new {@link AppUpdatePatientAsyncTask}. */
     public AppUpdatePatientAsyncTask newUpdatePatientAsyncTask(
             AppPatient originalPatient, AppPatientDelta patientDelta, CrudEventBus bus) {
         return new AppUpdatePatientAsyncTask(
                 this, mConverters, mServer, mContentResolver, originalPatient, patientDelta, bus);
     }
 
-    /**
-     * Creates a new {@link AppAddEncounterAsyncTask}.
-     */
+    /** Creates a new {@link AppAddEncounterAsyncTask}. */
     public AppAddEncounterAsyncTask newAddEncounterAsyncTask(
             AppPatient appPatient, AppEncounter appEncounter, CrudEventBus bus) {
         return new AppAddEncounterAsyncTask(
                 this, mConverters, mServer, mContentResolver, appPatient, appEncounter, bus);
     }
 
-    /**
-     * Creates a new {@link FetchSingleAsyncTask}.
-     */
+    /** Creates a new {@link FetchSingleAsyncTask}. */
     public <T extends AppTypeBase<?>> FetchSingleAsyncTask<T> newFetchSingleAsyncTask(
             Uri contentUri,
             String[] projectionColumns,

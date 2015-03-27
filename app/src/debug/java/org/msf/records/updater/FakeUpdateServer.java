@@ -22,9 +22,7 @@ import org.msf.records.net.VolleySingleton;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A fake {@link UpdateServer} for testing.
- */
+/** A fake {@link UpdateServer} for testing. */
 public class FakeUpdateServer extends UpdateServer {
 
     /**

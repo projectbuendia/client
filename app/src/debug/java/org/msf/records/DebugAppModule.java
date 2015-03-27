@@ -15,9 +15,7 @@ import org.msf.records.utils.DebugUtilsModule;
 
 import dagger.Module;
 
-/**
- * A Dagger module that is added to {@link AppModule} for debug builds.
- */
+/** A Dagger module that is added to {@link AppModule} for debug builds. */
 @Module(
         addsTo = AppModule.class,
         includes = {

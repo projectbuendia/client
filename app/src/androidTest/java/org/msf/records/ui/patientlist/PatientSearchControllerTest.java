@@ -39,9 +39,7 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link PatientSearchController}.
- */
+/** Tests for {@link PatientSearchController}. */
 public class PatientSearchControllerTest extends AndroidTestCase {
     private PatientSearchController mController;
     private FakeEventBus mFakeCrudEventBus;

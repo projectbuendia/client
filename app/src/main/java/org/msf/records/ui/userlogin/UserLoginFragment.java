@@ -32,9 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
 
-/**
- * Fragment for {@link UserLoginActivity}.
- */
+/** Fragment for {@link UserLoginActivity}. */
 public class UserLoginFragment extends ProgressFragment {
     private static final Logger LOG = Logger.create();
 
@@ -74,9 +72,7 @@ public class UserLoginFragment extends ProgressFragment {
         }
     }
 
-    /**
-     * Returns the {@link FragmentUi} for interfacing with the {@link UserLoginController}.
-     */
+    /** Returns the {@link FragmentUi} for interfacing with the {@link UserLoginController}. */
     public FragmentUi getFragmentUi() {
         return mFragmentUi;
     }

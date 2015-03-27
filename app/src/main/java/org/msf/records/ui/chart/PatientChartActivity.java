@@ -77,9 +77,7 @@ import de.greenrobot.event.EventBus;
 
 import static org.msf.records.utils.Utils.getSystemProperty;
 
-/**
- * Activity displaying a patient's vitals and chart history.
- */
+/** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final Logger LOG = Logger.create();
     // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
@@ -90,9 +88,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // Note the general condition uuid when retrieved so that it can be passed to the controller.
     private String mGeneralConditionUuid;
 
-    /**
-     * An enumeration of the XForms that can be launched from this activity.
-     */
+    /** An enumeration of the XForms that can be launched from this activity. */
     enum XForm {
         ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
         ADD_TEST_RESULTS("34d727a6-e515-4f27-ae91-703ba2c164ae", 1);
@@ -106,9 +102,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    /**
-     * An object that encapsulates a {@link Activity#startActivityForResult} request code.
-     */
+    /** An object that encapsulates a {@link Activity#startActivityForResult} request code. */
     static class RequestCode {
 
         public final XForm form;

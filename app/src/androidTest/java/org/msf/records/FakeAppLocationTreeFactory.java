@@ -15,9 +15,7 @@ import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.model.Zone;
 
-/**
- * Constructs a fake {@link AppLocationTree} for use in tests.
- */
+/** Constructs a fake {@link AppLocationTree} for use in tests. */
 public class FakeAppLocationTreeFactory {
     public static final String ROOT_UUID = "foo";
     public static final String SUSPECT_1_UUID = "tent_s1";

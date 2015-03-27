@@ -39,17 +39,13 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-/**
- * A store for users.
- */
+/** A store for users. */
 public class UserStore {
 
     private static final Logger LOG = Logger.create();
     private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
-    /**
-     * Loads the known users from local store.
-     */
+    /** Loads the known users from local store. */
     public Set<User> loadKnownUsers()
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
@@ -99,9 +95,7 @@ public class UserStore {
         }
     }
 
-    /**
-     * Syncs known users with the server.
-     */
+    /** Syncs known users with the server. */
     public Set<User> syncKnownUsers()
             throws ExecutionException, InterruptedException, RemoteException,
             OperationApplicationException {
@@ -138,9 +132,7 @@ public class UserStore {
         return userSet;
     }
 
-    /**
-     * Adds a new user, both locally and on the server.
-     */
+    /** Adds a new user, both locally and on the server. */
     public User addUser(NewUser user) throws VolleyError {
         // Define a container for the results.
         class Result {
@@ -199,9 +191,7 @@ public class UserStore {
         return result.user;
     }
 
-    /**
-     * Deletes a user, both locally and on the server.
-     */
+    /** Deletes a user, both locally and on the server. */
     public User deleteUser(User user) {
         throw new UnsupportedOperationException();
     }

@@ -69,9 +69,7 @@ public class AppEncounter extends AppTypeBase<String> {
         this.observations = observations;
     }
 
-    /**
-     * Serializes this into a {@link JSONObject}.
-     */
+    /** Serializes this into a {@link JSONObject}. */
     public boolean toJson(JSONObject json) {
         try {
             JSONArray observationsJson = new JSONArray();
@@ -91,17 +89,13 @@ public class AppEncounter extends AppTypeBase<String> {
         }
     }
 
-    /**
-     * Represents a single observation within this encounter.
-     */
+    /** Represents a single observation within this encounter. */
     public static final class AppObservation {
         public final String conceptUuid;
         public final String value;
         public final Type type;
 
-        /**
-         * Datatype of the observation.
-         */
+        /** Datatype of the observation. */
         public enum Type {
             DATE,
             UUID
@@ -123,9 +117,7 @@ public class AppEncounter extends AppTypeBase<String> {
             return Type.UUID;
         }
 
-        /**
-         * Returns the string used to represent the datatype of this observation on the server.
-         */
+        /** Returns the string used to represent the datatype of this observation on the server. */
         public String serverType() {
             switch (type) {
                 case DATE:

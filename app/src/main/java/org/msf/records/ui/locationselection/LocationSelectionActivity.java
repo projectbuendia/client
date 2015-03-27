@@ -41,9 +41,7 @@ import org.msf.records.utils.Utils;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * Displays a list of locations and allows users to search through a list of patients.
- */
+/** Displays a list of locations and allows users to search through a list of patients. */
 public final class LocationSelectionActivity extends PatientSearchActivity {
 
     private LocationSelectionController mController;

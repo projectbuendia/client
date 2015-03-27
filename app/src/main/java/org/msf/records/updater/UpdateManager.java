@@ -139,7 +139,7 @@ public class UpdateManager {
     }
 
     /**
-     * Post events notifying of whether a file is available to be downloaded, or a
+     * Posts events notifying of whether a file is available to be downloaded, or a
      * file is downloaded and ready to install.  See {@link UpdateReadyToInstallEvent},
      * {@link UpdateAvailableEvent}, and {@link UpdateNotAvailableEvent} for details.
      */
@@ -239,9 +239,7 @@ public class UpdateManager {
         return downloadDirectory;
     }
 
-    /**
-     * Get the time between updates from the shared preferences.
-     */
+    /** Gets the time between updates from the shared preferences. */
     private int getCheckPeriodSeconds() {
         if (mSharedPreferences == null) {
             return CHECK_PERIOD_SECONDS;
@@ -307,9 +305,7 @@ public class UpdateManager {
         }
     }
 
-    /**
-     * A listener that receives the index of available .apk files from the package server.
-     */
+    /** A listener that receives the index of available .apk files from the package server. */
     private class PackageIndexReceivedListener
             implements Response.Listener<List<UpdateInfo>>, Response.ErrorListener {
 

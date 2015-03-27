@@ -27,9 +27,7 @@ import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
 
-/**
- * Represents the data to write to a new patient or the data to update on a patient.
- */
+/** Represents the data to write to a new patient or the data to update on a patient. */
 public class AppPatientDelta {
 
     private static final Logger LOG = Logger.create();
@@ -105,9 +103,7 @@ public class AppPatientDelta {
         }
     }
 
-    /**
-     * Returns the {@link ContentValues} corresponding to the delta.
-     */
+    /** Returns the {@link ContentValues} corresponding to the delta. */
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
 

@@ -18,9 +18,7 @@ import org.hamcrest.Matcher;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
 
-/**
- * Matchers for {@link AppPatient} objects.
- */
+/** Matchers for {@link AppPatient} objects. */
 public class AppPatientMatchers {
     /**
      * Provides a {@link Matcher} that matches any patient with the given patient id.

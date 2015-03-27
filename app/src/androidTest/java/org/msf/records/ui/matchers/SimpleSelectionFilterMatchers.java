@@ -18,15 +18,11 @@ import org.msf.records.filter.db.SimpleSelectionFilter;
 
 import java.util.List;
 
-/**
- * Matchers for {@link SimpleSelectionFilter} objects and arrays.
- */
+/** Matchers for {@link SimpleSelectionFilter} objects and arrays. */
 public class SimpleSelectionFilterMatchers {
     private SimpleSelectionFilterMatchers() {}
 
-    /**
-     * Matches any array of filters containing a filter with the specified name.
-     */
+    /** Matches any array of filters containing a filter with the specified name. */
     public static class ContainsFilterWithName extends ArgumentMatcher<SimpleSelectionFilter[]> {
         private String mFilterName;
 

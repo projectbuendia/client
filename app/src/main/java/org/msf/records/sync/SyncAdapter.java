@@ -60,47 +60,34 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Global sync adapter for syncing all client side database caches.
- */
+/** Global sync adapter for syncing all client side database caches. */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Logger LOG = Logger.create();
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
-    /**
-     * If this key is present with boolean value true then sync patients.
-     */
+    /** If this key is present with boolean value true then sync patients. */
     public static final String SYNC_PATIENTS = "SYNC_PATIENTS";
 
-    /**
-     * If this key is present with boolean value true then sync concepts.
-     */
+    /** If this key is present with boolean value true then sync concepts. */
     public static final String SYNC_CONCEPTS = "SYNC_CONCEPTS";
 
-    /**
-     * If this key is present with boolean value true then sync the chart structure.
-     */
+    /** If this key is present with boolean value true then sync the chart structure. */
     public static final String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
 
-    /**
-     * If this key is present with boolean value true then sync the observations.
-     */
+    /** If this key is present with boolean value true then sync the observations. */
     public static final String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
 
-    /**
-     * If this key is present with boolean value true then sync locations.
-     */
+    /** If this key is present with boolean value true then sync locations. */
     public static final String SYNC_LOCATIONS = "SYNC_LOCATIONS";
 
-    /**
-     * If this key is present with boolean value true then sync users.
-     */
+    /** If this key is present with boolean value true then sync users. */
     public static final String SYNC_USERS = "SYNC_USERS";
 
     /**
-     * If this key is present with boolean value true then sync users.
+     * If this key is present with boolean value true then retrieve only observations entered since
+     * observations were last fetched.
      */
     public static final String INCREMENTAL_OBSERVATIONS_UPDATE = "INCREMENTAL_OBSERVATIONS_UPDATE";
 
@@ -110,24 +97,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     public static final String FULL_SYNC = "FULL_SYNC";
 
-    /**
-     * RPC timeout for getting observations.
-     */
+    /** RPC timeout for getting observations. */
     private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
 
-    /**
-     * Named used during the sync process for SQL savepoints.
-     */
+    /** Named used during the sync process for SQL savepoints. */
     private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
 
-    /**
-     * Content resolver, for performing database operations.
-     */
+    /** Content resolver, for performing database operations. */
     private final ContentResolver mContentResolver;
 
-    /**
-     * Tracks whether the sync has been canceled.
-     */
+    /** Tracks whether the sync has been canceled. */
     private boolean mIsSyncCanceled = false;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -146,9 +125,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("Detecting a sync cancellation, canceling sync soon.");
     }
 
-    /**
-     * Not thread-safe but, by default, this will never be called multiple times in parallel.
-     */
+    /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override
     public void onPerformSync(
             Account account,

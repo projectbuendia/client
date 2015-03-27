@@ -20,9 +20,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Base class for authenticated OpenMRS JSON requests.
- */
+/** Base class for authenticated OpenMRS JSON requests. */
 public class OpenMrsJsonRequest extends JsonObjectRequest {
 
     private final String mUsername;

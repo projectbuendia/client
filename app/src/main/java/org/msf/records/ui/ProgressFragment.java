@@ -172,9 +172,7 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         changeState(State.ERROR);
     }
 
-    /**
-     * Changes the state of this fragment, hiding or showing the spinner as necessary.
-     */
+    /** Changes the state of this fragment, hiding or showing the spinner as necessary. */
     public void changeState(State state) {
         mState = state;
         // On state change, always start with the indeterminate loader.

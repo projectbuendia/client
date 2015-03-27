@@ -20,9 +20,7 @@ import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewA
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 
-/**
- * Test cases for handling when the initial sync fails on the location selection screen.
- */
+/** Test cases for handling when the initial sync fails on the location selection screen. */
 public class LocationSelectionFailingSyncTest extends SyncTestCase {
     @Override
     public void setUp() throws Exception {

@@ -38,9 +38,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-/**
- * A {@link BaseActivity} that requires that there currently be a logged-in user.
- */
+/** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private static final Logger LOG = Logger.create();

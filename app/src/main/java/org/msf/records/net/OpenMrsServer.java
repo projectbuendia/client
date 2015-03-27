@@ -44,9 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Implementation of {@link Server} that sends RPC's to OpenMRS.
- */
+/** Implementation of {@link Server} that sends RPC's to OpenMRS. */
 public class OpenMrsServer implements Server {
 
     private static final Logger LOG = Logger.create();

@@ -17,9 +17,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.regex.Pattern;
 
-/**
- * Matchers for matching {@link String} objects.
- */
+/** Matchers for matching {@link String} objects. */
 public class StringMatchers {
     /**
      * Provides a {@link Matcher} that matches any String that matches the given regular expression.

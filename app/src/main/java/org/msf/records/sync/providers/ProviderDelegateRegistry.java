@@ -19,9 +19,7 @@ import net.sqlcipher.database.SQLiteOpenHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * A registry for {@link ProviderDelegate}s.
- */
+/** A registry for {@link ProviderDelegate}s. */
 class ProviderDelegateRegistry<T extends SQLiteOpenHelper> {
 
     private final UriMatcher mUriMatcher;

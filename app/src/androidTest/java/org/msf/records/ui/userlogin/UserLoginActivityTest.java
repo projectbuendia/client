@@ -29,9 +29,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 
-/**
- * Tests for {@link UserLoginActivity}.
- */
+/** Tests for {@link UserLoginActivity}. */
 public class UserLoginActivityTest extends FunctionalTestCase {
 
     /** Adds a new user and logs in. */

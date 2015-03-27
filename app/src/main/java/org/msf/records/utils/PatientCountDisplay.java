@@ -15,9 +15,7 @@ import android.content.Context;
 
 import org.msf.records.R;
 
-/**
- * Provides helper methods for displaying patient counts with support for internationalization.
- */
+/** Provides helper methods for displaying patient counts with support for internationalization. */
 public class PatientCountDisplay {
     public static String getPatientCountSubtitle(Context context, int patientCount) {
         return getPatientCountSubtitle(context, patientCount, false);

@@ -41,7 +41,6 @@ import java.util.List;
  */
 public class SettingsActivity extends PreferenceActivity {
     /**
-
      * Determines whether to always show the simplified settings UI, where
      * settings are presented in a single list. When false, settings are shown
      * as a master/detail two-pane view on tablets. When true, a single pane is
@@ -60,9 +59,7 @@ public class SettingsActivity extends PreferenceActivity {
         return true;
     }
 
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
+    /** Set up the {@link android.app.ActionBar}, if the API is available. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {

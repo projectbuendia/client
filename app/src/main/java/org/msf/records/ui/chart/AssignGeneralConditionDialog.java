@@ -26,9 +26,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * A dialog that allows users to assign or change a patient's general condition.
- */
+/** A dialog that allows users to assign or change a patient's general condition. */
 public final class AssignGeneralConditionDialog
         implements AdapterView.OnItemClickListener {
 
@@ -71,9 +69,7 @@ public final class AssignGeneralConditionDialog
         mConditionSelectedCallback = checkNotNull(conditionSelectedCallback);
     }
 
-    /**
-     * Builds and displays the dialog.
-     */
+    /** Builds and displays the dialog. */
     public void show() {
         FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to work
         View.inflate(mContext, R.layout.condition_grid, frameLayout);
@@ -112,16 +108,12 @@ public final class AssignGeneralConditionDialog
         }
     }
 
-    /**
-     * Returns true iff the dialog is currently displayed.
-     */
+    /** Returns true iff the dialog is currently displayed. */
     public boolean isShowing() {
         return mDialog != null && mDialog.isShowing();
     }
 
-    /**
-     * Dismisses the dialog.
-     */
+    /** Dismisses the dialog. */
     public void dismiss() {
         mProgressDialog.dismiss();
 

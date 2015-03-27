@@ -29,9 +29,7 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.text.StringStartsWith.startsWith;
 import static org.msf.records.ui.matchers.StringMatchers.matchesRegex;
 
-/**
- * Tests for {@link PatientListActivity}.
- */
+/** Tests for {@link PatientListActivity}. */
 public class PatientListActivityTest extends FunctionalTestCase {
 
     public void setUp() throws Exception {

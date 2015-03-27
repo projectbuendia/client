@@ -24,9 +24,7 @@ import org.msf.records.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * A button with a subtitle.
- */
+/** A button with a subtitle. */
 public class SubtitledButtonView extends LinearLayout {
 
     @InjectView(R.id.view_subtitled_button_subtitle)
@@ -96,9 +94,7 @@ public class SubtitledButtonView extends LinearLayout {
         mSubtitleView.setText(subtitle);
     }
 
-    /**
-     * Sets the text color of both the title and the subtitle.
-     */
+    /** Sets the text color of both the title and the subtitle. */
     public SubtitledButtonView setTextColor(int color) {
         mTitleView.setTextColor(color);
         mSubtitleView.setTextColor(color);

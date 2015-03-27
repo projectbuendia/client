@@ -43,16 +43,12 @@ public final class Logger {
 
     public final String tag;
 
-    /**
-     * Creates a {@link Logger} with the calling class's class name as a tag.
-     */
+    /** Creates a {@link Logger} with the calling class's class name as a tag. */
     public static final Logger create() {
         return new Logger(getTag());
     }
 
-    /**
-     * Creates a {@link Logger} with a manually-specified tag.
-     */
+    /** Creates a {@link Logger} with a manually-specified tag. */
     public static final Logger create(String tag) {
         return new Logger(tag);
     }

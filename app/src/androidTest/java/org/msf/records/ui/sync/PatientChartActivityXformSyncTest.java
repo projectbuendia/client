@@ -31,9 +31,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
-/**
- * Tests of loading the encounter xform from the patient chart activity.
- */
+/** Tests the loading of the encounter xform from the patient chart activity. */
 public class PatientChartActivityXformSyncTest extends SyncTestCase {
     @Override
     public void setUp() throws Exception {

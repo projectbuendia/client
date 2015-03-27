@@ -123,9 +123,7 @@ public class UserManager {
         return mIsDirty;
     }
 
-    /**
-     * Sets whether or not users have been recently updated.
-     */
+    /** Sets whether or not users have been recently updated. */
     public void setDirty(boolean shouldInvalidateFormCache) {
         mIsDirty = shouldInvalidateFormCache;
     }
@@ -165,18 +163,14 @@ public class UserManager {
         mAsyncTaskRunner.runTask(new SyncKnownUsersTask());
     }
 
-    /**
-     * Synchronous version of {@link #syncKnownUsers()}.
-     */
+    /** Synchronous version of {@link #syncKnownUsers()}. */
     public void syncKnownUsersSynchronously()
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException, UserSyncException {
         onUsersSynced(mUserStore.syncKnownUsers());
     }
 
-    /**
-     * Returns the current active user or {@code null} if no user is active.
-     */
+    /** Returns the current active user or {@code null} if no user is active. */
     @Nullable public User getActiveUser() {
         return mActiveUser;
     }
@@ -425,9 +419,7 @@ public class UserManager {
         }
     }
 
-    /**
-     * Thrown when an error occurs syncing users from server.
-     */
+    /** Thrown when an error occurs syncing users from server. */
     public static class UserSyncException extends Throwable {
         public UserSyncException(String s) {
             super(s);

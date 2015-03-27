@@ -13,9 +13,7 @@ package org.msf.records.sync.providers;
 
 import org.msf.records.sync.PatientDatabase;
 
-/**
- * A {@link DelegatingProvider} for MSF record info such as patients and locations.
- */
+/** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
 public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
 
     @Override

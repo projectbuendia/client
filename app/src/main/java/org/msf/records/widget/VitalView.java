@@ -24,9 +24,7 @@ import org.msf.records.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * A compound view that displays a patient vital in a colorful rectangle.
- */
+/** A compound view that displays a patient vital in a colorful rectangle. */
 public class VitalView extends LinearLayout {
 
     @InjectView(R.id.view_vital_name) TextView mNameView;

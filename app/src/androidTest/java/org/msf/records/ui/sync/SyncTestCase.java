@@ -81,9 +81,7 @@ public class SyncTestCase extends FunctionalTestCase {
         PreferenceManager.getDefaultSharedPreferences(App.getInstance()).edit().clear().commit();
     }
 
-    /**
-     * Turns wifi on or off.
-     */
+    /** Turns wifi on or off. */
     protected void setWifiEnabled(boolean enabled) {
         LOG.i("Setting wifi state: %b", enabled);
         WifiManager wifiManager =
@@ -91,9 +89,7 @@ public class SyncTestCase extends FunctionalTestCase {
         wifiManager.setWifiEnabled(enabled);
     }
 
-    /**
-     * Delays all ViewActions until sync has failed once.
-     */
+    /** Delays all ViewActions until sync has failed once. */
     protected void waitForSyncFailure() {
         EventBusIdlingResource<SyncFailedEvent> syncFailedEventIdlingResource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);

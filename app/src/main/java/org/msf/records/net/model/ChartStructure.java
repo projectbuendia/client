@@ -12,14 +12,12 @@
 package org.msf.records.net.model;
 
 /**
- * A simple Java bean for JSON/GSON encoding/decoding, defining how the patient chart should be
+ * A simple Java bean for JSON/Gson encoding/decoding, defining how the patient chart should be
  * displayed, giving the grouping and ordering of fields.
  */
 public class ChartStructure {
     public String version; // should this be int? String? Should be comparable.
     public String uuid;
-    /**
-     * The groups that results should be displayed in, in order.
-     */
+    /** The groups that results should be displayed in, in order. */
     public ChartGroup[] groups;
 }

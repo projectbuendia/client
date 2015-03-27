@@ -113,23 +113,17 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
-    /**
-     * Sets the visibility of the status bar.
-     */
+    /** Sets the visibility of the status bar. */
     public void setStatusVisibility(int visibility) {
         mStatusContent.setVisibility(visibility);
     }
 
-    /**
-     * Gets the visibility of the status bar.
-     */
+    /** Gets the visibility of the status bar. */
     public int getStatusVisibility() {
         return mStatusContent.getVisibility();
     }
 
-    /**
-     * Called when the set of troubleshooting actions changes.
-     */
+    /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
         if (event.actions.isEmpty()) {
             setStatusView(null);

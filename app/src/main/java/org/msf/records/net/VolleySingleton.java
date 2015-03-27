@@ -19,9 +19,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.msf.records.utils.Logger;
 
-/**
- * Wraps Volley up in a singleton object.
- */
+/** Wraps Volley up in a singleton object. */
 public class VolleySingleton {
 
     private static final Logger LOG = Logger.create();

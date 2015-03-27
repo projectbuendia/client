@@ -11,9 +11,7 @@
 
 package org.msf.records.net;
 
-/**
- * Common constants and helper methods for the network layer.
- */
+/** Common constants and helper methods for the network layer. */
 public final class Common {
 
     /**
@@ -40,9 +38,7 @@ public final class Common {
      */
     public static final int REQUEST_TIMEOUT_MS_VERY_LONG = 120000;
 
-    /**
-     * If true, allow data to be provided from the sync adapter rather than the network.
-     */
+    /** If true, allow data to be provided from the sync adapter rather than the network. */
     public static final boolean OFFLINE_SUPPORT = true;
 
     private Common() {}

@@ -15,9 +15,7 @@ import android.test.InstrumentationTestCase;
 
 import org.msf.records.data.app.AppPatient;
 
-/**
- * Tests for {@link IdFilter}.
- */
+/** Tests for {@link IdFilter}. */
 public class IdFilterTest extends InstrumentationTestCase {
     private IdFilter mIdFilter;
 

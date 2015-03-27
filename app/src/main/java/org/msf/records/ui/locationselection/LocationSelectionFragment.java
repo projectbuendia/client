@@ -36,9 +36,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
-/**
- * Displays a list of all locations.
- */
+/** Displays a list of all locations. */
 public final class LocationSelectionFragment extends ProgressFragment {
     @InjectView(R.id.location_selection_locations) GridView mLocationGrid;
     @InjectView(R.id.location_selection_all_patients) SubtitledButtonView mAllPatientsButton;

@@ -19,9 +19,7 @@ import org.msf.records.utils.Logger;
 
 import java.util.List;
 
-/**
- * An object containing information about an available application update.
- */
+/** An object containing information about an available application update. */
 public class AvailableUpdateInfo {
 
     private static final Logger LOG = Logger.create();
@@ -31,9 +29,7 @@ public class AvailableUpdateInfo {
     public final LexicographicVersion availableVersion;
     public final Uri updateUri;
 
-    /**
-     * Creates an instance of {@link AvailableUpdateInfo} for an invalid update.
-     */
+    /** Creates an instance of {@link AvailableUpdateInfo} for an invalid update. */
     public static AvailableUpdateInfo getInvalid(LexicographicVersion currentVersion) {
         return new AvailableUpdateInfo(
                 false /*isValid*/,
@@ -50,9 +46,7 @@ public class AvailableUpdateInfo {
                 + "updateUri=" + updateUri + ")";
     }
 
-    /**
-     * Creates an instance of {@link AvailableUpdateInfo} from a server response.
-     */
+    /** Creates an instance of {@link AvailableUpdateInfo} from a server response. */
     public static AvailableUpdateInfo fromResponse(
             LexicographicVersion currentVersion, List<UpdateInfo> response) {
         if (response == null) {
@@ -97,9 +91,7 @@ public class AvailableUpdateInfo {
         this.updateUri = updateUri;
     }
 
-    /**
-     * Returns true if this is a valid update with a higher version number.
-     */
+    /** Returns true if this is a valid update with a higher version number. */
     public boolean shouldUpdate() {
         return isValid && availableVersion.greaterThan(currentVersion);
     }

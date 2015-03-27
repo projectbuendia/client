@@ -15,9 +15,7 @@ import org.msf.records.data.app.AppEncounter;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.sync.providers.Contracts;
 
-/**
- * Matches only the encounter with the given UUID.
- */
+/** Matches only the encounter with the given UUID. */
 public final class EncounterUuidFilter extends SimpleSelectionFilter<AppEncounter> {
 
     @Override

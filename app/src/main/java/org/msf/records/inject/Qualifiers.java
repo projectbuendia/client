@@ -17,9 +17,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Qualifier;
 
-/**
- * Defines qualifiers for dependency injection.
- */
+/** Defines qualifiers for dependency injection. */
 public class Qualifiers {
 
     // .diagnostics

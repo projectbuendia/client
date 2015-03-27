@@ -27,9 +27,7 @@ import org.msf.records.model.Concepts;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * Shows a list of general conditions, with corresponding number, color, and name.
- */
+/** Shows a list of general conditions, with corresponding number, color, and name. */
 public class GeneralConditionAdapter extends ArrayAdapter<String> {
     private static final int VIEW_RESOURCE = R.layout.listview_cell_condition_selection;
     private String[] mConditions;

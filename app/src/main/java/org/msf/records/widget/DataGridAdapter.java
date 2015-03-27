@@ -18,19 +18,13 @@ import android.widget.TextView;
 
 import javax.annotation.Nullable;
 
-/**
- * An adapter that provides {@link View}s for {@link DataGridView}.
- */
+/** An adapter that provides {@link View}s for {@link DataGridView}. */
 public interface DataGridAdapter {
 
-    /**
-     * Returns the number of rows in the data grid.
-     */
+    /** Returns the number of rows in the data grid. */
     int getRowCount();
 
-    /**
-     * Returns the number of columns in the data grid.
-     */
+    /** Returns the number of columns in the data grid. */
     int getColumnCount();
 
     /**
@@ -39,9 +33,7 @@ public interface DataGridAdapter {
      */
     void fillRowHeader(int row, View view, TextView textView);
 
-    /**
-     * Returns the row header view for a given row.
-     */
+    /** Returns the row header view for a given row. */
     View getRowHeader(int row, View convertView, ViewGroup parent);
 
     /**
@@ -54,9 +46,7 @@ public interface DataGridAdapter {
      */
     void setCellBackgroundForViewType(View view, CellType viewType, int rowType);
 
-    /**
-     * Returns the column header view for a given column.
-     */
+    /** Returns the column header view for a given column. */
     View getColumnHeader(int column, View convertView, ViewGroup parent);
 
     /**
@@ -65,9 +55,7 @@ public interface DataGridAdapter {
      */
     void fillColumnHeader(int column, TextView textView);
 
-    /**
-     * Returns the cell view for a given row and column.
-     */
+    /** Returns the cell view for a given row and column. */
     View getCell(int row, int column, View convertView, ViewGroup parent);
 
     /**

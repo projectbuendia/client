@@ -24,9 +24,7 @@ import org.msf.records.ui.FakeEventBus;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests for {@link PatientListController}.
- */
+/** Tests for {@link PatientListController}. */
 public class PatientListControllerTest extends AndroidTestCase {
     private PatientListController mController;
     private FakeEventBus mFakeEventBus;

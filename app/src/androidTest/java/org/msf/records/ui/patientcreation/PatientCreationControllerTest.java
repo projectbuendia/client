@@ -40,9 +40,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.msf.records.ui.matchers.AppPatientMatchers.matchesPatientDelta;
 
-/**
- * Tests for {@link PatientCreationController}.
- */
+/** Tests for {@link PatientCreationController}. */
 public class PatientCreationControllerTest extends AndroidTestCase {
     private static final String VALID_ID = "123";
     private static final String VALID_GIVEN_NAME = "Jane";
