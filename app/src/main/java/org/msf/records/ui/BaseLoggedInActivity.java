@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.annotation.SuppressLint;
@@ -19,6 +30,7 @@ import org.msf.records.net.model.User;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Colorizer;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 import javax.inject.Inject;
 
@@ -26,9 +38,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-/**
- * An activity that requires that there currently be a logged-in user.
- */
+/** A {@link BaseActivity} that requires that there currently be a logged-in user. */
 public abstract class BaseLoggedInActivity extends BaseActivity {
 
     private static final Logger LOG = Logger.create();
@@ -62,7 +72,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             Intent intent = new Intent(this, UserLoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-
+            Utils.logEvent("redirected_to_login");
             return;
         }
 
@@ -203,7 +213,8 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         @InjectView(R.id.button_settings) ImageButton mSettings;
         @InjectView(R.id.button_log_out) ImageButton mLogOut;
 
-        @SuppressLint("InflateParams") public MenuPopupWindow() {
+        @SuppressLint("InflateParams")
+        public MenuPopupWindow() {
             super();
 
             mLayout = (LinearLayout) getLayoutInflater()
@@ -235,17 +246,19 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
         @OnClick(R.id.button_settings)
         public void onSettingsClick() {
-            Intent settingsIntent = new Intent(BaseLoggedInActivity.this, SettingsActivity.class);
-            startActivity(settingsIntent);
+            Utils.logUserAction("popup_settings_button_pressed");
+            Intent intent = new Intent(BaseLoggedInActivity.this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         @OnClick(R.id.button_log_out)
         public void onLogOutClick() {
+            Utils.logUserAction("popup_logout_button_pressed");
             App.getUserManager().setActiveUser(null);
 
-            Intent settingsIntent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
-            settingsIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(settingsIntent);
+            Intent intent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 

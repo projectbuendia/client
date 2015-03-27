@@ -43,9 +43,7 @@ public class DataGridView extends RelativeLayout {
 
         public Builder() {}
 
-        /**
-         * Sets the view in the top left corner of the grid.
-         */
+        /** Sets the view in the top left corner of the grid. */
         public Builder setCornerView(View cornerView) {
             mCornerView = cornerView;
             return this;
@@ -407,9 +405,7 @@ public class DataGridView extends RelativeLayout {
         }
     }
 
-    /**
-     * A {@link ScrollView} whose scrolling can be linked to other instances of this class.
-     */
+    /** A {@link ScrollView} whose scrolling can be linked to other instances of this class. */
     private static class LinkableScrollView extends ScrollView {
 
         private final Linkage<LinkableScrollView> mLinkage;

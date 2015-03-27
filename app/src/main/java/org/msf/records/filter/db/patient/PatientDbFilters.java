@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.filter.db.patient;
 
 import org.msf.records.App;
@@ -12,9 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * All available patient filters available to the user, categorized by filter type.
- */
+/** All available patient filters available to the user, categorized by filter type. */
 public final class PatientDbFilters {
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
             new ConceptFilter(
@@ -31,9 +40,7 @@ public final class PatientDbFilters {
         return DEFAULT_FILTER;
     }
 
-    /**
-     * Returns an array of {@link SimpleSelectionFilter}'s, each representing a zone.
-     */
+    /** Returns an array of {@link SimpleSelectionFilter}'s, each representing a zone. */
     public static SimpleSelectionFilter[] getZoneFilters(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
 

@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app.tasks;
 
 import android.content.ContentResolver;
@@ -24,7 +35,11 @@ import org.msf.records.utils.Logger;
 import java.util.concurrent.ExecutionException;
 
 /**
- * An {@link android.os.AsyncTask} that adds an encounter to a server.
+ * An {@link AsyncTask} that adds a patient encounter to a server.
+ *
+ * <p>If the operation succeeds, a {@link SingleItemCreatedEvent} is posted on the given
+ * {@link CrudEventBus} with the added encounter. If the operation fails, a
+ * {@link EncounterAddFailedEvent} is posted instead.
  */
 public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAddFailedEvent> {
     // TODO: Factor out common code between this class and AppAddPatientAsyncTask.
@@ -48,9 +63,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
 
     private String mUuid;
 
-    /**
-     * Creates a new {@link org.msf.records.data.app.tasks.AppAddEncounterAsyncTask}.
-     */
+    /** Creates a new {@link AppAddEncounterAsyncTask}. */
     public AppAddEncounterAsyncTask(
             AppAsyncTaskFactory taskFactory,
             AppTypeConverters converters,

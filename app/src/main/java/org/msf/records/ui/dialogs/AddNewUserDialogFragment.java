@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.dialogs;
 
 import android.app.AlertDialog;
@@ -14,17 +25,14 @@ import android.widget.EditText;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.net.model.NewUser;
+import org.msf.records.utils.Utils;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * A {@link android.support.v4.app.DialogFragment} for adding a new user.
- */
+/** A {@link android.support.v4.app.DialogFragment} for adding a new user. */
 public class AddNewUserDialogFragment extends DialogFragment {
-    /**
-     * Creates a new instance and registers the given UI, if specified.
-     */
+    /** Creates a new instance and registers the given UI, if specified. */
     public static AddNewUserDialogFragment newInstance(ActivityUi activityUi) {
         AddNewUserDialogFragment fragment = new AddNewUserDialogFragment();
         fragment.setUi(activityUi);
@@ -83,22 +91,31 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                     @Override
                                     public void onClick(View view) {
                                         // Validate the user.
-                                        if (isNullOrWhitespace(mGivenName)) {
-                                            setError(
-                                                    mGivenName,
+                                        String givenName = mGivenName.getText() == null ? ""
+                                                : mGivenName.getText().toString().trim();
+                                        String familyName = mFamilyName.getText() == null ? ""
+                                                : mFamilyName.getText().toString().trim();
+                                        boolean valid = true;
+                                        if (givenName.isEmpty()) {
+                                            setError(mGivenName,
                                                     R.string.given_name_cannot_be_null);
-                                            return;
+                                            valid = false;
                                         }
-                                        if (isNullOrWhitespace(mFamilyName)) {
-                                            setError(
-                                                    mFamilyName,
+                                        if (familyName.isEmpty()) {
+                                            setError(mFamilyName,
                                                     R.string.family_name_cannot_be_null);
+                                            valid = false;
+                                        }
+                                        Utils.logUserAction("add_user_submitted",
+                                                "valid", "" + valid,
+                                                "given_name", givenName,
+                                                "family_name", familyName);
+                                        if (!valid) {
                                             return;
                                         }
 
                                         App.getUserManager().addUser(new NewUser(
-                                                mGivenName.getText().toString().trim(),
-                                                mFamilyName.getText().toString().trim()
+                                                givenName, familyName
                                         ));
                                         if (mActivityUi != null) {
                                             mActivityUi.showSpinner(true);
@@ -110,10 +127,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
         });
 
         return dialog;
-    }
-
-    private boolean isNullOrWhitespace(EditText field) {
-        return field.getText() == null || field.getText().toString().trim().isEmpty();
     }
 
     private void setError(EditText field, int resourceId) {

@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import com.android.volley.AuthFailureError;
@@ -9,9 +20,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Base class for OpenMRS authenticated JSON requests.
- */
+/** Base class for authenticated OpenMRS JSON requests. */
 public class OpenMrsJsonRequest extends JsonObjectRequest {
 
     private final String mUsername;
@@ -25,6 +34,14 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         this.mPassword = password;
     }
 
+    /**
+     * Constructs a GET request to OpenMRS.
+     * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
+     * @param urlSuffix the API URL being requested, relative to the API root
+     * @param jsonRequest a {@link JSONObject} containing the request body
+     * @param listener a {@link Response.Listener} that handles successful requests
+     * @param errorListener a {@link Response.ErrorListener} that handles failed requests
+     */
     public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
                               String urlSuffix,
                               JSONObject jsonRequest,
@@ -35,6 +52,15 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                 jsonRequest, listener, errorListener);
     }
 
+    /**
+     * Constructs a request to OpenMRS using an arbitrary HTTP method.
+     * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
+     * @param method the HTTP method
+     * @param url the absolute URL being requested
+     * @param jsonRequest a {@link JSONObject} containing the request body
+     * @param listener a {@link Response.Listener} that handles successful requests
+     * @param errorListener a {@link Response.ErrorListener} that handles failed requests
+     */
     public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
                               int method, String url, JSONObject jsonRequest,
                               Response.Listener<JSONObject> listener,

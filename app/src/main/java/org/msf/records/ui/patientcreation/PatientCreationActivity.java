@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.patientcreation;
 
 import android.app.AlertDialog;
@@ -20,8 +31,6 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
@@ -30,12 +39,12 @@ import org.msf.records.data.app.AppModel;
 import org.msf.records.data.res.ResZone;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.model.Zone;
-import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.BaseLoggedInActivity;
 import org.msf.records.ui.BigToast;
-import org.msf.records.ui.tentselection.AssignLocationDialog;
+import org.msf.records.ui.locationselection.AssignLocationDialog;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.date.Dates;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -44,18 +53,10 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-/**
- * A {@link BaseActivity} that allows users to create a new patient.
- */
+/** A {@link BaseLoggedInActivity} that allows users to create a new patient. */
 public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
-
-    /**
-     * The formatting for dates when displayed in entry fields.  "d MMM yyyy" is probably the best
-     * option here, as it matches the ordering and style of the date as shown in the date picker.
-     */
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("d MMM yyyy");
 
     private PatientCreationController mController;
     private AlertDialog mAlertDialog;
@@ -82,7 +83,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     private AppLocationTree mLocationTree;
 
-    private AssignLocationDialog.TentSelectedCallback mTentSelectedCallback;
+    private AssignLocationDialog.LocationSelectedCallback mLocationSelectedCallback;
 
     // Alert dialog styling.
     private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
@@ -141,7 +142,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         mSymptomsOnsetDatePickerDialog.setTitle(R.string.symptoms_onset_date_picker_title);
         mSymptomsOnsetDatePickerDialog.getDatePicker().setCalendarViewShown(false);
 
-        mTentSelectedCallback = new AssignLocationDialog.TentSelectedCallback() {
+        mLocationSelectedCallback = new AssignLocationDialog.LocationSelectedCallback() {
 
             @Override public boolean onNewTentSelected(String newTentUuid) {
                 mLocationUuid = newTentUuid;
@@ -151,7 +152,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         };
 
         // Pre-populate admission date with today.
-        mAdmissionDate.setText(DATE_FORMAT.print(DateTime.now()));
+        mAdmissionDate.setText(Dates.toMediumString(DateTime.now().toLocalDate()));
     }
 
     private void updateLocationUi() {
@@ -170,11 +171,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             LOG.e("Location %s was selected but not found in location tree.", mLocationUuid);
             BigToast.show(this, R.string.error_setting_location);
 
-            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
-                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
-                    " mLocationUuid=" + mLocationUuid +
-                    " location=" + location +
-                    " location.parentUuid=" + (location == null ? "<invalid>" : location.parentUuid)
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree
+                    + " mLocationTree.getRoot()=" + mLocationTree.getRoot()
+                    + " mLocationUuid=" + mLocationUuid
+                    + " location=" + location
+                    + " location.parentUuid="
+                    + (location == null ? "<invalid>" : location.parentUuid)
             );
 
             //return;
@@ -188,12 +190,12 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
             LOG.e("%s could not be resolved to a zone.", location.parentUuid);
             BigToast.show(this, R.string.error_setting_location);
 
-            throw new IllegalArgumentException("mLocationTree=" + mLocationTree +
-                    " mLocationTree.getRoot()=" + mLocationTree.getRoot() +
-                    " mLocationUuid=" + mLocationUuid +
-                    " location=" + location +
-                    " location.parentUuid=" + location.parentUuid +
-                    " resZone=" + resZone
+            throw new IllegalArgumentException("mLocationTree=" + mLocationTree
+                    + " mLocationTree.getRoot()=" + mLocationTree.getRoot()
+                    + " mLocationUuid=" + mLocationUuid
+                    + " location=" + location
+                    + " location.parentUuid=" + location.parentUuid
+                    + " resZone=" + resZone
             );
 
             // return;
@@ -242,7 +244,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                 reEnableButton,
                 mCrudEventBusProvider.get(),
                 mLocationUuid == null ? Optional.<String>absent() : Optional.of(mLocationUuid),
-                mTentSelectedCallback).show();
+                mLocationSelectedCallback).show();
     }
 
     private void setUiEnabled(boolean enable) {
@@ -264,9 +266,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         showKeyboard(mId, mGivenName, mFamilyName, mAge);
     }
 
-    /**
-     * Gives focus to the first of the given views that has an error.
-     */
+    /** Gives focus to the first of the given views that has an error. */
     private void setFocus(TextView... views) {
         for (TextView v : views) {
             if (v.getError() != null) {
@@ -334,11 +334,10 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             showAlertDialog();
             return true;
-        }
-        else {
+        } else {
             return super.onKeyDown(keyCode, event);
         }
     }
@@ -505,7 +504,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     .withYear(year)
                     .withMonthOfYear(monthOfYear + 1)
                     .withDayOfMonth(dayOfMonth);
-            mDateField.setText(DATE_FORMAT.print(date));
+            mDateField.setText(Dates.toMediumString(date.toDateTimeAtStartOfDay().toLocalDate()));
             mLocalDate = date;
         }
 

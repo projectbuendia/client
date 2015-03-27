@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app;
 
 import android.content.ContentValues;
@@ -20,11 +31,15 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * An encounter in the app model. Encounters contain one or more observations taken at a particular
- * timestamp.
+ * timestamp. For more information on encounters and observations, see the official OpenMRS
+ * documentation here:
+ * <a href="https://wiki.openmrs.org/display/docs/Encounters+and+observations">
+ *     https://wiki.openmrs.org/display/docs/Encounters+and+observations"
+ * </a>
  *
- * <p>NOTE: Because of lack of typing info from the server, AppEncounter attempts to determine the
- * most appropriate type, but this typing is not guaranteed to succeed; also, currently only DATE
- * and UUID (coded) types are supported.
+ * <p>NOTE: Because of lack of typing info from the server, {@link AppEncounter} attempts to
+ * determine the most appropriate type, but this typing is not guaranteed to succeed; also,
+ * currently only <code>DATE</code> and <code>UUID</code> (coded) types are supported.
  */
 @Immutable
 public class AppEncounter extends AppTypeBase<String> {
@@ -54,9 +69,7 @@ public class AppEncounter extends AppTypeBase<String> {
         this.observations = observations;
     }
 
-    /**
-     * Serializes this into a {@link JSONObject}.
-     */
+    /** Serializes this into a {@link JSONObject}. */
     public boolean toJson(JSONObject json) {
         try {
             JSONArray observationsJson = new JSONArray();
@@ -76,17 +89,13 @@ public class AppEncounter extends AppTypeBase<String> {
         }
     }
 
-    /**
-     * Represents a single observation within this encounter.
-     */
+    /** Represents a single observation within this encounter. */
     public static final class AppObservation {
         public final String conceptUuid;
         public final String value;
         public final Type type;
 
-        /**
-         * Datatype of the observation.
-         */
+        /** Datatype of the observation. */
         public enum Type {
             DATE,
             UUID
@@ -108,9 +117,7 @@ public class AppEncounter extends AppTypeBase<String> {
             return Type.UUID;
         }
 
-        /**
-         * Returns the string used to represent the datatype of this observation on the server.
-         */
+        /** Returns the string used to represent the datatype of this observation on the server. */
         public String serverType() {
             switch (type) {
                 case DATE:

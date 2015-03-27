@@ -1,9 +1,19 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
-import com.android.volley.toolbox.RequestFuture;
 
 import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppPatient;
@@ -16,10 +26,7 @@ import org.msf.records.net.model.User;
 
 import java.util.List;
 
-/**
- * An interfacing abstracting the idea of an RPC to a server. Allows calls to be abstracted between
- * the existing custom project buendia server, and an OpenMSR server.
- */
+/** An interface abstracting the idea of an RPC to a server. */
 public interface Server {
 
     public static final String PATIENT_ID_KEY = "id";
@@ -37,16 +44,20 @@ public interface Server {
     public static final String PATIENT_ANSWER_UUID = "answer_uuid";
 
     /**
-     * Adds a patient.
+     * Logs an event by sending a dummy request to the server.  (The server logs
+     * can then be scanned later to produce analytics for the client app.)
+     * @param pairs An even number of arguments providing key-value pairs of
+     *              arbitrary data to record with the event.
      */
+    void logToServer(List<String> pairs);
+
+    /** Adds a patient. */
     void addPatient(
             AppPatientDelta patientDelta,
             Response.Listener<Patient> patientListener,
             Response.ErrorListener errorListener);
 
-    /**
-     * Updates a patient.
-     */
+    /** Updates a patient. */
     public void updatePatient(
             String patientId,
             AppPatientDelta patientDelta,
@@ -88,31 +99,27 @@ public interface Server {
             Response.ErrorListener errorListener);
 
     /**
-     * Update the location of a patient
+     * Updates the location of a patient.
      *
      * @param patientId the id of the patient to update
      * @param newLocationId the id of the new location that the patient is assigned to
      */
     public void updatePatientLocation(String patientId, String newLocationId);
 
-    /**
-     * List all existing patients.
-     */
+    /** Lists all existing patients. */
     public void listPatients(@Nullable String filterState,
                              @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              Response.Listener<List<Patient>> patientListener,
                              Response.ErrorListener errorListener);
 
-    /**
-     * List all existing users.
-     */
+    /** Lists all existing users. */
     public void listUsers(@Nullable String filterQueryTerm,
                           Response.Listener<List<User>> userListener,
                           Response.ErrorListener errorListener);
 
     /**
-     * Add a new location to the server.
+     * Adds a new location to the server.
      *
      * @param location uuid must not be set, parent_uuid must be set, and the names map must have a
      *                 name for at least one locale.
@@ -124,7 +131,7 @@ public interface Server {
                             final Response.ErrorListener errorListener);
 
     /**
-     * Update the names for a location on the server.
+     * Updates the names for a location on the server.
      *
      * @param location the location, only uuid and new locale names for the location will be used,
      *                 but ideally the other arguments should be correct
@@ -136,20 +143,16 @@ public interface Server {
                                final Response.ErrorListener errorListener);
 
     /**
-     * Delete a given location from the server. The location should not be the EMC location or
+     * Deletes a given location from the server. The location should not be the EMC location or
      * one of the zones - just a client added location, tent or bed.
      */
     public void deleteLocation(String locationUuid,
                                final Response.ErrorListener errorListener);
 
-    /**
-     * List all locations.
-     */
+    /** Lists all locations. */
     public void listLocations(Response.Listener<List<Location>> locationListener,
                               Response.ErrorListener errorListener);
 
-    /**
-     * Cancel all pending requests.
-     */
+    /** Cancels all pending requests. */
     public void cancelPendingRequests();
 }

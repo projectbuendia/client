@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.app.Activity;
@@ -27,7 +38,6 @@ import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
-import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Concepts;
@@ -35,12 +45,12 @@ import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
-import org.msf.records.ui.tentselection.AssignLocationDialog;
-import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
+import org.msf.records.ui.locationselection.AssignLocationDialog;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -50,11 +60,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-/**
- * Controller for {@link PatientChartActivity}.
- *
- * <p>Do not add untestable dependencies to this class.
- */
+/** Controller for {@link PatientChartActivity}. */
 final class PatientChartController {
 
     private static final Logger LOG = Logger.create();
@@ -79,7 +85,7 @@ final class PatientChartController {
 
     /** Maximum concurrent ODK forms assigned request codes. */
     private static final int MAX_ODK_REQUESTS = 10;
-    private int nextIndex = 0;
+    private int mNextIndex = 0;
 
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
@@ -120,6 +126,9 @@ final class PatientChartController {
         /** Shows the patient's personal details. */
         void setPatient(AppPatient patient);
 
+        /** Displays an error message with the given resource id. */
+        void showError(int errorMessageResource);
+
         /** Displays an error with the given resource and optional substitution args. */
         void showError(int errorResource, Object... args);
 
@@ -132,9 +141,6 @@ final class PatientChartController {
 
         /** Re-enables fetching. */
         void reEnableFetch();
-
-        /** Displays an error message with the given resource id. */
-        void showError(int errorMessageResource);
 
         /** Shows or hides the form loading dialog. */
         void showFormLoadingDialog(boolean show);
@@ -193,7 +199,10 @@ final class PatientChartController {
         mMainThreadHandler = mainThreadHandler;
     }
 
-    /** Returns the state of the controller. This should be saved to preserve it over activity restarts. */
+    /**
+     * Returns the state of the controller. This should be saved to preserve it over activity
+     * restarts.
+     */
     public Bundle getState() {
         Bundle bundle = new Bundle();
         bundle.putStringArray("pendingUuids", mPatientUuids);
@@ -214,7 +223,10 @@ final class PatientChartController {
         }
     }
 
-    /** Initializes the controller, setting async operations going to collect data required by the UI. */
+    /**
+     * Initializes the controller, setting async operations going to collect data required by the
+     * UI.
+     */
     public void init() {
         mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
 
@@ -271,13 +283,21 @@ final class PatientChartController {
         }
 
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
+        String action = (resultCode == Activity.RESULT_CANCELED)
+                ? "form_discard_pressed" : "form_save_pressed";
         switch (requestCode.form) {
             case ADD_OBSERVATION:
-                // This will fire a CreatePatientSucceededEvent.
+                Utils.logUserAction(action,
+                        "form", "round",
+                        "patient_uuid", patientUuid);
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
-                // This will fire a CreatePatientSucceededEvent.
+                Utils.logUserAction(action,
+                        "form", "lab_test",
+                        "patient_uuid", patientUuid);
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             default:
@@ -310,6 +330,9 @@ final class PatientChartController {
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
+        Utils.logUserAction("form_opener_pressed",
+                "form", "round",
+                "group", targetGroup);
         if (user != null) {
             fields.clinicianName = user.fullName;
         }
@@ -343,6 +366,7 @@ final class PatientChartController {
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
+        Utils.logUserAction("form_opener_pressed", "form", "lab_test");
         if (user != null) {
             fields.clinicianName = user.fullName;
         }
@@ -360,7 +384,7 @@ final class PatientChartController {
     private LocalDate getObservedDate(
             Map<String, LocalizedObservation> observations, String conceptUuid) {
         LocalizedObservation obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.stringToLocalDate(obs.localizedValue);
+        return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
     }
 
     /** Gets the latest observation values and displays them on the UI. */
@@ -400,13 +424,11 @@ final class PatientChartController {
         mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
     }
 
-    /**
-     * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
-     */
+    /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
     private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {
-        mPatientUuids[nextIndex] = patientUuid;
-        int requestCode = new PatientChartActivity.RequestCode(form, nextIndex).getCode();
-        nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
+        mPatientUuids[mNextIndex] = patientUuid;
+        int requestCode = new PatientChartActivity.RequestCode(form, mNextIndex).getCode();
+        mNextIndex = (mNextIndex + 1) % MAX_ODK_REQUESTS;
         return requestCode;
     }
 
@@ -418,6 +440,7 @@ final class PatientChartController {
                     @Override
                     public boolean onNewConditionSelected(String newConditionUuid) {
                         setCondition(newConditionUuid);
+                        Utils.logUserAction("condition_assigned");
                         return false;
                     }
                 };
@@ -445,8 +468,8 @@ final class PatientChartController {
     public void showAssignLocationDialog(
             Context context,
             final MenuItem menuItem) {
-        TentSelectedCallback callback =
-                new TentSelectedCallback() {
+        AssignLocationDialog.LocationSelectedCallback callback =
+                new AssignLocationDialog.LocationSelectedCallback() {
 
                     @Override
                     public boolean onNewTentSelected(String newTentUuid) {
@@ -454,6 +477,7 @@ final class PatientChartController {
                         patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
 
                         mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
+                        Utils.logUserAction("location_assigned");
                         return false;
                     }
                 };
@@ -478,7 +502,8 @@ final class PatientChartController {
     }
 
     /**
-     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient UUID.
+     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient
+     * UUID.
      *
      * <p>Also removes details of that requestCode from the controller's state.
      */
@@ -499,10 +524,6 @@ final class PatientChartController {
             }
             mLocationTree = event.tree;
             updatePatientLocationUi();
-        }
-
-        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
-            mSyncManager.forceSync();
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {

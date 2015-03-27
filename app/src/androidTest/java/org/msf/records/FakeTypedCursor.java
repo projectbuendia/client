@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records;
 
 import android.database.ContentObserver;
@@ -9,9 +20,7 @@ import org.msf.records.data.app.TypedCursor;
 
 import java.util.Iterator;
 
-/**
- * A {@link TypedCursor} that takes its contents as input for ease of testing.
- */
+/** A {@link TypedCursor} that takes its contents as input for ease of testing. */
 public class FakeTypedCursor<T> implements TypedCursor<T> {
     private final T[] mObjects;
     private boolean mIsClosed = false;
@@ -35,23 +44,17 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
         return mObjects[position];
     }
 
-    /**
-     * Returns {@code null}.
-     */
+    /** Returns {@code null}. */
     @Override
     public Uri getNotificationUri() {
         return null;
     }
 
-    /**
-     * No-op.
-     */
+    /** No-op. */
     @Override
     public void registerContentObserver(ContentObserver observer) {}
 
-    /**
-     * No-op.
-     */
+    /** No-op. */
     @Override
     public void unregisterContentObserver(ContentObserver observer) {}
 

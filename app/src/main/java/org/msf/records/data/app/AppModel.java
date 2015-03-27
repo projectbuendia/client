@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app;
 
 import android.content.ContentResolver;
@@ -5,7 +16,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import org.joda.time.Instant;
 import org.msf.records.data.app.converters.AppTypeConverter;
 import org.msf.records.data.app.converters.AppTypeConverters;
 import org.msf.records.data.app.tasks.AppAddEncounterAsyncTask;
@@ -22,7 +32,6 @@ import org.msf.records.events.data.TypedCursorFetchedEventFactory;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
-import org.msf.records.net.model.Encounter;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
@@ -186,9 +195,7 @@ public class AppModel {
         task.execute();
     }
 
-    /**
-     * A subscriber that handles error events posted to {@link CrudEventBus}es.
-     */
+    /** A subscriber that handles error events posted to {@link CrudEventBus}es. */
     private static class CrudEventBusCleanupSubscriber implements CleanupSubscriber {
 
         private final CrudEventBus mBus;

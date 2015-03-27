@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.app.Activity;
@@ -19,7 +30,6 @@ import org.msf.records.events.sync.SyncFinishedEvent;
 import org.msf.records.events.sync.SyncStartedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
-import org.msf.records.sync.GenericAccountService;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.ui.userlogin.UserLoginActivity;
 import org.msf.records.utils.Logger;
@@ -37,7 +47,10 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 
-// All tests have to launch the UserLoginActivity first because the app expects a user to log in.
+/**
+ * Base class for functional tests that sets timeouts to be permissive, optionally logs in as a
+ * user before continuing, and provides some utility functions for convenience.
+ */
 public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
     private static final Logger LOG = Logger.create();
     private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 30000;
@@ -217,9 +230,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
         }
     }
 
-    /**
-     * Closes all activities on the stack.
-     */
+    /** Closes all activities on the stack. */
     protected void closeAllActivities() throws Exception {
         try {
             for (int i = 0; i < 20; i++) {

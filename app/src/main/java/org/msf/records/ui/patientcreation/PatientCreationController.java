@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.patientcreation;
 
 import com.android.volley.VolleyError;
@@ -19,12 +30,9 @@ import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.model.Zone;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
-/**
- * Controller for {@link PatientCreationActivity}.
- *
- * Avoid adding untestable dependencies to this class.
- */
+/** Controller for {@link PatientCreationActivity}. */
 final class PatientCreationController {
 
     private static final Logger LOG = Logger.create();
@@ -83,7 +91,10 @@ final class PatientCreationController {
         mEventBusSubscriber = new EventSubscriber();
     }
 
-    /** Initializes the controller, setting async operations going to collect data required by the UI. */
+    /**
+     * Initializes the controller, setting async operations going to collect data required by the
+     * UI.
+     */
     public void init() {
         mCrudEventBus.register(mEventBusSubscriber);
         mModel.fetchLocationTree(mCrudEventBus, LocaleSelector.getCurrentLocale().getLanguage());
@@ -148,6 +159,7 @@ final class PatientCreationController {
             hasValidationErrors = true;
         }
 
+        Utils.logUserAction("add_patient_submitted", "valid", "" + !hasValidationErrors);
         if (hasValidationErrors) {
             return false;
         }
@@ -194,6 +206,7 @@ final class PatientCreationController {
         }
 
         public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
+            Utils.logEvent("add_patient_succeeded");
             mUi.quitActivity();
         }
 
@@ -242,6 +255,7 @@ final class PatientCreationController {
                     }
             }
             LOG.e(event.exception, "Patient add failed");
+            Utils.logEvent("add_patient_failed", "reason", "" + event.reason);
         }
 
         public void onEventMainThread(SingleItemFetchFailedEvent event) {

@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.user;
 
 import android.content.ContentProviderClient;
@@ -6,7 +17,6 @@ import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -29,17 +39,13 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
-/**
- * A store for users.
- */
+/** A store for users. */
 public class UserStore {
 
     private static final Logger LOG = Logger.create();
     private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
-    /**
-     * Loads the known users from local store.
-     */
+    /** Loads the known users from local store. */
     public Set<User> loadKnownUsers()
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
@@ -89,9 +95,7 @@ public class UserStore {
         }
     }
 
-    /**
-     * Syncs known users with the server.
-     */
+    /** Syncs known users with the server. */
     public Set<User> syncKnownUsers()
             throws ExecutionException, InterruptedException, RemoteException,
             OperationApplicationException {
@@ -128,9 +132,7 @@ public class UserStore {
         return userSet;
     }
 
-    /**
-     * Adds a new user, both locally and on the server.
-     */
+    /** Adds a new user, both locally and on the server. */
     public User addUser(NewUser user) throws VolleyError {
         // Define a container for the results.
         class Result {
@@ -189,9 +191,7 @@ public class UserStore {
         return result.user;
     }
 
-    /**
-     * Deletes a user, both locally and on the server.
-     */
+    /** Deletes a user, both locally and on the server. */
     public User deleteUser(User user) {
         throw new UnsupportedOperationException();
     }

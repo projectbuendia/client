@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync.providers;
 
 import android.content.ContentResolver;
@@ -6,11 +17,7 @@ import android.provider.BaseColumns;
 
 import org.msf.records.BuildConfig;
 
-import java.util.Locale;
-
-/**
- * The external contracts for {@link MsfRecordsProvider}.
- */
+/** The external contracts for {@link MsfRecordsProvider}. */
 @SuppressWarnings("unused")
 public class Contracts {
 
@@ -22,9 +29,7 @@ public class Contracts {
 
     private static final String TYPE_PACKAGE_PREFIX = "/vnd.msf.records.";
 
-    /**
-     * Columns for localized content.
-     */
+    /** Columns for localized content. */
     interface LocaleColumns {
 
         /**
@@ -33,26 +38,18 @@ public class Contracts {
          */
         String LOCALE = "locale";
 
-        /**
-         * The name of something in a given locale.
-         */
+        /** The name of something in a given locale. */
         String LOCALIZED_NAME = "name";
     }
 
-    /**
-     * Columns for a concept.
-     */
+    /** Columns for a concept. */
     interface BaseConceptColumns {
 
-        /**
-         * UUID for a concept.
-         */
+        /** UUID for a concept. */
         String CONCEPT_UUID = "concept_uuid";
     }
 
-    /**
-     * Columns for an XForms concept.
-     */
+    /** Columns for an XForms concept. */
     interface ConceptColumns {
 
         /**
@@ -61,27 +58,19 @@ public class Contracts {
          */
         String XFORM_ID = "xform_id";
 
-        /**
-         * Type for a concept like numeric, coded, etc.
-         */
+        /** Type for a concept like numeric, coded, etc. */
         String CONCEPT_TYPE = "concept_type";
     }
 
     interface ChartColumns {
 
-        /**
-         * UUID for an encounter.
-         */
+        /** UUID for an encounter. */
         String CHART_UUID = "chart_uuid";
 
-        /**
-         * Time for an encounter in seconds since epoch.
-         */
+        /** Time for an encounter in seconds since epoch. */
         String CHART_ROW = "chart_row";
 
-        /**
-         * UUID for a concept representing a group (section) in a chart.
-         */
+        /** UUID for a concept representing a group (section) in a chart. */
         String GROUP_UUID = "group_uuid";
 
         String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
@@ -89,24 +78,16 @@ public class Contracts {
 
     public interface ObservationColumns {
 
-        /**
-         * UUID for a patient.
-         */
+        /** UUID for a patient. */
         String PATIENT_UUID = "patient_uuid";
 
-        /**
-         * UUID for an encounter.
-         */
+        /** UUID for an encounter. */
         String ENCOUNTER_UUID = "encounter_uuid";
 
-        /**
-         * Time for an encounter in seconds since epoch.
-         */
+        /** Time for an encounter in seconds since epoch. */
         String ENCOUNTER_TIME = "encounter_time";
 
-        /**
-         * The value of a concept in an encounter.
-         */
+        /** The value of a concept in an encounter. */
         String VALUE = "value";
 
         /**
@@ -120,14 +101,10 @@ public class Contracts {
 
     interface LocationColumns {
 
-        /**
-         * UUID for a location.
-         */
+        /** UUID for a location. */
         String LOCATION_UUID = "location_uuid";
 
-        /**
-         * UUID for a parent location, or null if there is no parent.
-         */
+        /** UUID for a parent location, or null if there is no parent. */
         String PARENT_UUID = "parent_uuid";
     }
 
@@ -138,36 +115,25 @@ public class Contracts {
 
     interface PatientColumns {
 
-        /**
-         * Admission timestamp.
-         */
+        /** Admission timestamp. */
         String ADMISSION_TIMESTAMP = "admission_timestamp";
         
-        /**
-         * Family name.
-         */
+        /** Family name. */
         String FAMILY_NAME = "family_name";
         
-        /**
-         * Given name.
-         */
+        /** Given name. */
         String GIVEN_NAME = "given_name";
         
-        /**
-         * UUID.
-         */
+        /** UUID. */
         String UUID = "uuid";
 
+        /** UUID of the assigned location. */
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
         
-        /**
-         * Birthdate.
-         */
+        /** Birthdate. */
         String BIRTHDATE = "birthdate";
         
-        /**
-         * Gender.
-         */
+        /** Gender. */
         String GENDER = "gender";
     }
     
@@ -175,9 +141,7 @@ public class Contracts {
 
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
 
-        /**
-         * Number of patients in a tent.
-         */
+        /** Number of patients in a tent. */
         String TENT_PATIENT_COUNT = "tent_patient_count";
     }
 
@@ -429,9 +393,7 @@ public class Contracts {
         public static final String ITEM_CONTENT_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-location";
 
-        /**
-         * Returns the content URL for the localized locations for a given locale.
-         */
+        /** Returns the content URL for the localized locations for a given locale. */
         public static Uri getUri(String locale) {
             return CONTENT_URI.buildUpon()
                     .appendPath(locale)
