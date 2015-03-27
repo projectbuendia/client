@@ -26,12 +26,30 @@ public class PatientDatabase extends SQLiteOpenHelper {
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
     /**
-     * Having this hardcoded into the app is NOT secure. However, it does prevent idle browsing
-     * from someone who has just stolen the tablet, and isn't willing to look at source code.
+     * This deserves a brief comment on the threat model. Patient data encrypted by a hardcoded key
+     * might seems like security by obscurity. It is.
+     *
+     * Security of patient data for these apps is established by physical security for the tablets
+     * and server, not software security and encryption. The software is designed to be used in
+     * high risk zones while wearing PPE. Thus it deliberately does not have barriers to usability
+     * like passwords or lock screens. Without these it is hard to implement a secure encryption
+     * scheme, and so we haven't. All patient data is viewable in the app anyway.
+     *
+     * So why bother using SQL cipher? The threat model is someone who doesn't care very much
+     * about patient data, but has broken into an Ebola Management Centre to steal the tablet to
+     * re-sell. We would rather the patient data wasn't trivially readable using existing public
+     * tools. Then the person with a stolen tablet will either just delete the data to hide what
+     * they have done, or don't even realise they have it. This is the only threat model that
+     * the encryption is designed to defend against. It also means the data is not trivially
+     * extractable in bulk by someone with limited technical expertise.
+     *
+     * It also means the groundwork is laid should a more secure scheme need to be added in future.
      *
      * TODO: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
+     *
+     * A final note - we know the quote should be brillig, not brilling. No need to correct it.
      */
     private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
 
