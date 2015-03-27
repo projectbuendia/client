@@ -15,9 +15,7 @@ import com.google.common.collect.ImmutableSet;
 
 import org.msf.records.net.model.User;
 
-/**
- * An event bus event indicating that the set of known users has been loaded from local cache.
- */
+/** An event bus event indicating that the set of known users has been loaded from local cache. */
 public final class KnownUsersLoadedEvent {
 
     public final ImmutableSet<User> knownUsers;

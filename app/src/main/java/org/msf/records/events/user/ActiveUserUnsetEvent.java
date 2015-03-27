@@ -13,9 +13,7 @@ package org.msf.records.events.user;
 
 import org.msf.records.net.model.User;
 
-/**
- * An event bus event that indicates that the active user has been unset.
- */
+/** An event bus event that indicates that the active user has been unset. */
 public class ActiveUserUnsetEvent {
 
     /**
@@ -25,9 +23,7 @@ public class ActiveUserUnsetEvent {
      */
     public static final int REASON_UNKNOWN = 0;
 
-    /**
-     * Indicates that the active user was unset because the unset method was invoked.
-     */
+    /** Indicates that the active user was unset because the unset method was invoked. */
     public static final int REASON_UNSET_INVOKED = 1;
 
     /**
@@ -42,9 +38,7 @@ public class ActiveUserUnsetEvent {
      */
     public final User previousActiveUser;
 
-    /**
-     * The reason why the active user was unset.
-     */
+    /** The reason why the active user was unset. */
     public final int reason;
 
     /**

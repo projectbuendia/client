@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.app.Activity;
@@ -66,9 +77,7 @@ import de.greenrobot.event.EventBus;
 
 import static org.msf.records.utils.Utils.getSystemProperty;
 
-/**
- * Activity displaying a patient's vitals and charts.
- */
+/** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final Logger LOG = Logger.create();
     // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
@@ -79,9 +88,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // Note the general condition uuid when retrieved so that it can be passed to the controller.
     private String mGeneralConditionUuid;
 
-    /**
-     * An enumeration of the XForms that can be launched from this activity.
-     */
+    /** An enumeration of the XForms that can be launched from this activity. */
     enum XForm {
         ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
         ADD_TEST_RESULTS("34d727a6-e515-4f27-ae91-703ba2c164ae", 1);
@@ -95,9 +102,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    /**
-     * An object that encapsulates a {@link Activity#startActivityForResult} request code.
-     */
+    /** An object that encapsulates a {@link Activity#startActivityForResult} request code. */
     static class RequestCode {
 
         public final XForm form;
@@ -191,17 +196,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
-        OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override
-            public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
-                        mUpdateClientCache.get(), resultCode, data);
-            }
-        };
-
-        String patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
-        String patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
-        String patientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
+        final String patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
+        final String patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
+        final String patientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
 
         @Nullable Bundle controllerState = null;
         if (savedInstanceState != null) {
@@ -210,14 +207,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         ButterKnife.inject(this);
         App.getInstance().inject(this);
-
-        MinimalHandler minimalHandler = new MinimalHandler() {
-            private final Handler mHandler = new Handler();
-            @Override
-            public void post(Runnable runnable) {
-                mHandler.post(runnable);
-            }
-        };
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
@@ -233,6 +222,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        final OdkResultSender odkResultSender = new OdkResultSender() {
+            @Override
+            public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
+                OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
+                        mUpdateClientCache.get(), resultCode, data);
+            }
+        };
+        final MinimalHandler minimalHandler = new MinimalHandler() {
+            private final Handler mHandler = new Handler();
+            @Override
+            public void post(Runnable runnable) {
+                mHandler.post(runnable);
+            }
+        };
         mController = new PatientChartController(
                 mAppModel,
                 new EventBusWrapper(mEventBus),

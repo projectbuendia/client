@@ -20,9 +20,7 @@ import org.msf.records.utils.date.Dates;
 
 import javax.annotation.concurrent.Immutable;
 
-/**
- * An {@link AppTypeConverter} that converts {@link AppPatient}s.
- */
+/** An {@link AppTypeConverter} that converts {@link AppPatient}s. */
 @Immutable
 public class AppPatientConverter implements AppTypeConverter<AppPatient> {
 

@@ -23,9 +23,7 @@ import android.net.Uri;
  */
 public interface TypedCursor<T> extends Iterable<T>, AppModelObservable {
 
-    /**
-     * Returns the number of items in this lazy array.
-     */
+    /** Returns the number of items in this lazy array. */
     int getCount();
 
     /**
@@ -34,8 +32,6 @@ public interface TypedCursor<T> extends Iterable<T>, AppModelObservable {
      */
     T get(int position);
 
-    /**
-     * Returns the URI for which notifications are received.
-     */
+    /** Returns the URI for which notifications are received. */
     Uri getNotificationUri();
 }

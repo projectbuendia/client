@@ -17,7 +17,7 @@
     android:layout_height="wrap_content" >
     <GridView
         style="@style/TentGrid"
-        android:id="@+id/tent_selection_tents"
+        android:id="@+id/location_selection_locations"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </FrameLayout>

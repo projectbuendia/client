@@ -15,9 +15,7 @@ import android.content.res.Resources;
 
 import org.msf.records.R;
 
-/**
- * Zones and the resources associated with them.
- */
+/** Zones and the resources associated with them. */
 public enum ResZone implements Resolvable<ResZone.Resolved> {
 
     UNKNOWN(R.color.vital_unknown, R.color.vital_fg_unknown),

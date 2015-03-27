@@ -1,10 +1,20 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.userlogin;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.diagnostics.Troubleshooter;
 import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
@@ -21,18 +31,10 @@ import org.msf.records.utils.Utils;
 
 import com.google.common.collect.Ordering;
 
-import javax.inject.Inject;
-
-/**
- * Controller for {@link UserLoginActivity}.
- *
- * <p>Don't add untestable dependencies to this class.
- */
+/** Controller for {@link UserLoginActivity}. */
 public final class UserLoginController {
 
     private static final Logger LOG = Logger.create();
-
-    private static final boolean DEBUG = true;
 
     public interface Ui {
 
@@ -63,6 +65,17 @@ public final class UserLoginController {
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
     private final Troubleshooter mTroubleshooter;
 
+    /**
+     * Instantiates a {@link UserLoginController}.
+     * @param userManager a {@link UserManager} from which users will be fetched
+     * @param eventBus an {@link EventBusRegistrationInterface} for listening to user fetch and
+     *                 modification events
+     * @param troubleshooter a {@link Troubleshooter} for monitoring server health; if the server
+     *                       becomes available and the controller has no data available, the
+     *                       controller will automatically retry fetching users
+     * @param ui a {@link Ui} for handling activity changes
+     * @param fragmentUi a {@link FragmentUi} for displaying users
+     */
     public UserLoginController(
             UserManager userManager,
             EventBusRegistrationInterface eventBus,
@@ -76,6 +89,10 @@ public final class UserLoginController {
         mFragmentUi = fragmentUi;
     }
 
+    /**
+     * Requests any necessary resources. Note that some resources may be fetched asynchronously
+     * after this function returns.
+     */
     public void init() {
         mEventBus.register(mSubscriber);
         mFragmentUi.showSpinner(true);

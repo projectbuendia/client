@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.widget;
 
 import android.content.Context;
@@ -15,9 +26,7 @@ import org.msf.records.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * A compound view that displays a patient attribute name and value with optional icon.
- */
+/** A compound view that displays a patient attribute name and value with optional icon. */
 public class PatientAttributeView extends LinearLayout {
 
     @InjectView(R.id.view_attribute_name) TextView mNameView;
@@ -32,9 +41,7 @@ public class PatientAttributeView extends LinearLayout {
         this(context, attrs, 0);
     }
 
-    /**
-     * Constructs a {@link PatientAttributeView} with custom style parameters.
-     */
+    /** Constructs a {@link PatientAttributeView} with custom style parameters. */
     public PatientAttributeView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
@@ -72,27 +79,21 @@ public class PatientAttributeView extends LinearLayout {
         }
     }
 
-    /**
-     * Sets the text in the name view.
-     */
+    /** Sets the text in the name view. */
     public PatientAttributeView setName(CharSequence name) {
         mNameView.setText(name);
 
         return this;
     }
 
-    /**
-     * Sets the text in the value view.
-     */
+    /** Sets the text in the value view. */
     public PatientAttributeView setValue(CharSequence value) {
         mValueView.setText(value);
 
         return this;
     }
 
-    /**
-     * Sets the text color of both the name and the value.
-     */
+    /** Sets the text color of both the name and the value. */
     public PatientAttributeView setTextColor(int color) {
         mNameView.setTextColor(color);
         mValueView.setTextColor(color);
@@ -100,9 +101,7 @@ public class PatientAttributeView extends LinearLayout {
         return this;
     }
 
-    /**
-     * Sets a {@link Drawable} for use as an icon.
-     */
+    /** Sets a {@link Drawable} for use as an icon. */
     public PatientAttributeView setIconDrawable(Drawable drawable) {
         mImageView.setVisibility(VISIBLE);
         mImageView.setImageDrawable(drawable);

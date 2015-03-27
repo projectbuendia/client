@@ -18,13 +18,9 @@ import de.greenrobot.event.NoSubscriberEvent;
  */
 public interface CleanupSubscriber {
 
-    /**
-     * Called when an event is posted but no subscribers are registered for that event.
-     */
+    /** Called when an event is posted but no subscribers are registered for that event. */
     void onEvent(NoSubscriberEvent event);
 
-    /**
-     * Called when all subscribers on a {@link CrudEventBus} have been unregistered.
-     */
+    /** Called when all subscribers on a {@link CrudEventBus} have been unregistered. */
     void onAllUnregistered();
 }

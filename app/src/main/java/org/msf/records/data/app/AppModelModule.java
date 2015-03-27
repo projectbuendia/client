@@ -22,9 +22,7 @@ import dagger.Provides;
 
 import javax.inject.Singleton;
 
-/**
- * A Dagger module that provides bindings for the {@link AppModel}.
- */
+/** A Dagger module that provides bindings for the {@link AppModel}. */
 @Module(
         includes = {
                 AppTypeConverterModule.class,

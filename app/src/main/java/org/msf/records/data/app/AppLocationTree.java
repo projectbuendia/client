@@ -132,9 +132,7 @@ public class AppLocationTree implements AppModelObservable {
         return mRoot;
     }
 
-    /**
-     * Returns the parent of a given {@link AppLocation}.
-     */
+    /** Returns the parent of a given {@link AppLocation}. */
     @Nullable
     public AppLocation getParent(@Nullable AppLocation location) {
         if (location == null) {
@@ -234,9 +232,7 @@ public class AppLocationTree implements AppModelObservable {
         }
     }
 
-    /**
-     * Returns the total number of patients in this location and its descendant locations.
-     */
+    /** Returns the total number of patients in this location and its descendant locations. */
     public int getTotalPatientCount(AppLocation location) {
         if (location == null) {
             return 0;

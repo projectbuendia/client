@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net.model;
 
 import com.google.common.base.MoreObjects;
@@ -7,7 +18,7 @@ import org.joda.time.LocalDate;
 import java.io.Serializable;
 
 /**
- * An object that represents a patient.
+ * A simple Java bean for representing a patient which can be used for JSON/Gson encoding/decoding.
  */
 public class Patient implements Serializable {
     public static final int GENDER_UNKNOWN = 0;
@@ -18,8 +29,8 @@ public class Patient implements Serializable {
     public String uuid;
     // User-specified identifier.
     public String id;
-    public String given_name;
-    public String family_name;
+    public String given_name; // @nolint
+    public String family_name; // @nolint
 
     public String important_information;
 
@@ -27,11 +38,11 @@ public class Patient implements Serializable {
     public LocalDate birthdate;
 
     // All timestamps are in seconds since 1970-01-01 00:00 UTC.
-    public Long admission_timestamp;
-    public Long created_timestamp;
-    public Long first_showed_symptoms_timestamp;
+    public Long admission_timestamp; // @nolint
+    public Long created_timestamp; // @nolint
+    public Long first_showed_symptoms_timestamp; // @nolint
 
-    public Location assigned_location;
+    public Location assigned_location; // @nolint
 
     public Patient() {}
 

@@ -63,9 +63,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
 
     private String mUuid;
 
-    /**
-     * Creates a new {@link org.msf.records.data.app.tasks.AppAddEncounterAsyncTask}.
-     */
+    /** Creates a new {@link AppAddEncounterAsyncTask}. */
     public AppAddEncounterAsyncTask(
             AppAsyncTaskFactory taskFactory,
             AppTypeConverters converters,

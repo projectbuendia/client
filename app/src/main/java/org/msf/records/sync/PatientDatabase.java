@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync;
 
 import android.content.Context;
@@ -10,9 +21,8 @@ import org.msf.records.sync.providers.Contracts;
 import static android.provider.BaseColumns._ID;
 
 /**
- * A helper for the database for storing patient attributes, active patients, locations,
- * and chart information.
- * Stored in the same database as patients are the keys for charts too.
+ * An {@link SQLiteOpenHelper} that manages the local database where patients, locations, chart
+ * information, etc. is stored.
  */
 public class PatientDatabase extends SQLiteOpenHelper {
 
@@ -26,10 +36,12 @@ public class PatientDatabase extends SQLiteOpenHelper {
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
     /**
-     * Having this hardcoded into the app is NOT secure. However, it does prevent idle browsing
+     * The hardcoded password for encryption.
+     *
+     * <p>Having this hardcoded into the app is NOT secure. However, it does prevent idle browsing
      * from someone who has just stolen the tablet, and isn't willing to look at source code.
      *
-     * TODO: add something better. At the very minimum a server call and local storage
+     * <p>TODO: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
      */
@@ -44,9 +56,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
     private static final String NOTNULL = "  NOT NULL";
     private static final String COMMA_SEP = ",";
 
-    /**
-     * Table name where records are stored for "patient" resources.
-     */
+    /** Table name where records are stored for "patient" resources. */
     public static final String PATIENTS_TABLE_NAME = "patients";
 
     /** SQL statement to create "patient" table. */

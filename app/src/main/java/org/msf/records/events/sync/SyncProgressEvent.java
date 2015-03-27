@@ -13,9 +13,7 @@ package org.msf.records.events.sync;
 
 import android.support.annotation.Nullable;
 
-/**
- * An event bus event giving details on the last-reported progress of an in-progress sync.
- */
+/** An event bus event giving details on the last-reported progress of an in-progress sync. */
 public class SyncProgressEvent {
     public int progress;
     @Nullable public String label;

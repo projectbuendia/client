@@ -60,7 +60,7 @@
     <color name="chart_background_light">#e1e1e1</color>
     <color name="chart_background_dark">#cccccc</color>
     <color name="chart_grid_lines">#999999</color>
-    <color name="zone_tent_selected_padding">@android:color/black</color>
+    <color name="zone_location_selected_padding">@android:color/black</color>
     <color name="general_condition_selected_padding">@android:color/black</color>
 
 </resources>

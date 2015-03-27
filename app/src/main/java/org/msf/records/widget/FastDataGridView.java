@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.widget;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -24,29 +35,36 @@ import org.msf.records.utils.Utils;
  * layout is defined in XML, call {@code #createView} to trigger the actual inflation.
  */
 public class FastDataGridView {
-    private final Context context;
-    private final DataGridAdapter dataGridAdapter;
-    private final LayoutInflater layoutInflater;
+    private final Context mContext;
+    private final DataGridAdapter mDataGridAdapter;
+    private final LayoutInflater mLayoutInflater;
 
-    private int scrollX = 0;
-    private int scrollY = 0;
-    private int logNextScrollX = 40;
-    private int logNextScrollY = 40;
+    private int mScrollX = 0;
+    private int mScrollY = 0;
+    private int mLogNextScrollX = 40;
+    private int mLogNextScrollY = 40;
 
+    /**
+     * Instantiates a {@link FastDataGridView}.
+     * @param context the Activity context
+     * @param dataGridAdapter the {@link DataGridAdapter} used to populate this view
+     * @param layoutInflater the {@link LayoutInflater} used to inflate this view
+     */
     public FastDataGridView(
             Context context, DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
-        this.context = checkNotNull(context);
-        this.dataGridAdapter = checkNotNull(dataGridAdapter);
-        this.layoutInflater = checkNotNull(layoutInflater);
+        mContext = checkNotNull(context);
+        mDataGridAdapter = checkNotNull(dataGridAdapter);
+        mLayoutInflater = checkNotNull(layoutInflater);
         Preconditions.checkArgument(
                 dataGridAdapter.getColumnCount() % 2 == 0,
                 "If using double-width column headers, the number of columns must be even.");
     }
 
+    /** Inflates and returns the chart view. */
     public View createView() {
         // Assemble top-level views.
         TableLayout topLayout =
-                (TableLayout) layoutInflater.inflate(R.layout.tableview_chart_view, null);
+                (TableLayout) mLayoutInflater.inflate(R.layout.tableview_chart_view, null);
         final LinkableRecyclerView rowHeaders =
                 (LinkableRecyclerView) topLayout.findViewById(R.id.chart_row_headers);
         final LinkableRecyclerView columnHeaders =
@@ -58,9 +76,9 @@ public class FastDataGridView {
 
         // Initialize rowHeaders.
         LinearLayoutManager rowHeaderLayoutManager = new WrapContentLinearLayoutManager(
-                context, LinearLayoutManager.VERTICAL, false /* reverseLayout */);
+                mContext, LinearLayoutManager.VERTICAL, false /* reverseLayout */);
         rowHeaders.setAdapter(new RowHeaderAdapter(
-                dataGridAdapter, layoutInflater));
+                mDataGridAdapter, mLayoutInflater));
         rowHeaders.setLayoutManager(rowHeaderLayoutManager);
         rowHeaders.setInternalScrollListener(new OnInternalScrollListener() {
             @Override
@@ -72,9 +90,9 @@ public class FastDataGridView {
 
         // Initialize columnHeaders.
         LinearLayoutManager columnHeaderLayoutManager = new WrapContentLinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false);
+                mContext, LinearLayoutManager.HORIZONTAL, false);
         columnHeaderLayoutManager.setReverseLayout(true);
-        columnHeaders.setAdapter(new ColumnHeaderAdapter(dataGridAdapter, layoutInflater));
+        columnHeaders.setAdapter(new ColumnHeaderAdapter(mDataGridAdapter, mLayoutInflater));
         columnHeaders.setLayoutManager(columnHeaderLayoutManager);
         columnHeaders.setInternalScrollListener(new OnInternalScrollListener() {
             @Override
@@ -86,9 +104,9 @@ public class FastDataGridView {
 
         // Initialize cells.
         CellAdapter cellAdapter = new CellAdapter(
-                dataGridAdapter, layoutInflater);
+                mDataGridAdapter, mLayoutInflater);
         RecyclerView.LayoutManager layoutManager = new WrapContentGridLayoutManager(
-                context, dataGridAdapter.getRowCount(), LinearLayoutManager.HORIZONTAL,
+                mContext, mDataGridAdapter.getRowCount(), LinearLayoutManager.HORIZONTAL,
                 true /* reverseLayout */);
         cells.setHasFixedSize(true);
         cells.setLayoutManager(layoutManager);
@@ -112,25 +130,24 @@ public class FastDataGridView {
     }
 
     private void logScrollActions(int dx, int dy) {
-        scrollX += dx;
-        scrollY += dy;
-        int mx = Math.abs(scrollX);
-        int my = Math.abs(scrollY);
-        if (mx > logNextScrollX) {
-            Utils.logUserAction("chart_scrolled_left", "x", "" + scrollX);
-            logNextScrollX *= 2;
+        mScrollX += dx;
+        mScrollY += dy;
+        int mx = Math.abs(mScrollX);
+        int my = Math.abs(mScrollY);
+        if (mx > mLogNextScrollX) {
+            Utils.logUserAction("chart_scrolled_left", "x", "" + mScrollX);
+            mLogNextScrollX *= 2;
         }
-        if (my > logNextScrollY) {
-            Utils.logUserAction("chart_scrolled_down", "y", "" + scrollY);
-            logNextScrollY *= 2;
+        if (my > mLogNextScrollY) {
+            Utils.logUserAction("chart_scrolled_down", "y", "" + mScrollY);
+            mLogNextScrollY *= 2;
         }
     }
 
-    /**
-     * ViewHolder class for RowHeaders, ColumnHeaders and Cells.
-     */
+    /** ViewHolder class for RowHeaders, ColumnHeaders and Cells. */
     private static final class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView textView;
+
         public ViewHolder(View itemView, TextView textView) {
             super(itemView);
             this.textView = textView;
@@ -140,6 +157,7 @@ public class FastDataGridView {
     private static final class CellViewHolder extends RecyclerView.ViewHolder {
         public TextView textView = null;
         public ViewStub viewStub;
+
         public CellViewHolder(View itemView, ViewStub viewStub) {
             super(itemView);
             this.viewStub = viewStub;
@@ -287,54 +305,59 @@ public class FastDataGridView {
                 public void onInternalScrollBy(int dx, int dy) {}
             };
 
-    /**
-     * A {@link android.widget.ScrollView} whose scrolling can be linked to other instances of this class.
-     */
+    /** A {@link ScrollView} whose scrolling can be linked to other instances of this class. */
     public static class LinkableScrollView extends ScrollView {
 
-        private OnInternalScrollListener internalScrollListener = DO_NOTHING_LISTENER;
+        private OnInternalScrollListener mInternalScrollListener = DO_NOTHING_LISTENER;
         /** Whether the current scrolling operation was caused by a linked view. */
-        boolean externallyScrolled = false;
-        int lastX = 0;
-        int lastY = 0;
+        boolean mExternallyScrolled = false;
+        int mLastX = 0;
+        int mLastY = 0;
 
         public LinkableScrollView(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 
         public void setInternalScrollListener(OnInternalScrollListener l) {
-            internalScrollListener = Preconditions.checkNotNull(l);
+            mInternalScrollListener = Preconditions.checkNotNull(l);
         }
 
         @Override
         public void scrollBy(int x, int y) {
-            externallyScrolled = true;
+            mExternallyScrolled = true;
             super.scrollBy(x, y);
         }
 
         @Override
         protected void onScrollChanged(int l, int t, int oldl, int oldt) {
             super.onScrollChanged(l, t, oldl, oldt);
-            // Due to overscrolling, some onScrollChanged events might be sent twice. Hence we cannot
-            // rely on the diff "l - oldl" and instead do the tracking ourselves.
-            if (!externallyScrolled) {
-                int dx = l - lastX;
-                int dy = t - lastY;
+            // Due to overscrolling, some onScrollChanged events might be sent twice. Hence we
+            // cannot rely on the diff "l - oldl" and instead do the tracking ourselves.
+            if (!mExternallyScrolled) {
+                int dx = l - mLastX;
+                int dy = t - mLastY;
                 if (dx != 0 || dy != 0) {
-                    internalScrollListener.onInternalScrollBy(l - lastX, t - lastY);
+                    mInternalScrollListener.onInternalScrollBy(l - mLastX, t - mLastY);
                 }
             } else {
-                externallyScrolled = false;
+                mExternallyScrolled = false;
             }
-            lastX = l;
-            lastY = t;
+            mLastX = l;
+            mLastY = t;
         }
     }
 
+    /**
+     * A {@link RecyclerView} that optionally links internal (within the view) and external
+     * (within an ancestor view) scroll events.
+     */
     public static class LinkableRecyclerView extends RecyclerView {
-        private OnInternalScrollListener internalScrollListener = DO_NOTHING_LISTENER;
-        boolean externallyScrolled = false;
+        private OnInternalScrollListener mInternalScrollListener = DO_NOTHING_LISTENER;
+        boolean mExternallyScrolled = false;
 
+        /**
+         * Instantiates a {@link LinkableRecyclerView}. {@see RecyclerView(Context, AttributeSet)}
+         */
         public LinkableRecyclerView(Context context, AttributeSet attrs) {
             super(context, attrs);
             setOnScrollListener(new OnScrollListener() {
@@ -342,10 +365,10 @@ public class FastDataGridView {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    if (!externallyScrolled) {
-                        internalScrollListener.onInternalScrollBy(dx, dy);
+                    if (!mExternallyScrolled) {
+                        mInternalScrollListener.onInternalScrollBy(dx, dy);
                     } else {
-                        externallyScrolled = false;
+                        mExternallyScrolled = false;
                     }
                 }
             });
@@ -353,12 +376,12 @@ public class FastDataGridView {
 
         @Override
         public void scrollBy(int x, int y) {
-            externallyScrolled = true;
+            mExternallyScrolled = true;
             super.scrollBy(x, y);
         }
 
         public void setInternalScrollListener(OnInternalScrollListener l) {
-            internalScrollListener = Preconditions.checkNotNull(l);
+            mInternalScrollListener = Preconditions.checkNotNull(l);
         }
     }
 }

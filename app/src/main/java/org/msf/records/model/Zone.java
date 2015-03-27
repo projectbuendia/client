@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.model;
 
 import org.msf.records.data.app.AppLocation;
@@ -7,8 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Zone defines the superset of possible zones returned by the server and semantics/UI about those
- * zones.
+ * Defines a hardcoded set of possible zones returned by the server and semantics/UI about those
+ * zones. Over time, hardcoded UUID's should be phased out and replaced with modular configuration,
+ * either on the server or the client.
  */
 public class Zone {
 
@@ -42,9 +54,7 @@ public class Zone {
         return Integer.compare(ORDERED_ZONES.indexOf(a.uuid), ORDERED_ZONES.indexOf(b.uuid));
     }
 
-    /**
-     * Returns the {@link ResZone} for the specified zone UUID.
-     */
+    /** Returns the {@link ResZone} for the specified zone UUID. */
     public static ResZone getResZone(String uuid) {
         switch (uuid) {
             case SUSPECT_ZONE_UUID:

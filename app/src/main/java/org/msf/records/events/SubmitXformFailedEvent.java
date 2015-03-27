@@ -13,9 +13,7 @@ package org.msf.records.events;
 
 import android.support.annotation.Nullable;
 
-/**
- * An event bus event indicating that submitting an Xform failed.
- */
+/** An event bus event indicating that submitting an Xform failed. */
 public class SubmitXformFailedEvent {
     public enum Reason {
         UNKNOWN,

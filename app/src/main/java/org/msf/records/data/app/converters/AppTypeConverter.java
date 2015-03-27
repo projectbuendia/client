@@ -19,8 +19,6 @@ import android.database.Cursor;
  */
 public interface AppTypeConverter<T> {
 
-    /**
-     * Converts the current position in a {@link Cursor} to a model data type.
-     */
+    /** Converts the current position in a {@link Cursor} to a model data type. */
     T fromCursor(Cursor cursor);
 }

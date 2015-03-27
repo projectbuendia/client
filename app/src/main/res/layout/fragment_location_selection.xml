@@ -20,9 +20,9 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/tent_selection_layout"
-        tools:context="org.msf.records.ui.tentselection.TentSelectionFragment">
+        tools:context="org.msf.records.ui.locationselection.LocationSelectionFragment">
         <org.msf.records.widget.SubtitledButtonView
-            android:id="@+id/tent_selection_all_patients"
+            android:id="@+id/location_selection_all_patients"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"
@@ -30,7 +30,7 @@
             app:subtitledButtonTitle="ALL PRESENT PATIENTS"
             app:subtitledButtonSubtitle="No patients"/>
         <org.msf.records.widget.SubtitledButtonView
-            android:id="@+id/tent_selection_triage"
+            android:id="@+id/location_selection_triage"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"
@@ -38,11 +38,11 @@
             app:subtitledButtonSubtitle="No patients"/>
         <org.msf.records.widget.ScrollViewCompatibleGridView
             style="@style/TentGrid"
-            android:id="@+id/tent_selection_tents"
+            android:id="@+id/location_selection_locations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <org.msf.records.widget.SubtitledButtonView
-            android:id="@+id/tent_selection_discharged"
+            android:id="@+id/location_selection_discharged"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:layout_margin="10dp"

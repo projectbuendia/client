@@ -10,13 +10,11 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:padding="5dp"
-    android:background="@drawable/tent_selector">
-    <org.msf.records.widget.SubtitledButtonView
-        android:id="@+id/tent_selection_tent"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"/>
-</LinearLayout>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/zone_location_selected_padding"
+        android:state_selected="true"/>
+
+    <item android:drawable="@drawable/border_grey_1dp" />
+
+</selector>

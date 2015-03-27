@@ -38,11 +38,4 @@ public abstract class ModelEvent {
             mModels.append(model, true);
         }
     }
-
-    /**
-     * Returns whether the specified model should .
-     */
-    public boolean shouldRead(int model) {
-        return mModels.get(model, false);
-    }
 }
