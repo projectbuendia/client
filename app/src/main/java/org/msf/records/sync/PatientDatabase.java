@@ -26,8 +26,8 @@ public class PatientDatabase extends SQLiteOpenHelper {
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
     /*
-     * This deserves a brief comment on the threat model. Patient data encrypted by a hardcoded key
-     * might seems like security by obscurity. It is.
+     * This deserves a brief comment on security. Patient data encrypted by a hardcoded key
+     * might seem like security by obscurity. It is.
      *
      * Security of patient data for these apps is established by physical security for the tablets
      * and server, not software security and encryption. The software is designed to be used in
@@ -35,15 +35,19 @@ public class PatientDatabase extends SQLiteOpenHelper {
      * like passwords or lock screens. Without these it is hard to implement a secure encryption
      * scheme, and so we haven't. All patient data is viewable in the app anyway.
      *
-     * So why bother using SQL cipher? The threat model is someone who doesn't care very much
+     * So why bother using SQL cipher? The major reason is as groundwork. Eventually we would like
+     * to add some better security. To do this we need to make sure all code we write is compatible
+     * with an encrypted database.
+     *
+     * However, there is some value now. The presumed attacker is someone who doesn't care very much
      * about patient data, but has broken into an Ebola Management Centre to steal the tablet to
      * re-sell. We would rather the patient data wasn't trivially readable using existing public
-     * tools. Then the person with a stolen tablet will either just delete the data to hide what
-     * they have done, or don't even realise they have it. This is the only threat model that
-     * the encryption is designed to defend against. It also means the data is not trivially
-     * extractable in bulk by someone with limited technical expertise.
-     *
-     * It also means the groundwork is laid should a more secure scheme need to be added in future.
+     * tools, so there is slight defense in depth. Firstly, as the data is stored in per-app storage
+     * the device would need to be rooted, or adb used, to get access to the data. Encryption adds
+     * a second layer of security, in that once they have access to the database file, it isn't
+     * readable without the key. Of course as the key is in plaintext in the open source, anyone
+     * technically savvy enough to use adb can almost certainly find it, but at least it isn't as
+     * simple as using grep or strings.
      *
      * TODO: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
