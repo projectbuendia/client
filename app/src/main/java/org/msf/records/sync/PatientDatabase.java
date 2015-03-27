@@ -25,7 +25,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 15;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
-    /**
+    /*
      * This deserves a brief comment on the threat model. Patient data encrypted by a hardcoded key
      * might seems like security by obscurity. It is.
      *
