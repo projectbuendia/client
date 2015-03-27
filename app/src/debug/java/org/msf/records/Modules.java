@@ -11,13 +11,15 @@
 
 package org.msf.records;
 
-/** The modules used for injection in a debug build. */
+/**
+ * The modules used for injection in a debug build. Currently identical to a normal build, but
+ * can be used to add debug-specific modules.
+ */
 final class Modules {
 
     static Object[] list(App app) {
         return new Object[] {
-                new AppModule(app),
-                DebugAppModule.class
+                new AppModule(app)
         };
     }
 

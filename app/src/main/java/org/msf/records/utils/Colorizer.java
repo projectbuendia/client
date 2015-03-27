@@ -14,6 +14,7 @@ package org.msf.records.utils;
 import android.support.v4.util.LruCache;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /** A class that generates aesthetically pleasing colors based on a color wheel. */
 public class Colorizer {
@@ -48,6 +49,8 @@ public class Colorizer {
     private final int mColorCount;
     private final double mShift;
 
+    private final Random mRandom;
+
     private Colorizer(int[] palette) {
         this(getPaletteBytes(palette), 0, 0.);
     }
@@ -73,6 +76,7 @@ public class Colorizer {
         mInterpolationMultiplier = 1 << interpolations;
         mColorCount = paletteBytes.length * mInterpolationMultiplier;
         mShift = shift;
+        mRandom = new Random();
     }
 
     public Colorizer interpolate(int interpolation) {
@@ -162,21 +166,8 @@ public class Colorizer {
         return paletteBytes;
     }
 
-    // TODO: License (MurmurHash).
-
-    /**
-     * Mixes the specified value so that it is closer to being evenly distributed across all
-     * possible integers.
-     *
-     * <p>This method implements the finalizer step of MurmurHash.
-     */
-    private static int mix(int value) {
-        value ^= value >>> 16;
-        value *= 0x85ebca6b;
-        value ^= value >>> 13;
-        value *= 0xc2b2ae35;
-        value ^= value >>> 16;
-
-        return value;
+    private int mix(int value) {
+        mRandom.setSeed(value);
+        return mRandom.nextInt();
     }
 }
