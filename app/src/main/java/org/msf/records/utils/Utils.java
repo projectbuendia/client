@@ -14,6 +14,7 @@ package org.msf.records.utils;
 import com.google.common.collect.Lists;
 
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.net.Server;
 
 import java.io.UnsupportedEncodingException;
@@ -203,6 +204,23 @@ public class Utils {
             allPairs.addAll(Arrays.asList(pairs));
             server.logToServer(allPairs);
         }
+    }
+
+    /**
+     * Returns a value if that value is not null, or a specified default value otherwise.
+     * @param value the nullable value
+     * @param defaultValue the default
+     */
+    public static <T extends Object> T valueOrDefault(@Nullable T value, T defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
+    /**
+     * Returns the specified name or a sentinel representing an unknown name, if the name is null.
+     * @param name the nullable name
+     */
+    public static String nameOrUnknown(@Nullable String name) {
+        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
     }
 
     private Utils() {

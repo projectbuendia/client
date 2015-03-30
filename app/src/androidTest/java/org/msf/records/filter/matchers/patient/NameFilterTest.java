@@ -16,6 +16,7 @@ import android.test.InstrumentationTestCase;
 import org.msf.records.App;
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.utils.Utils;
 
 /** Tests for {@link NameFilter}. */
 public class NameFilterTest extends InstrumentationTestCase {
@@ -133,14 +134,8 @@ public class NameFilterTest extends InstrumentationTestCase {
 
     private AppPatient getPatientWithName(String givenName, String familyName) {
         return AppPatient.builder()
-                .setGivenName(
-                        givenName == null
-                                ? App.getInstance().getString(R.string.unknown_given_name)
-                                : givenName)
-                .setFamilyName(
-                        familyName == null
-                                ? App.getInstance().getString(R.string.unknown_family_name)
-                                : familyName)
+                .setGivenName(Utils.nameOrUnknown(givenName))
+                .setFamilyName(Utils.nameOrUnknown(familyName))
                 .build();
     }
 }

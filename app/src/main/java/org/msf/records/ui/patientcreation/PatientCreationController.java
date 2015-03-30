@@ -166,14 +166,12 @@ final class PatientCreationController {
 
         AppPatientDelta patientDelta = new AppPatientDelta();
         patientDelta.id = Optional.of(id);
-        patientDelta.givenName = Optional.of(givenName == null || givenName.isEmpty()
-                ? App.getInstance().getString(R.string.unknown_given_name) : givenName);
-        patientDelta.familyName = Optional.of(familyName == null || familyName.isEmpty()
-                ? App.getInstance().getString(R.string.unknown_family_name) : familyName);
+        patientDelta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
+        patientDelta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid = (locationUuid == null)
-                ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
+        patientDelta.assignedLocationUuid =
+                Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION));
         patientDelta.admissionDate = Optional.of(admissionDate);
         patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 

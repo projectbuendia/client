@@ -179,8 +179,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         patientDelta.givenName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller adds the patient with a default given name
-        patientDelta.givenName =
-                Optional.of(App.getInstance().getString(R.string.unknown_given_name));
+        patientDelta.givenName = Optional.of(App.getInstance().getString(R.string.unknown_name));
         verify(mMockAppModel).addPatient(
                 any(FakeEventBus.class),
                 argThat(matchesPatientDelta(patientDelta)));
@@ -196,7 +195,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller adds the patient with a default family name
         patientDelta.familyName =
-                Optional.of(App.getInstance().getString(R.string.unknown_family_name));
+                Optional.of(App.getInstance().getString(R.string.unknown_name));
         verify(mMockAppModel).addPatient(
                 any(FakeEventBus.class),
                 argThat(matchesPatientDelta(patientDelta)));

@@ -257,6 +257,5 @@
     <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
     <string name="family_name_hint_unknown">–</string>
     <string name="given_name_hint_unknown">–</string>
-    <string name="unknown_family_name">–</string>
-    <string name="unknown_given_name">–</string>
+    <string name="unknown_name">–</string>
 </resources>
