@@ -46,38 +46,38 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
         String query = ""
-                + " select obs._id,"
+                + " SELECT obs._id,"
                 + "     obs.encounter_time,"
-                + "     group_names.localized_name as group_name,"
+                + "     group_names.localized_name AS group_name,"
                 + "     chart.concept_uuid,"
-                + "     names.localized_name as concept_name,"
+                + "     names.localized_name AS concept_name,"
                 // Localized value for concept values
                 + "     obs.value,"
-                + "     coalesce(value_names.localized_name, obs.value) as localized_value"
-                + " from charts chart"
+                + "     COALESCE(value_names.localized_name, obs.value) AS localized_value"
+                + " FROM charts AS chart"
 
-                + "     inner join concept_names names"
-                + "     on chart.concept_uuid = names.concept_uuid"
+                + "     INNER JOIN concept_names names"
+                + "     ON chart.concept_uuid = names.concept_uuid"
 
-                + "     inner join concept_names group_names"
-                + "     on chart.group_uuid = group_names.concept_uuid"
+                + "     INNER JOIN concept_names group_names"
+                + "     ON chart.group_uuid = group_names.concept_uuid"
 
-                + "     left join observations obs"
-                + "     on chart.concept_uuid = obs.concept_uuid and "
-                + "         (obs.patient_uuid = ? or" // 2nd selection arg
+                + "     LEFT JOIN observations obs"
+                + "     ON chart.concept_uuid = obs.concept_uuid AND "
+                + "         (obs.patient_uuid = ? OR" // 2nd selection arg
                 + "          obs.patient_uuid is null)"
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
-                // To cope we will do a left join on the value and the name
-                + "     left join concept_names value_names"
-                + "     on obs.value = value_names.concept_uuid"
-                + "         and value_names.locale = ?" // 1st selection arg
+                // To cope we will do a LEFT JOIN on the value AND the name
+                + "     LEFT JOIN concept_names value_names"
+                + "     ON obs.value = value_names.concept_uuid"
+                + "         AND value_names.locale = ?" // 1st selection arg
 
-                + " where names.locale = ? and " // 3rd selection arg
+                + " WHERE names.locale = ? AND " // 3rd selection arg
                 + "     group_names.locale = ?" // 4th selection arg
 
-                + " order by chart.chart_row, obs.encounter_time, obs._id";
+                + " ORDER BY chart.chart_row, obs.encounter_time, obs._id";
 
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, locale, locale});

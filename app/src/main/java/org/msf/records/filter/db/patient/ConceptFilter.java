@@ -29,23 +29,23 @@ public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
     // WHERE subclause returning only the UUIDs of patients that had a given
     // concept whose latest observed value was the given value.
     private static final String CONCEPT_SUBQUERY = ""
-            + " uuid in ("
-            + "     select patient_uuid from ("
-            + "         select obs.patient_uuid as patient_uuid,"
-            + "                obs.value as concept_value"
-            + "         from observations obs"
-            + "         inner join ("
-            + "             select concept_uuid, patient_uuid,"
-            + "                    max(encounter_time) as maxtime"
-            + "             from observations"
-            + "             group by patient_uuid, concept_uuid"
-            + "         ) maxs "
-            + "         on obs.encounter_time = maxs.maxtime and "
-            + "             obs.concept_uuid = maxs.concept_uuid and "
+            + " uuid IN ("
+            + "     SELECT patient_uuid FROM ("
+            + "         SELECT obs.patient_uuid AS patient_uuid,"
+            + "                obs.value AS concept_value"
+            + "         FROM observations AS obs"
+            + "         INNER JOIN ("
+            + "             SELECT concept_uuid, patient_uuid,"
+            + "                    max(encounter_time) AS maxtime"
+            + "             FROM observations"
+            + "             GROUP BY patient_uuid, concept_uuid"
+            + "         ) maxs"
+            + "         ON obs.encounter_time = maxs.maxtime AND"
+            + "             obs.concept_uuid = maxs.concept_uuid AND"
             + "             obs.patient_uuid = maxs.patient_uuid"
-            + "         where obs.concept_uuid=?"
-            + "         order by obs.patient_uuid"
-            + "     ) where concept_value=?"
+            + "         WHERE obs.concept_uuid = ?"
+            + "         ORDER BY obs.patient_uuid"
+            + "     ) WHERE concept_value = ?"
             + " )";
 
     private final String mConceptUuid;
@@ -53,8 +53,8 @@ public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
     private final String mDescription;
 
     /**
-     * Creates a filter that filters by the given concept UUID, matching only patients that match
-     * the corresponding filter value.
+     * Creates a filter that filters by the given concept UUID, matching only
+     * patients that match the corresponding filter value.
      * @param description localized description of this filter used for logging and display
      * @param conceptUuid concept UUID to filter by
      * @param conceptValueUuid constraint for the concept UUID value

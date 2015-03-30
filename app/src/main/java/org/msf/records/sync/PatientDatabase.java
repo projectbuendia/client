@@ -49,85 +49,94 @@ public class PatientDatabase extends SQLiteOpenHelper {
      */
     private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
 
-    private static final String SQL_CREATE_ENTRIES = ""
-            + " create table patients ("
-            + "     _id text primary key not null,"
-            + "     given_name text,"
-            + "     family_name text,"
-            + "     uuid text,"
-            + "     location_uuid text,"
-            + "     admission_timestamp integer,"
-            + "     birthdate text,"
-            + "     gender text"
+    public static final String PATIENTS_TABLE = "patients";
+    private static final String SQL_CREATE_PATIENTS = ""
+            + " CREATE TABLE patients ("
+            + "     _id TEXT PRIMARY KEY NOT NULL,"
+            + "     given_name TEXT,"
+            + "     family_name TEXT,"
+            + "     uuid TEXT,"
+            + "     location_uuid TEXT,"
+            + "     admission_timestamp INTEGER,"
+            + "     birthdate TEXT,"
+            + "     gender TEXT"
             + " )";
 
+    public static final String CONCEPTS_TABLE = "concepts";
     private static final String SQL_CREATE_CONCEPTS = ""
-            + " create table concepts ("
-            + "     _id text primary key not null,"
-            + "     xform_id integer unique not null,"
-            + "     concept_type text"
+            + " CREATE TABLE concepts ("
+            + "     _id TEXT PRIMARY KEY NOT NULL,"
+            + "     xform_id INTEGER UNIQUE NOT NULL,"
+            + "     concept_type TEXT"
             + " )";
 
+    public static final String CONCEPT_NAMES_TABLE = "concept_names";
     private static final String SQL_CREATE_CONCEPT_NAMES = ""
-            + " create table concept_names ("
-            + "     _id integer primary key not null,"
-            + "     concept_uuid text,"
-            + "     locale text,"
-            + "     localized_name text,"
-            + "     unique(concept_uuid, locale)"
+            + " CREATE TABLE concept_names ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     concept_uuid TEXT,"
+            + "     locale TEXT,"
+            + "     localized_name TEXT,"
+            + "     UNIQUE (concept_uuid, locale)"
             + " )";
 
+    public static final String LOCATIONS_TABLE = "locations";
     private static final String SQL_CREATE_LOCATIONS = ""
-            + " create table locations ("
-            + "     _id integer primary key not null,"
-            + "     location_uuid text,"
-            + "     parent_uuid text"
+            + " CREATE TABLE locations ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     location_uuid TEXT,"
+            + "     parent_uuid TEXT"
             + " )";
 
+    public static final String LOCATION_NAMES_TABLE = "location_names";
     private static final String SQL_CREATE_LOCATION_NAMES = ""
-            + " create table location_names ("
-            + "     _id integer primary key not null,"
-            + "     location_uuid text,"
-            + "     locale text,"
-            + "     localized_name text,"
-            + "     unique (location_uuid, locale)"
+            + " CREATE TABLE location_names ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     location_uuid TEXT,"
+            + "     locale TEXT,"
+            + "     localized_name TEXT,"
+            + "     UNIQUE (location_uuid, locale)"
             + " )";
 
+    public static final String OBSERVATIONS_TABLE = "observations";
     private static final String SQL_CREATE_OBSERVATIONS = ""
-            + " create table observations ("
-            + "     _id integer primary key not null,"
-            + "     patient_uuid text,"
-            + "     encounter_uuid text,"
-            + "     encounter_time integer,"
-            + "     concept_uuid integer,"
-            + "     value integer,"
-            + "     temp_cache integer," // really boolean
-            + "     unique(patient_uuid, encounter_uuid, concept_uuid)"
+            + " CREATE TABLE observations ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     patient_uuid TEXT,"
+            + "     encounter_uuid TEXT,"
+            + "     encounter_time INTEGER,"
+            + "     concept_uuid INTEGER,"
+            + "     value INTEGER,"
+            + "     temp_cache INTEGER," // really boolean
+            + "     UNIQUE (patient_uuid, encounter_uuid, concept_uuid)"
             + " )";
 
+    public static final String CHARTS_TABLE = "charts";
     private static final String SQL_CREATE_CHARTS = ""
-            + " create table charts ("
-            + "     _id integer primary key not null,"
-            + "     chart_uuid text,"
-            + "     chart_row integer,"
-            + "     group_uuid text,"
-            + "     concept_uuid integer,"
-            + "     unique(chart_uuid, concept_uuid)"
+            + " CREATE TABLE charts ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     chart_uuid TEXT,"
+            + "     chart_row INTEGER,"
+            + "     group_uuid TEXT,"
+            + "     concept_uuid INTEGER,"
+            + "     UNIQUE (chart_uuid, concept_uuid)"
             + " )";
 
+    public static final String USERS_TABLE = "users";
     private static final String SQL_CREATE_USERS = ""
-            + " create table users ("
-            + "     _id integer primary key not null,"
-            + "     uuid text,"
-            + "     full_name text"
+            + " CREATE TABLE users ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     uuid TEXT,"
+            + "     full_name TEXT"
             + " )";
 
+    public static final String MISC_TABLE = "misc";
     private static final String SQL_CREATE_MISC = ""
-            + " create table misc ("
-            + "     _id integer primary key not null,"
-            + "     full_sync_start_time integer,"
-            + "     full_sync_end_time integer,"
-            + "     obs_sync_time integer"
+            + " CREATE TABLE misc ("
+            + "     _id INTEGER PRIMARY KEY NOT NULL,"
+            + "     full_sync_start_time INTEGER,"
+            + "     full_sync_end_time INTEGER,"
+            + "     obs_sync_time INTEGER"
             + " )";
 
     public PatientDatabase(Context context) {
@@ -136,13 +145,13 @@ public class PatientDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
-        db.execSQL(SQL_CREATE_CONCEPT_NAMES);
+        db.execSQL(SQL_CREATE_PATIENTS);
         db.execSQL(SQL_CREATE_CONCEPTS);
-        db.execSQL(SQL_CREATE_CHARTS);
+        db.execSQL(SQL_CREATE_CONCEPT_NAMES);
         db.execSQL(SQL_CREATE_LOCATIONS);
         db.execSQL(SQL_CREATE_LOCATION_NAMES);
         db.execSQL(SQL_CREATE_OBSERVATIONS);
+        db.execSQL(SQL_CREATE_CHARTS);
         db.execSQL(SQL_CREATE_USERS);
         db.execSQL(SQL_CREATE_MISC);
     }
@@ -151,15 +160,15 @@ public class PatientDatabase extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache, so its upgrade policy is
         // to simply to discard the data and start over
-        db.execSQL("drop table if exists patients");
-        db.execSQL("drop table if exists observations");
-        db.execSQL("drop table if exists concepts");
-        db.execSQL("drop table if exists concept_names");
-        db.execSQL("drop table if exists charts");
-        db.execSQL("drop table if exists locations");
-        db.execSQL("drop table if exists location_names");
-        db.execSQL("drop table if exists users");
-        db.execSQL("drop table if exists misc");
+        db.execSQL("DROP TABLE IF EXISTS " + PATIENTS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + CONCEPTS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + CONCEPT_NAMES_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + LOCATIONS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + LOCATION_NAMES_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + OBSERVATIONS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + CHARTS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + MISC_TABLE);
         onCreate(db);
     }
 

@@ -44,39 +44,39 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
         // This scary SQL statement joins the observations a subselect for the latest for each
         // concept with appropriate concept names to give localized output.
         String query = ""
-                + " select obs._id,"
+                + " SELECT obs._id,"
                 + "     obs.encounter_time,"
                 + "     obs.concept_uuid,"
-                + "     names.localized_name as concept_name,"
+                + "     names.localized_name AS concept_name,"
                 // Localized value for concept values
                 + "     obs.value,"
-                + "     coalesce(value_names.localized_name, obs.value) as localized_value"
-                + " from observations obs"
+                + "     COALESCE(value_names.localized_name, obs.value) AS localized_value"
+                + " FROM observations AS obs"
 
-                + " inner join ("
-                + "     select concept_uuid,"
-                + "         max(encounter_time) as maxtime"
-                + "     from observations"
-                + "     where patient_uuid = ?" // 1st selection arg
-                + "     group by concept_uuid"
+                + " INNER JOIN ("
+                + "     SELECT concept_uuid,"
+                + "         max(encounter_time) AS maxtime"
+                + "     FROM observations"
+                + "     WHERE patient_uuid = ?" // 1st selection arg
+                + "     GROUP BY concept_uuid"
                 + " ) maxs"
-                + " on obs.encounter_time = maxs.maxtime and"
+                + " ON obs.encounter_time = maxs.maxtime AND"
                 + "     obs.concept_uuid = maxs.concept_uuid"
 
-                + " inner join concept_names names"
-                + " on obs.concept_uuid = names.concept_uuid"
+                + " INNER JOIN concept_names names"
+                + " ON obs.concept_uuid = names.concept_uuid"
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
-                // To cope we will do a left join on the value and the name
-                + " left join concept_names value_names"
-                + " on obs.value = value_names.concept_uuid"
-                + "     and value_names.locale = ?" // 2nd selection arg
+                // To cope we will do a LEFT JOIN ON the value AND the name
+                + " LEFT JOIN concept_names value_names"
+                + " ON obs.value = value_names.concept_uuid"
+                + "     AND value_names.locale = ?" // 2nd selection arg
 
-                + " where obs.patient_uuid = ? and " // 3rd sel. arg
+                + " WHERE obs.patient_uuid = ? AND " // 3rd sel. arg
                 + "     names.locale = ? " // 4th selection arg
 
-                + " order by obs.concept_uuid, obs._id";
+                + " ORDER BY obs.concept_uuid, obs._id";
 
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, patientUuid, locale});
