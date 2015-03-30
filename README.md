@@ -1,10 +1,11 @@
 client
 ==============
 
-The Android client app for Buendia.
+The Android client app for Buendia. See the
+[Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for details.
 
 
-Copyright 2014 Pim de Witte
+Copyright 2015 The Project Buendia Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
