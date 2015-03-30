@@ -37,12 +37,6 @@ public class UtilsModule {
 
     @Provides
     @Singleton
-    ActivityHierarchyServer provideActivityHierarchyServer() {
-        return ActivityHierarchyServer.NONE;
-    }
-
-    @Provides
-    @Singleton
     Colorizer provideUserColorizer() {
         return Colorizer
                 .withPalette(

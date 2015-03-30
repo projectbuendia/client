@@ -19,7 +19,6 @@ import org.msf.records.diagnostics.HealthMonitor;
 import org.msf.records.net.OpenMrsConnectionDetails;
 import org.msf.records.net.Server;
 import org.msf.records.user.UserManager;
-import org.msf.records.utils.ActivityHierarchyServer;
 import org.odk.collect.android.application.Collect;
 
 import javax.inject.Inject;
@@ -40,7 +39,6 @@ public class App extends Application {
 
     private static OpenMrsConnectionDetails sConnectionDetails;
 
-    @Inject ActivityHierarchyServer mActivityHierarchyServer;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject Server mServer;
@@ -54,8 +52,6 @@ public class App extends Application {
         initializeSqlCipher();
 
         buildObjectGraphAndInject();
-
-        registerActivityLifecycleCallbacks(mActivityHierarchyServer);
 
         synchronized (App.class) {
             sInstance = this;
