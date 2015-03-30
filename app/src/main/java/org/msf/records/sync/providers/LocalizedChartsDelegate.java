@@ -52,7 +52,7 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
                 + "     chart.concept_uuid,"
                 + "     names.localized_name as concept_name,"
                 // Localized value for concept values
-                + "     obs.value,
+                + "     obs.value,"
                 + "     coalesce(value_names.localized_name, obs.value) as localized_value"
                 + " from charts chart"
 
