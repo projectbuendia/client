@@ -143,7 +143,7 @@ public class RpcToDb {
                 Contracts.LocationNames._ID,
                 Contracts.LocationNames.LOCATION_UUID,
                 Contracts.LocationNames.LOCALE,
-                Contracts.LocationNames.LOCALIZED_NAME
+                Contracts.LocationNames.NAME
         };
 
         LOG.d("Before network call");
@@ -185,7 +185,7 @@ public class RpcToDb {
             String locale = namesCur.getString(
                     namesCur.getColumnIndex(Contracts.LocationNames.LOCALE));
             String name = namesCur.getString(
-                    namesCur.getColumnIndex(Contracts.LocationNames.LOCALIZED_NAME));
+                    namesCur.getColumnIndex(Contracts.LocationNames.NAME));
             if (locationId == null || locale == null || name == null) {
                 continue;
             }
@@ -244,7 +244,7 @@ public class RpcToDb {
                                 .withValue(
                                         Contracts.LocationNames.LOCALE, locale)
                                 .withValue(
-                                        Contracts.LocationNames.LOCALIZED_NAME,
+                                        Contracts.LocationNames.NAME,
                                         location.names.get(locale))
                                 .build());
                         syncResult.stats.numInserts++;
@@ -284,7 +284,7 @@ public class RpcToDb {
                             .withValue(
                                     Contracts.LocationNames.LOCALE, locale)
                             .withValue(
-                                    Contracts.LocationNames.LOCALIZED_NAME,
+                                    Contracts.LocationNames.NAME,
                                     location.names.get(locale))
                             .build());
                     syncResult.stats.numInserts++;

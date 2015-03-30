@@ -39,7 +39,7 @@ public class Contracts {
         String LOCALE = "locale";
 
         /** The name of something in a given locale. */
-        String LOCALIZED_NAME = "name";
+        String NAME = "name";
     }
 
     /** Columns for a concept. */
@@ -117,26 +117,26 @@ public class Contracts {
 
         /** Admission timestamp. */
         String ADMISSION_TIMESTAMP = "admission_timestamp";
-        
+
         /** Family name. */
         String FAMILY_NAME = "family_name";
-        
+
         /** Given name. */
         String GIVEN_NAME = "given_name";
-        
+
         /** UUID. */
         String UUID = "uuid";
 
         /** UUID of the assigned location. */
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-        
+
         /** Birthdate. */
         String BIRTHDATE = "birthdate";
-        
+
         /** Gender. */
         String GENDER = "gender";
     }
-    
+
     interface PatientCountColumns {
 
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
@@ -173,7 +173,7 @@ public class Contracts {
 
         String PARENT_UUID = LocationColumns.PARENT_UUID;
 
-        String LOCALIZED_NAME = LocaleColumns.LOCALIZED_NAME;
+        String NAME = LocaleColumns.NAME;
 
         /** The patient count for a single location, not including child locations. */
         String PATIENT_COUNT = "patient_count";

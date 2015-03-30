@@ -76,7 +76,7 @@ public class Database extends SQLiteOpenHelper {
             + "     _id INTEGER PRIMARY KEY NOT NULL,"
             + "     concept_uuid TEXT,"
             + "     locale TEXT,"
-            + "     localized_name TEXT,"
+            + "     name TEXT,"
             + "     UNIQUE (concept_uuid, locale)"
             + " )";
 
@@ -94,7 +94,7 @@ public class Database extends SQLiteOpenHelper {
             + "     _id INTEGER PRIMARY KEY NOT NULL,"
             + "     location_uuid TEXT,"
             + "     locale TEXT,"
-            + "     localized_name TEXT,"
+            + "     name TEXT,"
             + "     UNIQUE (location_uuid, locale)"
             + " )";
 

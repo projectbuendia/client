@@ -24,8 +24,7 @@ public class AppLocationConverter implements AppTypeConverter<AppLocation> {
         return new AppLocation(
                 cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.LOCATION_UUID)),
                 cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.PARENT_UUID)),
-                cursor.getString(
-                        cursor.getColumnIndex(Contracts.LocalizedLocations.LOCALIZED_NAME)),
+                cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.NAME)),
                 cursor.getInt(cursor.getColumnIndex(Contracts.LocalizedLocations.PATIENT_COUNT)));
     }
 }
