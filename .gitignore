@@ -39,4 +39,10 @@ proguard/
 .idea/vcs.xml
 
 # User-specific configurations
+*.iml
+.classpath
+.settings
+.project
+
+# Build results
 *.apk
