@@ -45,53 +45,39 @@ public class LocalizedChartsDelegate implements ProviderDelegate<Database> {
 
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
-        String query = "SELECT obs." + Contracts.Observations._ID
-                + ",obs.encounter_time,"
-                + "group_names." + Contracts.ConceptNames.LOCALIZED_NAME + " AS group_name,"
-                + "chart." + Contracts.Observations.CONCEPT_UUID + ","
-                + "names." + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name,"
+        String query = ""
+                + " select obs._id,"
+                + "     obs.encounter_time,"
+                + "     group_names.localized_name as group_name,"
+                + "     chart.concept_uuid,"
+                + "     names.localized_name as concept_name,"
                 // Localized value for concept values
-                + "obs." + Contracts.Observations.VALUE
-                + ",coalesce(value_names." + Contracts.ConceptNames.LOCALIZED_NAME + ", obs."
-                + Contracts.Observations.VALUE + ") "
-                + "AS localized_value"
+                + "     obs.value,
+                + "     coalesce(value_names.localized_name, obs.value) as localized_value"
+                + " from charts chart"
 
-                + " FROM "
-                + "charts" + " chart "
+                + "     inner join concept_names names"
+                + "     on chart.concept_uuid = names.concept_uuid"
 
-                + " INNER JOIN " + "concept_names" + " names "
-                + "ON chart." + Contracts.Charts.CONCEPT_UUID + "="
-                + "names." + Contracts.Charts.CONCEPT_UUID
+                + "     inner join concept_names group_names"
+                + "     on chart.group_uuid = group_names.concept_uuid"
 
-                + " INNER JOIN "
-                + "concept_names" + " group_names "
-                + "ON chart." + Contracts.Charts.GROUP_UUID + "="
-                + "group_names." + Contracts.Charts.CONCEPT_UUID
-
-                + " LEFT JOIN "
-                + "observations" + " obs "
-                + "ON chart." + Contracts.Charts.CONCEPT_UUID + "="
-                + "obs." + Contracts.Observations.CONCEPT_UUID + " AND "
-                + "(obs." + Contracts.Observations.PATIENT_UUID + "=? OR " // 2nd selection arg
-                + "obs." + Contracts.Observations.PATIENT_UUID + " IS NULL)"
+                + "     left join observations obs"
+                + "     on chart.concept_uuid = obs.concept_uuid and "
+                + "         (obs.patient_uuid = ? or" // 2nd selection arg
+                + "          obs.patient_uuid is null)"
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
                 // To cope we will do a left join on the value and the name
-                + " LEFT JOIN " + "concept_names" + " value_names "
-                + "ON obs." + Contracts.Observations.VALUE + "= "
-                + "value_names." + Contracts.Charts.CONCEPT_UUID
-                + " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" // 1st selection arg
+                + "     left join concept_names value_names"
+                + "     on obs.value = value_names.concept_uuid"
+                + "         and value_names.locale = ?" // 1st selection arg
 
-//              + " WHERE chart." + ChartColumns.CHART_UUID + "=? AND "
-                + " WHERE "
-                + "names." + Contracts.ConceptNames.LOCALE + "=? AND " // 3rd selection arg
-                + "group_names." + Contracts.ConceptNames.LOCALE + "=?" // 4th selection arg
+                + " where names.locale = ? and " // 3rd selection arg
+                + "     group_names.locale = ?" // 4th selection arg
 
-                + " ORDER BY chart." + Contracts.Charts.CHART_ROW
-                + ", obs." + Contracts.Observations.ENCOUNTER_TIME
-                + ", obs." + Contracts.Observations._ID
-                ;
+                + " order by chart.chart_row, obs.encounter_time, obs._id";
 
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, locale, locale});

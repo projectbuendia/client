@@ -43,49 +43,40 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Datab
 
         // This scary SQL statement joins the observations a subselect for the latest for each
         // concept with appropriate concept names to give localized output.
-        String query = "SELECT obs." + Contracts.Observations._ID
-                + ", obs.encounter_time,"
-                + "obs.concept_uuid,names."
-                + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name,"
+        String query = ""
+                + " select obs._id,"
+                + "     obs.encounter_time,"
+                + "     obs.concept_uuid,"
+                + "     names.localized_name as concept_name,"
                 // Localized value for concept values
-                + "obs." + Contracts.Observations.VALUE
-                + ",coalesce(value_names." + Contracts.ConceptNames.LOCALIZED_NAME
-                + ", obs." + Contracts.Observations.VALUE + ") "
-                + "AS localized_value"
+                + "     obs.value,"
+                + "     coalesce(value_names.localized_name, obs.value) as localized_value"
+                + " from observations obs"
 
-                + " FROM "
-                + "observations" + " obs "
+                + " inner join ("
+                + "     select concept_uuid,"
+                + "         max(encounter_time) as maxtime"
+                + "     from observations"
+                + "     where patient_uuid = ?" // 1st selection arg
+                + "     group by concept_uuid"
+                + " ) maxs"
+                + " on obs.encounter_time = maxs.maxtime and"
+                + "     obs.concept_uuid = maxs.concept_uuid"
 
-                + " INNER JOIN "
-
-                + "(SELECT " + Contracts.Charts.CONCEPT_UUID
-                + ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime "
-                + "FROM " + "observations"
-                + " WHERE " + Contracts.Observations.PATIENT_UUID + "=? " // 1st selection arg
-                + "GROUP BY " + Contracts.Observations.CONCEPT_UUID + ") maxs "
-
-                + "ON obs." + Contracts.Observations.ENCOUNTER_TIME + " = maxs.maxtime AND "
-                + "obs." + Contracts.Observations.CONCEPT_UUID
-                + "=maxs." + Contracts.Observations.CONCEPT_UUID
-
-                + " INNER JOIN "
-                + "concept_names" + " names "
-                + "ON obs." + Contracts.Observations.CONCEPT_UUID + "="
-                + "names." + Contracts.ConceptNames.CONCEPT_UUID
+                + " inner join concept_names names"
+                + " on obs.concept_uuid = names.concept_uuid"
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
                 // To cope we will do a left join on the value and the name
-                + " LEFT JOIN " + "concept_names" + " value_names "
-                + "ON obs." + Contracts.Observations.VALUE + "="
-                + "value_names." + Contracts.Charts.CONCEPT_UUID
-                + " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" // 2nd selection arg
+                + " left join concept_names value_names"
+                + " on obs.value = value_names.concept_uuid"
+                + "     and value_names.locale = ?" // 2nd selection arg
 
-                + " WHERE obs." + Contracts.Observations.PATIENT_UUID + "=? AND " // 3rd sel. arg
-                + "names." + Contracts.ConceptNames.LOCALE + "=? " // 4th selection arg
+                + " where obs.patient_uuid = ? and " // 3rd sel. arg
+                + "     names.locale = ? " // 4th selection arg
 
-                + " ORDER BY obs." + Contracts.Charts.CONCEPT_UUID
-                + ", obs." + Contracts.Observations._ID;
+                + " order by obs.concept_uuid, obs._id";
 
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, patientUuid, locale});

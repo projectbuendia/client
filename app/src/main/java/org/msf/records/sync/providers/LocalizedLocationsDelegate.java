@@ -39,20 +39,18 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
      * </ul>
      */
     private static final String QUERY = ""
-            + "SELECT\n"
-            + "  locations.location_uuid as location_uuid,\n"
-            + "  locations.parent_uuid as parent_uuid,\n"
-            + "  location_names.name as name,\n"
-            + "  COUNT(patients.location_uuid) as patient_count\n"
-            + "FROM locations\n"
-            + "  INNER JOIN location_names\n"
-            + "    ON locations.location_uuid = location_names.location_uuid\n"
-            + "  LEFT JOIN patients\n"
-            + "    ON locations.location_uuid = patients.location_uuid\n"
-            + "WHERE\n"
-            + "  location_names.locale = ?\n"
-            + "GROUP BY\n"
-            + "  locations.location_uuid";
+            + " select"
+            + "     locations.location_uuid as location_uuid,"
+            + "     locations.parent_uuid as parent_uuid,"
+            + "     location_names.name as name,"
+            + "     count(patients.location_uuid) as patient_count"
+            + " from locations"
+            + "     inner join location_names"
+            + "     on locations.location_uuid = location_names.location_uuid"
+            + "     left join patients"
+            + "     on locations.location_uuid = patients.location_uuid"
+            + " where location_names.locale = ?"
+            + " group by locations.location_uuid";
 
     @Override
     public String getType() {
