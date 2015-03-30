@@ -1,2 +1,3 @@
 include ':app'
 include ':third_party:odkcollect'
+include ':third_party:AutoFitTextView'

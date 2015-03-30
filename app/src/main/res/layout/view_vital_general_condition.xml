@@ -54,7 +54,7 @@
             android:textSize="16sp"
             android:text="@string/condition" />
 
-        <org.msf.records.widget.AutoResizeTextView
+        <com.lb.auto_fit_textview.AutoResizeTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/patient_chart_vital_general_condition"

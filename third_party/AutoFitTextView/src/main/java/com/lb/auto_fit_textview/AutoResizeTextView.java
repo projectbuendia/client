@@ -1,5 +1,4 @@
-package org.msf.records.widget;
-
+package com.lb.auto_fit_textview;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -13,10 +12,6 @@ import android.util.AttributeSet;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.widget.TextView;
-
-// @nolint - Third-party.
-
-// TODO: License. From https://github.com/AndroidDeveloperLB/AutoFitTextView.
 
 /**
  * a textView that is able to self-adjust its font size depending on the min and max size of the font, and its own size.<br/>

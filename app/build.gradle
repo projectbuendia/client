@@ -53,6 +53,7 @@ dependencies {
     androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
     compile files('libs/sqlcipher.jar')
+    compile project(':third_party:AutoFitTextView')
 }
 
 apply plugin: 'spoon'
