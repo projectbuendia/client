@@ -28,33 +28,26 @@ import org.msf.records.sync.providers.Contracts;
  * </code>
  */
 public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
-    // WHERE subclause returning only patients that had the concept with the given value in
-    // the latest observation.
+    // WHERE subclause returning only the UUIDs of patients that had a given
+    // concept whose latest observed value was the given value.
     private static final String CONCEPT_SUBQUERY =
-            Contracts.Patients.UUID
-            + " IN (SELECT patient_uuid FROM "
-            + "(SELECT obs." + Contracts.Observations.PATIENT_UUID + " as patient_uuid,"
-            + "obs." + Contracts.Observations.VALUE + " as concept_value"
-            + " FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs "
-
-            + " INNER JOIN "
-            + "(SELECT " + Contracts.Charts.CONCEPT_UUID + ","
-            + Contracts.Observations.PATIENT_UUID
-            + ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime"
-            + " FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME
-            + " GROUP BY " + Contracts.Observations.PATIENT_UUID + ","
-            + Contracts.Charts.CONCEPT_UUID
-            + ") maxs "
-            + "ON obs." + Contracts.Observations.ENCOUNTER_TIME
-            + " = maxs.maxtime AND "
-            + "obs." + Contracts.Observations.CONCEPT_UUID + "=maxs."
-            + Contracts.Observations.CONCEPT_UUID + " AND "
-            + "obs." + Contracts.Observations.PATIENT_UUID + "=maxs."
-            + Contracts.Observations.PATIENT_UUID
-
-            + " WHERE obs." + Contracts.Observations.CONCEPT_UUID + "=?"
-            + " ORDER BY obs." + Contracts.Observations.PATIENT_UUID + ")"
-            + " WHERE concept_value=?)";
+            "uuid in ("
+            + "    select patient_uuid from ("
+            + "        select obs.patient_uuid as patient_uuid,"
+            + "               obs.value as concept_value"
+            + "        from observations obs inner join ("
+            + "            select concept_uuid, patient_uuid,"
+            + "                   max(encounter_time) as maxtime"
+            + "            from observations"
+            + "            group by patient_uuid, concept_uuid"
+            + "        ) maxs "
+            + "    on obs.encounter_time = maxs.maxtime and "
+            + "        obs.concept_uuid = maxs.concept_uuid and "
+            + "        obs.patient_uuid = maxs.patient_uuid"
+            + "    where obs.concept_uuid=?"
+            + "    order by obs.patient_uuid"
+            + "    ) where concept_value=?"
+            + ")";
 
     private final String mConceptUuid;
     private final String mConceptValueUuid;

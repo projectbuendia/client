@@ -57,19 +57,19 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
                 + "AS localized_value"
 
                 + " FROM "
-                + PatientDatabase.CHARTS_TABLE_NAME + " chart "
+                + "charts" + " chart "
 
-                + " INNER JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names "
+                + " INNER JOIN " + "concept_names" + " names "
                 + "ON chart." + Contracts.Charts.CONCEPT_UUID + "="
                 + "names." + Contracts.Charts.CONCEPT_UUID
 
                 + " INNER JOIN "
-                + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " group_names "
+                + "concept_names" + " group_names "
                 + "ON chart." + Contracts.Charts.GROUP_UUID + "="
                 + "group_names." + Contracts.Charts.CONCEPT_UUID
 
                 + " LEFT JOIN "
-                + PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs "
+                + "observations" + " obs "
                 + "ON chart." + Contracts.Charts.CONCEPT_UUID + "="
                 + "obs." + Contracts.Observations.CONCEPT_UUID + " AND "
                 + "(obs." + Contracts.Observations.PATIENT_UUID + "=? OR " // 2nd selection arg
@@ -78,7 +78,7 @@ public class LocalizedChartsDelegate implements ProviderDelegate<PatientDatabase
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
                 // To cope we will do a left join on the value and the name
-                + " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names "
+                + " LEFT JOIN " + "concept_names" + " value_names "
                 + "ON obs." + Contracts.Observations.VALUE + "= "
                 + "value_names." + Contracts.Charts.CONCEPT_UUID
                 + " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" // 1st selection arg

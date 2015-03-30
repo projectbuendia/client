@@ -37,7 +37,7 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SelectionBuilder builder = new SelectionBuilder()
-                .table(PatientDatabase.USERS_TABLE_NAME)
+                .table("users")
                 .where(selection, selectionArgs);
         Cursor cursor = builder.query(dbHelper.getReadableDatabase(), projection, sortOrder);
         cursor.setNotificationUri(contentResolver, uri);
@@ -49,7 +49,7 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         long id = dbHelper.getWritableDatabase()
-                .replaceOrThrow(PatientDatabase.USERS_TABLE_NAME, null, values);
+                .replaceOrThrow("users", null, values);
         contentResolver.notifyChange(uri, null, false);
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
@@ -70,7 +70,7 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
-                .table(PatientDatabase.USERS_TABLE_NAME)
+                .table("users")
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
@@ -82,7 +82,7 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
-                .table(PatientDatabase.USERS_TABLE_NAME)
+                .table("users")
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);

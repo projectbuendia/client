@@ -54,13 +54,13 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
                 + "AS localized_value"
 
                 + " FROM "
-                + PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs "
+                + "observations" + " obs "
 
                 + " INNER JOIN "
 
                 + "(SELECT " + Contracts.Charts.CONCEPT_UUID
                 + ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime "
-                + "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME
+                + "FROM " + "observations"
                 + " WHERE " + Contracts.Observations.PATIENT_UUID + "=? " // 1st selection arg
                 + "GROUP BY " + Contracts.Observations.CONCEPT_UUID + ") maxs "
 
@@ -69,14 +69,14 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
                 + "=maxs." + Contracts.Observations.CONCEPT_UUID
 
                 + " INNER JOIN "
-                + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names "
+                + "concept_names" + " names "
                 + "ON obs." + Contracts.Observations.CONCEPT_UUID + "="
                 + "names." + Contracts.ConceptNames.CONCEPT_UUID
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
                 // To cope we will do a left join on the value and the name
-                + " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names "
+                + " LEFT JOIN " + "concept_names" + " value_names "
                 + "ON obs." + Contracts.Observations.VALUE + "="
                 + "value_names." + Contracts.Charts.CONCEPT_UUID
                 + " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" // 2nd selection arg

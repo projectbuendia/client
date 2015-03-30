@@ -5,26 +5,18 @@ import android.content.Context;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
-import org.msf.records.sync.providers.Contracts;
-
-import static android.provider.BaseColumns._ID;
-
 /**
- * A helper for the database for storing patient attributes, active patients, locations,
- * and chart information.
- * Stored in the same database as patients are the keys for charts too.
+ * Schema definition of the database for patient attributes, active patients,
+ * locations, and chart information.
  */
 public class PatientDatabase extends SQLiteOpenHelper {
 
-    // TODO: This class currently uses providers.Contracts to define DB column names. This
-    // isn't strictly correct as those names are the ones used in the public interface of
-    // ContentProviders. Just because a DB column name has the same name as a ContentProvider column
-    // name doesn't mean that they should reference the exact same string.
-
     /** Schema version. */
     public static final int DATABASE_VERSION = 15;
+
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
+
     /*
      * This deserves a brief comment on security. Patient data encrypted by a hardcoded key
      * might seem like security by obscurity. It is.
@@ -57,124 +49,77 @@ public class PatientDatabase extends SQLiteOpenHelper {
      */
     private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
 
-    private static final String CREATE_TABLE = "CREATE TABLE ";
-    private static final String PRIMARY_KEY = " PRIMARY KEY";
-    private static final String UNIQUE = " UNIQUE";
-    private static final String UNIQUE_INDEX = "UNIQUE(";
-    private static final String TYPE_TEXT = " TEXT";
-    private static final String TYPE_INTEGER = " INTEGER";
-    private static final String NOTNULL = "  NOT NULL";
-    private static final String COMMA_SEP = ",";
-
-    /**
-     * Table name where records are stored for "patient" resources.
-     */
-    public static final String PATIENTS_TABLE_NAME = "patients";
-
-    /** SQL statement to create "patient" table. */
-    private static final String SQL_CREATE_ENTRIES = CREATE_TABLE + PATIENTS_TABLE_NAME + " ("
-            + _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Patients.GIVEN_NAME + TYPE_TEXT + COMMA_SEP
-            + Contracts.Patients.FAMILY_NAME + TYPE_TEXT + COMMA_SEP
-            + Contracts.Patients.UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Patients.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Patients.ADMISSION_TIMESTAMP + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Patients.BIRTHDATE + TYPE_TEXT + COMMA_SEP
-            + Contracts.Patients.GENDER + TYPE_TEXT
+    private static final String SQL_CREATE_ENTRIES = "create table patients ("
+            + "_id text primary key not null,"
+            + "given_name text,"
+            + "family_name text,"
+            + "uuid text,"
+            + "location_uuid text,"
+            + "admission_timestamp integer,"
+            + "birthdate text,"
+            + "gender text"
             + ")";
 
-    public static final String CONCEPTS_TABLE_NAME = "concepts";
-
-    private static final String SQL_CREATE_CONCEPTS = CREATE_TABLE + CONCEPTS_TABLE_NAME + " ("
-            + _ID + TYPE_TEXT + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Concepts.XFORM_ID + TYPE_INTEGER + UNIQUE + NOTNULL + COMMA_SEP
-            + Contracts.Concepts.CONCEPT_TYPE + TYPE_TEXT
+    private static final String SQL_CREATE_CONCEPTS = "create table concepts ("
+            + "_id text primary key not null,"
+            + "xform_id integer unique not null,"
+            + "concept_type text"
             + ")";
 
-    public static final String CONCEPT_NAMES_TABLE_NAME = "concept_names";
-
-    private static final String SQL_CREATE_CONCEPT_NAMES = CREATE_TABLE + CONCEPT_NAMES_TABLE_NAME
-            + " (" + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.ConceptNames.CONCEPT_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.ConceptNames.LOCALE + TYPE_TEXT + COMMA_SEP
-            + Contracts.ConceptNames.LOCALIZED_NAME + TYPE_TEXT + COMMA_SEP
-            + UNIQUE_INDEX + Contracts.ConceptNames.CONCEPT_UUID + COMMA_SEP
-            + Contracts.ConceptNames.LOCALE + ")"
+    private static final String SQL_CREATE_CONCEPT_NAMES = "create table concept_names ("
+            + "_id integer primary key not null,"
+            + "concept_uuid text,"
+            + "locale text,"
+            + "localized_name text,"
+            + "unique(concept_uuid, locale)"
             + ")";
 
-    public static final String LOCATIONS_TABLE_NAME = "locations";
-
-    private static final String SQL_CREATE_LOCATIONS = CREATE_TABLE + LOCATIONS_TABLE_NAME + " ("
-            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Locations.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Locations.PARENT_UUID + TYPE_TEXT
+    private static final String SQL_CREATE_LOCATIONS = "create table locations ("
+            + "_id integer primary key not null,"
+            + "location_uuid text,"
+            + "parent_uuid text"
             + ")";
 
-    public static final String LOCATION_NAMES_TABLE_NAME = "location_names";
-
-    private static final String SQL_CREATE_LOCATION_NAMES = CREATE_TABLE + LOCATION_NAMES_TABLE_NAME
-            + " ("
-            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.LocationNames.LOCATION_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.LocationNames.LOCALE + TYPE_TEXT + COMMA_SEP
-            + Contracts.LocationNames.LOCALIZED_NAME + TYPE_TEXT + COMMA_SEP
-            + UNIQUE_INDEX + Contracts.LocationNames.LOCATION_UUID + COMMA_SEP
-            + Contracts.LocationNames.LOCALE + ")"
+    private static final String SQL_CREATE_LOCATION_NAMES = "create table location_names ("
+            + "_id integer primary key not null,"
+            + "location_uuid text,"
+            + "locale text,"
+            + "localized_name text,"
+            + "unique (location_uuid, locale)"
             + ")";
 
-    public static final String OBSERVATIONS_TABLE_NAME = "observations";
-
-    private static final String SQL_CREATE_OBSERVATIONS = CREATE_TABLE + OBSERVATIONS_TABLE_NAME
-            + " ("
-            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Observations.PATIENT_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Observations.ENCOUNTER_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Observations.ENCOUNTER_TIME + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Observations.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Observations.VALUE + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Observations.TEMP_CACHE + TYPE_INTEGER + COMMA_SEP // really boolean
-            + UNIQUE_INDEX + Contracts.Observations.PATIENT_UUID + COMMA_SEP
-            + Contracts.Observations.ENCOUNTER_UUID + COMMA_SEP
-            + Contracts.Observations.CONCEPT_UUID + ")"
+    private static final String SQL_CREATE_OBSERVATIONS = "create table observations ("
+            + "_id integer primary key not null,"
+            + "patient_uuid text,"
+            + "encounter_uuid text,"
+            + "encounter_time integer,"
+            + "concept_uuid integer,"
+            + "value integer,"
+            + "temp_cache integer," // really boolean
+            + "unique(patient_uuid, encounter_uuid, concept_uuid)"
             + ")";
 
-    public static final String CHARTS_TABLE_NAME = "charts";
-
-    private static final String SQL_CREATE_CHARTS = CREATE_TABLE + CHARTS_TABLE_NAME + " ("
-            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Charts.CHART_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Charts.CHART_ROW + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Charts.GROUP_UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Charts.CONCEPT_UUID + TYPE_INTEGER + COMMA_SEP
-            + UNIQUE_INDEX + Contracts.Charts.CHART_UUID + COMMA_SEP
-            + Contracts.Charts.CONCEPT_UUID + ")"
+    private static final String SQL_CREATE_CHARTS = "create table charts ("
+            + "_id integer primary key not null,"
+            + "chart_uuid text,"
+            + "chart_row integer,"
+            + "group_uuid text,"
+            + "concept_uuid integer,"
+            + "unique(chart_uuid, concept_uuid)"
             + ")";
 
-    public static final String USERS_TABLE_NAME = "users";
-
-    private static final String SQL_CREATE_USERS = CREATE_TABLE + USERS_TABLE_NAME + " ("
-            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Users.UUID + TYPE_TEXT + COMMA_SEP
-            + Contracts.Users.FULL_NAME + TYPE_TEXT
+    private static final String SQL_CREATE_USERS = "create table users ("
+            + "_id integer primary key not null,"
+            + "uuid text,"
+            + "full_name text"
             + ")";
 
-    /**
-     * A table for storing miscellaneous single items that need persistent storage.
-     * At the moment one table, one row, then a column per item.
-     * We use a column per item as we don't have many elements, and it gives type safety.
-     */
-    public static final String MISC_TABLE_NAME = "misc";
-
-    private static final String SQL_CREATE_MISC = CREATE_TABLE + MISC_TABLE_NAME + " ("
-            + _ID + TYPE_INTEGER + PRIMARY_KEY + NOTNULL + COMMA_SEP
-            + Contracts.Misc.FULL_SYNC_START_TIME + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Misc.FULL_SYNC_END_TIME + TYPE_INTEGER + COMMA_SEP
-            + Contracts.Misc.OBS_SYNC_TIME + TYPE_INTEGER
+    private static final String SQL_CREATE_MISC = "create table misc ("
+            + "_id integer primary key not null,"
+            + "full_sync_start_time integer,"
+            + "full_sync_end_time integer,"
+            + "obs_sync_time integer"
             + ")";
-
-    private static String makeDropTable(String tableName) {
-        return "DROP TABLE IF EXISTS " + tableName;
-    }
 
     public PatientDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -197,15 +142,15 @@ public class PatientDatabase extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache, so its upgrade policy is
         // to simply to discard the data and start over
-        db.execSQL(makeDropTable(PATIENTS_TABLE_NAME));
-        db.execSQL(makeDropTable(OBSERVATIONS_TABLE_NAME));
-        db.execSQL(makeDropTable(CONCEPTS_TABLE_NAME));
-        db.execSQL(makeDropTable(CONCEPT_NAMES_TABLE_NAME));
-        db.execSQL(makeDropTable(CHARTS_TABLE_NAME));
-        db.execSQL(makeDropTable(LOCATIONS_TABLE_NAME));
-        db.execSQL(makeDropTable(LOCATION_NAMES_TABLE_NAME));
-        db.execSQL(makeDropTable(USERS_TABLE_NAME));
-        db.execSQL(makeDropTable(MISC_TABLE_NAME));
+        db.execSQL("drop table if exists patients");
+        db.execSQL("drop table if exists observations");
+        db.execSQL("drop table if exists concepts");
+        db.execSQL("drop table if exists concept_names");
+        db.execSQL("drop table if exists charts");
+        db.execSQL("drop table if exists locations");
+        db.execSQL("drop table if exists location_names");
+        db.execSQL("drop table if exists users");
+        db.execSQL("drop table if exists misc");
         onCreate(db);
     }
 

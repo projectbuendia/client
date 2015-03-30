@@ -33,7 +33,7 @@ public class PatientCountsDelegate implements ProviderDelegate<PatientDatabase> 
     public Cursor query(
             PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
-        Cursor cursor = new SelectionBuilder().table(PatientDatabase.PATIENTS_TABLE_NAME)
+        Cursor cursor = new SelectionBuilder().table("patients")
                 .where(selection, selectionArgs)
                 .where(Contracts.Patients.LOCATION_UUID
                         + " IS NOT NULL")
