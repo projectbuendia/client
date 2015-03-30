@@ -47,10 +47,10 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Datab
                 + " SELECT obs._id,"
                 + "     obs.encounter_time,"
                 + "     obs.concept_uuid,"
-                + "     names.localized_name AS concept_name,"
+                + "     names.name AS concept_name,"
                 // Localized value for concept values
                 + "     obs.value,"
-                + "     COALESCE(value_names.localized_name, obs.value) AS localized_value"
+                + "     COALESCE(value_names.name, obs.value) AS localized_value"
                 + " FROM observations AS obs"
 
                 + " INNER JOIN ("

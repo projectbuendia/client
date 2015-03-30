@@ -48,12 +48,12 @@ public class LocalizedChartsDelegate implements ProviderDelegate<Database> {
         String query = ""
                 + " SELECT obs._id,"
                 + "     obs.encounter_time,"
-                + "     group_names.localized_name AS group_name,"
+                + "     group_names.name AS group_name,"
                 + "     chart.concept_uuid,"
-                + "     names.localized_name AS concept_name,"
+                + "     names.name AS concept_name,"
                 // Localized value for concept values
                 + "     obs.value,"
-                + "     COALESCE(value_names.localized_name, obs.value) AS localized_value"
+                + "     COALESCE(value_names.name, obs.value) AS localized_value"
                 + " FROM charts AS chart"
 
                 + "     INNER JOIN concept_names names"

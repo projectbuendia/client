@@ -572,7 +572,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 ContentValues conceptNameInsert = new ContentValues();
                 conceptNameInsert.put(Contracts.ConceptNames.CONCEPT_UUID, concept.uuid);
                 conceptNameInsert.put(Contracts.ConceptNames.LOCALE, locale);
-                conceptNameInsert.put(Contracts.ConceptNames.LOCALIZED_NAME, name);
+                conceptNameInsert.put(Contracts.ConceptNames.NAME, name);
                 conceptNameInserts.add(conceptNameInsert);
                 syncResult.stats.numInserts++;
             }
