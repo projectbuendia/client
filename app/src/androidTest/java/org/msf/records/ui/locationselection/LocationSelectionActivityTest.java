@@ -1,13 +1,20 @@
-package org.msf.records.ui.tentselection;
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-import com.google.android.apps.common.testing.ui.espresso.action.ViewActions;
+package org.msf.records.ui.locationselection;
 
 import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.ui.FunctionalTestCase;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.closeSoftKeyboard;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
@@ -18,7 +25,8 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
-public class TentSelectionActivityTest extends FunctionalTestCase {
+/** Tests for {@link LocationSelectionActivity}. */
+public class LocationSelectionActivityTest extends FunctionalTestCase {
 
     @Override
     public void setUp() throws Exception {
@@ -30,7 +38,7 @@ public class TentSelectionActivityTest extends FunctionalTestCase {
     public void testZonesAndTentsDisplayed() {
         waitForProgressFragment();
 
-        // Should be at tent selection screen
+        // Should be at location selection screen
         checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
         screenshot("Test Start");
 
@@ -99,7 +107,7 @@ public class TentSelectionActivityTest extends FunctionalTestCase {
                 .perform(click());
 
         pressBack(); // Back to search fragment.
-        pressBack(); // Back to tent selection screen.
+        pressBack(); // Back to location selection screen.
 
         // Make sure zones and tents are still displayed correctly.
         testZonesAndTentsDisplayed();

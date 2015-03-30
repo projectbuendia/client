@@ -13,9 +13,7 @@ package org.msf.records.events.user;
 
 import org.msf.records.net.model.NewUser;
 
-/**
- * An event bus event indicating that a user could not be successfully added.
- */
+/** An event bus event indicating that a user could not be successfully added. */
 public class UserAddFailedEvent {
 
     public static final int REASON_UNKNOWN = 0;

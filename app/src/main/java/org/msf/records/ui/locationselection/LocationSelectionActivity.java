@@ -1,4 +1,15 @@
-package org.msf.records.ui.tentselection;
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
+package org.msf.records.ui.locationselection;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,7 +27,7 @@ import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.net.Constants;
+import org.msf.records.net.Common;
 import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.LoadingState;
@@ -30,12 +41,10 @@ import org.msf.records.utils.Utils;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * Displays a list of tents and allows users to search through a list of patients.
- */
-public final class TentSelectionActivity extends PatientSearchActivity {
+/** Displays a list of locations and allows users to search through a list of patients. */
+public final class LocationSelectionActivity extends PatientSearchActivity {
 
-    private TentSelectionController mController;
+    private LocationSelectionController mController;
     private AlertDialog mSyncFailedDialog;
 
     @Inject AppModel mAppModel;
@@ -47,15 +56,15 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
 
-        if (Constants.OFFLINE_SUPPORT) {
+        if (Common.OFFLINE_SUPPORT) {
             // Create account, if needed
             GenericAccountService.registerSyncAccount(this);
         }
 
-        mController = new TentSelectionController(
+        mController = new LocationSelectionController(
                 mAppModel,
                 mCrudEventBusProvider.get(),
-        		new MyUi(),
+                new MyUi(),
                 new EventBusWrapper(EventBus.getDefault()),
                 mSyncManager,
                 getSearchController());
@@ -78,7 +87,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 Utils.logEvent("sync_failed_settings_pressed");
                                 startActivity(new Intent(
-                                        TentSelectionActivity.this,SettingsActivity.class));
+                                        LocationSelectionActivity.this,SettingsActivity.class));
                             }
                         })
                 .setPositiveButton(
@@ -92,16 +101,16 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                 .setCancelable(false)
                 .create();
 
-        setContentView(R.layout.activity_tent_selection);
+        setContentView(R.layout.activity_location_selection);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.tent_selection_container, new TentSelectionFragment())
+                    .add(R.id.location_selection_container, new LocationSelectionFragment())
                     .commit();
         }
     }
 
-    TentSelectionController getController() {
-    	return mController;
+    LocationSelectionController getController() {
+        return mController;
     }
 
     @Override
@@ -129,7 +138,7 @@ public final class TentSelectionActivity extends PatientSearchActivity {
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         Utils.logEvent("add_patient_pressed");
                         startActivity(new Intent(
-                                TentSelectionActivity.this,
+                                LocationSelectionActivity.this,
                                 PatientCreationActivity.class));
 
                         return true;
@@ -142,28 +151,28 @@ public final class TentSelectionActivity extends PatientSearchActivity {
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-            	mController.onSearchPressed();
-            	return true;
+                mController.onSearchPressed();
+                return true;
             }
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-            	mController.onSearchCancelled();
-            	return true;
+                mController.onSearchCancelled();
+                return true;
             }
         });
     }
 
-    private final class MyUi implements TentSelectionController.Ui {
+    private final class MyUi implements LocationSelectionController.Ui {
         @Override
-        public void switchToTentSelectionScreen() {
-    		getSupportFragmentManager().popBackStack();
-    	}
+        public void switchToLocationSelectionScreen() {
+            getSupportFragmentManager().popBackStack();
+        }
 
         @Override
         public void switchToPatientListScreen() {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.tent_selection_container, new PatientListFragment())
+                    .replace(R.id.location_selection_container, new PatientListFragment())
                     .addToBackStack(null)
                     .commit();
         }
@@ -185,18 +194,18 @@ public final class TentSelectionActivity extends PatientSearchActivity {
 
         @Override
         public void setLoadingState(LoadingState loadingState) {
-            TentSelectionActivity.this.setLoadingState(loadingState);
+            LocationSelectionActivity.this.setLoadingState(loadingState);
         }
 
         @Override
         public void finish() {
-            TentSelectionActivity.this.finish();
+            LocationSelectionActivity.this.finish();
         }
 
         @Override
         public void launchActivityForLocation(AppLocation location) {
             Intent roundIntent =
-                    new Intent(TentSelectionActivity.this, RoundActivity.class);
+                    new Intent(LocationSelectionActivity.this, RoundActivity.class);
             roundIntent.putExtra(RoundActivity.LOCATION_NAME_KEY, location.name);
             roundIntent.putExtra(RoundActivity.LOCATION_UUID_KEY, location.uuid);
             roundIntent.putExtra(RoundActivity.LOCATION_PATIENT_COUNT_KEY, location.patientCount);

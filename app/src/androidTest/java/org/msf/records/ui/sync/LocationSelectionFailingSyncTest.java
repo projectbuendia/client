@@ -1,6 +1,15 @@
-package org.msf.records.ui.sync;
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
+package org.msf.records.ui.sync;
 
 import org.msf.records.R;
 
@@ -9,13 +18,10 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressB
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 
-/**
- * Test cases for handling when the initial sync fails on the tent selection screen.
- */
-public class TentSelectionFailingSyncTest extends SyncTestCase {
+/** Test cases for handling when the initial sync fails on the location selection screen. */
+public class LocationSelectionFailingSyncTest extends SyncTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -110,7 +116,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
         waitForProgressFragment();
         screenshot("After Retry Clicked");
 
-        // Should be at tent selection screen with tents available.
+        // Should be at location selection screen with locations available.
         onView(withText("S1")).check(matches(isDisplayed()));
 
         screenshot("After Sync Completed");
@@ -118,7 +124,7 @@ public class TentSelectionFailingSyncTest extends SyncTestCase {
 
     /**
      * Tests that clicking 'Settings' in sync failed dialog and returning to
-     * this activity results in the progress bar still being shown
+     * this activity results in the progress bar still being shown.
      */
     // TODO: This test is flaky because of a real bug -- Volley is unresponsive to changes in
     // connectivity state, so a sync may not fail for seconds or even minutes after wifi is turned

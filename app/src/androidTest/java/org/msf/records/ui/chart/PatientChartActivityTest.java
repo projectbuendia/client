@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.content.res.Resources;
@@ -5,7 +16,6 @@ import android.content.res.Resources;
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 
 import android.support.annotation.Nullable;
-import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -62,9 +72,7 @@ import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 import static org.msf.records.ui.matchers.ViewMatchers.hasBackground;
 import static org.msf.records.ui.matchers.ViewMatchers.inRow;
 
-/**
- * Functional test for {@link PatientChartActivity}.
- */
+/** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
 public class PatientChartActivityTest extends FunctionalTestCase {
     private static final Logger LOG = Logger.create();
@@ -85,9 +93,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText("Guest User")).perform(click());
     }
 
-    /**
-     * Tests that the general condition dialog successfully changes general condition.
-     */
+    /** Tests that the general condition dialog successfully changes general condition. */
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
         initWithDemoPatientChart();
         onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());

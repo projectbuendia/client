@@ -20,10 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
-/**
- * A {@link HealthCheck} that checks whether the current device is connected
- * to a wifi network.
- */
+/** A {@link HealthCheck} that checks whether the current device is connected to a wifi network. */
 public class WifiHealthCheck extends HealthCheck {
 
     private static final IntentFilter sWifiStateChangedIntentFilter =

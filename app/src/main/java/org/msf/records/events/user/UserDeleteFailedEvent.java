@@ -13,9 +13,7 @@ package org.msf.records.events.user;
 
 import org.msf.records.net.model.User;
 
-/**
- * An event bus event indicating that a user could not be successfully deleted.
- */
+/** An event bus event indicating that a user could not be successfully deleted. */
 public class UserDeleteFailedEvent {
 
     public static final int REASON_UNKNOWN = 0;

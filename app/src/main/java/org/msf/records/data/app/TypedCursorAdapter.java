@@ -16,9 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-/**
- * A {@link BaseAdapter} backed by a {@link TypedCursor}.
- */
+/** A {@link BaseAdapter} backed by a {@link TypedCursor}. */
 public abstract class TypedCursorAdapter<T extends AppTypeBase> extends BaseAdapter {
 
     private final Context mContext;

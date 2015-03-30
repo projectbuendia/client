@@ -13,9 +13,7 @@ package org.msf.records.data.app;
 
 import com.google.common.base.Preconditions;
 
-/**
- * A user in the app model.
- */
+/** A user in the app model. */
 public final class AppUser extends AppTypeBase<Integer> {
 
     public final String uuid;

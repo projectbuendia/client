@@ -16,9 +16,7 @@ import android.database.Cursor;
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.sync.providers.Contracts;
 
-/**
- * An {@link AppTypeConverter} that converts {@link AppLocation}s.
- */
+/** An {@link AppTypeConverter} that converts {@link AppLocation}s. */
 public class AppLocationConverter implements AppTypeConverter<AppLocation> {
 
     @Override

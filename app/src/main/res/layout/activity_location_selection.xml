@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright 2015 The Project Buendia Authors
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -10,11 +9,8 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:drawable="@color/zone_tent_selected_padding"
-        android:state_selected="true"/>
-
-    <item android:drawable="@drawable/border_grey_1dp" />
-
-</selector>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/location_selection_container"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    tools:context="org.msf.records.ui.locationselection.LocationSelectionActivity"
+    tools:ignore="MergeRootFrame" />

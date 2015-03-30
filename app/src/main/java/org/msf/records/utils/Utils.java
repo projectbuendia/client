@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.utils;
 
 import com.google.common.collect.Lists;
@@ -61,18 +72,19 @@ public class Utils {
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
-    public static Comparator<List<Object>> nullIntStrListComparator = new Comparator<List<Object>>() {
-        @Override
-        public int compare(List<Object> a, List<Object> b) {
-            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                int result = nullIntStrComparator.compare(a.get(i), b.get(i));
-                if (result != 0) {
-                    return result;
+    public static Comparator<List<Object>> nullIntStrListComparator =
+            new Comparator<List<Object>>() {
+                @Override
+                public int compare(List<Object> a, List<Object> b) {
+                    for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                        int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+                        if (result != 0) {
+                            return result;
+                        }
+                    }
+                    return a.size() - b.size();
                 }
-            }
-            return a.size() - b.size();
-        }
-    };
+            };
 
     // Note: Use of \L here assumes a string that is already NFC-normalized.
     private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");

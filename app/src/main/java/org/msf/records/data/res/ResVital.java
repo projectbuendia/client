@@ -15,9 +15,7 @@ import android.content.res.Resources;
 
 import org.msf.records.R;
 
-/**
- * Vitals and the resources associated with them.
- */
+/** Vitals and the resources associated with them. */
 public enum ResVital implements Resolvable<ResVital.Resolved> {
 
     UNKNOWN(R.color.vital_unknown, R.color.vital_fg_unknown),

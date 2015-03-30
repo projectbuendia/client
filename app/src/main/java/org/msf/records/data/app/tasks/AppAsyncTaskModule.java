@@ -21,9 +21,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/**
- * A Dagger module that provides bindings for an {@link AppAsyncTaskFactory}.
- */
+/** A Dagger module that provides bindings for an {@link AppAsyncTaskFactory}. */
 @Module(
         complete = false,
         library = true)

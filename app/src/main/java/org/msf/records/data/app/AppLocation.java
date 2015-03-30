@@ -30,9 +30,7 @@ public final class AppLocation extends AppTypeBase<String> {
     public final String name;
     public final int patientCount;
 
-    /**
-     * Creates an instance of {@link AppLocation}.
-     */
+    /** Creates an instance of {@link AppLocation}. */
     public AppLocation(String uuid, String parentUuid, String name, int patientCount) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;

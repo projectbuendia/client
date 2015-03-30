@@ -84,9 +84,7 @@ public abstract class HealthCheck {
 
     protected abstract void stopImpl();
 
-    /**
-     * Reports an issue as being active.
-     */
+    /** Reports an issue as being active. */
     protected final void reportIssue(HealthIssue healthIssue) {
         EventBus eventBus;
         synchronized (mLock) {
@@ -105,9 +103,7 @@ public abstract class HealthCheck {
         eventBus.post(healthIssue.discovered);
     }
 
-    /**
-     * Marks as resolved all issues that are currently active.
-     */
+    /** Marks as resolved all issues that are currently active. */
     protected final void resolveAllIssues() {
         EventBus eventBus;
         Set<HealthIssue> activeIssues;

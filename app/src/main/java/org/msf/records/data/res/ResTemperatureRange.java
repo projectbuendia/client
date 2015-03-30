@@ -15,9 +15,7 @@ import android.content.res.Resources;
 
 import org.msf.records.R;
 
-/**
- * Temperature ranges and the resources associated with them.
- */
+/** Temperature ranges and the resources associated with them. */
 public enum ResTemperatureRange implements Resolvable<ResTemperatureRange.Resolved> {
 
     UNKNOWN(R.color.vital_unknown, R.color.vital_fg_unknown),

@@ -25,13 +25,35 @@ public class PatientDatabase extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 15;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "patientscipher.db";
-    /**
-     * Having this hardcoded into the app is NOT secure. However, it does prevent idle browsing
-     * from someone who has just stolen the tablet, and isn't willing to look at source code.
+    /*
+     * This deserves a brief comment on security. Patient data encrypted by a hardcoded key
+     * might seem like security by obscurity. It is.
+     *
+     * Security of patient data for these apps is established by physical security for the tablets
+     * and server, not software security and encryption. The software is designed to be used in
+     * high risk zones while wearing PPE. Thus it deliberately does not have barriers to usability
+     * like passwords or lock screens. Without these it is hard to implement a secure encryption
+     * scheme, and so we haven't. All patient data is viewable in the app anyway.
+     *
+     * So why bother using SQL cipher? The major reason is as groundwork. Eventually we would like
+     * to add some better security. To do this we need to make sure all code we write is compatible
+     * with an encrypted database.
+     *
+     * However, there is some value now. The presumed attacker is someone who doesn't care very much
+     * about patient data, but has broken into an Ebola Management Centre to steal the tablet to
+     * re-sell. We would rather the patient data wasn't trivially readable using existing public
+     * tools, so there is slight defense in depth. Firstly, as the data is stored in per-app storage
+     * the device would need to be rooted, or adb used, to get access to the data. Encryption adds
+     * a second layer of security, in that once they have access to the database file, it isn't
+     * readable without the key. Of course as the key is in plaintext in the open source, anyone
+     * technically savvy enough to use adb can almost certainly find it, but at least it isn't as
+     * simple as using grep or strings.
      *
      * TODO: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
+     *
+     * A final note - we know the quote should be brillig, not brilling. No need to correct it.
      */
     private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
 

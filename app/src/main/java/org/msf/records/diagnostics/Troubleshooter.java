@@ -42,9 +42,7 @@ public class Troubleshooter {
         mActiveIssues = new HashSet<>();
     }
 
-    /**
-     * Returns a set of all currently-active health issues.
-     */
+    /** Returns a set of all currently-active health issues. */
     public ImmutableSet<HealthIssue> getActiveIssues() {
         return ImmutableSet.copyOf(mActiveIssues);
     }
@@ -57,9 +55,7 @@ public class Troubleshooter {
         return mActiveIssues.contains(issue);
     }
 
-    /**
-     * Returns true iff no active issues exist.
-     */
+    /** Returns true iff no active issues exist. */
     public boolean isHealthy() {
         return mActiveIssues.isEmpty();
     }
@@ -73,9 +69,7 @@ public class Troubleshooter {
                 && getConfigurationTroubleshootingActions().isEmpty();
     }
 
-    /**
-     * Called when a new health issue is discovered.
-     */
+    /** Called when a new health issue is discovered. */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
         synchronized (mIssuesLock) {
             mActiveIssues.add(healthIssue);
@@ -87,9 +81,7 @@ public class Troubleshooter {
         postTroubleshootingEvents();
     }
 
-    /**
-     * Called when a health issue is resolved.
-     */
+    /** Called when a health issue is resolved. */
     public void onResolved(HealthIssue healthIssue) {
         synchronized (mIssuesLock) {
             if (!mActiveIssues.remove(healthIssue)) {

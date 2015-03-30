@@ -27,9 +27,7 @@ import org.msf.records.utils.Logger;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-/**
- * A {@link HealthCheck} that checks whether the update server is up and running.
- */
+/** A {@link HealthCheck} that checks whether the update server is up and running. */
 public class UpdateServerHealthCheck extends HealthCheck {
 
     private static final Logger LOG = Logger.create();

@@ -38,14 +38,10 @@ enum HealthIssue {
 
     UPDATE_SERVER_INDEX_NOT_FOUND;
 
-    /**
-     * The event to be posted when a health issue is discovered.
-     */
+    /** The event to be posted when a health issue is discovered. */
     public final DiscoveredEvent discovered = new DiscoveredEvent();
 
-    /**
-     * The event to be posted when a health issue is resolved.
-     */
+    /** The event to be posted when a health issue is resolved. */
     public final ResolvedEvent resolved = new ResolvedEvent();
 
     class Event {

@@ -22,9 +22,7 @@ import dagger.Provides;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.EventBusBuilder;
 
-/**
- * A Dagger module that provides bindings for events.
- */
+/** A Dagger module that provides bindings for events. */
 @Module(
         complete = false,
         library = true)

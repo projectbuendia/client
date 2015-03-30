@@ -195,9 +195,7 @@ public class AppModel {
         task.execute();
     }
 
-    /**
-     * A subscriber that handles error events posted to {@link CrudEventBus}es.
-     */
+    /** A subscriber that handles error events posted to {@link CrudEventBus}es. */
     private static class CrudEventBusCleanupSubscriber implements CleanupSubscriber {
 
         private final CrudEventBus mBus;

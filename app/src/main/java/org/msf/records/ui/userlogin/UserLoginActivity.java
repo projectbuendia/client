@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.userlogin;
 
 import android.app.AlertDialog;
@@ -15,7 +26,7 @@ import org.msf.records.ui.BaseActivity;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.SettingsActivity;
 import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
-import org.msf.records.ui.tentselection.TentSelectionActivity;
+import org.msf.records.ui.locationselection.LocationSelectionActivity;
 import org.msf.records.utils.EventBusWrapper;
 
 import javax.inject.Inject;
@@ -23,7 +34,7 @@ import javax.inject.Inject;
 import de.greenrobot.event.EventBus;
 
 /**
- * Activity where users log in by selecting their name from a list.
+ * {@link BaseActivity} where users log in by selecting their name from a list.
  * This is the starting activity for the app.
  */
 public class UserLoginActivity extends BaseActivity {
@@ -45,13 +56,13 @@ public class UserLoginActivity extends BaseActivity {
                 (UserLoginFragment)getSupportFragmentManager()
                         .findFragmentById(R.id.fragment_user_login);
         mController = new UserLoginController(
-        		App.getUserManager(),
-        		new EventBusWrapper(EventBus.getDefault()),
+                App.getUserManager(),
+                new EventBusWrapper(EventBus.getDefault()),
                 mTroubleshooter,
                 new MyUi(),
                 fragment.getFragmentUi());
 
-        // TODO: Consider refactoring out some common code between here and tent selection.
+        // TODO/refactor: Consider refactoring out some common code between here and tent selection.
         mSyncFailedDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle(getString(R.string.sync_failed_dialog_title))
@@ -91,7 +102,7 @@ public class UserLoginActivity extends BaseActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                    	mController.onAddUserPressed();
+                        mController.onAddUserPressed();
                         return true;
                     }
                 }
@@ -102,7 +113,7 @@ public class UserLoginActivity extends BaseActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                    	mController.onSettingsPressed();
+                        mController.onSettingsPressed();
                         return true;
                     }
                 }
@@ -113,36 +124,36 @@ public class UserLoginActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
-    	super.onResume();
-    	mController.init();
+        super.onResume();
+        mController.init();
     }
 
     @Override
     protected void onPause() {
-    	mController.suspend();
-    	super.onPause();
+        mController.suspend();
+        super.onPause();
     }
 
     private final class MyUi implements UserLoginController.Ui {
-    	@Override
-    	public void showAddNewUserDialog() {
+        @Override
+        public void showAddNewUserDialog() {
             FragmentManager fm = getSupportFragmentManager();
             AddNewUserDialogFragment dialogFragment =
                     AddNewUserDialogFragment.newInstance(mController.getDialogUi());
             dialogFragment.show(fm, null);
-    	}
+        }
 
-    	@Override
-    	public void showSettings() {
+        @Override
+        public void showSettings() {
             Intent settingsIntent =
                     new Intent(UserLoginActivity.this, SettingsActivity.class);
             startActivity(settingsIntent);
-    	}
+        }
 
-    	@Override
-    	public void showErrorToast(int stringResourceId) {
+        @Override
+        public void showErrorToast(int stringResourceId) {
             BigToast.show(UserLoginActivity.this, getString(stringResourceId));
-    	}
+        }
 
         @Override
         public void showSyncFailedDialog(boolean show) {
@@ -160,8 +171,8 @@ public class UserLoginActivity extends BaseActivity {
         }
 
         @Override
-    	public void showTentSelectionScreen() {
-            startActivity(new Intent(UserLoginActivity.this, TentSelectionActivity.class));
-    	}
+        public void showTentSelectionScreen() {
+            startActivity(new Intent(UserLoginActivity.this, LocationSelectionActivity.class));
+        }
     }
 }
