@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import javax.annotation.Nullable;
 
-/** An adapter that provides {@link View}s for {@link FastDataGridView}. */
+/** An adapter that provides {@link View}s for {@link DataGridView}. */
 public interface DataGridAdapter {
 
     /** Returns the number of rows in the data grid. */

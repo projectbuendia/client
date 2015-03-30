@@ -34,7 +34,7 @@ import org.msf.records.utils.Utils;
  * A compound layout that displays a table of data with fixed column and row headers. Since the main
  * layout is defined in XML, call {@code #createView} to trigger the actual inflation.
  */
-public class FastDataGridView {
+public class DataGridView {
     private final Context mContext;
     private final DataGridAdapter mDataGridAdapter;
     private final LayoutInflater mLayoutInflater;
@@ -45,12 +45,12 @@ public class FastDataGridView {
     private int mLogNextScrollY = 40;
 
     /**
-     * Instantiates a {@link FastDataGridView}.
+     * Instantiates a {@link DataGridView}.
      * @param context the Activity context
      * @param dataGridAdapter the {@link DataGridAdapter} used to populate this view
      * @param layoutInflater the {@link LayoutInflater} used to inflate this view
      */
-    public FastDataGridView(
+    public DataGridView(
             Context context, DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
         mContext = checkNotNull(context);
         mDataGridAdapter = checkNotNull(dataGridAdapter);

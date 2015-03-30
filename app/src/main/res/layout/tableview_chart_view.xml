@@ -16,7 +16,7 @@
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <view class="org.msf.records.widget.FastDataGridView$LinkableRecyclerView"
+        <view class="org.msf.records.widget.DataGridView$LinkableRecyclerView"
             android:layout_column="1"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -26,18 +26,18 @@
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <view class="org.msf.records.widget.FastDataGridView$LinkableRecyclerView"
+        <view class="org.msf.records.widget.DataGridView$LinkableRecyclerView"
             android:overScrollMode="never"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/chart_row_headers" />
-        <view class="org.msf.records.widget.FastDataGridView$LinkableScrollView"
+        <view class="org.msf.records.widget.DataGridView$LinkableScrollView"
             android:id="@+id/chart_grid_vertical_scrollview"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:overScrollMode="never"
             android:layout_height="match_parent">
-            <view class="org.msf.records.widget.FastDataGridView$LinkableRecyclerView"
+            <view class="org.msf.records.widget.DataGridView$LinkableRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/chart_cells" />
