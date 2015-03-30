@@ -13,7 +13,10 @@ package org.msf.records.filter.matchers.patient;
 
 import android.test.InstrumentationTestCase;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppPatient;
+import org.msf.records.utils.Utils;
 
 /** Tests for {@link NameFilter}. */
 public class NameFilterTest extends InstrumentationTestCase {
@@ -80,7 +83,59 @@ public class NameFilterTest extends InstrumentationTestCase {
         assertFalse(mNameFilter.matches(getPatientWithName("John", "Doe"), "Jim"));
     }
 
+    /** Tests that a query with a dash matches a patient with an unknown family name. */
+    public void testMatches_dashMatchesUnknownFamilyName() {
+        assertTrue(mNameFilter.matches(getPatientWithName("John", null), "-"));
+    }
+
+    /** Tests that a query with a dash matches a patient with an unknown given name. */
+    public void testMatches_dashMatchesUnknownGivenName() {
+        assertTrue(mNameFilter.matches(getPatientWithName(null, "Doe"), "-"));
+    }
+
+    /** Tests that a query with a dash matches a patient with unknown family AND given names. */
+    public void testMatches_dashMatchesCompletelyUnknownName() {
+        assertTrue(mNameFilter.matches(getPatientWithName(null, null), "-"));
+    }
+
+    /**
+     * Tests that a query with multiple dashes matches a patient with unknown family AND given
+     * names.
+     */
+    public void testMatches_doubleDashMatchesCompletelyUnknownName() {
+        assertTrue(mNameFilter.matches(getPatientWithName(null, null), "- -"));
+    }
+
+    /** Tests that a Unicode dash still matches an unknown name. */
+    public void testMatches_unicodeDashMatchesUnknownName() {
+        assertTrue(mNameFilter.matches(getPatientWithName(null, "Doe"), "⸗"));
+    }
+
+    /**
+     * Tests that a query with both a dash and a family name matches a patient with an unknown given
+     * name and matching family name.
+     */
+    public void testMatches_unknownGivenNameWithMatchingFamilyName() {
+        assertTrue(mNameFilter.matches(getPatientWithName(null, "Doe"), "- Doe"));
+    }
+
+    /**
+     * Tests that a query with both a dash and a given name matches a patient with an unknown family
+     * name and matching given name.
+     */
+    public void testMatches_unknownFamilyNameWithMatchingGivenName() {
+        assertTrue(mNameFilter.matches(getPatientWithName("John", null), "John -"));
+    }
+
+    /** Tests that a dash does not match a patient with a fully-known name. */
+    public void testMatches_dashDoesNotMatchKnownName() {
+        assertFalse(mNameFilter.matches(getPatientWithName("John", "Doe"), "-"));
+    }
+
     private AppPatient getPatientWithName(String givenName, String familyName) {
-        return AppPatient.builder().setGivenName(givenName).setFamilyName(familyName).build();
+        return AppPatient.builder()
+                .setGivenName(Utils.nameOrUnknown(givenName))
+                .setFamilyName(Utils.nameOrUnknown(familyName))
+                .build();
     }
 }

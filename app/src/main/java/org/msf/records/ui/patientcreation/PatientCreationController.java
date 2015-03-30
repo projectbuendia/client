@@ -118,16 +118,6 @@ final class PatientCreationController {
             mUi.showValidationError(Ui.FIELD_ID, R.string.patient_validation_missing_id);
             hasValidationErrors = true;
         }
-        if (givenName == null || givenName.equals("")) {
-            mUi.showValidationError(
-                    Ui.FIELD_GIVEN_NAME, R.string.patient_validation_missing_given_name);
-            hasValidationErrors = true;
-        }
-        if (familyName == null || familyName.equals("")) {
-            mUi.showValidationError(
-                    Ui.FIELD_FAMILY_NAME, R.string.patient_validation_missing_family_name);
-            hasValidationErrors = true;
-        }
         if (age == null || age.equals("")) {
             mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_missing_age);
             hasValidationErrors = true;
@@ -176,12 +166,12 @@ final class PatientCreationController {
 
         AppPatientDelta patientDelta = new AppPatientDelta();
         patientDelta.id = Optional.of(id);
-        patientDelta.givenName = Optional.of(givenName);
-        patientDelta.familyName = Optional.of(familyName);
+        patientDelta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
+        patientDelta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid = (locationUuid == null)
-                ? Optional.of(Zone.DEFAULT_LOCATION) : Optional.of(locationUuid);
+        patientDelta.assignedLocationUuid =
+                Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION));
         patientDelta.admissionDate = Optional.of(admissionDate);
         patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
