@@ -16,11 +16,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.msf.records.sync.Database;
+import org.msf.records.sync.PatientDatabase;
 import org.msf.records.sync.SelectionBuilder;
 
 /** A {@link ProviderDelegate} that provides read-write access to users. */
-class UsersDelegate implements ProviderDelegate<Database> {
+class UsersDelegate implements ProviderDelegate<PatientDatabase> {
 
     public static final String NAME = "users";
 
@@ -34,7 +34,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
 
     @Override
     public Cursor query(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
+            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SelectionBuilder builder = new SelectionBuilder()
                 .table("users")
@@ -46,7 +46,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
 
     @Override
     public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
+            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         long id = dbHelper.getWritableDatabase()
                 .replaceOrThrow("users", null, values);
@@ -56,7 +56,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
 
     @Override
     public int bulkInsert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
+            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues[] values) {
         // TODO: optimise this.
         for (ContentValues value : values) {
@@ -67,7 +67,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
 
     @Override
     public int delete(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
+            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
                 .table("users")
@@ -79,7 +79,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
 
     @Override
     public int update(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
+            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
                 .table("users")
