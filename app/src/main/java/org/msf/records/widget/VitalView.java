@@ -23,6 +23,7 @@ import org.msf.records.R;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.lb.auto_fit_textview.AutoResizeTextView;
 
 /** A compound view that displays a patient vital in a colorful rectangle. */
 public class VitalView extends LinearLayout {
