@@ -9,7 +9,7 @@ import net.sqlcipher.database.SQLiteOpenHelper;
  * Schema definition for the app's database, which contains patient attributes,
  * active patients, locations, and chart information.
  */
-public class PatientDatabase extends SQLiteOpenHelper {
+public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
     public static final int DATABASE_VERSION = 15;
@@ -139,7 +139,7 @@ public class PatientDatabase extends SQLiteOpenHelper {
             + "     obs_sync_time INTEGER"
             + " )";
 
-    public PatientDatabase(Context context) {
+    public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

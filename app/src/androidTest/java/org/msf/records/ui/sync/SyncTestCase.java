@@ -21,7 +21,7 @@ import net.sqlcipher.database.SQLiteException;
 
 import org.msf.records.App;
 import org.msf.records.events.sync.SyncFailedEvent;
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.utils.Logger;
 
@@ -71,7 +71,7 @@ public class SyncTestCase extends FunctionalTestCase {
 
     /** Clears all contents of the database (note: this does not include ODK forms or instances). */
     public void clearDatabase() throws SQLException {
-        PatientDatabase db = new PatientDatabase(App.getInstance().getApplicationContext());
+        Database db = new Database(App.getInstance().getApplicationContext());
         db.onUpgrade(db.getWritableDatabase(), 0, 1);
         db.close();
     }
