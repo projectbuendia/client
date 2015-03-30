@@ -43,49 +43,40 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Patie
 
         // This scary SQL statement joins the observations a subselect for the latest for each
         // concept with appropriate concept names to give localized output.
-        String query = "SELECT obs." + Contracts.Observations._ID
-                + ", obs.encounter_time,"
-                + "obs.concept_uuid,names."
-                + Contracts.ConceptNames.LOCALIZED_NAME + " AS concept_name,"
+        String query = ""
+                + " SELECT obs._id,"
+                + "     obs.encounter_time,"
+                + "     obs.concept_uuid,"
+                + "     names.localized_name AS concept_name,"
                 // Localized value for concept values
-                + "obs." + Contracts.Observations.VALUE
-                + ",coalesce(value_names." + Contracts.ConceptNames.LOCALIZED_NAME
-                + ", obs." + Contracts.Observations.VALUE + ") "
-                + "AS localized_value"
+                + "     obs.value,"
+                + "     COALESCE(value_names.localized_name, obs.value) AS localized_value"
+                + " FROM observations AS obs"
 
-                + " FROM "
-                + PatientDatabase.OBSERVATIONS_TABLE_NAME + " obs "
+                + " INNER JOIN ("
+                + "     SELECT concept_uuid,"
+                + "         max(encounter_time) AS maxtime"
+                + "     FROM observations"
+                + "     WHERE patient_uuid = ?" // 1st selection arg
+                + "     GROUP BY concept_uuid"
+                + " ) maxs"
+                + " ON obs.encounter_time = maxs.maxtime AND"
+                + "     obs.concept_uuid = maxs.concept_uuid"
 
-                + " INNER JOIN "
-
-                + "(SELECT " + Contracts.Charts.CONCEPT_UUID
-                + ", MAX(" + Contracts.Observations.ENCOUNTER_TIME + ") AS maxtime "
-                + "FROM " + PatientDatabase.OBSERVATIONS_TABLE_NAME
-                + " WHERE " + Contracts.Observations.PATIENT_UUID + "=? " // 1st selection arg
-                + "GROUP BY " + Contracts.Observations.CONCEPT_UUID + ") maxs "
-
-                + "ON obs." + Contracts.Observations.ENCOUNTER_TIME + " = maxs.maxtime AND "
-                + "obs." + Contracts.Observations.CONCEPT_UUID
-                + "=maxs." + Contracts.Observations.CONCEPT_UUID
-
-                + " INNER JOIN "
-                + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " names "
-                + "ON obs." + Contracts.Observations.CONCEPT_UUID + "="
-                + "names." + Contracts.ConceptNames.CONCEPT_UUID
+                + " INNER JOIN concept_names names"
+                + " ON obs.concept_uuid = names.concept_uuid"
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.
-                // To cope we will do a left join on the value and the name
-                + " LEFT JOIN " + PatientDatabase.CONCEPT_NAMES_TABLE_NAME + " value_names "
-                + "ON obs." + Contracts.Observations.VALUE + "="
-                + "value_names." + Contracts.Charts.CONCEPT_UUID
-                + " AND value_names." + Contracts.ConceptNames.LOCALE + "=?" // 2nd selection arg
+                // To cope we will do a LEFT JOIN ON the value AND the name
+                + " LEFT JOIN concept_names value_names"
+                + " ON obs.value = value_names.concept_uuid"
+                + "     AND value_names.locale = ?" // 2nd selection arg
 
-                + " WHERE obs." + Contracts.Observations.PATIENT_UUID + "=? AND " // 3rd sel. arg
-                + "names." + Contracts.ConceptNames.LOCALE + "=? " // 4th selection arg
+                + " WHERE obs.patient_uuid = ? AND " // 3rd sel. arg
+                + "     names.locale = ? " // 4th selection arg
 
-                + " ORDER BY obs." + Contracts.Charts.CONCEPT_UUID
-                + ", obs." + Contracts.Observations._ID;
+                + " ORDER BY obs.concept_uuid, obs._id";
 
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, patientUuid, locale});
