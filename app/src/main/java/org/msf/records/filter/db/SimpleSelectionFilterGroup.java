@@ -1,7 +1,20 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.filter.db;
 
 import com.google.common.collect.ImmutableList;
 
+import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.data.app.AppTypeBase;
 
 import java.util.ArrayList;
@@ -13,8 +26,9 @@ import java.util.List;
  * an optional name used for string representations.
  */
 public final class SimpleSelectionFilterGroup<T extends AppTypeBase>
-        implements SimpleSelectionFilter<T> {
-    private static final String DEFAULT_FILTER_NAME = "";
+        extends SimpleSelectionFilter<T> {
+    private static final String DEFAULT_FILTER_NAME =
+            App.getInstance().getString(R.string.filter_group_default_name);
 
     private final FilterType mFilterType;
     private final ImmutableList<SimpleSelectionFilter> mFilters;
@@ -92,6 +106,11 @@ public final class SimpleSelectionFilterGroup<T extends AppTypeBase>
         allArgs.toArray(allArgsArray);
 
         return allArgsArray;
+    }
+
+    @Override
+    public String getDescription() {
+        return mName;
     }
 
     /**

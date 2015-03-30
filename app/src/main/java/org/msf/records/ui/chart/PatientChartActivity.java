@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.app.Activity;
@@ -18,7 +29,6 @@ import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
 import org.msf.records.R;
@@ -40,22 +50,19 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.RelativeDateTimeFormatter;
-import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.RelativeDateTimeFormatter;
 import org.msf.records.widget.DataGridView;
-import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.PatientAttributeView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -67,11 +74,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
-import static org.msf.records.utils.Utils.getSystemProperty;
-
-/**
- * Activity displaying a patient's vitals and charts.
- */
+/** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final Logger LOG = Logger.create();
     // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
@@ -82,9 +85,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // Note the general condition uuid when retrieved so that it can be passed to the controller.
     private String mGeneralConditionUuid;
 
-    /**
-     * An enumeration of the XForms that can be launched from this activity.
-     */
+    /** An enumeration of the XForms that can be launched from this activity. */
     enum XForm {
         ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
         ADD_TEST_RESULTS("34d727a6-e515-4f27-ae91-703ba2c164ae", 1);
@@ -98,9 +99,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    /**
-     * An object that encapsulates a {@link Activity#startActivityForResult} request code.
-     */
+    /** An object that encapsulates a {@link Activity#startActivityForResult} request code. */
     static class RequestCode {
 
         public final XForm form;
@@ -128,15 +127,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
     public static final String PATIENT_ID_KEY = "PATIENT_ID";
 
-    private static final RelativeDateTimeFormatter DATE_TIME_FORMATTER =
-            RelativeDateTimeFormatter.builder()
-                    .withCasing(RelativeDateTimeFormatter.Casing.SENTENCE_CASE)
-                    .build();
-
     private PatientChartController mController;
     private final MyUi mMyUi = new MyUi();
 
-    // TODO(dxchen): Refactor.
+    // TODO: Refactor.
     private boolean mIsFetchingXform = false;
 
     private ResVital.Resolved mVitalUnknown;
@@ -199,17 +193,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
-        OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override
-            public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
-                        mUpdateClientCache.get(), resultCode, data);
-            }
-        };
-
-        String patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
-        String patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
-        String patientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
+        final String patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
+        final String patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
+        final String patientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
 
         @Nullable Bundle controllerState = null;
         if (savedInstanceState != null) {
@@ -218,14 +204,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         ButterKnife.inject(this);
         App.getInstance().inject(this);
-
-        MinimalHandler minimalHandler = new MinimalHandler() {
-            private final Handler mHandler = new Handler();
-            @Override
-            public void post(Runnable runnable) {
-                mHandler.post(runnable);
-            }
-        };
 
         mFormLoadingDialog = new ProgressDialog(this);
         mFormLoadingDialog.setIcon(android.R.drawable.ic_dialog_info);
@@ -241,6 +219,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        final OdkResultSender odkResultSender = new OdkResultSender() {
+            @Override
+            public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
+                OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
+                        mUpdateClientCache.get(), resultCode, data);
+            }
+        };
+        final MinimalHandler minimalHandler = new MinimalHandler() {
+            private final Handler mHandler = new Handler();
+            @Override
+            public void post(Runnable runnable) {
+                mHandler.post(runnable);
+            }
+        };
         mController = new PatientChartController(
                 mAppModel,
                 new EventBusWrapper(mEventBus),
@@ -308,6 +300,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
+                        Utils.logUserAction("location_button_pressed");
                         mController.showAssignLocationDialog(
                                 PatientChartActivity.this, assignLocation);
                         return true;
@@ -356,6 +349,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @OnClick(R.id.patient_chart_general_condition_parent)
     void onGeneralConditionPressed(View v) {
+        Utils.logUserAction("condition_pressed");
         mController.showAssignGeneralConditionDialog(this, mGeneralConditionUuid);
     }
 
@@ -434,12 +428,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setLatestEncounter(long encounterTimeMilli) {
-            GregorianCalendar calendar = new GregorianCalendar();
-            calendar.setTimeInMillis(encounterTimeMilli);
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("d MMM yyyy, HH:mm a", Locale.US);
-
-            if (calendar.getTime().getTime() != 0) {
-                mLastObservationTimeView.setText(dateFormatter.format(calendar.getTime()));
+            if (encounterTimeMilli != 0) {
+                mLastObservationTimeView.setText(
+                        Dates.toMediumString(new DateTime(encounterTimeMilli)));
                 mLastObservationLabel.setVisibility(View.VISIBLE);
             } else {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
@@ -449,7 +440,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientVitalsUI(Map<String, LocalizedObservation> observations) {
+        public void updatePatientVitalsUi(Map<String, LocalizedObservation> observations,
+                                          LocalDate admissionDate, LocalDate firstSymptomsDate) {
+            // TODO: Localize strings in this function.
             showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
             showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
             showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
@@ -464,40 +457,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             showObservationForViewGroup(
                     mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
 
-            DateTime now = DateTime.now();
-            // Symptoms onset date
-            LocalizedObservation symptomsOnsetObservation =
-                    observations.get(Concepts.FIRST_SYMPTOM_DATE_UUID);
-            if (symptomsOnsetObservation != null
-                    && symptomsOnsetObservation.localizedValue != null) {
-                try {
-                    LocalDate symptomsOnsetDate =
-                            Utils.stringToLocalDate(symptomsOnsetObservation.localizedValue);
-                    int symptomsOnsetDays = Days
-                            .daysBetween(symptomsOnsetDate.toDateTimeAtStartOfDay(), now)
-                            .getDays() + 1;
-                    mPatientSymptomOnsetDaysView.setValue("Day " + symptomsOnsetDays);
-                } catch (Exception e) {
-                    LOG.w("Couldn't display symptoms onset date", e);
-                }
-            }
-
-            // Admission date
-            LocalizedObservation admissionDateObservation =
-                    observations.get(Concepts.ADMISSION_DATE_UUID);
-            if (admissionDateObservation != null
-                    && admissionDateObservation.localizedValue != null) {
-                try {
-                    LocalDate admissionDate =
-                            Utils.stringToLocalDate(admissionDateObservation.localizedValue);
-                    int admissionDays = Days
-                            .daysBetween(admissionDate.toDateTimeAtStartOfDay(), now)
-                            .getDays() + 1;
-                    mPatientAdmissionDaysView.setValue("Day " + admissionDays);
-                } catch (Exception e) {
-                    LOG.w("Couldn't display admission date", e);
-                }
-            }
+            int day = Dates.dayNumberSince(admissionDate, LocalDate.now());
+            mPatientAdmissionDaysView.setValue(
+                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+            day = Dates.dayNumberSince(firstSymptomsDate, LocalDate.now());
+            mPatientSymptomOnsetDaysView.setValue(
+                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
             // General Condition
             LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
@@ -550,20 +515,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 if (pcrObservationMillis > 0) {
                     LocalDate today = LocalDate.now();
                     LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
-                    String dateText = "invalid date";
-                    if (today.equals(obsDay)) {
-                        dateText = "today";
-                    } else if (obsDay.isBefore(today)) {
-                        int days = Days.daysBetween(obsDay, today).getDays();
-                        dateText = (days == 1) ? "1 day ago" : (days + " days ago");
-                    }
+                    String dateText = RelativeDateTimeFormatter.builder()
+                            .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
+                            .build()
+                            .format(today, obsDay);
                     mPcr.setName(getResources().getString(
                             R.string.latest_pcr_label_with_date, dateText));
                 }
             }
 
             // Pregnancy & IV status
-            // TODO: Localize all of this.
             List<String> specialLabels = new ArrayList<>();
 
             observation = observations.get(Concepts.PREGNANCY_UUID);
@@ -607,7 +568,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setObservationHistory(
-                List<LocalizedObservation> observations, LocalDate admissionDate) {
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate) {
             // Avoid resetting observation history if nothing has changed.
             if (observations.equals(mPreviousObservations)) {
                 return;
@@ -617,45 +580,25 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (mChartView != null) {
                 mRootView.removeView(mChartView);
             }
-            if (useRecyclerView()) {
-                mChartView = getChartViewNew(observations, admissionDate);
-            } else {
-                // TODO(sdoerner): Remove this old implementation once the new chart grid has got
-                //                 some testing and feedback.
-                mChartView = getChartView(observations, admissionDate);
-            }
+            mChartView = createChartView(observations, admissionDate, firstSymptomsDate);
             mChartView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             mRootView.addView(mChartView);
             mRootView.invalidate();
         }
 
-        boolean useRecyclerView() {
-            return !"1".equalsIgnoreCase(getSystemProperty("debug.useOldChartGrid"));
-        }
-
-        private View getChartView(
-                List<LocalizedObservation> observations, LocalDate admissionDate) {
-            return new DataGridView.Builder()
-                    .setDoubleWidthColumnHeaders(true)
-                    .setDataGridAdapter(
-                            new LocalizedChartDataGridAdapter(
-                                    PatientChartActivity.this,
-                                    observations,
-                                    admissionDate,
-                                    getLayoutInflater()))
-                    .build(PatientChartActivity.this);
-        }
-
-        private View getChartViewNew(
-                List<LocalizedObservation> observations, LocalDate admissionDate) {
+        private View createChartView(
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate) {
             LocalizedChartDataGridAdapter dataGridAdapter =
                     new LocalizedChartDataGridAdapter(
                             PatientChartActivity.this,
                             observations,
                             admissionDate,
+                            firstSymptomsDate,
                             getLayoutInflater());
-            FastDataGridView dataGridView = new FastDataGridView(
+            DataGridView dataGridView = new DataGridView(
                     PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
             return dataGridView.createView();
         }
@@ -685,7 +628,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+                    ? "age unknown" : Dates.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 

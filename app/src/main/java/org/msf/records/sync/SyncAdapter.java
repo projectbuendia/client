@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync;
 
 import android.accounts.Account;
@@ -36,8 +47,8 @@ import org.msf.records.sync.providers.Contracts;
 import org.msf.records.sync.providers.MsfRecordsProvider;
 import org.msf.records.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.msf.records.user.UserManager;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,47 +60,34 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Global sync adapter for syncing all client side database caches.
- */
+/** Global sync adapter for syncing all client side database caches. */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Logger LOG = Logger.create();
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
-    /**
-     * If this key is present with boolean value true then sync patients.
-     */
+    /** If this key is present with boolean value true then sync patients. */
     public static final String SYNC_PATIENTS = "SYNC_PATIENTS";
 
-    /**
-     * If this key is present with boolean value true then sync concepts.
-     */
+    /** If this key is present with boolean value true then sync concepts. */
     public static final String SYNC_CONCEPTS = "SYNC_CONCEPTS";
 
-    /**
-     * If this key is present with boolean value true then sync the chart structure.
-     */
+    /** If this key is present with boolean value true then sync the chart structure. */
     public static final String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
 
-    /**
-     * If this key is present with boolean value true then sync the observations.
-     */
+    /** If this key is present with boolean value true then sync the observations. */
     public static final String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
 
-    /**
-     * If this key is present with boolean value true then sync locations.
-     */
+    /** If this key is present with boolean value true then sync locations. */
     public static final String SYNC_LOCATIONS = "SYNC_LOCATIONS";
 
-    /**
-     * If this key is present with boolean value true then sync users.
-     */
+    /** If this key is present with boolean value true then sync users. */
     public static final String SYNC_USERS = "SYNC_USERS";
 
     /**
-     * If this key is present with boolean value true then sync users.
+     * If this key is present with boolean value true then retrieve only observations entered since
+     * observations were last fetched.
      */
     public static final String INCREMENTAL_OBSERVATIONS_UPDATE = "INCREMENTAL_OBSERVATIONS_UPDATE";
 
@@ -99,24 +97,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      */
     public static final String FULL_SYNC = "FULL_SYNC";
 
-    /**
-     * RPC timeout for getting observations.
-     */
-    private static final int OBSERVATIONS_TIMEOUT_SECS = 100;
+    /** RPC timeout for getting observations. */
+    private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
 
-    /**
-     * Named used during the sync process for SQL savepoints.
-     */
+    /** Named used during the sync process for SQL savepoints. */
     private static final String SYNC_SAVEPOINT_NAME = "SYNC_SAVEPOINT";
 
-    /**
-     * Content resolver, for performing database operations.
-     */
+    /** Content resolver, for performing database operations. */
     private final ContentResolver mContentResolver;
 
-    /**
-     * Tracks whether the sync has been canceled.
-     */
+    /** Tracks whether the sync has been canceled. */
     private boolean mIsSyncCanceled = false;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -135,11 +125,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("Detecting a sync cancellation, canceling sync soon.");
     }
 
-    /**
-     * Not thread-safe but, by default, this will never be called multiple times in parallel.
-     */
+    /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
     @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+    public void onPerformSync(
+            Account account,
+            Bundle extras,
+            String authority,
+            ContentProviderClient provider,
+            SyncResult syncResult) {
         // Fire a broadcast indicating that sync has completed.
         Intent syncStartedIntent =
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
@@ -154,7 +147,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncCanceledIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.CANCELED);
 
-        checkCancellation("Sync was canceled before it started.");
+        // If we can't access the Buendia API, short-circuit. Before this check was added, sync
+        // would occasionally hang indefinitely when wifi is unavailable. As a side effect of this
+        // change, however, any user-requested sync will instantly fail until the HealthMonitor has
+        // made a determination that the server is definitely accessible.
+        if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
+            LOG.e("Sync failed: Buendia API is unavailable.");
+            getContext().sendBroadcast(syncFailedIntent);
+        }
+
+        try {
+            checkCancellation("Sync was canceled before it started.");
+        } catch (CancellationException e) {
+            getContext().sendBroadcast(syncCanceledIntent);
+            return;
+        }
 
         int nExtras = countExtras(extras);
         int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
@@ -170,7 +177,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
-
         try {
             boolean specific = false;
 
@@ -290,19 +296,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error interruption");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (ExecutionException e){
+        } catch (ExecutionException e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error failed to execute");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (Exception e){
+        } catch (Exception e) {
             rollbackSavepoint(dbTransactionHelper);
             LOG.e(e, "Error reading from network");
             syncResult.stats.numIoExceptions++;
@@ -318,7 +324,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             LOG.i("Releasing savepoint %s", SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.releaseNamedTransaction(SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.close();
-            mIsSyncCanceled = false;
         }
         timings.dumpToLog();
         LOG.i("Network synchronization complete");
@@ -340,8 +345,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * canceled. It is the responsibility of the caller to perform any actual cancellation
      * procedures.
      */
-    private void checkCancellation(String message) throws CancellationException {
+    private synchronized void checkCancellation(String message) throws CancellationException {
         if (mIsSyncCanceled) {
+            mIsSyncCanceled = false;
             throw new CancellationException(message);
         }
     }
@@ -377,7 +383,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 extras.getBoolean(SYNC_USERS));
     }
 
-    private void updatePatientData(SyncResult syncResult) throws InterruptedException, ExecutionException, RemoteException, OperationApplicationException {
+    private void updatePatientData(SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
         final ContentResolver contentResolver = getContext().getContentResolver();
 
         final String[] projection = PatientProjection.getProjectionColumns();
@@ -386,7 +394,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
 
-        //No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a background thread
+        // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
+        // background thread
         List<Patient> patients = future.get();
         LOG.d("After network call to retrieve patients");
         checkCancellation("Sync was canceled before parsing retrieved patient data.");
@@ -409,7 +418,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String id;
-        String givenName, familyName, uuid, locationUuid;
+        String givenName;
+        String familyName;
+        String uuid;
+        String locationUuid;
         String gender;
         LocalDate birthdate;
         Long admissionTimestamp;
@@ -429,8 +441,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if (locationUuid == null) {
                     locationUuid = Zone.DEFAULT_LOCATION;
                 }
-                birthdate =
-                        Utils.stringToLocalDate(c.getString(PatientProjection.COLUMN_BIRTHDATE));
+                birthdate = Dates.toLocalDate(
+                        c.getString(PatientProjection.COLUMN_BIRTHDATE));
                 gender = c.getString(PatientProjection.COLUMN_GENDER);
 
                 Patient patient = patientsMap.get(id);
@@ -468,7 +480,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         patientAssignedLocationUuid)
                                 .withValue(
                                         Contracts.Patients.BIRTHDATE,
-                                        Utils.localDateToString(patient.birthdate))
+                                        Dates.toString(patient.birthdate))
                                 .withValue(Contracts.Patients.GENDER, patient.gender)
                                 .withValue(Contracts.Patients._ID, patient.id)
                                 .build());
@@ -499,8 +511,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             .withValue(Contracts.Patients.GIVEN_NAME, e.given_name)
                             .withValue(Contracts.Patients.FAMILY_NAME, e.family_name)
                             .withValue(Contracts.Patients.UUID, e.uuid)
-                            .withValue(Contracts.Patients.ADMISSION_TIMESTAMP, e.admission_timestamp)
-                            .withValue(Contracts.Patients.BIRTHDATE, Utils.localDateToString(e.birthdate))
+                            .withValue(
+                                    Contracts.Patients.ADMISSION_TIMESTAMP,
+                                    e.admission_timestamp)
+                            .withValue(
+                                    Contracts.Patients.BIRTHDATE,
+                                    Dates.toString(e.birthdate))
                             .withValue(Contracts.Patients.GENDER, e.gender);
 
             if (e.assigned_location == null) {
@@ -521,8 +537,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("batch apply done");
         mContentResolver.notifyChange(Contracts.Patients.CONTENT_URI, null, false);
         LOG.i("change notified");
-
-        //TODO(giljulio) update the server as well as the client
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
@@ -530,7 +544,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<ConceptList> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
-        ConceptList conceptList = future.get();
+        final ConceptList conceptList = future.get();
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
         for (Concept concept : conceptList.results) {
@@ -558,7 +572,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 ContentValues conceptNameInsert = new ContentValues();
                 conceptNameInsert.put(Contracts.ConceptNames.CONCEPT_UUID, concept.uuid);
                 conceptNameInsert.put(Contracts.ConceptNames.LOCALE, locale);
-                conceptNameInsert.put(Contracts.ConceptNames.LOCALIZED_NAME, name);
+                conceptNameInsert.put(Contracts.ConceptNames.NAME, name);
                 conceptNameInserts.add(conceptNameInsert);
                 syncResult.stats.numInserts++;
             }
@@ -581,8 +595,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
         mContentResolver.notifyChange(
                 Contracts.LocationNames.CONTENT_URI, null, false);
-
-        // TODO(akalachman): Update the server as well as the client
     }
 
     private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
@@ -591,7 +603,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<ChartStructure> future = RequestFuture.newFuture();
         chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
-        ChartStructure conceptList = future.get();
+        final ChartStructure conceptList = future.get();
         checkCancellation("Sync was canceled before applying chart structure deletions.");
         // When we do a chart update, delete everything first.
         provider.delete(Contracts.Charts.CONTENT_URI, null, null);
@@ -632,12 +644,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             newSyncTime = updateAllObservations(provider, syncResult, chartServer, listFuture,
                     timingLogger);
         }
-        // This is completely unsafe as regards exceptions - if we fail to store sync time then
-        // we have added observations and not stored the sync time. However, getting this right
-        // transactionally through a content provider interface is not easy, we'd have to update
-        // everything through a single URL. As deletes and inserts aren't safe right now, this
-        // will do.
-        // TODO(nfortescue): make this transactionally safe.
+        // This is only safe transactionally if we can rely on the entire sync being transactional.
         storeLastSyncTime(provider, newSyncTime);
 
         checkCancellation("Sync was canceled before deleting temporary observations.");
@@ -683,7 +690,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
-        PatientChartList patientChartList =
+        final PatientChartList patientChartList =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
@@ -742,7 +749,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
-        PatientChartList patientChartList =
+        final PatientChartList patientChartList =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");

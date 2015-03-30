@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app.tasks;
 
 import android.content.ContentResolver;
@@ -28,12 +39,14 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link AsyncTask} that adds a patient to a server.
+ *
+ * <p>If the operation succeeds, a {@link SingleItemCreatedEvent} is posted on the given
+ * {@link CrudEventBus} with the added patient. If the operation fails, a
+ * {@link PatientAddFailedEvent} is posted instead.
  */
 public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFailedEvent> {
 
     private static final Logger LOG = Logger.create();
-
-    private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final AppAsyncTaskFactory mTaskFactory;
     private final AppTypeConverters mConverters;
@@ -44,9 +57,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
     private String mUuid;
 
-    /**
-     * Creates a new {@link AppAddPatientAsyncTask}.
-     */
+    /** Creates a new {@link AppAddPatientAsyncTask}. */
     public AppAddPatientAsyncTask(
             AppAsyncTaskFactory taskFactory,
             AppTypeConverters converters,

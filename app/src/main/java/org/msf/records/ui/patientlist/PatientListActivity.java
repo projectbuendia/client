@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.patientlist;
 
 import android.app.ActionBar;
@@ -11,9 +22,11 @@ import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
+import org.msf.records.utils.Utils;
 
 /**
- * An activity representing a list of Patients.
+ * A {@link PatientSearchActivity} showing a filterable list of patients via a
+ * {@link PatientListFragment}.
  */
 public class PatientListActivity extends PatientSearchActivity {
 
@@ -72,8 +85,8 @@ public class PatientListActivity extends PatientSearchActivity {
     }
 
     private void startActivity(Class<?> activityClass) {
-      Intent intent = new Intent(PatientListActivity.this, activityClass);
-      startActivity(intent);
+        Intent intent = new Intent(PatientListActivity.this, activityClass);
+        startActivity(intent);
     }
 
     private final class FilterUi implements PatientListFilterController.Ui {
@@ -91,6 +104,8 @@ public class PatientListActivity extends PatientSearchActivity {
                 @Override
                 public boolean onNavigationItemSelected(int position, long id) {
                     getSearchController().setFilter(filters[position]);
+                    Utils.logUserAction("filter_selected",
+                            "filter", filters[position].toString());
                     getSearchController().loadSearchResults();
                     return true;
                 }

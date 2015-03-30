@@ -1,7 +1,21 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.utils;
 
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
+import com.google.common.collect.Lists;
+
+import org.msf.records.App;
+import org.msf.records.R;
+import org.msf.records.net.Server;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -9,13 +23,17 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 /** Utility methods. */
 public class Utils {
+
     /** Converts objects with integer type to BigInteger. */
     public static BigInteger toBigInteger(Object obj) {
         if (obj instanceof Integer) {
@@ -55,18 +73,19 @@ public class Utils {
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
-    public static Comparator<List<Object>> nullIntStrListComparator = new Comparator<List<Object>>() {
-        @Override
-        public int compare(List<Object> a, List<Object> b) {
-            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                int result = nullIntStrComparator.compare(a.get(i), b.get(i));
-                if (result != 0) {
-                    return result;
+    public static Comparator<List<Object>> nullIntStrListComparator =
+            new Comparator<List<Object>>() {
+                @Override
+                public int compare(List<Object> a, List<Object> b) {
+                    for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                        int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+                        if (result != 0) {
+                            return result;
+                        }
+                    }
+                    return a.size() - b.size();
                 }
-            }
-            return a.size() - b.size();
-        }
-    };
+            };
 
     // Note: Use of \L here assumes a string that is already NFC-normalized.
     private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
@@ -125,37 +144,16 @@ public class Utils {
         }
     };
 
-    /** Encodes a URL parameter, catching the useless exception that never happens. */
-    public static String urlEncode(String s) {
+    /** URL-encodes a nullable string, catching the useless exception that never happens. */
+    public static String urlEncode(@Nullable String s) {
+        if (s == null) {
+            return "";
+        }
         try {
             // Oh Java, how you make the simplest operation a waste of millions of programmer-hours.
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError("UTF-8 should be supported in every JVM");
-        }
-    }
-
-    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(LocalDate date) {
-        return date == null ? null : date.toString();
-    }
-
-    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(String string) {
-        try {
-            return string == null ? null : LocalDate.parse(string);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate) {
-        Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 2) {
-            return "" + age.getYears() + " y";
-        } else {
-            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
         }
     }
 
@@ -174,7 +172,58 @@ public class Utils {
         }
     }
 
+    /**
+     * Logs a user action by sending a dummy request to the server.  (The server
+     * logs can then be scanned later to produce analytics for the client app.)
+     * @param action An identifier for the user action; should describe a user-
+     *               initiated operation in the UI (e.g. "foo_button_pressed").
+     * @param pairs An even number of arguments providing key-value pairs of
+     *              arbitrary data to record with the event.
+     */
+    public static void logUserAction(String action, String... pairs) {
+        Server server = App.getInstance().getServer();
+        if (server != null) {
+            List<String> allPairs = Lists.newArrayList("action", action);
+            allPairs.addAll(Arrays.asList(pairs));
+            server.logToServer(allPairs);
+        }
+    }
+
+    /**
+     * Logs an event by sending a dummy request to the server.  (The server logs
+     * can then be scanned later to produce analytics for the client app.)
+     * @param event An identifier for an event that is not directly initiated by
+     *              the user (e.g. "form_submission_failed").
+     * @param pairs An even number of arguments providing key-value pairs of
+     *              arbitrary data to record with the event.
+     */
+    public static void logEvent(String event, String... pairs) {
+        Server server = App.getInstance().getServer();
+        if (server != null) {
+            List<String> allPairs = Lists.newArrayList("event", event);
+            allPairs.addAll(Arrays.asList(pairs));
+            server.logToServer(allPairs);
+        }
+    }
+
+    /**
+     * Returns a value if that value is not null, or a specified default value otherwise.
+     * @param value the nullable value
+     * @param defaultValue the default
+     */
+    public static <T extends Object> T valueOrDefault(@Nullable T value, T defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
+    /**
+     * Returns the specified name or a sentinel representing an unknown name, if the name is null.
+     * @param name the nullable name
+     */
+    public static String nameOrUnknown(@Nullable String name) {
+        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
+    }
+
     private Utils() {
-    	// Prevent instantiation.
+        // Prevent instantiation.
     }
 }

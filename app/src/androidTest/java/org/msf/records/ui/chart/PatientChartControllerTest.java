@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.test.AndroidTestCase;
@@ -33,102 +44,105 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Tests for {@link PatientChartController}.
- */
+/** Tests for {@link PatientChartController}. */
 public final class PatientChartControllerTest extends AndroidTestCase {
 
-	private static final String PATIENT_UUID_1 = "uuid1";
-	private static final String PATIENT_NAME_1 = "bob";
-	private static final String PATIENT_ID_1 = "id1";
+    private static final String PATIENT_UUID_1 = "uuid1";
+    private static final String PATIENT_NAME_1 = "bob";
+    private static final String PATIENT_ID_1 = "id1";
 
-	private static final LocalizedChartHelper.LocalizedObservation OBSERVATION_A =
-			new LocalizedChartHelper.LocalizedObservation(0, "g", "c", "c", "val", "localizedVal");
+    private static final LocalizedChartHelper.LocalizedObservation OBSERVATION_A =
+            new LocalizedChartHelper.LocalizedObservation(
+                    0, 0, "g", "c", "c", "val", "localizedVal");
 
-	private PatientChartController mController;
+    private PatientChartController mController;
 
-	@Mock private AppModel mMockAppModel;
-	@Mock private PatientChartController.Ui mMockUi;
-	@Mock private OdkResultSender mMockOdkResultSender;
-	@Mock private LocalizedChartHelper mMockObservationsProvider;
-	@Mock private SyncManager mMockSyncManager;
-	private FakeEventBus mFakeCrudEventBus;
+    @Mock private AppModel mMockAppModel;
+    @Mock private PatientChartController.Ui mMockUi;
+    @Mock private OdkResultSender mMockOdkResultSender;
+    @Mock private LocalizedChartHelper mMockObservationsProvider;
+    @Mock private SyncManager mMockSyncManager;
+    private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
     private FakeHandler mFakeHandler;
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		MockitoAnnotations.initMocks(this);
 
-		mFakeCrudEventBus = new FakeEventBus();
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeCrudEventBus = new FakeEventBus();
         mFakeGlobalEventBus = new FakeEventBus();
-		mFakeHandler = new FakeHandler();
-		mController = new PatientChartController(
-				mMockAppModel,
+        mFakeHandler = new FakeHandler();
+        mController = new PatientChartController(
+                mMockAppModel,
                 mFakeGlobalEventBus,
-				mFakeCrudEventBus,
-				mMockUi,
-				mMockOdkResultSender,
-				mMockObservationsProvider,
-				null,
-				mMockSyncManager,
-				mFakeHandler);
-	}
+                mFakeCrudEventBus,
+                mMockUi,
+                mMockOdkResultSender,
+                mMockObservationsProvider,
+                null,
+                mMockSyncManager,
+                mFakeHandler);
+    }
 
-	public void testSuspend_UnregistersFromEventBus() {
-		// GIVEN an initialized controller with patient set
-		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
-		mController.init();
-		// WHEN the controller is suspended
-		mController.suspend();
-		// THEN the controller unregisters from the event bus
-		assertEquals(0, mFakeCrudEventBus.countRegisteredReceivers());
-	}
+    /** Tests that suspend() unregisters from the event bus. */
+    public void testSuspend_UnregistersFromEventBus() {
+        // GIVEN an initialized controller with patient set
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN the controller is suspended
+        mController.suspend();
+        // THEN the controller unregisters from the event bus
+        assertEquals(0, mFakeCrudEventBus.countRegisteredReceivers());
+    }
 
-	public void testInit_RequestsPatientDetails() {
-		// GIVEN a patient was set
-		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
-		// WHEN the controller is inited
-		mController.init();
-		// THEN it requests that patient's details be fetched
-		mMockAppModel.fetchSinglePatient(mFakeCrudEventBus, PATIENT_UUID_1);
-	}
+    /** Tests that init() requests a single patient from the app model. */
+    public void testInit_RequestsPatientDetails() {
+        // GIVEN a patient was set
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // WHEN the controller is inited
+        mController.init();
+        // THEN it requests that patient's details be fetched
+        mMockAppModel.fetchSinglePatient(mFakeCrudEventBus, PATIENT_UUID_1);
+    }
 
-	public void testPatientDetailsLoaded_SetsObservationsOnUi() {
-		// GIVEN the observations provider is set up to return some dummy data
-		List<LocalizedChartHelper.LocalizedObservation> allObservations =
-				ImmutableList.of(OBSERVATION_A);
-		Map<String, LocalizedChartHelper.LocalizedObservation> recentObservations =
-				ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
-		when(mMockObservationsProvider.getObservations(PATIENT_UUID_1))
-				.thenReturn(allObservations);
-		when(mMockObservationsProvider.getMostRecentObservations(PATIENT_UUID_1))
-				.thenReturn(recentObservations);
-		// GIVEN patient is set and controller is initialized
-		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
-		mController.init();
-		// WHEN that patient's details are loaded
-		AppPatient patient = AppPatient.builder().build();
-		mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
-		// TODO(rjlothian): When the handler UI updating hack in PatientChartController is
-		// removed, this can also be removed.
-	    mFakeHandler.runUntilEmpty();
-		// THEN the controller puts observations on the UI
-        verify(mMockUi).setObservationHistory(allObservations, null);
-		verify(mMockUi).updatePatientVitalsUI(recentObservations);
-	}
+    /** Tests that observations are updated in the UI when patient details fetched. */
+    public void testPatientDetailsLoaded_SetsObservationsOnUi() {
+        // GIVEN the observations provider is set up to return some dummy data
+        List<LocalizedChartHelper.LocalizedObservation> allObservations =
+                ImmutableList.of(OBSERVATION_A);
+        Map<String, LocalizedChartHelper.LocalizedObservation> recentObservations =
+                ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
+        when(mMockObservationsProvider.getObservations(PATIENT_UUID_1))
+                .thenReturn(allObservations);
+        when(mMockObservationsProvider.getMostRecentObservations(PATIENT_UUID_1))
+                .thenReturn(recentObservations);
+        // GIVEN patient is set and controller is initialized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN that patient's details are loaded
+        AppPatient patient = AppPatient.builder().build();
+        mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
+        // TODO: When the handler UI updating hack in PatientChartController is removed, this can
+        // also be removed.
+        mFakeHandler.runUntilEmpty();
+        // THEN the controller puts observations on the UI
+        verify(mMockUi).setObservationHistory(allObservations, null, null);
+        verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
+    }
 
-	public void testPatientDetailsLoaded_UpdatesUi() {
-		// GIVEN patient is set and controller is initalized
-		mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
-		mController.init();
-		// WHEN that patient's details are loaded
-		AppPatient patient = AppPatient.builder().build();
-		mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
-		// THEN the controller updates the UI
-		verify(mMockUi).setPatient(patient);
-	}
+    /** Tests that the UI is given updated patient data when patient data is fetched. */
+    public void testPatientDetailsLoaded_UpdatesUi() {
+        // GIVEN patient is set and controller is initalized
+        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        mController.init();
+        // WHEN that patient's details are loaded
+        AppPatient patient = AppPatient.builder().build();
+        mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
+        // THEN the controller updates the UI
+        verify(mMockUi).setPatient(patient);
+    }
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
     public void testSetCondition_AddsEncounterForNewCondition() {
@@ -262,19 +276,19 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         verify(mMockUi).showFormSubmissionDialog(false);
     }
 
-	private final class FakeHandler implements MinimalHandler {
-	    private final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
+    private final class FakeHandler implements MinimalHandler {
+        private final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
 
-	    @Override
-	    public void post(Runnable runnable) {
-	        mTasks.add(runnable);
-	    }
+        @Override
+        public void post(Runnable runnable) {
+            mTasks.add(runnable);
+        }
 
-	    public void runUntilEmpty() {
-	        while (!mTasks.isEmpty()) {
-	            Runnable runnable = mTasks.pop();
-	            runnable.run();
-	        }
-	    }
-	}
+        public void runUntilEmpty() {
+            while (!mTasks.isEmpty()) {
+                Runnable runnable = mTasks.pop();
+                runnable.run();
+            }
+        }
+    }
 }

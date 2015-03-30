@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync;
 
 import android.content.BroadcastReceiver;
@@ -34,9 +45,7 @@ public class SyncManager {
     public static final String SYNC_PROGRESS = "sync-progress";
     public static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
-    /**
-     * Cancels an in-flight, non-periodic sync.
-     */
+    /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
         ContentResolver.cancelSync(
                 GenericAccountService.getAccount(),
@@ -51,8 +60,8 @@ public class SyncManager {
     }
 
     /**
-     * Forces a sync to occur immediately.
-     * TODO(kpy): Avoid triggering a new full sync if a full sync is already underway.
+     * Forces a sync to occur as soon as possible, though Android scheduling may still delay the
+     * sync.
      */
     public void forceSync() {
         LOG.d("Forcing new sync");
@@ -69,9 +78,7 @@ public class SyncManager {
                 PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
     }
 
-    /**
-     * Returns {@code true} if a sync is active.
-    */
+    /** Returns {@code true} if a sync is active. */
     public boolean isSyncing() {
         return
                 ContentResolver.isSyncActive(
@@ -79,9 +86,7 @@ public class SyncManager {
                         Contracts.CONTENT_AUTHORITY);
     }
 
-    /**
-     * Returns {@code true} if a sync is pending.
-     */
+    /** Returns {@code true} if a sync is pending. */
     public boolean isSyncPending() {
         return ContentResolver.isSyncPending(
                         GenericAccountService.getAccount(),
@@ -122,6 +127,7 @@ public class SyncManager {
                     break;
                 case -1:
                     LOG.i("Sync status broadcast intent received without a status code.");
+                    break;
                 default:
                     LOG.i(
                             "Sync status broadcast intent received with unknown status %1$d.",

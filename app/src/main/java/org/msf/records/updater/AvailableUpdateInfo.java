@@ -1,8 +1,17 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.updater;
 
 import android.net.Uri;
-
-import com.google.common.base.Strings;
 
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.utils.LexicographicVersion;
@@ -10,9 +19,7 @@ import org.msf.records.utils.Logger;
 
 import java.util.List;
 
-/**
- * An object containing information about an available application update.
- */
+/** An object containing information about an available application update. */
 public class AvailableUpdateInfo {
 
     private static final Logger LOG = Logger.create();
@@ -22,9 +29,7 @@ public class AvailableUpdateInfo {
     public final LexicographicVersion availableVersion;
     public final Uri updateUri;
 
-    /**
-     * Creates an instance of {@link AvailableUpdateInfo} for an invalid update.
-     */
+    /** Creates an instance of {@link AvailableUpdateInfo} for an invalid update. */
     public static AvailableUpdateInfo getInvalid(LexicographicVersion currentVersion) {
         return new AvailableUpdateInfo(
                 false /*isValid*/,
@@ -41,9 +46,7 @@ public class AvailableUpdateInfo {
                 + "updateUri=" + updateUri + ")";
     }
 
-    /**
-     * Creates an instance of {@link AvailableUpdateInfo} from a server response.
-     */
+    /** Creates an instance of {@link AvailableUpdateInfo} from a server response. */
     public static AvailableUpdateInfo fromResponse(
             LexicographicVersion currentVersion, List<UpdateInfo> response) {
         if (response == null) {
@@ -88,9 +91,7 @@ public class AvailableUpdateInfo {
         this.updateUri = updateUri;
     }
 
-    /**
-     * Returns true if this is a valid update with a higher version number.
-     */
+    /** Returns true if this is a valid update with a higher version number. */
     public boolean shouldUpdate() {
         return isValid && availableVersion.greaterThan(currentVersion);
     }

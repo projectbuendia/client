@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import android.support.annotation.Nullable;
@@ -6,6 +17,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -15,9 +27,11 @@ import com.google.gson.JsonParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.msf.records.App;
 import org.msf.records.data.app.AppEncounter;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.AppPatientDelta;
+import org.msf.records.model.Concepts;
 import org.msf.records.net.model.Encounter;
 import org.msf.records.net.model.Location;
 import org.msf.records.net.model.NewUser;
@@ -27,12 +41,10 @@ import org.msf.records.utils.Logger;
 import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/**
- * Implementation of Server RPCs that will talk to OpenMRS.
- * Currently no other implementations.
- */
+/** Implementation of {@link Server} that sends RPC's to OpenMRS. */
 public class OpenMrsServer implements Server {
 
     private static final Logger LOG = Logger.create();
@@ -41,13 +53,20 @@ public class OpenMrsServer implements Server {
     private final RequestFactory mRequestFactory;
     private final Gson mGson;
 
+    /**
+     * Constructs an interface to the OpenMRS server.
+     * @param connectionDetails an {@link OpenMrsConnectionDetails} instance for communicating with
+     *                          the server
+     * @param requestFactory a {@link RequestFactory} for generating requests to OpenMRS
+     * @param gson a {@link Gson} instance for serialization/deserialization
+     */
     public OpenMrsServer(
             OpenMrsConnectionDetails connectionDetails,
             RequestFactory requestFactory,
             Gson gson) {
         mConnectionDetails = connectionDetails;
         mRequestFactory = requestFactory;
-        // TODO(kpy): Inject a Gson instance here.
+        // TODO: Inject a Gson instance here.
         mGson = gson;
     }
 
@@ -56,7 +75,7 @@ public class OpenMrsServer implements Server {
      * content of a response, if possible.
      * @param errorListener An error listener.
      * @return A new error listener that tries to pass a more meaningful message
-     * to the original errorListener.
+     *     to the original errorListener.
      */
     private Response.ErrorListener wrapErrorListener(
             final Response.ErrorListener errorListener) {
@@ -65,8 +84,8 @@ public class OpenMrsServer implements Server {
             public void onErrorResponse(VolleyError error) {
                 String message = error.getMessage();
                 try {
-                    if (error.networkResponse != null &&
-                        error.networkResponse.data != null) {
+                    if (error.networkResponse != null
+                            && error.networkResponse.data != null) {
                         String text = new String(error.networkResponse.data);
                         JsonObject result = new JsonParser().parse(text).getAsJsonObject();
                         if (result.has("error")) {
@@ -88,6 +107,37 @@ public class OpenMrsServer implements Server {
                 errorListener.onErrorResponse(new VolleyError(message, error));
             }
         };
+    }
+
+    @Override
+    public void logToServer(List<String> pairs) {
+        // To avoid filling the server logs with big messy stack traces, let's make a dummy
+        // request that succeeds.  We assume "Pulse" will always be present on the server.
+        // Conveniently, extra data after ";" in the URL is included in request logs, but
+        // ignored by the REST resource handler, which just returns the "Pulse" concept.
+        final String urlPath = "/concept/" + Concepts.PULSE_UUID;
+        List<String> params = new ArrayList<>();
+        params.add("time=" + (new Date().getTime()));
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            params.add("user_id=" + user.id);
+            if (user.isGuestUser()) {
+                params.add("guest_user=1");
+            }
+        }
+        for (int i = 0; i + 1 < pairs.size(); i += 2) {
+            params.add(Utils.urlEncode(pairs.get(i)) + "=" + Utils.urlEncode(pairs.get(i + 1)));
+        }
+
+        LOG.i("Logging to server: %s", params);
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails, urlPath + ";" + Joiner.on(";").join(params), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) { }
+                } , null);
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 0, 1));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     @Override
@@ -254,7 +304,7 @@ public class OpenMrsServer implements Server {
 
     @Override
     public void updatePatientLocation(String patientId, String newLocationId) {
-        // TODO(sdoerner): Implement.
+        // TODO: Implement or remove (currently handled by updatePatient).
     }
 
     @Override
@@ -273,7 +323,7 @@ public class OpenMrsServer implements Server {
                         ArrayList<Patient> patients = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");
-                            for (int i=0; i<results.length(); i++) {
+                            for (int i = 0; i < results.length(); i++) {
                                 patients.add(patientFromJson(results.getJSONObject(i)));
                             }
                         } catch (JSONException e) {
@@ -320,7 +370,7 @@ public class OpenMrsServer implements Server {
                         ArrayList<User> users = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");
-                            for (int i=0; i<results.length(); i++) {
+                            for (int i = 0; i < results.length(); i++) {
                                 users.add(userFromJson(results.getJSONObject(i)));
                             }
                         } catch (JSONException e) {
@@ -442,7 +492,7 @@ public class OpenMrsServer implements Server {
                         ArrayList<Location> result = new ArrayList<>();
                         try {
                             JSONArray results = response.getJSONArray("results");
-                            for (int i=0; i<results.length(); i++) {
+                            for (int i = 0; i < results.length(); i++) {
                                 Location location =
                                         parseLocationJson(results.getJSONObject(i));
                                 result.add(location);
@@ -465,7 +515,7 @@ public class OpenMrsServer implements Server {
 
     @Override
     public void cancelPendingRequests() {
-        // TODO(dxchen): Implement or deprecate. The way this was implemented before, where a string
+        // TODO: Implement or deprecate. The way this was implemented before, where a string
         // was the tag, is not safe. Only the class that initiated a request (and its delegates)
         // should be able to cancel that request.
     }

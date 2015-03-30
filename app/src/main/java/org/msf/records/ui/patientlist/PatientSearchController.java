@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.patientlist;
 
 import android.util.Log;
@@ -12,14 +23,14 @@ import org.msf.records.events.actions.SyncCancelRequestedEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.TypedCursorFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
-import org.msf.records.filter.db.patient.PatientDbFilters;
+import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.filter.db.SimpleSelectionFilterGroup;
 import org.msf.records.filter.db.patient.LocationUuidFilter;
-import org.msf.records.filter.db.SimpleSelectionFilter;
+import org.msf.records.filter.db.patient.PatientDbFilters;
 import org.msf.records.filter.matchers.FilteredCursorWrapper;
-import org.msf.records.filter.matchers.patient.IdFilter;
 import org.msf.records.filter.matchers.MatchingFilter;
 import org.msf.records.filter.matchers.MatchingFilterGroup;
+import org.msf.records.filter.matchers.patient.IdFilter;
 import org.msf.records.filter.matchers.patient.NameFilter;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
@@ -29,11 +40,7 @@ import java.util.Set;
 
 import static org.msf.records.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
-/**
- * Controller for {@link PatientSearchActivity}.
- *
- * <p>Avoid adding untestable dependencies to this class.
- */
+/** Controller for {@link PatientSearchActivity}. */
 public class PatientSearchController {
 
     private static final String TAG = PatientSearchController.class.getSimpleName();
@@ -116,12 +123,17 @@ public class PatientSearchController {
         mLocationTreeUpdatedSubscriber = new LocationTreeUpdatedSubscriber();
     }
 
+    /**
+     * Requests resources required by this controller. Note that some resources may be fetched
+     * asynchronously after this function returns.
+     */
     public void init() {
         mGlobalEventBus.register(mSyncSubscriber);
         mCrudEventBus.register(mLocationTreeUpdatedSubscriber);
         mModel.fetchLocationTree(mCrudEventBus, mLocale);
     }
 
+    /** Releases resources required by this controller. */
     public void suspend() {
         mGlobalEventBus.unregister(mSyncSubscriber);
         mCrudEventBus.unregister(mLocationTreeUpdatedSubscriber);

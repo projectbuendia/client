@@ -11,10 +11,12 @@ buildscript {
 apply plugin: 'com.android.application'
 
 def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+def gitDirty = 'git diff --name-only HEAD'.execute([], project.rootDir).text.trim().size() > 0
+def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 
 dependencies {
     // Build plugins
-    // TODO(dxchen): Figure out why removing this causes a Dagger error.
+    // TODO: Figure out why removing this causes a Dagger error.
     provided 'com.github.frankiesardo:auto-parcel-processor:0.2' // Automatic Parcelables
     provided 'com.squareup.dagger:dagger-compiler:1.2.2' // Dependency injection
     // provided 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1' // Test multiplexing/selection
@@ -23,7 +25,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':odkcollect')
+    compile project(':third_party:odkcollect')
 
     // External dependencies
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -51,6 +53,7 @@ dependencies {
     androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
     compile files('libs/sqlcipher.jar')
+    compile project(':third_party:AutoFitTextView')
 }
 
 apply plugin: 'spoon'
@@ -65,32 +68,32 @@ spoon {
 // when no changes have been made to the build.
 tasks["spoon"].outputs.upToDateWhen { false }
 
-// The version number is set using -PversionNumber=1.2.3.  All its parts should
-// be numeric, and there should be at most 3 parts (e.g. 1, 1.2, or 1.2.3).
-def versionNumber = project.hasProperty('versionNumber') ? project.versionNumber : '0';
-def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
+// Development builds get the lowest possible version code, so that any release
+// build will be considered an upgrade over any development build.
+def versionInteger = 0
 
-// The version number is converted to an integer for the version code, and
-// normalized to a string for the version name.  The string normalization drops
-// leading and trailing zeroes (e.g. '0.001.0' becomes '0.1').
-def versionParts = versionNumber.split('\\.').toList()
-assert versionParts.size >= 1
-assert versionParts.size <= 3
-versionParts.push('0')
-versionParts.push('0')
-def versionMajor = versionParts[0].toInteger()
-def versionMinor = versionParts[1].toInteger()
-def versionPatch = versionParts[2].toInteger()
-assert versionMajor < 100
-assert versionMinor < 100
-assert versionPatch < 10000
-def versionInteger = versionMajor * 1000000 + versionMinor * 10000 + versionPatch
-def versionString = '' + versionMajor
-if (versionMinor > 0) {
-    versionString += '.' + versionMinor
-}
-if (versionPatch > 0) {
-    versionString += '.' + versionPatch
+// Development builds get a version name that identifies the commit.
+def versionString = gitSha.substring(0, 7) + (gitDirty ? '+' : '')
+
+// For a release build, use -PversionNumber=1.2.3 to set the version number.
+// It should have at most three parts, all numeric (e.g. 1, 1.2, or 1.2.3).
+if (project.hasProperty('versionNumber')) {
+    // The version number is converted to an integer for the version code,
+    // e.g. 2.34.5 becomes 2340005.
+    def versionParts = project.versionNumber.split('\\.').toList()
+    assert versionParts.size >= 1 && versionParts.size() <= 3
+    versionParts.addAll(['0', '0'])  // missing parts default to 0
+    def versionMajor = versionParts[0].toInteger()
+    def versionMinor = versionParts[1].toInteger()
+    def versionPatch = versionParts[2].toInteger()
+    assert versionMajor < 100
+    assert versionMinor < 100
+    assert versionPatch < 10000
+    versionInteger = versionMajor * 1000000 + versionMinor * 10000 + versionPatch
+    // Construct a normalized string for the version name, formatting integers
+    // canonically and dropping trailing zeroes (e.g. '0.001.0' becomes '0.1').
+    versionString = versionMajor + '.' + versionMinor + '.' + versionPatch;
+    versionString = versionString.replaceAll('(\\.0)*$', '');
 }
 logger.info("Version number: ${versionString}")
 logger.info("Version code: ${versionInteger}")
@@ -149,7 +152,8 @@ android {
         targetSdkVersion 19
 
         versionCode versionInteger
-        versionName '0'.equals(versionString) ? gitSha : versionString;
+        versionName versionString
+        resValue "string", "app_version", versionString
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 

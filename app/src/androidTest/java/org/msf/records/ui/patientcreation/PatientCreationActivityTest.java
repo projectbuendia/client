@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.patientcreation;
 
 import org.msf.records.R;
@@ -9,6 +20,7 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 
@@ -22,8 +34,13 @@ import static org.hamcrest.core.AllOf.allOf;
 
 import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 
+/** Tests for {@link PatientCreationActivity}. */
 public class PatientCreationActivityTest extends FunctionalTestCase {
-
+    /**
+     * Sets up the test by logging in as a guest user. This set up process does NOT open the
+     * add patient screen. Enter the add patient screen during the test by calling
+     * {@link #enterAddPatientScreen()}.
+     */
     public void setUp() throws Exception {
         super.setUp();
         // Go to PatientCreationActivity
@@ -71,7 +88,7 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
         screenshot("Test Start");
         String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
-        onView(withId(R.id.patient_creation_button_change_location)).perform(click());
+        onView(withId(R.id.patient_creation_button_change_location)).perform(scrollTo(), click());
         screenshot("After Location Dialog Shown");
         onView(withText("S1")).perform(click());
         screenshot("After Location Selected");
@@ -109,9 +126,10 @@ public class PatientCreationActivityTest extends FunctionalTestCase {
     /** Tests that the admission date is visible right after adding a patient. */
     public void testNewPatientHasDefaultAdmissionDate() {
         testNewPatientWithoutLocation();
-        checkViewDisplayedSoon(allOf(
+        // Flaky because of potential periodic syncs.
+        checkViewDisplayedWithin(allOf(
                 isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 1")));
+                withText("Day 1")), 90000);
     }
 
     /** Tests that symptoms onset is optional and not assigned a default value. */

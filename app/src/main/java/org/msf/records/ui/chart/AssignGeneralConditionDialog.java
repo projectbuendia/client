@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.app.AlertDialog;
@@ -7,7 +18,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import org.msf.records.R;
 import org.msf.records.model.Concepts;
@@ -16,9 +26,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * A dialog that allows users to assign or change a patient's location.
- */
+/** A dialog that allows users to assign or change a patient's general condition. */
 public final class AssignGeneralConditionDialog
         implements AdapterView.OnItemClickListener {
 
@@ -31,7 +39,7 @@ public final class AssignGeneralConditionDialog
     private final ConditionSelectedCallback mConditionSelectedCallback;
     private ProgressDialog mProgressDialog;
 
-    // TODO(dxchen): Consider making this an event bus event rather than a callback so that we don't
+    // TODO: Consider making this an event bus event rather than a callback so that we don't
     // have to worry about Activity context leaks.
     public interface ConditionSelectedCallback {
         /**
@@ -61,9 +69,7 @@ public final class AssignGeneralConditionDialog
         mConditionSelectedCallback = checkNotNull(conditionSelectedCallback);
     }
 
-    /**
-     * Builds and displays the dialog.
-     */
+    /** Builds and displays the dialog. */
     public void show() {
         FrameLayout frameLayout = new FrameLayout(mContext); // needed for outer margins to work
         View.inflate(mContext, R.layout.condition_grid, frameLayout);
@@ -102,16 +108,12 @@ public final class AssignGeneralConditionDialog
         }
     }
 
-    /**
-     * Returns true iff the dialog is currently displayed.
-     */
+    /** Returns true iff the dialog is currently displayed. */
     public boolean isShowing() {
         return mDialog != null && mDialog.isShowing();
     }
 
-    /**
-     * Dismisses the dialog.
-     */
+    /** Dismisses the dialog. */
     public void dismiss() {
         mProgressDialog.dismiss();
 

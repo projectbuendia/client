@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.patientcreation;
 
 import android.test.AndroidTestCase;
@@ -9,7 +20,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.msf.records.App;
 import org.msf.records.FakeAppLocationTreeFactory;
+import org.msf.records.R;
 import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.data.app.AppPatient;
@@ -29,9 +42,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.msf.records.ui.matchers.AppPatientMatchers.matchesPatientDelta;
 
-/**
- * Tests for {@link PatientCreationController}.
- */
+/** Tests for {@link PatientCreationController}. */
 public class PatientCreationControllerTest extends AndroidTestCase {
     private static final String VALID_ID = "123";
     private static final String VALID_GIVEN_NAME = "Jane";
@@ -159,28 +170,35 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
     }
 
-    /** Tests that given name is treated as a required field. */
-    public void testCreatePatient_requiresGivenName() {
+    /** Tests that given name is replaced by a default if not specified. */
+    public void testCreatePatient_givenNameDefaultsToUnknown() {
         // GIVEN an initialized controller
         mPatientCreationController.init();
         // WHEN all fields but given name are populated
         AppPatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.givenName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
-        // THEN controller fails to add the patient
-        verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
+        // THEN controller adds the patient with a default given name
+        patientDelta.givenName = Optional.of(App.getInstance().getString(R.string.unknown_name));
+        verify(mMockAppModel).addPatient(
+                any(FakeEventBus.class),
+                argThat(matchesPatientDelta(patientDelta)));
     }
 
-    /** Tests that family name is treated as a required field. */
-    public void testCreatePatient_requiresFamilyName() {
+    /** Tests that family name is replaced by a default if not specified. */
+    public void testCreatePatient_familyNameDefaultsToUnknown() {
         // GIVEN an initialized controller
         mPatientCreationController.init();
         // WHEN all fields but family name are populated
         AppPatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.familyName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
-        // THEN controller fails to add the patient
-        verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
+        // THEN controller adds the patient with a default family name
+        patientDelta.familyName =
+                Optional.of(App.getInstance().getString(R.string.unknown_name));
+        verify(mMockAppModel).addPatient(
+                any(FakeEventBus.class),
+                argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that negative ages are not allowed. */

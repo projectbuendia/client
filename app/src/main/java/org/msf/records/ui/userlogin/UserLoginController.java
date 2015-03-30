@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.userlogin;
 
 import java.util.ArrayList;
@@ -5,6 +16,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.msf.records.R;
+import org.msf.records.diagnostics.Troubleshooter;
+import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
@@ -14,19 +27,14 @@ import org.msf.records.ui.dialogs.AddNewUserDialogFragment;
 import org.msf.records.user.UserManager;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
 
 import com.google.common.collect.Ordering;
 
-/**
- * Controller for {@link UserLoginActivity}.
- *
- * <p>Don't add untestable dependencies to this class.
- */
-final class UserLoginController {
+/** Controller for {@link UserLoginActivity}. */
+public final class UserLoginController {
 
     private static final Logger LOG = Logger.create();
-
-    private static final boolean DEBUG = true;
 
     public interface Ui {
 
@@ -55,18 +63,36 @@ final class UserLoginController {
     private final UserManager mUserManager;
     private final List<User> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
+    private final Troubleshooter mTroubleshooter;
 
+    /**
+     * Instantiates a {@link UserLoginController}.
+     * @param userManager a {@link UserManager} from which users will be fetched
+     * @param eventBus an {@link EventBusRegistrationInterface} for listening to user fetch and
+     *                 modification events
+     * @param troubleshooter a {@link Troubleshooter} for monitoring server health; if the server
+     *                       becomes available and the controller has no data available, the
+     *                       controller will automatically retry fetching users
+     * @param ui a {@link Ui} for handling activity changes
+     * @param fragmentUi a {@link FragmentUi} for displaying users
+     */
     public UserLoginController(
             UserManager userManager,
             EventBusRegistrationInterface eventBus,
+            Troubleshooter troubleshooter,
             Ui ui,
             FragmentUi fragmentUi) {
         mUserManager = userManager;
         mEventBus = eventBus;
+        mTroubleshooter = troubleshooter;
         mUi = ui;
         mFragmentUi = fragmentUi;
     }
 
+    /**
+     * Requests any necessary resources. Note that some resources may be fetched asynchronously
+     * after this function returns.
+     */
     public void init() {
         mEventBus.register(mSubscriber);
         mFragmentUi.showSpinner(true);
@@ -85,22 +111,32 @@ final class UserLoginController {
 
     /** Call when the user presses the 'add user' button. */
     public void onAddUserPressed() {
+        Utils.logEvent("add_user_button_pressed");
         mUi.showAddNewUserDialog();
     }
 
     /** Call when the user presses the settings button. */
     public void onSettingsPressed() {
+        Utils.logEvent("settings_button_pressed");
         mUi.showSettings();
     }
 
     /** Call when the user taps to select a user. */
     public void onUserSelected(User user) {
         mUserManager.setActiveUser(user);
+        Utils.logUserAction("logged_in");
         mUi.showTentSelectionScreen();
     }
 
     @SuppressWarnings("unused") // Called by reflection from event bus.
     private final class BusEventSubscriber {
+        /** Restart user fetch if we have no users and the Buendia API just became available. */
+        public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
+            if (mUsersSortedByName.isEmpty() && mTroubleshooter.isServerHealthy()) {
+                LOG.d("Buendia API is available and users are not, retrying sync.");
+                onSyncRetry();
+            }
+        }
 
         /** Updates the UI when the list of users is loaded. */
         public void onEventMainThread(KnownUsersLoadedEvent event) {

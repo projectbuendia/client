@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.widget;
 
 import android.content.Context;
@@ -13,9 +24,7 @@ import org.msf.records.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-/**
- * A button with a subtitle.
- */
+/** A button with a subtitle. */
 public class SubtitledButtonView extends LinearLayout {
 
     @InjectView(R.id.view_subtitled_button_subtitle)
@@ -33,9 +42,13 @@ public class SubtitledButtonView extends LinearLayout {
         this(context, attrs, 0);
     }
 
+    /**
+     * Instantiates and inflates a {@link SubtitledButtonView}.
+     * {@see LinearLayout(Context, AttributeSet, int)}
+     */
     public SubtitledButtonView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        // TODO(akalachman): Find a way to maintain the border even when setting a bgcolor.
+        // TODO: Find a way to maintain the border even when setting a bgcolor.
         setBackgroundResource(R.drawable.border_grey_1dp);
 
         LayoutInflater.from(context).inflate(
@@ -81,9 +94,7 @@ public class SubtitledButtonView extends LinearLayout {
         mSubtitleView.setText(subtitle);
     }
 
-    /**
-     * Sets the text color of both the title and the subtitle.
-     */
+    /** Sets the text color of both the title and the subtitle. */
     public SubtitledButtonView setTextColor(int color) {
         mTitleView.setTextColor(color);
         mSubtitleView.setTextColor(color);
@@ -91,12 +102,22 @@ public class SubtitledButtonView extends LinearLayout {
         return this;
     }
 
+    /**
+     * Sets the title of the button, using the builder pattern.
+     * @param title the title text
+     * @return the button with the specified title
+     */
     public SubtitledButtonView setTitle(CharSequence title) {
         mTitleView.setText(title);
 
         return this;
     }
 
+    /**
+     * Sets the subtitle of the button, using the builder pattern.
+     * @param subtitle the subtitle text
+     * @return the button with the specified subtitle
+     */
     public SubtitledButtonView setSubtitle(CharSequence subtitle) {
         mSubtitleView.setText(subtitle);
 

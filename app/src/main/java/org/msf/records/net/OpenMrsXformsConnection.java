@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.net;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -19,11 +30,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /**
- * A connection to the Xform handling module we are adding to OpenMRS to provide xforms.
- * This is not part of OpenMrsServer as it has entirely it's own interface, but may be merged in
- * future.
- *
- * @author nfortescue@google.com
+ * A connection to the module deployed in OpenMRS to provide xforms (which is part of the Buendia
+ * API module). This is not part of OpenMrsServer as it has entirely its own interface, but should
+ * be merged in the future.
  */
 public class OpenMrsXformsConnection {
 
@@ -36,7 +45,7 @@ public class OpenMrsXformsConnection {
     }
 
     /**
-     * Get a single (full) Xform from the OpenMRS server
+     * Get a single (full) Xform from the OpenMRS server.
      * @param uuid the uuid of the form to fetch
      * @param resultListener the listener to be informed of the form asynchronously
      * @param errorListener a listener to be informed of any errors
@@ -90,17 +99,17 @@ public class OpenMrsXformsConnection {
 
                                 // Sometimes date_changed is not set; in this case, date_changed is
                                 // simply date_created.
-                                long date_changed;
+                                long dateChanged;
                                 if (entry.get("date_changed") == JSONObject.NULL) {
-                                    date_changed = entry.getLong("date_created");
+                                    dateChanged = entry.getLong("date_created");
                                 } else {
-                                    date_changed = entry.getLong("date_changed");
+                                    dateChanged = entry.getLong("date_changed");
                                 }
 
                                 OpenMrsXformIndexEntry indexEntry = new OpenMrsXformIndexEntry(
                                         entry.getString("uuid"),
                                         entry.getString("name"),
-                                        date_changed);
+                                        dateChanged);
                                 result.add(indexEntry);
                             }
                         } catch (JSONException e) {
@@ -143,7 +152,7 @@ public class OpenMrsXformsConnection {
         if (patientUuid != null) {
             post.addProperty("patient_uuid", patientUuid);
         }
-        // TODO(nfortescue): get the enterer from the user login
+        // TODO: get the enterer from the user login
         post.addProperty("enterer_id", 1);
 
         post.addProperty("date_entered", ISODateTimeFormat.dateTime().print(new DateTime()));
