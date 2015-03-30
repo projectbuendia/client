@@ -39,11 +39,11 @@ public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
             + "            from observations"
             + "            group by patient_uuid, concept_uuid"
             + "        ) maxs "
-            + "    on obs.encounter_time = maxs.maxtime and "
-            + "        obs.concept_uuid = maxs.concept_uuid and "
-            + "        obs.patient_uuid = maxs.patient_uuid"
-            + "    where obs.concept_uuid=?"
-            + "    order by obs.patient_uuid"
+            + "        on obs.encounter_time = maxs.maxtime and "
+            + "            obs.concept_uuid = maxs.concept_uuid and "
+            + "            obs.patient_uuid = maxs.patient_uuid"
+            + "        where obs.concept_uuid=?"
+            + "        order by obs.patient_uuid"
             + "    ) where concept_value=?"
             + ")";
 
