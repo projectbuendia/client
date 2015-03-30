@@ -13,13 +13,13 @@ package org.msf.records.sync.providers;
 
 import net.sqlcipher.database.SQLiteStatement;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 
 /** Provides helper functions for dealing with savepoints in SQLite databases. */
 public final class SQLiteDatabaseTransactionHelper { // @nolint
-    private final PatientDatabase mDbHelper;
+    private final Database mDbHelper;
 
-    SQLiteDatabaseTransactionHelper(PatientDatabase dbHelper) {
+    SQLiteDatabaseTransactionHelper(Database dbHelper) {
         mDbHelper = dbHelper;
     }
 

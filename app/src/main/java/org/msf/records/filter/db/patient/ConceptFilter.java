@@ -13,8 +13,6 @@ package org.msf.records.filter.db.patient;
 
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.filter.db.SimpleSelectionFilter;
-import org.msf.records.sync.PatientDatabase;
-import org.msf.records.sync.providers.Contracts;
 
 /**
  * Matches only patients with a most-recent observation for a given concept that matches a given

@@ -17,7 +17,7 @@ import android.net.Uri;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
 
     @Override
     public Uri insert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         values.put(mIdColumn, uri.getLastPathSegment());
         // Perform an upsert operation, not replacing any values of fields not being explicitly

@@ -11,19 +11,19 @@
 
 package org.msf.records.sync.providers;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
-public class MsfRecordsProvider extends DelegatingProvider<PatientDatabase> {
+public class MsfRecordsProvider extends DelegatingProvider<Database> {
 
     @Override
-    protected PatientDatabase getDatabaseHelper() {
-        return new PatientDatabase(getContext());
+    protected Database getDatabaseHelper() {
+        return new Database(getContext());
     }
 
     @Override
-    protected ProviderDelegateRegistry<PatientDatabase> getRegistry() {
-        ProviderDelegateRegistry<PatientDatabase> registry = new ProviderDelegateRegistry<>();
+    protected ProviderDelegateRegistry<Database> getRegistry() {
+        ProviderDelegateRegistry<Database> registry = new ProviderDelegateRegistry<>();
 
         // Providers for groups of things (e.g., all charts).
         registry.registerDelegate(
