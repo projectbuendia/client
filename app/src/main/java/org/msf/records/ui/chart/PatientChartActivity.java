@@ -55,7 +55,6 @@ import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.date.RelativeDateTimeFormatter;
-import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.PatientAttributeView;
 import org.msf.records.widget.VitalView;
@@ -74,8 +73,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
-
-import static org.msf.records.utils.Utils.getSystemProperty;
 
 /** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends BaseLoggedInActivity {
@@ -583,39 +580,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             if (mChartView != null) {
                 mRootView.removeView(mChartView);
             }
-            if (useRecyclerView()) {
-                mChartView = getChartViewNew(observations, admissionDate, firstSymptomsDate);
-            } else {
-                // TODO: Remove this old implementation.
-                mChartView = getChartView(observations, admissionDate, firstSymptomsDate);
-            }
+            mChartView = createChartView(observations, admissionDate, firstSymptomsDate);
             mChartView.setLayoutParams(
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             mRootView.addView(mChartView);
             mRootView.invalidate();
         }
 
-        boolean useRecyclerView() {
-            return !"1".equalsIgnoreCase(getSystemProperty("debug.useOldChartGrid"));
-        }
-
-        private View getChartView(
-                List<LocalizedObservation> observations,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate) {
-            return new DataGridView.Builder()
-                    .setDoubleWidthColumnHeaders(true)
-                    .setDataGridAdapter(
-                            new LocalizedChartDataGridAdapter(
-                                    PatientChartActivity.this,
-                                    observations,
-                                    admissionDate,
-                                    firstSymptomsDate,
-                                    getLayoutInflater()))
-                    .build(PatientChartActivity.this);
-        }
-
-        private View getChartViewNew(
+        private View createChartView(
                 List<LocalizedObservation> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
