@@ -16,12 +16,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 
 import java.util.List;
 
 /** A {@link ProviderDelegate} that provides query access to all localized locations. */
-public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatabase> {
+public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
 
     /**
      * Query that fetches localized location information for a given locale.
@@ -39,20 +39,18 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
      * </ul>
      */
     private static final String QUERY = ""
-            + "SELECT\n"
-            + "  locations.location_uuid as location_uuid,\n"
-            + "  locations.parent_uuid as parent_uuid,\n"
-            + "  location_names.name as name,\n"
-            + "  COUNT(patients.location_uuid) as patient_count\n"
-            + "FROM locations\n"
-            + "  INNER JOIN location_names\n"
-            + "    ON locations.location_uuid = location_names.location_uuid\n"
-            + "  LEFT JOIN patients\n"
-            + "    ON locations.location_uuid = patients.location_uuid\n"
-            + "WHERE\n"
-            + "  location_names.locale = ?\n"
-            + "GROUP BY\n"
-            + "  locations.location_uuid";
+            + " SELECT"
+            + "     locations.location_uuid AS location_uuid,"
+            + "     locations.parent_uuid AS parent_uuid,"
+            + "     location_names.name AS name,"
+            + "     COUNT(patients.location_uuid) AS patient_count"
+            + " FROM locations"
+            + "     INNER JOIN location_names"
+            + "     ON locations.location_uuid = location_names.location_uuid"
+            + "     LEFT JOIN patients"
+            + "     ON locations.location_uuid = patients.location_uuid"
+            + " WHERE location_names.locale = ?"
+            + " GROUP BY locations.location_uuid";
 
     @Override
     public String getType() {
@@ -61,7 +59,7 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
 
     @Override
     public Cursor query(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
+            Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
         // URI expected to be of form ../localized-locations/{locale}.
         List<String> pathSegments = uri.getPathSegments();
@@ -75,14 +73,14 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
 
     @Override
     public Uri insert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int bulkInsert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues[] values) {
         throw new UnsupportedOperationException(
                 "Bulk insert is not supported for URI '" + uri + "'.");
@@ -90,14 +88,14 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<PatientDatab
 
     @Override
     public int delete(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri, String selection,
+            Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
             String[] selectionArgs) {
         throw new UnsupportedOperationException("Delete is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int update(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("Update is not supported for URI '" + uri + "'.");
     }

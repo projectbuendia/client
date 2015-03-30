@@ -25,7 +25,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // Local project dependencies
-    compile project(':odkcollect')
+    compile project(':third_party:odkcollect')
 
     // External dependencies
     compile 'com.android.support:appcompat-v7:21.0.0'

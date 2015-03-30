@@ -1,2 +1,2 @@
 include ':app'
-include ':odkcollect'
+include ':third_party:odkcollect'
