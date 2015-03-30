@@ -19,14 +19,14 @@ import android.net.Uri;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteStatement;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 import org.msf.records.sync.SelectionBuilder;
 
 /**
  * A {@link ProviderDelegate} that provides query, insert, delete, and update access to a group or
  * list of items provided directly from the database.
  */
-class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
+class GroupProviderDelegate implements ProviderDelegate<Database> {
 
     private static final String BULK_INSERT_SAVEPOINT = "GROUP_PROVIDER_DELEGATE_BULK_INSERT";
     private final String mType;
@@ -44,7 +44,7 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public Cursor query(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SelectionBuilder builder = new SelectionBuilder()
                 .table(mTableName)
@@ -56,7 +56,7 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public Uri insert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         long id = dbHelper.getWritableDatabase()
                 .replaceOrThrow(mTableName, null, values);
@@ -66,7 +66,7 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int bulkInsert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues[] allValues) {
         if (allValues.length == 0) {
             return 0;
@@ -114,7 +114,7 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int delete(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
                 .table(mTableName)
@@ -126,7 +126,7 @@ class GroupProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int update(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
                 .table(mTableName)

@@ -16,14 +16,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 import org.msf.records.sync.SelectionBuilder;
 
 /**
  * A {@link ProviderDelegate} that provides query, delete, and update access to a single item
  * provided directly from the database.
  */
-public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
+public class ItemProviderDelegate implements ProviderDelegate<Database> {
 
     protected final String mName;
     protected final String mTableName;
@@ -45,7 +45,7 @@ public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public Cursor query(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SelectionBuilder builder = new SelectionBuilder()
                 .table(mTableName)
@@ -58,14 +58,14 @@ public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public Uri insert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int bulkInsert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues[] allValues) {
         throw new UnsupportedOperationException(
                 "Bulk insert is not supported for URI '" + uri + "'.");
@@ -73,7 +73,7 @@ public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int delete(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
                 .table(mTableName)
@@ -86,7 +86,7 @@ public class ItemProviderDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int update(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
                 .table(mTableName)
