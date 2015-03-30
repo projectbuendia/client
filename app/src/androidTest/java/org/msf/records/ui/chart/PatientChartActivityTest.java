@@ -39,7 +39,7 @@ import org.msf.records.net.model.Patient;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.utils.Logger;
-import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.FastDataGridView;
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets2.group.TableWidgetGroup;
@@ -577,7 +577,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(allOf(
                 withText(value),
                 isDescendantOfA(inRow(row, ROW_HEIGHT)),
-                isDescendantOfA(isAssignableFrom(DataGridView.LinkableRecyclerView.class))))
+                isDescendantOfA(isAssignableFrom(FastDataGridView.LinkableRecyclerView.class))))
                 .perform(scrollTo())
                 .check(matches(isDisplayed()));
     }
@@ -588,7 +588,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 isDescendantOfA(inRow(row, ROW_HEIGHT)),
                 hasBackground(
                         getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
-                isDescendantOfA(isAssignableFrom(DataGridView.LinkableRecyclerView.class))))
+                isDescendantOfA(isAssignableFrom(FastDataGridView.LinkableRecyclerView.class))))
                 .perform(scrollTo())
                 .check(matches(isDisplayed()));
     }

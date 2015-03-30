@@ -55,7 +55,7 @@ import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
 import org.msf.records.utils.date.RelativeDateTimeFormatter;
-import org.msf.records.widget.DataGridView;
+import org.msf.records.widget.FastDataGridView;
 import org.msf.records.widget.PatientAttributeView;
 import org.msf.records.widget.VitalView;
 import org.odk.collect.android.model.Patient;
@@ -598,7 +598,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                             admissionDate,
                             firstSymptomsDate,
                             getLayoutInflater());
-            DataGridView dataGridView = new DataGridView(
+            FastDataGridView dataGridView = new FastDataGridView(
                     PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
             return dataGridView.createView();
         }
