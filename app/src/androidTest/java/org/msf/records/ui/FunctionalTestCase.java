@@ -294,13 +294,13 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
             // TODO/completeness: Support admission date in addNewPatient().
             // The following code is broken -- hopefully fixed by Espresso 2.0.
             // onView(withId(R.id.patient_creation_admission_date)).perform(click());
-            // selectDateFromDatePicker(mDemoPatient.admissionDate.get());
+            // selectDateFromDatePickerDialog(mDemoPatient.admissionDate.get());
         }
         if (delta.firstSymptomDate.isPresent()) {
             // TODO/completeness: Support first symptoms date in addNewPatient().
             // The following code is broken -- hopefully fixed by Espresso 2.0.
             // onView(withId(R.id.patient_creation_symptoms_onset_date)).perform(click());
-            // selectDateFromDatePicker(mDemoPatient.firstSymptomDate.get());
+            // selectDateFromDatePickerDialog(mDemoPatient.firstSymptomDate.get());
         }
         if (delta.assignedLocationUuid.isPresent()) {
             // TODO/completeness: Support assigned location in addNewPatient().
@@ -321,6 +321,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     // Broken, but hopefully fixed in Espresso 2.0.
     private void selectDateFromDatePickerDialog(DateTime dateTime) {
+        selectDateFromDatePicker(dateTime);
         onView(withText("Set"))
                 .inRoot(isDialog())
                 .perform(click());

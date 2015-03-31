@@ -23,11 +23,6 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 /** Tests for {@link LocationSelectionActivity}. */
 public class LocationSelectionActivityTest extends FunctionalTestCase {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     /** Looks for the expected zones and tents. */
     public void testZonesAndTentsDisplayed() {
         inUserLoginGoToLocationSelection();
@@ -45,6 +40,7 @@ public class LocationSelectionActivityTest extends FunctionalTestCase {
     /** Tests that zones and tents are still displayed after returning from list view. */
     public void testZonesAndTentsDisplayed_afterPatientListView() {
         inUserLoginGoToLocationSelection();
+        // TODO/i18n: Use a string resource instead of the literal button text.
         inLocationSelectionClickLocation("ALL PRESENT PATIENTS");
         pressBack();
         inLocationSelectionCheckZonesAndTentsDisplayed();

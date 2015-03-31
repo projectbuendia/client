@@ -35,8 +35,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
     public final String familyName;
     public final int gender;
     public final LocalDate birthdate;
-    public final DateTime admissionDateTime;
-    // TODO/completeness: Add firstSymptomsDateTime field to AppPatient.
     public final String locationUuid;
 
     private AppPatient(Builder builder) {
@@ -46,7 +44,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         this.familyName = builder.mFamilyName;
         this.gender = builder.mGender;
         this.birthdate = builder.mBirthdate;
-        this.admissionDateTime = builder.mAdmissionDateTime;
         this.locationUuid = builder.mLocationUuid;
     }
 
@@ -63,7 +60,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 .setFamilyName(patient.family_name)
                 .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
                 .setBirthdate(patient.birthdate)
-                .setAdmissionDateTime(new DateTime(patient.admission_timestamp * 1000))
                 .setLocationUuid(
                         patient.assigned_location == null ? null : patient.assigned_location.uuid)
                 .build();
@@ -95,9 +91,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 Contracts.Patients.BIRTHDATE,
                 Dates.toString(birthdate));
         contentValues.put(
-                Contracts.Patients.ADMISSION_TIMESTAMP,
-                admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
-        contentValues.put(
                 Contracts.Patients.LOCATION_UUID,
                 locationUuid);
 
@@ -116,7 +109,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         private String mFamilyName;
         private int mGender;
         private LocalDate mBirthdate;
-        private DateTime mAdmissionDateTime;
         private String mLocationUuid;
 
         private Builder() {}
@@ -148,11 +140,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
 
         public Builder setBirthdate(LocalDate birthdate) {
             this.mBirthdate = birthdate;
-            return this;
-        }
-
-        public Builder setAdmissionDateTime(DateTime admissionDateTime) {
-            this.mAdmissionDateTime = admissionDateTime;
             return this;
         }
 
