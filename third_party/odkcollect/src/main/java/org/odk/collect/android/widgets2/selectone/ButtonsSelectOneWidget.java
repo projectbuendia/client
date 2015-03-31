@@ -13,7 +13,7 @@ import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.activities.FormEntryActivity;
-import org.odk.collect.android.views.FlowRadioGroup;
+import org.odk.collect.android.views.WrappingRadioGroup;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -50,7 +50,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
     }
 
     private final List<SelectChoice> mChoices;
-    private final FlowRadioGroup mGroup;
+    private final WrappingRadioGroup mGroup;
 
     public ButtonsSelectOneWidget(
             Context context, FormEntryPrompt prompt, Appearance appearance, boolean forceReadOnly) {
@@ -59,7 +59,7 @@ public class ButtonsSelectOneWidget extends TypedWidget<SelectOneData> {
         super(context, prompt, appearance, forceReadOnly);
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
-        mGroup = (FlowRadioGroup) inflater.inflate(R.layout.template_segmented_group, null);
+        mGroup = (WrappingRadioGroup) inflater.inflate(R.layout.template_segmented_group, null);
 
         mChoices = prompt.getSelectChoices();
         String defaultAnswer = prompt.getAnswerValue() == null
