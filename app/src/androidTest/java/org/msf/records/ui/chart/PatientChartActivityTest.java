@@ -11,31 +11,19 @@
 
 package org.msf.records.ui.chart;
 
-import android.content.res.Resources;
-
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-
-import android.support.annotation.Nullable;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingResource;
-import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.msf.records.R;
-import org.msf.records.data.app.AppPatient;
-import org.msf.records.data.app.AppPatientDelta;
 import org.msf.records.events.FetchXformSucceededEvent;
 import org.msf.records.events.SubmitXformSucceededEvent;
-import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.sync.SyncFinishedEvent;
-import org.msf.records.net.model.Patient;
 import org.msf.records.ui.FunctionalTestCase;
 import org.msf.records.ui.sync.EventBusIdlingResource;
 import org.msf.records.utils.Logger;
@@ -47,28 +35,22 @@ import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 
 import java.util.UUID;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isDialog;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasDescendant;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.AnyOf.anyOf;
-import static org.msf.records.ui.matchers.AppPatientMatchers.isPatientWithId;
 import static org.msf.records.ui.matchers.ViewMatchers.hasBackground;
 import static org.msf.records.ui.matchers.ViewMatchers.inRow;
 
@@ -83,19 +65,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         super();
     }
 
-    // For now, we create a new demo patient for these tests on each run.
-    // TODO: Use preloaded demo data.
-    protected static String sDemoPatientId = null;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        onView(withText("Guest User")).perform(click());
-    }
-
     /** Tests that the general condition dialog successfully changes general condition. */
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());
         screenshot("General Condition Dialog");
         onView(withText(R.string.status_well)).perform(click());
@@ -117,7 +89,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that the encounter form can be opened more than once. */
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         // Load the chart once
         openEncounterForm();
 
@@ -138,7 +110,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      */
     /*public void testPatientChart_ShowsCorrectAdmissionDate() {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         onView(allOf(
                 isDescendantOfA(withId(R.id.attribute_admission_days)),
                 withText("Day 6")))
@@ -152,7 +124,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         onView(allOf(
                 isDescendantOfA(withId(R.id.attribute_symptoms_onset_days)),
                 withText("Day 8")))
@@ -166,7 +138,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * Espresso 2.0).
      */
      /*public void testPatientChart_ShowsAllDaysInChartWhenNoObservations() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         onView(withText(containsString("Today (Day 6)"))).check(matchesWithin(isDisplayed(), 5000));
         screenshot("Patient Chart");
     }*/
@@ -174,7 +146,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     // TODO: Disabled as there seems to be no easy way of scrolling correctly with no adapter view.
     /** Tests that encounter time can be set to a date in the past and still displayed correctly. */
     /*public void testCanSubmitObservationsInThePast() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         selectDateFromDatePicker("2015", "Jan", null);
         answerVisibleTextQuestion("Temperature", "29.1");
@@ -184,14 +156,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         discardForm();
     }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
     public void testDismissButtonShowsDialogWithChanges() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         answerVisibleTextQuestion("Temperature", "29.2");
 
@@ -208,7 +180,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
     public void testPcr_requiresConfirmation() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         openPcrForm();
         answerVisibleTextQuestion("Ebola L gene", "38");
         answerVisibleTextQuestion("Ebola Np gene", "35");
@@ -228,7 +200,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified. */
     public void testPcr_showsNegFor40() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         openPcrForm();
         answerVisibleTextQuestion("Ebola L gene", "40");
         answerVisibleTextQuestion("Ebola Np gene", "40");
@@ -243,7 +215,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      * period of time, that only the latest encounter is present in the relevant column.
      */
     public void testEncounter_latestEncounterIsAlwaysShown() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
 
         // Update a vital tile (pulse) as well as a couple of observations (temperature, vomiting
         // count), and verify that the latest value is visible for each.
@@ -266,7 +238,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Ensures that non-overlapping observations for the same encounter are combined. */
     public void testCombinesNonOverlappingObservationsForSameEncounter() {
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         // Enter first set of observations for this encounter.
         openEncounterForm();
         answerVisibleTextQuestion("Pulse", "74");
@@ -292,7 +264,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /** Exercises all fields in the encounter form, except for encounter time. */
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
         // TODO: Get rid of magic numbers in this test and other tests in this class.
-        initWithDemoPatientChart();
+        inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         answerVisibleTextQuestion("Pulse", "80");
         answerVisibleTextQuestion("Respiratory rate", "20");
@@ -349,162 +321,6 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(containsString("IV Fitted"))).check(matches(isDisplayed()));
 
         // TODO: check notes field
-    }
-
-    // TODO: Replace with more extensive, externalized demo data.
-
-    /**
-     * Navigates to the patient chart for the shared demo patient,
-     * creating the shared demo patient if it does not exist yet.
-     * Note: this function will not work during {@link #setUp()} as it relies on
-     * {@link #waitForProgressFragment()}.
-     */
-    protected void initWithDemoPatientChart() {
-        waitForProgressFragment(); // Wait for tent selection screen to load.
-
-        if (sDemoPatientId == null) {
-            AppPatientDelta demoPatient = new AppPatientDelta();
-            populateDemoPatient(demoPatient);
-            addNewPatient(demoPatient);
-            sDemoPatientId = demoPatient.id.get();
-            //waitForProgressFragment();
-        }
-
-        // Open patient list.
-        // There may be a small delay before the search button becomes visible -- the button is
-        // not displayed while locations are loading.
-        checkViewDisplayedWithin(withId(R.id.action_search), 3000);
-        onView(withId(R.id.action_search)).perform(click());
-        //waitForProgressFragment();
-
-        // Select the patient.
-        selectPatient(sDemoPatientId);
-    }
-
-    protected void addNewPatient(AppPatientDelta delta) {
-        LOG.i("Adding patient: %s", delta.toContentValues().toString());
-
-        onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New Patient")).check(matches(isDisplayed()));
-        if (delta.id.isPresent()) {
-            onView(withId(R.id.patient_creation_text_patient_id))
-                    .perform(typeText(delta.id.get()));
-        }
-        if (delta.givenName.isPresent()) {
-            onView(withId(R.id.patient_creation_text_patient_given_name))
-                    .perform(typeText(delta.givenName.get()));
-        }
-        if (delta.familyName.isPresent()) {
-            onView(withId(R.id.patient_creation_text_patient_family_name))
-                    .perform(typeText(delta.familyName.get()));
-        }
-        if (delta.birthdate.isPresent()) {
-            Period age = new Period(delta.birthdate.get().toLocalDate(), LocalDate.now());
-            if (age.getYears() < 1) {
-                onView(withId(R.id.patient_creation_text_age))
-                        .perform(typeText(Integer.toString(age.getMonths())));
-                onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
-            } else {
-                onView(withId(R.id.patient_creation_text_age))
-                        .perform(typeText(Integer.toString(age.getYears())));
-                onView(withId(R.id.patient_creation_radiogroup_age_units_years)).perform(click());
-            }
-        }
-        if (delta.gender.isPresent()) {
-            if (delta.gender.get() == AppPatient.GENDER_MALE) {
-                onView(withId(R.id.patient_creation_radiogroup_age_sex_male)).perform(click());
-            } else if (delta.gender.get() == AppPatient.GENDER_FEMALE) {
-                onView(withId(R.id.patient_creation_radiogroup_age_sex_female)).perform(click());
-            }
-        }
-        if (delta.admissionDate.isPresent()) {
-            // TODO: Currently broken -- hopefully fixed by Espresso 2.0.
-            // onView(withId(R.id.patient_creation_admission_date)).perform(click());
-            // selectDateFromDatePicker(mDemoPatient.admissionDate.get());
-        }
-        if (delta.firstSymptomDate.isPresent()) {
-            // TODO: Currently broken -- hopefully fixed by Espresso 2.0.
-            // onView(withId(R.id.patient_creation_symptoms_onset_date)).perform(click());
-            // selectDateFromDatePicker(mDemoPatient.firstSymptomDate.get());
-        }
-        if (delta.assignedLocationUuid.isPresent()) {
-            // TODO: Add support. A little tricky as we need to select by UUID.
-            // onView(withId(R.id.patient_creation_button_change_location)).perform(click());
-        }
-
-        EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>> resource =
-                new EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>>(
-                        UUID.randomUUID().toString(), mEventBus
-                );
-
-        onView(withId(R.id.patient_creation_button_create)).perform(click());
-
-        // Wait for patient to be created.
-        Espresso.registerIdlingResources(resource);
-    }
-
-    /** Selects a patient by ID from the patient list. */
-    private void selectPatient(String id) {
-        onData(isPatientWithId(equalToIgnoringCase(id)))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .perform(click());
-    }
-
-    // Broken, but hopefully fixed in Espresso 2.0.
-    private void selectDateFromDatePickerDialog(DateTime dateTime) {
-        onView(withText("Set"))
-                .inRoot(isDialog())
-                .perform(click());
-    }
-
-    protected void selectDateFromDatePicker(
-            @Nullable String year,
-            @Nullable String monthOfYear,
-            @Nullable String dayOfMonth) {
-        LOG.e("Year: %s, Month: %s, Day: %s", year, monthOfYear, dayOfMonth);
-
-        if (year != null) {
-            setDateSpinner("year", year);
-        }
-        if (monthOfYear != null) {
-            setDateSpinner("month", monthOfYear);
-        }
-        if (dayOfMonth != null) {
-            setDateSpinner("day", dayOfMonth);
-        }
-    }
-
-    protected void selectDateFromDatePicker(DateTime dateTime) {
-        String year = dateTime.toString("yyyy");
-        String monthOfYear = dateTime.toString("MMM");
-        String dayOfMonth = dateTime.toString("dd");
-
-        selectDateFromDatePicker(year, monthOfYear, dayOfMonth);
-    }
-
-    // Broken, but hopefully fixed in Espresso 2.0.
-    protected void setDateSpinner(String spinnerName, String value) {
-        int numberPickerId =
-                Resources.getSystem().getIdentifier("numberpicker_input", "id", "android");
-        int spinnerId =
-                Resources.getSystem().getIdentifier(spinnerName, "id", "android");
-        LOG.i("%s: %s", spinnerName, value);
-        LOG.i("numberPickerId: %d", numberPickerId);
-        LOG.i("spinnerId: %d", spinnerId);
-        onView(allOf(withId(numberPickerId), withParent(withId(spinnerId))))
-                .check(matches(isDisplayed()))
-                .perform(typeText(value));
-    }
-
-    private void populateDemoPatient(AppPatientDelta delta) {
-        // Setting assigned location during this test is currently unsupported.
-        // mDemoPatient.assignedLocationUuid = Optional.of(Zone.TRIAGE_ZONE_UUID);
-        delta.givenName = Optional.of("TestPatientFor");
-        delta.familyName = Optional.of("ChartActivity");
-        delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
-        delta.gender = Optional.of(Patient.GENDER_FEMALE);
-        delta.id = Optional.of(Long.toString(System.currentTimeMillis() % 100000));
-        delta.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
     }
 
     protected void openEncounterForm() {
