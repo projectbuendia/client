@@ -35,7 +35,7 @@
             android:textSize="44sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
-            tools:text="KH.106: Rosky Entocher"/>
+            tools:text="106: Rosky Entocher"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

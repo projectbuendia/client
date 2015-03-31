@@ -21,4 +21,4 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:textSize="24sp"
-    tools:text="Heading" />
+    tools:text="Temperature (°C)" />
