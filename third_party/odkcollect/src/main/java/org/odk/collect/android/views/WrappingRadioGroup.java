@@ -45,7 +45,7 @@ public class WrappingRadioGroup extends RadioGroup {
         final int childCount = getChildCount();
         int x = PADDING;
         int y = PADDING;
-        int lastButtonHeight = 0;
+        int maxButtonHeightForLine = 0;
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             final int buttonWidth = getButtonWidth(child);
@@ -54,18 +54,20 @@ public class WrappingRadioGroup extends RadioGroup {
             // If the button would overflow, go to the next line.
             if (x + buttonWidth > width) {
                 x = PADDING;
-                y += ((lastButtonHeight > 0) ? lastButtonHeight : buttonHeight) + BUTTON_PADDING;
+                y += ((maxButtonHeightForLine > 0) ? maxButtonHeightForLine : buttonHeight)
+                        + BUTTON_PADDING;
+                maxButtonHeightForLine = buttonHeight;
             }
 
-            // Go to next button position.
+            // Go to next button position (the top right corner of the current button).
             x += buttonWidth;
-            lastButtonHeight = buttonHeight;
+            maxButtonHeightForLine = Math.max(maxButtonHeightForLine, buttonHeight);
         }
 
         // Height is the total height of all lines including top and bottom padding as well as
         // the bottom padding of the buttons on the last line.
         int newHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                lastButtonHeight + y + PADDING + BUTTON_PADDING, MeasureSpec.EXACTLY);
+                maxButtonHeightForLine + y + PADDING + BUTTON_PADDING, MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, newHeightMeasureSpec);
     }
 
@@ -77,7 +79,7 @@ public class WrappingRadioGroup extends RadioGroup {
         final int childCount = getChildCount();
         int x = PADDING;
         int y = PADDING;
-        int lastButtonHeight = 0;
+        int maxButtonHeightForLine = 0;
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             final int buttonWidth = getButtonWidth(child);
@@ -86,13 +88,15 @@ public class WrappingRadioGroup extends RadioGroup {
             // If the button would overflow, go to the next line.
             if (x + buttonWidth > width) {
                 x = PADDING;
-                y += ((lastButtonHeight > 0) ? lastButtonHeight : buttonHeight) + BUTTON_PADDING;
+                y += ((maxButtonHeightForLine > 0) ? maxButtonHeightForLine : buttonHeight)
+                        + BUTTON_PADDING;
+                maxButtonHeightForLine = buttonHeight;
             }
 
             // Layout this button and go to the next position.
             child.layout(x, y, x + buttonWidth, y + buttonHeight);
             x += buttonWidth;
-            lastButtonHeight = buttonHeight;
+            maxButtonHeightForLine = Math.max(maxButtonHeightForLine, buttonHeight);
         }
     }
 
