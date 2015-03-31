@@ -37,7 +37,6 @@ public class AppPatientDelta {
     public Optional<String> familyName = Optional.absent();
     public Optional<Integer> gender = Optional.absent();
     public Optional<DateTime> birthdate = Optional.absent();
-
     public Optional<LocalDate> admissionDate = Optional.absent();
     public Optional<LocalDate> firstSymptomDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();

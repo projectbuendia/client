@@ -36,6 +36,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
     public final int gender;
     public final LocalDate birthdate;
     public final DateTime admissionDateTime;
+    // TODO/completeness: Add firstSymptomsDateTime field to AppPatient.
     public final String locationUuid;
 
     private AppPatient(Builder builder) {
