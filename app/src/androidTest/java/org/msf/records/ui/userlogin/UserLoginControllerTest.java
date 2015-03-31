@@ -1,11 +1,26 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.userlogin;
 
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.msf.records.diagnostics.Troubleshooter;
+import org.msf.records.diagnostics.TroubleshootingAction;
+import org.msf.records.events.data.AppUsersFetchedEvent;
+import org.msf.records.events.diagnostics.TroubleshootingActionsChangedEvent;
 import org.msf.records.events.user.KnownUsersLoadFailedEvent;
 import org.msf.records.events.user.KnownUsersLoadedEvent;
 import org.msf.records.events.user.UserAddFailedEvent;
@@ -21,15 +36,14 @@ import android.test.AndroidTestCase;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-/**
- * Tests for {@link UserLoginController}.
- */
+/** Tests for {@link UserLoginController}. */
 public class UserLoginControllerTest extends AndroidTestCase {
 
     private UserLoginController mController;
     @Mock private UserManager mMockUserManager;
     @Mock private UserLoginController.Ui mMockUi;
     @Mock private UserLoginController.FragmentUi mMockFragmentUi;
+    @Mock private Troubleshooter mTroubleshooter;
     private FakeEventBus mFakeEventBus;
 
     @Override
@@ -41,6 +55,7 @@ public class UserLoginControllerTest extends AndroidTestCase {
         mController = new UserLoginController(
                 mMockUserManager,
                 mFakeEventBus,
+                mTroubleshooter,
                 mMockUi,
                 mMockFragmentUi);
     }
@@ -180,5 +195,51 @@ public class UserLoginControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new UserAddFailedEvent(new NewUser(), 0));
         // THEN spinner is hidden
         verify(mMockFragmentUi).showSpinner(false);
+    }
+
+    /** Tests that users are reloaded if the server becomes healthy and users are unavailable. */
+    public void testOnServerHealthy_reloadsUsersIfNotAvailable() {
+        // GIVEN initialized controller, no users loaded, server unhealthy
+        when(mTroubleshooter.isServerHealthy()).thenReturn(false);
+        mController.init();
+        // WHEN server becomes healthy
+        when(mTroubleshooter.isServerHealthy()).thenReturn(true);
+        mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
+                ImmutableSet.of(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION)));
+        // THEN users are reloaded
+        // Note: already called once in init()
+        verify(mMockUserManager, times(2)).loadKnownUsers();
+    }
+
+    /** Tests that users are not reloaded if the server becomes healthy and users are available. */
+    public void testOnServerHealthy_doesNothingIfUsersAvailable() {
+        // GIVEN initialized controller, users loaded, server unhealthy
+        when(mTroubleshooter.isServerHealthy()).thenReturn(false);
+        mController.init();
+        User user = new User("idA", "nameA");
+        mFakeEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.of(user)));
+        // WHEN server becomes healthy
+        when(mTroubleshooter.isServerHealthy()).thenReturn(true);
+        mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
+                ImmutableSet.of(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION)));
+        // THEN users are not reloaded
+        verify(mMockUserManager, times(1)).loadKnownUsers();
+    }
+
+    /**
+     * Tests that TroubleshootingActionsChangedEvents do not trigger user reload if server is still
+     * unhealthy.
+     */
+    public void testOnTroubleshootingActionsChanged_checksServerHealthy() {
+        // GIVEN initialized controller, no users loaded, server unhealthy
+        when(mTroubleshooter.isServerHealthy()).thenReturn(false);
+        mController.init();
+        // WHEN TroubleshootingActions change but server is still unhealthy
+        mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
+                ImmutableSet.of(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION)));
+        // THEN users are not reloaded
+        // Note: this function is called once during init(), so expect it to be called once, but
+        //       only once.
+        verify(mMockUserManager, times(1)).loadKnownUsers();
     }
 }

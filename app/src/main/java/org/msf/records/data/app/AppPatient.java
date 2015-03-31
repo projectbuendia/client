@@ -1,20 +1,28 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app;
 
 import android.content.ContentValues;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-/**
- * A patient in the app model.
- */
+/** A patient in the app model. */
 @Immutable
 public final class AppPatient extends AppTypeBase<String> implements Comparable<AppPatient> {
 
@@ -27,7 +35,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
     public final String familyName;
     public final int gender;
     public final LocalDate birthdate;
-    public final DateTime admissionDateTime;
     public final String locationUuid;
 
     private AppPatient(Builder builder) {
@@ -37,7 +44,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         this.familyName = builder.mFamilyName;
         this.gender = builder.mGender;
         this.birthdate = builder.mBirthdate;
-        this.admissionDateTime = builder.mAdmissionDateTime;
         this.locationUuid = builder.mLocationUuid;
     }
 
@@ -45,9 +51,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         return new Builder();
     }
 
-    /**
-     * Creates an instance of {@link AppPatient} from a network {@link Patient} object.
-     */
+    /** Creates an instance of {@link AppPatient} from a network {@link Patient} object. */
     public static AppPatient fromNet(Patient patient) {
         return builder()
                 .setId(patient.id)
@@ -56,7 +60,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 .setFamilyName(patient.family_name)
                 .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
                 .setBirthdate(patient.birthdate)
-                .setAdmissionDateTime(new DateTime(patient.admission_timestamp * 1000))
                 .setLocationUuid(
                         patient.assigned_location == null ? null : patient.assigned_location.uuid)
                 .build();
@@ -86,10 +89,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 gender == Patient.GENDER_MALE ? "M" : "F");
         contentValues.put(
                 Contracts.Patients.BIRTHDATE,
-                Utils.localDateToString(birthdate));
-        contentValues.put(
-                Contracts.Patients.ADMISSION_TIMESTAMP,
-                admissionDateTime == null ? null : admissionDateTime.getMillis() / 1000);
+                Dates.toString(birthdate));
         contentValues.put(
                 Contracts.Patients.LOCATION_UUID,
                 locationUuid);
@@ -109,7 +109,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         private String mFamilyName;
         private int mGender;
         private LocalDate mBirthdate;
-        private DateTime mAdmissionDateTime;
         private String mLocationUuid;
 
         private Builder() {}
@@ -141,11 +140,6 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
 
         public Builder setBirthdate(LocalDate birthdate) {
             this.mBirthdate = birthdate;
-            return this;
-        }
-
-        public Builder setAdmissionDateTime(DateTime admissionDateTime) {
-            this.mAdmissionDateTime = admissionDateTime;
             return this;
         }
 

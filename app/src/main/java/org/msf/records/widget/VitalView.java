@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.widget;
 
 import android.content.Context;
@@ -12,10 +23,9 @@ import org.msf.records.R;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.lb.auto_fit_textview.AutoResizeTextView;
 
-/**
- * A compound view that displays a patient vital in a colorful rectangle.
- */
+/** A compound view that displays a patient vital in a colorful rectangle. */
 public class VitalView extends LinearLayout {
 
     @InjectView(R.id.view_vital_name) TextView mNameView;
@@ -29,6 +39,10 @@ public class VitalView extends LinearLayout {
         this(context, attrs, 0);
     }
 
+    /**
+     * Instantiates a {@link VitalView}.
+     * {@see LinearLayout(Context, AttributeSet, int)}
+     */
     public VitalView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
@@ -61,7 +75,9 @@ public class VitalView extends LinearLayout {
     }
 
     /**
-     * Sets the name.
+     * Sets the vital name, using the builder pattern.
+     * @param name the name
+     * @return this, with the specified name applied
      */
     public VitalView setName(CharSequence name) {
         mNameView.setText(name);
@@ -69,6 +85,11 @@ public class VitalView extends LinearLayout {
         return this;
     }
 
+    /**
+     * Sets the vital value, using the builder pattern.
+     * @param value the value
+     * @return this, with the specified value applied
+     */
     public VitalView setValue(CharSequence value) {
         mValueView.setText(value);
 
@@ -76,7 +97,9 @@ public class VitalView extends LinearLayout {
     }
 
     /**
-     * Sets the text color of both the name and the value.
+     * Sets the text color of both the name and the value, using the builder pattern.
+     * @param color the color resource
+     * @return this, with the specified color applied
      */
     public VitalView setTextColor(int color) {
         mNameView.setTextColor(color);

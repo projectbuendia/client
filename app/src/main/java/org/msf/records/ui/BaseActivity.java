@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.app.AlertDialog;
@@ -26,7 +37,9 @@ import org.msf.records.utils.Utils;
 import de.greenrobot.event.EventBus;
 
 /**
- * An abstract {@link FragmentActivity} that is the base for all activities.
+ * An abstract {@link FragmentActivity} that is the base for all activities, providing a "content
+ * view" that can be populated by implementing classes and a "status view" that can be used for
+ * troubleshooting and status messages.
  */
 public abstract class BaseActivity extends FragmentActivity {
 
@@ -100,23 +113,17 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
-    /**
-     * Sets the visibility of the status bar.
-     */
+    /** Sets the visibility of the status bar. */
     public void setStatusVisibility(int visibility) {
         mStatusContent.setVisibility(visibility);
     }
 
-    /**
-     * Gets the visibility of the status bar.
-     */
+    /** Gets the visibility of the status bar. */
     public int getStatusVisibility() {
         return mStatusContent.getVisibility();
     }
 
-    /**
-     * Called when the set of troubleshooting actions changes.
-     */
+    /** Called when the set of troubleshooting actions changes. */
     public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
         if (event.actions.isEmpty()) {
             setStatusView(null);
@@ -192,7 +199,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // TODO: Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
@@ -210,7 +217,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // TODO: Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
@@ -228,7 +235,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
                     @Override
                     public void onClick(View view) {
-                        // TODO(dxchen): Display the actual server URL that couldn't be reached in
+                        // TODO: Display the actual server URL that couldn't be reached in
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(

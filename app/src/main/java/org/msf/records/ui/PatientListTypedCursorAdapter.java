@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui;
 
 import android.content.Context;
@@ -19,8 +30,8 @@ import org.msf.records.data.app.TypedCursor;
 import org.msf.records.data.res.ResStatus;
 import org.msf.records.model.Concepts;
 import org.msf.records.sync.LocalizedChartHelper;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.PatientCountDisplay;
-import org.msf.records.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,7 +177,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
 
         holder.mPatientAge.setText(
-                patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));
+                patient.birthdate == null ? "" : Dates.birthdateToAge(patient.birthdate));
 
         holder.mPatientGender.setVisibility(
                 patient.gender == AppPatient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);

@@ -1,0 +1,6 @@
+URL: https://github.com/AndroidDeveloperLB/AutoFitTextView
+Version: c43a1623d8253f6b98c6e6825211f7e87f541280
+License: Apache 2.0
+Description: A TextView that automatically adjusts its font size and line count
+    to make its content fit in the available space.
+Local modifications: No local modifications.

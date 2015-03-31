@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.sync.providers;
 
 import android.content.ContentResolver;
@@ -5,13 +16,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.msf.records.sync.PatientDatabase;
+import org.msf.records.sync.Database;
 import org.msf.records.sync.SelectionBuilder;
 
-/**
- * A {@link ProviderDelegate} that provides read-write access to users.
- */
-class UsersDelegate implements ProviderDelegate<PatientDatabase> {
+/** A {@link ProviderDelegate} that provides read-write access to users. */
+class UsersDelegate implements ProviderDelegate<Database> {
 
     public static final String NAME = "users";
 
@@ -25,10 +34,10 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public Cursor query(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SelectionBuilder builder = new SelectionBuilder()
-                .table(PatientDatabase.USERS_TABLE_NAME)
+                .table(Database.USERS_TABLE)
                 .where(selection, selectionArgs);
         Cursor cursor = builder.query(dbHelper.getReadableDatabase(), projection, sortOrder);
         cursor.setNotificationUri(contentResolver, uri);
@@ -37,19 +46,19 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public Uri insert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         long id = dbHelper.getWritableDatabase()
-                .replaceOrThrow(PatientDatabase.USERS_TABLE_NAME, null, values);
+                .replaceOrThrow(Database.USERS_TABLE, null, values);
         contentResolver.notifyChange(uri, null, false);
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
 
     @Override
     public int bulkInsert(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues[] values) {
-        // TODO(nfortescue): optimise this.
+        // TODO: optimise this.
         for (ContentValues value : values) {
             insert(dbHelper, contentResolver, uri, value);
         }
@@ -58,10 +67,10 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int delete(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
-                .table(PatientDatabase.USERS_TABLE_NAME)
+                .table(Database.USERS_TABLE)
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
@@ -70,10 +79,10 @@ class UsersDelegate implements ProviderDelegate<PatientDatabase> {
 
     @Override
     public int update(
-            PatientDatabase dbHelper, ContentResolver contentResolver, Uri uri,
+            Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
         int count = new SelectionBuilder()
-                .table(PatientDatabase.USERS_TABLE_NAME)
+                .table(Database.USERS_TABLE)
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);

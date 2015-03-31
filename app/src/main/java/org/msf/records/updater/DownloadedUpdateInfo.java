@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.updater;
 
 import android.content.pm.PackageInfo;
@@ -21,17 +32,13 @@ public class DownloadedUpdateInfo {
     public final LexicographicVersion downloadedVersion;
     public final String path;
 
-    /**
-     * Creates an instance of {@link DownloadedUpdateInfo} for an invalid update.
-     */
+    /** Creates an instance of {@link DownloadedUpdateInfo} for an invalid update. */
     public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
         return new DownloadedUpdateInfo(
                 false /*isValid*/, currentVersion, UpdateManager.MINIMAL_VERSION, null /*path*/);
     }
 
-    /**
-     * Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk.
-     */
+    /** Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk. */
     public static DownloadedUpdateInfo fromUri(LexicographicVersion currentVersion, String uri) {
         if (uri == null || uri.equals("") || !uri.startsWith("file://")) {
             LOG.w("URI was not specified or invalid.");

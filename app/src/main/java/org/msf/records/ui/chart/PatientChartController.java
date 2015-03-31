@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.ui.chart;
 
 import android.app.Activity;
@@ -27,7 +38,6 @@ import org.msf.records.events.SubmitXformSucceededEvent;
 import org.msf.records.events.data.AppLocationTreeFetchedEvent;
 import org.msf.records.events.data.EncounterAddFailedEvent;
 import org.msf.records.events.data.PatientUpdateFailedEvent;
-import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
 import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.model.Concepts;
@@ -35,12 +45,12 @@ import org.msf.records.net.model.User;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
-import org.msf.records.ui.tentselection.AssignLocationDialog;
-import org.msf.records.ui.tentselection.AssignLocationDialog.TentSelectedCallback;
+import org.msf.records.ui.locationselection.AssignLocationDialog;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusRegistrationInterface;
 import org.msf.records.utils.LocaleSelector;
 import org.msf.records.utils.Logger;
-import org.msf.records.utils.Utils;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
@@ -50,11 +60,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-/**
- * Controller for {@link PatientChartActivity}.
- *
- * <p>Do not add untestable dependencies to this class.
- */
+/** Controller for {@link PatientChartActivity}. */
 final class PatientChartController {
 
     private static final Logger LOG = Logger.create();
@@ -66,9 +72,9 @@ final class PatientChartController {
     /**
      * Period between observation syncs while the chart view is active.  It would be nice for
      * this to be even shorter (20 s? 10 s?) but currently the table scroll position resets on
-     * each sync.  TODO: Try reducing this period to improve responsiveness, but only after
-     * we're able to prevent the table from scrolling to the top on sync, or when we're able to
-     * skip re-rendering for syncs that pull down no new patient or observation data.
+     * each sync, if any data has changed.
+     * TODO: Try reducing this period to improve responsiveness, but be wary of the table scrolling
+     * whenever data is refreshed.
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
@@ -79,7 +85,7 @@ final class PatientChartController {
 
     /** Maximum concurrent ODK forms assigned request codes. */
     private static final int MAX_ODK_REQUESTS = 10;
-    private int nextIndex = 0;
+    private int mNextIndex = 0;
 
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
@@ -97,7 +103,10 @@ final class PatientChartController {
         void setTitle(String title);
 
         /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUI(Map<String, LocalizedObservation> observations);
+        void updatePatientVitalsUi(
+                Map<String, LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate);
 
         /** Updates the general condition UI with the patient's current condition. */
         void updatePatientGeneralConditionUi(String generalConditionUuid);
@@ -107,13 +116,18 @@ final class PatientChartController {
 
         /** Updates the UI showing the historic log of observation values for this patient. */
         void setObservationHistory(
-                List<LocalizedObservation> observations, LocalDate admissionDate);
+                List<LocalizedObservation> observations,
+                LocalDate admissionDate,
+                LocalDate firstSymptomsDate);
 
         /** Shows the last time a user interacted with this patient. */
         void setLatestEncounter(long latestEncounterTimeMillis);
 
         /** Shows the patient's personal details. */
         void setPatient(AppPatient patient);
+
+        /** Displays an error message with the given resource id. */
+        void showError(int errorMessageResource);
 
         /** Displays an error with the given resource and optional substitution args. */
         void showError(int errorResource, Object... args);
@@ -127,9 +141,6 @@ final class PatientChartController {
 
         /** Re-enables fetching. */
         void reEnableFetch();
-
-        /** Displays an error message with the given resource id. */
-        void showError(int errorMessageResource);
 
         /** Shows or hides the form loading dialog. */
         void showFormLoadingDialog(boolean show);
@@ -188,7 +199,10 @@ final class PatientChartController {
         mMainThreadHandler = mainThreadHandler;
     }
 
-    /** Returns the state of the controller. This should be saved to preserve it over activity restarts. */
+    /**
+     * Returns the state of the controller. This should be saved to preserve it over activity
+     * restarts.
+     */
     public Bundle getState() {
         Bundle bundle = new Bundle();
         bundle.putStringArray("pendingUuids", mPatientUuids);
@@ -209,7 +223,10 @@ final class PatientChartController {
         }
     }
 
-    /** Initializes the controller, setting async operations going to collect data required by the UI. */
+    /**
+     * Initializes the controller, setting async operations going to collect data required by the
+     * UI.
+     */
     public void init() {
         mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
 
@@ -273,14 +290,14 @@ final class PatientChartController {
                 Utils.logUserAction(action,
                         "form", "round",
                         "patient_uuid", patientUuid);
-                // This will fire a CreatePatientSucceededEvent.
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             case ADD_TEST_RESULTS:
                 Utils.logUserAction(action,
                         "form", "lab_test",
                         "patient_uuid", patientUuid);
-                // This will fire a CreatePatientSucceededEvent.
+                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
                 mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
                 break;
             default:
@@ -304,10 +321,12 @@ final class PatientChartController {
      *                    with the "description" field in OpenMRS.
      */
     public void onAddObservationPressed(String targetGroup) {
-        PrepopulatableFields fields = new PrepopulatableFields();
+        // Don't acknowledge this action if a dialog is showing
+        if (dialogShowing()) {
+            return;
+        }
 
-        // TODO(dxchen): Re-enable this post v0.2.1.
-//        fields.encounterTime = DateTime.now();
+        PrepopulatableFields fields = new PrepopulatableFields();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -344,9 +363,6 @@ final class PatientChartController {
 
     public void onAddTestResultsPressed() {
         PrepopulatableFields fields = new PrepopulatableFields();
-
-        // TODO(dxchen): Re-enable this post v0.2.1.
-//        fields.encounterTime = DateTime.now();
         fields.locationName = "Triage";
 
         User user = App.getUserManager().getActiveUser();
@@ -364,50 +380,55 @@ final class PatientChartController {
                 fields);
     }
 
+    /** Retrieves the value of a date observation as a LocalDate. */
+    private LocalDate getObservedDate(
+            Map<String, LocalizedObservation> observations, String conceptUuid) {
+        LocalizedObservation obs = observations.get(conceptUuid);
+        return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
+    }
+
     /** Gets the latest observation values and displays them on the UI. */
     private synchronized void updatePatientUi() {
         // Get the observations
-        // TODO(dxchen,nfortescue): Background thread this, or make this call async-like.
-        List<LocalizedObservation> observations = mObservationsProvider.getObservations(mPatientUuid);
+        // TODO: Background thread this, or make this call async-like.
+        List<LocalizedObservation> observations =
+                mObservationsProvider.getObservations(mPatientUuid);
         Map<String, LocalizedObservation> conceptsToLatestObservations =
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
-        for (LocalizedObservation observation : observations) {
-            // TODO(rjlothian): This looks odd. Why do we do this? I'd expect this to be set by getMostRecentObservations instead.
-            conceptsToLatestObservations.put(observation.conceptUuid, observation);
-            mLastObservation = Math.max(
-                    mLastObservation,
-                    observation.encounterTimeMillis);
+        for (LocalizedObservation obs : observations) {
+            mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
         }
+
+        // Add in initial observation.
+        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
+                conceptsToLatestObservations.entrySet()) {
+            if (!observations.contains(recentObservation.getValue())) {
+                observations.add(recentObservation.getValue());
+            }
+        }*/
 
         if (DEBUG) {
-            LOG.d("Showing " + observations.size() + " observations, and "
-                    + conceptsToLatestObservations.size() + " latest observations");
+            LOG.d("Showing " + observations.size() + " observations and "
+                    + conceptsToLatestObservations.size() + " latest obs");
         }
 
+        LocalDate admissionDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
+        LocalDate firstSymptomsDate = getObservedDate(
+                conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
         mUi.setLatestEncounter(mLastObservation);
-        mUi.updatePatientVitalsUI(conceptsToLatestObservations);
-
-        LocalDate admissionDate = null;
-        if (conceptsToLatestObservations.containsKey(Concepts.ADMISSION_DATE_UUID)) {
-            LocalizedObservation admissionDateObservation =
-                    conceptsToLatestObservations.get(Concepts.ADMISSION_DATE_UUID);
-            String admissionDateString = admissionDateObservation.localizedValue;
-            if (admissionDateString != null) {
-                admissionDate = Utils.stringToLocalDate(admissionDateString);
-            }
-        }
-        mUi.setObservationHistory(observations, admissionDate);
+        mUi.updatePatientVitalsUi(
+                conceptsToLatestObservations, admissionDate, firstSymptomsDate);
+        mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
     }
 
-    /**
-     * Returns a requestCode that can be sent to ODK Xform activity representing the given UUID.
-     */
+    /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
     private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {
-        mPatientUuids[nextIndex] = patientUuid;
-        int requestCode = new PatientChartActivity.RequestCode(form, nextIndex).getCode();
-        nextIndex = (nextIndex + 1) % MAX_ODK_REQUESTS;
+        mPatientUuids[mNextIndex] = patientUuid;
+        int requestCode = new PatientChartActivity.RequestCode(form, mNextIndex).getCode();
+        mNextIndex = (mNextIndex + 1) % MAX_ODK_REQUESTS;
         return requestCode;
     }
 
@@ -447,8 +468,8 @@ final class PatientChartController {
     public void showAssignLocationDialog(
             Context context,
             final MenuItem menuItem) {
-        TentSelectedCallback callback =
-                new TentSelectedCallback() {
+        AssignLocationDialog.LocationSelectedCallback callback =
+                new AssignLocationDialog.LocationSelectedCallback() {
 
                     @Override
                     public boolean onNewTentSelected(String newTentUuid) {
@@ -481,7 +502,8 @@ final class PatientChartController {
     }
 
     /**
-     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient UUID.
+     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient
+     * UUID.
      *
      * <p>Also removes details of that requestCode from the controller's state.
      */
@@ -502,10 +524,6 @@ final class PatientChartController {
             }
             mLocationTree = event.tree;
             updatePatientLocationUi();
-        }
-
-        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
-            mSyncManager.forceSync();
         }
 
         public void onEventMainThread(SyncSucceededEvent event) {
@@ -560,15 +578,6 @@ final class PatientChartController {
                     mAssignLocationDialog.dismiss();
                     mAssignLocationDialog = null;
                 }
-
-                // TODO(dxchen): Displaying the observations part of the UI takes a lot of
-                // main-thread time. This delays rendering of the rest of UI.
-                // To allow the rest of the UI to be displayed before we attempt to populate
-                // the observations, we delay the observation update slightly.
-                // We need this hack because we load observations on the main thread. We should
-                // change this to use a background thread. Either an async task or using
-                // CrudEventBus events.
-
             } else if (event.item instanceof AppEncounter) {
                 AppEncounter.AppObservation[] observations =
                         ((AppEncounter)event.item).observations;
@@ -585,6 +594,12 @@ final class PatientChartController {
                 }
             }
 
+            // TODO: Displaying the observations part of the UI takes a lot of main-thread time.
+            // This delays rendering of the rest of UI. To allow the rest of the UI to be displayed
+            // before we attempt to populate the observations, we delay the observation update
+            // slightly. We need this hack because we load observations on the main thread. We
+            // should change this to use a background thread. Either an async task or using
+            // CrudEventBus events.
             mMainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -661,5 +676,10 @@ final class PatientChartController {
         if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
             mUi.updatePatientLocationUi(mLocationTree, mPatient);
         }
+    }
+
+    private boolean dialogShowing() {
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
+                || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
     }
 }

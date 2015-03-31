@@ -1,438 +1,387 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.widget;
 
-import android.annotation.SuppressLint;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
-import android.widget.RelativeLayout;
+import android.view.ViewStub;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.TextView;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 
 import org.msf.records.R;
-
-import java.util.Set;
+import org.msf.records.utils.Utils;
 
 /**
- * A compound layout that displays a table of data with fixed column and row headers.
- *
- * <p>This layout can only be instantiated programmatically; it is not intended to be used in XML.
- *
- * <p>In order to instantiate this layout, you must use a {@link DataGridView.Builder}, to which you
- * must provide a {@link DataGridAdapter}. The adapter's methods will be invoked synchronously on
- * construction and never again; therefore, the adapter must have ALL the data you wish to display
- * before you call {@link DataGridView.Builder#build}.
- *
- * <p>Based on https://www.codeofaninja.com/2013/08/android-scroll-table-fixed-header-column.html.
- * License is unclear: https://www.codeofaninja.com/terms-of-use.
- *
- * TODO(dxchen): Figure out license.
+ * A compound layout that displays a table of data with fixed column and row headers. Since the main
+ * layout is defined in XML, call {@code #createView} to trigger the actual inflation.
  */
-@SuppressLint("ViewConstructor") // Never to be instantiated in XML.
-public class DataGridView extends RelativeLayout {
-
-    public static class Builder {
-
-        private View mCornerView;
-        private DataGridAdapter mDataGridAdapter;
-        private boolean mHasDoubleWidthColumnHeaders = false;
-
-        public Builder() {}
-
-        /**
-         * Sets the view in the top left corner of the grid.
-         */
-        public Builder setCornerView(View cornerView) {
-            mCornerView = cornerView;
-            return this;
-        }
-
-        public Builder setDataGridAdapter(DataGridAdapter dataGridAdapter) {
-            mDataGridAdapter = dataGridAdapter;
-            return this;
-        }
-
-        /**
-         * Sets whether the column headers should be double width.
-         *
-         * <p>Double-width column headers span two columns each. When using double-width column
-         * headers, {@link DataGridAdapter#getColumnHeader} will be called only for every other
-         * column; for example, when called with column {@code 2}, the adapter should return the
-         * column header for columns {@code 2} and {@code 3}.
-         *
-         * <p>If you use double-width column headers, the number of columns returned by
-         * {@link DataGridAdapter#getColumnCount} must be a multiple of {@code 2}.
-         */
-        public Builder setDoubleWidthColumnHeaders(boolean hasDoubleWidthColumnHeaders) {
-            mHasDoubleWidthColumnHeaders = hasDoubleWidthColumnHeaders;
-            return this;
-        }
-
-        public DataGridView build(Context context) {
-            if (mDataGridAdapter == null) {
-                throw new IllegalStateException("Data grid adapter must be set.");
-            }
-
-            View cornerView = mCornerView != null ? mCornerView : new View(context);
-            return new DataGridView(
-                    context,
-                    mDataGridAdapter,
-                    cornerView,
-                    mHasDoubleWidthColumnHeaders);
-        }
-    }
-
+public class DataGridView {
     private final Context mContext;
     private final DataGridAdapter mDataGridAdapter;
-    private final boolean mHasDoubleWidthColumnHeaders;
+    private final LayoutInflater mLayoutInflater;
 
-    private final HorizontalScrollView mDataHorizontalScrollView;
+    private int mScrollX = 0;
+    private int mScrollY = 0;
+    private int mLogNextScrollX = 40;
+    private int mLogNextScrollY = 40;
 
-    @SuppressWarnings("ResourceType")
-    private DataGridView(
-            Context context,
-            DataGridAdapter dataGridAdapter,
-            View cornerView,
-            boolean hasDoubleWidthColumnHeaders) {
-        super(context);
-
-        mContext = context;
-        mDataGridAdapter = dataGridAdapter;
-        mHasDoubleWidthColumnHeaders = hasDoubleWidthColumnHeaders;
-
-        if (mHasDoubleWidthColumnHeaders) {
-            Preconditions.checkArgument(
-                    mDataGridAdapter.getColumnCount() % 2 == 0,
-                    "If using double-width column headers, the number of columns must be even.");
-        }
-
-        // Create all the main layout components.
-        TableLayout columnHeadersLayout = new TableLayout(mContext);
-        columnHeadersLayout.setBackgroundResource(R.color.chart_grid_lines);
-        TableLayout rowHeadersLayout = new TableLayout(mContext);
-        rowHeadersLayout.setBackgroundResource(R.color.chart_grid_lines);
-        TableLayout dataLayout = new TableLayout(mContext);
-        dataLayout.setBackgroundResource(R.color.chart_grid_lines);
-
-        Linkage<LinkableHorizontalScrollView> horizontalScrollViewLinkage = new Linkage<>();
-        HorizontalScrollView columnHeadersHorizontalScrollView = new LinkableHorizontalScrollView(mContext, horizontalScrollViewLinkage);
-        mDataHorizontalScrollView =
-                new LinkableHorizontalScrollView(mContext, horizontalScrollViewLinkage);
-        columnHeadersHorizontalScrollView.setHorizontalScrollBarEnabled(false);
-        mDataHorizontalScrollView.setHorizontalScrollBarEnabled(false);
-
-        Linkage<LinkableScrollView> verticalScrollViewLinkage = new Linkage<>();
-        ScrollView rowHeadersScrollView = new LinkableScrollView(mContext, verticalScrollViewLinkage);
-        ScrollView dataScrollView = new LinkableScrollView(mContext, verticalScrollViewLinkage);
-        rowHeadersScrollView.setVerticalScrollBarEnabled(false);
-        dataScrollView.setVerticalScrollBarEnabled(false);
-
-        // Set resource IDs so that they can be referenced by RelativeLayout.
-        cornerView.setId(1);
-        columnHeadersHorizontalScrollView.setId(2);
-        rowHeadersScrollView.setId(3);
-        dataScrollView.setId(4);
-
-        // Wrap the column headers in a horizontal scroll view.
-        columnHeadersHorizontalScrollView.addView(columnHeadersLayout);
-
-        // Wrap the row headers in a vertical scroll view.
-        rowHeadersScrollView.addView(rowHeadersLayout);
-
-        // Wrap the data grid in both horizontal and vertical scroll views.
-        dataScrollView.addView(mDataHorizontalScrollView);
-        mDataHorizontalScrollView.addView(dataLayout);
-
-        // Add all the views to the main view.
-        addView(cornerView);
-
-        RelativeLayout.LayoutParams columnHeadersParams = new RelativeLayout.LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        columnHeadersParams.addRule(RelativeLayout.RIGHT_OF, cornerView.getId());
-        addView(columnHeadersHorizontalScrollView, columnHeadersParams);
-
-        RelativeLayout.LayoutParams mRowHeadersParams = new RelativeLayout.LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        mRowHeadersParams.addRule(RelativeLayout.BELOW, cornerView.getId());
-        addView(rowHeadersScrollView, mRowHeadersParams);
-
-        RelativeLayout.LayoutParams mDataParams = new RelativeLayout.LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        mDataParams.addRule(RelativeLayout.RIGHT_OF, rowHeadersScrollView.getId());
-        mDataParams.addRule(RelativeLayout.BELOW, columnHeadersHorizontalScrollView.getId());
-        addView(dataScrollView, mDataParams);
-
-        // Add the column headers.
-        columnHeadersLayout.addView(createColumnHeadersView());
-
-        // Add the row headers.
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = new TableRow(mContext);
-            View view = mDataGridAdapter.getRowHeader(i, null /*convertView*/, row);
-            row.addView(view);
-
-            rowHeadersLayout.addView(row);
-        }
-
-        // Add the data cells.
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = new TableRow(mContext);
-            for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
-                View view = mDataGridAdapter.getCell(i, j, null /*convertView*/, row);
-
-                row.addView(view);
-            }
-
-            dataLayout.addView(row);
-        }
-
-        // Measure the entire layout!
-        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-
-        // Find the widest column header...
-        int maxWidth = 0;
-        if (!mHasDoubleWidthColumnHeaders) {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-                int width = ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
-                        .getMeasuredWidth();
-                if (width > maxWidth) {
-                    maxWidth = width;
-                }
-            }
-        } else {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
-                int width =
-                        divideRoundUp(
-                                ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
-                                        .getMeasuredWidth(),
-                                2);
-                if (width > maxWidth) {
-                    maxWidth = width;
-                }
-            }
-        }
-
-        // ... or data cell...
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) dataLayout.getChildAt(i);
-            for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
-                int width = row.getChildAt(j).getMeasuredWidth();
-                if (width > maxWidth) {
-                    maxWidth = width;
-                }
-            }
-        }
-
-        // ... then set all of the column headers to that width...
-        if (!mHasDoubleWidthColumnHeaders) {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-                ViewGroup.LayoutParams newParams =
-                        ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
-                                .getLayoutParams();
-
-                newParams.width = maxWidth;
-            }
-        } else {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
-                ViewGroup.LayoutParams newParams =
-                        ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
-                                .getLayoutParams();
-
-                newParams.width = maxWidth * 2;
-            }
-        }
-
-        // ... then all of the data cells too.
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) dataLayout.getChildAt(i);
-            for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
-                ViewGroup.LayoutParams newParams = row.getChildAt(j).getLayoutParams();
-
-                newParams.width = maxWidth;
-            }
-        }
-
-        // Measure again!
-        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-
-        // Find the tallest row header...
-        int maxHeight = 0;
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            int height = ((TableRow) rowHeadersLayout.getChildAt(i)).getChildAt(0)
-                    .getMeasuredHeight();
-            if (height > maxHeight) {
-                maxHeight = height;
-            }
-        }
-
-        // ... or data cell...
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) dataLayout.getChildAt(i);
-            for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
-                int height = row.getChildAt(j).getMeasuredHeight();
-                if (height > maxHeight) {
-                    maxHeight = height;
-                }
-            }
-        }
-
-        // ... then set all of the row headers to that height...
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            ViewGroup.LayoutParams newParams =
-                    ((TableRow) rowHeadersLayout.getChildAt(i)).getChildAt(0).getLayoutParams();
-            newParams.height = maxHeight;
-        }
-
-        // ... then all of the data cells too.
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            TableRow row = (TableRow) dataLayout.getChildAt(i);
-            for (int j = 0; j < mDataGridAdapter.getColumnCount(); j++) {
-                ViewGroup.LayoutParams newParams = row.getChildAt(j).getLayoutParams();
-
-                newParams.height = maxHeight;
-            }
-        }
-
-        // Measure again (sigh)...
-        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-
-        // Find the tallest column header.
-        int maxColumnHeaderHeight = 0;
-        if (!mHasDoubleWidthColumnHeaders) {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-                int height = ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
-                        .getMeasuredHeight();
-                if (height > maxColumnHeaderHeight) {
-                    maxColumnHeaderHeight = height;
-                }
-            }
-        } else {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount() / 2; i++) {
-                int height = ((TableRow) columnHeadersLayout.getChildAt(0)).getChildAt(i)
-                        .getMeasuredHeight();
-                if (height > maxColumnHeaderHeight) {
-                    maxColumnHeaderHeight = height;
-                }
-            }
-        }
-
-        // Find the widest row header.
-        int maxRowHeaderWidth = 0;
-        for (int i = 0; i < mDataGridAdapter.getRowCount(); i++) {
-            int width = ((TableRow) rowHeadersLayout.getChildAt(i)).getChildAt(0)
-                    .getMeasuredWidth();
-            if (width > maxRowHeaderWidth) {
-                maxRowHeaderWidth = width;
-            }
-        }
-
-        // Set the corner view's height and width.
-        ViewGroup.LayoutParams cornerParams = cornerView.getLayoutParams();
-        cornerParams.height = maxColumnHeaderHeight;
-        cornerParams.width = maxRowHeaderWidth;
+    /**
+     * Instantiates a {@link DataGridView}.
+     * @param context the Activity context
+     * @param dataGridAdapter the {@link DataGridAdapter} used to populate this view
+     * @param layoutInflater the {@link LayoutInflater} used to inflate this view
+     */
+    public DataGridView(
+            Context context, DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
+        mContext = checkNotNull(context);
+        mDataGridAdapter = checkNotNull(dataGridAdapter);
+        mLayoutInflater = checkNotNull(layoutInflater);
+        Preconditions.checkArgument(
+                dataGridAdapter.getColumnCount() % 2 == 0,
+                "If using double-width column headers, the number of columns must be even.");
     }
 
-    private int divideRoundUp(int dividend, int divisor) {
-        return (dividend + divisor - 1) / divisor;
+    /** Inflates and returns the chart view. */
+    public View createView() {
+        // Assemble top-level views.
+        TableLayout topLayout =
+                (TableLayout) mLayoutInflater.inflate(R.layout.tableview_chart_view, null);
+        final LinkableRecyclerView rowHeaders =
+                (LinkableRecyclerView) topLayout.findViewById(R.id.chart_row_headers);
+        final LinkableRecyclerView columnHeaders =
+                (LinkableRecyclerView) topLayout.findViewById(R.id.chart_col_headers);
+        final LinkableRecyclerView cells =
+                (LinkableRecyclerView) topLayout.findViewById(R.id.chart_cells);
+        final LinkableScrollView verticalScrollview =
+                (LinkableScrollView) topLayout.findViewById(R.id.chart_grid_vertical_scrollview);
+
+        // Initialize rowHeaders.
+        LinearLayoutManager rowHeaderLayoutManager = new WrapContentLinearLayoutManager(
+                mContext, LinearLayoutManager.VERTICAL, false /* reverseLayout */);
+        rowHeaders.setAdapter(new RowHeaderAdapter(
+                mDataGridAdapter, mLayoutInflater));
+        rowHeaders.setLayoutManager(rowHeaderLayoutManager);
+        rowHeaders.setInternalScrollListener(new OnInternalScrollListener() {
+            @Override
+            public void onInternalScrollBy(int dx, int dy) {
+                verticalScrollview.scrollBy(0, dy);
+                logScrollActions(0, dy);
+            }
+        });
+
+        // Initialize columnHeaders.
+        LinearLayoutManager columnHeaderLayoutManager = new WrapContentLinearLayoutManager(
+                mContext, LinearLayoutManager.HORIZONTAL, false);
+        columnHeaderLayoutManager.setReverseLayout(true);
+        columnHeaders.setAdapter(new ColumnHeaderAdapter(mDataGridAdapter, mLayoutInflater));
+        columnHeaders.setLayoutManager(columnHeaderLayoutManager);
+        columnHeaders.setInternalScrollListener(new OnInternalScrollListener() {
+            @Override
+            public void onInternalScrollBy(int dx, int dy) {
+                cells.scrollBy(dx, 0);
+                logScrollActions(dx, 0);
+            }
+        });
+
+        // Initialize cells.
+        CellAdapter cellAdapter = new CellAdapter(
+                mDataGridAdapter, mLayoutInflater);
+        RecyclerView.LayoutManager layoutManager = new WrapContentGridLayoutManager(
+                mContext, mDataGridAdapter.getRowCount(), LinearLayoutManager.HORIZONTAL,
+                true /* reverseLayout */);
+        cells.setHasFixedSize(true);
+        cells.setLayoutManager(layoutManager);
+        cells.setAdapter(cellAdapter);
+        cells.setInternalScrollListener(new OnInternalScrollListener() {
+            @Override
+            public void onInternalScrollBy(int dx, int dy) {
+                columnHeaders.scrollBy(dx, 0);
+                logScrollActions(dx, 0);
+            }
+        });
+        verticalScrollview.setInternalScrollListener(new OnInternalScrollListener() {
+            @Override
+            public void onInternalScrollBy(int dx, int dy) {
+                rowHeaders.scrollBy(0, dy);
+                logScrollActions(0, dy);
+            }
+        });
+
+        return topLayout;
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        mDataHorizontalScrollView.fullScroll(View.FOCUS_RIGHT);
-    }
-
-    private TableRow createColumnHeadersView() {
-        TableRow columnHeadersTableRow = new TableRow(mContext);
-
-        if (!mHasDoubleWidthColumnHeaders) {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i++) {
-                View view = mDataGridAdapter
-                        .getColumnHeader(i, null /*convertView*/, columnHeadersTableRow);
-
-                columnHeadersTableRow.addView(view);
-            }
-        } else {
-            for (int i = 0; i < mDataGridAdapter.getColumnCount(); i += 2) {
-                View view = mDataGridAdapter
-                        .getColumnHeader(i, null /*convertView*/, columnHeadersTableRow);
-
-                columnHeadersTableRow.addView(view);
-            }
+    private void logScrollActions(int dx, int dy) {
+        mScrollX += dx;
+        mScrollY += dy;
+        int mx = Math.abs(mScrollX);
+        int my = Math.abs(mScrollY);
+        if (mx > mLogNextScrollX) {
+            Utils.logUserAction("chart_scrolled_left", "x", "" + mScrollX);
+            mLogNextScrollX *= 2;
         }
-
-        return columnHeadersTableRow;
+        if (my > mLogNextScrollY) {
+            Utils.logUserAction("chart_scrolled_down", "y", "" + mScrollY);
+            mLogNextScrollY *= 2;
+        }
     }
 
-    private static class Linkage<T extends View> {
+    /** ViewHolder class for RowHeaders, ColumnHeaders and Cells. */
+    private static final class ViewHolder extends RecyclerView.ViewHolder {
+        public final TextView textView;
 
-        final Set<T> mLinkedViews = Sets.newHashSet();
+        public ViewHolder(View itemView, TextView textView) {
+            super(itemView);
+            this.textView = textView;
+        }
+    }
 
-        public void addLinkedView(T view) {
-            mLinkedViews.add(view);
+    private static final class CellViewHolder extends RecyclerView.ViewHolder {
+        public TextView textView = null;
+        public ViewStub viewStub;
+
+        public CellViewHolder(View itemView, ViewStub viewStub) {
+            super(itemView);
+            this.viewStub = viewStub;
         }
     }
 
     /**
-     * A {@link HorizontalScrollView} whose scrolling can be linked to other instances of this
-     * class.
+     * A {@link RecyclerView.Adapter} for patient observation cells.
+     *
+     * <p>This class wraps {@link DataGridAdapter} but reverses the order in which columns are
+     * populated so that the most recent day with observations is shown on screen first.
      */
-    private static class LinkableHorizontalScrollView extends HorizontalScrollView {
+    private static final class CellAdapter extends RecyclerView.Adapter {
+        private final DataGridAdapter mDataGridAdapter;
+        private final LayoutInflater mLayoutInflater;
 
-        private final Linkage<LinkableHorizontalScrollView> mLinkage;
 
-        public LinkableHorizontalScrollView(
-                Context context,
-                Linkage<LinkableHorizontalScrollView> linkage) {
-            super(context);
-
-            mLinkage = linkage;
-
-            linkage.addLinkedView(this);
+        public CellAdapter(
+                DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
+            this.mDataGridAdapter = checkNotNull(dataGridAdapter);
+            this.mLayoutInflater = checkNotNull(layoutInflater);
         }
 
         @Override
-        protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-            for (LinkableHorizontalScrollView view : mLinkage.mLinkedViews) {
-                if (view == this) {
-                    continue;
-                }
+        public int getItemViewType(int position) {
+            // Setting row backgrounds is expensive, so only reuse item views with the right
+            // background color.
+            int rowIndex = position % mDataGridAdapter.getRowCount();
+            return rowIndex % 2;
+        }
 
-                view.scrollTo(l, 0);
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = mLayoutInflater.inflate(
+                    R.layout.data_grid_cell_chart_text, parent, false /* attachToRoot */);
+            ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
+            mDataGridAdapter.setCellBackgroundForViewType(view, CellType.CELL, viewType);
+            return new CellViewHolder(view, viewStub);
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            int columnIndex = position / mDataGridAdapter.getRowCount();
+            int rowIndex = position % mDataGridAdapter.getRowCount();
+            CellViewHolder viewHolder = (CellViewHolder) holder;
+            viewHolder.textView = mDataGridAdapter.fillCell(
+                    rowIndex,
+                    (mDataGridAdapter.getColumnCount() - columnIndex - 1),
+                    viewHolder.itemView,
+                    viewHolder.viewStub,
+                    viewHolder.textView);
+            if (viewHolder.textView != null) {
+                // After inflation, the viewStub is no longer part of the view hierarchy, so let it
+                // be garbage collected.
+                viewHolder.viewStub = null;
             }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mDataGridAdapter.getColumnCount() * mDataGridAdapter.getRowCount();
+        }
+    }
+
+    private static final class RowHeaderAdapter extends RecyclerView.Adapter {
+        private final DataGridAdapter mDataGridAdapter;
+        private final LayoutInflater mLayoutInflater;
+
+        public RowHeaderAdapter(DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
+            this.mDataGridAdapter = checkNotNull(dataGridAdapter);
+            this.mLayoutInflater = checkNotNull(layoutInflater);
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            // Setting row backgrounds is expensive, so only reuse item views with the right
+            // background color.
+            return position % 2;
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = mLayoutInflater.inflate(
+                    R.layout.data_grid_row_header_chart, parent, false /* attachToRoot */);
+            TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
+            mDataGridAdapter.setCellBackgroundForViewType(view, CellType.ROW_HEADER, viewType);
+            return new ViewHolder(view, textView);
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            int rowIndex = position;
+            mDataGridAdapter.fillRowHeader(
+                    rowIndex, holder.itemView, ((ViewHolder)holder).textView);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mDataGridAdapter.getRowCount();
+        }
+    }
+
+    private static final class ColumnHeaderAdapter extends RecyclerView.Adapter {
+        private final DataGridAdapter mDataGridAdapter;
+        private final LayoutInflater mLayoutInflater;
+
+        public ColumnHeaderAdapter(DataGridAdapter dataGridAdapter, LayoutInflater layoutInflater) {
+            this.mDataGridAdapter = checkNotNull(dataGridAdapter);
+            this.mLayoutInflater = (layoutInflater);
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = mLayoutInflater.inflate(
+                    R.layout.data_grid_column_header_chart, parent, false /* attachToRoot */);
+            TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
+            return new ViewHolder(view, textView);
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            mDataGridAdapter.fillColumnHeader(
+                    (mDataGridAdapter.getColumnCount() - (position * 2) - 2),
+                    ((ViewHolder) holder).textView);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mDataGridAdapter.getColumnCount() / 2;
         }
     }
 
     /**
-     * A {@link ScrollView} whose scrolling can be linked to other instances of this class.
+     * Interface to notify clients of internal scroll events of a View. These events have been
+     * generated by a user scrolling the view itself, rather than by programmatically scrolling it.
      */
-    private static class LinkableScrollView extends ScrollView {
+    private interface OnInternalScrollListener {
+        void onInternalScrollBy(int dx, int dy);
+    }
 
-        private final Linkage<LinkableScrollView> mLinkage;
+    private static final OnInternalScrollListener DO_NOTHING_LISTENER =
+            new OnInternalScrollListener() {
 
-        public LinkableScrollView(
-                Context context,
-                Linkage<LinkableScrollView> linkage) {
-            super(context);
+                @Override
+                public void onInternalScrollBy(int dx, int dy) {}
+            };
 
-            mLinkage = linkage;
+    /** A {@link ScrollView} whose scrolling can be linked to other instances of this class. */
+    public static class LinkableScrollView extends ScrollView {
 
-            linkage.addLinkedView(this);
+        private OnInternalScrollListener mInternalScrollListener = DO_NOTHING_LISTENER;
+        /** Whether the current scrolling operation was caused by a linked view. */
+        boolean mExternallyScrolled = false;
+        int mLastX = 0;
+        int mLastY = 0;
+
+        public LinkableScrollView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public void setInternalScrollListener(OnInternalScrollListener l) {
+            mInternalScrollListener = Preconditions.checkNotNull(l);
+        }
+
+        @Override
+        public void scrollBy(int x, int y) {
+            mExternallyScrolled = true;
+            super.scrollBy(x, y);
         }
 
         @Override
         protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-            for (LinkableScrollView view : mLinkage.mLinkedViews) {
-                if (view == this) {
-                    continue;
+            super.onScrollChanged(l, t, oldl, oldt);
+            // Due to overscrolling, some onScrollChanged events might be sent twice. Hence we
+            // cannot rely on the diff "l - oldl" and instead do the tracking ourselves.
+            if (!mExternallyScrolled) {
+                int dx = l - mLastX;
+                int dy = t - mLastY;
+                if (dx != 0 || dy != 0) {
+                    mInternalScrollListener.onInternalScrollBy(l - mLastX, t - mLastY);
                 }
-
-                view.scrollTo(0, t);
+            } else {
+                mExternallyScrolled = false;
             }
+            mLastX = l;
+            mLastY = t;
+        }
+    }
+
+    /**
+     * A {@link RecyclerView} that optionally links internal (within the view) and external
+     * (within an ancestor view) scroll events.
+     */
+    public static class LinkableRecyclerView extends RecyclerView {
+        private OnInternalScrollListener mInternalScrollListener = DO_NOTHING_LISTENER;
+        boolean mExternallyScrolled = false;
+
+        /**
+         * Instantiates a {@link LinkableRecyclerView}. {@see RecyclerView(Context, AttributeSet)}
+         */
+        public LinkableRecyclerView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            setOnScrollListener(new OnScrollListener() {
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if (!mExternallyScrolled) {
+                        mInternalScrollListener.onInternalScrollBy(dx, dy);
+                    } else {
+                        mExternallyScrolled = false;
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void scrollBy(int x, int y) {
+            mExternallyScrolled = true;
+            super.scrollBy(x, y);
+        }
+
+        public void setInternalScrollListener(OnInternalScrollListener l) {
+            mInternalScrollListener = Preconditions.checkNotNull(l);
         }
     }
 }

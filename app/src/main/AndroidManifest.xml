@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2015 The Project Buendia Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License.  You may obtain a copy
+    of the License at: http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software distributed
+    under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+    OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+    specific language governing permissions and limitations under the License.
+-->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -71,7 +82,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.tentselection.TentSelectionActivity"
+            android:name=".ui.locationselection.LocationSelectionActivity"
             android:label="@string/title_activity_tent_selection"
             android:screenOrientation="userPortrait" >
             <intent-filter>
@@ -83,7 +94,7 @@
         <activity
             android:name="org.msf.records.ui.patientlist.PatientListActivity"
             android:label="@string/title_patient_list"
-            android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
+            android:parentActivityName=".ui.locationselection.LocationSelectionActivity"
             android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -122,11 +133,11 @@
         <activity
             android:name="org.msf.records.ui.patientlist.RoundActivity"
             android:label="@string/title_activity_round"
-            android:parentActivityName="org.msf.records.ui.tentselection.TentSelectionActivity"
+            android:parentActivityName=".ui.locationselection.LocationSelectionActivity"
             android:screenOrientation="userPortrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.tentselection.TentSelectionActivity" />
+                android:value=".ui.locationselection.LocationSelectionActivity" />
         </activity>
 
         <service

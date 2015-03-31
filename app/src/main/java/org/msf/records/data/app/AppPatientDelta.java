@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.data.app;
 
 import android.content.ContentValues;
@@ -6,8 +17,6 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,24 +24,19 @@ import org.msf.records.model.Concepts;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
 import org.msf.records.sync.providers.Contracts;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.Logger;
 
-/**
- * An object that represents the data to write to a new patient or the data to update on a patient.
- */
+/** Represents the data to write to a new patient or the data to update on a patient. */
 public class AppPatientDelta {
 
     private static final Logger LOG = Logger.create();
-
-    private static final DateTimeFormatter BIRTHDATE_FORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd");
 
     public Optional<String> id = Optional.absent();
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
     public Optional<Integer> gender = Optional.absent();
     public Optional<DateTime> birthdate = Optional.absent();
-
     public Optional<LocalDate> admissionDate = Optional.absent();
     public Optional<LocalDate> firstSymptomDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();
@@ -58,22 +62,26 @@ public class AppPatientDelta {
                         Server.PATIENT_GENDER_KEY, gender.get() == Patient.GENDER_MALE ? "M" : "F");
             }
             if (birthdate.isPresent()) {
-                json.put(Server.PATIENT_BIRTHDATE_KEY, getDateTimeString(birthdate.get()));
+                json.put(
+                        Server.PATIENT_BIRTHDATE_KEY,
+                        Dates.toString(birthdate.get().toLocalDate()));
             }
 
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
-                observation.put(Server.PATIENT_ANSWER_DATE,
-                        getLocalDateString(admissionDate.get()));
+                observation.put(
+                        Server.PATIENT_ANSWER_DATE,
+                        Dates.toString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
-                observation.put(Server.PATIENT_ANSWER_DATE,
-                        getLocalDateString(firstSymptomDate.get()));
+                observation.put(
+                        Server.PATIENT_ANSWER_DATE,
+                        Dates.toString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {
@@ -94,9 +102,7 @@ public class AppPatientDelta {
         }
     }
 
-    /**
-     * Returns the {@link ContentValues} corresponding to the delta.
-     */
+    /** Returns the {@link ContentValues} corresponding to the delta. */
     public ContentValues toContentValues() {
         ContentValues contentValues = new ContentValues();
 
@@ -125,7 +131,7 @@ public class AppPatientDelta {
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
-        // TODO: Either remove admission date here as it's no longer used from the database.
+        // TODO: Consider removing admission date here as it's no longer used from the database.
         if (admissionDate.isPresent()) {
             contentValues.put(
                     Contracts.Patients.ADMISSION_TIMESTAMP,
@@ -139,18 +145,19 @@ public class AppPatientDelta {
         return contentValues;
     }
 
+    @Override
+    public String toString() {
+        JSONObject jsonObject = new JSONObject();
+        if (toJson(jsonObject)) {
+            return jsonObject.toString();
+        }
+        return super.toString();
+    }
+
     private static JSONObject getLocationObject(String assignedLocationUuid) throws JSONException {
         JSONObject location = new JSONObject();
         location.put("uuid", assignedLocationUuid);
         return location;
-    }
-
-    private static String getLocalDateString(LocalDate localDate) {
-        return BIRTHDATE_FORMATTER.print(localDate);
-    }
-
-    private static String getDateTimeString(DateTime dateTime) {
-        return BIRTHDATE_FORMATTER.print(dateTime);
     }
 
     private static long getTimestamp(DateTime dateTime) {

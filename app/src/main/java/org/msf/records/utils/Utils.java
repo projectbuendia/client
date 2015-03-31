@@ -1,10 +1,20 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.utils;
 
 import com.google.common.collect.Lists;
 
-import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.msf.records.App;
+import org.msf.records.R;
 import org.msf.records.net.Server;
 
 import java.io.UnsupportedEncodingException;
@@ -23,6 +33,7 @@ import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
+
     /** Converts objects with integer type to BigInteger. */
     public static BigInteger toBigInteger(Object obj) {
         if (obj instanceof Integer) {
@@ -62,18 +73,19 @@ public class Utils {
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
-    public static Comparator<List<Object>> nullIntStrListComparator = new Comparator<List<Object>>() {
-        @Override
-        public int compare(List<Object> a, List<Object> b) {
-            for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                int result = nullIntStrComparator.compare(a.get(i), b.get(i));
-                if (result != 0) {
-                    return result;
+    public static Comparator<List<Object>> nullIntStrListComparator =
+            new Comparator<List<Object>>() {
+                @Override
+                public int compare(List<Object> a, List<Object> b) {
+                    for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                        int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+                        if (result != 0) {
+                            return result;
+                        }
+                    }
+                    return a.size() - b.size();
                 }
-            }
-            return a.size() - b.size();
-        }
-    };
+            };
 
     // Note: Use of \L here assumes a string that is already NFC-normalized.
     private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
@@ -145,30 +157,6 @@ public class Utils {
         }
     }
 
-    /** Converts a LocalDate or null safely to a yyyy-mm-dd String or null. */
-    public static String localDateToString(@Nullable LocalDate date) {
-        return date == null ? null : date.toString();
-    }
-
-    /** Converts a yyyy-mm-dd String or null safely to a LocalDate or null. */
-    public static LocalDate stringToLocalDate(@Nullable String string) {
-        try {
-            return string == null ? null : LocalDate.parse(string);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    /** Converts a birthdate to a string describing age in months or years. */
-    public static String birthdateToAge(LocalDate birthdate) {
-        Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 2) {
-            return "" + age.getYears() + " y";
-        } else {
-            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
-        }
-    }
-
     /**
      * Returns the value for a system property. System properties need to start with "debug." and
      * can be set using "adb shell setprop $propertyName $value".
@@ -218,7 +206,24 @@ public class Utils {
         }
     }
 
+    /**
+     * Returns a value if that value is not null, or a specified default value otherwise.
+     * @param value the nullable value
+     * @param defaultValue the default
+     */
+    public static <T extends Object> T valueOrDefault(@Nullable T value, T defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
+    /**
+     * Returns the specified name or a sentinel representing an unknown name, if the name is null.
+     * @param name the nullable name
+     */
+    public static String nameOrUnknown(@Nullable String name) {
+        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
+    }
+
     private Utils() {
-    	// Prevent instantiation.
+        // Prevent instantiation.
     }
 }

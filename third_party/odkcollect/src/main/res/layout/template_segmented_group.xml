@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- A template for the group of radio buttons. -->
+<org.odk.collect.android.views.WrappingRadioGroup
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/radio_group"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+</org.odk.collect.android.views.WrappingRadioGroup>

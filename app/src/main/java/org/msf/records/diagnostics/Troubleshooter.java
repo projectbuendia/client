@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 package org.msf.records.diagnostics;
 
 import com.google.common.collect.ImmutableSet;
@@ -11,8 +22,8 @@ import java.util.Set;
 import de.greenrobot.event.EventBus;
 
 /**
- * An object that aggregates reported {@link HealthIssue}s and fires events containing the
- * appropriate troubleshooting steps.
+ * Aggregates reported {@link HealthIssue}s and fires events containing the appropriate
+ * troubleshooting steps.
  */
 public class Troubleshooter {
 
@@ -31,9 +42,7 @@ public class Troubleshooter {
         mActiveIssues = new HashSet<>();
     }
 
-    /**
-     * Returns a set of all currently-active health issues.
-     */
+    /** Returns a set of all currently-active health issues. */
     public ImmutableSet<HealthIssue> getActiveIssues() {
         return ImmutableSet.copyOf(mActiveIssues);
     }
@@ -46,30 +55,33 @@ public class Troubleshooter {
         return mActiveIssues.contains(issue);
     }
 
-    /**
-     * Returns true iff no active issues exist.
-     */
+    /** Returns true iff no active issues exist. */
     public boolean isHealthy() {
         return mActiveIssues.isEmpty();
     }
 
     /**
-     * Called when a new health issue is discovered.
+     * Returns true if no ongoing issues preventing access to the Buendia server exist. Note that
+     * connectivity is still not guaranteed, just not ruled out.
      */
+    public boolean isServerHealthy() {
+        return getNetworkConnectivityTroubleshootingActions().isEmpty()
+                && getConfigurationTroubleshootingActions().isEmpty();
+    }
+
+    /** Called when a new health issue is discovered. */
     public <T extends HealthIssue> void onDiscovered(T healthIssue) {
         synchronized (mIssuesLock) {
             mActiveIssues.add(healthIssue);
         }
 
-        // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
         postTroubleshootingEvents();
     }
 
-    /**
-     * Called when a health issue is resolved.
-     */
+    /** Called when a health issue is resolved. */
     public void onResolved(HealthIssue healthIssue) {
         synchronized (mIssuesLock) {
             if (!mActiveIssues.remove(healthIssue)) {
@@ -80,7 +92,7 @@ public class Troubleshooter {
             }
         }
 
-        // TODO(dxchen): Consider scheduling this for ~100 milliseconds in the future so as to
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
         // prevent multiple troubleshooting events from firing for issues resulting from the same
         // root cause.
         postTroubleshootingEvents();
