@@ -79,8 +79,8 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     private boolean mWaitForUserSync = true;
 
     protected EventBusRegistrationInterface mEventBus;
-    // For now, we create a new demo patient for tests using the real new
-    // patient UI on each test run (see {@link #inUserLoginInitDemoPatient()}).
+    // For now, we create a new demo patient for tests using the real patient
+    // creation UI on each test run (see {@link #inUserLoginInitDemoPatient()}).
     // TODO/robustness: Use externally preloaded demo data instead.
     protected static String sDemoPatientId = null;
 
