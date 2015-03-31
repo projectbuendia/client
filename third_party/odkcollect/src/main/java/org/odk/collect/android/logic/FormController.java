@@ -41,6 +41,7 @@ import org.javarosa.xform.parse.XFormParser;
 import org.javarosa.xpath.XPathParseTool;
 import org.javarosa.xpath.expr.XPathExpression;
 import org.odk.collect.android.exception.JavaRosaException;
+import org.odk.collect.android.serializers.XFormUtcDateAnswerDataSerializer;
 import org.odk.collect.android.views.ODKView;
 
 import java.io.File;
@@ -1180,6 +1181,7 @@ public class FormController {
         // assume no binary data inside the model.
         FormInstance datamodel = getInstance();
         XFormSerializingVisitor serializer = new XFormSerializingVisitor();
+        serializer.setAnswerDataSerializer(new XFormUtcDateAnswerDataSerializer());
         ByteArrayPayload payload =
         		(ByteArrayPayload) serializer.createSerializedPayload(datamodel);
 
