@@ -47,6 +47,7 @@ public class OpenMrsConnectionDetails {
     /**
      * Constructs an {@link OpenMrsConnectionDetails} object.
      * @param volley the {@link VolleySingleton} for making requests
+     * @param settings the application settings
      */
     public OpenMrsConnectionDetails(VolleySingleton volley, AppSettings settings) {
         mVolley = volley;

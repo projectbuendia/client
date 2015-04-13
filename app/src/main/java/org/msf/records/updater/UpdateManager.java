@@ -102,10 +102,11 @@ public class UpdateManager {
     }
 
     /**
-     * Ensures that a check for available updates has been initiated within the last APK
-     * update interval period, or initiates one.  May post events that update the UI
-     * even if no new server check is initiated.  The check proceeds asynchronously in
-     * the background and eventually posts the relevant events (see @link postEvent()).
+     * Ensures that a check for available updates has been initiated within the
+     * last update interval period {@see AppSettings#getApkUpdateInterval()},
+     * or initiates one.  May post events that update the UI even if no new
+     * server check is initiated.  The check proceeds asynchronously in the
+     * background and eventually posts the relevant events {@see postEvent()}.
      * Clients should call this method and then check for two sticky events:
      * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
