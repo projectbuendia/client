@@ -184,7 +184,8 @@ public class OdkActivityLauncher {
     /**
      * Convenient shared code for handling an ODK activity result.
      *
-     * @param settings
+     * @param context the application context
+     * @param settings the application settings
      * @param patientUuid the patient to add an observation to, or null to create a new patient
      * @param updateClientCache true if we should update the client database with temporary
  *                          observations
