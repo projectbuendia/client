@@ -15,9 +15,9 @@ import android.app.Application;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.msf.records.AppSettings;
 import org.msf.records.inject.Qualifiers;
 import org.msf.records.net.OpenMrsConnectionDetails;
-import org.msf.records.prefs.StringPreference;
 
 import javax.inject.Singleton;
 
@@ -42,13 +42,12 @@ public class DiagnosticsModule {
     @Singleton
     ImmutableSet<HealthCheck> provideHealthChecks(
             Application application,
-            @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
             OpenMrsConnectionDetails connectionDetails,
-            @Qualifiers.PackageServerRootUrl StringPreference packageServerRootUrl) {
+            AppSettings settings) {
         return ImmutableSet.of(
                 new WifiHealthCheck(application),
                 new BuendiaApiHealthCheck(application, connectionDetails),
-                new UpdateServerHealthCheck(application, packageServerRootUrl));
+                new UpdateServerHealthCheck(application, settings));
     }
 
     @Provides

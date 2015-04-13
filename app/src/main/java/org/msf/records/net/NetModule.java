@@ -18,8 +18,7 @@ import com.google.gson.GsonBuilder;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.msf.records.inject.Qualifiers;
-import org.msf.records.prefs.StringPreference;
+import org.msf.records.AppSettings;
 import org.msf.records.utils.date.DateTimeDeserializer;
 
 import javax.inject.Singleton;
@@ -41,11 +40,8 @@ public class NetModule {
     @Provides
     @Singleton
     OpenMrsConnectionDetails provideOpenMrsConnectionDetails(
-            VolleySingleton volley,
-            @Qualifiers.OpenMrsRootUrl StringPreference openMrsRootUrl,
-            @Qualifiers.OpenMrsUser StringPreference openMrsUser,
-            @Qualifiers.OpenMrsPassword StringPreference openMrsPassword) {
-        return new OpenMrsConnectionDetails(volley, openMrsRootUrl, openMrsUser, openMrsPassword);
+            VolleySingleton volley, AppSettings settings) {
+        return new OpenMrsConnectionDetails(volley, settings);
     }
 
     @Provides

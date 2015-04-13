@@ -149,7 +149,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                     HttpGet httpGet = new HttpGet(uri.toString());
                     httpGet.addHeader(BasicScheme.authenticate(
                             new UsernamePasswordCredentials(
-                                    mConnectionDetails.getUserName(),
+                                    mConnectionDetails.getUser(),
                                     mConnectionDetails.getPassword()),
                             "UTF-8", false));
 

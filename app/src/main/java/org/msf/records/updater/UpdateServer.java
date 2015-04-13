@@ -14,11 +14,11 @@ package org.msf.records.updater;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
+import org.msf.records.AppSettings;
 import org.msf.records.model.UpdateInfo;
 import org.msf.records.net.Common;
 import org.msf.records.net.GsonRequest;
 import org.msf.records.net.VolleySingleton;
-import org.msf.records.prefs.StringPreference;
 
 import java.util.List;
 
@@ -33,16 +33,11 @@ public class UpdateServer {
     private static final String MODULE_NAME = "buendia-client";
 
     private final VolleySingleton mVolley;
-    private final StringPreference mRootUrl;
+    private final AppSettings mSettings;
 
-    public UpdateServer(VolleySingleton volley, StringPreference rootUrl) {
+    public UpdateServer(VolleySingleton volley, AppSettings settings) {
         mVolley = volley;
-        mRootUrl = rootUrl;
-    }
-
-    /** Returns the package server root URL preference, with trailing slashes removed. */
-    public String getRootUrl() {
-        return mRootUrl.get().replaceAll("/*$", "");
+        mSettings = settings;
     }
 
     /**
@@ -56,9 +51,9 @@ public class UpdateServer {
             Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
                 GsonRequest.withArrayResponse(
-                        getRootUrl() + "/" + MODULE_NAME + ".json",
+                        mSettings.getPackageServerUrl("/" + MODULE_NAME + ".json"),
                         UpdateInfo.class,
-                        null /*headers*/,
+                        null /* headers */,
                         listener,
                         errorListener
                 ).setRetryPolicy(

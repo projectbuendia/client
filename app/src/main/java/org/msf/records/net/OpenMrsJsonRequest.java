@@ -47,7 +47,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                               JSONObject jsonRequest,
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
-        this(connectionDetails.getUserName(), connectionDetails.getPassword(),
+        this(connectionDetails.getUser(), connectionDetails.getPassword(),
                 connectionDetails.getBuendiaApiUrl() + urlSuffix,
                 jsonRequest, listener, errorListener);
     }
@@ -66,7 +66,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
         super(method, url, jsonRequest, listener, errorListener);
-        this.mUsername = connectionDetails.getUserName();
+        this.mUsername = connectionDetails.getUser();
         this.mPassword = connectionDetails.getPassword();
     }
 

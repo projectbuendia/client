@@ -107,15 +107,13 @@ public class SettingsActivity extends PreferenceActivity {
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.
 
-        // Add 'general' preferences.
+        // Load the preference definitions.
         addPreferencesFromResource(R.xml.pref_general);
 
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
-        // their values. When their values change, their summaries are updated
-        // to reflect the new value, per the Android Design guidelines.
+        // Show the values of EditText/List/Dialog/Ringtone preferences
+        // in their summary lines, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference("openmrs_root_url"));
         bindPreferenceSummaryToValue(findPreference("openmrs_user"));
-        bindPreferenceSummaryToValue(findPreference("openmrs_password"));
     }
 
     @Override
@@ -213,13 +211,14 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
+            // Load the preference definitions.
             addPreferencesFromResource(R.xml.pref_general);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
+            // Show the values of EditText/List/Dialog/Ringtone preferences
+            // in their summary lines, per the Android Design guidelines.
             bindPreferenceSummaryToValue(findPreference("openmrs_root_url"));
+            bindPreferenceSummaryToValue(findPreference("openmrs_user"));
         }
     }
 }

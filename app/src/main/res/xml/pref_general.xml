@@ -71,19 +71,19 @@
         android:key="xform_update_client_cache"
         android:title="@string/pref_title_xform_update_client_cache"
         android:summary="@string/pref_desc_xform_update_client_cache"
-        android:defaultValue="@bool/xform_update_client_cache" />
+        android:defaultValue="@bool/xform_update_client_cache_default" />
 
     <!-- Whether to instantly update the observations cache incrementally -->
     <CheckBoxPreference
         android:key="incremental_observation_update"
         android:title="@string/pref_title_incremental_observation_update"
         android:summary="@string/pref_desc_xform_update_client_cache"
-        android:defaultValue="@bool/incremental_observation_update" />
+        android:defaultValue="@bool/incremental_observation_update_default" />
 
     <!-- The delay interval in seconds between looking for APK updates -->
     <org.msf.records.widget.EditIntegerPreference
         android:key="apk_update_interval_secs"
         android:title="@string/pref_title_apk_update_interval_secs"
-        android:defaultValue="90"/> <!-- default to 1.5 minutes -->
+        android:defaultValue="90" /> <!-- default to 1.5 minutes -->
 
 </PreferenceScreen>

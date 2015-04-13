@@ -12,11 +12,9 @@
 package org.msf.records.updater;
 
 import android.app.Application;
-import android.content.SharedPreferences;
 
-import org.msf.records.inject.Qualifiers;
+import org.msf.records.AppSettings;
 import org.msf.records.net.VolleySingleton;
-import org.msf.records.prefs.StringPreference;
 import org.msf.records.ui.patientlist.PatientSearchActivity;
 
 import javax.inject.Singleton;
@@ -35,16 +33,14 @@ public class UpdateModule {
 
     @Provides
     @Singleton
-    UpdateServer providePackageServer(
-            Application application,
-            @Qualifiers.PackageServerRootUrl StringPreference rootUrl) {
-        return new UpdateServer(VolleySingleton.getInstance(application), rootUrl);
+    UpdateServer providePackageServer(Application application, AppSettings settings) {
+        return new UpdateServer(VolleySingleton.getInstance(application), settings);
     }
 
     @Provides
     @Singleton
-    UpdateManager provideUpdateManager(Application application, UpdateServer updateServer,
-                                       SharedPreferences sharedPreferences) {
-        return new UpdateManager(application, updateServer, sharedPreferences);
+    UpdateManager provideUpdateManager(
+            Application application, UpdateServer server, AppSettings settings) {
+        return new UpdateManager(application, server, settings);
     }
 }

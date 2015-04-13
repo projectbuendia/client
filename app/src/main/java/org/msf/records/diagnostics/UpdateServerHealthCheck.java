@@ -21,7 +21,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.msf.records.prefs.StringPreference;
+import org.msf.records.AppSettings;
 import org.msf.records.utils.Logger;
 
 import java.io.IOException;
@@ -39,14 +39,13 @@ public class UpdateServerHealthCheck extends HealthCheck {
 
     private final Object mLock = new Object();
 
-    private final StringPreference mRootUrl;
-
     private HandlerThread mHandlerThread;
     private Handler mHandler;
+    private AppSettings mSettings;
 
-    UpdateServerHealthCheck(Application application, StringPreference rootUrl) {
+    UpdateServerHealthCheck(Application application, AppSettings settings) {
         super(application);
-        mRootUrl = rootUrl;
+        mSettings = settings;
     }
 
     @Override
@@ -75,7 +74,7 @@ public class UpdateServerHealthCheck extends HealthCheck {
     private final Runnable mHealthCheckRunnable = new Runnable() {
 
         private void performCheck() {
-            Uri uri = Uri.parse(mRootUrl.get() + HEALTH_CHECK_ENDPOINT);
+            Uri uri = Uri.parse(mSettings.getPackageServerUrl(HEALTH_CHECK_ENDPOINT));
 
             HttpClient httpClient = new DefaultHttpClient();
             HttpGet getRequest = new HttpGet(uri.toString());
