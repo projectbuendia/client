@@ -31,6 +31,7 @@ import com.joanzapata.android.iconify.Iconify;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.msf.records.App;
+import org.msf.records.AppSettings;
 import org.msf.records.R;
 import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppLocationTree;
@@ -39,9 +40,7 @@ import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.res.ResStatus;
 import org.msf.records.data.res.ResVital;
 import org.msf.records.events.CrudEventBus;
-import org.msf.records.inject.Qualifiers;
 import org.msf.records.model.Concepts;
-import org.msf.records.prefs.BooleanPreference;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.LocalizedChartHelper.LocalizedObservation;
 import org.msf.records.sync.SyncManager;
@@ -50,10 +49,10 @@ import org.msf.records.ui.BigToast;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.chart.PatientChartController.MinimalHandler;
 import org.msf.records.ui.chart.PatientChartController.OdkResultSender;
-import org.msf.records.utils.Utils;
-import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.EventBusWrapper;
 import org.msf.records.utils.Logger;
+import org.msf.records.utils.Utils;
+import org.msf.records.utils.date.Dates;
 import org.msf.records.utils.date.RelativeDateTimeFormatter;
 import org.msf.records.widget.DataGridView;
 import org.msf.records.widget.PatientAttributeView;
@@ -145,9 +144,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject @Qualifiers.XformUpdateClientCache BooleanPreference mUpdateClientCache;
     @Inject SyncManager mSyncManager;
     @Inject LocalizedChartHelper mLocalizedChartHelper;
+    @Inject AppSettings mSettings;
 
     @Nullable private View mChartView;
 
@@ -222,8 +221,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override
             public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
-                OdkActivityLauncher.sendOdkResultToServer(PatientChartActivity.this, patientUuid,
-                        mUpdateClientCache.get(), resultCode, data);
+                OdkActivityLauncher.sendOdkResultToServer(
+                        PatientChartActivity.this, mSettings,
+                        patientUuid, mSettings.getXformUpdateClientCache(), resultCode, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {

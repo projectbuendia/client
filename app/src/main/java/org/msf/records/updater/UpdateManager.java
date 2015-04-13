@@ -17,7 +17,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -28,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.joda.time.DateTime;
+import org.msf.records.AppSettings;
 import org.msf.records.events.UpdateAvailableEvent;
 import org.msf.records.events.UpdateNotAvailableEvent;
 import org.msf.records.events.UpdateReadyToInstallEvent;
@@ -56,14 +56,6 @@ public class UpdateManager {
     private static final String MODULE_NAME = "buendia-client";
 
     /**
-     * The minimum period between checks for new updates, in seconds.  Repeated calls to
-     * checkForUpdate() within this period will not check the server for new updates.
-     *
-     * <p>Note that if the application is relaunched, an update check will be performed.
-     */
-    public static final int CHECK_PERIOD_SECONDS = 90; // default to 1.5 minutes.
-
-    /**
      * The minimal version number.
      *
      * <p>This value is smaller than any other version. If the current application has this version,
@@ -83,7 +75,7 @@ public class UpdateManager {
     private final PackageManager mPackageManager;
     private final LexicographicVersion mCurrentVersion;
     private final DownloadManager mDownloadManager;
-    private final SharedPreferences mSharedPreferences;
+    private final AppSettings mSettings;
 
     private DateTime mLastCheckForUpdateTime = new DateTime(0 /*instant*/);
     private AvailableUpdateInfo mLastAvailableUpdateInfo = null;
@@ -97,32 +89,29 @@ public class UpdateManager {
     // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
 
-    UpdateManager(Application application, UpdateServer updateServer,
-                  SharedPreferences sharedPreferences) {
+    UpdateManager(Application application, UpdateServer updateServer, AppSettings settings) {
         mApplication = application;
         mServer = updateServer;
-
+        mSettings = settings;
         mPackageManager = application.getPackageManager();
         mDownloadManager =
                 (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
-        mSharedPreferences = sharedPreferences;
         mCurrentVersion = getCurrentVersion();
         mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
         mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
     }
 
     /**
-     * Ensures that a check for available updates has been initiated within the last
-     * CHECK_PERIOD_SECONDS, or initiates one.  May post events that update the UI
+     * Ensures that a check for available updates has been initiated within the last APK
+     * update interval period, or initiates one.  May post events that update the UI
      * even if no new server check is initiated.  The check proceeds asynchronously in
      * the background and eventually posts the relevant events (see @link postEvent()).
      * Clients should call this method and then check for two sticky events:
      * UpdateAvailableEvent and UpdateReadyToInstallEvent.
      */
     public void checkForUpdate() {
-        int checkPeriodSeconds = getCheckPeriodSeconds();
         DateTime now = DateTime.now();
-        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(checkPeriodSeconds))) {
+        if (now.isBefore(mLastCheckForUpdateTime.plusSeconds(mSettings.getApkUpdateInterval()))) {
             if (!isDownloadInProgress()) {
                 // This immediate check just updates the event state to match any current
                 // knowledge of an available or downloaded update.  The more interesting
@@ -237,14 +226,6 @@ public class UpdateManager {
             downloadDirectory = downloadDirectory.substring(externalStorageDirectory.length());
         }
         return downloadDirectory;
-    }
-
-    /** Gets the time between updates from the shared preferences. */
-    private int getCheckPeriodSeconds() {
-        if (mSharedPreferences == null) {
-            return CHECK_PERIOD_SECONDS;
-        }
-        return mSharedPreferences.getInt("apk_update_interval_secs", CHECK_PERIOD_SECONDS);
     }
 
     /** Returns the version of the application. */
@@ -421,7 +402,7 @@ public class UpdateManager {
                     LOG.w(
                             "The last update downloaded from the server is invalid. Update checks "
                                     + "will not occur for the next %1$d seconds.",
-                            CHECK_PERIOD_SECONDS);
+                            mSettings.getApkUpdateInterval());
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.
@@ -439,7 +420,7 @@ public class UpdateManager {
                                     + "will not occur for the next %3$d seconds.",
                             mLastAvailableUpdateInfo.availableVersion.toString(),
                             mLastDownloadedUpdateInfo.downloadedVersion.toString(),
-                            CHECK_PERIOD_SECONDS);
+                            mSettings.getApkUpdateInterval());
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.

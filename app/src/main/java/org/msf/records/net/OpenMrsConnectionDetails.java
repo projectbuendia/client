@@ -13,83 +13,67 @@ package org.msf.records.net;
 
 import android.util.Base64;
 
-import org.msf.records.prefs.StringPreference;
+import org.msf.records.AppSettings;
 
-import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Provides up-to-date preferences for connecting to OpenMRS, as they are shared between various
- * classes.
- */
+/** Provides the URL and credentials for connecting to OpenMRS. */
 public class OpenMrsConnectionDetails {
 
     private final VolleySingleton mVolley;
-    private final StringPreference mOpenMrsRootUrl;
-    private final StringPreference mOpenMrsUser;
-    private final StringPreference mOpenMrsPassword;
+    private final AppSettings mSettings;
 
+    /** Gets the Volley instance to use for network connections. */
     public VolleySingleton getVolley() {
         return mVolley;
     }
 
+    /** Gets the URL to the API served by the Buendia module in OpenMRS. */
     public String getBuendiaApiUrl() {
-        return mOpenMrsRootUrl.get() + "/ws/rest/v1/projectbuendia";
+        // The default value is set by setDefaultValues, not specified here.
+        return mSettings.getOpenmrsUrl("/ws/rest/v1/projectbuendia");
     }
 
-    public String getUserName() {
-        return mOpenMrsUser.get();
+    /** Gets the OpenMRS username to use. */
+    public String getUser() {
+        return mSettings.getOpenmrsUser();
     }
 
+    /** Gets the OpenMRS password to use. */
     public String getPassword() {
-        return mOpenMrsPassword.get();
+        return mSettings.getOpenmrsPassword();
     }
 
     /**
-     * Constructs an {@link OpenMrsConnectionDetails} object with the connection details for a
-     * particular server.
-     * @param volley a {@link VolleySingleton} used to make requests
-     * @param openMrsRootUrl the URL of the OpenMRS server
-     * @param openMrsUser the username used to authenticate OpenMRS requests
-     * @param openMrsPassword the password used to authenticate OpenMRS requests
+     * Constructs an {@link OpenMrsConnectionDetails} object.
+     * @param volley the {@link VolleySingleton} for making requests
      */
-    public OpenMrsConnectionDetails(
-            VolleySingleton volley,
-            StringPreference openMrsRootUrl,
-            StringPreference openMrsUser,
-            StringPreference openMrsPassword) {
+    public OpenMrsConnectionDetails(VolleySingleton volley, AppSettings settings) {
         mVolley = volley;
-        mOpenMrsRootUrl = openMrsRootUrl;
-        mOpenMrsUser = openMrsUser;
-        mOpenMrsPassword = openMrsPassword;
+        mSettings = settings;
     }
 
     /**
-     * Adds an authentication header to an existing map of header->header value.
-     * @param params the header map
-     * @return the header map, including an authentication header
+     * Adds an authentication header to an existing map of HTTP headers.
+     * @param params the header map to be modified
+     * @return the modified header map, for method chaining
      */
-    public Map<String, String> addAuthHeader(HashMap<String, String> params) {
-        return addAuthHeader(getUserName(), getPassword(), params);
+    public Map<String, String> addAuthHeader(Map<String, String> params) {
+        return addAuthHeader(getUser(), getPassword(), params);
     }
 
     /**
-     * Adds an authentication header to an existing map of header->header value using a given
-     * username and password.
-     * @param username the OpenMRS username
-     * @param password the OpenMRS password
-     * @param params the header map
-     * @return the header map, including an authentication header
+     * Adds an authentication header to an existing map of HTTP headers.
+     * @param username the username
+     * @param password the password
+     * @param params the header map to be modified
+     * @return the modified header map, for method chaining
      */
-    public static Map<String, String> addAuthHeader(String username, String password,
-                                                    Map<String, String> params) {
-        String auth = OpenMrsConnectionDetails.makeBasicAuth(username, password);
-        params.put("Authorization", auth);
-        return params;
-    }
-
-    private static String makeBasicAuth(String username, String password) {
+    public static Map<String, String> addAuthHeader(
+            String username, String password, Map<String, String> params) {
         String creds = String.format("%s:%s", username, password);
-        return "Basic " + Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
+        String encoded = Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
+        params.put("Authorization", "Basic " + encoded);
+        return params;
     }
 }

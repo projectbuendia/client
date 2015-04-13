@@ -17,12 +17,16 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.msf.records.App;
+import org.msf.records.AppSettings;
 import org.msf.records.R;
 import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.ui.OdkActivityLauncher;
 import org.msf.records.ui.SectionedSpinnerAdapter;
 import org.msf.records.ui.patientcreation.PatientCreationActivity;
 import org.msf.records.utils.Utils;
+
+import javax.inject.Inject;
 
 /**
  * A {@link PatientSearchActivity} showing a filterable list of patients via a
@@ -35,6 +39,7 @@ public class PatientListActivity extends PatientSearchActivity {
 
     private PatientListFilterController mFilterController;
     private int mSelectedFilter = 0;
+    @Inject AppSettings mSettings;
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -51,6 +56,8 @@ public class PatientListActivity extends PatientSearchActivity {
             mAppModel,
             mLocale);
         mFilterController.setupActionBarAsync();
+
+        App.getInstance().inject(this);
     }
 
     @Override
@@ -80,8 +87,9 @@ public class PatientListActivity extends PatientSearchActivity {
         if (requestCode != ODK_ACTIVITY_REQUEST) {
             return;
         }
-        OdkActivityLauncher.sendOdkResultToServer(this, null /* create a new patient */, false,
-                resultCode, data);
+        OdkActivityLauncher.sendOdkResultToServer(
+                this, mSettings, /* create a new patient */ null,
+                false, resultCode, data);
     }
 
     private void startActivity(Class<?> activityClass) {

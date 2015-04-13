@@ -13,13 +13,13 @@ package org.msf.records;
 
 import android.app.Application;
 import android.content.ContentResolver;
-import android.content.res.Resources;
+import android.preference.PreferenceManager;
 
 import org.msf.records.data.app.AppModelModule;
 import org.msf.records.diagnostics.DiagnosticsModule;
 import org.msf.records.events.EventsModule;
 import org.msf.records.net.NetModule;
-import org.msf.records.prefs.PrefsModule;
+import org.msf.records.sync.GenericAccountService;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
@@ -51,7 +51,6 @@ import dagger.Provides;
                 DiagnosticsModule.class,
                 EventsModule.class,
                 NetModule.class,
-                PrefsModule.class,
                 UpdateModule.class,
                 UserModule.class,
                 UtilsModule.class
@@ -74,6 +73,9 @@ import dagger.Provides;
                 UpdateNotificationController.class,
                 UserLoginActivity.class,
                 UserLoginFragment.class
+        },
+        staticInjections = {
+                GenericAccountService.class
         })
 public final class AppModule {
 
@@ -91,14 +93,15 @@ public final class AppModule {
 
     @Provides
     @Singleton
-    ContentResolver provideContentResolver(Application app) {
-        return app.getContentResolver();
+    AppSettings provideAppSettings(Application app) {
+        return new AppSettings(
+                PreferenceManager.getDefaultSharedPreferences(app), app.getResources());
     }
 
     @Provides
     @Singleton
-    Resources provideResources(Application app) {
-        return app.getResources();
+    ContentResolver provideContentResolver(Application app) {
+        return app.getContentResolver();
     }
 
     @Provides

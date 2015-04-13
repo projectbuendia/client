@@ -17,10 +17,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
@@ -35,6 +33,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONObject;
 import org.msf.records.App;
+import org.msf.records.AppSettings;
 import org.msf.records.events.FetchXformFailedEvent;
 import org.msf.records.events.SubmitXformFailedEvent;
 import org.msf.records.events.SubmitXformSucceededEvent;
@@ -185,14 +184,16 @@ public class OdkActivityLauncher {
     /**
      * Convenient shared code for handling an ODK activity result.
      *
+     * @param settings
      * @param patientUuid the patient to add an observation to, or null to create a new patient
-     * @param resultCode the result code sent from Android activity transition
      * @param updateClientCache true if we should update the client database with temporary
-     *                          observations
+ *                          observations
+     * @param resultCode the result code sent from Android activity transition
      * @param data the incoming intent
      */
     public static void sendOdkResultToServer(
             final Context context,
+            final AppSettings settings,
             @Nullable final String patientUuid,
             final boolean updateClientCache,
             int resultCode,
@@ -248,11 +249,6 @@ public class OdkActivityLauncher {
             }
             final long idToDelete = instanceCursor.getLong(columnIndex);
 
-            SharedPreferences preferences =
-                    PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-            final boolean keepFormInstancesLocally =
-                    preferences.getBoolean("keep_form_instances_locally", false);
-
             // Temporary code for messing about with xform instance, reading values.
             //
             byte[] fileBytes = FileUtils.getFileAsBytes(new File(instancePath));
@@ -273,7 +269,7 @@ public class OdkActivityLauncher {
                                         patientUuid, savedRoot, context.getContentResolver());
                             }
 
-                            if (!keepFormInstancesLocally) {
+                            if (!settings.getKeepFormInstancesLocally()) {
                                 //Code largely copied from InstanceUploaderTask to delete on upload
                                 DeleteInstancesTask dit = new DeleteInstancesTask();
                                 dit.setContentResolver(

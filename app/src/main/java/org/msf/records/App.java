@@ -12,6 +12,7 @@
 package org.msf.records;
 
 import android.app.Application;
+import android.preference.PreferenceManager;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -51,7 +52,12 @@ public class App extends Application {
 
         initializeSqlCipher();
 
-        buildObjectGraphAndInject();
+        mObjectGraph = ObjectGraph.create(Modules.list(this));
+        mObjectGraph.inject(this);
+        mObjectGraph.injectStatics();
+
+        // Ensure all unset preferences get initialized with default values.
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         synchronized (App.class) {
             sInstance = this;
@@ -65,11 +71,6 @@ public class App extends Application {
 
     private void initializeSqlCipher() {
         SQLiteDatabase.loadLibs(this);
-    }
-
-    public void buildObjectGraphAndInject() {
-        mObjectGraph = ObjectGraph.create(Modules.list(this));
-        mObjectGraph.inject(this);
     }
 
     public void inject(Object obj) {

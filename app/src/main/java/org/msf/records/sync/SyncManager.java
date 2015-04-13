@@ -60,37 +60,34 @@ public class SyncManager {
     }
 
     /**
-     * Forces a sync to occur as soon as possible, though Android scheduling may still delay the
-     * sync.
+     * Forces a sync to occur as soon as possible.  (Note that Android
+     * scheduling may still delay the sync.)
      */
     public void forceSync() {
         LOG.d("Forcing new sync");
-        GenericAccountService.triggerRefresh(
-                PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
+        GenericAccountService.triggerRefresh();
     }
 
     /**
-     * Initiates an incremental sync of observations.  No-op if incremental observation
-     * update is disabled.
+     * Initiates an incremental sync of observations.
+     * No-op if incremental observation update is disabled.
      */
     public void incrementalObservationSync() {
-        GenericAccountService.triggerIncrementalObservationSync(
-                PreferenceManager.getDefaultSharedPreferences(App.getInstance()));
+        GenericAccountService.triggerIncrementalObservationSync();
     }
 
     /** Returns {@code true} if a sync is active. */
     public boolean isSyncing() {
-        return
-                ContentResolver.isSyncActive(
-                        GenericAccountService.getAccount(),
-                        Contracts.CONTENT_AUTHORITY);
+        return ContentResolver.isSyncActive(
+                GenericAccountService.getAccount(),
+                Contracts.CONTENT_AUTHORITY);
     }
 
     /** Returns {@code true} if a sync is pending. */
     public boolean isSyncPending() {
         return ContentResolver.isSyncPending(
-                        GenericAccountService.getAccount(),
-                        Contracts.CONTENT_AUTHORITY);
+                GenericAccountService.getAccount(),
+                Contracts.CONTENT_AUTHORITY);
     }
 
     /**
