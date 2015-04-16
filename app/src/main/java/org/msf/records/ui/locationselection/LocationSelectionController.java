@@ -136,7 +136,7 @@ final class LocationSelectionController {
         } else {
             LOG.i("Data model unavailable; waiting on sync.");
             mWaitingOnSync = true;
-            if (!mSyncManager.isSyncing() && !mSyncManager.isSyncPending()) {
+            if (!mSyncManager.isSyncActive() && !mSyncManager.isSyncPending()) {
                 LOG.i("No sync detected, forcing new sync.");
                 onSyncRetry();
             }
@@ -156,7 +156,7 @@ final class LocationSelectionController {
         for (LocationFragmentUi fragmentUi : mFragmentUis) {
             fragmentUi.resetSyncProgress();
         }
-        mSyncManager.forceSync();
+        mSyncManager.startFullSync();
     }
 
     public void attachFragmentUi(LocationFragmentUi fragmentUi) {

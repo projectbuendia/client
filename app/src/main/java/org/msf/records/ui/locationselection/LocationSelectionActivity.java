@@ -28,7 +28,7 @@ import org.msf.records.data.app.AppLocation;
 import org.msf.records.data.app.AppModel;
 import org.msf.records.events.CrudEventBus;
 import org.msf.records.net.Common;
-import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.LoadingState;
 import org.msf.records.ui.SettingsActivity;
@@ -58,7 +58,7 @@ public final class LocationSelectionActivity extends PatientSearchActivity {
 
         if (Common.OFFLINE_SUPPORT) {
             // Create account, if needed
-            GenericAccountService.registerSyncAccount(this);
+            SyncAccountService.initialize(this);
         }
 
         mController = new LocationSelectionController(

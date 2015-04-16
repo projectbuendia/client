@@ -26,11 +26,10 @@ import org.msf.records.events.data.PatientAddFailedEvent;
 import org.msf.records.events.data.SingleItemCreatedEvent;
 import org.msf.records.events.data.SingleItemFetchFailedEvent;
 import org.msf.records.events.data.SingleItemFetchedEvent;
-import org.msf.records.filter.db.SimpleSelectionFilter;
 import org.msf.records.filter.db.patient.UuidFilter;
 import org.msf.records.net.Server;
 import org.msf.records.net.model.Patient;
-import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncAccountService;
 import org.msf.records.sync.PatientProjection;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
@@ -65,7 +64,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
             ContentResolver contentResolver,
             AppPatientDelta patientDelta,
             CrudEventBus bus) {
-        mTaskFactory = taskFactory; 
+        mTaskFactory = taskFactory;
         mConverters = converters;
         mServer = server;
         mContentResolver = contentResolver;
@@ -114,7 +113,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
                 Contracts.Patients.CONTENT_URI, appPatient.toContentValues());
 
         // Perform incremental observation sync so we get admission date.
-        GenericAccountService.forceIncrementalObservationSync();
+        SyncAccountService.startIncrementalObsSync();
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(

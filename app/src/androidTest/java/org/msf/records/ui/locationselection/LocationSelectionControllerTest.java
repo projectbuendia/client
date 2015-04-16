@@ -79,7 +79,7 @@ public final class LocationSelectionControllerTest extends AndroidTestCase {
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller does not start a new sync
-        assertFalse(mFakeSyncManager.isSyncing());
+        assertFalse(mFakeSyncManager.isSyncActive());
     }
 
     /** Tests that init kicks off a sync if the data model is unavailable. */
@@ -91,7 +91,7 @@ public final class LocationSelectionControllerTest extends AndroidTestCase {
         // WHEN the controller is initialized
         mController.init();
         // THEN the controller requests a sync
-        assertTrue(mFakeSyncManager.isSyncing());
+        assertTrue(mFakeSyncManager.isSyncActive());
     }
 
     /** Tests that suspend() unregisters any subscribers from the event bus. */
@@ -185,7 +185,7 @@ public final class LocationSelectionControllerTest extends AndroidTestCase {
         AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller starts a new sync
-        assertTrue(mFakeSyncManager.isSyncing());
+        assertTrue(mFakeSyncManager.isSyncActive());
     }
 
     /** Tests that loading an empty location tree does not hide the sync failed dialog. */
@@ -222,7 +222,7 @@ public final class LocationSelectionControllerTest extends AndroidTestCase {
         AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller does not start a new sync
-        assertTrue(!mFakeSyncManager.isSyncing());
+        assertTrue(!mFakeSyncManager.isSyncActive());
     }
 
     /**

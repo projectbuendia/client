@@ -19,7 +19,7 @@ import org.msf.records.data.app.AppModelModule;
 import org.msf.records.diagnostics.DiagnosticsModule;
 import org.msf.records.events.EventsModule;
 import org.msf.records.net.NetModule;
-import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncAccountService;
 import org.msf.records.sync.LocalizedChartHelper;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BaseActivity;
@@ -75,7 +75,7 @@ import dagger.Provides;
                 UserLoginFragment.class
         },
         staticInjections = {
-                GenericAccountService.class
+                SyncAccountService.class
         })
 public final class AppModule {
 
@@ -106,8 +106,8 @@ public final class AppModule {
 
     @Provides
     @Singleton
-    SyncManager provideSyncManager() {
-        return new SyncManager();
+    SyncManager provideSyncManager(AppSettings settings) {
+        return new SyncManager(settings);
     }
 
     @Provides
