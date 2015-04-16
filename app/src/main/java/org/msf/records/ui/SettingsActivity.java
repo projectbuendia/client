@@ -13,10 +13,10 @@ package org.msf.records.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
@@ -41,10 +41,8 @@ import java.util.List;
  */
 public class SettingsActivity extends PreferenceActivity {
     /**
-     * Determines whether to always show the simplified settings UI, where
-     * settings are presented in a single list. When false, settings are shown
-     * as a master/detail two-pane view on tablets. When true, a single pane is
-     * shown on tablets.
+     * Controls whether to always show the simplified UI, where settings are
+     * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
 
@@ -95,25 +93,23 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * Shows the simplified settings UI if the device configuration if the
-     * device configuration dictates that a simplified, single-pane UI should be
-     * shown.
+     * Shows the simplified settings UI if the device configuration dictates
+     * that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
         if (!isSimplePreferences(this)) {
             return;
         }
 
-        // In the simplified UI, fragments are not used at all and we instead
-        // use the older PreferenceActivity APIs.
-
+        // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
         // Load the preference definitions.
         addPreferencesFromResource(R.xml.pref_general);
 
-        // Show the values of EditText/List/Dialog/Ringtone preferences
-        // in their summary lines, per the Android Design guidelines.
-        bindPreferenceSummaryToValue(findPreference("openmrs_root_url"));
-        bindPreferenceSummaryToValue(findPreference("openmrs_user"));
+        // Show the values of preferences in their summary lines, per the Android Design guidelines.
+        showValueAsSummary(findPreference("openmrs_root_url"));
+        showValueAsSummary(findPreference("openmrs_user"));
+        showValueAsSummary(findPreference("package_server_root_url"));
+        showValueAsSummary(findPreference("apk_update_interval_secs"));
     }
 
     @Override
@@ -121,10 +117,7 @@ public class SettingsActivity extends PreferenceActivity {
         return isXLargeTablet(this) && !isSimplePreferences(this);
     }
 
-    /**
-     * Helper method to determine if the device has an extra-large screen. For
-     * example, 10" tablets are extra-large.
-     */
+    /** Checks if the screen is extra-large (e.g. a 10" tablet is extra-large). */
     private static boolean isXLargeTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
@@ -151,55 +144,29 @@ public class SettingsActivity extends PreferenceActivity {
         }
     }
 
-    /**
-     * A preference value change listener that updates the preference's summary
-     * to reflect its new value.
-     */
-    private static final Preference.OnPreferenceChangeListener
-            sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+    /** A listener that updates a preference's summary to match its value. */
+    private static final Preference.OnPreferenceChangeListener sListener =
+            new Preference.OnPreferenceChangeListener() {
                 @Override
-                public boolean onPreferenceChange(Preference preference, Object value) {
-                    String stringValue = value.toString();
-
-                    if (preference instanceof ListPreference) {
-                        // For list preferences, look up the correct display value in
-                        // the preference's 'entries' list.
-                        ListPreference listPreference = (ListPreference) preference;
-                        int index = listPreference.findIndexOfValue(stringValue);
-
-                        // Set the summary to reflect the new value.
-                        preference.setSummary(
-                                index >= 0
-                                        ? listPreference.getEntries()[index]
-                                        : null);
-                    } else {
-                        // For all other preferences, set the summary to the value's
-                        // simple string representation.
-                        preference.setSummary(stringValue);
-                    }
+                public boolean onPreferenceChange(Preference pref, Object value) {
+                    pref.setSummary("" + value);
                     return true;
                 }
             };
 
     /**
-     * Binds a preference's summary to its value. More specifically, when the
-     * preference's value is changed, its summary (line of text below the
-     * preference title) is updated to reflect the value. The summary is also
-     * immediately updated upon calling this method. The exact display format is
-     * dependent on the type of preference.
+     * Shows a preference's string value on its summary line (below the title
+     * of the preference), and keep the summary updated when the value changes.
      *
-     * @see #sBindPreferenceSummaryToValueListener
+     * @see #sListener
      */
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private static void showValueAsSummary(Preference pref) {
         // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+        pref.setOnPreferenceChangeListener(sListener);
 
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
+        // Trigger the listener immediately with the preference's current value.
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+        sListener.onPreferenceChange(pref, prefs.getAll().get(pref.getKey()));
     }
 
     /**
@@ -215,10 +182,11 @@ public class SettingsActivity extends PreferenceActivity {
             // Load the preference definitions.
             addPreferencesFromResource(R.xml.pref_general);
 
-            // Show the values of EditText/List/Dialog/Ringtone preferences
-            // in their summary lines, per the Android Design guidelines.
-            bindPreferenceSummaryToValue(findPreference("openmrs_root_url"));
-            bindPreferenceSummaryToValue(findPreference("openmrs_user"));
+            // Show the values of preferences in their summary lines.
+            showValueAsSummary(findPreference("openmrs_root_url"));
+            showValueAsSummary(findPreference("openmrs_user"));
+            showValueAsSummary(findPreference("package_server_root_url"));
+            showValueAsSummary(findPreference("apk_update_interval_secs"));
         }
     }
 }

@@ -24,7 +24,7 @@ import org.msf.records.data.app.AppLocationTree;
 import org.msf.records.data.app.AppPatient;
 import org.msf.records.data.app.TypedCursor;
 import org.msf.records.net.Common;
-import org.msf.records.sync.GenericAccountService;
+import org.msf.records.sync.SyncAccountService;
 import org.msf.records.sync.SyncManager;
 import org.msf.records.ui.BigToast;
 import org.msf.records.ui.PatientListTypedCursorAdapter;
@@ -133,7 +133,7 @@ public class PatientListFragment extends ProgressFragment implements
 
         if (Common.OFFLINE_SUPPORT) {
             // Create account, if needed
-            GenericAccountService.registerSyncAccount(activity);
+            SyncAccountService.initialize(activity);
         }
     }
 

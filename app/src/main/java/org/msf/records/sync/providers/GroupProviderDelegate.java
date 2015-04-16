@@ -20,7 +20,7 @@ import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteStatement;
 
 import org.msf.records.sync.Database;
-import org.msf.records.sync.SelectionBuilder;
+import org.msf.records.sync.QueryBuilder;
 
 /**
  * A {@link ProviderDelegate} that provides query, insert, delete, and update access to a group or
@@ -46,10 +46,9 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SelectionBuilder builder = new SelectionBuilder()
-                .table(mTableName)
-                .where(selection, selectionArgs);
-        Cursor cursor = builder.query(dbHelper.getReadableDatabase(), projection, sortOrder);
+        Cursor cursor = new QueryBuilder(mTableName).where(selection, selectionArgs)
+                .orderBy(sortOrder)
+                .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
@@ -58,8 +57,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public Uri insert(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
-        long id = dbHelper.getWritableDatabase()
-                .replaceOrThrow(mTableName, null, values);
+        long id = dbHelper.getWritableDatabase().replaceOrThrow(mTableName, null, values);
         contentResolver.notifyChange(uri, null, false);
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
@@ -116,8 +114,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public int delete(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
-        int count = new SelectionBuilder()
-                .table(mTableName)
+        int count = new QueryBuilder(mTableName)
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
@@ -128,8 +125,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public int update(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
-        int count = new SelectionBuilder()
-                .table(mTableName)
+        int count = new QueryBuilder(mTableName)
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);

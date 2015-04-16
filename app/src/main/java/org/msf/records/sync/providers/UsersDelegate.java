@@ -17,7 +17,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import org.msf.records.sync.Database;
-import org.msf.records.sync.SelectionBuilder;
+import org.msf.records.sync.QueryBuilder;
 
 /** A {@link ProviderDelegate} that provides read-write access to users. */
 class UsersDelegate implements ProviderDelegate<Database> {
@@ -36,10 +36,10 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SelectionBuilder builder = new SelectionBuilder()
-                .table(Database.USERS_TABLE)
-                .where(selection, selectionArgs);
-        Cursor cursor = builder.query(dbHelper.getReadableDatabase(), projection, sortOrder);
+        Cursor cursor = new QueryBuilder(Database.USERS_TABLE)
+                .where(selection, selectionArgs)
+                .orderBy(sortOrder)
+                .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
@@ -69,8 +69,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public int delete(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
-        int count = new SelectionBuilder()
-                .table(Database.USERS_TABLE)
+        int count = new QueryBuilder(Database.USERS_TABLE)
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
@@ -81,8 +80,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public int update(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
-        int count = new SelectionBuilder()
-                .table(Database.USERS_TABLE)
+        int count = new QueryBuilder(Database.USERS_TABLE)
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);

@@ -141,30 +141,27 @@
         </activity>
 
         <service
-            android:name="org.msf.records.sync.SyncService"
+            android:name=".sync.SyncAdapterService"
             android:exported="false">
 
-            <!--
-            This intent filter is required. It allows the system to launch our sync service
-            as needed.
-            -->
+            <!-- Required filter used by the system to launch our sync service. -->
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <!-- This points to a required XML file which describes our SyncAdapter. -->
+            <!-- This points to the XML file that describes our SyncAdapter. -->
             <meta-data
                 android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
+                android:resource="@xml/sync_adapter" />
         </service>
         <service
-            android:name="org.msf.records.sync.GenericAccountService"
+            android:name=".sync.SyncAccountService"
             android:exported="false">
 
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
-            <!-- This points to an XMLf ile which describes our account service. -->
+            <!-- This points to an XML file that describes our account service. -->
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />

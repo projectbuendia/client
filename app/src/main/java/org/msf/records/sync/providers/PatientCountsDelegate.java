@@ -17,7 +17,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import org.msf.records.sync.Database;
-import org.msf.records.sync.SelectionBuilder;
+import org.msf.records.sync.QueryBuilder;
 
 /**
  * A {@link ProviderDelegate} that provides query access to the count of patients in each location.
@@ -33,22 +33,15 @@ public class PatientCountsDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
-        Cursor cursor = new SelectionBuilder().table(Database.PATIENTS_TABLE)
+        return new QueryBuilder(Database.PATIENTS_TABLE)
                 .where(selection, selectionArgs)
-                .where(Contracts.Patients.LOCATION_UUID
-                        + " IS NOT NULL")
-                .query(
-                        dbHelper.getReadableDatabase(),
-                        new String[] {
-                                Contracts.Patients._ID,
-                                Contracts.Patients.LOCATION_UUID,
-                                "COUNT(*) AS " + Contracts.Patients._COUNT,
-                        },  // Projection
-                        Contracts.Patients.LOCATION_UUID, // Group
-                        "",
-                        sortOrder,
-                        "");
-        return cursor;
+                .where(Contracts.Patients.LOCATION_UUID + " is not null")
+                .groupBy(Contracts.Patients.LOCATION_UUID)
+                .orderBy(sortOrder)
+                .select(dbHelper.getReadableDatabase(),
+                        Contracts.Patients._ID,
+                        Contracts.Patients.LOCATION_UUID,
+                        "count(*) as " + Contracts.Patients._COUNT);
     }
 
     @Override

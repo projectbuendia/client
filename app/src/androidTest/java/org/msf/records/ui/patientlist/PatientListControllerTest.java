@@ -47,7 +47,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         // WHEN PatientListController is refreshed
         mController.onRefreshRequested();
         // THEN SyncManager performs sync
-        verify(mMockSyncManager).forceSync();
+        verify(mMockSyncManager).startFullSync();
     }
 
     /** Tests that refreshing multiple times in quick succession results in only one sync. */
@@ -58,7 +58,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         mController.onRefreshRequested();
         mController.onRefreshRequested();
         // THEN SyncManager performs one, and only one, sync
-        verify(mMockSyncManager, times(1)).forceSync();
+        verify(mMockSyncManager, times(1)).startFullSync();
     }
 
     /** Tests that refreshing again after a first successful sync results in a new sync. */
@@ -70,7 +70,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new SyncSucceededEvent());
         mController.onRefreshRequested();
         // THEN SyncManager performs sync each time
-        verify(mMockSyncManager, times(2)).forceSync();
+        verify(mMockSyncManager, times(2)).startFullSync();
     }
 
     /** Tests that refreshing again after a first failed sync results in a new sync. */
@@ -82,7 +82,7 @@ public class PatientListControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new SyncFailedEvent());
         mController.onRefreshRequested();
         // THEN SyncManager performs sync each time
-        verify(mMockSyncManager, times(2)).forceSync();
+        verify(mMockSyncManager, times(2)).startFullSync();
     }
 
     /** Tests that the PatientListController listens for events when initialized. */

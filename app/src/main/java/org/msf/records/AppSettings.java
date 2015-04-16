@@ -93,13 +93,13 @@ public class AppSettings {
                 mResources.getBoolean(R.bool.keep_form_instances_locally_default));
     }
 
-    /** Gets the flag indicating whether sync account setup is complete. */
-    public boolean getSetupComplete() {
-        return mSharedPreferences.getBoolean("setup_complete", false);
+    /** Gets the flag indicating whether the sync account has been initialized. */
+    public boolean getSyncAccountInitialized() {
+        return mSharedPreferences.getBoolean("sync_account_initialized", false);
     }
 
-    /** Sets the flag indicating whether sync account setup is complete. */
-    public void setSetupComplete(boolean value) {
-        mSharedPreferences.edit().putBoolean("setup_complete", value).commit();
+    /** Sets the flag indicating whether the sync account has been initialized. */
+    public void setSyncAccountInitialized(boolean value) {
+        mSharedPreferences.edit().putBoolean("sync_account_initialized", value).commit();
     }
 }

@@ -15,9 +15,8 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
 
-import org.msf.records.App;
+import org.msf.records.AppSettings;
 import org.msf.records.events.sync.SyncCanceledEvent;
 import org.msf.records.events.sync.SyncFailedEvent;
 import org.msf.records.events.sync.SyncProgressEvent;
@@ -26,11 +25,11 @@ import org.msf.records.events.sync.SyncSucceededEvent;
 import org.msf.records.sync.providers.Contracts;
 import org.msf.records.utils.Logger;
 
+import javax.annotation.Nullable;
+
 import de.greenrobot.event.EventBus;
 
-/**
- * An object that provides callers a way of managing the sync process and responding to sync events.
- */
+/** Manages the sync process and responds to sync events. */
 public class SyncManager {
 
     private static final Logger LOG = Logger.create();
@@ -40,54 +39,54 @@ public class SyncManager {
     static final int COMPLETED = 2;
     static final int FAILED = 3;
     static final int IN_PROGRESS = 4;
-    public static final int CANCELED = 5;
+    static final int CANCELED = 5;
+    static final String SYNC_PROGRESS = "sync-progress";
+    static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
 
-    public static final String SYNC_PROGRESS = "sync-progress";
-    public static final String SYNC_PROGRESS_LABEL = "sync-progress-label";
+    @Nullable private final AppSettings mSettings;
+
+    public SyncManager(@Nullable AppSettings settings) {
+        mSettings = settings;
+    }
 
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
         ContentResolver.cancelSync(
-                GenericAccountService.getAccount(),
-                Contracts.CONTENT_AUTHORITY);
+                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
 
         // If sync was pending, it should now be idle and we can consider the sync immediately
         // canceled.
-        if (!isSyncPending() && !isSyncing()) {
+        if (!isSyncPending() && !isSyncActive()) {
             LOG.i("Sync was canceled before it began -- immediately firing SyncCanceledEvent.");
             EventBus.getDefault().post(new SyncCanceledEvent());
         }
     }
 
-    /**
-     * Forces a sync to occur as soon as possible.  (Note that Android
-     * scheduling may still delay the sync.)
-     */
-    public void forceSync() {
-        LOG.d("Forcing new sync");
-        GenericAccountService.triggerRefresh();
+    /** Starts a full sync as soon as possible. */
+    public void startFullSync() {
+        SyncAccountService.startFullSync();
     }
 
     /**
-     * Initiates an incremental sync of observations.
-     * No-op if incremental observation update is disabled.
+     * Starts an incremental sync of observations.
+     * Does nothing if incremental observation update is disabled.
      */
-    public void incrementalObservationSync() {
-        GenericAccountService.triggerIncrementalObservationSync();
+    public void startIncrementalObsSync() {
+        if (mSettings == null || mSettings.getIncrementalObservationUpdate()) {
+            SyncAccountService.startIncrementalObsSync();
+        }
     }
 
     /** Returns {@code true} if a sync is active. */
-    public boolean isSyncing() {
+    public boolean isSyncActive() {
         return ContentResolver.isSyncActive(
-                GenericAccountService.getAccount(),
-                Contracts.CONTENT_AUTHORITY);
+                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
     /** Returns {@code true} if a sync is pending. */
     public boolean isSyncPending() {
         return ContentResolver.isSyncPending(
-                GenericAccountService.getAccount(),
-                Contracts.CONTENT_AUTHORITY);
+                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
     /**
@@ -126,8 +125,7 @@ public class SyncManager {
                     LOG.i("Sync status broadcast intent received without a status code.");
                     break;
                 default:
-                    LOG.i(
-                            "Sync status broadcast intent received with unknown status %1$d.",
+                    LOG.i("Sync status broadcast intent received with unknown status %1$d.",
                             syncStatus);
             }
         }

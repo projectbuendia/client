@@ -17,7 +17,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import org.msf.records.sync.Database;
-import org.msf.records.sync.SelectionBuilder;
+import org.msf.records.sync.QueryBuilder;
 
 /**
  * A {@link ProviderDelegate} that provides query, delete, and update access to a single item
@@ -47,11 +47,11 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SelectionBuilder builder = new SelectionBuilder()
-                .table(mTableName)
+        Cursor cursor = new QueryBuilder(mTableName)
                 .where(mIdColumn + "=?", uri.getLastPathSegment())
-                .where(selection, selectionArgs);
-        Cursor cursor = builder.query(dbHelper.getReadableDatabase(), projection, sortOrder);
+                .where(selection, selectionArgs)
+                .orderBy(sortOrder)
+                .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
@@ -75,8 +75,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
     public int delete(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
-        int count = new SelectionBuilder()
-                .table(mTableName)
+        int count = new QueryBuilder(mTableName)
                 .where(mIdColumn + "=?", uri.getLastPathSegment())
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
@@ -88,8 +87,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
     public int update(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
-        int count = new SelectionBuilder()
-                .table(mTableName)
+        int count = new QueryBuilder(mTableName)
                 .where(mIdColumn + "=?", uri.getLastPathSegment())
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);

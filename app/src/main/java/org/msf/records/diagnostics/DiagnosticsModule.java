@@ -26,9 +26,7 @@ import dagger.Provides;
 import de.greenrobot.event.EventBus;
 
 /** A Dagger module that provides bindings for diagnostics-related classes. */
-@Module(
-        complete = false,
-        library = true)
+@Module(complete = false, library = true)
 public class DiagnosticsModule {
 
     @Provides

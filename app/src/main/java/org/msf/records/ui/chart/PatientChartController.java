@@ -263,7 +263,7 @@ final class PatientChartController {
                 // controller is suspended the cycle stops; and also since mCurrentPhaseId can
                 // only have one value, only one such cycle can be active at any given time.
                 if (mCurrentPhaseId == phaseId) {
-                    mSyncManager.incrementalObservationSync();
+                    mSyncManager.startIncrementalObsSync();
                     handler.postDelayed(this, OBSERVATION_SYNC_PERIOD_MILLIS);
                 }
             }

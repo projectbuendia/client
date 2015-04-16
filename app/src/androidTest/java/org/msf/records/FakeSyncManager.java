@@ -19,7 +19,9 @@ import org.msf.records.sync.SyncManager;
  */
 public class FakeSyncManager extends SyncManager {
     // TODO/refactor: Create common interface between SyncManager and this class.
-    public FakeSyncManager() { }
+    public FakeSyncManager() {
+        super(null);
+    }
 
     private boolean mSyncing;
 
@@ -34,12 +36,12 @@ public class FakeSyncManager extends SyncManager {
     }
 
     @Override
-    public boolean isSyncing() {
+    public boolean isSyncActive() {
         return mSyncing;
     }
 
     @Override
-    public void forceSync() {
+    public void startFullSync() {
         mSyncing = true;
     }
 }
