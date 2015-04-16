@@ -1,4 +1,8 @@
 # Created by .gitignore support plugin (hsz.mobi)
+
+# MacOS junk
+.DS_Store
+
 ### Android template
 # Files for the Dalvik VM
 *.dex
