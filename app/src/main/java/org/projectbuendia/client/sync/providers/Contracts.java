@@ -17,17 +17,13 @@ import android.provider.BaseColumns;
 
 import org.projectbuendia.client.BuildConfig;
 
-/** The external contracts for {@link MsfRecordsProvider}. */
+/** The external contracts for {@link BuendiaProvider}. */
 @SuppressWarnings("unused")
 public class Contracts {
 
-    // TODO: The content authority should be defined somewhere else. It's not strictly
-    // limited to ContentProviders.
-    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider.client";
-
+    public static final String CONTENT_AUTHORITY = BuildConfig.CONTENT_AUTHORITY;
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-
-    private static final String TYPE_PACKAGE_PREFIX = "/vnd.msf.client.";
+    private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
 
     /** Columns for localized content. */
     interface LocaleColumns {

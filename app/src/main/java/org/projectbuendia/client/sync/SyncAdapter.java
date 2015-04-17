@@ -43,8 +43,8 @@ import org.projectbuendia.client.net.model.ConceptList;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.PatientChartList;
+import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.sync.providers.MsfRecordsProvider;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.date.Dates;
@@ -168,10 +168,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         LOG.i("Beginning network synchronization");
 
-        MsfRecordsProvider msfRecordsProvider =
-                (MsfRecordsProvider)(provider.getLocalContentProvider());
+        BuendiaProvider buendiaProvider =
+                (BuendiaProvider) (provider.getLocalContentProvider());
         SQLiteDatabaseTransactionHelper dbTransactionHelper =
-                msfRecordsProvider.getDbTransactionHelper();
+                buendiaProvider.getDbTransactionHelper();
         LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
 

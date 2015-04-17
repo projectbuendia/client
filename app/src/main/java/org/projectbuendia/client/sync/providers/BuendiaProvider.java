@@ -14,7 +14,7 @@ package org.projectbuendia.client.sync.providers;
 import org.projectbuendia.client.sync.Database;
 
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
-public class MsfRecordsProvider extends DelegatingProvider<Database> {
+public class BuendiaProvider extends DelegatingProvider<Database> {
 
     @Override
     protected Database getDatabaseHelper() {

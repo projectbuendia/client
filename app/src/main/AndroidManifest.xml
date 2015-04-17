@@ -36,6 +36,11 @@
     <!-- Required because we're manually creating a new account. -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="org.projectbuendia.client" />
+    <uses-library android:name="android.test.runner" />
+
     <application
         android:name="org.projectbuendia.client.App"
         android:allowBackup="true"
@@ -49,19 +54,19 @@
             android:name="org.odk.collect.android.provider.FormsProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.forms"
             android:exported="true"
-            tools:ignore="ExportedContentProvider" /> <!-- need to export to MSF app -->
+            tools:ignore="ExportedContentProvider" /> <!-- need to export to Buendia app -->
 
         <!-- Content Provider for ODK form instances. -->
         <provider
             android:name="org.odk.collect.android.provider.InstanceProvider"
             android:authorities="${applicationId}.odk.collect.android.provider.odk.instances"
             android:exported="true"
-            tools:ignore="ExportedContentProvider" /> <!-- need to export to MSF app -->
+            tools:ignore="ExportedContentProvider" /> <!-- need to export to Buendia app -->
 
         <!-- Content Provider for medical records. -->
         <provider
-            android:name="org.projectbuendia.client.sync.providers.MsfRecordsProvider"
-            android:authorities="${applicationId}.provider.records"
+            android:name=".sync.providers.BuendiaProvider"
+            android:authorities="@string/content_authority"
             android:exported="false" />
 
         <activity
@@ -72,12 +77,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -87,7 +90,6 @@
             android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -98,7 +100,6 @@
             android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -143,7 +144,6 @@
         <service
             android:name="org.projectbuendia.client.sync.SyncAdapterService"
             android:exported="false">
-
             <!-- Required filter used by the system to launch our sync service. -->
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
@@ -156,7 +156,6 @@
         <service
             android:name="org.projectbuendia.client.sync.SyncAccountService"
             android:exported="false">
-
             <!-- Required filter used by the system to launch our account service. -->
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -168,5 +167,4 @@
         </service>
         <receiver android:name="org.projectbuendia.client.sync.SyncManager$SyncStatusBroadcastReceiver" />
     </application>
-
 </manifest>

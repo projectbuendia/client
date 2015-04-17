@@ -22,7 +22,7 @@ import net.sqlcipher.database.SQLiteOpenHelper;
 /** A delegate used to handle a single URI for {@link DelegatingProvider}. */
 public interface ProviderDelegate<T extends SQLiteOpenHelper> {
 
-    static final String TYPE_PACKAGE_PREFIX = "/vnd.msf.client.";
+    static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
 
     /**  Returns the MIME type this delegate provides. */
     String getType();

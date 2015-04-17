@@ -28,8 +28,8 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.net.model.NewUser;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.sync.RpcToDb;
+import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.sync.providers.MsfRecordsProvider;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.utils.Logger;
 
@@ -110,10 +110,10 @@ public class UserStore {
         ContentProviderClient client =
                 App.getInstance().getContentResolver().acquireContentProviderClient(
                         Contracts.Users.CONTENT_URI);
-        MsfRecordsProvider msfRecordsProvider =
-                (MsfRecordsProvider)(client.getLocalContentProvider());
+        BuendiaProvider buendiaProvider =
+                (BuendiaProvider)(client.getLocalContentProvider());
         SQLiteDatabaseTransactionHelper dbTransactionHelper =
-                msfRecordsProvider.getDbTransactionHelper();
+                buendiaProvider.getDbTransactionHelper();
         try {
             LOG.i("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
