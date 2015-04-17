@@ -137,6 +137,8 @@ def openmrsUser = project.hasProperty('openmrsUser') ? project.openmrsUser : ope
 def openmrsPassword = project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
 def packageServerRootUrl = project.hasProperty('packageServerRootUrl') ? project.packageServerRootUrl : packageServerRootUrlDefault
 
+openmrsRootUrl = openmrsRootUrlIntegration;
+
 logger.info("Default preference values:")
 logger.info("OpenMRS root URL: ${openmrsRootUrl}")
 logger.info("OpenMRS user: ${openmrsUser}")
@@ -157,7 +159,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.msf.records"
+        applicationId "org.projectbuendia.client"
 
         minSdkVersion 19
         targetSdkVersion 19
@@ -168,7 +170,7 @@ android {
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
-        testApplicationId 'org.msf.records.test'
+        testApplicationId 'org.projectbuendia.client.test'
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
 
         resValue "string", "openmrs_root_url_default", openmrsRootUrl
@@ -177,7 +179,7 @@ android {
         resValue "string", "package_server_root_url_default", packageServerRootUrl
 
         // Allow different sync adapters to be defined for debug and release builds.
-        resValue "string", "sync_authority", applicationId + '.provider.records'
+        resValue "string", "sync_authority", applicationId + '.provider.client'
         resValue "string", "account_type", applicationId
         buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}\""
         buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
@@ -186,9 +188,9 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(new File(releaseRepoRoot, 'keys/org.msf.records.jks'))
+            storeFile file(new File(releaseRepoRoot, 'keys/org.projectbuendia.client.jks'))
             storePassword ''
-            keyAlias 'org.msf.records'
+            keyAlias 'org.projectbuendia.client'
             keyPassword ''
         }
     }
@@ -213,7 +215,7 @@ android {
         debug {
             applicationIdSuffix '.dev'
 
-            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
+            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.client'
             resValue "string", "account_type", defaultConfig.applicationId + '.dev'
             buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
 

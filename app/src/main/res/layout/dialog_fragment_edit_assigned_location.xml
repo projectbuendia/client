@@ -47,18 +47,18 @@
 
         <TableRow>
 
-            <org.msf.records.widget.InstantAutoCompleteTextView
+            <org.projectbuendia.client.widget.InstantAutoCompleteTextView
                 android:id="@+id/zone"
                 android:minEms="13"
                 android:maxEms="13" />
                 <!--style="@style/Widget.Buendia.AutoCompleteTextView"/>-->
 
-            <org.msf.records.widget.InstantAutoCompleteTextView
+            <org.projectbuendia.client.widget.InstantAutoCompleteTextView
                 android:id="@+id/tent"
                 android:minEms="3" />
                 <!--style="@style/Widget.Buendia.AutoCompleteTextView"/>-->
 
-            <org.msf.records.widget.InstantAutoCompleteTextView
+            <org.projectbuendia.client.widget.InstantAutoCompleteTextView
                 android:id="@+id/bed"
                 android:minEms="3" />
                 <!--style="@style/Widget.Buendia.AutoCompleteTextView"/>-->

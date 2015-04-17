@@ -13,7 +13,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.msf.records">
+    package="org.projectbuendia.client">
 
     <!-- used for a unique identifier for forms for JavaRosa in ODK Collect -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -37,7 +37,7 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <application
-        android:name="org.msf.records.App"
+        android:name="org.projectbuendia.client.App"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -60,12 +60,12 @@
 
         <!-- Content Provider for medical records. -->
         <provider
-            android:name=".sync.providers.MsfRecordsProvider"
+            android:name="org.projectbuendia.client.sync.providers.MsfRecordsProvider"
             android:authorities="${applicationId}.provider.records"
             android:exported="false" />
 
         <activity
-            android:name="org.msf.records.ui.userlogin.UserLoginActivity"
+            android:name="org.projectbuendia.client.ui.userlogin.UserLoginActivity"
             android:label="@string/app_name"
             android:theme="@style/AppThemeTextButtonActionBar"
             android:screenOrientation="userPortrait" >
@@ -82,7 +82,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.locationselection.LocationSelectionActivity"
+            android:name="org.projectbuendia.client.ui.locationselection.LocationSelectionActivity"
             android:label="@string/title_activity_tent_selection"
             android:screenOrientation="userPortrait" >
             <intent-filter>
@@ -92,9 +92,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.patientlist.PatientListActivity"
+            android:name="org.projectbuendia.client.ui.patientlist.PatientListActivity"
             android:label="@string/title_patient_list"
-            android:parentActivityName=".ui.locationselection.LocationSelectionActivity"
+            android:parentActivityName="org.projectbuendia.client.ui.locationselection.LocationSelectionActivity"
             android:screenOrientation="userPortrait" >
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />
@@ -103,9 +103,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.msf.records.ui.chart.PatientChartActivity"
+            android:name="org.projectbuendia.client.ui.chart.PatientChartActivity"
             android:label="@string/title_patient_chart"
-            android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
+            android:parentActivityName="org.projectbuendia.client.ui.patientlist.PatientListActivity"
             android:screenOrientation="userPortrait"
             android:uiOptions="splitActionBarWhenNarrow">
             <meta-data
@@ -113,35 +113,35 @@
                 android:value="splitActionBarWhenNarrow" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.patientlist.PatientListActivity" />
+                android:value="org.projectbuendia.client.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
-            android:name="org.msf.records.ui.SettingsActivity"
+            android:name="org.projectbuendia.client.ui.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="org.msf.records.ui.patientlist.PatientListActivity"
+            android:parentActivityName="org.projectbuendia.client.ui.patientlist.PatientListActivity"
             android:screenOrientation="userPortrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.msf.records.ui.patientlist.PatientListActivity" />
+                android:value="org.projectbuendia.client.ui.patientlist.PatientListActivity" />
         </activity>
         <activity
-            android:name="org.msf.records.ui.patientcreation.PatientCreationActivity"
+            android:name="org.projectbuendia.client.ui.patientcreation.PatientCreationActivity"
             android:label="@string/title_activity_patient_add"
             android:screenOrientation="userPortrait"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
-            android:name="org.msf.records.ui.patientlist.RoundActivity"
+            android:name="org.projectbuendia.client.ui.patientlist.RoundActivity"
             android:label="@string/title_activity_round"
-            android:parentActivityName=".ui.locationselection.LocationSelectionActivity"
+            android:parentActivityName="org.projectbuendia.client.ui.locationselection.LocationSelectionActivity"
             android:screenOrientation="userPortrait"  >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.locationselection.LocationSelectionActivity" />
+                android:value="org.projectbuendia.client.ui.locationselection.LocationSelectionActivity" />
         </activity>
 
         <service
-            android:name=".sync.SyncAdapterService"
+            android:name="org.projectbuendia.client.sync.SyncAdapterService"
             android:exported="false">
 
             <!-- Required filter used by the system to launch our sync service. -->
@@ -154,7 +154,7 @@
                 android:resource="@xml/sync_adapter" />
         </service>
         <service
-            android:name=".sync.SyncAccountService"
+            android:name="org.projectbuendia.client.sync.SyncAccountService"
             android:exported="false">
 
             <!-- Required filter used by the system to launch our account service. -->
@@ -166,7 +166,7 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-        <receiver android:name=".sync.SyncManager$SyncStatusBroadcastReceiver" />
+        <receiver android:name="org.projectbuendia.client.sync.SyncManager$SyncStatusBroadcastReceiver" />
     </application>
 
 </manifest>

@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.msf.records;
+package org.projectbuendia.client;
 
 /** The modules used for injection in a release build. */
 final class Modules {
