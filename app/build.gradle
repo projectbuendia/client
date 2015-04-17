@@ -16,15 +16,17 @@ buildscript {
 
     dependencies {
         classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
+        classpath 'org.ajoberstar:gradle-git:0.8.0'
     }
 }
 
 apply plugin: 'com.android.application'
 
-def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
-def gitDirty = 'git diff --name-only HEAD'.execute([], project.rootDir).text.trim().size() > 0
-def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
-
+android {
+    dexOptions {
+        preDexLibraries = false
+    }
+}
 dependencies {
     // Build plugins
     // TODO: Figure out why removing this causes a Dagger error.
@@ -37,6 +39,7 @@ dependencies {
 
     // Local project dependencies
     compile project(':third_party:odkcollect')
+    compile project(':third_party:AutoFitTextView')
 
     // External dependencies
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -63,8 +66,6 @@ dependencies {
     }
     androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
-    compile files('libs/sqlcipher.jar')
-    compile project(':third_party:AutoFitTextView')
 }
 
 apply plugin: 'spoon'
@@ -84,7 +85,9 @@ tasks["spoon"].outputs.upToDateWhen { false }
 def versionInteger = 0
 
 // Development builds get a version name that identifies the commit.
-def versionString = gitSha.substring(0, 7) + (gitDirty ? '+' : '')
+def repo = org.ajoberstar.grgit.Grgit.open(project.rootDir)
+def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
+//def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
 // It should have at most three parts, all numeric (e.g. 1, 1.2, or 1.2.3).
@@ -132,10 +135,11 @@ def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
 
 // Apply overrides such as -PopenmrsRootUrl=url etc.
-def openmrsRootUrl = project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
-def openmrsUser = project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
-def openmrsPassword = project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
-def packageServerRootUrl = project.hasProperty('packageServerRootUrl') ? project.packageServerRootUrl : packageServerRootUrlDefault
+project.metaClass.propertyMissing = { null }
+def openmrsRootUrl = project.openmrsRootUrl ?: openmrsRootUrlDefault
+def openmrsUser = project.openmrsUser ?: openmrsUserDefault
+def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
+def packageServerRootUrl = project.packageServerRootUrl ?: packageServerRootUrlDefault
 
 openmrsRootUrl = openmrsRootUrlIntegration;
 
@@ -182,8 +186,6 @@ android {
         resValue "string", "sync_authority", applicationId + '.provider.client'
         resValue "string", "account_type", applicationId
         buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}\""
-        buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
-        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
     }
 
     signingConfigs {
