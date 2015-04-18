@@ -42,7 +42,7 @@ import org.projectbuendia.client.data.res.ResVital;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
-import org.projectbuendia.client.sync.LocalizedChartHelper.LocalizedObservation;
+import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
@@ -139,7 +139,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ProgressDialog mFormSubmissionDialog;
 
     // The last set of observations received.
-    private List<LocalizedObservation> mPreviousObservations;
+    private List<LocalizedObs> mPreviousObservations;
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
@@ -376,7 +376,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     /** Updates a {@link VitalView} to display a new observation value. */
-    private void showObservation(VitalView view, @Nullable LocalizedObservation observation) {
+    private void showObservation(VitalView view, @Nullable LocalizedObs observation) {
         if (observation != null) {
             view.setBackgroundColor(mVitalKnown.getBackgroundColor());
             view.setTextColor(mVitalKnown.getForegroundColor());
@@ -393,7 +393,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     /** Updates a {@link ViewGroup} to display a new observation value. */
     private void showObservationForViewGroup(
             ViewGroup parent, TextView nameView, TextView valueView,
-            @Nullable LocalizedObservation observation) {
+            @Nullable LocalizedObs observation) {
         if (observation != null && observation.localizedValue != null) {
             parent.setBackgroundColor(mVitalKnown.getBackgroundColor());
             valueView.setTextColor(mVitalKnown.getForegroundColor());
@@ -440,7 +440,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientVitalsUi(Map<String, LocalizedObservation> observations,
+        public void updatePatientVitalsUi(Map<String, LocalizedObs> observations,
                                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             // TODO: Localize strings in this function.
             showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
@@ -465,14 +465,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
             // General Condition
-            LocalizedObservation observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
+            LocalizedObs observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
             if (observation != null) {
                 updatePatientGeneralConditionUi(observation.value);
             }
 
             // PCR
-            LocalizedObservation pcrLObservation = observations.get(Concepts.PCR_L_UUID);
-            LocalizedObservation pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
+            LocalizedObs pcrLObservation = observations.get(Concepts.PCR_L_UUID);
+            LocalizedObs pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
             mPcr.setIconDrawable(
                     new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                             .color(0x00000000)
@@ -568,7 +568,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void setObservationHistory(
-                List<LocalizedObservation> observations,
+                List<LocalizedObs> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
             // Avoid resetting observation history if nothing has changed.
@@ -588,7 +588,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         private View createChartView(
-                List<LocalizedObservation> observations,
+                List<LocalizedObs> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
             LocalizedChartDataGridAdapter dataGridAdapter =

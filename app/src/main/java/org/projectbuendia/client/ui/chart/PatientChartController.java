@@ -43,7 +43,7 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
-import org.projectbuendia.client.sync.LocalizedChartHelper.LocalizedObservation;
+import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.locationselection.AssignLocationDialog;
 import org.projectbuendia.client.utils.Utils;
@@ -104,7 +104,7 @@ final class PatientChartController {
 
         /** Updates the UI showing current observation values for this patient. */
         void updatePatientVitalsUi(
-                Map<String, LocalizedObservation> observations,
+                Map<String, LocalizedObs> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate);
 
@@ -116,7 +116,7 @@ final class PatientChartController {
 
         /** Updates the UI showing the historic log of observation values for this patient. */
         void setObservationHistory(
-                List<LocalizedObservation> observations,
+                List<LocalizedObs> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate);
 
@@ -337,7 +337,7 @@ final class PatientChartController {
             fields.clinicianName = user.fullName;
         }
 
-        Map<String, LocalizedChartHelper.LocalizedObservation> observations =
+        Map<String, LocalizedObs> observations =
                 mObservationsProvider.getMostRecentObservations(mPatientUuid);
 
         if (observations.containsKey(Concepts.PREGNANCY_UUID)
@@ -382,8 +382,8 @@ final class PatientChartController {
 
     /** Retrieves the value of a date observation as a LocalDate. */
     private LocalDate getObservedDate(
-            Map<String, LocalizedObservation> observations, String conceptUuid) {
-        LocalizedObservation obs = observations.get(conceptUuid);
+            Map<String, LocalizedObs> observations, String conceptUuid) {
+        LocalizedObs obs = observations.get(conceptUuid);
         return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
     }
 
@@ -391,13 +391,13 @@ final class PatientChartController {
     private synchronized void updatePatientUi() {
         // Get the observations
         // TODO: Background thread this, or make this call async-like.
-        List<LocalizedObservation> observations =
+        List<LocalizedObs> observations =
                 mObservationsProvider.getObservations(mPatientUuid);
-        Map<String, LocalizedObservation> conceptsToLatestObservations =
+        Map<String, LocalizedObs> conceptsToLatestObservations =
                 new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
 
         // Update timestamp
-        for (LocalizedObservation obs : observations) {
+        for (LocalizedObs obs : observations) {
             mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
         }
 

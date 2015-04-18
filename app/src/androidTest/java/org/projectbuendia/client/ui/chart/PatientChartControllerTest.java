@@ -31,6 +31,7 @@ import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
@@ -51,8 +52,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_NAME_1 = "bob";
     private static final String PATIENT_ID_1 = "id1";
 
-    private static final LocalizedChartHelper.LocalizedObservation OBSERVATION_A =
-            new LocalizedChartHelper.LocalizedObservation(
+    private static final LocalizedObs OBSERVATION_A =
+            new LocalizedObs(
                     0, 0, "g", "c", "c", "val", "localizedVal");
 
     private PatientChartController mController;
@@ -110,9 +111,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     /** Tests that observations are updated in the UI when patient details fetched. */
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
-        List<LocalizedChartHelper.LocalizedObservation> allObservations =
+        List<LocalizedObs> allObservations =
                 ImmutableList.of(OBSERVATION_A);
-        Map<String, LocalizedChartHelper.LocalizedObservation> recentObservations =
+        Map<String, LocalizedObs> recentObservations =
                 ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
         when(mMockObservationsProvider.getObservations(PATIENT_UUID_1))
                 .thenReturn(allObservations);

@@ -32,7 +32,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.res.ResStatus;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
-import org.projectbuendia.client.sync.LocalizedChartHelper.LocalizedObservation;
+import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.date.Dates;
 import org.projectbuendia.client.widget.CellType;
@@ -97,7 +97,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
     private final LocalDate mFirstSymptomsDate;
 
     public LocalizedChartDataGridAdapter(Context context,
-                                         List<LocalizedObservation> observations,
+                                         List<LocalizedObs> observations,
                                          LocalDate admissionDate,
                                          LocalDate firstSymptomsDate,
                                          LayoutInflater layoutInflater) {
@@ -122,7 +122,7 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         Row row = null;
         TreeSet<LocalDate> days = new TreeSet<>();
         mToday = LocalDate.now(mChronology);
-        for (LocalizedObservation ob : observations) {
+        for (LocalizedObs ob : observations) {
             // Observations come through ordered by the chart row, then the observation time, so we
             // want to maintain that order.
             if (row == null || !ob.conceptName.equals(row.mName)) {
@@ -180,9 +180,9 @@ final class LocalizedChartDataGridAdapter implements DataGridAdapter {
         // If there are no observations, put some known rows to make it clearer what is being
         // displayed.
         if (mRows.isEmpty()) {
-            List<LocalizedObservation> emptyChart =
+            List<LocalizedObs> emptyChart =
                     localizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
-            for (LocalizedObservation ob : emptyChart) {
+            for (LocalizedObs ob : emptyChart) {
                 mRows.add(new Row(ob.conceptUuid, ob.conceptName));
             }
         }

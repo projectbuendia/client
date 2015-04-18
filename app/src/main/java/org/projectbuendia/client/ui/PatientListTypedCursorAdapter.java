@@ -30,6 +30,7 @@ import org.projectbuendia.client.data.app.TypedCursor;
 import org.projectbuendia.client.data.res.ResStatus;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.date.Dates;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 
@@ -56,7 +57,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private final LocalizedChartHelper mLocalizedChartHelper;
 
     private AppLocation[] mLocations;
-    private Map<String, Map<String, LocalizedChartHelper.LocalizedObservation>> mObservations;
+    private Map<String, Map<String, LocalizedObs>> mObservations;
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
@@ -151,13 +152,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean pregnant = false;
         String condition = null;
         if (mObservations != null) {
-            Map<String, LocalizedChartHelper.LocalizedObservation> obsMap =
+            Map<String, LocalizedObs> obsMap =
                     mObservations.get(patient.uuid);
             if (obsMap != null) {
-                LocalizedChartHelper.LocalizedObservation pregObs =
+                LocalizedObs pregObs =
                         obsMap.get(Concepts.PREGNANCY_UUID);
                 pregnant = pregObs == null ? false : Concepts.YES_UUID.equals(pregObs.value);
-                LocalizedChartHelper.LocalizedObservation condObs =
+                LocalizedObs condObs =
                         obsMap.get(Concepts.GENERAL_CONDITION_UUID);
                 condition = condObs == null ? null : condObs.value;
             }
