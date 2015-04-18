@@ -92,7 +92,6 @@ def versionInteger = 0
 // Development builds get a version name that identifies the commit.
 def repo = org.ajoberstar.grgit.Grgit.open(project.rootDir)
 def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
-//def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone('UTC'))
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
 // It should have at most three parts, all numeric (e.g. 1, 1.2, or 1.2.3).
@@ -145,8 +144,6 @@ def openmrsRootUrl = project.openmrsRootUrl ?: openmrsRootUrlDefault
 def openmrsUser = project.openmrsUser ?: openmrsUserDefault
 def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
 def packageServerRootUrl = project.packageServerRootUrl ?: packageServerRootUrlDefault
-
-openmrsRootUrl = openmrsRootUrlIntegration;
 
 logger.info('Default preference values:')
 logger.info("OpenMRS root URL: ${openmrsRootUrl}")
