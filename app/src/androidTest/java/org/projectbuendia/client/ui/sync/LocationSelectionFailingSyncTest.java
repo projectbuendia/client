@@ -81,9 +81,9 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     }
 
     /** Tests that clicking 'Retry' in sync failed dialog reshows the progress bar. */
-    // TODO: This test is flaky because of a real bug -- Volley is unresponsive to changes in
-    // connectivity state, so a sync may not fail for seconds or even minutes after wifi is turned
-    // off.
+    // TODO/robustness: This test is flaky because of a real bug -- Volley is
+    // unresponsive to changes in connectivity state, so a sync may not fail
+    // for seconds or even minutes after wifi is turned off.
     /*public void testSyncFailedDialog_RetryButtonRetainsProgressBar() {
         screenshot("Test Start");
         waitForSyncFailure();
@@ -126,9 +126,9 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
      * Tests that clicking 'Settings' in sync failed dialog and returning to
      * this activity results in the progress bar still being shown.
      */
-    // TODO: This test is flaky because of a real bug -- Volley is unresponsive to changes in
-    // connectivity state, so a sync may not fail for seconds or even minutes after wifi is turned
-    // off.
+    // TODO/robustness: This test is flaky because of a real bug -- Volley is
+    // unresponsive to changes in connectivity state, so a sync may not fail
+    // for seconds or even minutes after wifi is turned off.
     /*public void testSyncFailedDialog_ReturningFromSettingsRetainsProgressBar() {
         setWifiEnabled(false);
         waitForSyncFailure();

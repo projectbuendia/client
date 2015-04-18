@@ -25,10 +25,10 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
     @Override
     public void setUp() throws Exception {
         setWaitForUserSync(false);
-        // TODO: Remove all this manual UserManager management once daggered.
+        // TODO/cleanup: Remove all this manual UserManager management once daggered.
         App.getInstance().getUserManager().reset();
-        // Force all user sync tasks to fail. If you need one to pass, remember to reset this to
-        // false!
+        // Force all user sync tasks to fail. If you need a sync task to pass,
+        // remember to reset this to false!
         App.getInstance().getUserManager().setAutoCancelEnabled(true);
         super.setUp();
     }

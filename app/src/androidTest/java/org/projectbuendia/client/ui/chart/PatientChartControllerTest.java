@@ -241,7 +241,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         verify(mMockUi).showFormLoadingDialog(false);
     }
 
-    // TODO: Test that starting an xform submission shows the submission dialog.
+    // TODO/completeness: Test that starting an xform submission shows the submission dialog.
 
     /** Tests that errors in xform submission are reported to the user. */
     public void testXformSubmitFailed_ShowsErrorMessage() {

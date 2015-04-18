@@ -37,7 +37,7 @@ public class RoundActivityTest extends FunctionalTestCase {
 
     /** Checks for a populated title. */
     public void testTitlePopulation() {
-        // TODO: Check that title count actually matches patient count.
+        // TODO/completeness: Check that title count actually matches patient count.
         screenshot("Test Start");
         assert getActivity().getTitle().toString().matches("$Triage \\((No|[0-9]+) Patients\\)");
     }

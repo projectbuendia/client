@@ -105,8 +105,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the admission date is correctly displayed in the header.
-     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
-     * Espresso 2.0).
+     * TODO/completeness: Currently disabled. Re-enable once date picker
+     * selection works (supposedly works in Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectAdmissionDate() {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
@@ -120,8 +120,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the patient chart shows the correct symptoms onset date.
-     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
-     * Espresso 2.0).
+     * TODO/completeness: Currently disabled. Re-enable once date picker
+     * selection works (supposedly works in Espresso 2.0).
      */
     /*public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
         inUserLoginGoToDemoPatientChart();
@@ -134,8 +134,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /**
      * Tests that the patient chart shows all days, even when no observations are present.
-     * TODO: Currently disabled. Re-enable once date picker selection works (supposedly works in
-     * Espresso 2.0).
+     * TODO/completeness: Currently disabled. Re-enable once date picker
+     * selection works (supposedly works in Espresso 2.0).
      */
      /*public void testPatientChart_ShowsAllDaysInChartWhenNoObservations() {
         inUserLoginGoToDemoPatientChart();
@@ -143,7 +143,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         screenshot("Patient Chart");
     }*/
 
-    // TODO: Disabled as there seems to be no easy way of scrolling correctly with no adapter view.
+    // TODO/completeness: Disabled as there seems to be no easy way of
+    // scrolling correctly with no adapter view.
     /** Tests that encounter time can be set to a date in the past and still displayed correctly. */
     /*public void testCanSubmitObservationsInThePast() {
         inUserLoginGoToDemoPatientChart();
@@ -263,7 +264,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     /** Exercises all fields in the encounter form, except for encounter time. */
     public void testEncounter_allFieldsWorkOtherThanEncounterTime() {
-        // TODO: Get rid of magic numbers in this test and other tests in this class.
+        // TODO/robustness: Get rid of magic numbers in these tests.
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         answerVisibleTextQuestion("Pulse", "80");
@@ -320,7 +321,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         onView(withText(containsString("Pregnant"))).check(matches(isDisplayed()));
         onView(withText(containsString("IV Fitted"))).check(matches(isDisplayed()));
 
-        // TODO: check notes field
+        // TODO/completeness: exercise the Notes field
     }
 
     protected void openEncounterForm() {
@@ -388,7 +389,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     private void checkObservationValueEquals(int row, String value, String dateKey) {
-        // TODO: actually check dateKey
+        // TODO/completeness: actually check dateKey
 
         onView(allOf(
                 withText(value),
@@ -399,7 +400,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     }
 
     private void checkObservationSet(int row, String dateKey) {
-        // TODO: actually check dateKey
+        // TODO/completeness: actually check dateKey
         onView(allOf(
                 isDescendantOfA(inRow(row, ROW_HEIGHT)),
                 hasBackground(
