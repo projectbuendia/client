@@ -22,10 +22,10 @@
     <bool name="keep_form_instances_locally_default">false</bool>
 
     <!-- The default value for whether Xform submission should update the client cache -->
-    <bool name="xform_update_client_cache">true</bool>
+    <bool name="xform_update_client_cache_default">true</bool>
 
     <!-- The default value for whether observations should sync incrementally -->
-    <bool name="incremental_observation_update">true</bool>
+    <bool name="incremental_observation_update_default">true</bool>
 
     <!-- The title for the preference for choosing the OpenMRS user -->
     <string name="pref_title_openmrs_user">OpenMRS username</string>

@@ -14,7 +14,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="org.msf.records.ui.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="org.projectbuendia.client.ui.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
 </preference-headers>

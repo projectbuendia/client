@@ -17,7 +17,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context="org.msf.records.ui.chart.PatientChartFragment">
+    tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -71,7 +71,7 @@
         android:layout_marginTop="0dp"
         android:orientation="horizontal">
 
-        <org.msf.records.widget.PatientAttributeView
+        <org.projectbuendia.client.widget.PatientAttributeView
             android:id="@+id/attribute_admission_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
             app:attributeName="Since admission"
             app:attributeValue="–"/>
 
-        <org.msf.records.widget.PatientAttributeView
+        <org.projectbuendia.client.widget.PatientAttributeView
             android:id="@+id/attribute_symptoms_onset_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
             app:attributeName="Since symptom onset"
             app:attributeValue="–"/>
 
-        <org.msf.records.widget.PatientAttributeView
+        <org.projectbuendia.client.widget.PatientAttributeView
             android:id="@+id/attribute_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
             app:attributeName="Location"
             app:attributeValue="–"/>
 
-        <org.msf.records.widget.PatientAttributeView
+        <org.projectbuendia.client.widget.PatientAttributeView
             android:id="@+id/attribute_pcr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -186,7 +186,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <org.msf.records.widget.VitalView
+            <org.projectbuendia.client.widget.VitalView
                 android:id="@+id/vital_pulse"
                 android:layout_width="0dp"
                 android:layout_height="104dp"
@@ -196,7 +196,7 @@
                 app:vitalName="Pulse"
                 app:vitalValue="–"/>
 
-            <org.msf.records.widget.VitalView
+            <org.projectbuendia.client.widget.VitalView
                 android:id="@+id/vital_respiration"
                 android:layout_width="0dp"
                 android:layout_height="104dp"
@@ -206,7 +206,7 @@
                 app:vitalName="Respiration"
                 app:vitalValue="–"/>
 
-            <org.msf.records.widget.VitalView
+            <org.projectbuendia.client.widget.VitalView
                 android:id="@+id/vital_diet"
                 android:layout_width="0dp"
                 android:layout_height="104dp"
@@ -216,7 +216,7 @@
                 app:vitalName="Tolerating Diet"
                 app:vitalValue="–"/>
 
-            <org.msf.records.widget.VitalView
+            <org.projectbuendia.client.widget.VitalView
                 android:id="@+id/vital_food_drink"
                 android:layout_width="0dp"
                 android:layout_height="104dp"

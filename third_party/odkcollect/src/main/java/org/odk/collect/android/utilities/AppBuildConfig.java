@@ -16,7 +16,7 @@ public class AppBuildConfig {
         String applicationId = null;
 
         try {
-            appBuildConfigClass = Class.forName("org.msf.records.BuildConfig");
+            appBuildConfigClass = Class.forName("org.projectbuendia.client.BuildConfig");
             applicationIdField = appBuildConfigClass.getField("APPLICATION_ID");
             applicationId = (String) applicationIdField.get(null /*object*/);
         } catch (Exception e) {

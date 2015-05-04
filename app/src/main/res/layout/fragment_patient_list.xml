@@ -23,7 +23,7 @@
         android:id="@+id/fragment_patient_list_swipe_to_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <org.msf.records.widget.GroupedListView
+        <org.projectbuendia.client.widget.GroupedListView
             android:id="@+id/fragment_patient_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

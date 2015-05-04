@@ -1,3 +1,14 @@
+// Copyright 2015 The Project Buendia Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at: http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distrib-
+// uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+// OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
+// specific language governing permissions and limitations under the License.
+
 buildscript {
     repositories {
         mavenCentral()
@@ -5,15 +16,22 @@ buildscript {
 
     dependencies {
         classpath 'com.stanfy.spoon:spoon-gradle-plugin:0.14.1'
+        classpath 'org.ajoberstar:gradle-git:0.8.0'
     }
 }
 
 apply plugin: 'com.android.application'
+def appId = 'org.projectbuendia.client'
+def debugAppIdSuffix = '.dev'
+def debugAppId = appId + debugAppIdSuffix
+def contentAuthority = appId + '.provider'
+def debugContentAuthority = debugAppId + '.provider'
 
-def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
-def gitDirty = 'git diff --name-only HEAD'.execute([], project.rootDir).text.trim().size() > 0
-def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
-
+android {
+    dexOptions {
+        preDexLibraries = false
+    }
+}
 dependencies {
     // Build plugins
     // TODO: Figure out why removing this causes a Dagger error.
@@ -26,6 +44,7 @@ dependencies {
 
     // Local project dependencies
     compile project(':third_party:odkcollect')
+    compile project(':third_party:AutoFitTextView')
 
     // External dependencies
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -52,8 +71,6 @@ dependencies {
     }
     androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
-    compile files('libs/sqlcipher.jar')
-    compile project(':third_party:AutoFitTextView')
 }
 
 apply plugin: 'spoon'
@@ -66,14 +83,15 @@ spoon {
 
 // Consider spoon to always be "out-of-date" so that spoon tests will run (when requested) even
 // when no changes have been made to the build.
-tasks["spoon"].outputs.upToDateWhen { false }
+tasks['spoon'].outputs.upToDateWhen { false }
 
 // Development builds get the lowest possible version code, so that any release
 // build will be considered an upgrade over any development build.
 def versionInteger = 0
 
 // Development builds get a version name that identifies the commit.
-def versionString = gitSha.substring(0, 7) + (gitDirty ? '+' : '')
+def repo = org.ajoberstar.grgit.Grgit.open(project.rootDir)
+def versionString = repo.head().id.substring(0, 7) + (repo.status().clean ? '' : '+')
 
 // For a release build, use -PversionNumber=1.2.3 to set the version number.
 // It should have at most three parts, all numeric (e.g. 1, 1.2, or 1.2.3).
@@ -121,12 +139,13 @@ def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
 
 // Apply overrides such as -PopenmrsRootUrl=url etc.
-def openmrsRootUrl = project.hasProperty('openmrsRootUrl') ? project.openmrsRootUrl : openmrsRootUrlDefault
-def openmrsUser = project.hasProperty('openmrsUser') ? project.openmrsUser : openmrsUserDefault
-def openmrsPassword = project.hasProperty('openmrsPassword') ? project.openmrsPassword : openmrsPasswordDefault
-def packageServerRootUrl = project.hasProperty('packageServerRootUrl') ? project.packageServerRootUrl : packageServerRootUrlDefault
+project.metaClass.propertyMissing = { null }
+def openmrsRootUrl = project.openmrsRootUrl ?: openmrsRootUrlDefault
+def openmrsUser = project.openmrsUser ?: openmrsUserDefault
+def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
+def packageServerRootUrl = project.packageServerRootUrl ?: packageServerRootUrlDefault
 
-logger.info("Default preference values:")
+logger.info('Default preference values:')
 logger.info("OpenMRS root URL: ${openmrsRootUrl}")
 logger.info("OpenMRS user: ${openmrsUser}")
 logger.info("OpenMRS password: ${openmrsPassword}")
@@ -134,7 +153,7 @@ logger.info("Package server root URL: ${packageServerRootUrl}")
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "19.1.0"
+    buildToolsVersion '19.1.0'
 
     sourceSets.main {
         jniLibs.srcDir 'libs'
@@ -146,38 +165,34 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.msf.records"
-
+        applicationId appId
         minSdkVersion 19
         targetSdkVersion 19
 
         versionCode versionInteger
         versionName versionString
-        resValue "string", "app_version", versionString
+        resValue 'string', 'app_version', versionString
 
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        testApplicationId appId + '.test'
+        testInstrumentationRunner 'com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner'
 
-        testApplicationId 'org.msf.records.test'
-        testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
-
-        resValue "string", "openmrs_root_url_default", openmrsRootUrl
-        resValue "string", "openmrs_user_default", openmrsUser
-        resValue "string", "openmrs_password_default", openmrsPassword
-        resValue "string", "package_server_root_url_default", packageServerRootUrl
+        resValue 'string', 'openmrs_root_url_default', openmrsRootUrl
+        resValue 'string', 'openmrs_user_default', openmrsUser
+        resValue 'string', 'openmrs_password_default', openmrsPassword
+        resValue 'string', 'package_server_root_url_default', packageServerRootUrl
 
         // Allow different sync adapters to be defined for debug and release builds.
-        resValue "string", "sync_authority", applicationId + '.provider.records'
-        resValue "string", "account_type", applicationId
-        buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}\""
-        buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
-        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+        resValue 'string', 'content_authority', contentAuthority
+        buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + contentAuthority + '"'
+        resValue 'string', 'account_type', appId
+        buildConfigField 'String', 'ACCOUNT_TYPE', '"' + appId + '"'
     }
 
     signingConfigs {
         release {
-            storeFile file(new File(releaseRepoRoot, 'keys/org.msf.records.jks'))
+            storeFile file(new File(releaseRepoRoot, 'keys/org.projectbuendia.client.jks'))
             storePassword ''
-            keyAlias 'org.msf.records'
+            keyAlias 'org.projectbuendia.client'
             keyPassword ''
         }
     }
@@ -194,22 +209,16 @@ android {
 
     lintOptions {
         lintConfig file('lint.xml')
-
         htmlReport false
     }
 
     buildTypes {
         debug {
-            applicationIdSuffix '.dev'
-
-            resValue "string", "sync_authority", defaultConfig.applicationId + '.dev.provider.records'
-            resValue "string", "account_type", defaultConfig.applicationId + '.dev'
-            buildConfigField "String", "ACCOUNT_TYPE", "\"${defaultConfig.applicationId}.dev\""
-
-            // For release builds, it's useful to include the real build time.
-            // However, including the time would force recompilation on every run
-            // even when no code has changed; so for debug builds, use a constant.
-            buildConfigField "String", "BUILD_TIME", "\"[debug]\""
+            applicationIdSuffix debugAppIdSuffix
+            resValue 'string', 'content_authority', debugContentAuthority
+            buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + debugContentAuthority + '"'
+            resValue 'string', 'account_type', debugAppId
+            buildConfigField 'String', 'ACCOUNT_TYPE', '"' + debugAppId + '"'
         }
 
         release {
@@ -222,21 +231,16 @@ android {
 gradle.taskGraph.whenReady {
     taskGraph ->
         if (taskGraph.hasTask(':app:assembleRelease')) {
-            def pass
             if (!android.signingConfigs.release.storeFile.exists()) {
                 throw new IllegalStateException("To perform a release build, you must have the release repo cloned at ${releaseRepoRoot}.")
             }
             if (System.console() == null) {
                 throw new IllegalStateException("Assembling the release build only works from command line with the Gradle Daemon disabled. Please run ./gradlew :app:assembleRelease.");
             }
-
-            pass = System.console().readPassword("\nPlease enter key passphrase: ")
-            pass = new String(pass)
-
-            if (pass.size() <= 0) {
+            def pass = new String(System.console().readPassword("\nPlease enter key passphrase: "))
+            if (!pass) {
                 throw new IllegalArgumentException("You must enter a password to proceed.")
             }
-
             android.signingConfigs.release.storePassword = pass
             android.signingConfigs.release.keyPassword = pass
         }
