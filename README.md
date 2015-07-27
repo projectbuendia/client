@@ -6,7 +6,9 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 ## Prerequisites
 
 ##### JDK 7
-  * If `java -version` does not report a version >= 1.7, install JDK 7 (available from [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)).
+  * If `java -version` does not report a version >= 1.7, install JDK 7:
+      * Linux: `sudo apt-get install openjdk-7-jdk`
+      * Mac OS: Download from [Oracle](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 
 ##### Android Studio 1.2
   * Visit https://developer.android.com/sdk/installing/studio.html and follow the steps to install Android Studio.
@@ -17,11 +19,11 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
         git clone --recursive https://github.com/projectbuendia/client`
 
-1.  Launch Android Studio and click "Open an existing Android Studio project".
+2.  Launch Android Studio and click "Open an existing Android Studio project".
 
-1.  Navigate to the root directory of your `client` repo and click "Choose".
+3.  Navigate to the root directory of your `client` repo and click "Choose".
 
-1.  Wait a few minutes while Android Studio builds the project for the first time.
+4.  Wait a few minutes while Android Studio builds the project for the first time.
 
     * It's normal to get errors about missing parts of the SDK (e.g. "Error: failed to find target android-21", "Error: failed to find Build Tools revision 19.1.0").  In each case, just click the suggested resolution to install the necessary SDK component (e.g. "Install missing platform(s) and sync project", "Install Build Tools 19.1.0 and sync project") until the build finishes without errors.
 
