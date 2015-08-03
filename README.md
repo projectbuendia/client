@@ -29,6 +29,16 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 You are now ready to develop the Buendia client in Android Studio.
 
+## Build and run the client
+
+On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in **Developer options**, enable USB debugging.
+
+Connect a USB cable from your computer to your tablet.  The tablet will ask if you want to allow USB debugging; click OK.
+
+Click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click OK.
+
+Wait a few minutes for Android Studio to build the app (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
+
 ## Hardware
 
 In the field, we use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets. These are a good choice because they are waterproof, have a great screen, and have a reasonably-new version of Android.
