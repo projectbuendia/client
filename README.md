@@ -31,13 +31,13 @@ You are now ready to develop the Buendia client in Android Studio.
 
 ## Build and run the client
 
-On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in **Developer options**, enable USB debugging.
+On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in the Settings app under **Developer options**, turn on **USB debugging**.
 
-Connect a USB cable from your computer to your tablet.  The tablet will ask if you want to allow USB debugging; click OK.
+Connect a USB cable from your computer to your tablet.  Click OK when asked if you want to allow USB debugging.
 
 Click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click OK.
 
-Wait a few minutes for Android Studio to build the app (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
+Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
 ## Hardware
 
