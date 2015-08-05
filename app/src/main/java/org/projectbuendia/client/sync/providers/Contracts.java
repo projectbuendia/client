@@ -44,7 +44,6 @@ public class Contracts {
 
     /** Columns for localized content. */
     interface LocaleColumns {
-
         /**
          * Really a language, but as Android does not have LanguageCode, encoded as a
          * java.util.Locale.toString(), eg en_US.
@@ -57,14 +56,11 @@ public class Contracts {
 
     /** Columns for a concept. */
     interface BaseConceptColumns {
-
-        /** UUID for a concept. */
         String CONCEPT_UUID = "concept_uuid";
     }
 
     /** Columns for an XForms concept. */
     interface ConceptColumns {
-
         /**
          * The id used to represent the concept in xforms (for client side parsing).
          * In reality this is the openmrs ID, but the client doesn't need to know that.
@@ -76,7 +72,6 @@ public class Contracts {
     }
 
     interface ChartColumns {
-
         /** UUID for an encounter. */
         String CHART_UUID = "chart_uuid";
 
@@ -90,68 +85,39 @@ public class Contracts {
     }
 
     public interface ObservationColumns {
-
-        /** UUID for a patient. */
         String PATIENT_UUID = "patient_uuid";
-
-        /** UUID for an encounter. */
         String ENCOUNTER_UUID = "encounter_uuid";
-
-        /** Time for an encounter in seconds since epoch. */
-        String ENCOUNTER_TIME = "encounter_time";
-
-        /** The value of a concept in an encounter. */
-        String VALUE = "value";
+        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
+        String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
+        String VALUE = "value";  // concept value
 
         /**
-         * A boolean (0 or 1) column indicating 1 if this is an observation cached from an xform
-         * that has not yet been sent.
+         * Value is either 0 or 1, where 1 means this observation is cached
+         * from an XForm that has not yet been sent.
          */
         String TEMP_CACHE = "temp_cache";
-
-        String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
     }
 
     interface LocationColumns {
-
-        /** UUID for a location. */
         String LOCATION_UUID = "location_uuid";
-
-        /** UUID for a parent location, or null if there is no parent. */
-        String PARENT_UUID = "parent_uuid";
+        String PARENT_UUID = "parent_uuid"; // parent location or null
     }
 
     interface LocationNameColumns {
-
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
     }
 
     interface PatientColumns {
-
-        /** Admission timestamp. */
-        String ADMISSION_TIMESTAMP = "admission_timestamp";
-
-        /** Family name. */
-        String FAMILY_NAME = "family_name";
-
-        /** Given name. */
         String GIVEN_NAME = "given_name";
-
-        /** UUID. */
+        String FAMILY_NAME = "family_name";
+        String ADMISSION_TIMESTAMP = "admission_timestamp";
         String UUID = "uuid";
-
-        /** UUID of the assigned location. */
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-
-        /** Birthdate. */
         String BIRTHDATE = "birthdate";
-
-        /** Gender. */
         String GENDER = "gender";
     }
 
     interface PatientCountColumns {
-
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
 
         /** Number of patients in a tent. */
@@ -159,33 +125,22 @@ public class Contracts {
     }
 
     interface LocalizedChartColumns {
-
         String ENCOUNTER_TIME = ObservationColumns.ENCOUNTER_TIME;
-
         String GROUP_NAME = "group_name";
-
         String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
-
         String CONCEPT_NAME = "concept_name";
-
         String VALUE = "value";
-
         String LOCALIZED_VALUE = "localized_value";
     }
 
     interface UserColumns {
-
         String UUID = "uuid";
-
         String FULL_NAME = "full_name";
     }
 
     interface LocalizedLocationColumns {
-
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-
         String PARENT_UUID = LocationColumns.PARENT_UUID;
-
         String NAME = LocaleColumns.NAME;
 
         /** The patient count for a single location, not including child locations. */
