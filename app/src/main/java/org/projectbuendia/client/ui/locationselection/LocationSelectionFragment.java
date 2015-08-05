@@ -44,7 +44,7 @@ public final class LocationSelectionFragment extends ProgressFragment {
     @InjectView(R.id.location_selection_discharged) SubtitledButtonView mDischargedButton;
 
     private LocationSelectionController mController;
-    private final MyUi mMyUi = new MyUi();
+    private final Ui mUi = new Ui();
     private LocationListAdapter mAdapter;
 
     public LocationSelectionFragment() {
@@ -90,16 +90,16 @@ public final class LocationSelectionFragment extends ProgressFragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         mController = ((LocationSelectionActivity) getActivity()).getController();
-        mController.attachFragmentUi(mMyUi);
+        mController.attachFragmentUi(mUi);
     }
 
     @Override
     public void onDestroyView() {
-        mController.detachFragmentUi(mMyUi);
+        mController.detachFragmentUi(mUi);
         super.onDestroyView();
     }
 
-    private final class MyUi implements LocationSelectionController.LocationFragmentUi {
+    private final class Ui implements LocationSelectionController.LocationFragmentUi {
         @Override
         public void setDischargedPatientCount(int patientCount) {
             mDischargedButton.setSubtitle(

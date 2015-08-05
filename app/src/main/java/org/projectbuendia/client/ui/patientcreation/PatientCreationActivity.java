@@ -102,7 +102,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         CrudEventBus crudEventBus = mCrudEventBusProvider.get();
 
         mController =
-                new PatientCreationController(new MyUi(), crudEventBus, mModel);
+                new PatientCreationController(new Ui(), crudEventBus, mModel);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setTitle(R.string.title_add_patient_cancel)
@@ -403,7 +403,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         }
     }
 
-    private final class MyUi implements PatientCreationController.Ui {
+    private final class Ui implements PatientCreationController.Ui {
 
         @Override
         public void setLocationTree(AppLocationTree locationTree) {

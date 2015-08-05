@@ -64,7 +64,7 @@ public final class LocationSelectionActivity extends PatientSearchActivity {
         mController = new LocationSelectionController(
                 mAppModel,
                 mCrudEventBusProvider.get(),
-                new MyUi(),
+                new Ui(),
                 new EventBusWrapper(EventBus.getDefault()),
                 mSyncManager,
                 getSearchController());
@@ -163,7 +163,7 @@ public final class LocationSelectionActivity extends PatientSearchActivity {
         });
     }
 
-    private final class MyUi implements LocationSelectionController.Ui {
+    private final class Ui implements LocationSelectionController.Ui {
         @Override
         public void switchToLocationSelectionScreen() {
             getSupportFragmentManager().popBackStack();

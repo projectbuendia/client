@@ -59,7 +59,7 @@ public class UserLoginActivity extends BaseActivity {
                 App.getUserManager(),
                 new EventBusWrapper(EventBus.getDefault()),
                 mTroubleshooter,
-                new MyUi(),
+                new Ui(),
                 fragment.getFragmentUi());
 
         // TODO/refactor: Consider refactoring out some common code between here and tent selection.
@@ -134,7 +134,7 @@ public class UserLoginActivity extends BaseActivity {
         super.onPause();
     }
 
-    private final class MyUi implements UserLoginController.Ui {
+    private final class Ui implements UserLoginController.Ui {
         @Override
         public void showAddNewUserDialog() {
             FragmentManager fm = getSupportFragmentManager();
