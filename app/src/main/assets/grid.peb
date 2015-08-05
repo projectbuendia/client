@@ -47,7 +47,7 @@
             {% if last.number != null %}
               {{values | avg | numberformat("#.#")}}
             {% elseif last.abbrev != null %}
-              {{(values | max).abbrev}}
+              {{(values | last).abbrev}}
             {% elseif last.text != null %}
               <div onclick="alert(''
                 {%- for value in values -%}
