@@ -55,7 +55,11 @@ public class GridRenderer {
         mView.getSettings().setDefaultFontSize(10);  // define 1 em to be equal to 10 sp
         mView.getSettings().setJavaScriptEnabled(true);
         mView.setWebChromeClient(new WebChromeClient());
-        mView.loadData(renderTemplate("assets/grid.peb", context), "text/html", null);
+        String html = renderTemplate("assets/grid.peb", context);
+        // If we only call loadData once, the WebView doesn't render the new HTML.
+        // If we call loadData twice, it works.  TODO: Figure out what's going on.
+        mView.loadData(html, "text/html", null);
+        mView.loadData(html, "text/html", null);
     }
 
     /** Renders a Pebble template. */
