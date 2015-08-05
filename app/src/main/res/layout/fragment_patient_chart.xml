@@ -9,7 +9,7 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -20,6 +20,7 @@
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
     <LinearLayout
+        android:id="@+id/patient_chart_name_section"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -31,7 +32,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="sans-serif-condensed"
             android:textSize="44sp"
             android:gravity="start"
             android:id="@+id/patient_chart_fullname"
@@ -46,7 +46,6 @@
                     android:layout_height="wrap_content"
                     android:textSize="30sp"
                     android:gravity="end"
-                    android:fontFamily="sans-serif-condensed"
                     android:textColor="@android:color/black"
                     android:id="@+id/patient_chart_gender_age"
                     tools:text="M, 23 mo" />
@@ -56,7 +55,6 @@
                     android:layout_height="wrap_content"
                     android:textSize="24sp"
                     android:gravity="end"
-                    android:fontFamily="sans-serif-condensed"
                     android:textColor="@color/red"
                     android:id="@+id/patient_chart_pregnant"
                     tools:text="(Pregnant, IV Fitted)" />
@@ -64,6 +62,8 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/patient_chart_status_section"
+        android:layout_below="@+id/patient_chart_name_section"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -106,6 +106,8 @@
     </LinearLayout>
 
     <FrameLayout
+        android:id="@+id/patient_chart_last_update_section"
+        android:layout_below="@+id/patient_chart_status_section"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp">
@@ -116,7 +118,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="18sp"
                 android:text="@string/chart_last_updated"
@@ -129,17 +130,17 @@
                 android:textSize="18sp"
                 android:text="–"
                 android:layout_toEndOf="@id/patient_chart_last_observation_label"
-                android:id="@+id/patient_chart_last_observation_date_time"
-                android:fontFamily="sans-serif-condensed"/>
+                android:id="@+id/patient_chart_last_observation_date_time"/>
         </RelativeLayout>
     </FrameLayout>
 
     <TableLayout
+        android:id="@+id/patient_chart_vitals"
+        android:layout_below="@+id/patient_chart_last_update_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:id="@+id/patient_chart_vitals"
         android:stretchColumns="*">
 
         <TableRow
@@ -230,4 +231,10 @@
 
     </TableLayout>
 
-</LinearLayout>
+    <WebView
+        android:id="@+id/chart_webview"
+        android:layout_below="@+id/patient_chart_vitals"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"/>
+
+</RelativeLayout>

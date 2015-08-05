@@ -21,7 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.google.common.base.Joiner;
@@ -54,7 +54,6 @@ import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.date.Dates;
 import org.projectbuendia.client.utils.date.RelativeDateTimeFormatter;
-import org.projectbuendia.client.widget.DataGridView;
 import org.projectbuendia.client.widget.PatientAttributeView;
 import org.projectbuendia.client.widget.VitalView;
 import org.odk.collect.android.model.Patient;
@@ -127,7 +126,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     public static final String PATIENT_ID_KEY = "PATIENT_ID";
 
     private PatientChartController mController;
-    private final MyUi mMyUi = new MyUi();
 
     // TODO: Refactor.
     private boolean mIsFetchingXform = false;
@@ -138,17 +136,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
 
-    // The last set of observations received.
-    private List<LocalizedObs> mPreviousObservations;
-
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
     @Inject LocalizedChartHelper mLocalizedChartHelper;
     @Inject AppSettings mSettings;
-
-    @Nullable private View mChartView;
 
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
 
@@ -187,6 +180,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
 
+    @InjectView(R.id.chart_webview) WebView mGridWebView;
+    GridRenderer mGridRenderer;
+
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
@@ -218,6 +214,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
+        mGridRenderer = new GridRenderer(mGridWebView, getResources());
+
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override
             public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
@@ -237,7 +235,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mAppModel,
                 new EventBusWrapper(mEventBus),
                 mCrudEventBusProvider.get(),
-                mMyUi,
+                new Ui(),
                 odkResultSender,
                 mLocalizedChartHelper,
                 controllerState,
@@ -420,7 +418,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
     }
 
-    private final class MyUi implements PatientChartController.Ui {
+    private final class Ui implements PatientChartController.Ui {
         @Override
         public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
@@ -571,22 +569,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 List<LocalizedObs> observations,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
-            // Avoid resetting observation history if nothing has changed.
-            if (observations.equals(mPreviousObservations)) {
-                return;
-            }
-            mPreviousObservations = observations;
-
-            if (mChartView != null) {
-                mRootView.removeView(mChartView);
-            }
-            mChartView = createChartView(observations, admissionDate, firstSymptomsDate);
-            mChartView.setLayoutParams(
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            mRootView.addView(mChartView);
+            mGridRenderer.render(observations, admissionDate, firstSymptomsDate);
             mRootView.invalidate();
         }
 
+        /*
         private View createChartView(
                 List<LocalizedObs> observations,
                 LocalDate admissionDate,
@@ -602,6 +589,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
             return dataGridView.createView();
         }
+        */
 
         @Override
         public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {

@@ -96,6 +96,12 @@ public class Concepts {
     /** UUID for the (answer) concept None. */
     public static final String NONE_UUID = "1107AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+    /** UUID for the (answer) concept Mild. */
+    public static final String MILD_UUID = "1148AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (answer) concept Moderate. */
+    public static final String MODERATE_UUID = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
     /** UUID for the (answer) concept Severe. */
     public static final String SEVERE_UUID = "1500AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
