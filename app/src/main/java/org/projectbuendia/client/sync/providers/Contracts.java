@@ -42,13 +42,14 @@ public class Contracts {
         String LOCATIONS = "locations";
         String LOCATION_NAMES = "location_names";
         String OBSERVATIONS = "observations";
+        String ORDERS = "orders";
         String CHARTS = "charts";
         String USERS = "users";
         String MISC = "misc";
 
         String[] ALL = {
                 PATIENTS, CONCEPTS, CONCEPT_NAMES, LOCATIONS,
-                LOCATION_NAMES, OBSERVATIONS, CHARTS, USERS, MISC
+                LOCATION_NAMES, OBSERVATIONS, ORDERS, CHARTS, USERS, MISC
         };
     }
 
@@ -106,6 +107,13 @@ public class Contracts {
          * from an XForm that has not yet been sent.
          */
         String TEMP_CACHE = "temp_cache";
+    }
+
+    interface OrderColumns {
+        String PATIENT_UUID = "patient_uuid";
+        String INSTRUCTIONS = "instructions";
+        String START_TIME = "start_time";  // seconds since epoch
+        String STOP_TIME = "stop_time";  // seconds since epoch
     }
 
     interface LocationColumns {
@@ -232,6 +240,14 @@ public class Contracts {
         public static final String ITEM_CONTENT_TYPE = buildItemType("observation");
 
         private Observations() {}
+    }
+
+    public static class Orders implements OrderColumns, BaseColumns {
+        public static final Uri CONTENT_URI = buildContentUri("orders");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("order");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("order");
+
+        private Orders() {}
     }
 
     public static class Patients implements PatientColumns, BaseColumns {

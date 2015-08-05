@@ -115,6 +115,13 @@ public class Database extends SQLiteOpenHelper {
                 + "temp_cache INTEGER," // really boolean
                 + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
+        SCHEMAS.put(Tables.ORDERS, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "patient_uuid TEXT,"
+                + "instructions TEXT,"
+                + "start_time INTEGER,"
+                + "stop_time INTEGER");
+
         SCHEMAS.put(Tables.CHARTS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "chart_uuid TEXT,"
