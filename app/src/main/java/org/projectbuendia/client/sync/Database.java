@@ -16,6 +16,11 @@ import android.content.Context;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
+import org.projectbuendia.client.sync.providers.Contracts.Tables;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Schema definition for the app's database, which contains patient attributes,
  * active patients, locations, and chart information.
@@ -60,95 +65,75 @@ public class Database extends SQLiteOpenHelper {
      */
     private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
 
-    public static final String PATIENTS_TABLE = "patients";
-    private static final String SQL_CREATE_PATIENTS = ""
-            + " CREATE TABLE patients ("
-            + "     _id TEXT PRIMARY KEY NOT NULL,"
-            + "     given_name TEXT,"
-            + "     family_name TEXT,"
-            + "     uuid TEXT,"
-            + "     location_uuid TEXT,"
-            + "     admission_timestamp INTEGER,"
-            + "     birthdate TEXT,"
-            + "     gender TEXT"
-            + " )";
+    /**
+     * A map of SQL table schemas, with one entry per table.  The values should
+     * be strings that take the place of X in a "CREATE TABLE foo (X)" statement.
+     */
+    static final Map<String, String> SCHEMAS = new HashMap();
+    static {
+        SCHEMAS.put(Tables.PATIENTS, ""
+                + "_id TEXT PRIMARY KEY NOT NULL,"
+                + "given_name TEXT,"
+                + "family_name TEXT,"
+                + "uuid TEXT,"
+                + "location_uuid TEXT,"
+                + "admission_timestamp INTEGER,"
+                + "birthdate TEXT,"
+                + "gender TEXT");
 
-    public static final String CONCEPTS_TABLE = "concepts";
-    private static final String SQL_CREATE_CONCEPTS = ""
-            + " CREATE TABLE concepts ("
-            + "     _id TEXT PRIMARY KEY NOT NULL,"
-            + "     xform_id INTEGER UNIQUE NOT NULL,"
-            + "     concept_type TEXT"
-            + " )";
+        SCHEMAS.put(Tables.CONCEPTS, ""
+                + "_id TEXT PRIMARY KEY NOT NULL,"
+                + "xform_id INTEGER UNIQUE NOT NULL,"
+                + "concept_type TEXT");
 
-    public static final String CONCEPT_NAMES_TABLE = "concept_names";
-    private static final String SQL_CREATE_CONCEPT_NAMES = ""
-            + " CREATE TABLE concept_names ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     concept_uuid TEXT,"
-            + "     locale TEXT,"
-            + "     name TEXT,"
-            + "     UNIQUE (concept_uuid, locale)"
-            + " )";
+        SCHEMAS.put(Tables.CONCEPT_NAMES, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "concept_uuid TEXT,"
+                + "locale TEXT,"
+                + "name TEXT,"
+                + "UNIQUE (concept_uuid, locale)");
 
-    public static final String LOCATIONS_TABLE = "locations";
-    private static final String SQL_CREATE_LOCATIONS = ""
-            + " CREATE TABLE locations ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     location_uuid TEXT,"
-            + "     parent_uuid TEXT"
-            + " )";
+        SCHEMAS.put(Tables.LOCATIONS, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "location_uuid TEXT,"
+                + "parent_uuid TEXT");
 
-    public static final String LOCATION_NAMES_TABLE = "location_names";
-    private static final String SQL_CREATE_LOCATION_NAMES = ""
-            + " CREATE TABLE location_names ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     location_uuid TEXT,"
-            + "     locale TEXT,"
-            + "     name TEXT,"
-            + "     UNIQUE (location_uuid, locale)"
-            + " )";
+        SCHEMAS.put(Tables.LOCATION_NAMES, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "location_uuid TEXT,"
+                + "locale TEXT,"
+                + "name TEXT,"
+                + "UNIQUE (location_uuid, locale)");
 
-    public static final String OBSERVATIONS_TABLE = "observations";
-    private static final String SQL_CREATE_OBSERVATIONS = ""
-            + " CREATE TABLE observations ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     patient_uuid TEXT,"
-            + "     encounter_uuid TEXT,"
-            + "     encounter_time INTEGER,"
-            + "     concept_uuid INTEGER,"
-            + "     value INTEGER,"
-            + "     temp_cache INTEGER," // really boolean
-            + "     UNIQUE (patient_uuid, encounter_uuid, concept_uuid)"
-            + " )";
+        SCHEMAS.put(Tables.OBSERVATIONS, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "patient_uuid TEXT,"
+                + "encounter_uuid TEXT,"
+                + "encounter_time INTEGER,"
+                + "concept_uuid INTEGER,"
+                + "value INTEGER,"
+                + "temp_cache INTEGER," // really boolean
+                + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
-    public static final String CHARTS_TABLE = "charts";
-    private static final String SQL_CREATE_CHARTS = ""
-            + " CREATE TABLE charts ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     chart_uuid TEXT,"
-            + "     chart_row INTEGER,"
-            + "     group_uuid TEXT,"
-            + "     concept_uuid INTEGER,"
-            + "     UNIQUE (chart_uuid, concept_uuid)"
-            + " )";
+        SCHEMAS.put(Tables.CHARTS, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "chart_uuid TEXT,"
+                + "chart_row INTEGER,"
+                + "group_uuid TEXT,"
+                + "concept_uuid INTEGER,"
+                + "UNIQUE (chart_uuid, concept_uuid)");
 
-    public static final String USERS_TABLE = "users";
-    private static final String SQL_CREATE_USERS = ""
-            + " CREATE TABLE users ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     uuid TEXT,"
-            + "     full_name TEXT"
-            + " )";
+        SCHEMAS.put(Tables.USERS, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "uuid TEXT,"
+                + "full_name TEXT");
 
-    public static final String MISC_TABLE = "misc";
-    private static final String SQL_CREATE_MISC = ""
-            + " CREATE TABLE misc ("
-            + "     _id INTEGER PRIMARY KEY NOT NULL,"
-            + "     full_sync_start_time INTEGER,"
-            + "     full_sync_end_time INTEGER,"
-            + "     obs_sync_time INTEGER"
-            + " )";
+        SCHEMAS.put(Tables.MISC, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "full_sync_start_time INTEGER,"
+                + "full_sync_end_time INTEGER,"
+                + "obs_sync_time INTEGER");
+    }
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -156,30 +141,18 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_PATIENTS);
-        db.execSQL(SQL_CREATE_CONCEPTS);
-        db.execSQL(SQL_CREATE_CONCEPT_NAMES);
-        db.execSQL(SQL_CREATE_LOCATIONS);
-        db.execSQL(SQL_CREATE_LOCATION_NAMES);
-        db.execSQL(SQL_CREATE_OBSERVATIONS);
-        db.execSQL(SQL_CREATE_CHARTS);
-        db.execSQL(SQL_CREATE_USERS);
-        db.execSQL(SQL_CREATE_MISC);
+        for (String table : Tables.ALL) {
+            db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
+        }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // This database is only a cache, so its upgrade policy is
-        // to simply to discard the data and start over
-        db.execSQL("DROP TABLE IF EXISTS " + PATIENTS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + CONCEPTS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + CONCEPT_NAMES_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + LOCATIONS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + LOCATION_NAMES_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + OBSERVATIONS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + CHARTS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + MISC_TABLE);
+        // This database is only a cache of data on the server, so its upgrade
+        // policy is to discard all the data and start over.
+        for (String table : Tables.ALL) {
+            db.execSQL("DROP TABLE IF EXISTS " + table);
+        }
         onCreate(db);
     }
 

@@ -25,6 +25,23 @@ public class Contracts {
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
 
+    public interface Tables {
+        String PATIENTS = "patients";
+        String CONCEPTS = "concepts";
+        String CONCEPT_NAMES = "concept_names";
+        String LOCATIONS = "locations";
+        String LOCATION_NAMES = "location_names";
+        String OBSERVATIONS = "observations";
+        String CHARTS = "charts";
+        String USERS = "users";
+        String MISC = "misc";
+
+        String[] ALL = {
+                PATIENTS, CONCEPTS, CONCEPT_NAMES, LOCATIONS,
+                LOCATION_NAMES, OBSERVATIONS, CHARTS, USERS, MISC
+        };
+    }
+
     /** Columns for localized content. */
     interface LocaleColumns {
 

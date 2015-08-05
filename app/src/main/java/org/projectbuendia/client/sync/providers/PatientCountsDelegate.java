@@ -18,6 +18,7 @@ import android.net.Uri;
 
 import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.QueryBuilder;
+import org.projectbuendia.client.sync.providers.Contracts.Tables;
 
 /**
  * A {@link ProviderDelegate} that provides query access to the count of patients in each location.
@@ -33,7 +34,7 @@ public class PatientCountsDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
-        return new QueryBuilder(Database.PATIENTS_TABLE)
+        return new QueryBuilder(Tables.PATIENTS)
                 .where(selection, selectionArgs)
                 .where(Contracts.Patients.LOCATION_UUID + " is not null")
                 .groupBy(Contracts.Patients.LOCATION_UUID)
