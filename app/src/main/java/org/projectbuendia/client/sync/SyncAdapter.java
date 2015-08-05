@@ -186,15 +186,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 storeFullSyncStartTime(provider, syncStartTime);
             }
 
+            // Patients: Always fetch all patients.  The patient list changes
+            // often and can grow very large; incremental fetch would help a lot.
+            // TODO: Implement incremental fetch for patients.
             if (extras.getBoolean(SYNC_PATIENTS)) {
                 checkCancellation("Sync was canceled before patient sync.");
                 reportProgress(0, R.string.syncing_patients);
                 specific = true;
-                // default behaviour
                 updatePatientData(syncResult);
                 timings.addSplit("update patient data specified");
                 reportProgress(progressIncrement, R.string.syncing_patients);
             }
+            // Concepts: Always fetch all available concepts.  The concepts only
+            // need to be updated when the form definitions change; this is
+            // infrequent, so wiping and reloading all concepts is acceptable.
             if (extras.getBoolean(SYNC_CONCEPTS)) {
                 checkCancellation("Sync was canceled before concept sync.");
                 reportProgress(0, R.string.syncing_concepts);
@@ -203,6 +208,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 timings.addSplit("update concepts specified");
                 reportProgress(progressIncrement, R.string.syncing_concepts);
             }
+            // Chart layouts: Always fetch everything.  The layouts only need
+            // to be updated when the profile changes; this is infrequent, so
+            // wiping and reloading all chart layouts is acceptable.
             if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
                 checkCancellation("Sync was canceled before chart sync.");
                 reportProgress(0, R.string.syncing_charts);
@@ -211,14 +219,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 updateChartStructure(provider, syncResult);
                 reportProgress(progressIncrement, R.string.syncing_charts);
             }
+            // Observations: Both full fetch and incremental fetch are supported.
             if (extras.getBoolean(SYNC_OBSERVATIONS)) {
                 checkCancellation("Sync was canceled before observation sync.");
                 reportProgress(0, R.string.syncing_observations);
                 specific = true;
-                updateObservations(provider, syncResult, extras);
+                updateObservations(provider, syncResult, extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE));
                 timings.addSplit("update observations specified");
                 reportProgress(progressIncrement, R.string.syncing_observations);
             }
+            // Locations: Always fetch everything.  The locations only need
+            // to be updated when the profile changes, which is infrequent,
+            // so wiping and reloading all locations is acceptable.
             if (extras.getBoolean(SYNC_LOCATIONS)) {
                 checkCancellation("Sync was canceled before location sync.");
                 reportProgress(0, R.string.syncing_locations);
@@ -227,6 +239,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 timings.addSplit("update locations specified");
                 reportProgress(progressIncrement, R.string.syncing_locations);
             }
+            // Users: Always fetch all users.  New users aren't added all that
+            // often and the set of users stays fairly small, so wiping and
+            // reloading all users is acceptable.
             if (extras.getBoolean(SYNC_USERS)) {
                 checkCancellation("Sync was canceled before user sync.");
                 reportProgress(0, R.string.syncing_users);
@@ -255,7 +270,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                 checkCancellation("Sync was canceled before observation sync.");
                 reportProgress(progressIncrement, R.string.syncing_observations);
-                updateObservations(provider, syncResult, extras);
+                updateObservations(provider, syncResult, extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE));
                 timings.addSplit("update all (observations)");
 
                 checkCancellation("Sync was canceled before location sync.");
@@ -613,7 +628,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult,
-                                    Bundle extras)
+                                    boolean incrementalFetch)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
 
         // Get call patients from the cache.
@@ -637,7 +652,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Instant lastSyncTime = getLastSyncTime(provider);
         Instant newSyncTime;
         checkCancellation("Sync was canceled before updating observations.");
-        if (extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE) && lastSyncTime != null) {
+        if (incrementalFetch && lastSyncTime != null) {
             newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
                     chartServer, listFuture, timingLogger);
         } else {

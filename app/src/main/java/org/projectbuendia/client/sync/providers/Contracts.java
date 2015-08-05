@@ -24,6 +24,16 @@ public class Contracts {
     public static final String CONTENT_AUTHORITY = BuildConfig.CONTENT_AUTHORITY;
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
+    
+    public static Uri buildContentUri(String path) {
+        return BASE_CONTENT_URI.buildUpon().appendPath(path).build();
+    }
+    public static String buildGroupType(String name) {
+        return ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
+    }
+    public static String buildItemType(String name) {
+        return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
+    }
 
     public interface Tables {
         String PATIENTS = "patients";
@@ -148,22 +158,17 @@ public class Contracts {
     }
 
     public static class Charts implements ChartColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("charts").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "chart";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "chart";
+        public static final Uri CONTENT_URI = buildContentUri("charts");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("chart");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("chart");
 
         private Charts() {}
     }
 
     interface MiscColumns {
         /**
-         * The start time of the last full sync operation. Since sync operations are transactional,
+         * The start time of the last full sync operation, according to the
+         * local (client's) clock.  Since sync operations are transactional,
          * this should only be set if this sync was completed successfully.
          *
          * <p>Updated at the very beginning of full sync operations.
@@ -171,7 +176,8 @@ public class Contracts {
         String FULL_SYNC_START_TIME = "full_sync_start_time";
 
         /**
-         * The end time of the last full sync operation. In rare cases, this may correspond to a
+         * The end time of the last full sync operation, according to the
+         * local (client's) clock.  In rare cases, this may correspond to a
          * sync that completed but downloaded incomplete data.
          *
          * <p>Updated at the very end of full sync operations.
@@ -179,122 +185,75 @@ public class Contracts {
         String FULL_SYNC_END_TIME = "full_sync_end_time";
 
         /**
-         * The encounter time of the last observation sync operation, allowing for an incremental
-         * update of observations.
+         * The "snapshot time" of the last observation sync operation, according
+         * to the server's clock.  This is used to request an incremental update
+         * of observations from the server.
          *
-         * <p>Updated after observations are synced to the encounter time of the latest observation.
+         * <p>Updated after observation sync to the snapshot time reported by the server.
          */
         String OBS_SYNC_TIME = "obs_sync_time";
     }
 
     public static class ConceptNames implements BaseConceptColumns, LocaleColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("concept-names").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "concept-name";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "concept-name";
+        public static final Uri CONTENT_URI = buildContentUri("concept-names");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("concept-name");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("concept-name");
 
         private ConceptNames() {}
     }
 
     public static class Concepts implements ConceptColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("concepts").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "concept";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "concept";
+        public static final Uri CONTENT_URI = buildContentUri("concepts");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("concept");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("concept");
 
         private Concepts() {}
     }
 
     public static class Locations implements LocationColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("locations").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "location";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "location";
+        public static final Uri CONTENT_URI = buildContentUri("locations");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("location");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("location");
 
         private Locations() {}
     }
 
     public static class LocationNames implements LocationNameColumns, LocaleColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("location-names").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "location-name";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "location-name";
+        public static final Uri CONTENT_URI = buildContentUri("location-names");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("location-name");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("location-name");
 
         private LocationNames() {}
     }
 
     public static class Observations implements ObservationColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("observations").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "observation";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "observation";
+        public static final Uri CONTENT_URI = buildContentUri("observations");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("observation");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("observation");
 
         private Observations() {}
     }
 
     public static class Patients implements PatientColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("patients").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "patient";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "patient";
+        public static final Uri CONTENT_URI = buildContentUri("patients");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("patient");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("patient");
 
         private Patients() {}
     }
 
     public static class PatientCounts implements PatientCountColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("patient-counts").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "patient-count";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "patient-count";
+        public static final Uri CONTENT_URI = buildContentUri("patient-counts");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("patient-count");
 
         private PatientCounts() {}
     }
 
     public static class LocalizedCharts implements LocalizedChartColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("localized-charts").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-chart";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-chart";
+        public static final Uri CONTENT_URI = buildContentUri("localized-charts");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
         private static final String FAKE_PATIENT_UUID = "fake-patient";
 
         /**
@@ -326,15 +285,9 @@ public class Contracts {
     }
 
     public static class MostRecentLocalizedCharts implements LocalizedChartColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("most-recent-localized-charts").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-chart";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-chart";
+        public static final Uri CONTENT_URI = buildContentUri("most-recent-localized-charts");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
 
         /**
          * Returns the content URI for the most recent localized chart for a given patient UUID and
@@ -351,15 +304,9 @@ public class Contracts {
     }
 
     public static class LocalizedLocations implements LocalizedLocationColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("localized-locations").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-location";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "localized-location";
+        public static final Uri CONTENT_URI = buildContentUri("localized-locations");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("localized-location");
 
         /** Returns the content URL for the localized locations for a given locale. */
         public static Uri getUri(String locale) {
@@ -372,26 +319,17 @@ public class Contracts {
     }
 
     public static class Users implements UserColumns, BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("users").build();
-
-        public static final String GROUP_CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + "user";
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "user";
+        public static final Uri CONTENT_URI = buildContentUri("users");
+        public static final String GROUP_CONTENT_TYPE = buildGroupType("user");
+        public static final String ITEM_CONTENT_TYPE = buildItemType("user");
 
         private Users() {}
     }
 
     public static class Misc implements MiscColumns, BaseColumns {
-
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
-
-        public static final String ITEM_CONTENT_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + "misc";
+        public static final String ITEM_CONTENT_TYPE = buildItemType("misc");
 
         private Misc() {}
     }
