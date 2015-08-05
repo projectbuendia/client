@@ -29,7 +29,6 @@ import android.support.annotation.Nullable;
 import android.util.TimingLogger;
 
 import com.android.volley.toolbox.RequestFuture;
-import com.google.common.primitives.Booleans;
 
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
@@ -47,14 +46,17 @@ import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
-import org.projectbuendia.client.utils.date.Dates;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.date.Dates;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -67,35 +69,43 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
 
-    /** If this key is present with boolean value true then sync patients. */
-    public static final String SYNC_PATIENTS = "SYNC_PATIENTS";
-
-    /** If this key is present with boolean value true then sync concepts. */
-    public static final String SYNC_CONCEPTS = "SYNC_CONCEPTS";
-
-    /** If this key is present with boolean value true then sync the chart structure. */
-    public static final String SYNC_CHART_STRUCTURE = "SYNC_CHART_STRUCTURE";
-
-    /** If this key is present with boolean value true then sync the observations. */
-    public static final String SYNC_OBSERVATIONS = "SYNC_OBSERVATIONS";
-
-    /** If this key is present with boolean value true then sync locations. */
-    public static final String SYNC_LOCATIONS = "SYNC_LOCATIONS";
-
-    /** If this key is present with boolean value true then sync users. */
-    public static final String SYNC_USERS = "SYNC_USERS";
-
     /**
-     * If this key is present with boolean value true then retrieve only observations entered since
-     * observations were last fetched.
+     * Keys in the extras bundle used to select which sync phases to do.
+     * Select a phase by setting a boolean value of true for the appropriate key.
      */
-    public static final String INCREMENTAL_OBSERVATIONS_UPDATE = "INCREMENTAL_OBSERVATIONS_UPDATE";
+    enum SyncPhase {
+        SYNC_USERS,
+        SYNC_LOCATIONS,
+        SYNC_CHART_STRUCTURE,
+        SYNC_CONCEPTS,
+        SYNC_PATIENTS,
+        SYNC_OBSERVATIONS
+    }
 
-    /**
-     * If this key is present with boolean value true, then the start and end times of this sync
-     * will be recorded.
-     */
-    public static final String FULL_SYNC = "FULL_SYNC";
+    /** UI messages to show while each phase of the sync is in progress. */
+    static final Map<SyncPhase, Integer> PHASE_MESSAGES = new HashMap<>();
+    static {
+        PHASE_MESSAGES.put(SyncPhase.SYNC_USERS, R.string.syncing_users);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_LOCATIONS, R.string.syncing_locations);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_CHART_STRUCTURE, R.string.syncing_charts);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_CONCEPTS, R.string.syncing_concepts);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_PATIENTS, R.string.syncing_patients);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_OBSERVATIONS, R.string.syncing_observations);
+    }
+
+    enum SyncOption {
+        /**
+         * If this key is present with a boolean value of true, only fetch
+         * observations entered since the last fetch of observations.
+         */
+        INCREMENTAL_OBS,
+        /**
+         * If this key is present with boolean value true, then the starting
+         * and ending times of the entire sync operation will be recorded (as a
+         * way of recording whether a full sync has ever successfully completed).
+         */
+        FULL_SYNC
+    }
 
     /** RPC timeout for getting observations. */
     private static final int OBSERVATIONS_TIMEOUT_SECS = 180;
@@ -163,10 +173,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
-        int nExtras = countExtras(extras);
-        int progressIncrement = nExtras > 0 ? 100 / nExtras : 100;
-
         LOG.i("Beginning network synchronization");
+        reportProgress(0, R.string.sync_in_progress);
 
         BuendiaProvider buendiaProvider =
                 (BuendiaProvider) (provider.getLocalContentProvider());
@@ -175,124 +183,85 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
         dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
 
-        reportProgress(0, R.string.sync_in_progress);
         TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
-        try {
-            boolean specific = false;
 
-            if (extras.getBoolean(FULL_SYNC)) {
+        // Decide which phases to do.  If FULL_SYNC is set or no phases
+        // are specified, do them all.
+        Set<SyncPhase> phases = new HashSet<>();
+        for (SyncPhase phase : SyncPhase.values()) {
+            if (extras.getBoolean(phase.name())) {
+                phases.add(phase);
+            }
+        }
+        if (phases.isEmpty() || extras.getBoolean(SyncOption.FULL_SYNC.name())) {
+            Collections.addAll(phases, SyncPhase.values());
+        }
+
+        try {
+            if (extras.getBoolean(SyncOption.FULL_SYNC.name())) {
                 Instant syncStartTime = Instant.now();
-                LOG.i("Setting sync start time: " + syncStartTime);
+                LOG.i("Recording full sync start time: " + syncStartTime);
                 storeFullSyncStartTime(provider, syncStartTime);
             }
 
-            // Patients: Always fetch all patients.  The patient list changes
-            // often and can grow very large; incremental fetch would help a lot.
-            // TODO: Implement incremental fetch for patients.
-            if (extras.getBoolean(SYNC_PATIENTS)) {
-                checkCancellation("Sync was canceled before patient sync.");
-                reportProgress(0, R.string.syncing_patients);
-                specific = true;
-                updatePatientData(syncResult);
-                timings.addSplit("update patient data specified");
-                reportProgress(progressIncrement, R.string.syncing_patients);
-            }
-            // Concepts: Always fetch all available concepts.  The concepts only
-            // need to be updated when the form definitions change; this is
-            // infrequent, so wiping and reloading all concepts is acceptable.
-            if (extras.getBoolean(SYNC_CONCEPTS)) {
-                checkCancellation("Sync was canceled before concept sync.");
-                reportProgress(0, R.string.syncing_concepts);
-                specific = true;
-                updateConcepts(provider, syncResult);
-                timings.addSplit("update concepts specified");
-                reportProgress(progressIncrement, R.string.syncing_concepts);
-            }
-            // Chart layouts: Always fetch everything.  The layouts only need
-            // to be updated when the profile changes; this is infrequent, so
-            // wiping and reloading all chart layouts is acceptable.
-            if (extras.getBoolean(SYNC_CHART_STRUCTURE)) {
-                checkCancellation("Sync was canceled before chart sync.");
-                reportProgress(0, R.string.syncing_charts);
-                specific = true;
-                timings.addSplit("update chart specified");
-                updateChartStructure(provider, syncResult);
-                reportProgress(progressIncrement, R.string.syncing_charts);
-            }
-            // Observations: Both full fetch and incremental fetch are supported.
-            if (extras.getBoolean(SYNC_OBSERVATIONS)) {
-                checkCancellation("Sync was canceled before observation sync.");
-                reportProgress(0, R.string.syncing_observations);
-                specific = true;
-                updateObservations(provider, syncResult, extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE));
-                timings.addSplit("update observations specified");
-                reportProgress(progressIncrement, R.string.syncing_observations);
-            }
-            // Locations: Always fetch everything.  The locations only need
-            // to be updated when the profile changes, which is infrequent,
-            // so wiping and reloading all locations is acceptable.
-            if (extras.getBoolean(SYNC_LOCATIONS)) {
-                checkCancellation("Sync was canceled before location sync.");
-                reportProgress(0, R.string.syncing_locations);
-                specific = true;
-                updateLocations(provider, syncResult);
-                timings.addSplit("update locations specified");
-                reportProgress(progressIncrement, R.string.syncing_locations);
-            }
-            // Users: Always fetch all users.  New users aren't added all that
-            // often and the set of users stays fairly small, so wiping and
-            // reloading all users is acceptable.
-            if (extras.getBoolean(SYNC_USERS)) {
-                checkCancellation("Sync was canceled before user sync.");
-                reportProgress(0, R.string.syncing_users);
-                specific = true;
-                updateUsers(provider, syncResult);
-                timings.addSplit("update users specified");
-                reportProgress(progressIncrement, R.string.syncing_users);
-            }
-            if (!specific) {
-                // If nothing is specified explicitly (such as from the android system menu),
-                // do everything.
-                checkCancellation("Sync was canceled before patient sync.");
-                reportProgress(0, R.string.syncing_patients);
-                updatePatientData(syncResult);
-                timings.addSplit("update all (patients)");
+            int progressIncrement = 100 / phases.size();
+            for (SyncPhase phase : SyncPhase.values()) {
+                if (!phases.contains(phase)) break;
+                checkCancellation("Sync was cancelled before " + phase);
+                reportProgress(0, PHASE_MESSAGES.get(phase));
 
-                checkCancellation("Sync was canceled before concept sync.");
-                reportProgress(progressIncrement, R.string.syncing_concepts);
-                updateConcepts(provider, syncResult);
-                timings.addSplit("update all (concepts)");
+                switch (phase) {
+                    // Patients: Always fetch all patients.  The patient list changes
+                    // often and can grow very large; incremental fetch would help a lot.
+                    // TODO: Implement incremental fetch for patients.
+                    case SYNC_PATIENTS:
+                        updatePatientData(syncResult);
+                        break;
 
-                checkCancellation("Sync was canceled before chart sync.");
-                reportProgress(progressIncrement, R.string.syncing_charts);
-                updateChartStructure(provider, syncResult);
-                timings.addSplit("update all (chart)");
+                    // Concepts: Always fetch all available concepts.  The concepts only
+                    // need to be updated when the form definitions change; this is
+                    // infrequent, so wiping and reloading all concepts is acceptable.
+                    case SYNC_CONCEPTS:
+                        updateConcepts(provider, syncResult);
+                        break;
 
-                checkCancellation("Sync was canceled before observation sync.");
-                reportProgress(progressIncrement, R.string.syncing_observations);
-                updateObservations(provider, syncResult, extras.getBoolean(INCREMENTAL_OBSERVATIONS_UPDATE));
-                timings.addSplit("update all (observations)");
+                    // Chart layouts: Always fetch everything.  The layouts only need
+                    // to be updated when the profile changes; this is infrequent, so
+                    // wiping and reloading all chart layouts is acceptable.
+                    case SYNC_CHART_STRUCTURE:
+                        updateChartStructure(provider, syncResult);
+                        break;
 
-                checkCancellation("Sync was canceled before location sync.");
-                reportProgress(progressIncrement, R.string.syncing_locations);
-                updateLocations(provider, syncResult);
-                timings.addSplit("update all (locations)");
+                    // Observations: Both full fetch and incremental fetch are supported.
+                    case SYNC_OBSERVATIONS:
+                        updateObservations(provider, syncResult,
+                                extras.getBoolean(SyncOption.INCREMENTAL_OBS.name()));
+                        break;
 
-                checkCancellation("Sync was canceled before user sync.");
-                reportProgress(progressIncrement, R.string.syncing_users);
-                updateUsers(provider, syncResult);
-                timings.addSplit("update all (users)");
+                    // Locations: Always fetch everything.  The locations only need
+                    // to be updated when the profile changes, which is infrequent,
+                    // so wiping and reloading all locations is acceptable.
+                    case SYNC_LOCATIONS:
+                        updateLocations(provider, syncResult);
+                        break;
 
-                checkCancellation("Sync was canceled right before finishing.");
+                    // Users: Always fetch all users.  New users aren't added all that
+                    // often and the set of users stays fairly small, so wiping and
+                    // reloading all users is acceptable.
+                    case SYNC_USERS:
+                        updateUsers(provider, syncResult);
+                        break;
+                }
+                timings.addSplit(phase.name() + " phase completed");
+                reportProgress(progressIncrement, PHASE_MESSAGES.get(phase));
             }
+            reportProgress(100, R.string.completing_sync);
 
-            if (extras.getBoolean(FULL_SYNC)) {
+            if (extras.getBoolean(SyncOption.FULL_SYNC.name())) {
                 Instant syncEndTime = Instant.now();
-                LOG.i("Setting sync end time: " + syncEndTime);
+                LOG.i("Recording full sync end time: " + syncEndTime);
                 storeFullSyncEndTime(provider, syncEndTime);
             }
-
-            reportProgress(100, R.string.completing_sync);
         } catch (CancellationException e) {
             rollbackSavepoint(dbTransactionHelper);
             // Reset canceled state so that it doesn't interfere with next sync.
@@ -386,16 +355,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void reportProgress(int progressIncrement) {
         reportProgress(progressIncrement, null);
-    }
-
-    private int countExtras(Bundle extras) {
-        return Booleans.countTrue(
-                extras.getBoolean(SYNC_PATIENTS),
-                extras.getBoolean(SYNC_CHART_STRUCTURE),
-                extras.getBoolean(SYNC_CONCEPTS),
-                extras.getBoolean(SYNC_LOCATIONS),
-                extras.getBoolean(SYNC_OBSERVATIONS),
-                extras.getBoolean(SYNC_USERS));
     }
 
     private void updatePatientData(SyncResult syncResult)

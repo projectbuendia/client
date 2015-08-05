@@ -26,6 +26,8 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.sync.SyncAdapter.SyncOption;
+import org.projectbuendia.client.sync.SyncAdapter.SyncPhase;
 
 import javax.inject.Inject;
 
@@ -65,15 +67,15 @@ public class SyncAccountService extends Service {
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
         // Fetch everything, except fetch only newly added observations if so enabled.
-        b.putBoolean(SyncAdapter.FULL_SYNC, true);
-        b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-        b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
-        b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
-        b.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
-        b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-        b.putBoolean(SyncAdapter.SYNC_USERS, true);
+        b.putBoolean(SyncOption.FULL_SYNC.name(), true);
+        b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
+        b.putBoolean(SyncPhase.SYNC_CONCEPTS.name(), true);
+        b.putBoolean(SyncPhase.SYNC_CHART_STRUCTURE.name(), true);
+        b.putBoolean(SyncPhase.SYNC_LOCATIONS.name(), true);
+        b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
+        b.putBoolean(SyncPhase.SYNC_USERS.name(), true);
         if (sSettings.getIncrementalObservationUpdate()) {
-            b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+            b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
         }
         LOG.i("Requesting full sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
@@ -90,8 +92,8 @@ public class SyncAccountService extends Service {
         b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
         // Fetch just the newly added observations.
-        b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-        b.putBoolean(SyncAdapter.INCREMENTAL_OBSERVATIONS_UPDATE, true);
+        b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
+        b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
         LOG.i("Requesting incremental observation sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
@@ -108,12 +110,12 @@ public class SyncAccountService extends Service {
             ContentResolver.setIsSyncable(account, Contracts.CONTENT_AUTHORITY, 1);
             ContentResolver.setSyncAutomatically(account, Contracts.CONTENT_AUTHORITY, true);
             Bundle b = new Bundle();
-            b.putBoolean(SyncAdapter.SYNC_PATIENTS, true);
-            b.putBoolean(SyncAdapter.SYNC_CONCEPTS, true);
-            b.putBoolean(SyncAdapter.SYNC_CHART_STRUCTURE, true);
-            b.putBoolean(SyncAdapter.SYNC_LOCATIONS, true);
-            b.putBoolean(SyncAdapter.SYNC_OBSERVATIONS, true);
-            b.putBoolean(SyncAdapter.SYNC_USERS, true);
+            b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
+            b.putBoolean(SyncPhase.SYNC_CONCEPTS.name(), true);
+            b.putBoolean(SyncPhase.SYNC_CHART_STRUCTURE.name(), true);
+            b.putBoolean(SyncPhase.SYNC_LOCATIONS.name(), true);
+            b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
+            b.putBoolean(SyncPhase.SYNC_USERS.name(), true);
             ContentResolver.addPeriodicSync(account, Contracts.CONTENT_AUTHORITY, b, SYNC_PERIOD);
             return true;
         }
