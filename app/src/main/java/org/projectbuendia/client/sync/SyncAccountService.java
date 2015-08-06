@@ -94,6 +94,7 @@ public class SyncAccountService extends Service {
         // Fetch just the newly added observations.
         b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
         b.putBoolean(SyncOption.INCREMENTAL_OBS.name(), true);
+        b.putBoolean(SyncPhase.SYNC_ORDERS.name(), true);
         LOG.i("Requesting incremental observation sync");
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
