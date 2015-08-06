@@ -147,6 +147,7 @@ public class RpcToDb {
                         .withValue(Contracts.Orders.START_TIME, order.start_time)
                         .withValue(Contracts.Orders.STOP_TIME, order.stop_time)
                         .build());
+                ordersToStore.remove(uuid);  // done with this incoming order
                 syncResult.stats.numUpdates++;
             } else {  // delete the local order (the server doesn't have it)
                 LOG.v("  - will delete order " + uuid);
