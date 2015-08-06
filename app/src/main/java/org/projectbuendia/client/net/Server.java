@@ -21,6 +21,7 @@ import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.net.model.Encounter;
 import org.projectbuendia.client.net.model.Location;
 import org.projectbuendia.client.net.model.NewUser;
+import org.projectbuendia.client.net.model.Order;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.User;
 
@@ -152,6 +153,10 @@ public interface Server {
     /** Lists all locations. */
     public void listLocations(Response.Listener<List<Location>> locationListener,
                               Response.ErrorListener errorListener);
+
+    /** Lists all existing orders. */
+    public void listOrders(Response.Listener<List<Order>> successListener,
+                           Response.ErrorListener errorListener);
 
     /** Cancels all pending requests. */
     public void cancelPendingRequests();

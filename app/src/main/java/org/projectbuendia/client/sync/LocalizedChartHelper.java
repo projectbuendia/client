@@ -47,6 +47,21 @@ public class LocalizedChartHelper {
         mContentResolver = checkNotNull(contentResolver);
     }
 
+    public List<Order> getOrders(String patientUuid) {
+        Cursor c = mContentResolver.query(
+                Contracts.Orders.CONTENT_URI,
+                null, "patient_uuid = ?", new String[] {patientUuid}, "start_time");
+        List<Order> orders = new ArrayList<>();
+        while (c.moveToNext()) {
+            orders.add(new Order(
+                    c.getString(c.getColumnIndex("uuid")),
+                    c.getString(c.getColumnIndex("instructions")),
+                    c.getLong(c.getColumnIndex("start_time")),
+                    c.getLong(c.getColumnIndex("stop_time"))));
+        }
+        return orders;
+    }
+
     /** Gets all observations for a given patient from the local cache, localized to English. */
     public List<LocalizedObs> getObservations(String patientUuid) {
         return getObservations(patientUuid, ENGLISH_LOCALE);

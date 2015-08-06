@@ -110,6 +110,7 @@ public class Contracts {
     }
 
     interface OrderColumns {
+        String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
         String INSTRUCTIONS = "instructions";
         String START_TIME = "start_time";  // seconds since epoch

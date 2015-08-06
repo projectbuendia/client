@@ -35,6 +35,7 @@ import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.model.Encounter;
 import org.projectbuendia.client.net.model.Location;
 import org.projectbuendia.client.net.model.NewUser;
+import org.projectbuendia.client.net.model.Order;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.utils.Logger;
@@ -511,6 +512,34 @@ public class OpenMrsServer implements Server {
 
     private Location parseLocationJson(JSONObject object) {
         return mGson.fromJson(object.toString(), Location.class);
+    }
+
+    @Override
+    public void listOrders(final Response.Listener<List<Order>> successListener,
+                           Response.ErrorListener errorListener) {
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails, "/order",
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        ArrayList<Order> orders = new ArrayList<>();
+                        try {
+                            JSONArray results = response.getJSONArray("results");
+                            for (int i = 0; i < results.length(); i++) {
+                                JSONObject result = results.getJSONObject(i);
+                                orders.add(mGson.fromJson(result.toString(), Order.class));
+                            }
+                        } catch (JSONException e) {
+                            LOG.e(e, "Failed to parse response");
+                        }
+                        successListener.onResponse(orders);
+                    }
+                },
+                wrapErrorListener(errorListener)
+        );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     @Override

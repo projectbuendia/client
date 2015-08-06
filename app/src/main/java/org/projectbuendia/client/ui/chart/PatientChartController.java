@@ -44,6 +44,7 @@ import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.locationselection.AssignLocationDialog;
 import org.projectbuendia.client.utils.Utils;
@@ -114,9 +115,10 @@ final class PatientChartController {
         /** Updates the UI with the patient's location. */
         void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
 
-        /** Updates the UI showing the historic log of observation values for this patient. */
-        void setObservationHistory(
+        /** Updates the UI showing the history of observations and orders for this patient. */
+        void updateHistoryGrid(
                 List<LocalizedObs> observations,
+                List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate);
 
@@ -153,7 +155,7 @@ final class PatientChartController {
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
-    private final LocalizedChartHelper mObservationsProvider;
+    private final LocalizedChartHelper mChartHelper;
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final SyncManager mSyncManager;
@@ -180,7 +182,7 @@ final class PatientChartController {
             CrudEventBus crudEventBus,
             Ui ui,
             OdkResultSender odkResultSender,
-            LocalizedChartHelper observationsProvider,
+            LocalizedChartHelper chartHelper,
             @Nullable Bundle savedState,
             SyncManager syncManager,
             MinimalHandler mainThreadHandler) {
@@ -189,7 +191,7 @@ final class PatientChartController {
         mCrudEventBus = crudEventBus;
         mUi = ui;
         mOdkResultSender = odkResultSender;
-        mObservationsProvider = observationsProvider;
+        mChartHelper = chartHelper;
         if (savedState != null) {
             mPatientUuids = savedState.getStringArray(KEY_PENDING_UUIDS);
         } else {
@@ -338,7 +340,7 @@ final class PatientChartController {
         }
 
         Map<String, LocalizedObs> observations =
-                mObservationsProvider.getMostRecentObservations(mPatientUuid);
+                mChartHelper.getMostRecentObservations(mPatientUuid);
 
         if (observations.containsKey(Concepts.PREGNANCY_UUID)
                 && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
@@ -389,30 +391,19 @@ final class PatientChartController {
 
     /** Gets the latest observation values and displays them on the UI. */
     private synchronized void updatePatientUi() {
-        // Get the observations
+        // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
         List<LocalizedObs> observations =
-                mObservationsProvider.getObservations(mPatientUuid);
+                mChartHelper.getObservations(mPatientUuid);
         Map<String, LocalizedObs> conceptsToLatestObservations =
-                new HashMap<>(mObservationsProvider.getMostRecentObservations(mPatientUuid));
-
-        // Update timestamp
+                new HashMap<>(mChartHelper.getMostRecentObservations(mPatientUuid));
         for (LocalizedObs obs : observations) {
             mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
         }
+        List<Order> orders = mChartHelper.getOrders(mPatientUuid);
 
-        // Add in initial observation.
-        /*for (Map.Entry<String, LocalizedObservation> recentObservation :
-                conceptsToLatestObservations.entrySet()) {
-            if (!observations.contains(recentObservation.getValue())) {
-                observations.add(recentObservation.getValue());
-            }
-        }*/
-
-        if (DEBUG) {
-            LOG.d("Showing " + observations.size() + " observations and "
-                    + conceptsToLatestObservations.size() + " latest obs");
-        }
+        LOG.d("Showing " + observations.size() + " observations and "
+                + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
                 conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
@@ -421,7 +412,7 @@ final class PatientChartController {
         mUi.setLatestEncounter(mLastObservation);
         mUi.updatePatientVitalsUi(
                 conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.setObservationHistory(observations, admissionDate, firstSymptomsDate);
+        mUi.updateHistoryGrid(observations, orders, admissionDate, firstSymptomsDate);
     }
 
     /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */

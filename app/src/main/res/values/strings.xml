@@ -173,6 +173,7 @@
     <string name="syncing_concepts">Syncing concepts…</string>
     <string name="syncing_charts">Syncing charts…</string>
     <string name="syncing_observations">Syncing observations…</string>
+    <string name="syncing_orders">Syncing orders…</string>
     <string name="syncing_locations">Syncing locations…</string>
     <string name="syncing_users">Syncing users…</string>
     <string name="completing_sync">Completing sync…</string>

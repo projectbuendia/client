@@ -21,6 +21,15 @@
   th { white-space: nowrap; text-align: left; padding: 8px 16px; }
   td { text-align: center; min-width: 2.4em; }
   tr.heading th { text-align: center; font-size: 1.6em; }
+  th.gutter {
+    background: transparent;
+    text-align: left;
+    border: none;
+    padding-top: 4.8em;
+    text-transform: uppercase;
+    font-size: 1.6em;
+    font-weight: bold;
+  }
 </style>
 
 <table>
@@ -34,6 +43,7 @@
       {% endif %}
     {% endfor %}
   </tr>
+
   {% for row in rows %}
     <tr>
       <th>
@@ -60,5 +70,26 @@
         </td>
       {% endfor %}
     </tr>
+  {% endfor %}
+
+  {% if orders is not empty %}
+    <tr>
+      <th class="gutter" colspan="{{columns.size + 1}}">
+        Orders
+      </th>
+    </tr>
+  {% endif %}
+
+  {% for order in orders %}
+  <tr>
+    <th>
+      {{order.instructions}}
+    </th>
+    {% for column in columns %}
+      <td>
+        &nbsp;
+      </td>
+    {% endfor %}
+  </tr>
   {% endfor %}
 </table>

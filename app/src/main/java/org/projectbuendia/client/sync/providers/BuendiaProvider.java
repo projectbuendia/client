@@ -58,6 +58,11 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                         Contracts.Observations.GROUP_CONTENT_TYPE,
                         Tables.OBSERVATIONS));
         registry.registerDelegate(
+                Contracts.Orders.CONTENT_URI.getPath(),
+                new GroupProviderDelegate(
+                        Contracts.Orders.GROUP_CONTENT_TYPE,
+                        Tables.ORDERS));
+        registry.registerDelegate(
                 Contracts.Patients.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Patients.GROUP_CONTENT_TYPE,
@@ -81,6 +86,12 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                         Contracts.LocationNames.ITEM_CONTENT_TYPE,
                         Tables.LOCATION_NAMES,
                         Contracts.Locations.LOCATION_UUID));
+        registry.registerDelegate(
+                Contracts.Orders.CONTENT_URI.getPath() + "/*",
+                new InsertableItemProviderDelegate(
+                        Contracts.Orders.ITEM_CONTENT_TYPE,
+                        Tables.ORDERS,
+                        Contracts.Orders.UUID));
         registry.registerDelegate(
                 Contracts.Patients.CONTENT_URI.getPath() + "/*",
                 new ItemProviderDelegate(

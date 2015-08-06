@@ -26,6 +26,7 @@ import org.projectbuendia.client.net.model.ChartGroup;
 import org.projectbuendia.client.net.model.ChartStructure;
 import org.projectbuendia.client.net.model.Encounter;
 import org.projectbuendia.client.net.model.Location;
+import org.projectbuendia.client.net.model.Order;
 import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.sync.providers.Contracts;
@@ -76,7 +77,7 @@ public class RpcToDb {
         return operations;
     }
 
-    /** Converts a ChartStructure response into appropriate inserts in the chart table. */
+    /** Converts a Order response into appropriate inserts in the chart table. */
     public static void observationsRpcToDb(
             PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
         final String patientUuid = response.uuid;
@@ -106,6 +107,67 @@ public class RpcToDb {
                 syncResult.stats.numInserts++;
             }
         }
+    }
+
+    /**
+     * Gets orders from the server and returns a list of operations that will
+     * update the database with the new orders and edits to existing orders.
+     */
+    public static ArrayList<ContentProviderOperation> ordersRpcToDb(SyncResult syncResult)
+            throws ExecutionException, InterruptedException {
+        // Request all orders from the server.
+        RequestFuture<List<Order>> future = RequestFuture.newFuture();
+        App.getServer().listOrders(future, future);
+        Map<String, Order> ordersToStore = new HashMap<>();
+        for (Order order : future.get()) {
+            ordersToStore.put(order.uuid, order);
+        }
+
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        final ContentResolver resolver = App.getInstance().getContentResolver();
+        Cursor c = resolver.query(Contracts.Orders.CONTENT_URI, new String[] {
+                Contracts.Orders.UUID,
+                Contracts.Orders.PATIENT_UUID,
+                Contracts.Orders.INSTRUCTIONS,
+                Contracts.Orders.START_TIME,
+                Contracts.Orders.STOP_TIME
+        }, null, null, null);
+
+        LOG.i("Merging in orders: client has %d, server has %d.", c.getCount(), ordersToStore.size());
+        // Scan all the locally stored orders, updating the orders we've just received.
+        while (c.moveToNext()) {
+            String uuid = c.getString(c.getColumnIndex(Contracts.Orders.UUID));
+            Uri uri = Contracts.Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
+            Order order = ordersToStore.get(uuid);
+            if (order != null) {  // apply update to a local order
+                LOG.v("  - will update order " + uuid);
+                ops.add(ContentProviderOperation.newUpdate(uri)
+                        .withValue(Contracts.Orders.PATIENT_UUID, order.patient_uuid)
+                        .withValue(Contracts.Orders.INSTRUCTIONS, order.instructions)
+                        .withValue(Contracts.Orders.START_TIME, order.start_time)
+                        .withValue(Contracts.Orders.STOP_TIME, order.stop_time)
+                        .build());
+                syncResult.stats.numUpdates++;
+            } else {  // delete the local order (the server doesn't have it)
+                LOG.v("  - will delete order " + uuid);
+                ops.add(ContentProviderOperation.newDelete(uri).build());
+                syncResult.stats.numDeletes++;
+            }
+        }
+
+        // Store all the remaining received orders as new orders.
+        for (Order order : ordersToStore.values()) {
+            LOG.v("  - will insert order " + order.uuid);
+            ops.add(ContentProviderOperation.newInsert(Contracts.Orders.CONTENT_URI)
+                    .withValue(Contracts.Orders.UUID, order.uuid)
+                    .withValue(Contracts.Orders.PATIENT_UUID, order.patient_uuid)
+                    .withValue(Contracts.Orders.INSTRUCTIONS, order.instructions)
+                    .withValue(Contracts.Orders.START_TIME, order.start_time)
+                    .withValue(Contracts.Orders.STOP_TIME, order.stop_time)
+                    .build());
+            syncResult.stats.numInserts++;
+        }
+        return ops;
     }
 
     /** Given a set of users, replaces the current set of users with users from that set. */

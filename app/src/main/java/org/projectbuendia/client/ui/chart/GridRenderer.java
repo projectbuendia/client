@@ -4,6 +4,8 @@ import android.content.res.Resources;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.PebbleException;
@@ -14,7 +16,10 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.Order;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.date.Dates;
 
 import java.io.IOException;
@@ -22,6 +27,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +39,8 @@ import java.util.TreeSet;
 /** Renders a patient's history of observations to an HTML table displayed in a WebView. */
 public class GridRenderer {
     static PebbleEngine sEngine;
+    private static final Logger LOG = Logger.create();
+
 
     WebView mView;  // view into which the HTML table will be rendered
     Resources mResources;  // resources used for localizing the rendering
@@ -45,13 +53,14 @@ public class GridRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(List<LocalizedObs> observations, LocalDate admissionDate, LocalDate firstSymptomsDate) {
+    public void render(List<LocalizedObs> observations, List<Order> orders, LocalDate admissionDate, LocalDate firstSymptomsDate) {
         // Avoid redrawing if nothing has changed.
         if (observations.equals(mPreviousObservations)) {
             return;
         }
         mPreviousObservations = observations;
-        Map<String, Object> context = gatherTableData(observations, admissionDate, firstSymptomsDate);
+        Map<String, Object> context = gatherTableData(
+                observations, orders, admissionDate, firstSymptomsDate);
         mView.getSettings().setDefaultFontSize(10);  // define 1 em to be equal to 10 sp
         mView.getSettings().setJavaScriptEnabled(true);
         mView.setWebChromeClient(new WebChromeClient());
@@ -85,7 +94,8 @@ public class GridRenderer {
     // TODO: concept tags for formatting hints (e.g. none/mild/moderate/severe, abbreviated)
 
     Map<String, Object> gatherTableData(
-            List<LocalizedObs> observations, LocalDate admissionDate, LocalDate firstSymptomsDate) {
+            List<LocalizedObs> observations, List<Order> orders,
+            LocalDate admissionDate, LocalDate firstSymptomsDate) {
         LocalDate today = LocalDate.now(chronology);
 
         List<Row> rows = new ArrayList<>();
@@ -121,30 +131,11 @@ public class GridRenderer {
                 values.add(value);
             }
 
-            /*
-            LOG.v("Column: %s, Observation: %s", columnId, ob.toString());
-            if (row.mColumnIdsToLocalizedValues.containsKey(columnId)) {
-                LOG.v("Overriding previous observation with value: %s",
-                        row.mColumnIdsToLocalizedValues.get(columnId));
-            }
-
             // If this is any bleeding site, also show a dot in the "any bleeding" row.
-            if (Concepts.BLEEDING_SITES_NAME.equals(ob.groupName)) {
-                columnIdsWithAnyBleeding.add(columnId);
+            // Note value.bool is a Boolean; if (value.bool) can crash without the null check!
+            if (value.bool != null && value.bool && Concepts.BLEEDING_SITES_NAME.equals(obs.groupName)) {
+                column.values.put(Concepts.BLEEDING_UUID, ImmutableSortedSet.of(value));
             }
-
-            // For notes, perform a concatenation rather than overwriting.
-            if (Concepts.NOTES_UUID.equals(ob.conceptUuid)) {
-                String oldText = row.mColumnIdsToValues.get(columnId);
-                String newText = (oldText == null ? "" : oldText + "\n—\n")
-                        + Dates.toMediumString(obsDateTime) + "\n" + ob.value;
-                row.mColumnIdsToValues.put(columnId, newText);
-            } else {
-                row.mColumnIdsToValues.put(columnId, ob.value);
-            }
-
-            row.mColumnIdsToLocalizedValues.put(columnId, ob.localizedValue);
-            */
         }
 
         // Create the list of all the columns to show.  Today and the admission date should
@@ -167,20 +158,10 @@ public class GridRenderer {
             }
         }
 
-        /*
-        // If there are no observations, put some known rows to make it clearer what is being
-        // displayed.
-        if (rows.isEmpty()) {
-            List<LocalizedObs> emptyChart =
-                    localizedChartHelper.getEmptyChart(LocalizedChartHelper.ENGLISH_LOCALE);
-            for (LocalizedObs ob : emptyChart) {
-                rows.add(new Row(ob.conceptUuid, ob.conceptName));
-            }
-        }
-        */
         Map<String, Object> data = new HashMap<>();
         data.put("rows", rows);
         data.put("columns", Lists.newArrayList(columnsById.values()));  // ordered by columnId
+        data.put("orders", orders);
         return data;
     }
 

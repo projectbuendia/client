@@ -61,7 +61,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     @Mock private AppModel mMockAppModel;
     @Mock private PatientChartController.Ui mMockUi;
     @Mock private OdkResultSender mMockOdkResultSender;
-    @Mock private LocalizedChartHelper mMockObservationsProvider;
+    @Mock private LocalizedChartHelper mMockChartHelper;
     @Mock private SyncManager mMockSyncManager;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
@@ -81,7 +81,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
                 mFakeCrudEventBus,
                 mMockUi,
                 mMockOdkResultSender,
-                mMockObservationsProvider,
+                mMockChartHelper,
                 null,
                 mMockSyncManager,
                 mFakeHandler);
@@ -115,9 +115,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
                 ImmutableList.of(OBSERVATION_A);
         Map<String, LocalizedObs> recentObservations =
                 ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
-        when(mMockObservationsProvider.getObservations(PATIENT_UUID_1))
+        when(mMockChartHelper.getObservations(PATIENT_UUID_1))
                 .thenReturn(allObservations);
-        when(mMockObservationsProvider.getMostRecentObservations(PATIENT_UUID_1))
+        when(mMockChartHelper.getMostRecentObservations(PATIENT_UUID_1))
                 .thenReturn(recentObservations);
         // GIVEN patient is set and controller is initialized
         mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);

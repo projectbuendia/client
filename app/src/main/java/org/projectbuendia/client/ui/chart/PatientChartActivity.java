@@ -43,6 +43,7 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
@@ -565,31 +566,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void setObservationHistory(
+        public void updateHistoryGrid(
                 List<LocalizedObs> observations,
+                List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
-            mGridRenderer.render(observations, admissionDate, firstSymptomsDate);
+            mGridRenderer.render(observations, orders, admissionDate, firstSymptomsDate);
             mRootView.invalidate();
         }
-
-        /*
-        private View createChartView(
-                List<LocalizedObs> observations,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate) {
-            LocalizedChartDataGridAdapter dataGridAdapter =
-                    new LocalizedChartDataGridAdapter(
-                            PatientChartActivity.this,
-                            observations,
-                            admissionDate,
-                            firstSymptomsDate,
-                            getLayoutInflater());
-            DataGridView dataGridView = new DataGridView(
-                    PatientChartActivity.this, dataGridAdapter, getLayoutInflater());
-            return dataGridView.createView();
-        }
-        */
 
         @Override
         public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {

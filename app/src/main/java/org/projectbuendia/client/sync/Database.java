@@ -117,6 +117,7 @@ public class Database extends SQLiteOpenHelper {
 
         SCHEMAS.put(Tables.ORDERS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "uuid TEXT,"
                 + "patient_uuid TEXT,"
                 + "instructions TEXT,"
                 + "start_time INTEGER,"

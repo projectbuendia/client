@@ -79,7 +79,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         SYNC_CHART_STRUCTURE,
         SYNC_CONCEPTS,
         SYNC_PATIENTS,
-        SYNC_OBSERVATIONS
+        SYNC_OBSERVATIONS,
+        SYNC_ORDERS
     }
 
     /** UI messages to show while each phase of the sync is in progress. */
@@ -91,6 +92,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         PHASE_MESSAGES.put(SyncPhase.SYNC_CONCEPTS, R.string.syncing_concepts);
         PHASE_MESSAGES.put(SyncPhase.SYNC_PATIENTS, R.string.syncing_patients);
         PHASE_MESSAGES.put(SyncPhase.SYNC_OBSERVATIONS, R.string.syncing_observations);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_ORDERS, R.string.syncing_orders);
     }
 
     enum SyncOption {
@@ -211,25 +213,35 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 reportProgress(0, PHASE_MESSAGES.get(phase));
 
                 switch (phase) {
-                    // Patients: Always fetch all patients.  The patient list changes
-                    // often and can grow very large; incremental fetch would help a lot.
-                    // TODO: Implement incremental fetch for patients.
-                    case SYNC_PATIENTS:
-                        updatePatientData(syncResult);
+                    // Users: Always fetch all users.  This is okay because new users
+                    // aren't added all that often and the set of users is fairly small.
+                    case SYNC_USERS:
+                        updateUsers(provider, syncResult);
                         break;
 
-                    // Concepts: Always fetch all available concepts.  The concepts only
-                    // need to be updated when the form definitions change; this is
-                    // infrequent, so wiping and reloading all concepts is acceptable.
+                    // Locations: Always fetch everything.  This is okay because
+                    // profiles (and hence locations) change infrequently.
+                    case SYNC_LOCATIONS:
+                        updateLocations(provider, syncResult);
+                        break;
+
+                    // Chart layouts: Always fetch everything.  This is okay because
+                    // profiles (and hence chart layouts) change infrequently.
+                    case SYNC_CHART_STRUCTURE:
+                        updateChartStructure(provider, syncResult);
+                        break;
+
+                    // Concepts: Always fetch all concepts.  This is okay because
+                    // profiles (and hence form definitions) change infrequently.
                     case SYNC_CONCEPTS:
                         updateConcepts(provider, syncResult);
                         break;
 
-                    // Chart layouts: Always fetch everything.  The layouts only need
-                    // to be updated when the profile changes; this is infrequent, so
-                    // wiping and reloading all chart layouts is acceptable.
-                    case SYNC_CHART_STRUCTURE:
-                        updateChartStructure(provider, syncResult);
+                    // Patients: Always fetch all patients.  This won't scale;
+                    // incremental fetch would help a lot.
+                    // TODO: Implement incremental fetch for patients.
+                    case SYNC_PATIENTS:
+                        updatePatientData(syncResult);
                         break;
 
                     // Observations: Both full fetch and incremental fetch are supported.
@@ -238,18 +250,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 extras.getBoolean(SyncOption.INCREMENTAL_OBS.name()));
                         break;
 
-                    // Locations: Always fetch everything.  The locations only need
-                    // to be updated when the profile changes, which is infrequent,
-                    // so wiping and reloading all locations is acceptable.
-                    case SYNC_LOCATIONS:
-                        updateLocations(provider, syncResult);
-                        break;
-
-                    // Users: Always fetch all users.  New users aren't added all that
-                    // often and the set of users stays fairly small, so wiping and
-                    // reloading all users is acceptable.
-                    case SYNC_USERS:
-                        updateUsers(provider, syncResult);
+                    // Orders: Always fetch all orders.  This won't scale;
+                    // incremental fetch would help a lot.
+                    // TODO: Implement incremental fetch for orders.
+                    case SYNC_ORDERS:
+                        updateOrders(provider, syncResult);
                         break;
                 }
                 timings.addSplit(phase.name() + " phase completed");
@@ -564,11 +569,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             OperationApplicationException {
         ArrayList<ContentProviderOperation> batch = RpcToDb.locationsRpcToDb(syncResult);
         checkCancellation("Sync was canceled before applying location updates.");
-        LOG.i("locations Merge solution ready. Applying batch update");
+        LOG.i("Applying batch update of locations.");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
         mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
-        mContentResolver.notifyChange(
-                Contracts.LocationNames.CONTENT_URI, null, false);
+        mContentResolver.notifyChange(Contracts.LocationNames.CONTENT_URI, null, false);
     }
 
     private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
@@ -628,6 +632,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 new String[0]);
         timingLogger.addSplit("delete temp observations");
         timingLogger.dumpToLog();
+    }
+
+    private void updateOrders(final ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
+        ArrayList<ContentProviderOperation> batch = RpcToDb.ordersRpcToDb(syncResult);
+        checkCancellation("Sync was canceled before applying order updates.");
+        LOG.i("Applying batch update of orders.");
+        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
+        mContentResolver.notifyChange(Contracts.Orders.CONTENT_URI, null, false);
     }
 
     private Instant getLastSyncTime(ContentProviderClient provider) throws RemoteException {
