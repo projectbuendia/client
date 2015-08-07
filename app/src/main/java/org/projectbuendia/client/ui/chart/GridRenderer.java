@@ -165,7 +165,7 @@ public class GridRenderer {
         Map<String, Object> data = new HashMap<>();
         data.put("rows", rows);
         data.put("columns", Lists.newArrayList(columnsById.values()));  // ordered by columnId
-        data.put("nowColumn", toColumnId(DateTime.now()));
+        data.put("nowColumnId", toColumnId(DateTime.now()));
         data.put("orders", orders);
         return data;
     }

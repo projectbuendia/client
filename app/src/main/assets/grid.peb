@@ -45,7 +45,7 @@
   <tr class="heading">
     <th></th>
     {% for column in columns %}
-      <th class="{{column == nowColumn ? "now" : ""}}">
+      <th class="{{column.id == nowColumnId ? "now" : ""}}">
         {{column.headingHtml | raw}}
       </th>
     {% endfor %}
@@ -57,7 +57,7 @@
         {{row.heading}}
       </th>
       {% for column in columns %}
-        <td class="{{column == nowColumn ? "now" : ""}}">
+        <td class="{{column.id == nowColumnId ? "now" : ""}}">
           {% set values = get_values(row=row, column=column) %}
           {% if values is not empty %}
             {% set last = values | last %}
