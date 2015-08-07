@@ -13,7 +13,8 @@
     font-size: 2.4em;
     padding: 8px 0;
     vertical-align: baseline;
-    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 67%, transparent 67%);
+    background-image:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 67%, transparent 67%);
     background-size: 1px 100%;
     background-repeat: no-repeat;
     background-position: left;
@@ -21,11 +22,11 @@
   th { white-space: nowrap; text-align: left; padding: 8px 16px; }
   th.now, td.now {
     font-weight: bold;
-    background: #f0ffff;
+    background: #e0f0ff;
   }
   tr:nth-child(even) th.now, tr:nth-child(even) td.now {
     font-weight: bold;
-    background: #e8f8f8;
+    background: #d8e8f8;
   }
   td { text-align: center; min-width: 3em; }
   tr.heading th { text-align: center; font-size: 1.6em; }
