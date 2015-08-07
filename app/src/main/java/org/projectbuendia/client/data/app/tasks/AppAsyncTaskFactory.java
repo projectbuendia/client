@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 
 import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.data.app.AppTypeBase;
@@ -64,6 +65,14 @@ public class AppAsyncTaskFactory {
         return new AppAddEncounterAsyncTask(
                 this, mConverters, mServer, mContentResolver, appPatient, appEncounter, bus);
     }
+
+    /** Creates a new {@link AppAddOrderAsyncTask}. */
+    public AppAddOrderAsyncTask newAddOrderAsyncTask(
+            AppOrder order, CrudEventBus bus) {
+        return new AppAddOrderAsyncTask(
+                this, mConverters, mServer, mContentResolver, order, bus);
+    }
+
 
     /** Creates a new {@link FetchSingleAsyncTask}. */
     public <T extends AppTypeBase<?>> FetchSingleAsyncTask<T> newFetchSingleAsyncTask(

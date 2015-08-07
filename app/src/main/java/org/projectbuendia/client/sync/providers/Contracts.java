@@ -109,12 +109,13 @@ public class Contracts {
         String TEMP_CACHE = "temp_cache";
     }
 
-    interface OrderColumns {
+    public interface OrderColumns {
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
         String INSTRUCTIONS = "instructions";
         String START_TIME = "start_time";  // seconds since epoch
         String STOP_TIME = "stop_time";  // seconds since epoch
+        String[] ALL = {UUID, PATIENT_UUID, INSTRUCTIONS, START_TIME, STOP_TIME};
     }
 
     interface LocationColumns {

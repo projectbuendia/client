@@ -66,6 +66,15 @@
     <string name="one_present_patient">1 present patient</string>
     <string name="n_present_patients">%d present patients</string>
 
+    <string name="title_new_order">New order</string>
+    <string name="order_instructions">Order</string>
+    <string name="order_medication">Medication</string>
+    <string name="order_stop_after">Stop after</string>
+    <string name="order_stop_day">day</string>
+    <string name="order_stop_days">days</string>
+    <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
+    <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
+
     <string name="string_with_paren">%1$s (%2$s)</string>
     <string name="unknown_tent">Unknown tent</string>
     <string name="unknown_zone">Unknown zone</string>

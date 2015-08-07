@@ -22,10 +22,14 @@ public class AppTypeConverters {
 
     public final AppPatientConverter patient;
     public final AppLocationConverter location;
+    public final AppOrderConverter order;
 
     AppTypeConverters(
-            AppPatientConverter patientConverter, AppLocationConverter locationConverter) {
+            AppPatientConverter patientConverter,
+            AppLocationConverter locationConverter,
+            AppOrderConverter orderConverter) {
         patient = patientConverter;
         location = locationConverter;
+        order = orderConverter;
     }
 }

@@ -27,12 +27,14 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.data.app.AppLocationTree;
 import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.data.odk.OdkConverter;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
+import org.projectbuendia.client.events.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
@@ -149,6 +151,9 @@ final class PatientChartController {
 
         /** Shows or hides the form submission dialog. */
         void showFormSubmissionDialog(boolean show);
+
+        /** Shows the new order dialog. */
+        void showNewOrderDialog(String patientUuid);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -380,6 +385,10 @@ final class PatientChartController {
                         PatientChartActivity.XForm.ADD_TEST_RESULTS, mPatientUuid),
                 OdkConverter.toOdkPatient(mPatient),
                 fields);
+    }
+
+    public void onNewOrderPressed() {
+        mUi.showNewOrderDialog(mPatientUuid);
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
@@ -660,6 +669,20 @@ final class PatientChartController {
             mUi.showError(errorMessageResource);
             mUi.showFormLoadingDialog(false);
             mUi.reEnableFetch();
+        }
+
+        public void onEventMainThread(OrderSaveRequestedEvent event) {
+            DateTime start = DateTime.now();
+            DateTime stop = null;
+
+            if (event.stopDays != null) {
+                LocalDate startDate = start.toLocalDate();
+                LocalDate stopDate = startDate.plusDays(event.stopDays);
+                stop = stopDate.toDateTimeAtStartOfDay();
+            }
+
+            mAppModel.addOrder(mCrudEventBus, new AppOrder(
+                    null, event.patientUuid, event.instructions, start, stop));
         }
     }
 

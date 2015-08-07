@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import com.android.volley.Response;
 
 import org.projectbuendia.client.data.app.AppEncounter;
+import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.net.model.Encounter;
@@ -157,6 +158,11 @@ public interface Server {
     /** Lists all existing orders. */
     public void listOrders(Response.Listener<List<Order>> successListener,
                            Response.ErrorListener errorListener);
+
+    /** Adds an order for a patient. */
+    void addOrder(AppOrder order,
+                  Response.Listener<Order> successListener,
+                  Response.ErrorListener errorListener);
 
     /** Cancels all pending requests. */
     public void cancelPendingRequests();

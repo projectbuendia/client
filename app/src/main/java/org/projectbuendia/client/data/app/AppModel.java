@@ -186,6 +186,14 @@ public class AppModel {
     }
 
     /**
+     * Asynchronously adds an order, posting a
+     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} with the newly-added order on
+     * the specified event bus when complete.
+     */
+    public void addOrder(CrudEventBus bus, AppOrder order) {
+        mTaskFactory.newAddOrderAsyncTask(order, bus).execute();
+    }
+    /**
      * Asynchronously adds an encounter to a patient, posting a
      * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent}.
      */

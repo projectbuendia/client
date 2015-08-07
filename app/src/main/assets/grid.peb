@@ -72,13 +72,11 @@
     </tr>
   {% endfor %}
 
-  {% if orders is not empty %}
-    <tr>
-      <th class="gutter" colspan="{{columns.size + 1}}">
-        Orders
-      </th>
-    </tr>
-  {% endif %}
+  <tr>
+    <th class="gutter" colspan="{{columns.size + 1}}">
+      Orders
+    </th>
+  </tr>
 
   {% for order in orders %}
   <tr>
@@ -92,4 +90,10 @@
     {% endfor %}
   </tr>
   {% endfor %}
+
+  <tr>
+    <th>
+      <button onclick="controller.onNewOrderPressed()">+ New Order</button>
+    </th>
+  </tr>
 </table>

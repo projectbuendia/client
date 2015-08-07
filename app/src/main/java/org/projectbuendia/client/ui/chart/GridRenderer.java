@@ -4,11 +4,9 @@ import android.content.res.Resources;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.PebbleException;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
@@ -22,12 +20,9 @@ import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.date.Dates;
 
-import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +36,16 @@ public class GridRenderer {
     static PebbleEngine sEngine;
     private static final Logger LOG = Logger.create();
 
-
     WebView mView;  // view into which the HTML table will be rendered
     Resources mResources;  // resources used for localizing the rendering
-    private List<LocalizedObs> mPreviousObservations;  // last set of observations rendered
+    private List<LocalizedObs> mRenderedObs;  // last set of observations rendered
+    private List<Order> mRenderedOrders;  // last set of orders rendered
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
+
+    public interface JsInterface {
+        @android.webkit.JavascriptInterface
+        void onNewOrderPressed();
+    }
 
     public GridRenderer(WebView view, Resources resources) {
         mView = view;
@@ -53,22 +53,26 @@ public class GridRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(List<LocalizedObs> observations, List<Order> orders, LocalDate admissionDate, LocalDate firstSymptomsDate) {
-        // Avoid redrawing if nothing has changed.
-        if (observations.equals(mPreviousObservations)) {
-            return;
+    public void render(List<LocalizedObs> observations, List<Order> orders,
+                       LocalDate admissionDate, LocalDate firstSymptomsDate,
+                       JsInterface controllerInterface) {
+        if (observations.equals(mRenderedObs) && orders.equals(mRenderedOrders)) {
+            return;  // nothing has changed; no need to render again
         }
-        mPreviousObservations = observations;
         Map<String, Object> context = gatherTableData(
                 observations, orders, admissionDate, firstSymptomsDate);
         mView.getSettings().setDefaultFontSize(10);  // define 1 em to be equal to 10 sp
         mView.getSettings().setJavaScriptEnabled(true);
+        mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
         String html = renderTemplate("assets/grid.peb", context);
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
         mView.loadData(html, "text/html", null);
         mView.loadData(html, "text/html", null);
+
+        mRenderedObs = observations;
+        mRenderedOrders = orders;
     }
 
     /** Renders a Pebble template. */

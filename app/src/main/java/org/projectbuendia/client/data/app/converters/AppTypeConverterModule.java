@@ -30,6 +30,7 @@ public class AppTypeConverterModule {
     AppTypeConverters provideAppTypeConverters() {
         return new AppTypeConverters(
                 new AppPatientConverter(),
-                new AppLocationConverter());
+                new AppLocationConverter(),
+                new AppOrderConverter());
     }
 }

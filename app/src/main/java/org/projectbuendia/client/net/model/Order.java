@@ -15,6 +15,6 @@ public class Order {
     public String uuid;
     public String patient_uuid;
     public String instructions;
-    public Integer start_time;
-    public Integer stop_time;
+    public Long start_time;
+    public Long stop_time;
 }

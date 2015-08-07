@@ -16,6 +16,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,6 +51,8 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
+import org.projectbuendia.client.ui.dialogs.AddNewUserDialogFragment;
+import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -571,11 +574,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
-            mGridRenderer.render(observations, orders, admissionDate, firstSymptomsDate);
+            mGridRenderer.render(observations, orders, admissionDate, firstSymptomsDate,
+                    new JsInterface());
             mRootView.invalidate();
         }
 
-        @Override
+        class JsInterface implements GridRenderer.JsInterface {
+            @android.webkit.JavascriptInterface
+            public void onNewOrderPressed() {
+                mController.onNewOrderPressed();
+            }
+        }
+
         public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {
             AppLocation location = locationTree.findByUuid(patient.locationUuid);
             String locationText = location == null ? "Unknown" : location.toString();
@@ -650,6 +660,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             } else {
                 mFormSubmissionDialog.hide();
             }
+        }
+
+        @Override
+        public void showNewOrderDialog(String patientUuid) {
+            OrderDialogFragment.newInstance(patientUuid, null).show(
+                    getSupportFragmentManager(), null);
         }
     }
 

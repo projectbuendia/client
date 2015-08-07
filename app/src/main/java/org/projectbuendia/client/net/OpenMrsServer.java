@@ -23,12 +23,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.data.app.AppEncounter;
+import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.model.Concepts;
@@ -267,6 +269,37 @@ public class OpenMrsServer implements Server {
                         try {
                             encounterListener.onResponse(encounterFromJson(response));
                         } catch (JSONException e) {
+                            LOG.e(e, "Failed to parse response");
+                            errorListener.onErrorResponse(
+                                    new VolleyError("Failed to parse response", e));
+                        }
+                    }
+                },
+                wrapErrorListener(errorListener));
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    @Override
+    public void addOrder(AppOrder order,
+                         final Response.Listener<Order> successListener,
+                         final Response.ErrorListener errorListener) {
+        JSONObject json = new JSONObject();
+        order.toJson(json);
+
+        LOG.v("Adding order with JSON: %s", json);
+
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/order",
+                json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            successListener.onResponse(
+                                    mGson.fromJson(response.toString(), Order.class));
+                        } catch (JsonSyntaxException e) {
                             LOG.e(e, "Failed to parse response");
                             errorListener.onErrorResponse(
                                     new VolleyError("Failed to parse response", e));
