@@ -19,7 +19,15 @@
     background-position: left;
   }
   th { white-space: nowrap; text-align: left; padding: 8px 16px; }
-  td { text-align: center; min-width: 2.4em; }
+  th.now, td.now {
+    font-weight: bold;
+    background: #f0ffff;
+  }
+  tr:nth-child(even) th.now, tr:nth-child(even) td.now {
+    font-weight: bold;
+    background: #e8f8f8;
+  }
+  td { text-align: center; min-width: 3em; }
   tr.heading th { text-align: center; font-size: 1.6em; }
   th.gutter {
     background: transparent;
@@ -30,17 +38,16 @@
     font-size: 1.6em;
     font-weight: bold;
   }
+  button { font-size: 100%; }
 </style>
 
 <table>
   <tr class="heading">
     <th></th>
     {% for column in columns %}
-      {% if loop.index % 2 == 0 %}
-        <th colspan=2>
-          {{column.headingHtml | raw}}
-        </th>
-      {% endif %}
+      <th class="{{column == nowColumn ? "now" : ""}}">
+        {{column.headingHtml | raw}}
+      </th>
     {% endfor %}
   </tr>
 
@@ -50,7 +57,7 @@
         {{row.heading}}
       </th>
       {% for column in columns %}
-        <td>
+        <td class="{{column == nowColumn ? "now" : ""}}">
           {% set values = get_values(row=row, column=column) %}
           {% if values is not empty %}
             {% set last = values | last %}
@@ -92,7 +99,7 @@
   {% endfor %}
 
   <tr>
-    <th>
+    <th colspan="{{columns.size + 1}}">
       <button onclick="controller.onNewOrderPressed()">+ New Order</button>
     </th>
   </tr>

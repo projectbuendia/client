@@ -123,7 +123,7 @@ public class GridRenderer {
 
             Column column = columnsById.get(columnId);
             if (column == null) {
-                column = new Column(columnId, formatColumnHeadingHtml(columnId, admissionDate, today));
+                column = new Column(columnId, formatColumnHeadingHtml(columnId, admissionDate));
                 columnsById.put(columnId, column);
             }
             SortedSet<Value> values = column.values.get(obs.conceptUuid);
@@ -154,17 +154,18 @@ public class GridRenderer {
             DateTime dayStart = d.toDateTimeAtStartOfDay();
             String columnId = toColumnId(dayStart);
             if (!columnsById.containsKey(columnId)) {
-                columnsById.put(columnId, new Column(columnId, formatColumnHeadingHtml(columnId, admissionDate, today)));
+                columnsById.put(columnId, new Column(columnId, formatColumnHeadingHtml(columnId, admissionDate)));
             }
             columnId = toColumnId(dayStart.withHourOfDay(12));
             if (!columnsById.containsKey(columnId)) {
-                columnsById.put(columnId, new Column(columnId, formatColumnHeadingHtml(columnId, admissionDate, today)));
+                columnsById.put(columnId, new Column(columnId, formatColumnHeadingHtml(columnId, admissionDate)));
             }
         }
 
         Map<String, Object> data = new HashMap<>();
         data.put("rows", rows);
         data.put("columns", Lists.newArrayList(columnsById.values()));  // ordered by columnId
+        data.put("nowColumn", toColumnId(DateTime.now()));
         data.put("orders", orders);
         return data;
     }
@@ -172,26 +173,21 @@ public class GridRenderer {
     // Determines the column in which a particular DateTime (in the local time zone) belongs,
     // returning a sortable string ID for the column.
     private String toColumnId(DateTime dateTime) {
-        int hour = dateTime.getHourOfDay() >= 12 ? 12 : 0;  // choose am or pm column
-        return dateTime.withTimeAtStartOfDay().withHourOfDay(hour).toString();
+        return dateTime.withTimeAtStartOfDay().toString();
     }
 
-    private String formatColumnHeadingHtml(String columnId, LocalDate admissionDate, LocalDate today) {
+    private String formatColumnHeadingHtml(String columnId, LocalDate admissionDate) {
         DateTime dateTime = DateTime.parse(columnId).withChronology(chronology);
         LocalDate date = dateTime.toLocalDate();
 
         int admitDay = Dates.dayNumberSince(admissionDate, date);
         String admitDayLabel = (admitDay >= 1) ? mResources.getString(R.string.day_n, admitDay) : "–";
-
-        String dateString = date.toString("d MMM");
-        String dateLabel = date.equals(today)
-                ? mResources.getString(R.string.today_date, dateString) : dateString;
+        String dateLabel = date.toString("d MMM");
 
         // The column header has two lines of text: the first line gives the day number since
         // admission and the second line gives the calendar date.  Pending feedback from the field
         // on its importance, the symptom onset day number could also be shown in the column
-        // header in a different colour.  This would be done by constructing HTML and using
-        // Html.fromHtml() to produce a Spanned object that will be rendered by the TextView.
+        // header in a different colour.
         return admitDayLabel + "<br>" + dateLabel;
     }
 
