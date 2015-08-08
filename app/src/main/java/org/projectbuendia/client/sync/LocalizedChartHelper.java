@@ -19,6 +19,7 @@ import android.provider.BaseColumns;
 
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.utils.Utils;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -54,10 +55,10 @@ public class LocalizedChartHelper {
         List<Order> orders = new ArrayList<>();
         while (c.moveToNext()) {
             orders.add(new Order(
-                    c.getString(c.getColumnIndex("uuid")),
-                    c.getString(c.getColumnIndex("instructions")),
-                    c.getLong(c.getColumnIndex("start_time")),
-                    c.getLong(c.getColumnIndex("stop_time"))));
+                    Utils.getString(c, "uuid", ""),
+                    Utils.getString(c, "instructions", ""),
+                    Utils.getNullableLong(c, "start_time"),
+                    Utils.getNullableLong(c, "stop_time")));
         }
         return orders;
     }

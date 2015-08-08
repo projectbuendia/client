@@ -65,8 +65,8 @@ public final class AppOrder extends AppTypeBase<String> implements Comparable<Ap
                 order.uuid,
                 order.patient_uuid,
                 order.instructions,
-                order.start_time,
-                order.stop_time
+                order.start,
+                order.stop
         );
     }
 
@@ -74,8 +74,8 @@ public final class AppOrder extends AppTypeBase<String> implements Comparable<Ap
         try {
             json.put("patient_uuid", patientUuid);
             json.put("instructions", instructions);
-            json.put("start_time", start.getMillis());
-            json.put("stop_time", stop == null ? null : stop.getMillis());
+            json.put("start", start.getMillis());
+            json.put("stop", stop == null ? null : stop.getMillis());
         } catch (JSONException e) {
             throw new IllegalArgumentException("Unable to serialize order to JSON", e);
         }

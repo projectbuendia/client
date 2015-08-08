@@ -144,8 +144,8 @@ public class RpcToDb {
                 ops.add(ContentProviderOperation.newUpdate(uri)
                         .withValue(Contracts.Orders.PATIENT_UUID, order.patient_uuid)
                         .withValue(Contracts.Orders.INSTRUCTIONS, order.instructions)
-                        .withValue(Contracts.Orders.START_TIME, order.start_time)
-                        .withValue(Contracts.Orders.STOP_TIME, order.stop_time)
+                        .withValue(Contracts.Orders.START_TIME, order.start)
+                        .withValue(Contracts.Orders.STOP_TIME, order.stop)
                         .build());
                 ordersToStore.remove(uuid);  // done with this incoming order
                 syncResult.stats.numUpdates++;
@@ -163,8 +163,8 @@ public class RpcToDb {
                     .withValue(Contracts.Orders.UUID, order.uuid)
                     .withValue(Contracts.Orders.PATIENT_UUID, order.patient_uuid)
                     .withValue(Contracts.Orders.INSTRUCTIONS, order.instructions)
-                    .withValue(Contracts.Orders.START_TIME, order.start_time)
-                    .withValue(Contracts.Orders.STOP_TIME, order.stop_time)
+                    .withValue(Contracts.Orders.START_TIME, order.start)
+                    .withValue(Contracts.Orders.STOP_TIME, order.stop)
                     .build());
             syncResult.stats.numInserts++;
         }

@@ -40,6 +40,8 @@
     font-weight: bold;
   }
   button { font-size: 100%; }
+  td.active { background: #e0ffe0; }
+  td.stop { font-weight: bold; color: #f66; font-size: 1.8em; }
 </style>
 
 <table>
@@ -91,10 +93,17 @@
     <th>
       {{order.instructions}}
     </th>
+    {% set previousActive = null %}
     {% for column in columns %}
-      <td>
-        &nbsp;
-      </td>
+      {% set a = column.stop.getMillis > order.start.getMillis %}
+      {% set b = order.stop is null or column.start.getMillis < order.stop.getMillis %}
+      {% set active = a and b ? 1 : null %}
+      {% if previousActive is not null and active is null %}
+        <td class="stop">Stop</td>
+      {% else %}
+        <td class="{{active is not null ? "active" : ""}}">&nbsp;</td>
+      {% endif %}
+      {% set previousActive = active %}
     {% endfor %}
   </tr>
   {% endfor %}

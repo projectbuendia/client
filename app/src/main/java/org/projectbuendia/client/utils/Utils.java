@@ -11,6 +11,8 @@
 
 package org.projectbuendia.client.utils;
 
+import android.database.Cursor;
+
 import com.google.common.collect.Lists;
 
 import org.projectbuendia.client.App;
@@ -221,6 +223,24 @@ public class Utils {
      */
     public static String nameOrUnknown(@Nullable String name) {
         return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
+    }
+
+    /** Gets a string value from a cursor, returning a default value instead of null. */
+    public static String getString(Cursor c, String columnName, String defaultString) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? defaultString : c.getString(index);
+    }
+
+    /** Gets a string value from a cursor, possibly returning null. */
+    public static String getNullableString(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : c.getString(index);
+    }
+
+    /** Gets a long integer value from a cursor, possibly returning null. */
+    public static Long getNullableLong(Cursor c, String columnName) {
+        int index = c.getColumnIndex(columnName);
+        return c.isNull(index) ? null : c.getLong(index);
     }
 
     private Utils() {

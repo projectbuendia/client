@@ -10,10 +10,14 @@ import java.util.SortedSet;
 public class Column {
     public String id;
     public String headingHtml;
+    public DateTime start;
+    public DateTime stop;
     public Map<String, SortedSet<Value>> values = new HashMap<>();  // keyed by conceptUuid
 
-    public Column(String id, String headingHtml) {
+    public Column(String id, String headingHtml, DateTime start, DateTime stop) {
         this.id = id;
         this.headingHtml = headingHtml;
+        this.start = start;
+        this.stop = stop;
     }
 }

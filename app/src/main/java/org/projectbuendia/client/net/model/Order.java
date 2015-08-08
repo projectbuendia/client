@@ -11,10 +11,12 @@
 
 package org.projectbuendia.client.net.model;
 
+import org.joda.time.DateTime;
+
 public class Order {
     public String uuid;
     public String patient_uuid;
     public String instructions;
-    public Long start_time;
-    public Long stop_time;
+    public Long start;
+    public Long stop;
 }

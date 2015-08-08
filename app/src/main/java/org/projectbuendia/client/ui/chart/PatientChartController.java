@@ -677,6 +677,10 @@ final class PatientChartController {
 
             if (event.stopDays != null) {
                 LocalDate startDate = start.toLocalDate();
+                if (start.getHourOfDay() >= 12) {
+                    // Orders placed after noon start tomorrow.
+                    startDate = startDate.plusDays(1);
+                }
                 LocalDate stopDate = startDate.plusDays(event.stopDays);
                 stop = stopDate.toDateTimeAtStartOfDay();
             }
