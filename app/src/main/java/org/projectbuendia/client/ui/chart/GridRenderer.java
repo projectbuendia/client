@@ -153,9 +153,11 @@ public class GridRenderer {
             days.add(admissionDate);
         }
         for (Order order : orders) {
-            days.add(order.start.toLocalDate());
-            if (order.stop != null) {
-                days.add(order.stop.toLocalDate().plusDays(1));
+            if (order.start != null) {
+                days.add(order.start.toLocalDate());
+                if (order.stop != null) {
+                    days.add(order.stop.toLocalDate().plusDays(1));
+                }
             }
         }
         LocalDate lastDay = days.last();

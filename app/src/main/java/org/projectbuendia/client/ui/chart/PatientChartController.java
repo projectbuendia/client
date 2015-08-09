@@ -682,6 +682,7 @@ final class PatientChartController {
                     startDate = startDate.plusDays(1);
                 }
                 LocalDate stopDate = startDate.plusDays(event.stopDays);
+                start = startDate.toDateTimeAtStartOfDay();
                 stop = stopDate.toDateTimeAtStartOfDay();
             }
 

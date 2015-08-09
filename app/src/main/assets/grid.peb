@@ -40,8 +40,10 @@
     font-weight: bold;
   }
   button { font-size: 100%; }
-  td.active { background: #e0ffe0; }
-  td.stop { font-weight: bold; color: #f66; font-size: 1.8em; }
+  tr.order td { vertical-align: center: text-align: center; }
+  tr.order td div { margin: auto auto; width: 90%; height: 90%; }
+  .active { font-size: 75%; }
+  .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
 </style>
 
 <table>
@@ -55,7 +57,7 @@
   </tr>
 
   {% for row in rows %}
-    <tr>
+    <tr class="obs">
       <th>
         {{row.heading}}
       </th>
@@ -89,21 +91,23 @@
   </tr>
 
   {% for order in orders %}
-  <tr>
+  <tr class="order">
     <th>
       {{order.instructions}}
     </th>
-    {% set previousActive = null %}
+    {% set previousActive = false %}
     {% for column in columns %}
-      {% set a = column.stop.getMillis > order.start.getMillis %}
-      {% set b = order.stop is null or column.start.getMillis < order.stop.getMillis %}
-      {% set active = a and b ? 1 : null %}
-      {% if previousActive is not null and active is null %}
-        <td class="stop">Stop</td>
-      {% else %}
-        <td class="{{active is not null ? "active" : ""}}">&nbsp;</td>
-      {% endif %}
-      {% set previousActive = active %}
+      <td class="{{column.id == nowColumnId ? "now" : ""}}">
+        {% set active =
+            (order.start is null or column.stop.getMillis > order.start.getMillis) and
+            (order.stop is null or column.start.getMillis < order.stop.getMillis - 1) %}
+        {% if previousActive and not active %}
+          <div class="stop">Stop</div>
+        {% elseif active %}
+          <div class="active">&#x25cf;</div>
+        {% endif %}
+        {% set previousActive = active %}
+      </td>
     {% endfor %}
   </tr>
   {% endfor %}
