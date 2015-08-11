@@ -684,6 +684,13 @@ final class PatientChartController {
                 LocalDate stopDate = startDate.plusDays(event.stopDays);
                 start = startDate.toDateTimeAtStartOfDay();
                 stop = stopDate.toDateTimeAtStartOfDay();
+                // In OpenMRS, OrderServiceImpl.saveOrderInternal() forces the
+                // order expiry (auuughhh!) to 23:59:59.999 on its specified date.
+                // We have to shift it back a bit to prevent it from being
+                // advanced almost an entire day, and even then this only works if
+                // the client's time zone matches the server's time zone, because
+                // the server's infidelity is time-zone-dependent (auggghh!!!)
+                stop = stop.minusSeconds(1);
             }
 
             mAppModel.addOrder(mCrudEventBus, new AppOrder(

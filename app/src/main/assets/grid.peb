@@ -100,7 +100,7 @@
       <td class="{{column.id == nowColumnId ? "now" : ""}}">
         {% set active =
             (order.start is null or column.stop.getMillis > order.start.getMillis) and
-            (order.stop is null or column.start.getMillis < order.stop.getMillis - 1) %}
+            (order.stop is null or column.start.getMillis < order.stop.getMillis) %}
         {% if previousActive and not active %}
           <div class="stop">Stop</div>
         {% elseif active %}

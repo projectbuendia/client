@@ -135,7 +135,7 @@ def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs'
 
 // Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlDev;
+def openmrsRootUrlDefault = openmrsRootUrlLocalhost;
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
