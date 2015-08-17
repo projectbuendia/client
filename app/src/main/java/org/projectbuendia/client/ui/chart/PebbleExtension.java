@@ -7,6 +7,7 @@ import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
 import java.util.Collection;
@@ -22,7 +23,9 @@ public class PebbleExtension extends AbstractExtension {
             "avg", new AvgFilter(),
             "js", new JsFilter(),
             "dateformat", new DateFormatFilter());
-    static Map<String, Function> functions = ImmutableMap.<String, Function>of("get_values", new GetValuesFunction());
+    static Map<String, Function> functions = ImmutableMap.<String, Function>of(
+            "get_values", new GetValuesFunction(),
+            "intervals_overlap", new IntervalsOverlapFunction());
 
     abstract static class NullaryFilter implements Filter {
         @Override
@@ -104,6 +107,20 @@ public class PebbleExtension extends AbstractExtension {
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
             return column.values.get(row.conceptUuid);
+        }
+    }
+
+    static class IntervalsOverlapFunction implements Function {
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("a", "b");
+        }
+
+        @Override
+        public Object execute(Map<String, Object> args) {
+            Interval a = (Interval) args.get("a");
+            Interval b = (Interval) args.get("b");
+            return a.overlaps(b);
         }
     }
 

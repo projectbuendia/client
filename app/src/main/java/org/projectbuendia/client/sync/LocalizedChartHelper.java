@@ -60,6 +60,7 @@ public class LocalizedChartHelper {
                     Utils.getNullableLong(c, "start_time"),
                     Utils.getNullableLong(c, "stop_time")));
         }
+        c.close();
         return orders;
     }
 
@@ -81,7 +82,7 @@ public class LocalizedChartHelper {
             while (cursor.moveToNext()) {
                 LocalizedObs obs = new LocalizedObs(
                         cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
-                        cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
+                        cursor.getLong(cursor.getColumnIndex("encounter_time")) * 1000L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
@@ -125,7 +126,7 @@ public class LocalizedChartHelper {
 
                 LocalizedObs obs = new LocalizedObs(
                         cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
-                        cursor.getInt(cursor.getColumnIndex("encounter_time")) * 1000L,
+                        cursor.getLong(cursor.getColumnIndex("encounter_time")) * 1000L,
                         "", /* no group */
                         conceptUuid,
                         cursor.getString(cursor.getColumnIndex("concept_name")),

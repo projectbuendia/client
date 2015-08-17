@@ -16,7 +16,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +29,7 @@ import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
@@ -51,13 +51,12 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
-import org.projectbuendia.client.ui.dialogs.AddNewUserDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
+import org.projectbuendia.client.ui.dialogs.OrderExecutionCountDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
-import org.projectbuendia.client.utils.date.Dates;
-import org.projectbuendia.client.utils.date.RelativeDateTimeFormatter;
+import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.widget.PatientAttributeView;
 import org.projectbuendia.client.widget.VitalView;
 import org.odk.collect.android.model.Patient;
@@ -429,10 +428,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void setLatestEncounter(long encounterTimeMilli) {
-            if (encounterTimeMilli != 0) {
+        public void updateLatestEncounterTimeUi(long encounterTimeMillis) {
+            if (encounterTimeMillis != 0) {
                 mLastObservationTimeView.setText(
-                        Dates.toMediumString(new DateTime(encounterTimeMilli)));
+                        Utils.toMediumString(new DateTime(encounterTimeMillis)));
                 mLastObservationLabel.setVisibility(View.VISIBLE);
             } else {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
@@ -459,17 +458,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             showObservationForViewGroup(
                     mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
 
-            int day = Dates.dayNumberSince(admissionDate, LocalDate.now());
+            int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
             mPatientAdmissionDaysView.setValue(
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
-            day = Dates.dayNumberSince(firstSymptomsDate, LocalDate.now());
+            day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mPatientSymptomOnsetDaysView.setValue(
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
             // General Condition
             LocalizedObs observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
             if (observation != null) {
-                updatePatientGeneralConditionUi(observation.value);
+                updatePatientConditionUi(observation.value);
             }
 
             // PCR
@@ -543,7 +542,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientGeneralConditionUi(String generalConditionUuid) {
+        public void updatePatientConditionUi(String generalConditionUuid) {
             mGeneralConditionUuid = generalConditionUuid;
             if (generalConditionUuid == null) {
                 mGeneralConditionUuid = null;
@@ -569,21 +568,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updateHistoryGrid(
+        public void updatePatientHistoryUi(
                 List<LocalizedObs> observations,
                 List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
-            mGridRenderer.render(observations, orders, admissionDate, firstSymptomsDate,
-                    new JsInterface());
+            mGridRenderer.render(
+                    observations, orders, admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
-        }
-
-        class JsInterface implements GridRenderer.JsInterface {
-            @android.webkit.JavascriptInterface
-            public void onNewOrderPressed() {
-                mController.onNewOrderPressed();
-            }
         }
 
         public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {
@@ -598,7 +590,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void setPatient(AppPatient patient) {
+        public void updatePatientDetailsUi(AppPatient patient) {
             // TODO: Localize everything below.
             mPatientFullNameView.setText(
                     patient.id + ": " + patient.givenName + " " + patient.familyName);
@@ -610,7 +602,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                    ? "age unknown" : Dates.birthdateToAge(patient.birthdate));
+                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 
@@ -667,6 +659,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             OrderDialogFragment.newInstance(patientUuid, null).show(
                     getSupportFragmentManager(), null);
         }
+
+        @Override
+        public void showOrderExecutionCountDialog(
+                Order order, Interval interval, int currentExecutionCount) {
+            OrderExecutionCountDialogFragment.newInstance(
+                    order, interval, currentExecutionCount).show(
+                    getSupportFragmentManager(), null);
+        }
+
     }
 
     private String getFormattedPcrString(double pcrValue) {

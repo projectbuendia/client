@@ -12,16 +12,13 @@
 package org.projectbuendia.client.data.app;
 
 import android.content.ContentValues;
+import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.model.Order;
-import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.utils.Utils;
-import org.projectbuendia.client.utils.date.Dates;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -54,7 +51,7 @@ public final class AppOrder extends AppTypeBase<String> implements Comparable<Ap
     }
 
     @Override
-    public int compareTo(AppOrder other) {
+    public int compareTo(@NonNull AppOrder other) {
         int result = start.compareTo(other.start);
         result = result != 0 ? result : instructions.compareTo(other.instructions);
         return result;

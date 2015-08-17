@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.utils.date;
+package org.projectbuendia.client.utils;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

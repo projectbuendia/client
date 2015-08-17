@@ -31,7 +31,7 @@ import org.projectbuendia.client.data.res.ResStatus;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
-import org.projectbuendia.client.utils.date.Dates;
+import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 
 import java.util.ArrayList;
@@ -178,7 +178,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
 
         holder.mPatientAge.setText(
-                patient.birthdate == null ? "" : Dates.birthdateToAge(patient.birthdate));
+                patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));
 
         holder.mPatientGender.setVisibility(
                 patient.gender == AppPatient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);

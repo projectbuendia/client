@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
@@ -50,7 +51,6 @@ import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.locationselection.AssignLocationDialog;
 import org.projectbuendia.client.utils.Utils;
-import org.projectbuendia.client.utils.date.Dates;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
@@ -64,7 +64,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Controller for {@link PatientChartActivity}. */
-final class PatientChartController {
+final class PatientChartController implements GridRenderer.GridJsInterface {
 
     private static final Logger LOG = Logger.create();
 
@@ -96,6 +96,7 @@ final class PatientChartController {
     private AppLocationTree mLocationTree;
     private long mLastObservation = Long.MIN_VALUE;
     private String mPatientUuid = "";
+    private Map<String, Order> mOrdersByUuid;
 
     // This value is incremented whenever the controller is activated or suspended.
     // A "phase" is a period of time between such transition points.
@@ -112,23 +113,23 @@ final class PatientChartController {
                 LocalDate firstSymptomsDate);
 
         /** Updates the general condition UI with the patient's current condition. */
-        void updatePatientGeneralConditionUi(String generalConditionUuid);
+        void updatePatientConditionUi(String generalConditionUuid);
 
         /** Updates the UI with the patient's location. */
         void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
 
         /** Updates the UI showing the history of observations and orders for this patient. */
-        void updateHistoryGrid(
+        void updatePatientHistoryUi(
                 List<LocalizedObs> observations,
                 List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate);
 
         /** Shows the last time a user interacted with this patient. */
-        void setLatestEncounter(long latestEncounterTimeMillis);
+        void updateLatestEncounterTimeUi(long latestEncounterTimeMillis);
 
-        /** Shows the patient's personal details. */
-        void setPatient(AppPatient patient);
+        /** Updates the UI with the patient's personal details (name, gender, etc.). */
+        void updatePatientDetailsUi(AppPatient patient);
 
         /** Displays an error message with the given resource id. */
         void showError(int errorMessageResource);
@@ -143,17 +144,12 @@ final class PatientChartController {
                 Patient patient,
                 PrepopulatableFields fields);
 
-        /** Re-enables fetching. */
         void reEnableFetch();
-
-        /** Shows or hides the form loading dialog. */
         void showFormLoadingDialog(boolean show);
-
-        /** Shows or hides the form submission dialog. */
         void showFormSubmissionDialog(boolean show);
-
-        /** Shows the new order dialog. */
         void showNewOrderDialog(String patientUuid);
+        void showOrderExecutionCountDialog(
+                Order order, Interval interval, int currentExecutionCount);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -387,15 +383,26 @@ final class PatientChartController {
                 fields);
     }
 
+    @android.webkit.JavascriptInterface
     public void onNewOrderPressed() {
         mUi.showNewOrderDialog(mPatientUuid);
+    }
+
+    @android.webkit.JavascriptInterface
+    public void onOrderCellPressed(
+            String orderUuid, long startMillis, int currentExecutionCount) {
+        Order order = mOrdersByUuid.get(orderUuid);
+        DateTime start = new DateTime(startMillis);
+        Interval interval = new Interval(start, start.plusDays(1));
+        mUi.showOrderExecutionCountDialog(
+                order, interval, currentExecutionCount);
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
     private LocalDate getObservedDate(
             Map<String, LocalizedObs> observations, String conceptUuid) {
         LocalizedObs obs = observations.get(conceptUuid);
-        return obs == null ? null : Dates.toLocalDate(obs.localizedValue);
+        return obs == null ? null : Utils.toLocalDate(obs.localizedValue);
     }
 
     /** Gets the latest observation values and displays them on the UI. */
@@ -410,7 +417,10 @@ final class PatientChartController {
             mLastObservation = Math.max(mLastObservation, obs.encounterTimeMillis);
         }
         List<Order> orders = mChartHelper.getOrders(mPatientUuid);
-
+        mOrdersByUuid = new HashMap<>();
+        for (Order order : orders) {
+            mOrdersByUuid.put(order.uuid, order);
+        }
         LOG.d("Showing " + observations.size() + " observations and "
                 + orders.size() + " orders");
 
@@ -418,10 +428,10 @@ final class PatientChartController {
                 conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
                 conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
-        mUi.setLatestEncounter(mLastObservation);
+        mUi.updateLatestEncounterTimeUi(mLastObservation);
         mUi.updatePatientVitalsUi(
                 conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.updateHistoryGrid(observations, orders, admissionDate, firstSymptomsDate);
+        mUi.updatePatientHistoryUi(observations, orders, admissionDate, firstSymptomsDate);
     }
 
     /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
@@ -571,7 +581,7 @@ final class PatientChartController {
         public void onEventMainThread(SingleItemFetchedEvent event) {
             if (event.item instanceof AppPatient) {
                 mPatient = (AppPatient)event.item;
-                mUi.setPatient(mPatient);
+                mUi.updatePatientDetailsUi(mPatient);
                 updatePatientLocationUi();
 
                 if (mAssignLocationDialog != null) {
@@ -583,7 +593,7 @@ final class PatientChartController {
                         ((AppEncounter)event.item).observations;
                 for (AppEncounter.AppObservation observation : observations) {
                     if (observation.conceptUuid.equals(Concepts.GENERAL_CONDITION_UUID)) {
-                        mUi.updatePatientGeneralConditionUi(observation.value);
+                        mUi.updatePatientConditionUi(observation.value);
                         LOG.v("Setting general condition in UI: %s", observation.value);
                     }
                 }

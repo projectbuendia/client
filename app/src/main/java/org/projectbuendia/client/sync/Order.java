@@ -12,6 +12,8 @@
 package org.projectbuendia.client.sync;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.Date;
 import java.util.Objects;
@@ -28,6 +30,10 @@ public final class Order {
         this.instructions = instructions;
         this.start = startMillis == null ? null : new DateTime(startMillis);
         this.stop = stopMillis == null ? null : new DateTime(stopMillis);
+    }
+
+    public Interval getInterval() {
+        return Utils.toInterval(start, stop);
     }
 
     @Override

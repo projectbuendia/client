@@ -47,7 +47,7 @@ import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.utils.date.Dates;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -420,7 +420,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 if (locationUuid == null) {
                     locationUuid = Zone.DEFAULT_LOCATION;
                 }
-                birthdate = Dates.toLocalDate(
+                birthdate = Utils.toLocalDate(
                         c.getString(PatientProjection.COLUMN_BIRTHDATE));
                 gender = c.getString(PatientProjection.COLUMN_GENDER);
 
@@ -459,7 +459,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                         patientAssignedLocationUuid)
                                 .withValue(
                                         Contracts.Patients.BIRTHDATE,
-                                        Dates.toString(patient.birthdate))
+                                        Utils.toString(patient.birthdate))
                                 .withValue(Contracts.Patients.GENDER, patient.gender)
                                 .withValue(Contracts.Patients._ID, patient.id)
                                 .build());
@@ -495,7 +495,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     e.admission_timestamp)
                             .withValue(
                                     Contracts.Patients.BIRTHDATE,
-                                    Dates.toString(e.birthdate))
+                                    Utils.toString(e.birthdate))
                             .withValue(Contracts.Patients.GENDER, e.gender);
 
             if (e.assigned_location == null) {

@@ -15,7 +15,7 @@ import android.database.Cursor;
 
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.sync.PatientProjection;
-import org.projectbuendia.client.utils.date.Dates;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -30,7 +30,7 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
                 .setUuid(cursor.getString(PatientProjection.COLUMN_UUID))
                 .setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
                 .setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
-                .setBirthdate(Dates.toLocalDate(
+                .setBirthdate(Utils.toLocalDate(
                         cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
                 .setGender(getGenderFromString(
                         cursor.getString(PatientProjection.COLUMN_GENDER)))

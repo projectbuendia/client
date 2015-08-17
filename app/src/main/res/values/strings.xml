@@ -74,6 +74,9 @@
     <string name="order_stop_days">days</string>
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
+    <string name="order_execution_pre_count_label">was administered</string>
+    <string name="order_execution_post_count_label">times on %s</string>
+    <string name="order_execution_post_count_label_today">times today (%s)</string>
 
     <string name="string_with_paren">%1$s (%2$s)</string>
     <string name="unknown_tent">Unknown tent</string>

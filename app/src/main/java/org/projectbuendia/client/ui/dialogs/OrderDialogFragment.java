@@ -47,11 +47,6 @@ public class OrderDialogFragment extends DialogFragment {
 
     private LayoutInflater mInflater;
 
-    /** Called to save the new order when the user clicks OK. */
-    public interface OrderSaver {
-        void saveNewOrder(String patientUuid, String instructions, Integer stopDays);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

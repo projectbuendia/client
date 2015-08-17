@@ -44,7 +44,7 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.locationselection.AssignLocationDialog;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.utils.date.Dates;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -152,7 +152,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
         };
 
         // Pre-populate admission date with today.
-        mAdmissionDate.setText(Dates.toMediumString(DateTime.now().toLocalDate()));
+        mAdmissionDate.setText(Utils.toMediumString(DateTime.now().toLocalDate()));
     }
 
     private void updateLocationUi() {
@@ -504,7 +504,7 @@ public final class PatientCreationActivity extends BaseLoggedInActivity {
                     .withYear(year)
                     .withMonthOfYear(monthOfYear + 1)
                     .withDayOfMonth(dayOfMonth);
-            mDateField.setText(Dates.toMediumString(date.toDateTimeAtStartOfDay().toLocalDate()));
+            mDateField.setText(Utils.toMediumString(date.toDateTimeAtStartOfDay().toLocalDate()));
             mLocalDate = date;
         }
 

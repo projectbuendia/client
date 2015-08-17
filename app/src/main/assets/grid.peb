@@ -50,7 +50,7 @@
   <tr class="heading">
     <th></th>
     {% for column in columns %}
-      <th class="{{column.id == nowColumnId ? "now" : ""}}">
+      <th class="{{column.start == nowColumnStart ? "now" : ""}}">
         {{column.headingHtml | raw}}
       </th>
     {% endfor %}
@@ -62,7 +62,7 @@
         {{row.heading}}
       </th>
       {% for column in columns %}
-        <td class="{{column.id == nowColumnId ? "now" : ""}}">
+        <td class="{{column.start == nowColumnStart ? "now" : ""}}">
           {% set values = get_values(row=row, column=column) %}
           {% if values is not empty %}
             {% set last = values | last %}
@@ -97,14 +97,12 @@
     </th>
     {% set previousActive = false %}
     {% for column in columns %}
-      <td class="{{column.id == nowColumnId ? "now" : ""}}">
-        {% set active =
-            (order.start is null or column.stop.getMillis > order.start.getMillis) and
-            (order.stop is null or column.start.getMillis < order.stop.getMillis) %}
+      <td class="{{column.start == nowColumnStart ? "now" : ""}}">
+        {% set active = intervals_overlap(order.interval, column.interval) %}
         {% if previousActive and not active %}
           <div class="stop">Stop</div>
         {% elseif active %}
-          <div class="active">&#x25cf;</div>
+          <div class="active" onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}}, 0)">&#x25cf;</div>
         {% endif %}
         {% set previousActive = active %}
       </td>

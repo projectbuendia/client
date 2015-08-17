@@ -15,6 +15,14 @@ import android.database.Cursor;
 
 import com.google.common.collect.Lists;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Days;
+import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.Server;
@@ -35,6 +43,15 @@ import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
+    static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
+    static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
+    static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
+    public static final DateTime MIN_DATE = new DateTime(0, 1, 1, 0, 0, 0, DateTimeZone.UTC);
+    public static final DateTime MAX_DATE = new DateTime(100000, 1, 1, 0, 0, 0, DateTimeZone.UTC);
+
+    private Utils() {
+        // Prevent instantiation.
+    }
 
     /** Converts objects with integer type to BigInteger. */
     public static BigInteger toBigInteger(Object obj) {
@@ -243,7 +260,63 @@ public class Utils {
         return c.isNull(index) ? null : c.getLong(index);
     }
 
-    private Utils() {
-        // Prevent instantiation.
+    /** Converts a nullable LocalDate to a yyyy-mm-dd String. */
+    public static @Nullable String toString(@Nullable LocalDate date) {
+        return date == null ? null : date.toString();
+    }
+
+    /** Converts a nullable yyyy-mm-dd String to a LocalDate. */
+    public static @Nullable LocalDate toLocalDate(@Nullable String string) {
+        try {
+            return string == null ? null : LocalDate.parse(string);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
+    public static @Nullable String toShortString(@Nullable LocalDate localDate) {
+        return localDate == null ? null : SHORT_DATE_FORMATTER.print(localDate);
+    }
+
+    /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
+    public static @Nullable String toMediumString(@Nullable LocalDate localDate) {
+        return localDate == null ? null : MEDIUM_DATE_FORMATTER.print(localDate);
+    }
+
+    /**
+     * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
+     * time zone.
+     */
+    public static @Nullable String toMediumString(@Nullable DateTime dateTime) {
+        return dateTime == null ? null : MEDIUM_DATETIME_FORMATTER.print(dateTime);
+    }
+
+    /** Converts a birthdate to a string describing age in months or years. */
+    public static String birthdateToAge(LocalDate birthdate) {
+        // TODO: Localization
+        Period age = new Period(birthdate, LocalDate.now());
+        if (age.getYears() >= 2) {
+            return "" + age.getYears() + " y";
+        } else {
+            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
+        }
+    }
+
+    /**
+     * Describes a given date as a number of days since a starting date, where the starting date
+     * itself is Day 1.  Returns a value <= 0 if the given date is null or in the future.
+     */
+    public static int dayNumberSince(@Nullable LocalDate startDate, @Nullable LocalDate date) {
+        if (startDate == null || date == null) {
+            return -1;
+        }
+        return Days.daysBetween(startDate, date).getDays() + 1;
+    }
+
+    /** Creates an interval from a min and max, where null means "unbounded". */
+    public static Interval toInterval(DateTime start, DateTime stop) {
+        return new Interval(start == null ? MIN_DATE : start,
+                stop == null ? MAX_DATE : stop);
     }
 }

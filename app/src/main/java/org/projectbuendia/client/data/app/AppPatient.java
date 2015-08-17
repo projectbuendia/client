@@ -16,7 +16,6 @@ import android.content.ContentValues;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.utils.date.Dates;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
@@ -88,7 +87,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 gender == Patient.GENDER_MALE ? "M" : "F");
         contentValues.put(
                 Contracts.Patients.BIRTHDATE,
-                Dates.toString(birthdate));
+                Utils.toString(birthdate));
         contentValues.put(
                 Contracts.Patients.LOCATION_UUID,
                 locationUuid);

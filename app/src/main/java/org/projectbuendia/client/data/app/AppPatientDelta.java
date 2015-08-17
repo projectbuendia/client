@@ -24,7 +24,7 @@ import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.utils.date.Dates;
+import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.Logger;
 
 /** Represents the data to write to a new patient or the data to update on a patient. */
@@ -64,7 +64,7 @@ public class AppPatientDelta {
             if (birthdate.isPresent()) {
                 json.put(
                         Server.PATIENT_BIRTHDATE_KEY,
-                        Dates.toString(birthdate.get().toLocalDate()));
+                        Utils.toString(birthdate.get().toLocalDate()));
             }
 
             JSONArray observations = new JSONArray();
@@ -73,7 +73,7 @@ public class AppPatientDelta {
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
                 observation.put(
                         Server.PATIENT_ANSWER_DATE,
-                        Dates.toString(admissionDate.get()));
+                        Utils.toString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
@@ -81,7 +81,7 @@ public class AppPatientDelta {
                 observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(
                         Server.PATIENT_ANSWER_DATE,
-                        Dates.toString(firstSymptomDate.get()));
+                        Utils.toString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {

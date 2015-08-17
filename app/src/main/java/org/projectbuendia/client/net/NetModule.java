@@ -19,7 +19,7 @@ import com.google.gson.GsonBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.utils.date.DateTimeDeserializer;
+import org.projectbuendia.client.utils.DateTimeDeserializer;
 
 import javax.inject.Singleton;
 

@@ -14,10 +14,7 @@ package org.projectbuendia.client.data.app.converters;
 import android.database.Cursor;
 
 import org.projectbuendia.client.data.app.AppOrder;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.sync.PatientProjection;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.utils.date.Dates;
 
 import javax.annotation.concurrent.Immutable;
 

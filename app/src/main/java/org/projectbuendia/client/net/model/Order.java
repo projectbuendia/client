@@ -11,8 +11,6 @@
 
 package org.projectbuendia.client.net.model;
 
-import org.joda.time.DateTime;
-
 public class Order {
     public String uuid;
     public String patient_uuid;

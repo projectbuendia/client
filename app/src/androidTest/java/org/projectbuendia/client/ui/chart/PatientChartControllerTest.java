@@ -32,6 +32,7 @@ import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
@@ -129,7 +130,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // also be removed.
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
-        verify(mMockUi).setObservationHistory(allObservations, null, null);
+        verify(mMockUi).updatePatientHistoryUi(allObservations, ImmutableList.<Order>of(), null, null);
         verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
     }
 
@@ -142,7 +143,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         AppPatient patient = AppPatient.builder().build();
         mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
         // THEN the controller updates the UI
-        verify(mMockUi).setPatient(patient);
+        verify(mMockUi).updatePatientDetailsUi(patient);
     }
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
