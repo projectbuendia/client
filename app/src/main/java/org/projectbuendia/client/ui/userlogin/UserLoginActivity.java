@@ -28,6 +28,7 @@ import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.dialogs.AddNewUserDialogFragment;
 import org.projectbuendia.client.ui.locationselection.LocationSelectionActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 
@@ -38,7 +39,6 @@ import de.greenrobot.event.EventBus;
  * This is the starting activity for the app.
  */
 public class UserLoginActivity extends BaseActivity {
-
     private UserLoginController mController;
     private AlertDialog mSyncFailedDialog;
     @Inject Troubleshooter mTroubleshooter;
@@ -52,9 +52,8 @@ public class UserLoginActivity extends BaseActivity {
         setTitle(getString(R.string.app_name) + " " + getString(R.string.app_version));
 
         setContentView(R.layout.activity_user_login);
-        UserLoginFragment fragment =
-                (UserLoginFragment)getSupportFragmentManager()
-                        .findFragmentById(R.id.fragment_user_login);
+        UserLoginFragment fragment = (UserLoginFragment)
+                getSupportFragmentManager().findFragmentById(R.id.fragment_user_login);
         mController = new UserLoginController(
                 App.getUserManager(),
                 new EventBusWrapper(EventBus.getDefault()),
@@ -72,7 +71,7 @@ public class UserLoginActivity extends BaseActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 startActivity(new Intent(
-                                        UserLoginActivity.this,SettingsActivity.class));
+                                        UserLoginActivity.this, SettingsActivity.class));
                             }
                         })
                 .setPositiveButton(
@@ -137,17 +136,13 @@ public class UserLoginActivity extends BaseActivity {
     private final class Ui implements UserLoginController.Ui {
         @Override
         public void showAddNewUserDialog() {
-            FragmentManager fm = getSupportFragmentManager();
-            AddNewUserDialogFragment dialogFragment =
-                    AddNewUserDialogFragment.newInstance(mController.getDialogUi());
-            dialogFragment.show(fm, null);
+            AddNewUserDialogFragment.newInstance(mController.getDialogUi())
+                    .show(getSupportFragmentManager(), null);
         }
 
         @Override
         public void showSettings() {
-            Intent settingsIntent =
-                    new Intent(UserLoginActivity.this, SettingsActivity.class);
-            startActivity(settingsIntent);
+            startActivity(new Intent(UserLoginActivity.this, SettingsActivity.class));
         }
 
         @Override
@@ -157,17 +152,7 @@ public class UserLoginActivity extends BaseActivity {
 
         @Override
         public void showSyncFailedDialog(boolean show) {
-            if (mSyncFailedDialog == null) {
-                return;
-            }
-
-            if (mSyncFailedDialog.isShowing() != show) {
-                if (show) {
-                    mSyncFailedDialog.show();
-                } else {
-                    mSyncFailedDialog.hide();
-                }
-            }
+            Utils.showOrHideDialog(mSyncFailedDialog, show);
         }
 
         @Override

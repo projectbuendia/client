@@ -61,6 +61,6 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
                 new AppEncounter.AppObservation[observationList.size()];
         observationList.toArray(observations);
 
-        return new AppEncounter(mPatientUuid, encounterUuid, dateTime, observations);
+        return new AppEncounter(mPatientUuid, encounterUuid, dateTime, observations, null);
     }
 }

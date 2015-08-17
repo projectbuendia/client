@@ -49,7 +49,6 @@ import java.util.List;
 
 /** Implementation of {@link Server} that sends RPC's to OpenMRS. */
 public class OpenMrsServer implements Server {
-
     private static final Logger LOG = Logger.create();
 
     private final OpenMrsConnectionDetails mConnectionDetails;
@@ -254,9 +253,11 @@ public class OpenMrsServer implements Server {
                              AppEncounter encounter,
                              final Response.Listener<Encounter> encounterListener,
                              final Response.ErrorListener errorListener) {
-        JSONObject json = new JSONObject();
-        if (!encounter.toJson(json)) {
-            throw new IllegalArgumentException("Unable to serialize the encounter to JSON.");
+        JSONObject json;
+        try {
+            json = encounter.toJson();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Unable to serialize the encounter to JSON.", e);
         }
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
@@ -284,8 +285,12 @@ public class OpenMrsServer implements Server {
     public void addOrder(AppOrder order,
                          final Response.Listener<Order> successListener,
                          final Response.ErrorListener errorListener) {
-        JSONObject json = new JSONObject();
-        order.toJson(json);
+        JSONObject json;
+        try {
+            json = order.toJson();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Unable to serialize the order to JSON.", e);
+        }
 
         LOG.v("Adding order with JSON: %s", json);
 

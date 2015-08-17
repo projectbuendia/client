@@ -16,9 +16,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 
+import org.joda.time.DateTime;
 import org.projectbuendia.client.data.app.converters.AppTypeConverter;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
-import org.projectbuendia.client.data.app.tasks.AppAddEncounterAsyncTask;
 import org.projectbuendia.client.data.app.tasks.AppAddPatientAsyncTask;
 import org.projectbuendia.client.data.app.tasks.AppAsyncTaskFactory;
 import org.projectbuendia.client.data.app.tasks.AppUpdatePatientAsyncTask;
@@ -49,6 +49,7 @@ import de.greenrobot.event.NoSubscriberEvent;
  */
 public class AppModel {
     private static final Logger LOG = Logger.create();
+    public static final String ORDER_EXECUTED_UUID = "buendia.order_executed";
 
     private final ContentResolver mContentResolver;
     private final AppTypeConverters mConverters;
@@ -187,20 +188,28 @@ public class AppModel {
 
     /**
      * Asynchronously adds an order, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} with the newly-added order on
-     * the specified event bus when complete.
+     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} when complete.
      */
     public void addOrder(CrudEventBus bus, AppOrder order) {
         mTaskFactory.newAddOrderAsyncTask(order, bus).execute();
     }
+
+    /**
+     * Asynchronously adds an encounter that records an order as executed, posting a
+     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} when complete.
+     */
+    public void addOrderExecutedEncounter(CrudEventBus bus, AppPatient patient, String orderUuid) {
+        addEncounter(bus, patient, new AppEncounter(
+                patient.uuid, null, DateTime.now(), null, new String[] { orderUuid }
+        ));
+    }
+
     /**
      * Asynchronously adds an encounter to a patient, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent}.
+     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} when complete.
      */
     public void addEncounter(CrudEventBus bus, AppPatient appPatient, AppEncounter appEncounter) {
-        AppAddEncounterAsyncTask task =
-                mTaskFactory.newAddEncounterAsyncTask(appPatient, appEncounter, bus);
-        task.execute();
+        mTaskFactory.newAddEncounterAsyncTask(appPatient, appEncounter, bus).execute();
     }
 
     /** A subscriber that handles error events posted to {@link CrudEventBus}es. */

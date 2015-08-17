@@ -42,7 +42,8 @@
   button { font-size: 100%; }
   tr.order td { vertical-align: center: text-align: center; }
   tr.order td div { margin: auto auto; width: 90%; height: 90%; }
-  .active { font-size: 75%; }
+  .no-count { font-size: 75%; }
+  .future { color: #999; }
   .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
 </style>
 
@@ -96,15 +97,24 @@
       {{order.instructions}}
     </th>
     {% set previousActive = false %}
+    {% set future = false %}
     {% for column in columns %}
+      {% set id = order.uuid + "." + column.start.getMillis %}
       <td class="{{column.start == nowColumnStart ? "now" : ""}}">
         {% set active = intervals_overlap(order.interval, column.interval) %}
         {% if previousActive and not active %}
           <div class="stop">Stop</div>
         {% elseif active %}
-          <div class="active" onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}}, 0)">&#x25cf;</div>
+          {% if future %}
+            <div class="future active"><div class="no-count">&#x25cf;</div></div>
+          {% else %}
+            <div class="past active" id="{{id}}"
+                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}}, counts['{{id}}'] || 0)"
+                ><div class="no-count">&#x25cf;</div></div>
+          {% endif %}
         {% endif %}
         {% set previousActive = active %}
+        {% set future = future or column.start == nowColumnStart %}
       </td>
     {% endfor %}
   </tr>
@@ -116,3 +126,15 @@
     </th>
   </tr>
 </table>
+
+<script>
+  var counts = {};
+  function incrementOrderCell(orderUuid, columnStartMillis) {
+    var id = orderUuid + '.' + columnStartMillis;
+    counts[id] = (counts[id] || 0) + 1;
+    var cell = document.getElementById(id);
+    if (cell) {
+      cell.innerHTML = '<div class="count">' + counts[id] + '</div>';
+    }
+  }
+</script>

@@ -11,6 +11,7 @@ import com.mitchellbosecke.pebble.PebbleEngine;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.projectbuendia.client.R;
@@ -47,7 +48,7 @@ public class GridRenderer {
         void onNewOrderPressed();
 
         @android.webkit.JavascriptInterface
-        void onOrderCellPressed(String orderUuid, long startMillis, int currentExecutionCount);
+        void onOrderCellPressed(String orderUuid, long startMillis, int currentCount);
     }
 
     public GridRenderer(WebView view, Resources resources) {
@@ -75,6 +76,14 @@ public class GridRenderer {
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
+    }
+
+    public void incrementOrderCell(Order order, Interval interval) {
+        mView.evaluateJavascript(
+                "incrementOrderCell('$1', $2)"
+                        .replace("$1", order.uuid)
+                        .replace("$2", "" + interval.getStartMillis()),
+        null);
     }
 
     class GridHtmlGenerator {

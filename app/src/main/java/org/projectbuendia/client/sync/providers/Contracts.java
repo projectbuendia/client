@@ -103,8 +103,8 @@ public class Contracts {
         String VALUE = "value";  // concept value
 
         /**
-         * Value is either 0 or 1, where 1 means this observation is cached
-         * from an XForm that has not yet been sent.
+         * Value is either 0 or 1, where 1 means this observation is cached locally
+         * from a submitted XForm, rather than loaded from the server.
          */
         String TEMP_CACHE = "temp_cache";
     }

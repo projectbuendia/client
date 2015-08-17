@@ -70,22 +70,22 @@ public class AppPatientDelta {
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.PATIENT_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
+                observation.put(Server.OBSERVATION_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
                 observation.put(
-                        Server.PATIENT_ANSWER_DATE,
+                        Server.OBSERVATION_ANSWER_DATE,
                         Utils.toString(admissionDate.get()));
                 observations.put(observation);
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.PATIENT_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
+                observation.put(Server.OBSERVATION_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(
-                        Server.PATIENT_ANSWER_DATE,
+                        Server.OBSERVATION_ANSWER_DATE,
                         Utils.toString(firstSymptomDate.get()));
                 observations.put(observation);
             }
             if (observations != null) {
-                json.put(Server.PATIENT_OBSERVATIONS_KEY, observations);
+                json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observations);
             }
 
             if (assignedLocationUuid.isPresent()) {

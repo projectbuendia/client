@@ -67,15 +67,15 @@ public final class AppOrder extends AppTypeBase<String> implements Comparable<Ap
         );
     }
 
-    public void toJson(JSONObject json) {
-        try {
-            json.put("patient_uuid", patientUuid);
-            json.put("instructions", instructions);
-            json.put("start", start.getMillis());
-            json.put("stop", stop == null ? null : stop.getMillis());
-        } catch (JSONException e) {
-            throw new IllegalArgumentException("Unable to serialize order to JSON", e);
+    public JSONObject toJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("patient_uuid", patientUuid);
+        json.put("instructions", instructions);
+        json.put("start", start.getMillis());
+        if (stop != null) {
+            json.put("stop", stop.getMillis());
         }
+        return json;
     }
 
     public ContentValues toContentValues() {

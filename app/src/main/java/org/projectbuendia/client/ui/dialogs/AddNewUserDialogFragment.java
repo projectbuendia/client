@@ -43,15 +43,10 @@ public class AddNewUserDialogFragment extends DialogFragment {
     @InjectView(R.id.add_user_family_name_tv) EditText mFamilyName;
 
     private LayoutInflater mInflater;
-    // Optional UI for exposing a spinner.
-    @Nullable private ActivityUi mActivityUi;
+    @Nullable private ActivityUi mActivityUi;  // optional UI for showing a spinner
 
-    /**
-     * Delegate for the UI that will be shown when the dialog is closed, so that a spinner can be
-     * shown until the user has loaded.
-     */
+    /** An interface to show a spinner while the new user is being saved. */
     public interface ActivityUi {
-
         void showSpinner(boolean show);
     }
 
@@ -62,13 +57,11 @@ public class AddNewUserDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.dialog_fragment_add_new_user, null);
         ButterKnife.inject(this, fragment);
 
@@ -81,7 +74,6 @@ public class AddNewUserDialogFragment extends DialogFragment {
 
         final AlertDialog dialog = dialogBuilder.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-
             @Override
             public void onShow(DialogInterface dialogInterface) {
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE)

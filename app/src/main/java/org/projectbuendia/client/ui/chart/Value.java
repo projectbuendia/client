@@ -37,8 +37,7 @@ class Value implements Comparable<Value> {
     public Value(LocalizedObs obs, Chronology chronology) {
         final Set<String> FALSE_CODED_VALUES = new ImmutableSet.Builder<String>().add(
                 Concepts.UNKNOWN_UUID).addAll(LocalizedChartHelper.NO_SYMPTOM_VALUES).build();
-
-        observed = new DateTime(obs.encounterTimeMillis, chronology);
+        observed = obs.encounterTime;
         present = obs.value != null;
         if (present) {
             switch (getConceptType(obs.conceptUuid)) {

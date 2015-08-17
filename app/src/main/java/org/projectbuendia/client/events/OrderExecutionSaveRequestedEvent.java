@@ -11,21 +11,22 @@
 
 package org.projectbuendia.client.events;
 
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 /**
  * Event indicating that the user has entered an order execution count that needs to be saved
  * (both stored locally on the client and posted to the server's order API).
  */
-public class OrderExecutionCountSaveRequestedEvent {
+public class OrderExecutionSaveRequestedEvent {
     public final String orderUuid;
     public final Interval interval;
-    public final int executionCount;
+    public final DateTime encounterTime;
 
-    public OrderExecutionCountSaveRequestedEvent(
-            String orderUuid, Interval interval, int executionCount) {
+    public OrderExecutionSaveRequestedEvent(
+            String orderUuid, Interval interval, DateTime encounterTime) {
         this.orderUuid = orderUuid;
         this.interval = interval;
-        this.executionCount = executionCount;
+        this.encounterTime = encounterTime;
     }
 }

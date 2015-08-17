@@ -56,9 +56,7 @@ public class OrderDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        // Replace the existing button listener so we can prevent the dialog
-        // from being dismissed when validation fails.
+        // Replace the existing button listener so we can control whether the dialog is dismissed.
         final AlertDialog dialog = (AlertDialog) getDialog();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
                 new View.OnClickListener() {
@@ -68,10 +66,7 @@ public class OrderDialogFragment extends DialogFragment {
                     }
                 }
         );
-
-
     }
-
 
     public void onSubmit(AlertDialog dialog) {
         String instructions = mInstructions.getText().toString().trim();

@@ -11,6 +11,7 @@
 
 package org.projectbuendia.client.utils;
 
+import android.app.Dialog;
 import android.database.Cursor;
 
 import com.google.common.collect.Lists;
@@ -265,6 +266,16 @@ public class Utils {
         return date == null ? null : date.toString();
     }
 
+    /** Returns the greater of two DateTimes, treating null as the least value. */
+    public static @Nullable DateTime max(DateTime a, DateTime b) {
+        return a == null ? b : b == null ? a : a.isAfter(b) ? a : b;
+    }
+
+    /** Returns the lesser of two DateTimes, treating null as the greatest value. */
+    public static @Nullable DateTime min(DateTime a, DateTime b) {
+        return a == null ? b : b == null ? a : a.isBefore(b) ? a : b;
+    }
+
     /** Converts a nullable yyyy-mm-dd String to a LocalDate. */
     public static @Nullable LocalDate toLocalDate(@Nullable String string) {
         try {
@@ -318,5 +329,16 @@ public class Utils {
     public static Interval toInterval(DateTime start, DateTime stop) {
         return new Interval(start == null ? MIN_DATE : start,
                 stop == null ? MAX_DATE : stop);
+    }
+
+    /** Shows or hides a dialog based on a boolean flag. */
+    public static void showOrHideDialog(@Nullable Dialog dialog, boolean show) {
+        if (dialog != null) {
+            if (show) {
+                dialog.show();
+            } else {
+                dialog.hide();
+            }
+        }
     }
 }

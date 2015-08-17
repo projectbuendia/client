@@ -32,5 +32,6 @@ public class Encounter {
      * inspected. Common values are doubles and String representing concept uuids of coded concepts.
      */
     public Map<Object, Object> observations;
+    public String[] order_uuids;  // orders executed during this encounter
 
 }

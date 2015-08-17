@@ -30,7 +30,6 @@ import java.util.List;
 
 /** An interface abstracting the idea of an RPC to a server. */
 public interface Server {
-
     public static final String PATIENT_ID_KEY = "id";
     public static final String PATIENT_UUID_KEY = "uuid";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";
@@ -39,11 +38,12 @@ public interface Server {
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
     public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
-    public static final String PATIENT_OBSERVATIONS_KEY = "observations";
-    public static final String PATIENT_OBSERVATIONS_TIMESTAMP = "timestamp";
-    public static final String PATIENT_QUESTION_UUID = "question_uuid";
-    public static final String PATIENT_ANSWER_DATE = "answer_date";
-    public static final String PATIENT_ANSWER_UUID = "answer_uuid";
+    public static final String ENCOUNTER_OBSERVATIONS_KEY = "observations";
+    public static final String ENCOUNTER_TIMESTAMP = "timestamp";
+    public static final String ENCOUNTER_ORDER_UUIDS = "order_uuids";
+    public static final String OBSERVATION_QUESTION_UUID = "question_uuid";
+    public static final String OBSERVATION_ANSWER_DATE = "answer_date";
+    public static final String OBSERVATION_ANSWER_UUID = "answer_uuid";
 
     /**
      * Logs an event by sending a dummy request to the server.  (The server logs

@@ -46,47 +46,58 @@ public class AppEncounter extends AppTypeBase<String> {
     private static final Logger LOG = Logger.create();
 
     public final String patientUuid;
-    public final String encounterUuid;
+    public final @Nullable String encounterUuid;
     public final DateTime timestamp;
     public final AppObservation[] observations;
+    public final String[] orderUuids;
 
     /**
      * Creates a new AppEncounter for the given patient.
-     * @param patientUuid the patient under observation
-     * @param encounterUuid id for this encounter--for encounters created on the client, use null
-     * @param timestamp the encounter time
-     * @param observations an array of observations to include in the encounter
+     * @param patientUuid The UUID of the patient.
+     * @param encounterUuid The UUID of this encounter, or null for encounters created on the client.
+     * @param timestamp The encounter time.
+     * @param observations An array of observations to include in the encounter.
+     * @param orderUuids A list of UUIDs of the orders executed during this encounter.
      */
     public AppEncounter(
             String patientUuid,
-            @Nullable String encounterUuid, // May not be known.
+            @Nullable String encounterUuid,
             DateTime timestamp,
-            AppObservation[] observations) {
+            AppObservation[] observations,
+            String[] orderUuids) {
         id = encounterUuid;
         this.patientUuid = patientUuid;
         this.encounterUuid = id;
         this.timestamp = timestamp;
-        this.observations = observations;
+        this.observations = observations == null ? new AppObservation[] {} : observations;
+        this.orderUuids = orderUuids == null ? new String[] {} : orderUuids;
     }
 
     /** Serializes this into a {@link JSONObject}. */
-    public boolean toJson(JSONObject json) {
-        try {
+    public JSONObject toJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(Server.PATIENT_UUID_KEY, patientUuid);
+        json.put(Server.ENCOUNTER_TIMESTAMP, timestamp.getMillis() / 1000);
+        if (observations.length > 0) {
             JSONArray observationsJson = new JSONArray();
-            for (AppObservation observation : observations) {
+            for (AppObservation obs : observations) {
                 JSONObject observationJson = new JSONObject();
-                observationJson.put(Server.PATIENT_QUESTION_UUID, observation.conceptUuid);
-                observationJson.put(observation.serverType(), observation.value);
+                observationJson.put(Server.OBSERVATION_QUESTION_UUID, obs.conceptUuid);
+                String valueKey = obs.type == AppObservation.Type.DATE ?
+                        Server.OBSERVATION_ANSWER_DATE : Server.OBSERVATION_ANSWER_UUID;
+                observationJson.put(valueKey, obs.value);
                 observationsJson.put(observationJson);
             }
-            json.put(Server.PATIENT_OBSERVATIONS_KEY, observationsJson);
-            json.put(Server.PATIENT_UUID_KEY, patientUuid);
-            json.put(Server.PATIENT_OBSERVATIONS_TIMESTAMP, timestamp.getMillis() / 1000);
-            return true;
-        } catch (JSONException e) {
-            LOG.e("Error constructing encounter JSON", e);
-            return false;
+            json.put(Server.ENCOUNTER_OBSERVATIONS_KEY, observationsJson);
         }
+        if (orderUuids.length > 0) {
+            JSONArray orderUuidsJson = new JSONArray();
+            for (String orderUuid : orderUuids) {
+                orderUuidsJson.put(orderUuid);
+            }
+            json.put(Server.ENCOUNTER_ORDER_UUIDS, orderUuidsJson);
+        }
+        return json;
     }
 
     /** Represents a single observation within this encounter. */
@@ -95,10 +106,10 @@ public class AppEncounter extends AppTypeBase<String> {
         public final String value;
         public final Type type;
 
-        /** Datatype of the observation. */
+        /** Data type of the observation. */
         public enum Type {
             DATE,
-            UUID
+            NON_DATE
         }
 
         /**
@@ -107,35 +118,13 @@ public class AppEncounter extends AppTypeBase<String> {
          */
         public static Type estimatedTypeFor(String value) {
             try {
-                long longValue = Long.parseLong(value);
-                DateTime dateTime = new DateTime(longValue);
+                new DateTime(Long.parseLong(value));
                 return Type.DATE;
             } catch (Exception e) {
-                // Intentionally blank -- value is not numeric or not a date.
+                return Type.NON_DATE;
             }
-
-            return Type.UUID;
         }
 
-        /** Returns the string used to represent the datatype of this observation on the server. */
-        public String serverType() {
-            switch (type) {
-                case DATE:
-                    return Server.PATIENT_ANSWER_DATE;
-                case UUID:
-                    return Server.PATIENT_ANSWER_UUID;
-                default:
-                    // Intentionally blank.
-            }
-            throw new IllegalArgumentException("Invalid type: " + type.toString());
-        }
-
-        /**
-         * Creates a new observation.
-         * @param conceptUuid UUID of the observation concept
-         * @param value value of the observation
-         * @param type datatype of the observation value
-         */
         public AppObservation(String conceptUuid, String value, Type type) {
             this.conceptUuid = conceptUuid;
             this.value = value;
@@ -152,16 +141,15 @@ public class AppEncounter extends AppTypeBase<String> {
         ContentValues[] valuesArray = new ContentValues[observations.length];
         long timestampSec = timestamp.getMillis() / 1000;
         for (int i = 0; i < observations.length; i++) {
-            AppObservation observation = observations[i];
+            AppObservation obs = observations[i];
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, observation.conceptUuid);
+            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, obs.conceptUuid);
             contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestampSec);
             contentValues.put(Contracts.ObservationColumns.ENCOUNTER_UUID, encounterUuid);
             contentValues.put(Contracts.ObservationColumns.PATIENT_UUID, patientUuid);
-            contentValues.put(Contracts.ObservationColumns.VALUE, observation.value);
+            contentValues.put(Contracts.ObservationColumns.VALUE, obs.value);
             valuesArray[i] = contentValues;
         }
-
         return valuesArray;
     }
 
@@ -173,14 +161,14 @@ public class AppEncounter extends AppTypeBase<String> {
         List<AppObservation> observationList = new ArrayList<AppObservation>();
         for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
             observationList.add(new AppObservation(
-                    (String)observation.getKey(),
-                    (String)observation.getValue(),
-                    AppObservation.estimatedTypeFor((String)observation.getValue())
+                    (String) observation.getKey(),
+                    (String) observation.getValue(),
+                    AppObservation.estimatedTypeFor((String) observation.getValue())
             ));
         }
         AppObservation[] observations = new AppObservation[observationList.size()];
         observationList.toArray(observations);
-
-        return new AppEncounter(patientUuid, encounter.uuid, encounter.timestamp, observations);
+        return new AppEncounter(patientUuid, encounter.uuid, encounter.timestamp,
+                observations, encounter.order_uuids);
     }
 }

@@ -250,9 +250,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 extras.getBoolean(SyncOption.INCREMENTAL_OBS.name()));
                         break;
 
-                    // Orders: Always fetch all orders.  This won't scale;
-                    // incremental fetch would help a lot.
-                    // TODO: Implement incremental fetch for orders.
+                    // Orders: Currently we always fetch all orders.  This won't scale;
+                    // incremental fetch would help a lot.  If we link orders to
+                    // encounters then we can use a common incremental sync
+                    // mechanism observations and orders.
+                    // TODO: Store and retrieve orders as associated with encounters.
                     case SYNC_ORDERS:
                         updateOrders(provider, syncResult);
                         break;
@@ -594,7 +596,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                     boolean incrementalFetch)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
 
-        // Get call patients from the cache.
+        // Get all patients from the cache.
         Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
         Cursor c = provider.query(
                 uri, new String[] {Contracts.Patients.UUID}, null, null, null);

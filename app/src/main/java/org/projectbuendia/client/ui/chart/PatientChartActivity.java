@@ -52,7 +52,7 @@ import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
-import org.projectbuendia.client.ui.dialogs.OrderExecutionCountDialogFragment;
+import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -428,16 +428,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updateLatestEncounterTimeUi(long encounterTimeMillis) {
-            if (encounterTimeMillis != 0) {
-                mLastObservationTimeView.setText(
-                        Utils.toMediumString(new DateTime(encounterTimeMillis)));
-                mLastObservationLabel.setVisibility(View.VISIBLE);
-            } else {
+        public void updateLastObsTimeUi(DateTime lastObsTime) {
+            if (lastObsTime == null) {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
                 mLastObservationLabel.setVisibility(View.GONE);
+            } else {
+                mLastObservationTimeView.setText(Utils.toMediumString(lastObsTime));
+                mLastObservationLabel.setVisibility(View.VISIBLE);
             }
-
         }
 
         @Override
@@ -483,12 +481,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mPcr.setValue("–");
             } else {
                 String pcrLString = "–";
-                long pcrObservationMillis = -1;
+                DateTime pcrObsTime = null;
                 if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
-                    pcrObservationMillis = pcrLObservation.encounterTimeMillis;
-                    double pcrL;
+                    pcrObsTime = pcrLObservation.encounterTime;
                     try {
-                        pcrL = Double.parseDouble(pcrLObservation.localizedValue);
+                        double pcrL = Double.parseDouble(pcrLObservation.localizedValue);
                         pcrLString = getFormattedPcrString(pcrL);
                     } catch (NumberFormatException e) {
                         LOG.w(
@@ -499,10 +496,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
                 String pcrNpString = "–";
                 if (pcrNpObservation != null && pcrNpObservation.localizedValue != null) {
-                    pcrObservationMillis = pcrNpObservation.encounterTimeMillis;
-                    double pcrNp;
+                    pcrObsTime = pcrNpObservation.encounterTime;
                     try {
-                        pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
+                        double pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
                         pcrNpString = getFormattedPcrString(pcrNp);
                     } catch (NumberFormatException e) {
                         LOG.w(
@@ -513,9 +509,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 }
 
                 mPcr.setValue(String.format("%1$s / %2$s", pcrLString, pcrNpString));
-                if (pcrObservationMillis > 0) {
+                if (pcrObsTime != null) {
                     LocalDate today = LocalDate.now();
-                    LocalDate obsDay = new DateTime(pcrObservationMillis).toLocalDate();
+                    LocalDate obsDay = pcrObsTime.toLocalDate();
                     String dateText = RelativeDateTimeFormatter.builder()
                             .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
                             .build()
@@ -638,45 +634,36 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void showFormLoadingDialog(boolean show) {
-            if (show) {
-                mFormLoadingDialog.show();
-            } else {
-                mFormLoadingDialog.hide();
-            }
+            Utils.showOrHideDialog(mFormLoadingDialog, show);
         }
 
         @Override
         public void showFormSubmissionDialog(boolean show) {
-            if (show) {
-                mFormSubmissionDialog.show();
-            } else {
-                mFormSubmissionDialog.hide();
-            }
+            Utils.showOrHideDialog(mFormSubmissionDialog, show);
         }
 
         @Override
         public void showNewOrderDialog(String patientUuid) {
-            OrderDialogFragment.newInstance(patientUuid, null).show(
-                    getSupportFragmentManager(), null);
+            OrderDialogFragment.newInstance(patientUuid, null)
+                    .show(getSupportFragmentManager(), null);
         }
 
         @Override
-        public void showOrderExecutionCountDialog(
-                Order order, Interval interval, int currentExecutionCount) {
-            OrderExecutionCountDialogFragment.newInstance(
-                    order, interval, currentExecutionCount).show(
-                    getSupportFragmentManager(), null);
+        public void showOrderExecutionDialog(
+                Order order, Interval interval, int currentCount) {
+            OrderExecutionDialogFragment.newInstance(order, interval, currentCount)
+                    .show(getSupportFragmentManager(), null);
         }
 
+        @Override
+        public void incrementOrderCell(Order order, Interval interval) {
+            mGridRenderer.incrementOrderCell(order, interval);
+        }
     }
 
     private String getFormattedPcrString(double pcrValue) {
-        String pcrValueString;
-        if (pcrValue >= PCR_NEGATIVE_THRESHOLD) {
-            pcrValueString = getResources().getString(R.string.pcr_negative);
-        } else {
-            pcrValueString = String.format("%1$.1f", pcrValue);
-        }
-        return pcrValueString;
+        return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
+            getResources().getString(R.string.pcr_negative) :
+            String.format("%1$.1f", pcrValue);
     }
 }
