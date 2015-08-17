@@ -42,8 +42,10 @@ public class OrderDialogFragment extends DialogFragment {
         return f;
     }
 
-    @InjectView(R.id.order_instructions) EditText mInstructions;
-    @InjectView(R.id.order_stop_days) EditText mStopDays;
+    @InjectView(R.id.order_medication) EditText mMedication;
+    @InjectView(R.id.order_dosage) EditText mDosage;
+    @InjectView(R.id.order_frequency) EditText mFrequency;
+    @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
 
     private LayoutInflater mInflater;
 
@@ -69,22 +71,35 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     public void onSubmit(AlertDialog dialog) {
-        String instructions = mInstructions.getText().toString().trim();
-        String stopDaysStr = mStopDays.getText().toString().trim();
-        Integer stopDays = stopDaysStr.isEmpty() ? null : Integer.valueOf(stopDaysStr);
+        String medication = mMedication.getText().toString().trim();
+        String dosage = mDosage.getText().toString().trim();
+        String frequency = mFrequency.getText().toString().trim();
+
+        String instructions = medication;
+        if (!dosage.isEmpty()) {
+            instructions += " " + dosage;
+        }
+        if (!frequency.isEmpty()) {
+            instructions += " " + frequency + "x daily";
+        }
+        String durationStr = mGiveForDays.getText().toString().trim();
+        Integer durationDays = durationStr.isEmpty() ? null : Integer.valueOf(durationStr);
         boolean valid = true;
-        if (instructions.isEmpty()) {
-            setError(mInstructions, R.string.order_medication_cannot_be_blank);
+        if (medication.isEmpty()) {
+            setError(mMedication, R.string.order_medication_cannot_be_blank);
             valid = false;
         }
-        if (stopDays != null && stopDays == 0) {
-            setError(mStopDays, R.string.order_stop_days_cannot_be_zero);
+        if (durationDays != null && durationDays == 0) {
+            setError(mGiveForDays, R.string.order_stop_days_cannot_be_zero);
             valid = false;
         }
         Utils.logUserAction("order_submitted",
                 "valid", "" + valid,
+                "medication", medication,
+                "dosage", dosage,
+                "frequency", frequency,
                 "instructions", instructions,
-                "stopDays", "" + stopDays);
+                "durationDays", "" + durationDays);
 
         if (valid) {
             dialog.dismiss();
@@ -94,7 +109,7 @@ public class OrderDialogFragment extends DialogFragment {
             EventBus.getDefault().post(new OrderSaveRequestedEvent(
                     getArguments().getString("previousOrderUuid"),
                     getArguments().getString("patientUuid"),
-                    instructions, stopDays));
+                    instructions, durationDays));
         }
     }
 

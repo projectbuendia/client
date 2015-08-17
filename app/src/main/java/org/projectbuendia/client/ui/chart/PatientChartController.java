@@ -689,13 +689,13 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             DateTime start = DateTime.now();
             DateTime stop = null;
 
-            if (event.stopDays != null) {
+            if (event.durationDays != null) {
                 LocalDate startDate = start.toLocalDate();
                 if (start.getHourOfDay() >= 12) {
                     // Orders placed after noon start tomorrow.
                     startDate = startDate.plusDays(1);
                 }
-                LocalDate stopDate = startDate.plusDays(event.stopDays);
+                LocalDate stopDate = startDate.plusDays(event.durationDays);
                 start = startDate.toDateTimeAtStartOfDay();
                 stop = stopDate.toDateTimeAtStartOfDay();
                 // In OpenMRS, OrderServiceImpl.saveOrderInternal() forces the

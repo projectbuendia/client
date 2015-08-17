@@ -69,9 +69,13 @@
     <string name="title_new_order">New order</string>
     <string name="order_instructions">Order</string>
     <string name="order_medication">Medication</string>
-    <string name="order_stop_after">Stop after</string>
-    <string name="order_stop_day">day</string>
-    <string name="order_stop_days">days</string>
+    <string name="order_dosage">Dosage</string>
+    <string name="order_frequency">Frequency</string>
+    <string name="order_time_per_day">time per day</string>
+    <string name="order_times_per_day">times per day</string>
+    <string name="order_give_for">Give for</string>
+    <string name="order_give_for_day">day</string>
+    <string name="order_give_for_days">days</string>
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
 

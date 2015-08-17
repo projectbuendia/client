@@ -27,20 +27,18 @@
             android:layout_height="fill_parent">
 
             <TextView
-                android:text="@string/order_medication"
                 android:layout_column="0"
-                android:id="@+id/order_instructions_label" />
+                android:text="@string/order_medication"
+                android:layout_marginEnd="12sp" />
 
             <EditText
+                android:id="@+id/order_medication"
+                android:layout_column="1"
+                android:layout_span="2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
-                android:ems="20"
-                android:id="@+id/order_instructions"
-                android:layout_span="2"
-                android:layout_column="1"
-                android:layout_marginStart="12sp"/>
-
+                android:ems="20" />
         </TableRow>
 
         <TableRow
@@ -48,10 +46,55 @@
             android:layout_height="fill_parent">
 
             <TextView
-                android:gravity="center_vertical"
-                android:text="@string/order_stop_after"
                 android:layout_column="0"
-                android:id="@+id/order_stop_after_label" />
+                android:text="@string/order_dosage"
+                android:layout_marginEnd="12sp" />
+
+            <EditText
+                android:id="@+id/order_dosage"
+                android:layout_column="1"
+                android:layout_span="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords|textPersonName"
+                android:ems="20" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:layout_column="0"
+                android:text="@string/order_frequency"
+                android:layout_marginEnd="12sp" />
+
+            <EditText
+                android:id="@+id/order_frequency"
+                android:layout_column="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords|textPersonName"
+                android:ems="3" />
+
+            <TextView
+                android:id="@+id/order_times_per_day_label"
+                android:layout_column="2"
+                android:layout_width="300dip"
+                android:layout_gravity="top|start"
+                android:text="@string/order_times_per_day"
+                android:layout_marginStart="12sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:layout_column="0"
+                android:gravity="center_vertical"
+                android:text="@string/order_give_for"
+                android:layout_marginEnd="12sp" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -59,16 +102,16 @@
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
                 android:ems="3"
-                android:id="@+id/order_stop_days"
-                android:layout_column="1"
-                android:layout_marginStart="12sp"/>
+                android:id="@+id/order_give_for_days"
+                android:layout_column="1" />
 
             <TextView
+                android:id="@+id/order_give_for_days_label"
+                android:layout_column="2"
                 android:layout_width="300dip"
                 android:layout_gravity="top|start"
-                android:text="@string/order_stop_days"
-                android:layout_column="2"
-                android:id="@+id/order_stop_days_label" />
+                android:text="@string/order_give_for_days"
+                android:layout_marginStart="12sp" />
 
         </TableRow>
 

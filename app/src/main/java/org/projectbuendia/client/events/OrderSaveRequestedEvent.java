@@ -23,14 +23,14 @@ public class OrderSaveRequestedEvent {
     public final String previousOrderUuid;
     public final String patientUuid;
     public final String instructions;
-    public final Integer stopDays;
+    public final Integer durationDays;
 
     public OrderSaveRequestedEvent(
             @Nullable String previousOrderUuid, String patientUuid,
-            String instructions, @Nullable Integer stopDays) {
+            String instructions, @Nullable Integer durationDays) {
         this.previousOrderUuid = previousOrderUuid;
         this.patientUuid = patientUuid;
         this.instructions = instructions;
-        this.stopDays = stopDays;
+        this.durationDays = durationDays;
     }
 }
