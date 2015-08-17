@@ -34,6 +34,7 @@ import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.net.model.ChartStructure;

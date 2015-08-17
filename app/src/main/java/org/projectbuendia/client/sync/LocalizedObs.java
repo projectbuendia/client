@@ -50,7 +50,8 @@ public final class LocalizedObs {
      * @param groupName The localized name of the group/section the observation belongs in
      * @param conceptUuid The UUID of the concept that was observed
      * @param conceptName The localized name of the concept that was observed
-     * @param value The unlocalized value (a numeric value or the concept UUID of the answer).
+     * @param value The unlocalized value (a numeric value, text string, concept UUID of the
+     *              answer, or UUID of the order that was executed).
      * @param localizedValue The localized value (a numeric value or a localized concept name).
      */
     public LocalizedObs(

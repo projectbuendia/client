@@ -22,6 +22,7 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.net.model.ChartGroup;
 import org.projectbuendia.client.net.model.ChartStructure;
 import org.projectbuendia.client.net.model.Encounter;
@@ -77,7 +78,7 @@ public class RpcToDb {
         return operations;
     }
 
-    /** Converts a Order response into appropriate inserts in the chart table. */
+    /** Converts a chart data response into appropriate inserts in the chart table. */
     public static void observationsRpcToDb(
             PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
         final String patientUuid = response.uuid;
@@ -98,13 +99,23 @@ public class RpcToDb {
             base.put(Contracts.Observations.ENCOUNTER_UUID, encounterUuid);
             base.put(Contracts.Observations.ENCOUNTER_TIME, encounterTime);
 
-            for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
-                final String conceptUuid = (String) entry.getKey();
-                ContentValues values = new ContentValues(base);
-                values.put(Contracts.Observations.CONCEPT_UUID, conceptUuid);
-                values.put(Contracts.Observations.VALUE, entry.getValue().toString());
-                result.add(values);
-                syncResult.stats.numInserts++;
+            if (encounter.observations != null) {
+                for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {
+                    final String conceptUuid = (String) entry.getKey();
+                    ContentValues values = new ContentValues(base);
+                    values.put(Contracts.Observations.CONCEPT_UUID, conceptUuid);
+                    values.put(Contracts.Observations.VALUE, entry.getValue().toString());
+                    result.add(values);
+                    syncResult.stats.numInserts++;
+                }
+            }
+            if (encounter.order_uuids != null) {
+                for (String orderUuid : encounter.order_uuids) {
+                    ContentValues values = new ContentValues(base);
+                    values.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_UUID);
+                    values.put(Contracts.ObservationColumns.VALUE, orderUuid);
+                    result.add(values);
+                }
             }
         }
     }

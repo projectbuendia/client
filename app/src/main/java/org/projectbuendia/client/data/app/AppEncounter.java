@@ -138,7 +138,7 @@ public class AppEncounter extends AppTypeBase<String> {
      * provider.
      */
     public ContentValues[] toContentValuesArray() {
-        ContentValues[] valuesArray = new ContentValues[observations.length];
+        ContentValues[] valuesArray = new ContentValues[observations.length + orderUuids.length];
         long timestampSec = timestamp.getMillis() / 1000;
         for (int i = 0; i < observations.length; i++) {
             AppObservation obs = observations[i];
@@ -150,6 +150,15 @@ public class AppEncounter extends AppTypeBase<String> {
             contentValues.put(Contracts.ObservationColumns.VALUE, obs.value);
             valuesArray[i] = contentValues;
         }
+        for (int i = 0; i < orderUuids.length; i++) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_UUID);
+            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestampSec);
+            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_UUID, encounterUuid);
+            contentValues.put(Contracts.ObservationColumns.PATIENT_UUID, patientUuid);
+            contentValues.put(Contracts.ObservationColumns.VALUE, orderUuids[i]);
+            valuesArray[observations.length + i] = contentValues;
+        }
         return valuesArray;
     }
 
@@ -159,12 +168,14 @@ public class AppEncounter extends AppTypeBase<String> {
      */
     public static AppEncounter fromNet(String patientUuid, Encounter encounter) {
         List<AppObservation> observationList = new ArrayList<AppObservation>();
-        for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
-            observationList.add(new AppObservation(
-                    (String) observation.getKey(),
-                    (String) observation.getValue(),
-                    AppObservation.estimatedTypeFor((String) observation.getValue())
-            ));
+        if (encounter.observations != null) {
+            for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
+                observationList.add(new AppObservation(
+                        (String) observation.getKey(),
+                        (String) observation.getValue(),
+                        AppObservation.estimatedTypeFor((String) observation.getValue())
+                ));
+            }
         }
         AppObservation[] observations = new AppObservation[observationList.size()];
         observationList.toArray(observations);

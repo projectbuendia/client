@@ -17,6 +17,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 
+import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
@@ -73,14 +74,15 @@ public class LocalizedChartHelper {
     public List<LocalizedObs> getObservations(String patientUuid, String locale) {
         Cursor cursor = null;
         try {
+            List<LocalizedObs> results = new ArrayList<>();
+
+            // Get all the regular observations with localized names.
             cursor = mContentResolver.query(
                     Contracts.LocalizedCharts.getLocalizedChartUri(
                             KNOWN_CHART_UUID, patientUuid, locale),
                     null, null, null, null);
-
-            List<LocalizedObs> result = new ArrayList<>();
             while (cursor.moveToNext()) {
-                LocalizedObs obs = new LocalizedObs(
+                results.add(new LocalizedObs(
                         cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                         cursor.getLong(cursor.getColumnIndex("encounter_time")) * 1000L,
                         cursor.getString(cursor.getColumnIndex("group_name")),
@@ -88,10 +90,27 @@ public class LocalizedChartHelper {
                         cursor.getString(cursor.getColumnIndex("concept_name")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
-                );
-                result.add(obs);
+                ));
             }
-            return result;
+            cursor.close();
+
+            // Also get observations representing executed orders.
+            cursor = mContentResolver.query(
+                    Contracts.Observations.CONTENT_URI, null,
+                    "concept_uuid = ?", new String[] {AppModel.ORDER_EXECUTED_UUID}, null);
+            while (cursor.moveToNext()) {
+                results.add(new LocalizedObs(
+                        cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
+                        cursor.getLong(cursor.getColumnIndex("encounter_time")) * 1000L,
+                        "",
+                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
+                        "",
+                        cursor.getString(cursor.getColumnIndex("value")),
+                        ""
+                ));
+            }
+
+            return results;
         } finally {
             if (cursor != null) {
                 cursor.close();

@@ -389,9 +389,7 @@ public class OpenMrsServer implements Server {
     }
 
     private Encounter encounterFromJson(JSONObject object) throws JSONException {
-        Encounter encounter = mGson.fromJson(object.toString(), Encounter.class);
-
-        return encounter;
+        return mGson.fromJson(object.toString(), Encounter.class);
     }
 
     @Override

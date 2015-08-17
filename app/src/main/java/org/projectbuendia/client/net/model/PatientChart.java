@@ -18,7 +18,6 @@ package org.projectbuendia.client.net.model;
  * <p>Must call {@link CustomSerialization#registerTo(com.google.gson.GsonBuilder)} before use.
  */
 public class PatientChart {
-
     public String uuid;
     public Encounter[] encounters;
 }

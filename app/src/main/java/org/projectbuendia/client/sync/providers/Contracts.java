@@ -100,7 +100,7 @@ public class Contracts {
         String ENCOUNTER_UUID = "encounter_uuid";
         String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
         String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
-        String VALUE = "value";  // concept value
+        String VALUE = "value";  // concept value or order UUID
 
         /**
          * Value is either 0 or 1, where 1 means this observation is cached locally

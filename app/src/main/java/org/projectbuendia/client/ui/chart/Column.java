@@ -14,6 +14,7 @@ public class Column {
     public DateTime stop;
     public String headingHtml;
     public Map<String, SortedSet<Value>> values = new HashMap<>();  // keyed by conceptUuid
+    public Map<String, Integer> orderExecutionCounts = new HashMap<>();  // keyed by orderUuid
 
     public Column(DateTime start, DateTime stop, String headingHtml) {
         this.start = start;

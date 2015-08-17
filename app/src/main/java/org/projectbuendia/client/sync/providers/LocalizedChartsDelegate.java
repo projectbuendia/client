@@ -16,6 +16,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.sync.Database;
 
 import java.util.List;
@@ -78,7 +79,6 @@ public class LocalizedChartsDelegate implements ProviderDelegate<Database> {
                 + "     group_names.locale = ?" // 4th selection arg
 
                 + " ORDER BY chart.chart_row, obs.encounter_time, obs._id";
-
         return dbHelper.getReadableDatabase()
                 .rawQuery(query, new String[]{patientUuid, locale, locale, locale});
     }

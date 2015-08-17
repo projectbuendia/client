@@ -15,6 +15,7 @@ import android.database.Cursor;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.data.app.AppEncounter;
+import org.projectbuendia.client.data.app.AppEncounter.AppObservation;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 import java.util.ArrayList;
@@ -42,25 +43,17 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
                 cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_UUID));
         final long timestamp = cursor.getLong(
                 cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_TIME));
-        final DateTime dateTime = new DateTime(timestamp);
-        List<AppEncounter.AppObservation> observationList = new ArrayList<>();
+        List<AppObservation> observationList = new ArrayList<>();
         cursor.move(-1);
         while (cursor.moveToNext()) {
-            String value =
-                    cursor.getString((cursor.getColumnIndex(Contracts.ObservationColumns.VALUE)));
-            AppEncounter.AppObservation.Type type =
-                    AppEncounter.AppObservation.estimatedTypeFor(value);
-            observationList.add(new AppEncounter.AppObservation(
-                    cursor.getString(
-                            (cursor.getColumnIndex(Contracts.ObservationColumns.CONCEPT_UUID))),
-                    value,
-                    type
+            String value = cursor.getString(cursor.getColumnIndex(Contracts.ObservationColumns.VALUE));
+            observationList.add(new AppObservation(
+                    cursor.getString(cursor.getColumnIndex(Contracts.ObservationColumns.CONCEPT_UUID)),
+                    value, AppObservation.estimatedTypeFor(value)
             ));
         }
-        AppEncounter.AppObservation[] observations =
-                new AppEncounter.AppObservation[observationList.size()];
+        AppObservation[] observations = new AppObservation[observationList.size()];
         observationList.toArray(observations);
-
-        return new AppEncounter(mPatientUuid, encounterUuid, dateTime, observations, null);
+        return new AppEncounter(mPatientUuid, encounterUuid, new DateTime(timestamp), observations, null);
     }
 }

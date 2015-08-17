@@ -20,14 +20,8 @@
     background-position: left;
   }
   th { white-space: nowrap; text-align: left; padding: 8px 16px; }
-  th.now, td.now {
-    font-weight: bold;
-    background: #e0f0ff;
-  }
-  tr:nth-child(even) th.now, tr:nth-child(even) td.now {
-    font-weight: bold;
-    background: #d8e8f8;
-  }
+  .now { font-weight: bold; background: #e0f0ff; }
+  tr:nth-child(even) .now { background: #d8e8f8; }
   td { text-align: center; min-width: 3em; }
   tr.heading th { text-align: center; font-size: 1.6em; }
   th.gutter {
@@ -42,8 +36,7 @@
   button { font-size: 100%; }
   tr.order td { vertical-align: center: text-align: center; }
   tr.order td div { margin: auto auto; width: 90%; height: 90%; }
-  .no-count { font-size: 75%; }
-  .future { color: #999; }
+  .future { font-size: 75%; color: #999; }
   .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
 </style>
 
@@ -106,11 +99,12 @@
           <div class="stop">Stop</div>
         {% elseif active %}
           {% if future %}
-            <div class="future active"><div class="no-count">&#x25cf;</div></div>
+            <div class="future active">&#x25cf;</div>
           {% else %}
+            {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
             <div class="past active" id="{{id}}"
-                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}}, counts['{{id}}'] || 0)"
-                ><div class="no-count">&#x25cf;</div></div>
+                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}}, {{count}})"
+                >{{count}}</div>
           {% endif %}
         {% endif %}
         {% set previousActive = active %}
@@ -126,15 +120,3 @@
     </th>
   </tr>
 </table>
-
-<script>
-  var counts = {};
-  function incrementOrderCell(orderUuid, columnStartMillis) {
-    var id = orderUuid + '.' + columnStartMillis;
-    counts[id] = (counts[id] || 0) + 1;
-    var cell = document.getElementById(id);
-    if (cell) {
-      cell.innerHTML = '<div class="count">' + counts[id] + '</div>';
-    }
-  }
-</script>

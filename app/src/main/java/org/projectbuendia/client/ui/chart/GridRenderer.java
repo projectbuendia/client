@@ -15,6 +15,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -78,14 +79,6 @@ public class GridRenderer {
         mLastRenderedOrders = orders;
     }
 
-    public void incrementOrderCell(Order order, Interval interval) {
-        mView.evaluateJavascript(
-                "incrementOrderCell('$1', $2)"
-                        .replace("$1", order.uuid)
-                        .replace("$2", "" + interval.getStartMillis()),
-        null);
-    }
-
     class GridHtmlGenerator {
         List<Order> mOrders;
         LocalDate mToday;
@@ -110,18 +103,19 @@ public class GridRenderer {
             for (LocalizedObs obs : observations) {
                 if (obs.value == null) continue;
 
-                Row row = mRowsByUuid.get(obs.conceptUuid);
-                if (row == null) {
-                    row = new Row(obs.conceptUuid, obs.conceptName);
-                    mRows.add(row);
-                    mRowsByUuid.put(obs.conceptUuid, row);
-                }
-
                 Value value = new Value(obs, chronology);
                 mDays.add(value.observed.toLocalDate());
                 Column column = getColumnContainingTime(value.observed);
                 if (value.present) {
                     addValue(column, obs.conceptUuid, value);
+                }
+
+                if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_UUID)) {
+                    Integer count = column.orderExecutionCounts.get(obs.value);
+                    column.orderExecutionCounts.put(
+                            obs.value, count == null ? 1 : count + 1);
+                } else {
+                    addRow(obs.conceptUuid, obs.conceptName);
                 }
 
                 // If this is any bleeding site, also show a dot in the "any bleeding" row.
@@ -137,6 +131,15 @@ public class GridRenderer {
                 column.values.put(conceptUuid, new TreeSet<>(Value.BY_OBS_TIME));
             }
             column.values.get(conceptUuid).add(value);
+        }
+
+        void addRow(String conceptUuid, String conceptName) {
+            Row row = mRowsByUuid.get(conceptUuid);
+            if (row == null) {
+                row = new Row(conceptUuid, conceptName);
+                mRows.add(row);
+                mRowsByUuid.put(conceptUuid, row);
+            }
         }
 
         Column getColumnContainingTime(DateTime dt) {

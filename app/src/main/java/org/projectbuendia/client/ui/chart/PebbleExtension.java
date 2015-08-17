@@ -25,6 +25,7 @@ public class PebbleExtension extends AbstractExtension {
             "dateformat", new DateFormatFilter());
     static Map<String, Function> functions = ImmutableMap.<String, Function>of(
             "get_values", new GetValuesFunction(),
+            "get_order_execution_count", new GetOrderExecutionCountFunction(),
             "intervals_overlap", new IntervalsOverlapFunction());
 
     abstract static class NullaryFilter implements Filter {
@@ -110,6 +111,20 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
+    static class GetOrderExecutionCountFunction implements Function {
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("order_uuid", "column");
+        }
+
+        @Override
+        public Object execute(Map<String, Object> args) {
+            String orderUuid = (String) args.get("order_uuid");
+            Column column = (Column) args.get("column");
+            Integer count = column.orderExecutionCounts.get(orderUuid);
+            return count == null ? 0 : count;
+        }
+    }
     static class IntervalsOverlapFunction implements Function {
         @Override
         public List<String> getArgumentNames() {

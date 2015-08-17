@@ -12,6 +12,7 @@
 package org.projectbuendia.client.data.app.tasks;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.os.AsyncTask;
 
 import com.android.volley.VolleyError;
@@ -119,12 +120,11 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
         }
 
         AppEncounter appEncounter = AppEncounter.fromNet(mPatient.uuid, encounter);
+        ContentValues[] values = appEncounter.toContentValuesArray();
+        if (values.length > 0) {
+            int inserted = mContentResolver.bulkInsert(Contracts.Observations.CONTENT_URI, values);
 
-        if (appEncounter.observations.length > 0) {
-            int inserted = mContentResolver.bulkInsert(Contracts.Observations.CONTENT_URI,
-                    appEncounter.toContentValuesArray());
-
-            if (inserted != appEncounter.observations.length) {
+            if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
                         inserted, appEncounter.observations.length);
                 return new EncounterAddFailedEvent(

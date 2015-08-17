@@ -28,10 +28,10 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 15;
+    public static final int DATABASE_VERSION = 16;
 
     /** Filename for SQLite file. */
-    public static final String DATABASE_NAME = "patientscipher.db";
+    public static final String DATABASE_NAME = "buendia.db";
 
     /*
      * This deserves a brief comment on security. Patient data encrypted by a hardcoded key
@@ -111,7 +111,7 @@ public class Database extends SQLiteOpenHelper {
                 + "encounter_uuid TEXT,"
                 + "encounter_time INTEGER,"
                 + "concept_uuid INTEGER,"
-                + "value INTEGER,"
+                + "value STRING,"
                 + "temp_cache INTEGER," // really boolean
                 + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 

@@ -654,11 +654,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             OrderExecutionDialogFragment.newInstance(order, interval, currentCount)
                     .show(getSupportFragmentManager(), null);
         }
-
-        @Override
-        public void incrementOrderCell(Order order, Interval interval) {
-            mGridRenderer.incrementOrderCell(order, interval);
-        }
     }
 
     private String getFormattedPcrString(double pcrValue) {

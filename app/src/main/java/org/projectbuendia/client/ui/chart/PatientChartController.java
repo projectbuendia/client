@@ -151,7 +151,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void showFormSubmissionDialog(boolean show);
         void showNewOrderDialog(String patientUuid);
         void showOrderExecutionDialog(Order order, Interval interval, int currentCount);
-        void incrementOrderCell(Order order, Interval interval);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -716,7 +715,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
                 mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
-                mUi.incrementOrderCell(order, event.interval);
             }
         }
     }
