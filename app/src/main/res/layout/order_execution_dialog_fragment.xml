@@ -18,7 +18,19 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/order_execution_text"
+        android:id="@+id/order_instructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/order_start_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24dp"
+        android:layout_marginBottom="32dp"/>
+
+    <TextView
+        android:id="@+id/order_execution_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

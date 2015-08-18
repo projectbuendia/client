@@ -79,12 +79,14 @@
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
 
-    <string name="order_execution_title">Order: %s</string>
-    <string name="order_execution_historical_singular">This order was administered %1$d time on %2$s.</string>
-    <string name="order_execution_historical_plural">This order was administered %1$d times on %2$s.</string>
-    <string name="order_execution_today_singular">This order has been administered %1$d time today, %2$s.</string>
-    <string name="order_execution_today_plural">This order has been administered %1$d times today, %2$s.</string>
-    <string name="order_execution_increase_count">Increase count by one</string>
+    <string name="order_execution_title">Record treatment</string>
+    <string name="order_execution_historical_singular">Given %1$d time on %2$s.</string>
+    <string name="order_execution_historical_plural">Given %1$d times on %2$s.</string>
+    <string name="order_execution_today_singular">Given %1$d time today, %2$s.</string>
+    <string name="order_execution_today_plural">Given %1$d times today, %2$s.</string>
+    <string name="order_execution_increase_count">Mark order as given</string>
+    <string name="order_started_at_time">Started at %s</string>
+    <string name="order_administered_at_time">&#xb7; %s</string>
 
     <string name="string_with_paren">%1$s (%2$s)</string>
     <string name="unknown_tent">Unknown tent</string>

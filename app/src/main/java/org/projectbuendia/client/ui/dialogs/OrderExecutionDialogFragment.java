@@ -53,6 +53,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
         args.putString("instructions", order.instructions);
+        args.putLong("orderStartMillis", order.start.getMillis());
         List<Long> millis = new ArrayList<>();
         for (DateTime dt : executionTimes) {
             if (interval.contains(dt)) {
@@ -69,7 +70,9 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         return f;
     }
 
-    @InjectView(R.id.order_execution_text) TextView mText;
+    @InjectView(R.id.order_instructions) TextView mOrderInstructions;
+    @InjectView(R.id.order_start_time) TextView mOrderStartTime;
+    @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
     @InjectView(R.id.order_execution_increment_button) ToggleButton mIncrButton;
 
     private LayoutInflater mInflater;
@@ -111,6 +114,12 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             executionTimes.add(new DateTime(getArguments().getLong("encounterTimeMillis")));
         }
 
+        mOrderInstructions.setText(getArguments().getString("instructions"));
+
+        DateTime start = new DateTime(getArguments().getLong("orderStartMillis"));
+        mOrderStartTime.setText(getResources().getString(
+                R.string.order_started_at_time, Utils.toShortString(start)));
+
         // Describe how many times the order was executed during the selected interval.
         int count = executionTimes.size();
         boolean plural = count != 1;
@@ -125,10 +134,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         // Show the list of times that the order was executed during the selected interval.
         label += "\n";
         for (DateTime executionTime : executionTimes) {
-            label += "\n    \u00b7 " + Utils.toShortString(executionTime);
+            label += "\n    " + getResources().getString(R.string.order_administered_at_time,
+                    Utils.toShortString(executionTime));
         }
         label += orderExecutedNow ? "" : "\n";  // keep total height stable
-        mText.setText(label + "\u00a0");  // prevent trimming of trailing whitespace
+        mOrderExecutionCount.setText(label + "\u00a0");  // prevent trimming of trailing whitespace
     }
 
     @Override
@@ -146,7 +156,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
         String instructions = getArguments().getString("instructions");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(getResources().getString(R.string.order_execution_title, instructions))
+                .setTitle(getResources().getString(R.string.order_execution_title))
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
