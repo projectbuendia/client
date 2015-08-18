@@ -103,7 +103,7 @@
           {% else %}
             {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
             <div class="past active" id="{{id}}"
-                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}}, {{count}})"
+                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
                 >{{count}}</div>
           {% endif %}
         {% endif %}

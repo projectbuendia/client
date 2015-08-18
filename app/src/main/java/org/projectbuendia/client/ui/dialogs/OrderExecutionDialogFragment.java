@@ -23,6 +23,8 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.common.base.Joiner;
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -30,6 +32,9 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -39,7 +44,7 @@ import de.greenrobot.event.EventBus;
 public class OrderExecutionDialogFragment extends DialogFragment {
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderExecutionDialogFragment newInstance(
-            Order order, Interval interval, int currentCount) {
+            Order order, Interval interval, List<DateTime> executionTimes) {
         // Save the current time for use as the encounter time later, thus avoiding
         // confusion if the dialog is opened before midnight and submitted after midnight.
         DateTime encounterTime = DateTime.now();
@@ -48,7 +53,13 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
         args.putString("instructions", order.instructions);
-        args.putInt("currentCount", currentCount);
+        List<Long> millis = new ArrayList<>();
+        for (DateTime dt : executionTimes) {
+            if (interval.contains(dt)) {
+                millis.add(dt.getMillis());
+            }
+        }
+        args.putString("executionTimes", Joiner.on("/").join(millis));
         args.putBoolean("viewOnly", viewOnly);
         args.putLong("encounterTimeMillis", encounterTime.getMillis());
         args.putLong("intervalStartMillis", interval.getStartMillis());
@@ -88,18 +99,36 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         }
     }
 
-    void updateUi(int increment) {
-        String instructions = getArguments().getString("instructions");
+    void updateUi(boolean orderExecutedNow) {
         LocalDate date = new DateTime(getArguments().getLong("intervalStartMillis")).toLocalDate();
-        int count = getArguments().getInt("currentCount") + increment;
+        List<DateTime> executionTimes = new ArrayList<>();
+        for (String millis : getArguments().getString("executionTimes").split("/")) {
+            if (!millis.isEmpty()) {
+                executionTimes.add(new DateTime(Long.parseLong(millis)));
+            }
+        }
+        if (orderExecutedNow) {
+            executionTimes.add(new DateTime(getArguments().getLong("encounterTimeMillis")));
+        }
+
+        // Describe how many times the order was executed during the selected interval.
+        int count = executionTimes.size();
         boolean plural = count != 1;
-        mText.setText(getResources().getString(
+        String label = getResources().getString(
                 date.equals(LocalDate.now()) ?
                         (plural ? R.string.order_execution_today_plural
                                 : R.string.order_execution_today_singular) :
                         (plural ? R.string.order_execution_historical_plural
                                 : R.string.order_execution_historical_singular),
-                instructions, count, Utils.toShortString(date)));
+                count, Utils.toShortString(date));
+
+        // Show the list of times that the order was executed during the selected interval.
+        label += "\n";
+        for (DateTime executionTime : executionTimes) {
+            label += "\n    \u00b7 " + Utils.toShortString(executionTime);
+        }
+        label += orderExecutedNow ? "" : "\n";  // keep total height stable
+        mText.setText(label + "\u00a0");  // prevent trimming of trailing whitespace
     }
 
     @Override
@@ -107,16 +136,17 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         View fragment = mInflater.inflate(R.layout.order_execution_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
-        updateUi(0);
+        updateUi(false);
         mIncrButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                updateUi(checked ? 1 : 0);
+                updateUi(checked);
             }
         });
 
+        String instructions = getArguments().getString("instructions");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.order_execution_title)
+                .setTitle(getResources().getString(R.string.order_execution_title, instructions))
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

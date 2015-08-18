@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 import android.widget.EditText;
 
 import org.projectbuendia.client.R;
@@ -119,13 +120,17 @@ public class OrderDialogFragment extends DialogFragment {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
-        return new AlertDialog.Builder(getActivity())
+        mMedication.requestFocus();
+        Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setCancelable(false) // Disable auto-cancel.
                 .setTitle(R.string.title_new_order)
                 .setPositiveButton(R.string.ok, null)
                 .setNegativeButton(R.string.cancel, null)
                 .setView(fragment)
                 .create();
+        // Open the keyboard, ready to type into the medication field.
+        dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        return dialog;
     }
 
     private void setError(EditText field, int resourceId) {

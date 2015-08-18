@@ -650,8 +650,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void showOrderExecutionDialog(
-                Order order, Interval interval, int currentCount) {
-            OrderExecutionDialogFragment.newInstance(order, interval, currentCount)
+                Order order, Interval interval, List<DateTime> executionTimes) {
+            OrderExecutionDialogFragment.newInstance(order, interval, executionTimes)
                     .show(getSupportFragmentManager(), null);
         }
     }

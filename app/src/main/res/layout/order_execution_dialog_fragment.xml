@@ -17,18 +17,18 @@
     android:padding="32dp"
     android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/order_execution_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"/>
+    <TextView
+        android:id="@+id/order_execution_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <ToggleButton
-            android:id="@+id/order_execution_increment_button"
-            android:textOn="@string/order_execution_increase_count"
-            android:textOff="@string/order_execution_increase_count"
-            android:textSize="32sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+    <ToggleButton
+        android:id="@+id/order_execution_increment_button"
+        android:textOn="@string/order_execution_increase_count"
+        android:textOff="@string/order_execution_increase_count"
+        android:textSize="32sp"
+        android:layout_marginTop="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

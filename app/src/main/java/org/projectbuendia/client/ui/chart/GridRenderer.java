@@ -49,7 +49,7 @@ public class GridRenderer {
         void onNewOrderPressed();
 
         @android.webkit.JavascriptInterface
-        void onOrderCellPressed(String orderUuid, long startMillis, int currentCount);
+        void onOrderCellPressed(String orderUuid, long startMillis);
     }
 
     public GridRenderer(WebView view, Resources resources) {

@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager.LayoutParams;
 import android.widget.EditText;
 
 import org.projectbuendia.client.App;
@@ -117,7 +118,8 @@ public class AddNewUserDialogFragment extends DialogFragment {
                                 });
             }
         });
-
+        // Open the keyboard, ready to type into the given name field.
+        dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
     }
 

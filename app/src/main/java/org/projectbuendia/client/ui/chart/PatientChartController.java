@@ -59,6 +59,7 @@ import org.projectbuendia.client.utils.Logger;
 import org.odk.collect.android.model.Patient;
 import org.odk.collect.android.model.PrepopulatableFields;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +100,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     private DateTime mLastObsTime = null;
     private String mPatientUuid = "";
     private Map<String, Order> mOrdersByUuid;
+    private List<LocalizedObs> mObservations;
 
     // This value is incremented whenever the controller is activated or suspended.
     // A "phase" is a period of time between such transition points.
@@ -150,7 +152,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showNewOrderDialog(String patientUuid);
-        void showOrderExecutionDialog(Order order, Interval interval, int currentCount);
+        void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -390,13 +392,18 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     }
 
     @android.webkit.JavascriptInterface
-    public void onOrderCellPressed(
-            String orderUuid, long startMillis, int currentCount) {
+    public void onOrderCellPressed(String orderUuid, long startMillis) {
         Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
-        mUi.showOrderExecutionDialog(
-                order, interval, currentCount);
+        List<DateTime> executionTimes = new ArrayList<>();
+        for (LocalizedObs obs : mObservations) {
+            if (AppModel.ORDER_EXECUTED_UUID.equals(obs.conceptUuid) &&
+                    order.uuid.equals(obs.value)) {
+                executionTimes.add(obs.encounterTime);
+            }
+        }
+        mUi.showOrderExecutionDialog(order, interval, executionTimes);
     }
 
     /** Retrieves the value of a date observation as a LocalDate. */
@@ -410,11 +417,10 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     private synchronized void updatePatientObsUi() {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
-        List<LocalizedObs> observations =
-                mChartHelper.getObservations(mPatientUuid);
+        mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, LocalizedObs> conceptsToLatestObservations =
                 new HashMap<>(mChartHelper.getMostRecentObservations(mPatientUuid));
-        for (LocalizedObs obs : observations) {
+        for (LocalizedObs obs : mObservations) {
             mLastObsTime = Utils.max(mLastObsTime, obs.encounterTime);
         }
         List<Order> orders = mChartHelper.getOrders(mPatientUuid);
@@ -422,7 +428,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         for (Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
-        LOG.d("Showing " + observations.size() + " observations and "
+        LOG.d("Showing " + mObservations.size() + " observations and "
                 + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
@@ -432,7 +438,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mUi.updateLastObsTimeUi(mLastObsTime);
         mUi.updatePatientVitalsUi(
                 conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.updatePatientHistoryUi(observations, orders, admissionDate, firstSymptomsDate);
+        mUi.updatePatientHistoryUi(mObservations, orders, admissionDate, firstSymptomsDate);
     }
 
     /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */

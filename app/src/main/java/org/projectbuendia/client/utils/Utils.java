@@ -46,6 +46,7 @@ import javax.annotation.Nullable;
 public class Utils {
     static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
+    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("HH:mm 'on' d MMM");
     static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
     public static final DateTime MIN_DATE = new DateTime(0, 1, 1, 0, 0, 0, DateTimeZone.UTC);
     public static final DateTime MAX_DATE = new DateTime(100000, 1, 1, 0, 0, 0, DateTimeZone.UTC);
@@ -293,6 +294,11 @@ public class Utils {
     /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
     public static @Nullable String toMediumString(@Nullable LocalDate localDate) {
         return localDate == null ? null : MEDIUM_DATE_FORMATTER.print(localDate);
+    }
+
+    /** Converts a nullable {@link DateTime} to a nullable String with time, day, and month only. */
+    public static @Nullable String toShortString(@Nullable DateTime dateTime) {
+        return dateTime == null ? null : SHORT_DATETIME_FORMATTER.print(dateTime);
     }
 
     /**

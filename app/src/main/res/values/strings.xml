@@ -79,11 +79,11 @@
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
 
-    <string name="order_execution_title">Order</string>
-    <string name="order_execution_historical_singular">%1$s was administered %2$d time on %3$s.</string>
-    <string name="order_execution_historical_plural">%1$s was administered %2$d times on %3$s.</string>
-    <string name="order_execution_today_singular">%1$s has been administered %2$d time today, %3$s.</string>
-    <string name="order_execution_today_plural">%1$s has been administered %2$d times today, %3$s.</string>
+    <string name="order_execution_title">Order: %s</string>
+    <string name="order_execution_historical_singular">This order was administered %1$d time on %2$s.</string>
+    <string name="order_execution_historical_plural">This order was administered %1$d times on %2$s.</string>
+    <string name="order_execution_today_singular">This order has been administered %1$d time today, %2$s.</string>
+    <string name="order_execution_today_plural">This order has been administered %1$d times today, %2$s.</string>
     <string name="order_execution_increase_count">Increase count by one</string>
 
     <string name="string_with_paren">%1$s (%2$s)</string>
