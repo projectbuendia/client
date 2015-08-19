@@ -15,23 +15,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="32dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
 
     <TextView
         android:id="@+id/order_instructions"
+        android:text="Medication and dosage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/order_start_time"
+        android:text="Started on Date at Time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24dp"
-        android:layout_marginBottom="32dp"/>
+        android:textSize="24sp"
+        android:layout_marginBottom="32dp" />
 
     <TextView
         android:id="@+id/order_execution_count"
+        android:text="Given N times today"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -39,19 +43,27 @@
         android:id="@+id/order_execution_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24dp"
-        android:padding="16dp"
+        android:textSize="24sp"
+        android:paddingTop="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="0dp"
+        android:layout_marginTop="12dp"
         android:text="11:30&#x0a;12:45"
         android:lineSpacingMultiplier="1.5"
         android:background="#ddd" />
 
     <ToggleButton
-        android:id="@+id/order_execution_increment_button"
-        android:textOn="@string/order_execution_increase_count"
-        android:textOff="@string/order_execution_increase_count"
-        android:textSize="32sp"
+        android:id="@+id/order_execution_mark_toggle"
+        android:textOn="@string/order_execution_marked_as_given"
+        android:textOff="@string/order_execution_mark_as_given"
+        android:textSize="24dp"
+        android:padding="24dp"
         android:layout_marginTop="32dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/toggle_button_selector"
+        android:textColor="#fff"
+        android:checked="false"/>
 
 </LinearLayout>

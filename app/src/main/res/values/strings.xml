@@ -66,7 +66,7 @@
     <string name="one_present_patient">1 present patient</string>
     <string name="n_present_patients">%d present patients</string>
 
-    <string name="title_new_order">New order</string>
+    <string name="title_new_order">New Order</string>
     <string name="order_instructions">Order</string>
     <string name="order_medication">Medication</string>
     <string name="order_dosage">Dosage</string>
@@ -75,18 +75,22 @@
     <string name="order_times_per_day">times per day</string>
     <string name="order_give_for">Give for</string>
     <string name="order_give_for_days">days</string>
-    <string name="order_give_for_day_today">day (today only)</string>
-    <string name="order_give_for_days_until_date">days (today until %s)</string>
+    <string name="order_give_for_day">day</string>
+    <string name="order_duration_today">(today only)</string>
+    <string name="order_duration_today_and_tomorrow">(today and tomorrow)</string>
+    <string name="order_duration_today_through_date">(today through %s)</string>
+    <string name="order_duration_indefinitely">(indefinitely)</string>
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
 
     <string name="order_execution_title">Record Treatment</string>
-    <string name="order_execution_historical_singular_html">Given <b>%1$d</b> time on %2$s.</string>
-    <string name="order_execution_historical_plural_html">Given <b>%1$d</b> times on %2$s.</string>
-    <string name="order_execution_today_singular_html">Given <b>%1$d</b> time today, %2$s.</string>
-    <string name="order_execution_today_plural_html">Given <b>%1$d</b> times today, %2$s.</string>
-    <string name="order_execution_increase_count">Mark order as given</string>
-    <string name="order_started_at_time">Started at %s</string>
+    <string name="order_execution_historical_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time on %2$s</string>
+    <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times on %2$s</string>
+    <string name="order_execution_today_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time today, %2$s</string>
+    <string name="order_execution_today_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times today, %2$s</string>
+    <string name="order_execution_mark_as_given">Mark as given now</string>
+    <string name="order_execution_marked_as_given">&#x2714; Marked as given now</string>
+    <string name="order_started_on_date_at_time">Started on %1$s at %2$s</string>
 
     <string name="string_with_paren">%1$s (%2$s)</string>
     <string name="unknown_tent">Unknown tent</string>

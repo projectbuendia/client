@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 public class Utils {
     static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
-    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("HH:mm 'on' d MMM");
+    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("d MMM 'at' HH:mm");
     static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
     static final DateTimeFormatter TIME_OF_DAY_FORMATTER = DateTimeFormat.forPattern("HH:mm");
     public static final DateTime MIN_DATE = new DateTime(0, 1, 1, 0, 0, 0, DateTimeZone.UTC);

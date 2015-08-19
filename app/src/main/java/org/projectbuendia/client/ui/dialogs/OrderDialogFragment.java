@@ -19,7 +19,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
@@ -53,6 +52,7 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_frequency) EditText mFrequency;
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
     @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
+    @InjectView(R.id.order_duration_label) TextView mDurationLabel;
 
     private LayoutInflater mInflater;
 
@@ -130,15 +130,20 @@ public class OrderDialogFragment extends DialogFragment {
             int days = giveForDaysStr.isEmpty() ? 0 : Integer.parseInt(giveForDaysStr);
             LocalDate lastDay = LocalDate.now().plusDays(days - 1);
             mGiveForDaysLabel.setText(
-                    days == 0 ? getResources().getString(R.string.order_give_for_days) :
-                            days == 1 ? getResources().getString(R.string.order_give_for_day_today) :
-                                    getResources().getString(R.string.order_give_for_days_until_date, Utils.toShortString(lastDay)));
+                    days == 0 ? R.string.order_give_for_days :
+                    days == 1 ? R.string.order_give_for_day :
+                    R.string.order_give_for_days);
+            mDurationLabel.setText(getResources().getString(
+                    days == 0 ? R.string.order_duration_indefinitely :
+                    days == 1 ? R.string.order_duration_today :
+                    days == 2 ? R.string.order_duration_today_and_tomorrow :
+                    R.string.order_duration_today_through_date
+            ).replace("%s", Utils.toShortString(lastDay)));
         }
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mGiveForDays.addTextChangedListener(new GiveForDaysWatcher());

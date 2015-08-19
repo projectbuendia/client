@@ -46,15 +46,12 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderExecutionDialogFragment newInstance(
             Order order, Interval interval, List<DateTime> executionTimes) {
-        // Save the current time for use as the encounter time later, thus avoiding
-        // confusion if the dialog is opened before midnight and submitted after midnight.
-        DateTime encounterTime = DateTime.now();
-        boolean viewOnly = !interval.contains(encounterTime);
-
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
         args.putString("instructions", order.instructions);
         args.putLong("orderStartMillis", order.start.getMillis());
+        args.putLong("intervalStartMillis", interval.getStartMillis());
+        args.putLong("intervalStopMillis", interval.getEndMillis());
         List<Long> millis = new ArrayList<>();
         for (DateTime dt : executionTimes) {
             if (interval.contains(dt)) {
@@ -62,10 +59,11 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             }
         }
         args.putString("executionTimes", Joiner.on("/").join(millis));
-        args.putBoolean("viewOnly", viewOnly);
+        // To avoid the possibility of confusion when the dialog is opened just
+        // before midnight, save the current time for use as the encounter time later.
+        DateTime encounterTime = DateTime.now();
         args.putLong("encounterTimeMillis", encounterTime.getMillis());
-        args.putLong("intervalStartMillis", interval.getStartMillis());
-        args.putLong("intervalStopMillis", interval.getEndMillis());
+        args.putBoolean("editable", interval.contains(encounterTime));
         OrderExecutionDialogFragment f = new OrderExecutionDialogFragment();
         f.setArguments(args);
         return f;
@@ -75,7 +73,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
     @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
     @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
-    @InjectView(R.id.order_execution_increment_button) ToggleButton mIncrButton;
+    @InjectView(R.id.order_execution_mark_toggle) ToggleButton mMarkToggle;
 
     private LayoutInflater mInflater;
 
@@ -86,7 +84,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     }
 
     public void onSubmit() {
-        if (mIncrButton.isChecked()) {
+        if (mMarkToggle.isChecked()) {
             String orderUuid = getArguments().getString("orderUuid");
             String instructions = getArguments().getString("instructions");
             Interval interval = new Interval(getArguments().getLong("intervalStartMillis"),
@@ -113,10 +111,12 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             }
         }
 
+        // Show what was ordered and when the order started.
         mOrderInstructions.setText(getArguments().getString("instructions"));
         DateTime start = new DateTime(getArguments().getLong("orderStartMillis"));
         mOrderStartTime.setText(getResources().getString(
-                R.string.order_started_at_time, Utils.toShortString(start)));
+                R.string.order_started_on_date_at_time,
+                Utils.toShortString(start.toLocalDate()), Utils.toTimeOfDayString(start)));
 
         // Describe how many times the order was executed during the selected interval.
         int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
@@ -130,16 +130,17 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 count, Utils.toShortString(date))));
 
         // Show the list of times that the order was executed during the selected interval.
-        boolean editable = !getArguments().getBoolean("viewOnly");
+        boolean editable = getArguments().getBoolean("editable");
         Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
         List<String> htmlItems = new ArrayList<>();
         for (DateTime executionTime : executionTimes) {
             htmlItems.add(Utils.toTimeOfDayString(executionTime));
         }
         if (editable) {
+            DateTime encounterTime = new DateTime(getArguments().getLong("encounterTimeMillis"));
             htmlItems.add(orderExecutedNow ?
-                    Utils.toTimeOfDayString(new DateTime(getArguments().getLong("encounterTime"))) :
-                    "");  // keep total height stable
+                    "<b>" + Utils.toTimeOfDayString(encounterTime) + "</b>" :
+                    "<b>&nbsp;</b>");  // keep total height stable
         }
         mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
     }
@@ -150,7 +151,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         ButterKnife.inject(this, fragment);
 
         updateUi(false);
-        mIncrButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mMarkToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 updateUi(checked);
@@ -168,10 +169,10 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.cancel, null)
                 .setView(fragment);
 
-        if (getArguments().getBoolean("viewOnly")) {
+        if (!getArguments().getBoolean("editable")) {
             // Historical counts can be viewed but not changed.
             builder.setNegativeButton(null, null);
-            mIncrButton.setVisibility(View.GONE);
+            mMarkToggle.setVisibility(View.GONE);
         }
         return builder.create();
     }

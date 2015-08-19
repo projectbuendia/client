@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
-                android:ems="30" />
+                android:ems="15" />
         </TableRow>
 
         <TableRow
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
-                android:ems="30" />
+                android:ems="15" />
         </TableRow>
 
         <TableRow
@@ -74,7 +74,9 @@
                 android:layout_column="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords|textPersonName"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                android:maxLength="2"
                 android:ems="2" />
 
             <TextView
@@ -97,13 +99,14 @@
                 android:layout_marginEnd="12sp" />
 
             <EditText
+                android:id="@+id/order_give_for_days"
+                android:layout_column="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
-                android:ems="2"
-                android:id="@+id/order_give_for_days"
-                android:layout_column="1" />
+                android:maxLength="2"
+                android:ems="2" />
 
             <TextView
                 android:id="@+id/order_give_for_days_label"
@@ -112,8 +115,18 @@
                 android:layout_gravity="top|start"
                 android:text="@string/order_give_for_days"
                 android:layout_marginStart="12sp" />
-
         </TableRow>
-
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+            <TextView
+                android:id="@+id/order_duration_label"
+                android:layout_column="1"
+                android:layout_span="2"
+                android:layout_width="400dip"
+                android:layout_gravity="top|start"
+                android:text="@string/order_duration_indefinitely"
+                android:layout_marginStart="12sp" />
+        </TableRow>
     </TableLayout>
 </FrameLayout>
