@@ -179,7 +179,7 @@ public final class LocationSelectionActivity extends PatientSearchActivity {
 
         @Override
         public void showSyncFailedDialog(boolean show) {
-            Utils.showOrHideDialog(mSyncFailedDialog, show);
+            Utils.showDialogIf(mSyncFailedDialog, show);
         }
 
         @Override

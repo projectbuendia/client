@@ -15,7 +15,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -152,7 +151,7 @@ public class UserLoginActivity extends BaseActivity {
 
         @Override
         public void showSyncFailedDialog(boolean show) {
-            Utils.showOrHideDialog(mSyncFailedDialog, show);
+            Utils.showDialogIf(mSyncFailedDialog, show);
         }
 
         @Override

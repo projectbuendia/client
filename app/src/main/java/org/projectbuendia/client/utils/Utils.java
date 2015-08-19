@@ -13,6 +13,7 @@ package org.projectbuendia.client.utils;
 
 import android.app.Dialog;
 import android.database.Cursor;
+import android.view.View;
 
 import com.google.common.collect.Lists;
 
@@ -48,6 +49,7 @@ public class Utils {
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
     static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("HH:mm 'on' d MMM");
     static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
+    static final DateTimeFormatter TIME_OF_DAY_FORMATTER = DateTimeFormat.forPattern("HH:mm");
     public static final DateTime MIN_DATE = new DateTime(0, 1, 1, 0, 0, 0, DateTimeZone.UTC);
     public static final DateTime MAX_DATE = new DateTime(100000, 1, 1, 0, 0, 0, DateTimeZone.UTC);
 
@@ -301,6 +303,11 @@ public class Utils {
         return dateTime == null ? null : SHORT_DATETIME_FORMATTER.print(dateTime);
     }
 
+    /** Converts a nullable {@link DateTime} to a nullable String with just the time in hours and minutes. */
+    public static @Nullable String toTimeOfDayString(@Nullable DateTime dateTime) {
+        return dateTime == null ? null : TIME_OF_DAY_FORMATTER.print(dateTime);
+    }
+
     /**
      * Converts a nullable {@link DateTime} to a nullable String with full date and time, but no
      * time zone.
@@ -338,7 +345,7 @@ public class Utils {
     }
 
     /** Shows or hides a dialog based on a boolean flag. */
-    public static void showOrHideDialog(@Nullable Dialog dialog, boolean show) {
+    public static void showDialogIf(@Nullable Dialog dialog, boolean show) {
         if (dialog != null) {
             if (show) {
                 dialog.show();
@@ -346,5 +353,10 @@ public class Utils {
                 dialog.hide();
             }
         }
+    }
+
+    /** Shows or a hides a view based on a boolean flag. */
+    public static void showIf(View view, boolean show) {
+        view.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

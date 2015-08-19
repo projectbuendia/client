@@ -74,19 +74,19 @@
     <string name="order_time_per_day">time per day</string>
     <string name="order_times_per_day">times per day</string>
     <string name="order_give_for">Give for</string>
-    <string name="order_give_for_day">day</string>
     <string name="order_give_for_days">days</string>
+    <string name="order_give_for_day_today">day (today only)</string>
+    <string name="order_give_for_days_until_date">days (today until %s)</string>
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
-    <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
+    <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
 
     <string name="order_execution_title">Record Treatment</string>
-    <string name="order_execution_historical_singular">Given %1$d time on %2$s.</string>
-    <string name="order_execution_historical_plural">Given %1$d times on %2$s.</string>
-    <string name="order_execution_today_singular">Given %1$d time today, %2$s.</string>
-    <string name="order_execution_today_plural">Given %1$d times today, %2$s.</string>
+    <string name="order_execution_historical_singular_html">Given <b>%1$d</b> time on %2$s.</string>
+    <string name="order_execution_historical_plural_html">Given <b>%1$d</b> times on %2$s.</string>
+    <string name="order_execution_today_singular_html">Given <b>%1$d</b> time today, %2$s.</string>
+    <string name="order_execution_today_plural_html">Given <b>%1$d</b> times today, %2$s.</string>
     <string name="order_execution_increase_count">Mark order as given</string>
     <string name="order_started_at_time">Started at %s</string>
-    <string name="order_administered_at_time">&#xb7; %s</string>
 
     <string name="string_with_paren">%1$s (%2$s)</string>
     <string name="unknown_tent">Unknown tent</string>

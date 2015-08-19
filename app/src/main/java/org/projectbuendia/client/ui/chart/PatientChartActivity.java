@@ -634,12 +634,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void showFormLoadingDialog(boolean show) {
-            Utils.showOrHideDialog(mFormLoadingDialog, show);
+            Utils.showDialogIf(mFormLoadingDialog, show);
         }
 
         @Override
         public void showFormSubmissionDialog(boolean show) {
-            Utils.showOrHideDialog(mFormSubmissionDialog, show);
+            Utils.showDialogIf(mFormSubmissionDialog, show);
         }
 
         @Override

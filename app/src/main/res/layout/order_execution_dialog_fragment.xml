@@ -20,7 +20,8 @@
     <TextView
         android:id="@+id/order_instructions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/order_start_time"
@@ -33,6 +34,16 @@
         android:id="@+id/order_execution_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/order_execution_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="24dp"
+        android:padding="16dp"
+        android:text="11:30&#x0a;12:45"
+        android:lineSpacingMultiplier="1.5"
+        android:background="#ddd" />
 
     <ToggleButton
         android:id="@+id/order_execution_increment_button"

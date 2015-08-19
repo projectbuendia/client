@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
-                android:ems="20" />
+                android:ems="30" />
         </TableRow>
 
         <TableRow
@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
-                android:ems="20" />
+                android:ems="30" />
         </TableRow>
 
         <TableRow
@@ -75,7 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords|textPersonName"
-                android:ems="3" />
+                android:ems="2" />
 
             <TextView
                 android:id="@+id/order_times_per_day_label"
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
-                android:ems="3"
+                android:ems="2"
                 android:id="@+id/order_give_for_days"
                 android:layout_column="1" />
 

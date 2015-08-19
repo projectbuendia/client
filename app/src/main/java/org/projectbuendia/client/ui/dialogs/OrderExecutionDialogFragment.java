@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -73,6 +74,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     @InjectView(R.id.order_instructions) TextView mOrderInstructions;
     @InjectView(R.id.order_start_time) TextView mOrderStartTime;
     @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
+    @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
     @InjectView(R.id.order_execution_increment_button) ToggleButton mIncrButton;
 
     private LayoutInflater mInflater;
@@ -110,35 +112,36 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 executionTimes.add(new DateTime(Long.parseLong(millis)));
             }
         }
-        if (orderExecutedNow) {
-            executionTimes.add(new DateTime(getArguments().getLong("encounterTimeMillis")));
-        }
 
         mOrderInstructions.setText(getArguments().getString("instructions"));
-
         DateTime start = new DateTime(getArguments().getLong("orderStartMillis"));
         mOrderStartTime.setText(getResources().getString(
                 R.string.order_started_at_time, Utils.toShortString(start)));
 
         // Describe how many times the order was executed during the selected interval.
-        int count = executionTimes.size();
+        int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
         boolean plural = count != 1;
-        String label = getResources().getString(
+        mOrderExecutionCount.setText(Html.fromHtml(getResources().getString(
                 date.equals(LocalDate.now()) ?
-                        (plural ? R.string.order_execution_today_plural
-                                : R.string.order_execution_today_singular) :
-                        (plural ? R.string.order_execution_historical_plural
-                                : R.string.order_execution_historical_singular),
-                count, Utils.toShortString(date));
+                        (plural ? R.string.order_execution_today_plural_html
+                                : R.string.order_execution_today_singular_html) :
+                        (plural ? R.string.order_execution_historical_plural_html
+                                : R.string.order_execution_historical_singular_html),
+                count, Utils.toShortString(date))));
 
         // Show the list of times that the order was executed during the selected interval.
-        label += "\n";
+        boolean editable = !getArguments().getBoolean("viewOnly");
+        Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
+        List<String> htmlItems = new ArrayList<>();
         for (DateTime executionTime : executionTimes) {
-            label += "\n    " + getResources().getString(R.string.order_administered_at_time,
-                    Utils.toShortString(executionTime));
+            htmlItems.add(Utils.toTimeOfDayString(executionTime));
         }
-        label += orderExecutedNow ? "" : "\n";  // keep total height stable
-        mOrderExecutionCount.setText(label + "\u00a0");  // prevent trimming of trailing whitespace
+        if (editable) {
+            htmlItems.add(orderExecutedNow ?
+                    Utils.toTimeOfDayString(new DateTime(getArguments().getLong("encounterTime"))) :
+                    "");  // keep total height stable
+        }
+        mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
     }
 
     @Override
@@ -154,7 +157,6 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             }
         });
 
-        String instructions = getArguments().getString("instructions");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                 .setTitle(getResources().getString(R.string.order_execution_title))
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {

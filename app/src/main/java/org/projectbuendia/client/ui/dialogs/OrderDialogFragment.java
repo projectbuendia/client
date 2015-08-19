@@ -17,11 +17,16 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.OrderSaveRequestedEvent;
 import org.projectbuendia.client.utils.Utils;
@@ -47,6 +52,7 @@ public class OrderDialogFragment extends DialogFragment {
     @InjectView(R.id.order_dosage) EditText mDosage;
     @InjectView(R.id.order_frequency) EditText mFrequency;
     @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
+    @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
 
     private LayoutInflater mInflater;
 
@@ -91,7 +97,7 @@ public class OrderDialogFragment extends DialogFragment {
             valid = false;
         }
         if (durationDays != null && durationDays == 0) {
-            setError(mGiveForDays, R.string.order_stop_days_cannot_be_zero);
+            setError(mGiveForDays, R.string.order_give_for_days_cannot_be_zero);
             valid = false;
         }
         Utils.logUserAction("order_submitted",
@@ -114,12 +120,28 @@ public class OrderDialogFragment extends DialogFragment {
         }
     }
 
+    class GiveForDaysWatcher implements TextWatcher {
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {}
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {}
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            String giveForDaysStr = mGiveForDays.getText().toString().trim();
+            int days = giveForDaysStr.isEmpty() ? 0 : Integer.parseInt(giveForDaysStr);
+            LocalDate lastDay = LocalDate.now().plusDays(days - 1);
+            mGiveForDaysLabel.setText(
+                    days == 0 ? getResources().getString(R.string.order_give_for_days) :
+                            days == 1 ? getResources().getString(R.string.order_give_for_day_today) :
+                                    getResources().getString(R.string.order_give_for_days_until_date, Utils.toShortString(lastDay)));
+        }
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
-
+        mGiveForDays.addTextChangedListener(new GiveForDaysWatcher());
         mMedication.requestFocus();
         Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setCancelable(false) // Disable auto-cancel.
