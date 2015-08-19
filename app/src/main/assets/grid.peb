@@ -63,11 +63,15 @@
             {% if last.number != null %}
               {{values | avg | numberformat("#.#")}}
             {% elseif last.abbrev != null %}
-              {{(values | last).abbrev}}
+              {{last.abbrev}}
             {% elseif last.text != null %}
               <div onclick="alert(''
                 {%- for value in values -%}
-                  + '---- ' + {{value.observed | dateformat("MMM dd, hh:mm") | js}} + ' ----\n' + {{value.text | js}} + '\n\n'
+                  + '---- '
+                  + {{value.observed | dateformat("dd MMM at HH:mm") | js}}
+                  + ' ----\n'
+                  + {{value.text | js}}
+                  + '\n\n'
                 {%- endfor -%})">&#x1f4dd;</div>
             {% elseif last.bool != null %}
               {{(values | max).bool ? "&#x25cf;" : "" | raw}}
@@ -85,33 +89,32 @@
   </tr>
 
   {% for order in orders %}
-  <tr class="order">
-    <th>
-      {{order.instructions}}
-    </th>
-    {% set previousActive = false %}
-    {% set future = false %}
-    {% for column in columns %}
-      {% set id = order.uuid + "." + column.start.getMillis %}
-      <td class="{{column.start == nowColumnStart ? "now" : ""}}">
-        {% set active = intervals_overlap(order.interval, column.interval) %}
-        {% if previousActive and not active %}
-          <div class="stop">Stop</div>
-        {% elseif active %}
-          {% if future %}
-            <div class="future active">&#x25cf;</div>
-          {% else %}
-            {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
-            <div class="past active" id="{{id}}"
-                onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
-                >{{count}}</div>
+    <tr class="order">
+      <th>
+        {{order.instructions}}
+      </th>
+      {% set previousActive = false %}
+      {% set future = false %}
+      {% for column in columns %}
+        <td class="{{column.start == nowColumnStart ? "now" : ""}}">
+          {% set active = intervals_overlap(order.interval, column.interval) %}
+          {% if previousActive and not active %}
+            <div class="stop">Stop</div>
+          {% elseif active %}
+            {% if future %}
+              <div class="future active">&#x25cf;</div>
+            {% else %}
+              {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
+              <div class="past active"
+                  onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
+                  >{{count}}</div>
+            {% endif %}
           {% endif %}
-        {% endif %}
-        {% set previousActive = active %}
-        {% set future = future or column.start == nowColumnStart %}
-      </td>
-    {% endfor %}
-  </tr>
+          {% set previousActive = active %}
+          {% set future = future or column.start == nowColumnStart %}
+        </td>
+      {% endfor %}
+    </tr>
   {% endfor %}
 
   <tr>
