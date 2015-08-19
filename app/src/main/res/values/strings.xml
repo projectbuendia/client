@@ -79,7 +79,7 @@
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_stop_days_cannot_be_zero">Must be empty or greater than 0</string>
 
-    <string name="order_execution_title">Record treatment</string>
+    <string name="order_execution_title">Record Treatment</string>
     <string name="order_execution_historical_singular">Given %1$d time on %2$s.</string>
     <string name="order_execution_historical_plural">Given %1$d times on %2$s.</string>
     <string name="order_execution_today_singular">Given %1$d time today, %2$s.</string>
