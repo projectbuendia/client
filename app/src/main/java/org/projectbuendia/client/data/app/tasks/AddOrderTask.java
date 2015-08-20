@@ -39,11 +39,11 @@ import java.util.concurrent.ExecutionException;
  * given {@link CrudEventBus} with the added order. If the operation fails, an
  * {@link OrderAddFailedEvent} is posted instead.
  */
-public class AppAddOrderAsyncTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
+public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
-    private final AppAsyncTaskFactory mTaskFactory;
+    private final TaskFactory mTaskFactory;
     private final AppTypeConverters mConverters;
     private final Server mServer;
     private final ContentResolver mContentResolver;
@@ -52,9 +52,9 @@ public class AppAddOrderAsyncTask extends AsyncTask<Void, Void, OrderAddFailedEv
 
     private String mUuid;
 
-    /** Creates a new {@link AppAddOrderAsyncTask}. */
-    public AppAddOrderAsyncTask(
-            AppAsyncTaskFactory taskFactory,
+    /** Creates a new {@link AddOrderTask}. */
+    public AddOrderTask(
+            TaskFactory taskFactory,
             AppTypeConverters converters,
             Server server,
             ContentResolver contentResolver,
@@ -105,7 +105,7 @@ public class AppAddOrderAsyncTask extends AsyncTask<Void, Void, OrderAddFailedEv
 
         // Otherwise, start a fetch task to fetch the order from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemAsyncTask<AppOrder> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemTask<AppOrder> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Orders.CONTENT_URI,
                 Contracts.OrderColumns.ALL,
                 new UuidFilter(),

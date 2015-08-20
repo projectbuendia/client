@@ -42,11 +42,11 @@ import java.util.concurrent.ExecutionException;
  * {@link CrudEventBus} with the added patient. If the operation fails, a
  * {@link PatientAddFailedEvent} is posted instead.
  */
-public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFailedEvent> {
+public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent> {
 
     private static final Logger LOG = Logger.create();
 
-    private final AppAsyncTaskFactory mTaskFactory;
+    private final TaskFactory mTaskFactory;
     private final AppTypeConverters mConverters;
     private final Server mServer;
     private final ContentResolver mContentResolver;
@@ -55,9 +55,9 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
     private String mUuid;
 
-    /** Creates a new {@link AppAddPatientAsyncTask}. */
-    public AppAddPatientAsyncTask(
-            AppAsyncTaskFactory taskFactory,
+    /** Creates a new {@link AddPatientTask}. */
+    public AddPatientTask(
+            TaskFactory taskFactory,
             AppTypeConverters converters,
             Server server,
             ContentResolver contentResolver,
@@ -145,7 +145,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
                 null,
                 new UuidFilter(),

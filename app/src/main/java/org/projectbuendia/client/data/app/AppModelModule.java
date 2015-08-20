@@ -14,8 +14,8 @@ package org.projectbuendia.client.data.app;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.data.app.converters.AppTypeConverterModule;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
-import org.projectbuendia.client.data.app.tasks.AppAsyncTaskFactory;
-import org.projectbuendia.client.data.app.tasks.AppAsyncTaskModule;
+import org.projectbuendia.client.data.app.tasks.TaskFactory;
+import org.projectbuendia.client.data.app.tasks.TaskModule;
 
 import dagger.Module;
 import dagger.Provides;
@@ -26,7 +26,7 @@ import javax.inject.Singleton;
 @Module(
         includes = {
                 AppTypeConverterModule.class,
-                AppAsyncTaskModule.class
+                TaskModule.class
         },
         complete = false,
         library = true)
@@ -36,7 +36,7 @@ public class AppModelModule {
     @Singleton
     AppModel provideAppModel(
             AppTypeConverters converters,
-            AppAsyncTaskFactory taskFactory) {
+            TaskFactory taskFactory) {
         return new AppModel(App.getInstance().getContentResolver(), converters, taskFactory);
     }
 }

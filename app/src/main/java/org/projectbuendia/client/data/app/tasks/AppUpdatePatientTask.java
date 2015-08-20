@@ -40,11 +40,10 @@ import java.util.concurrent.ExecutionException;
  * {@link CrudEventBus} with both the old and updated patient data. If the operation fails, a
  * {@link PatientUpdateFailedEvent} is posted instead.
  */
-public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
-
+public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFailedEvent> {
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
-    private final AppAsyncTaskFactory mTaskFactory;
+    private final TaskFactory mTaskFactory;
     private final AppTypeConverters mConverters;
     private final Server mServer;
     private final ContentResolver mContentResolver;
@@ -53,8 +52,8 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
     private final AppPatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
-    AppUpdatePatientAsyncTask(
-            AppAsyncTaskFactory taskFactory,
+    AppUpdatePatientTask(
+            TaskFactory taskFactory,
             AppTypeConverters converters,
             Server server,
             ContentResolver contentResolver,
@@ -114,7 +113,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
-        FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
                 null,
                 new UuidFilter(),

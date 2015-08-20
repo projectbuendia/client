@@ -31,58 +31,57 @@ import org.projectbuendia.client.net.Server;
  * An assisted injection factory that creates {@link AsyncTask}s for performing {@link AppModel}
  * operations.
  */
-public class AppAsyncTaskFactory {
-
+public class TaskFactory {
     private final AppTypeConverters mConverters;
     private final Server mServer;
     private final ContentResolver mContentResolver;
 
-    /** Creates a new {@link AppAsyncTaskFactory}. */
-    public AppAsyncTaskFactory(
+    /** Creates a new {@link TaskFactory}. */
+    public TaskFactory(
             AppTypeConverters converters, Server server, ContentResolver contentResolver) {
         mConverters = converters;
         mServer = server;
         mContentResolver = contentResolver;
     }
 
-    /** Creates a new {@link AppAddPatientAsyncTask}. */
-    public AppAddPatientAsyncTask newAddPatientAsyncTask(
+    /** Creates a new {@link AddPatientTask}. */
+    public AddPatientTask newAddPatientAsyncTask(
             AppPatientDelta patientDelta, CrudEventBus bus) {
-        return new AppAddPatientAsyncTask(
+        return new AddPatientTask(
                 this, mConverters, mServer, mContentResolver, patientDelta, bus);
     }
 
-    /** Creates a new {@link AppUpdatePatientAsyncTask}. */
-    public AppUpdatePatientAsyncTask newUpdatePatientAsyncTask(
+    /** Creates a new {@link AppUpdatePatientTask}. */
+    public AppUpdatePatientTask newUpdatePatientAsyncTask(
             AppPatient originalPatient, AppPatientDelta patientDelta, CrudEventBus bus) {
-        return new AppUpdatePatientAsyncTask(
+        return new AppUpdatePatientTask(
                 this, mConverters, mServer, mContentResolver, originalPatient, patientDelta, bus);
     }
 
-    /** Creates a new {@link AppAddEncounterAsyncTask}. */
-    public AppAddEncounterAsyncTask newAddEncounterAsyncTask(
+    /** Creates a new {@link AddEncounterTask}. */
+    public AddEncounterTask newAddEncounterAsyncTask(
             AppPatient appPatient, AppEncounter appEncounter, CrudEventBus bus) {
-        return new AppAddEncounterAsyncTask(
+        return new AddEncounterTask(
                 this, mConverters, mServer, mContentResolver, appPatient, appEncounter, bus);
     }
 
-    /** Creates a new {@link AppAddOrderAsyncTask}. */
-    public AppAddOrderAsyncTask newAddOrderAsyncTask(
+    /** Creates a new {@link AddOrderTask}. */
+    public AddOrderTask newAddOrderAsyncTask(
             AppOrder order, CrudEventBus bus) {
-        return new AppAddOrderAsyncTask(
+        return new AddOrderTask(
                 this, mConverters, mServer, mContentResolver, order, bus);
     }
 
 
-    /** Creates a new {@link FetchItemAsyncTask}. */
-    public <T extends AppTypeBase<?>> FetchItemAsyncTask<T> newFetchSingleAsyncTask(
+    /** Creates a new {@link FetchItemTask}. */
+    public <T extends AppTypeBase<?>> FetchItemTask<T> newFetchSingleAsyncTask(
             Uri contentUri,
             String[] projectionColumns,
             SimpleSelectionFilter filter,
             String constraint,
             AppTypeConverter<T> converter,
             CrudEventBus bus) {
-        return new FetchItemAsyncTask<>(
+        return new FetchItemTask<>(
                 mContentResolver, contentUri, projectionColumns, filter, constraint, converter,
                 bus);
     }

@@ -30,9 +30,7 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
  * {@link CrudEventBus} with the retrieved item. If the operation fails, a
  * {@link ItemFetchFailedEvent} is posted instead.
  */
-public class FetchItemAsyncTask<T extends AppTypeBase>
-        extends AsyncTask<Void, Void, Object> {
-
+public class FetchItemTask<T extends AppTypeBase> extends AsyncTask<Void, Void, Object> {
     private final ContentResolver mContentResolver;
     private final Uri mContentUri;
     private final String[] mProjectionColumns;
@@ -41,7 +39,7 @@ public class FetchItemAsyncTask<T extends AppTypeBase>
     private final AppTypeConverter<T> mConverter;
     private final CrudEventBus mBus;
 
-    FetchItemAsyncTask(
+    FetchItemTask(
             ContentResolver contentResolver,
             Uri contentUri,
             String[] projectionColumns,

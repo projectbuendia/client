@@ -21,18 +21,15 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-/** A Dagger module that provides bindings for an {@link AppAsyncTaskFactory}. */
-@Module(
-        complete = false,
-        library = true)
-public class AppAsyncTaskModule {
-
+/** A Dagger module that provides bindings for a {@link TaskFactory}. */
+@Module(complete = false, library = true)
+public class TaskModule {
     @Provides
     @Singleton
-    AppAsyncTaskFactory provideAppAsyncTaskFactory(
+    TaskFactory provideAppAsyncTaskFactory(
             Server server,
             ContentResolver contentResolver,
             AppTypeConverters converters) {
-        return new AppAsyncTaskFactory(converters, server, contentResolver);
+        return new TaskFactory(converters, server, contentResolver);
     }
 }

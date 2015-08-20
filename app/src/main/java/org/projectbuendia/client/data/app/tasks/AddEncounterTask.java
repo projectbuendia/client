@@ -42,8 +42,8 @@ import java.util.concurrent.ExecutionException;
  * {@link CrudEventBus} with the added encounter. If the operation fails, a
  * {@link EncounterAddFailedEvent} is posted instead.
  */
-public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAddFailedEvent> {
-    // TODO: Factor out common code between this class and AppAddPatientAsyncTask.
+public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEvent> {
+    // TODO: Factor out common code between this class and AddPatientTask.
     private static final Logger LOG = Logger.create();
 
     private static final String[] ENCOUNTER_PROJECTION = new String[] {
@@ -54,7 +54,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
             Contracts.ObservationColumns.VALUE
     };
 
-    private final AppAsyncTaskFactory mTaskFactory;
+    private final TaskFactory mTaskFactory;
     private final AppTypeConverters mConverters;
     private final Server mServer;
     private final ContentResolver mContentResolver;
@@ -64,9 +64,9 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
 
     private String mUuid;
 
-    /** Creates a new {@link AppAddEncounterAsyncTask}. */
-    public AppAddEncounterAsyncTask(
-            AppAsyncTaskFactory taskFactory,
+    /** Creates a new {@link AddEncounterTask}. */
+    public AddEncounterTask(
+            TaskFactory taskFactory,
             AppTypeConverters converters,
             Server server,
             ContentResolver contentResolver,
@@ -161,7 +161,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
 
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemAsyncTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Observations.CONTENT_URI,
                 ENCOUNTER_PROJECTION,
                 new EncounterUuidFilter(),

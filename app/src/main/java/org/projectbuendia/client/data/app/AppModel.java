@@ -19,10 +19,10 @@ import android.os.AsyncTask;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.data.app.converters.AppTypeConverter;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
-import org.projectbuendia.client.data.app.tasks.AppAddPatientAsyncTask;
-import org.projectbuendia.client.data.app.tasks.AppAsyncTaskFactory;
-import org.projectbuendia.client.data.app.tasks.AppUpdatePatientAsyncTask;
-import org.projectbuendia.client.data.app.tasks.FetchItemAsyncTask;
+import org.projectbuendia.client.data.app.tasks.AddPatientTask;
+import org.projectbuendia.client.data.app.tasks.TaskFactory;
+import org.projectbuendia.client.data.app.tasks.AppUpdatePatientTask;
+import org.projectbuendia.client.data.app.tasks.FetchItemTask;
 import org.projectbuendia.client.events.CleanupSubscriber;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
@@ -54,11 +54,11 @@ public class AppModel {
 
     private final ContentResolver mContentResolver;
     private final AppTypeConverters mConverters;
-    private final AppAsyncTaskFactory mTaskFactory;
+    private final TaskFactory mTaskFactory;
 
     AppModel(ContentResolver contentResolver,
             AppTypeConverters converters,
-            AppAsyncTaskFactory taskFactory) {
+            TaskFactory taskFactory) {
         mContentResolver = contentResolver;
         mConverters = converters;
         mTaskFactory = taskFactory;
@@ -143,7 +143,7 @@ public class AppModel {
      * with the {@link AppPatient} on the specified event bus when complete.
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
-        FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
                 null,
                 new UuidFilter(),
@@ -170,7 +170,7 @@ public class AppModel {
      * the specified event bus when complete.
      */
     public void addPatient(CrudEventBus bus, AppPatientDelta patientDelta) {
-        AppAddPatientAsyncTask task = mTaskFactory.newAddPatientAsyncTask(patientDelta, bus);
+        AddPatientTask task = mTaskFactory.newAddPatientAsyncTask(patientDelta, bus);
         task.execute();
     }
 
@@ -181,7 +181,7 @@ public class AppModel {
      */
     public void updatePatient(
             CrudEventBus bus, AppPatient originalPatient, AppPatientDelta patientDelta) {
-        AppUpdatePatientAsyncTask task =
+        AppUpdatePatientTask task =
                 mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
         task.execute();
     }
