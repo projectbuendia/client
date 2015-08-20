@@ -127,24 +127,6 @@ public final class LocationSelectionActivity extends PatientSearchActivity {
 
     @Override
     public void onExtendOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar.
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-
-        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logEvent("add_patient_pressed");
-                        startActivity(new Intent(
-                                LocationSelectionActivity.this,
-                                PatientCreationActivity.class));
-
-                        return true;
-                    }
-                });
-
         super.onExtendOptionsMenu(menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);

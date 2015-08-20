@@ -12,8 +12,10 @@
 package org.projectbuendia.client.ui.patientlist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
@@ -32,7 +34,10 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.LoadingState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
+import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
+import org.projectbuendia.client.ui.patientcreation.PatientCreationActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
+import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -85,6 +90,35 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+
+        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logEvent("add_patient_pressed");
+                        startActivity(new Intent(
+                                PatientSearchActivity.this,
+                                PatientCreationActivity.class));
+
+                        return true;
+                    }
+                });
+
+        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("go_to_patient_pressed");
+                        GoToPatientDialogFragment.newInstance()
+                                .show(getSupportFragmentManager(), null);
+                        return true;
+                    }
+                });
 
         MenuItem search = menu.findItem(R.id.action_search);
         search.setIcon(

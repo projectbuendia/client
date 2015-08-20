@@ -54,40 +54,6 @@ public class RoundActivity extends PatientSearchActivity {
     }
 
     @Override
-    public void onExtendOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-
-        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("add_patient_pressed");
-                        startActivity(
-                                new Intent(RoundActivity.this, PatientCreationActivity.class));
-
-                        return true;
-                    }
-                });
-
-        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("go_to_patient_pressed");
-                        GoToPatientDialogFragment.newInstance()
-                                .show(getSupportFragmentManager(), null);
-                        return true;
-                    }
-                });
-
-        super.onExtendOptionsMenu(menu);
-    }
-
-    @Override
     protected void setPatients(TypedCursor<AppPatient> patients) {
         mLocationPatientCount = patients.getCount();
         setTitle(PatientCountDisplay.getPatientCountTitle(

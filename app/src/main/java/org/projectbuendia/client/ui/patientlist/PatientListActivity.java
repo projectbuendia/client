@@ -67,22 +67,6 @@ public class PatientListActivity extends PatientSearchActivity {
     }
 
     @Override
-    public void onExtendOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        menu.findItem(R.id.action_add).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        startActivity(PatientCreationActivity.class);
-
-                        return true;
-                    }
-                });
-        super.onExtendOptionsMenu(menu);
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode != ODK_ACTIVITY_REQUEST) {
             return;
