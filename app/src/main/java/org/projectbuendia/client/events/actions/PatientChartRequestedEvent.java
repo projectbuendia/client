@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.events;
+package org.projectbuendia.client.events.actions;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;

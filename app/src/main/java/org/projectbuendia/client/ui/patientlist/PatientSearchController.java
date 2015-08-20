@@ -19,7 +19,7 @@ import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.TypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.PatientChartRequestedEvent;
+import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;

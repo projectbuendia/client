@@ -30,7 +30,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.OrderExecutionSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Utils;
 

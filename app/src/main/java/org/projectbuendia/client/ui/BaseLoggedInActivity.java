@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.PatientChartRequestedEvent;
+import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;

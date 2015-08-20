@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.PatientChartRequestedEvent;
+import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
 

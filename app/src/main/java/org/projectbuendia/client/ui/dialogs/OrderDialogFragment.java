@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.events.OrderSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.utils.Utils;
 
 import butterknife.ButterKnife;
