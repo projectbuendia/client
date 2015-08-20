@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui.chart;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -87,7 +88,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // Note the general condition uuid when retrieved so that it can be passed to the controller.
     private String mGeneralConditionUuid;
 
-    public static void start(Activity caller, String uuid) {
+    public static void start(Context caller, String uuid) {
         Intent intent = new Intent(caller, PatientChartActivity.class);
         intent.putExtra("uuid", uuid);
         caller.startActivity(intent);

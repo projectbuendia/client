@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:id="@+id/tent_selection_layout"
-        tools:context="org.projectbuendia.client.ui.locationselection.LocationSelectionFragment">
+        tools:context="org.projectbuendia.client.ui.lists.LocationListFragment">
         <org.projectbuendia.client.widget.SubtitledButtonView
             android:id="@+id/location_selection_all_patients"
             android:layout_height="wrap_content"

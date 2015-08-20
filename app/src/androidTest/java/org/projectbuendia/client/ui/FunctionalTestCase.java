@@ -42,7 +42,7 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
-import org.projectbuendia.client.ui.userlogin.UserLoginActivity;
+import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
@@ -72,7 +72,7 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
  * Base class for functional tests that sets timeouts to be permissive, optionally logs in as a
  * user before continuing, and provides some utility functions for convenience.
  */
-public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLoginActivity> {
+public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginActivity> {
     private static final Logger LOG = Logger.create();
     private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 30000;
 
@@ -85,7 +85,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
     protected static String sDemoPatientId = null;
 
     public FunctionalTestCase() {
-        super(UserLoginActivity.class);
+        super(LoginActivity.class);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
 
     /**
      * Determines the currently loaded activity, rather than {@link #getActivity()}, which will
-     * always return {@link UserLoginActivity}.
+     * always return {@link LoginActivity}.
      */
     protected Activity getCurrentActivity() throws Throwable {
         getInstrumentation().waitForIdleSync();

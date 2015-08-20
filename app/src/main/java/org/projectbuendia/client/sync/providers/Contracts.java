@@ -138,9 +138,6 @@ public class Contracts {
 
     interface PatientCountColumns {
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-
-        /** Number of patients in a tent. */
-        String TENT_PATIENT_COUNT = "tent_patient_count";
     }
 
     interface LocalizedChartColumns {

@@ -12,7 +12,7 @@
 package org.projectbuendia.client.utils;
 
 import org.projectbuendia.client.ui.BaseActivity;
-import org.projectbuendia.client.ui.userlogin.UserLoginActivity;
+import org.projectbuendia.client.ui.login.LoginActivity;
 
 import javax.inject.Singleton;
 
@@ -23,7 +23,7 @@ import dagger.Provides;
 @Module(
         injects = {
                 BaseActivity.class,
-                UserLoginActivity.class
+                LoginActivity.class
         },
         complete = false,
         library = true)

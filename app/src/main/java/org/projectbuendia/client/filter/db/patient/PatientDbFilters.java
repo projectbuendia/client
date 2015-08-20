@@ -40,7 +40,7 @@ public final class PatientDbFilters {
         return DEFAULT_FILTER;
     }
 
-    /** Returns an array of {@link SimpleSelectionFilter}'s, each representing a zone. */
+    /** Returns an array of {@link SimpleSelectionFilter}s, each representing a zone. */
     public static SimpleSelectionFilter[] getZoneFilters(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
 
@@ -54,7 +54,7 @@ public final class PatientDbFilters {
     }
 
     /**
-     * Returns an array of all {@link SimpleSelectionFilter}'s that are unrelated to user location
+     * Returns an array of all {@link SimpleSelectionFilter}s that are unrelated to user location
      * (for example, based on pregnancy or age).
      */
     public static SimpleSelectionFilter[] getOtherFilters() {
@@ -62,7 +62,7 @@ public final class PatientDbFilters {
     }
 
     /**
-     * Returns an array of all {@link SimpleSelectionFilter}'s that should be displayed to the user.
+     * Returns an array of all {@link SimpleSelectionFilter}s that should be displayed to the user.
      */
     public static SimpleSelectionFilter[] getFiltersForDisplay(AppLocationTree locationTree) {
         List<SimpleSelectionFilter> allFilters = new ArrayList<>();

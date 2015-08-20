@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -45,6 +46,10 @@ public class SettingsActivity extends PreferenceActivity {
      * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+
+    public static void start(Context caller) {
+        caller.startActivity(new Intent(caller, SettingsActivity.class));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

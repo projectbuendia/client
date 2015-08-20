@@ -26,8 +26,8 @@
 
     <string name="app_name">Buendia</string>
     <string name="title_patient_list">Patients</string>
-    <string name="title_patient_chart">Patient Chart</string>
-    <string name="title_activity_patient_add">New Patient</string>
+    <string name="title_patient_chart">Patient chart</string>
+    <string name="title_activity_patient_add">New patient</string>
     <string name="cancel">Cancel</string>
     <string name="action_new_patient">+ Create new patient</string>
     <string name="action_view_xform">+ View first saved xform</string>
@@ -48,7 +48,7 @@
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
     <string name="action_go_to">#</string>
-    <string name="title_activity_tent_selection">Patients by Location</string>
+    <string name="title_location_list">Locations</string>
     <string name="today">Today</string>
     <string name="today_date">Today, %s</string>
     <string name="day_n">Day %d</string>
@@ -57,7 +57,7 @@
     <string name="add_user_user_exists_locally">User already exists on tablet</string>
     <string name="add_user_user_exists_on_server">Username already exists on server</string>
     <string name="add_user_connection_error">Error connecting to server</string>
-    <string name="title_activity_round">RoundActivity</string>
+    <string name="title_single_location">Patients at this location</string>
 
     <string name="no_patients">No patients</string>
     <string name="one_patient">1 patient</string>
@@ -67,7 +67,7 @@
     <string name="one_present_patient">1 present patient</string>
     <string name="n_present_patients">%d present patients</string>
 
-    <string name="title_new_order">New Order</string>
+    <string name="title_new_order">New order</string>
     <string name="order_instructions">Order</string>
     <string name="order_medication">Medication</string>
     <string name="order_dosage">Dosage</string>
@@ -84,7 +84,7 @@
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
 
-    <string name="order_execution_title">Record Treatment</string>
+    <string name="order_execution_title">Record treatment</string>
     <string name="order_execution_historical_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time on %2$s</string>
     <string name="order_execution_historical_plural_html">Given &lt;b&gt;%1$d&lt;/b&gt; times on %2$s</string>
     <string name="order_execution_today_singular_html">Given &lt;b&gt;%1$d&lt;/b&gt; time today, %2$s</string>
@@ -109,7 +109,7 @@
     <string name="title_updating_patient">Updating patient</string>
     <string name="please_wait">Please wait&#8230;</string>
 
-    <string name="go_to_patient_title">Go to Patient Chart</string>
+    <string name="go_to_patient_title">Go to patient chart</string>
     <string name="go_to_patient_id_label">Patient ID</string>
     <string name="go_to_patient_not_found">No such patient</string>
     <string name="go_to_patient_go">Go to chart</string>
@@ -138,7 +138,7 @@
     <string name="latest_pcr_label_with_date">Ebola test (%s)</string>
     <string name="action_add_test_result">Add test result</string>
     <string name="pregnant">Pregnant</string>
-    <string name="iv_fitted">IV Fitted</string>
+    <string name="iv_fitted">IV fitted</string>
     <string name="status_short_desc_unknown">-</string>
     <string name="status_short_desc_well">1</string>
     <string name="status_short_desc_unwell">2</string>
@@ -199,7 +199,7 @@
     <string name="fetch_xform_failed_server_bad_endpoint">Error retrieving form list from server.</string>
     <string name="fetch_xform_failed_server_failed_to_fetch">Failed to fetch the form from the server.</string>
     <string name="fetch_xform_failed_server_unknown">Error retrieving the form from the server.</string>
-    <string name="retrieving_encounter_form_title">Retrieving Form</string>
+    <string name="retrieving_encounter_form_title">Retrieving form</string>
     <string name="retrieving_encounter_form_message">Please wait while the requested form is retrieved.</string>
     <string name="syncing_patients">Syncing patients…</string>
     <string name="syncing_concepts">Syncing concepts…</string>
@@ -213,8 +213,8 @@
     <string name="submit_xform_failed_unknown_reason">Something went wrong submitting the form.</string>
     <string name="submit_xform_failed_server_auth">Error submitting form: could not authenticate with server.</string>
     <string name="submit_xform_failed_server_timeout">Timed out while sending form to the server.</string>
-    <string name="submitting_encounter_form_title">Submitting Form</string>
-    <string name="submitting_encounter_form_message">Please wait while form is submitted.</string>
+    <string name="submitting_encounter_form_title">Submitting form</string>
+    <string name="submitting_encounter_form_message">Please wait while the form data is submitted.</string>
     <string name="consciousness">Consciousness</string>
     <string name="condition">Condition</string>
     <string name="cancel_sync">Cancel Sync</string>
@@ -271,9 +271,9 @@
     </string>
     <string name="troubleshoot_action_check_settings">Check Settings</string>
 
-    <string name="present_filter_description">All Present Patients</string>
-    <string name="age_filter_description">Under %d Years</string>
-    <string name="filter_group_default_name">Multiple Filters</string>
+    <string name="present_filter_description">All present patients</string>
+    <string name="age_filter_description">Under %d years</string>
+    <string name="filter_group_default_name">Multiple filters</string>
 
     <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
     <string name="patient_validation_missing_age">Please enter the age.</string>

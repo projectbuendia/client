@@ -11,12 +11,14 @@
 
 package org.projectbuendia.client.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
@@ -147,9 +149,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override
                     public void onClick(View view) {
                         action.setEnabled(false);
-
-                        ((WifiManager) getSystemService(Context.WIFI_SERVICE))
-                                .setWifiEnabled(true);
+                        ((WifiManager) getSystemService(Context.WIFI_SERVICE)).setWifiEnabled(true);
                     }
                 });
                 break;
@@ -161,7 +161,6 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override
                     public void onClick(View view) {
                         action.setEnabled(false);
-
                         startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
                     }
                 });
@@ -174,8 +173,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override
                     public void onClick(View view) {
                         action.setEnabled(false);
-
-                        startActivity(new Intent(BaseActivity.this, SettingsActivity.class));
+                        SettingsActivity.start(BaseActivity.this);
                     }
                 });
                 break;
@@ -187,8 +185,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override
                     public void onClick(View view) {
                         action.setEnabled(false);
-
-                        startActivity(new Intent(BaseActivity.this, SettingsActivity.class));
+                        SettingsActivity.start(BaseActivity.this);
                     }
                 });
                 break;
@@ -304,7 +301,7 @@ public abstract class BaseActivity extends FragmentActivity {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            startActivity(new Intent(BaseActivity.this, SettingsActivity.class));
+                            SettingsActivity.start(BaseActivity.this);
                         }
                     });
         }

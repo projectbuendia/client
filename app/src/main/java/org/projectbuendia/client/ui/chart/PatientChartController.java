@@ -51,7 +51,7 @@ import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.locationselection.AssignLocationDialog;
+import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.LocaleSelector;
@@ -477,9 +477,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                 new AssignLocationDialog.LocationSelectedCallback() {
 
                     @Override
-                    public boolean onNewTentSelected(String newTentUuid) {
+                    public boolean onLocationSelected(String locationUuid) {
                         AppPatientDelta patientDelta = new AppPatientDelta();
-                        patientDelta.assignedLocationUuid = Optional.of(newTentUuid);
+                        patientDelta.assignedLocationUuid = Optional.of(locationUuid);
 
                         mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
                         Utils.logUserAction("location_assigned");

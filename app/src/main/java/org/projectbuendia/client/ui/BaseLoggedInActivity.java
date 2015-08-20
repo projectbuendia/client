@@ -29,7 +29,7 @@ import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
 import org.projectbuendia.client.net.model.User;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.userlogin.UserLoginActivity;
+import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -71,7 +71,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             // If there is no active user, then return the user to the user login activity.
             BigToast.show(this, "Please login to continue");
 
-            Intent intent = new Intent(this, UserLoginActivity.class);
+            Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             Utils.logEvent("redirected_to_login");
@@ -253,8 +253,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         @OnClick(R.id.button_settings)
         public void onSettingsClick() {
             Utils.logUserAction("popup_settings_button_pressed");
-            Intent intent = new Intent(BaseLoggedInActivity.this, SettingsActivity.class);
-            startActivity(intent);
+            SettingsActivity.start(BaseLoggedInActivity.this);
         }
 
         @OnClick(R.id.button_log_out)
@@ -262,7 +261,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             Utils.logUserAction("popup_logout_button_pressed");
             App.getUserManager().setActiveUser(null);
 
-            Intent intent = new Intent(BaseLoggedInActivity.this, UserLoginActivity.class);
+            Intent intent = new Intent(BaseLoggedInActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }

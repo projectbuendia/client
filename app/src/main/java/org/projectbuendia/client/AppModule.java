@@ -25,16 +25,16 @@ import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
-import org.projectbuendia.client.ui.locationselection.LocationSelectionActivity;
-import org.projectbuendia.client.ui.patientcreation.PatientCreationActivity;
-import org.projectbuendia.client.ui.patientlist.PatientListActivity;
-import org.projectbuendia.client.ui.patientlist.PatientListController;
-import org.projectbuendia.client.ui.patientlist.PatientListFragment;
-import org.projectbuendia.client.ui.patientlist.PatientSearchActivity;
-import org.projectbuendia.client.ui.patientlist.RoundActivity;
-import org.projectbuendia.client.ui.patientlist.RoundFragment;
-import org.projectbuendia.client.ui.userlogin.UserLoginActivity;
-import org.projectbuendia.client.ui.userlogin.UserLoginFragment;
+import org.projectbuendia.client.ui.lists.LocationListActivity;
+import org.projectbuendia.client.ui.newpatient.NewPatientActivity;
+import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
+import org.projectbuendia.client.ui.lists.PatientListController;
+import org.projectbuendia.client.ui.lists.PatientListFragment;
+import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
+import org.projectbuendia.client.ui.lists.SingleLocationActivity;
+import org.projectbuendia.client.ui.lists.SingleLocationFragment;
+import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.ui.login.LoginFragment;
 import org.projectbuendia.client.updater.UpdateModule;
 import org.projectbuendia.client.user.UserModule;
 import org.projectbuendia.client.utils.UtilsModule;
@@ -60,19 +60,19 @@ import dagger.Provides;
 
                 // TODO: Move these into activity-specific modules.
                 // Activities
-                PatientCreationActivity.class,
+                NewPatientActivity.class,
                 BaseActivity.class,
                 PatientChartActivity.class,
-                PatientListActivity.class,
+                FilteredPatientListActivity.class,
                 PatientListController.class,
-                PatientSearchActivity.class,
-                RoundActivity.class,
-                LocationSelectionActivity.class,
+                BaseSearchablePatientListActivity.class,
+                SingleLocationActivity.class,
+                LocationListActivity.class,
                 PatientListFragment.class,
-                RoundFragment.class,
+                SingleLocationFragment.class,
                 UpdateNotificationController.class,
-                UserLoginActivity.class,
-                UserLoginFragment.class
+                LoginActivity.class,
+                LoginFragment.class
         },
         staticInjections = {
                 SyncAccountService.class
