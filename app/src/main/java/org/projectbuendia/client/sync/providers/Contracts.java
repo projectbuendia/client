@@ -130,7 +130,6 @@ public class Contracts {
     interface PatientColumns {
         String GIVEN_NAME = "given_name";
         String FAMILY_NAME = "family_name";
-        String ADMISSION_TIMESTAMP = "admission_timestamp";
         String UUID = "uuid";
         String LOCATION_UUID = LocationColumns.LOCATION_UUID;
         String BIRTHDATE = "birthdate";

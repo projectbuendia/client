@@ -37,7 +37,6 @@ public interface Server {
     public static final String PATIENT_BIRTHDATE_KEY = "birthdate";
     public static final String PATIENT_GENDER_KEY = "gender";
     public static final String PATIENT_ASSIGNED_LOCATION = "assigned_location";
-    public static final String PATIENT_ADMISSION_TIMESTAMP = "admission_timestamp";
     public static final String ENCOUNTER_OBSERVATIONS_KEY = "observations";
     public static final String ENCOUNTER_TIMESTAMP = "timestamp";
     public static final String ENCOUNTER_ORDER_UUIDS = "order_uuids";

@@ -405,7 +405,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         String locationUuid;
         String gender;
         LocalDate birthdate;
-        Long admissionTimestamp;
 
         //iterate through the list of patients
         try {
@@ -417,7 +416,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 givenName = Utils.getString(c, Patients.GIVEN_NAME);
                 familyName = Utils.getString(c, Patients.FAMILY_NAME);
                 uuid = Utils.getString(c, Patients.UUID);
-                admissionTimestamp = Utils.getLong(c, Patients.ADMISSION_TIMESTAMP);
                 locationUuid = Utils.getString(c, Patients.LOCATION_UUID, Zone.DEFAULT_LOCATION);
                 birthdate = Utils.getLocalDate(c, Patients.BIRTHDATE);
                 gender = Utils.getString(c, Patients.GENDER);
@@ -436,7 +434,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if (!Objects.equals(patient.given_name, givenName)
                             || !Objects.equals(patient.family_name, familyName)
                             || !Objects.equals(patient.uuid, uuid)
-                            || !Objects.equals(patient.admission_timestamp, admissionTimestamp)
                             || !Objects.equals(patientAssignedLocationUuid, locationUuid)
                             || !Objects.equals(patient.birthdate, birthdate)
                             || !Objects.equals(patient.gender, gender)
@@ -447,8 +444,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 .withValue(Patients.GIVEN_NAME, patient.given_name)
                                 .withValue(Patients.FAMILY_NAME, patient.family_name)
                                 .withValue(Patients.UUID, patient.uuid)
-                                .withValue(Patients.ADMISSION_TIMESTAMP,
-                                        patient.admission_timestamp)
                                 .withValue(Patients.LOCATION_UUID,
                                         patientAssignedLocationUuid)
                                 .withValue(Patients.BIRTHDATE,
@@ -480,7 +475,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(Patients.GIVEN_NAME, e.given_name)
                     .withValue(Patients.FAMILY_NAME, e.family_name)
                     .withValue(Patients.UUID, e.uuid)
-                    .withValue(Patients.ADMISSION_TIMESTAMP, e.admission_timestamp)
                     .withValue(Patients.BIRTHDATE, Utils.toString(e.birthdate))
                     .withValue(Patients.GENDER, e.gender)
                     .withValue(Patients.LOCATION_UUID,

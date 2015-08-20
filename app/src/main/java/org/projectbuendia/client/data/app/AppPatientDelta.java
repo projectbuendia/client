@@ -131,12 +131,6 @@ public class AppPatientDelta {
                     Contracts.Patients.BIRTHDATE,
                     birthdate.toString());
         }
-        // TODO: Consider removing admission date here as it's no longer used from the database.
-        if (admissionDate.isPresent()) {
-            contentValues.put(
-                    Contracts.Patients.ADMISSION_TIMESTAMP,
-                    getTimestamp(admissionDate.get().toDateTimeAtStartOfDay()));
-        }
         if (assignedLocationUuid.isPresent()) {
             contentValues.put(
                     Contracts.Patients.LOCATION_UUID,
