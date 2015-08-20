@@ -152,14 +152,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         boolean pregnant = false;
         String condition = null;
         if (mObservations != null) {
-            Map<String, LocalizedObs> obsMap =
-                    mObservations.get(patient.uuid);
+            Map<String, LocalizedObs> obsMap = mObservations.get(patient.uuid);
             if (obsMap != null) {
-                LocalizedObs pregObs =
-                        obsMap.get(Concepts.PREGNANCY_UUID);
+                LocalizedObs pregObs = obsMap.get(Concepts.PREGNANCY_UUID);
                 pregnant = pregObs == null ? false : Concepts.YES_UUID.equals(pregObs.value);
-                LocalizedObs condObs =
-                        obsMap.get(Concepts.GENERAL_CONDITION_UUID);
+                LocalizedObs condObs = obsMap.get(Concepts.GENERAL_CONDITION_UUID);
                 condition = condObs == null ? null : condObs.value;
             }
         }

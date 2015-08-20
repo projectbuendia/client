@@ -106,22 +106,19 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
 
         CrudEventBus crudEventBus = mCrudEventBusProvider.get();
 
-        mController =
-                new NewPatientController(new Ui(), crudEventBus, mModel);
+        mController = new NewPatientController(new Ui(), crudEventBus, mModel);
         mAlertDialog = new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setTitle(R.string.title_add_patient_cancel)
-                .setPositiveButton(
-                        "Yes",
+                .setPositiveButton(R.string.yes,
                         new DialogInterface.OnClickListener() {
 
                             @Override
                             public void onClick(DialogInterface dialog, int i) {
                                 finish();
                             }
-                        }
-                )
-                .setNegativeButton("No", null)
+                        })
+                .setNegativeButton(R.string.no, null)
                 .create();
 
         setContentView(R.layout.activity_patient_creation);
@@ -253,7 +250,6 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
     }
 
     private void setUiEnabled(boolean enable) {
-        Log.d("PCA", "enableUi " + enable);
         mId.setEnabled(enable);
         mGivenName.setEnabled(enable);
         mFamilyName.setEnabled(enable);
