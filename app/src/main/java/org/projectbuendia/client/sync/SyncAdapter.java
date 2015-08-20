@@ -44,7 +44,14 @@ import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.PatientChartList;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.sync.providers.Contracts.Charts;
 import org.projectbuendia.client.sync.providers.Contracts.Concepts;
+import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.sync.providers.Contracts.Locations;
+import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
+import org.projectbuendia.client.sync.providers.Contracts.Misc;
+import org.projectbuendia.client.sync.providers.Contracts.Observations;
+import org.projectbuendia.client.sync.providers.Contracts.Orders;
 import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
@@ -380,8 +387,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         List<Patient> patients = future.get();
         LOG.d("After network call to retrieve patients");
         checkCancellation("Sync was canceled before parsing retrieved patient data.");
-        ArrayList<ContentProviderOperation> batch = new ArrayList<>();
-
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
 
         HashMap<String, Patient> patientsMap = new HashMap<>();
         for (Patient p : patients) {
@@ -390,7 +396,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         // Get list of all items
         LOG.i("Fetching local entries for merge");
-        Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
+        Uri uri = Patients.CONTENT_URI; // Get all entries
         Cursor c = contentResolver.query(uri, null, null, null, null);
         assert c != null;
         checkCancellation("Sync was canceled before merging patient data.");
@@ -440,7 +446,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             || !Objects.equals(patient.id, id)) {
                         // Update existing record
                         LOG.i("Scheduling update: " + existingUri);
-                        batch.add(ContentProviderOperation.newUpdate(existingUri)
+                        ops.add(ContentProviderOperation.newUpdate(existingUri)
                                 .withValue(Patients.GIVEN_NAME, patient.given_name)
                                 .withValue(Patients.FAMILY_NAME, patient.family_name)
                                 .withValue(Patients.UUID, patient.uuid)
@@ -459,7 +465,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // Entry doesn't exist. Remove it from the database.
                     Uri deleteUri = Patients.CONTENT_URI.buildUpon().appendPath(id).build();
                     LOG.i("Scheduling delete: " + deleteUri);
-                    batch.add(ContentProviderOperation.newDelete(deleteUri).build());
+                    ops.add(ContentProviderOperation.newDelete(deleteUri).build());
                     syncResult.stats.numDeletes++;
                 }
             }
@@ -470,7 +476,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         for (Patient e : patientsMap.values()) {
             checkCancellation("Sync was canceled while inserting new patient data.");
             LOG.i("Scheduling insert: entry_id=" + e.id);
-            batch.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI)
+            ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI)
                     .withValue(Patients._ID, e.id)
                     .withValue(Patients.GIVEN_NAME, e.given_name)
                     .withValue(Patients.FAMILY_NAME, e.family_name)
@@ -479,13 +485,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     .withValue(Patients.GENDER, e.gender)
                     .withValue(Patients.LOCATION_UUID,
                             e.assigned_location == null ?
-                            Zone.DEFAULT_LOCATION : e.assigned_location.uuid)
+                                    Zone.DEFAULT_LOCATION : e.assigned_location.uuid)
                     .build());
             syncResult.stats.numInserts++;
         }
         LOG.i("Merge solution ready. Applying batch update");
         checkCancellation("Sync was canceled before completing patient merge operation.");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
+        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
         LOG.i("batch apply done");
         mContentResolver.notifyChange(Patients.CONTENT_URI, null, false);
         LOG.i("change notified");
@@ -504,9 +510,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             // This is safe because we have implemented insert on the content provider
             // with replace.
             ContentValues conceptInsert = new ContentValues();
-            conceptInsert.put(Contracts.Concepts._ID, concept.uuid);
-            conceptInsert.put(Contracts.Concepts.XFORM_ID, concept.xform_id);
-            conceptInsert.put(Contracts.Concepts.CONCEPT_TYPE, concept.type.name());
+            conceptInsert.put(Concepts._ID, concept.uuid);
+            conceptInsert.put(Concepts.XFORM_ID, concept.xform_id);
+            conceptInsert.put(Concepts.CONCEPT_TYPE, concept.type.name());
             conceptInserts.add(conceptInsert);
             syncResult.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
@@ -522,30 +528,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     continue;
                 }
                 ContentValues conceptNameInsert = new ContentValues();
-                conceptNameInsert.put(Contracts.ConceptNames.CONCEPT_UUID, concept.uuid);
-                conceptNameInsert.put(Contracts.ConceptNames.LOCALE, locale);
-                conceptNameInsert.put(Contracts.ConceptNames.NAME, name);
+                conceptNameInsert.put(ConceptNames.CONCEPT_UUID, concept.uuid);
+                conceptNameInsert.put(ConceptNames.LOCALE, locale);
+                conceptNameInsert.put(ConceptNames.NAME, name);
                 conceptNameInserts.add(conceptNameInsert);
                 syncResult.stats.numInserts++;
             }
         }
         checkCancellation("Sync was canceled before inserting concepts.");
-        provider.bulkInsert(Contracts.Concepts.CONTENT_URI,
+        provider.bulkInsert(Concepts.CONTENT_URI,
                 conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
         checkCancellation("Sync was canceled before inserting concept names.");
-        provider.bulkInsert(Contracts.ConceptNames.CONTENT_URI,
+        provider.bulkInsert(ConceptNames.CONTENT_URI,
                 conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
     }
 
     private void updateLocations(final ContentProviderClient provider, SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
-        ArrayList<ContentProviderOperation> batch = RpcToDb.locationsRpcToDb(syncResult);
+        ArrayList<ContentProviderOperation> ops = RpcToDb.locationsRpcToDb(syncResult);
         checkCancellation("Sync was canceled before applying location updates.");
         LOG.i("Applying batch update of locations.");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
-        mContentResolver.notifyChange(Contracts.Locations.CONTENT_URI, null, false);
-        mContentResolver.notifyChange(Contracts.LocationNames.CONTENT_URI, null, false);
+        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
+        mContentResolver.notifyChange(Locations.CONTENT_URI, null, false);
+        mContentResolver.notifyChange(LocationNames.CONTENT_URI, null, false);
     }
 
     private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
@@ -557,7 +563,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         final ChartStructure conceptList = future.get();
         checkCancellation("Sync was canceled before applying chart structure deletions.");
         // When we do a chart update, delete everything first.
-        provider.delete(Contracts.Charts.CONTENT_URI, null, null);
+        provider.delete(Charts.CONTENT_URI, null, null);
         checkCancellation("Sync was canceled before applying chart structure insertions.");
         syncResult.stats.numDeletes++;
         provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
@@ -568,9 +574,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
 
         // Get all patients from the cache.
-        Uri uri = Contracts.Patients.CONTENT_URI; // Get all entries
+        Uri uri = Patients.CONTENT_URI; // Get all entries
         Cursor c = provider.query(
-                uri, new String[] {Contracts.Patients.UUID}, null, null, null);
+                uri, new String[] {Patients.UUID}, null, null, null);
         try {
             if (c.getCount() < 1) {
                 return;
@@ -600,8 +606,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         checkCancellation("Sync was canceled before deleting temporary observations.");
         // Remove all temporary observations now we have the real ones
-        provider.delete(Contracts.Observations.CONTENT_URI,
-                Contracts.Observations.TEMP_CACHE + "!=0",
+        provider.delete(Observations.CONTENT_URI,
+                Observations.TEMP_CACHE + "!=0",
                 new String[0]);
         timingLogger.addSplit("delete temp observations");
         timingLogger.dumpToLog();
@@ -610,19 +616,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void updateOrders(final ContentProviderClient provider, SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
-        ArrayList<ContentProviderOperation> batch = RpcToDb.ordersRpcToDb(syncResult);
+        ArrayList<ContentProviderOperation> ops = RpcToDb.ordersRpcToDb(syncResult);
         checkCancellation("Sync was canceled before applying order updates.");
         LOG.i("Applying batch update of orders.");
-        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, batch);
-        mContentResolver.notifyChange(Contracts.Orders.CONTENT_URI, null, false);
+        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
+        mContentResolver.notifyChange(Orders.CONTENT_URI, null, false);
     }
 
     private Instant getLastSyncTime(ContentProviderClient provider) throws RemoteException {
         Cursor c = null;
         try {
             c = provider.query(
-                    Contracts.Misc.CONTENT_URI,
-                    new String[]{Contracts.Misc.OBS_SYNC_TIME}, null, null, null);
+                    Misc.CONTENT_URI,
+                    new String[]{Misc.OBS_SYNC_TIME}, null, null, null);
             if (c.moveToNext()) {
                 return new Instant(c.getLong(0));
             } else {
@@ -638,8 +644,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)
             throws RemoteException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contracts.Misc.OBS_SYNC_TIME, newSyncTime.getMillis());
-        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
+        contentValues.put(Misc.OBS_SYNC_TIME, newSyncTime.getMillis());
+        provider.insert(Misc.CONTENT_URI, contentValues);
     }
 
     private Instant updateAllObservations(
@@ -675,7 +681,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         bulkDelete(provider, toDelete);
         timingLogger.addSplit("bulk deletes");
         checkCancellation("Sync was canceled before bulk inserting observations.");
-        provider.bulkInsert(Contracts.Observations.CONTENT_URI,
+        provider.bulkInsert(Observations.CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
         return patientChartList.snapshotTime == null ? null :
@@ -684,7 +690,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void bulkDelete(ContentProviderClient provider, ArrayList<String> toDelete)
             throws RemoteException {
-        StringBuilder select = new StringBuilder(Contracts.Observations.PATIENT_UUID);
+        StringBuilder select = new StringBuilder(Observations.PATIENT_UUID);
         select.append(" IN (");
         boolean first = true;
         for (String uuid : toDelete) {
@@ -698,7 +704,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             select.append('\"');
         }
         select.append(")");
-        provider.delete(Contracts.Observations.CONTENT_URI, select.toString(),
+        provider.delete(Observations.CONTENT_URI, select.toString(),
                 new String[0]);
     }
 
@@ -731,7 +737,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         timingLogger.addSplit("making operations");
         if (toInsert.size() > 0) {
             checkCancellation("Sync was canceled before inserting incremental observations.");
-            provider.bulkInsert(Contracts.Observations.CONTENT_URI,
+            provider.bulkInsert(Observations.CONTENT_URI,
                     toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");
         }
@@ -748,14 +754,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
             throws RemoteException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contracts.Misc.FULL_SYNC_START_TIME, syncStartTime.getMillis());
-        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
+        contentValues.put(Misc.FULL_SYNC_START_TIME, syncStartTime.getMillis());
+        provider.insert(Misc.CONTENT_URI, contentValues);
     }
 
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
             throws RemoteException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(Contracts.Misc.FULL_SYNC_END_TIME, syncEndTime.getMillis());
-        provider.insert(Contracts.Misc.CONTENT_URI, contentValues);
+        contentValues.put(Misc.FULL_SYNC_END_TIME, syncEndTime.getMillis());
+        provider.insert(Misc.CONTENT_URI, contentValues);
     }
 }
