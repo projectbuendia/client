@@ -53,6 +53,7 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
+import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
@@ -267,7 +268,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     public void onExtendOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.overview, menu);
+        inflater.inflate(R.menu.chart, menu);
+
+        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("go_to_patient_pressed");
+                        GoToPatientDialogFragment.newInstance()
+                                .show(getSupportFragmentManager(), null);
+                        return true;
+                    }
+                });
 
         final MenuItem addTestResult = menu.findItem(R.id.action_add_test_result);
         addTestResult.setIcon(

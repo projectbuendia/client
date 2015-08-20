@@ -10,26 +10,22 @@
     OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
     specific language governing permissions and limitations under the License.
 -->
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-      android:id="@+id/action_search"
-      android:title="@string/action_search"
-      android:showAsAction="ifRoom|collapseActionView"
-      android:actionViewClass="android.widget.SearchView"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/action_go_to"
-        android:title="@string/action_go_to"
-        android:showAsAction="ifRoom|collapseActionView" />
+    <item android:id="@+id/action_search"
+          android:title="@string/action_search"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:actionViewClass="android.widget.SearchView"/>
 
-    <item
-        android:showAsAction="ifRoom|collapseActionView"
-        android:id="@+id/action_add"
-        android:title="Add Patient"/>
+    <item android:id="@+id/action_go_to"
+          android:title="@string/action_go_to"
+          android:showAsAction="ifRoom|collapseActionView" />
 
-    <item
-        android:showAsAction="ifRoom|collapseActionView"
-        android:id="@+id/action_cancel"
-        android:title="@string/cancel_sync"/>
+    <item android:id="@+id/action_add"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:title="Add Patient"/>
+
+    <item android:id="@+id/action_cancel"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:title="@string/cancel_sync"/>
 </menu>
