@@ -185,6 +185,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             EventBusRegistrationInterface defaultEventBus,
             CrudEventBus crudEventBus,
             Ui ui,
+            String patientUuid,
             OdkResultSender odkResultSender,
             LocalizedChartHelper chartHelper,
             @Nullable Bundle savedState,
@@ -194,6 +195,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mDefaultEventBus = defaultEventBus;
         mCrudEventBus = crudEventBus;
         mUi = ui;
+        mPatientUuid = patientUuid;
         mOdkResultSender = odkResultSender;
         mChartHelper = chartHelper;
         if (savedState != null) {
@@ -213,20 +215,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         Bundle bundle = new Bundle();
         bundle.putStringArray("pendingUuids", mPatientUuids);
         return bundle;
-    }
-
-    /** Sets the current patient. This should be called before init. */
-    public void setPatient(
-            String patientUuid,
-            @Nullable String patientName,
-            @Nullable String patientId) {
-        mPatientUuid = patientUuid;
-
-        if (patientName != null && patientId != null) {
-            mUi.setTitle(patientName + " (" + patientId + ")");
-        } else {
-            mUi.setTitle("");
-        }
     }
 
     /**

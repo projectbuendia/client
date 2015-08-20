@@ -86,6 +86,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // Note the general condition uuid when retrieved so that it can be passed to the controller.
     private String mGeneralConditionUuid;
 
+    public static void start(Activity caller, String uuid) {
+        Intent intent = new Intent(caller, PatientChartActivity.class);
+        intent.putExtra("uuid", uuid);
+        caller.startActivity(intent);
+    }
+
     /** An enumeration of the XForms that can be launched from this activity. */
     enum XForm {
         ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
@@ -123,10 +129,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
-
-    public static final String PATIENT_UUID_KEY = "PATIENT_UUID";
-    public static final String PATIENT_NAME_KEY = "PATIENT_NAME";
-    public static final String PATIENT_ID_KEY = "PATIENT_ID";
 
     private PatientChartController mController;
 
@@ -191,10 +193,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
-        final String patientName = getIntent().getStringExtra(PATIENT_NAME_KEY);
-        final String patientId = getIntent().getStringExtra(PATIENT_ID_KEY);
-        final String patientUuid = getIntent().getStringExtra(PATIENT_UUID_KEY);
-
         @Nullable Bundle controllerState = null;
         if (savedInstanceState != null) {
             controllerState = savedInstanceState.getBundle(KEY_CONTROLLER_STATE);
@@ -239,6 +237,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 new EventBusWrapper(mEventBus),
                 mCrudEventBusProvider.get(),
                 new Ui(),
+                getIntent().getStringExtra("uuid"),
                 odkResultSender,
                 mLocalizedChartHelper,
                 controllerState,
@@ -247,11 +246,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        mController.setPatient(patientUuid, patientName, patientId);
-        if (patientName != null && patientId != null) {
-            setTitle(patientId + ": " + patientName);
-        }
 
         mVitalUnknown = ResVital.UNKNOWN.resolve(getResources());
         mVitalKnown = ResVital.KNOWN.resolve(getResources());

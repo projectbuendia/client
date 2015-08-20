@@ -153,28 +153,15 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     }
 
     private final class SearchUi implements PatientSearchController.Ui {
-
         @Override
-        public void launchChartActivity(
-                String uuid, String givenName, String familyName, String id) {
-            Intent detailIntent = new Intent(
-                    PatientSearchActivity.this, PatientChartActivity.class);
-            detailIntent.putExtra(PatientChartActivity.PATIENT_ID_KEY, id);
-            detailIntent.putExtra(
-                    PatientChartActivity.PATIENT_NAME_KEY, givenName + " " + familyName);
-            detailIntent.putExtra(PatientChartActivity.PATIENT_UUID_KEY, uuid);
-            startActivity(detailIntent);
+        public void openPatientChart(String uuid) {
+            PatientChartActivity.start(PatientSearchActivity.this, uuid);
         }
 
         @Override
         public void setPatients(TypedCursor<AppPatient> patients) {
             // Delegate to implementers.
             PatientSearchActivity.this.setPatients(patients);
-        }
-
-        @Override
-        public void showErrorMessage(int resource) {
-            BigToast.show(PatientSearchActivity.this, resource);
         }
     }
 

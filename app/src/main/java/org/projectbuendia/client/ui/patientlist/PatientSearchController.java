@@ -33,6 +33,7 @@ import org.projectbuendia.client.filter.matchers.MatchingFilterGroup;
 import org.projectbuendia.client.filter.matchers.patient.IdFilter;
 import org.projectbuendia.client.filter.matchers.patient.NameFilter;
 import org.projectbuendia.client.sync.SyncManager;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 
 import java.util.HashSet;
@@ -47,20 +48,13 @@ public class PatientSearchController {
     private static final boolean DEBUG = true;
 
     public interface Ui {
-
-        void launchChartActivity(String uuid, String givenName, String familyName, String id);
-
+        void openPatientChart(String uuid);
         void setPatients(TypedCursor<AppPatient> patients);
-
-        void showErrorMessage(int message);
     }
 
     public interface FragmentUi {
-
         void setLocationTree(AppLocationTree locationTree);
-
         void setPatients(TypedCursor<AppPatient> patients);
-
         void showSpinner(boolean show);
     }
 
@@ -225,7 +219,7 @@ public class PatientSearchController {
      * @param patient the selected {@link org.projectbuendia.client.data.app.AppPatient}
      */
     public void onPatientSelected(AppPatient patient) {
-        mUi.launchChartActivity(patient.uuid, patient.givenName, patient.familyName, patient.id);
+        mUi.openPatientChart(patient.uuid);
     }
 
     /**
