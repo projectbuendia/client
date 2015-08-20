@@ -58,7 +58,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 millis.add(dt.getMillis());
             }
         }
-        args.putString("executionTimes", Joiner.on("/").join(millis));
+        args.putLongArray("executionTimes", Utils.toArray(millis));
         // To avoid the possibility of confusion when the dialog is opened just
         // before midnight, save the current time for use as the encounter time later.
         DateTime encounterTime = DateTime.now();
@@ -85,11 +85,13 @@ public class OrderExecutionDialogFragment extends DialogFragment {
 
     public void onSubmit() {
         if (mMarkToggle.isChecked()) {
-            String orderUuid = getArguments().getString("orderUuid");
-            String instructions = getArguments().getString("instructions");
-            Interval interval = new Interval(getArguments().getLong("intervalStartMillis"),
-                    getArguments().getLong("intervalStopMillis"));
-            DateTime encounterTime = new DateTime(getArguments().getLong("encounterTimeMillis"));
+            Bundle args = getArguments();
+            String orderUuid = args.getString("orderUuid");
+            String instructions = args.getString("instructions");
+            Interval interval = new Interval(
+                    args.getLong("intervalStartMillis"),
+                    args.getLong("intervalStopMillis"));
+            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
             Utils.logUserAction("order_execution_submitted",
                     "orderUuid", orderUuid,
                     "instructions", instructions,
@@ -103,17 +105,16 @@ public class OrderExecutionDialogFragment extends DialogFragment {
     }
 
     void updateUi(boolean orderExecutedNow) {
-        LocalDate date = new DateTime(getArguments().getLong("intervalStartMillis")).toLocalDate();
+        Bundle args = getArguments();
+        LocalDate date = new DateTime(args.getLong("intervalStartMillis")).toLocalDate();
         List<DateTime> executionTimes = new ArrayList<>();
-        for (String millis : getArguments().getString("executionTimes").split("/")) {
-            if (!millis.isEmpty()) {
-                executionTimes.add(new DateTime(Long.parseLong(millis)));
-            }
+        for (long millis : args.getLongArray("executionTimes")) {
+            executionTimes.add(new DateTime(millis));
         }
 
         // Show what was ordered and when the order started.
-        mOrderInstructions.setText(getArguments().getString("instructions"));
-        DateTime start = new DateTime(getArguments().getLong("orderStartMillis"));
+        mOrderInstructions.setText(args.getString("instructions"));
+        DateTime start = new DateTime(args.getLong("orderStartMillis"));
         mOrderStartTime.setText(getResources().getString(
                 R.string.order_started_on_date_at_time,
                 Utils.toShortString(start.toLocalDate()), Utils.toTimeOfDayString(start)));
@@ -130,14 +131,14 @@ public class OrderExecutionDialogFragment extends DialogFragment {
                 count, Utils.toShortString(date))));
 
         // Show the list of times that the order was executed during the selected interval.
-        boolean editable = getArguments().getBoolean("editable");
+        boolean editable = args.getBoolean("editable");
         Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
         List<String> htmlItems = new ArrayList<>();
         for (DateTime executionTime : executionTimes) {
             htmlItems.add(Utils.toTimeOfDayString(executionTime));
         }
         if (editable) {
-            DateTime encounterTime = new DateTime(getArguments().getLong("encounterTimeMillis"));
+            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
             htmlItems.add(orderExecutedNow ?
                     "<b>" + Utils.toTimeOfDayString(encounterTime) + "</b>" :
                     "<b>&nbsp;</b>");  // keep total height stable

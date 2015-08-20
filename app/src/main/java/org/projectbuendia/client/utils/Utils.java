@@ -246,6 +246,16 @@ public class Utils {
         return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
     }
 
+    /** Converts a list of Longs to an array of primitive longs. */
+    public static long[] toArray(List<Long> items) {
+        long[] array = new long[items.size()];
+        int i = 0;
+        for (Long item : items) {
+            array[i++] = item;
+        }
+        return array;
+    }
+
     /** Gets a string value from a cursor, returning a default value instead of null. */
     public static String getString(Cursor c, String columnName, String defaultString) {
         int index = c.getColumnIndex(columnName);
