@@ -143,28 +143,31 @@ public class RpcToDb {
                 Contracts.Orders.START_TIME,
                 Contracts.Orders.STOP_TIME
         }, null, null, null);
-
-        LOG.i("Merging in orders: client has %d, server has %d.", c.getCount(), ordersToStore.size());
-        // Scan all the locally stored orders, updating the orders we've just received.
-        while (c.moveToNext()) {
-            String uuid = c.getString(c.getColumnIndex(Contracts.Orders.UUID));
-            Uri uri = Contracts.Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
-            Order order = ordersToStore.get(uuid);
-            if (order != null) {  // apply update to a local order
-                LOG.v("  - will update order " + uuid);
-                ops.add(ContentProviderOperation.newUpdate(uri)
-                        .withValue(Contracts.Orders.PATIENT_UUID, order.patient_uuid)
-                        .withValue(Contracts.Orders.INSTRUCTIONS, order.instructions)
-                        .withValue(Contracts.Orders.START_TIME, order.start)
-                        .withValue(Contracts.Orders.STOP_TIME, order.stop)
-                        .build());
-                ordersToStore.remove(uuid);  // done with this incoming order
-                syncResult.stats.numUpdates++;
-            } else {  // delete the local order (the server doesn't have it)
-                LOG.v("  - will delete order " + uuid);
-                ops.add(ContentProviderOperation.newDelete(uri).build());
-                syncResult.stats.numDeletes++;
+        try {
+            LOG.i("Merging in orders: client has %d, server has %d.", c.getCount(), ordersToStore.size());
+            // Scan all the locally stored orders, updating the orders we've just received.
+            while (c.moveToNext()) {
+                String uuid = c.getString(c.getColumnIndex(Contracts.Orders.UUID));
+                Uri uri = Contracts.Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
+                Order order = ordersToStore.get(uuid);
+                if (order != null) {  // apply update to a local order
+                    LOG.v("  - will update order " + uuid);
+                    ops.add(ContentProviderOperation.newUpdate(uri)
+                            .withValue(Contracts.Orders.PATIENT_UUID, order.patient_uuid)
+                            .withValue(Contracts.Orders.INSTRUCTIONS, order.instructions)
+                            .withValue(Contracts.Orders.START_TIME, order.start)
+                            .withValue(Contracts.Orders.STOP_TIME, order.stop)
+                            .build());
+                    ordersToStore.remove(uuid);  // done with this incoming order
+                    syncResult.stats.numUpdates++;
+                } else {  // delete the local order (the server doesn't have it)
+                    LOG.v("  - will delete order " + uuid);
+                    ops.add(ContentProviderOperation.newDelete(uri).build());
+                    syncResult.stats.numDeletes++;
+                }
             }
+        } finally {
+            c.close();
         }
 
         // Store all the remaining received orders as new orders.
