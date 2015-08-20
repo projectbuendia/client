@@ -22,11 +22,13 @@ import org.projectbuendia.client.data.app.converters.AppTypeConverters;
 import org.projectbuendia.client.data.app.tasks.AppAddPatientAsyncTask;
 import org.projectbuendia.client.data.app.tasks.AppAsyncTaskFactory;
 import org.projectbuendia.client.data.app.tasks.AppUpdatePatientAsyncTask;
-import org.projectbuendia.client.data.app.tasks.FetchSingleAsyncTask;
+import org.projectbuendia.client.data.app.tasks.FetchItemAsyncTask;
 import org.projectbuendia.client.events.CleanupSubscriber;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
@@ -139,11 +141,11 @@ public class AppModel {
     }
 
     /**
-     * Asynchronously fetches a single patient by UUID, posting a {@link SingleItemFetchedEvent}
+     * Asynchronously fetches a single patient by UUID, posting a {@link ItemFetchedEvent}
      * with the {@link AppPatient} on the specified event bus when complete.
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
-        FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
                 PatientProjection.getProjectionColumns(),
                 new UuidFilter(),
@@ -166,7 +168,7 @@ public class AppModel {
 
     /**
      * Asynchronously adds a patient, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} with the newly-added patient on
+     * {@link ItemCreatedEvent} with the newly-added patient on
      * the specified event bus when complete.
      */
     public void addPatient(CrudEventBus bus, AppPatientDelta patientDelta) {
@@ -176,7 +178,7 @@ public class AppModel {
 
     /**
      * Asynchronously updates a patient, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemUpdatedEvent} with the updated
+     * {@link ItemUpdatedEvent} with the updated
      * {@link AppPatient} on the specified event bus when complete.
      */
     public void updatePatient(
@@ -188,7 +190,7 @@ public class AppModel {
 
     /**
      * Asynchronously adds an order, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} when complete.
+     * {@link ItemCreatedEvent} when complete.
      */
     public void addOrder(CrudEventBus bus, AppOrder order) {
         mTaskFactory.newAddOrderAsyncTask(order, bus).execute();
@@ -196,7 +198,7 @@ public class AppModel {
 
     /**
      * Asynchronously adds an encounter that records an order as executed, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} when complete.
+     * {@link ItemCreatedEvent} when complete.
      */
     public void addOrderExecutedEncounter(CrudEventBus bus, AppPatient patient, String orderUuid) {
         addEncounter(bus, patient, new AppEncounter(
@@ -206,7 +208,7 @@ public class AppModel {
 
     /**
      * Asynchronously adds an encounter to a patient, posting a
-     * {@link org.projectbuendia.client.events.data.SingleItemCreatedEvent} when complete.
+     * {@link ItemCreatedEvent} when complete.
      */
     public void addEncounter(CrudEventBus bus, AppPatient appPatient, AppEncounter appEncounter) {
         mTaskFactory.newAddEncounterAsyncTask(appPatient, appEncounter, bus).execute();

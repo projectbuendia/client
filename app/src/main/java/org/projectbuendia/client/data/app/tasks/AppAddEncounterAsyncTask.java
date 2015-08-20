@@ -24,9 +24,9 @@ import org.projectbuendia.client.data.app.converters.AppEncounterConverter;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemCreatedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Encounter;
@@ -38,7 +38,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * An {@link AsyncTask} that adds a patient encounter to a server.
  *
- * <p>If the operation succeeds, a {@link SingleItemCreatedEvent} is posted on the given
+ * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the given
  * {@link CrudEventBus} with the added encounter. If the operation fails, a
  * {@link EncounterAddFailedEvent} is posted instead.
  */
@@ -161,7 +161,7 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
 
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchSingleAsyncTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemAsyncTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Observations.CONTENT_URI,
                 ENCOUNTER_PROJECTION,
                 new EncounterUuidFilter(),
@@ -176,12 +176,12 @@ public class AppAddEncounterAsyncTask extends AsyncTask<Void, Void, EncounterAdd
     // report success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(SingleItemFetchedEvent<AppEncounter> event) {
-            mBus.post(new SingleItemCreatedEvent<>(event.item));
+        public void onEventMainThread(ItemFetchedEvent<AppEncounter> event) {
+            mBus.post(new ItemCreatedEvent<>(event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new EncounterAddFailedEvent(
                     EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
                     new Exception(event.error)));

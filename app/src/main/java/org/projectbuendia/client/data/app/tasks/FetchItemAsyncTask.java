@@ -19,18 +19,18 @@ import android.os.AsyncTask;
 import org.projectbuendia.client.data.app.AppTypeBase;
 import org.projectbuendia.client.data.app.converters.AppTypeConverter;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.SingleItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 
 /**
  * An {@link AsyncTask} that fetches a single item from the data store.
  *
- * <p>If the operation succeeds, a {@link SingleItemFetchedEvent} is posted on the given
+ * <p>If the operation succeeds, a {@link ItemFetchedEvent} is posted on the given
  * {@link CrudEventBus} with the retrieved item. If the operation fails, a
- * {@link SingleItemFetchFailedEvent} is posted instead.
+ * {@link ItemFetchFailedEvent} is posted instead.
  */
-public class FetchSingleAsyncTask<T extends AppTypeBase>
+public class FetchItemAsyncTask<T extends AppTypeBase>
         extends AsyncTask<Void, Void, Object> {
 
     private final ContentResolver mContentResolver;
@@ -41,7 +41,7 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
     private final AppTypeConverter<T> mConverter;
     private final CrudEventBus mBus;
 
-    FetchSingleAsyncTask(
+    FetchItemAsyncTask(
             ContentResolver contentResolver,
             Uri contentUri,
             String[] projectionColumns,
@@ -70,10 +70,10 @@ public class FetchSingleAsyncTask<T extends AppTypeBase>
                     null);
 
             if (cursor == null || !cursor.moveToFirst()) {
-                return new SingleItemFetchFailedEvent("empty response from provider");
+                return new ItemFetchFailedEvent("empty response from provider");
             }
 
-            return new SingleItemFetchedEvent<>(mConverter.fromCursor(cursor));
+            return new ItemFetchedEvent<>(mConverter.fromCursor(cursor));
         } finally {
             if (cursor != null) {
                 cursor.close();

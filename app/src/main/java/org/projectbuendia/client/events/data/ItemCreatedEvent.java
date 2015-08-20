@@ -14,18 +14,13 @@ package org.projectbuendia.client.events.data;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
- * An event bus event indicating that a single item has been updated on the server, directly
- * providing both the original and new items for ease of comparison.
- *
- * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
+ * Indicates that a single item has been created on the server.  Should
+ * only be posted on a {@link DefaultCrudEventBus}.
  */
-public class SingleItemUpdatedEvent<T> {
+public class ItemCreatedEvent<T> {
+    public final T item;
 
-    public final T originalItem;
-    public final T newItem;
-
-    public SingleItemUpdatedEvent(T originalItem, T newItem) {
-        this.originalItem = originalItem;
-        this.newItem = newItem;
+    public ItemCreatedEvent(T item) {
+        this.item = item;
     }
 }

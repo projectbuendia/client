@@ -42,8 +42,8 @@ import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.model.User;
@@ -573,9 +573,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             mUi.showError(messageResource, exceptionMessage);
         }
 
-        // We get a SingleItemFetchedEvent when the initial patient data is loaded
+        // We get a ItemFetchedEvent when the initial patient data is loaded
         // from SQLite or after an edit has been successfully posted to the server.
-        public void onEventMainThread(SingleItemFetchedEvent event) {
+        public void onEventMainThread(ItemFetchedEvent event) {
             if (event.item instanceof AppPatient) {
                 // When the patient's location is changed, the location dialog stays
                 // open while we wait for the patient edit to be posted to the server.

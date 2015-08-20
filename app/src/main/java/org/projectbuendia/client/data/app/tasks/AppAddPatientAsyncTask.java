@@ -23,9 +23,9 @@ import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemCreatedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Patient;
@@ -39,7 +39,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * An {@link AsyncTask} that adds a patient to a server.
  *
- * <p>If the operation succeeds, a {@link SingleItemCreatedEvent} is posted on the given
+ * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the given
  * {@link CrudEventBus} with the added patient. If the operation fails, a
  * {@link PatientAddFailedEvent} is posted instead.
  */
@@ -146,7 +146,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
                 PatientProjection.getProjectionColumns(),
                 new UuidFilter(),
@@ -166,12 +166,12 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-            mBus.post(new SingleItemCreatedEvent<>(event.item));
+        public void onEventMainThread(ItemFetchedEvent<AppPatient> event) {
+            mBus.post(new ItemCreatedEvent<>(event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new PatientAddFailedEvent(
                     PatientAddFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);

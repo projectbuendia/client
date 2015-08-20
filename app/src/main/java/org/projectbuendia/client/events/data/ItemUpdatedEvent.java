@@ -14,15 +14,15 @@ package org.projectbuendia.client.events.data;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
- * An event bus event indicating that fetching a single item failed.
- *
- * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
+ * Indicates that an item has been updated on the server.
+ * Should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class SingleItemFetchFailedEvent {
+public class ItemUpdatedEvent<T> {
+    public final T oldItem;
+    public final T newItem;
 
-    public final String error;
-
-    public SingleItemFetchFailedEvent(String errorMessage) {
-        error = errorMessage;
+    public ItemUpdatedEvent(T oldItem, T newItem) {
+        this.oldItem = oldItem;
+        this.newItem = newItem;
     }
 }

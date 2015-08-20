@@ -25,8 +25,8 @@ import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemCreatedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
@@ -203,7 +203,7 @@ final class PatientCreationController {
             mLocationTree = event.tree;
         }
 
-        public void onEventMainThread(SingleItemCreatedEvent<AppPatient> event) {
+        public void onEventMainThread(ItemCreatedEvent<AppPatient> event) {
             Utils.logEvent("add_patient_succeeded");
             mUi.quitActivity();
         }
@@ -256,7 +256,7 @@ final class PatientCreationController {
             Utils.logEvent("add_patient_failed", "reason", "" + event.reason);
         }
 
-        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemFetchFailedEvent event) {
             mUi.showErrorMessage(event.error);
         }
     }

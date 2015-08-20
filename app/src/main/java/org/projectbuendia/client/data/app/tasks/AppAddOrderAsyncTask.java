@@ -21,9 +21,9 @@ import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.OrderAddFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemCreatedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Order;
@@ -35,7 +35,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * An {@link AsyncTask} that adds an order, both on the server and in the local store.
  *
- * <p>If the operation succeeds, a {@link SingleItemCreatedEvent} is posted on the
+ * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the
  * given {@link CrudEventBus} with the added order. If the operation fails, an
  * {@link OrderAddFailedEvent} is posted instead.
  */
@@ -105,7 +105,7 @@ public class AppAddOrderAsyncTask extends AsyncTask<Void, Void, OrderAddFailedEv
 
         // Otherwise, start a fetch task to fetch the order from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchSingleAsyncTask<AppOrder> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemAsyncTask<AppOrder> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Orders.CONTENT_URI,
                 Contracts.OrderColumns.ALL,
                 new UuidFilter(),
@@ -120,12 +120,12 @@ public class AppAddOrderAsyncTask extends AsyncTask<Void, Void, OrderAddFailedEv
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class CreationEventSubscriber {
-        public void onEventMainThread(SingleItemFetchedEvent<AppOrder> event) {
-            mBus.post(new SingleItemCreatedEvent<>(event.item));
+        public void onEventMainThread(ItemFetchedEvent<AppOrder> event) {
+            mBus.post(new ItemCreatedEvent<>(event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new OrderAddFailedEvent(
                     OrderAddFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
             mBus.unregister(this);

@@ -35,7 +35,7 @@ import org.joda.time.Period;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
-import org.projectbuendia.client.events.data.SingleItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.sync.SyncFinishedEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
@@ -312,7 +312,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<UserLog
             onView(withText(locationName)).perform(click());
         }
 
-        EventBusIdlingResource<SingleItemCreatedEvent<AppPatient>> resource =
+        EventBusIdlingResource<ItemCreatedEvent<AppPatient>> resource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
         onView(withId(R.id.patient_creation_button_create)).perform(click());

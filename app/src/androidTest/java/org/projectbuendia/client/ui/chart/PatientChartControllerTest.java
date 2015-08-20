@@ -28,7 +28,7 @@ import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
@@ -124,7 +124,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mController.init();
         // WHEN that patient's details are loaded
         AppPatient patient = AppPatient.builder().build();
-        mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
+        mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
         mFakeHandler.runUntilEmpty();
@@ -140,7 +140,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mController.init();
         // WHEN that patient's details are loaded
         AppPatient patient = AppPatient.builder().build();
-        mFakeCrudEventBus.post(new SingleItemFetchedEvent<>(patient));
+        mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
         // THEN the controller updates the UI
         verify(mMockUi).updatePatientDetailsUi(patient);
     }

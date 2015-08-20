@@ -74,15 +74,15 @@ public class AppAsyncTaskFactory {
     }
 
 
-    /** Creates a new {@link FetchSingleAsyncTask}. */
-    public <T extends AppTypeBase<?>> FetchSingleAsyncTask<T> newFetchSingleAsyncTask(
+    /** Creates a new {@link FetchItemAsyncTask}. */
+    public <T extends AppTypeBase<?>> FetchItemAsyncTask<T> newFetchSingleAsyncTask(
             Uri contentUri,
             String[] projectionColumns,
             SimpleSelectionFilter filter,
             String constraint,
             AppTypeConverter<T> converter,
             CrudEventBus bus) {
-        return new FetchSingleAsyncTask<>(
+        return new FetchItemAsyncTask<>(
                 mContentResolver, contentUri, projectionColumns, filter, constraint, converter,
                 bus);
     }

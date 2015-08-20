@@ -22,9 +22,9 @@ import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemFetchedEvent;
-import org.projectbuendia.client.events.data.SingleItemUpdatedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * An {@link AsyncTask} that updates a patient on a server.
  *
- * <p>If the operation succeeds, a {@link SingleItemUpdatedEvent} is posted on the given
+ * <p>If the operation succeeds, a {@link ItemUpdatedEvent} is posted on the given
  * {@link CrudEventBus} with both the old and updated patient data. If the operation fails, a
  * {@link PatientUpdateFailedEvent} is posted instead.
  */
@@ -115,7 +115,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
-        FetchSingleAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
                 PatientProjection.getProjectionColumns(),
                 new UuidFilter(),
@@ -130,12 +130,12 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
     // success/failure.
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class UpdateEventSubscriber {
-        public void onEventMainThread(SingleItemFetchedEvent<AppPatient> event) {
-            mBus.post(new SingleItemUpdatedEvent<>(mOriginalPatient, event.item));
+        public void onEventMainThread(ItemFetchedEvent<AppPatient> event) {
+            mBus.post(new ItemUpdatedEvent<>(mOriginalPatient, event.item));
             mBus.unregister(this);
         }
 
-        public void onEventMainThread(SingleItemFetchFailedEvent event) {
+        public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new PatientUpdateFailedEvent(
                     PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);

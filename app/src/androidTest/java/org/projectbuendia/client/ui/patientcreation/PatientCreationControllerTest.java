@@ -29,7 +29,7 @@ import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
-import org.projectbuendia.client.events.data.SingleItemCreatedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.ui.FakeEventBus;
 
@@ -126,7 +126,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         mPatientCreationController.init();
         // WHEN a patient is successfully added
         AppPatient patient = AppPatient.builder().build();
-        mFakeCrudEventBus.post(new SingleItemCreatedEvent<>(patient));
+        mFakeCrudEventBus.post(new ItemCreatedEvent<>(patient));
         // THEN controller tries to quit the activity
         verify(mMockUi).quitActivity();
     }
