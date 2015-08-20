@@ -276,7 +276,11 @@ public class Utils {
     /** Gets a long integer value from a cursor, returning a default value instead of null. */
     public static Long getLong(Cursor c, String columnName, Long defaultValue) {
         int index = c.getColumnIndex(columnName);
-        return c.isNull(index) ? defaultValue : c.getLong(index);
+        // The cast (Long) c.getLong(index) is necessary to work around the fact that
+        // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
+        // causing an NPE when defaultValue is null.  The correct superset of (Long) and
+        // (long) is obviously (Long); the Java specification (15.25) is incorrect.
+        return c.isNull(index) ? defaultValue : (Long) c.getLong(index);
     }
 
     /** Gets a nullable long value from a cursor. */

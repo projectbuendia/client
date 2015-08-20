@@ -68,7 +68,7 @@
               <div onclick="alert(''
                 {%- for value in values -%}
                   + '---- '
-                  + {{value.observed | dateformat("dd MMM at HH:mm") | js}}
+                  + {{value.observed | dateformat("dd MMM 'at' HH:mm") | js}}
                   + ' ----\n'
                   + {{value.text | js}}
                   + '\n\n'
