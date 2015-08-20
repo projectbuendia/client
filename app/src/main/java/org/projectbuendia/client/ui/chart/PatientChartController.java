@@ -386,7 +386,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
         for (LocalizedObs obs : mObservations) {
-            if (AppModel.ORDER_EXECUTED_UUID.equals(obs.conceptUuid) &&
+            if (AppModel.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
                     order.uuid.equals(obs.value)) {
                 executionTimes.add(obs.encounterTime);
             }

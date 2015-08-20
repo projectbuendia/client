@@ -152,7 +152,7 @@ public class AppEncounter extends AppTypeBase<String> {
         }
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_UUID);
+            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
             contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestampSec);
             contentValues.put(Contracts.ObservationColumns.ENCOUNTER_UUID, encounterUuid);
             contentValues.put(Contracts.ObservationColumns.PATIENT_UUID, patientUuid);

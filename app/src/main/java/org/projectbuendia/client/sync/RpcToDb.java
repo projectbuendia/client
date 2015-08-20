@@ -112,7 +112,7 @@ public class RpcToDb {
             if (encounter.order_uuids != null) {
                 for (String orderUuid : encounter.order_uuids) {
                     ContentValues values = new ContentValues(base);
-                    values.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_UUID);
+                    values.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
                     values.put(Contracts.ObservationColumns.VALUE, orderUuid);
                     result.add(values);
                 }

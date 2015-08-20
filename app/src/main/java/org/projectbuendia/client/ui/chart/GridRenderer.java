@@ -109,7 +109,7 @@ public class GridRenderer {
                     addValue(column, obs.conceptUuid, value);
                 }
 
-                if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_UUID)) {
+                if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Integer count = column.orderExecutionCounts.get(obs.value);
                     column.orderExecutionCounts.put(
                             obs.value, count == null ? 1 : count + 1);
