@@ -14,6 +14,7 @@ package org.projectbuendia.client.data.app;
 import android.content.ContentValues;
 
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
@@ -90,7 +91,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 Utils.toString(birthdate));
         contentValues.put(
                 Contracts.Patients.LOCATION_UUID,
-                locationUuid);
+                locationUuid == null ? Zone.DEFAULT_LOCATION_UUID : locationUuid);
 
         return contentValues;
     }

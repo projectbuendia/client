@@ -37,7 +37,7 @@ public class Zone {
     public static final String DISCHARGED_ZONE_UUID = "d7ca63c3-6ea0-4357-82fd-0910cc17a2cb";
 
     // Where to place patients with no location.
-    public static final String DEFAULT_LOCATION = TRIAGE_ZONE_UUID;
+    public static final String DEFAULT_LOCATION_UUID = TRIAGE_ZONE_UUID;
 
     private static final List<String> ORDERED_ZONES = Arrays.asList(
             TRIAGE_ZONE_UUID,

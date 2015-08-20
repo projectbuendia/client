@@ -171,7 +171,7 @@ final class NewPatientController {
         patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid =
-                Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION));
+                Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION_UUID));
         patientDelta.admissionDate = Optional.of(admissionDate);
         patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 

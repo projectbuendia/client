@@ -34,6 +34,7 @@ import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.net.model.ChartStructure;
@@ -45,10 +46,10 @@ import org.projectbuendia.client.net.model.PatientChartList;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
-import org.projectbuendia.client.sync.providers.Contracts.Concepts;
 import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
-import org.projectbuendia.client.sync.providers.Contracts.Locations;
+import org.projectbuendia.client.sync.providers.Contracts.Concepts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
+import org.projectbuendia.client.sync.providers.Contracts.Locations;
 import org.projectbuendia.client.sync.providers.Contracts.Misc;
 import org.projectbuendia.client.sync.providers.Contracts.Observations;
 import org.projectbuendia.client.sync.providers.Contracts.Orders;
@@ -154,7 +155,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String authority,
             ContentProviderClient provider,
             SyncResult syncResult) {
-        // Fire a broadcast indicating that sync has completed.
+        // Broadcast that sync is starting.
         Intent syncStartedIntent =
                 new Intent(getContext(), SyncManager.SyncStatusBroadcastReceiver.class);
         syncStartedIntent.putExtra(SyncManager.SYNC_STATUS, SyncManager.STARTED);
@@ -178,7 +179,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         try {
-            checkCancellation("Sync was canceled before it started.");
+            checkCancellation("before work started");
         } catch (CancellationException e) {
             getContext().sendBroadcast(syncCanceledIntent);
             return;
@@ -218,7 +219,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             int progressIncrement = 100 / phases.size();
             for (SyncPhase phase : SyncPhase.values()) {
                 if (!phases.contains(phase)) break;
-                checkCancellation("Sync was cancelled before " + phase);
+                checkCancellation("before " + phase);
                 reportProgress(0, PHASE_MESSAGES.get(phase));
 
                 switch (phase) {
@@ -250,7 +251,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     // incremental fetch would help a lot.
                     // TODO: Implement incremental fetch for patients.
                     case SYNC_PATIENTS:
-                        updatePatientData(syncResult);
+                        updatePatients(syncResult);
                         break;
 
                     // Observations: Both full fetch and incremental fetch are supported.
@@ -284,39 +285,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             LOG.e(e, "Sync canceled");
             getContext().sendBroadcast(syncCanceledIntent);
             return;
-        } catch (RemoteException e) {
-            rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error in RPC");
-            syncResult.stats.numIoExceptions++;
-            getContext().sendBroadcast(syncFailedIntent);
-            return;
         } catch (OperationApplicationException e) {
             rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error updating database");
+            LOG.e(e, "Error updating database during sync");
             syncResult.databaseError = true;
             getContext().sendBroadcast(syncFailedIntent);
             return;
-        } catch (InterruptedException e) {
+        } catch (Throwable e) {
             rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error interruption");
-            syncResult.stats.numIoExceptions++;
-            getContext().sendBroadcast(syncFailedIntent);
-            return;
-        } catch (ExecutionException e) {
-            rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error failed to execute");
-            syncResult.stats.numIoExceptions++;
-            getContext().sendBroadcast(syncFailedIntent);
-            return;
-        } catch (Exception e) {
-            rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error reading from network");
-            syncResult.stats.numIoExceptions++;
-            getContext().sendBroadcast(syncFailedIntent);
-            return;
-        } catch (UserManager.UserSyncException e) {
-            rollbackSavepoint(dbTransactionHelper);
-            LOG.e(e, "Error syncing users");
+            LOG.e(e, "Error during sync");
             syncResult.stats.numIoExceptions++;
             getContext().sendBroadcast(syncFailedIntent);
             return;
@@ -345,10 +322,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * canceled. It is the responsibility of the caller to perform any actual cancellation
      * procedures.
      */
-    private synchronized void checkCancellation(String message) throws CancellationException {
+    private synchronized void checkCancellation(String when) throws CancellationException {
         if (mIsSyncCanceled) {
             mIsSyncCanceled = false;
-            throw new CancellationException(message);
+            throw new CancellationException("Sync cancelled " + when);
         }
     }
 
@@ -373,99 +350,43 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         reportProgress(progressIncrement, null);
     }
 
-    private void updatePatientData(SyncResult syncResult)
+    private void updatePatients(SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         final ContentResolver contentResolver = getContext().getContentResolver();
         
-        LOG.d("Before network call to retrieve patients");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
-
-        // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
-        // background thread
-        List<Patient> patients = future.get();
-        LOG.d("After network call to retrieve patients");
-        checkCancellation("Sync was canceled before parsing retrieved patient data.");
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-
-        HashMap<String, Patient> patientsMap = new HashMap<>();
-        for (Patient p : patients) {
-            patientsMap.put(p.id, p);
+        // Okay to block; this {@AbstractThreadedSyncAdapter} is executed in a background thread.
+        Map<String, ContentValues> patients = new HashMap<>();
+        for (Patient p : future.get()) {
+            checkCancellation("while receiving patients from server");
+            patients.put(p.id, AppPatient.fromNet(p).toContentValues());
         }
 
         // Get list of all items
-        LOG.i("Fetching local entries for merge");
-        Uri uri = Patients.CONTENT_URI; // Get all entries
-        Cursor c = contentResolver.query(uri, null, null, null, null);
-        assert c != null;
-        checkCancellation("Sync was canceled before merging patient data.");
-        LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
-        LOG.i("Found " + patients.size() + " external entries. Computing merge solution...");
+        Cursor c = contentResolver.query(Patients.CONTENT_URI, null, null, null, null);
+        checkCancellation("before merging patients");
+        LOG.i("Merging patients: " + c.getCount() + " local, " + patients.size() + " from server");
 
-
-        String id;
-        String givenName;
-        String familyName;
-        String uuid;
-        String locationUuid;
-        String gender;
-        LocalDate birthdate;
-
-        //iterate through the list of patients
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         try {
             while (c.moveToNext()) {
-                checkCancellation("Sync was canceled while merging retrieved patient data.");
+                checkCancellation("while merging retrieved patients");
                 syncResult.stats.numEntries++;
 
-                id = Utils.getString(c, Patients._ID);
-                givenName = Utils.getString(c, Patients.GIVEN_NAME);
-                familyName = Utils.getString(c, Patients.FAMILY_NAME);
-                uuid = Utils.getString(c, Patients.UUID);
-                locationUuid = Utils.getString(c, Patients.LOCATION_UUID, Zone.DEFAULT_LOCATION);
-                birthdate = Utils.getLocalDate(c, Patients.BIRTHDATE);
-                gender = Utils.getString(c, Patients.GENDER);
-
-                Patient patient = patientsMap.get(id);
-                if (patient != null) {
-                    // Entry exists. Remove from entry map to prevent insert later.
-                    patientsMap.remove(id);
-                    // Check to see if the entry needs to be updated
-                    Uri existingUri = Patients.CONTENT_URI.buildUpon()
-                            .appendPath(String.valueOf(id)).build();
-
-                    //check if it needs updating
-                    String patientAssignedLocationUuid = patient.assigned_location == null
-                            ? null : patient.assigned_location.uuid;
-                    if (!Objects.equals(patient.given_name, givenName)
-                            || !Objects.equals(patient.family_name, familyName)
-                            || !Objects.equals(patient.uuid, uuid)
-                            || !Objects.equals(patientAssignedLocationUuid, locationUuid)
-                            || !Objects.equals(patient.birthdate, birthdate)
-                            || !Objects.equals(patient.gender, gender)
-                            || !Objects.equals(patient.id, id)) {
-                        // Update existing record
-                        LOG.i("Scheduling update: " + existingUri);
-                        ops.add(ContentProviderOperation.newUpdate(existingUri)
-                                .withValue(Patients.GIVEN_NAME, patient.given_name)
-                                .withValue(Patients.FAMILY_NAME, patient.family_name)
-                                .withValue(Patients.UUID, patient.uuid)
-                                .withValue(Patients.LOCATION_UUID,
-                                        patientAssignedLocationUuid)
-                                .withValue(Patients.BIRTHDATE,
-                                        Utils.toString(patient.birthdate))
-                                .withValue(Patients.GENDER, patient.gender)
-                                .withValue(Patients._ID, patient.id)
-                                .build());
-                        syncResult.stats.numUpdates++;
-                    } else {
-                        LOG.v("No action required for " + existingUri);
-                    }
+                String localId = Utils.getString(c, Patients._ID);
+                Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(localId).build();
+                ContentValues values = patients.remove(localId);
+                if (values != null) {
+                    // Update existing record
+                    LOG.i("  - will update: " + localId);
+                    ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
+                    syncResult.stats.numUpdates++;
                 } else {
                     // Entry doesn't exist. Remove it from the database.
-                    Uri deleteUri = Patients.CONTENT_URI.buildUpon().appendPath(id).build();
-                    LOG.i("Scheduling delete: " + deleteUri);
-                    ops.add(ContentProviderOperation.newDelete(deleteUri).build());
+                    LOG.i("  - will delete: " + localId);
+                    ops.add(ContentProviderOperation.newDelete(uri).build());
                     syncResult.stats.numDeletes++;
                 }
             }
@@ -473,28 +394,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             c.close();
         }
 
-        for (Patient e : patientsMap.values()) {
-            checkCancellation("Sync was canceled while inserting new patient data.");
-            LOG.i("Scheduling insert: entry_id=" + e.id);
-            ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI)
-                    .withValue(Patients._ID, e.id)
-                    .withValue(Patients.GIVEN_NAME, e.given_name)
-                    .withValue(Patients.FAMILY_NAME, e.family_name)
-                    .withValue(Patients.UUID, e.uuid)
-                    .withValue(Patients.BIRTHDATE, Utils.toString(e.birthdate))
-                    .withValue(Patients.GENDER, e.gender)
-                    .withValue(Patients.LOCATION_UUID,
-                            e.assigned_location == null ?
-                                    Zone.DEFAULT_LOCATION : e.assigned_location.uuid)
-                    .build());
+        for (ContentValues values : patients.values()) {
+            checkCancellation("while inserting new patients");
+            LOG.i("  - will insert: " + values.getAsString(Patients._ID));
+            ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
-        LOG.i("Merge solution ready. Applying batch update");
-        checkCancellation("Sync was canceled before completing patient merge operation.");
+        checkCancellation("before applying patient merge");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
-        LOG.i("batch apply done");
+        LOG.i("Finished updating patients");
         mContentResolver.notifyChange(Patients.CONTENT_URI, null, false);
-        LOG.i("change notified");
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
