@@ -19,6 +19,11 @@
       android:actionViewClass="android.widget.SearchView"/>
 
     <item
+        android:id="@+id/action_go_to"
+        android:title="@string/action_go_to"
+        android:showAsAction="ifRoom|collapseActionView" />
+
+    <item
         android:showAsAction="ifRoom|collapseActionView"
         android:id="@+id/action_add"
         android:title="Add Patient"/>

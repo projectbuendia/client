@@ -257,21 +257,21 @@ public class Utils {
     }
 
     /** Gets a string value from a cursor, returning a default value instead of null. */
-    public static String getString(Cursor c, String columnName, String defaultString) {
+    public static String getString(Cursor c, String columnName, String defaultValue) {
         int index = c.getColumnIndex(columnName);
-        return c.isNull(index) ? defaultString : c.getString(index);
+        return c.isNull(index) ? defaultValue : c.getString(index);
     }
 
-    /** Gets a string value from a cursor, possibly returning null. */
-    public static String getNullableString(Cursor c, String columnName) {
+    /** Gets a LocalDate value from a cursor, possibly returning null. */
+    public static LocalDate getLocalDate(Cursor c, String columnName) {
         int index = c.getColumnIndex(columnName);
-        return c.isNull(index) ? null : c.getString(index);
+        return c.isNull(index) ? null : new LocalDate(c.getString(index));
     }
 
-    /** Gets a long integer value from a cursor, possibly returning null. */
-    public static Long getNullableLong(Cursor c, String columnName) {
+    /** Gets a long integer value from a cursor, returning a default value instead of null. */
+    public static Long getLong(Cursor c, String columnName, Long defaultValue) {
         int index = c.getColumnIndex(columnName);
-        return c.isNull(index) ? null : c.getLong(index);
+        return c.isNull(index) ? defaultValue : c.getLong(index);
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String. */

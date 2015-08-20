@@ -58,8 +58,8 @@ public class LocalizedChartHelper {
             orders.add(new Order(
                     Utils.getString(c, "uuid", ""),
                     Utils.getString(c, "instructions", ""),
-                    Utils.getNullableLong(c, "start_time"),
-                    Utils.getNullableLong(c, "stop_time")));
+                    Utils.getLong(c, "start_time", null),
+                    Utils.getLong(c, "stop_time", null)));
         }
         c.close();
         return orders;

@@ -120,33 +120,11 @@ public class OrderDialogFragment extends DialogFragment {
         }
     }
 
-    class GiveForDaysWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {}
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {}
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            String giveForDaysStr = mGiveForDays.getText().toString().trim();
-            int days = giveForDaysStr.isEmpty() ? 0 : Integer.parseInt(giveForDaysStr);
-            LocalDate lastDay = LocalDate.now().plusDays(days - 1);
-            mGiveForDaysLabel.setText(
-                    days == 0 ? R.string.order_give_for_days :
-                    days == 1 ? R.string.order_give_for_day :
-                    R.string.order_give_for_days);
-            mDurationLabel.setText(getResources().getString(
-                    days == 0 ? R.string.order_duration_indefinitely :
-                    days == 1 ? R.string.order_duration_today :
-                    days == 2 ? R.string.order_duration_today_and_tomorrow :
-                    R.string.order_duration_today_through_date
-            ).replace("%s", Utils.toShortString(lastDay)));
-        }
-    }
-
     @Override
     public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
-        mGiveForDays.addTextChangedListener(new GiveForDaysWatcher());
+        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
         mMedication.requestFocus();
         Dialog dialog = new AlertDialog.Builder(getActivity())
                 .setCancelable(false) // Disable auto-cancel.
@@ -164,5 +142,27 @@ public class OrderDialogFragment extends DialogFragment {
         field.setError(getResources().getString(resourceId));
         field.invalidate();
         field.requestFocus();
+    }
+
+    class DurationDaysWatcher implements TextWatcher {
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {}
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {}
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            String text = mGiveForDays.getText().toString().trim();
+            int days = text.isEmpty() ? 0 : Integer.parseInt(text);
+            LocalDate lastDay = LocalDate.now().plusDays(days - 1);
+            mGiveForDaysLabel.setText(
+                    days == 0 ? R.string.order_give_for_days :
+                            days == 1 ? R.string.order_give_for_day :
+                                    R.string.order_give_for_days);
+            mDurationLabel.setText(getResources().getString(
+                    days == 0 ? R.string.order_duration_indefinitely :
+                            days == 1 ? R.string.order_duration_today :
+                                    days == 2 ? R.string.order_duration_today_and_tomorrow :
+                                            R.string.order_duration_today_through_date
+            ).replace("%s", Utils.toShortString(lastDay)));
+        }
     }
 }

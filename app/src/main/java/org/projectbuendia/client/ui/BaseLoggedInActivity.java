@@ -25,8 +25,10 @@ import android.widget.TextView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
 import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.userlogin.UserLoginActivity;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
@@ -203,6 +205,10 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     public void onEvent(ActiveUserUnsetEvent event) {
         // TODO: Implement this in one way or another!
+    }
+
+    public void onEvent(PatientChartRequestedEvent event) {
+        PatientChartActivity.start(this, event.uuid);
     }
 
     class MenuPopupWindow extends PopupWindow {

@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.patientcreation.PatientCreationActivity;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
@@ -67,6 +68,18 @@ public class RoundActivity extends PatientSearchActivity {
                         startActivity(
                                 new Intent(RoundActivity.this, PatientCreationActivity.class));
 
+                        return true;
+                    }
+                });
+
+        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Utils.logUserAction("go_to_patient_pressed");
+                        GoToPatientDialogFragment.newInstance()
+                                .show(getSupportFragmentManager(), null);
                         return true;
                     }
                 });

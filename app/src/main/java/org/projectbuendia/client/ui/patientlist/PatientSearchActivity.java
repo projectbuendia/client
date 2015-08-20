@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.patientlist;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,10 +30,8 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
-import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoadingState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
-import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
 
 import javax.inject.Inject;
@@ -153,11 +150,6 @@ public abstract class PatientSearchActivity extends BaseLoggedInActivity {
     }
 
     private final class SearchUi implements PatientSearchController.Ui {
-        @Override
-        public void openPatientChart(String uuid) {
-            PatientChartActivity.start(PatientSearchActivity.this, uuid);
-        }
-
         @Override
         public void setPatients(TypedCursor<AppPatient> patients) {
             // Delegate to implementers.

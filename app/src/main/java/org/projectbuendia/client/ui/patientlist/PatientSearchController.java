@@ -19,6 +19,7 @@ import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.TypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
@@ -33,11 +34,12 @@ import org.projectbuendia.client.filter.matchers.MatchingFilterGroup;
 import org.projectbuendia.client.filter.matchers.patient.IdFilter;
 import org.projectbuendia.client.filter.matchers.patient.NameFilter;
 import org.projectbuendia.client.sync.SyncManager;
-import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import de.greenrobot.event.EventBus;
 
 import static org.projectbuendia.client.filter.matchers.MatchingFilterGroup.FilterType.OR;
 
@@ -48,7 +50,6 @@ public class PatientSearchController {
     private static final boolean DEBUG = true;
 
     public interface Ui {
-        void openPatientChart(String uuid);
         void setPatients(TypedCursor<AppPatient> patients);
     }
 
@@ -219,7 +220,7 @@ public class PatientSearchController {
      * @param patient the selected {@link org.projectbuendia.client.data.app.AppPatient}
      */
     public void onPatientSelected(AppPatient patient) {
-        mUi.openPatientChart(patient.uuid);
+        EventBus.getDefault().post(new PatientChartRequestedEvent(patient.uuid));
     }
 
     /**

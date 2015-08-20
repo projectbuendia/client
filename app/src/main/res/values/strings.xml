@@ -47,6 +47,7 @@
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
+    <string name="action_go_to">#</string>
     <string name="title_activity_tent_selection">Patients by Location</string>
     <string name="today">Today</string>
     <string name="today_date">Today, %s</string>
@@ -107,6 +108,11 @@
     <string name="sex_female">Female</string>
     <string name="title_updating_patient">Updating patient</string>
     <string name="please_wait">Please wait&#8230;</string>
+
+    <string name="go_to_patient_title">Go to Patient Chart</string>
+    <string name="go_to_patient_id_label">Patient ID</string>
+    <string name="go_to_patient_not_found">No such patient</string>
+    <string name="go_to_patient_go">Go to chart</string>
 
     <string name="patient_creation_id_label">ID</string>
     <string name="patient_creation_given_name_label">Given name</string>
