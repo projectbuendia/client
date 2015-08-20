@@ -34,7 +34,6 @@ import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.sync.PatientProjection;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
@@ -130,7 +129,7 @@ public class AppModel {
 
         FetchTypedCursorAsyncTask<AppPatient> task = new FetchTypedCursorAsyncTask<>(
                 Contracts.Patients.CONTENT_URI,
-                PatientProjection.getProjectionColumns(),
+                null,
                 AppPatient.class,
                 mContentResolver,
                 filter,
@@ -147,7 +146,7 @@ public class AppModel {
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
-                PatientProjection.getProjectionColumns(),
+                null,
                 new UuidFilter(),
                 uuid,
                 mConverters.patient,

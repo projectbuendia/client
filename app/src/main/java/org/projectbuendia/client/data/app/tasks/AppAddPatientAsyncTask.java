@@ -30,7 +30,6 @@ import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.sync.SyncAccountService;
-import org.projectbuendia.client.sync.PatientProjection;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
@@ -148,7 +147,7 @@ public class AppAddPatientAsyncTask extends AsyncTask<Void, Void, PatientAddFail
         mBus.register(new CreationEventSubscriber());
         FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
-                PatientProjection.getProjectionColumns(),
+                null,
                 new UuidFilter(),
                 mUuid,
                 mConverters.patient,

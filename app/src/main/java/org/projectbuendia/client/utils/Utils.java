@@ -262,6 +262,11 @@ public class Utils {
         return c.isNull(index) ? defaultValue : c.getString(index);
     }
 
+    /** Gets a nullable string value from a cursor. */
+    public static String getString(Cursor c, String columnName) {
+        return getString(c, columnName, null);
+    }
+
     /** Gets a LocalDate value from a cursor, possibly returning null. */
     public static LocalDate getLocalDate(Cursor c, String columnName) {
         int index = c.getColumnIndex(columnName);
@@ -272,6 +277,11 @@ public class Utils {
     public static Long getLong(Cursor c, String columnName, Long defaultValue) {
         int index = c.getColumnIndex(columnName);
         return c.isNull(index) ? defaultValue : c.getLong(index);
+    }
+
+    /** Gets a nullable long value from a cursor. */
+    public static Long getLong(Cursor c, String columnName) {
+        return getLong(c, columnName, null);
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String. */

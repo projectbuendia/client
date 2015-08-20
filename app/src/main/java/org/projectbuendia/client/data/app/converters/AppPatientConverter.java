@@ -12,9 +12,10 @@
 package org.projectbuendia.client.data.app.converters;
 
 import android.database.Cursor;
+import android.provider.BaseColumns;
 
 import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.sync.PatientProjection;
+import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
@@ -26,15 +27,13 @@ public class AppPatientConverter implements AppTypeConverter<AppPatient> {
     @Override
     public AppPatient fromCursor(Cursor cursor) {
         return AppPatient.builder()
-                .setId(cursor.getString(PatientProjection.COLUMN_ID))
-                .setUuid(cursor.getString(PatientProjection.COLUMN_UUID))
-                .setGivenName(cursor.getString(PatientProjection.COLUMN_GIVEN_NAME))
-                .setFamilyName(cursor.getString(PatientProjection.COLUMN_FAMILY_NAME))
-                .setBirthdate(Utils.toLocalDate(
-                        cursor.getString(PatientProjection.COLUMN_BIRTHDATE)))
-                .setGender(getGenderFromString(
-                        cursor.getString(PatientProjection.COLUMN_GENDER)))
-                .setLocationUuid(cursor.getString(PatientProjection.COLUMN_LOCATION_UUID))
+                .setId(Utils.getString(cursor, Patients._ID))
+                .setUuid(Utils.getString(cursor, Patients.UUID))
+                .setGivenName(Utils.getString(cursor, Patients.GIVEN_NAME))
+                .setFamilyName(Utils.getString(cursor, Patients.FAMILY_NAME))
+                .setBirthdate(Utils.getLocalDate(cursor, Patients.BIRTHDATE))
+                .setGender(getGenderFromString(Utils.getString(cursor, Patients.GENDER)))
+                .setLocationUuid(Utils.getString(cursor, Patients.LOCATION_UUID))
                 .build();
     }
 

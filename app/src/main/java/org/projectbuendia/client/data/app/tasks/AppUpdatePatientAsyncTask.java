@@ -29,7 +29,6 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Patient;
-import org.projectbuendia.client.sync.PatientProjection;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
@@ -117,7 +116,7 @@ public class AppUpdatePatientAsyncTask extends AsyncTask<Void, Void, PatientUpda
         mBus.register(new UpdateEventSubscriber());
         FetchItemAsyncTask<AppPatient> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Patients.CONTENT_URI,
-                PatientProjection.getProjectionColumns(),
+                null,
                 new UuidFilter(),
                 mUuid,
                 mConverters.patient,
