@@ -76,8 +76,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
-                android:maxLength="2"
-                android:ems="2" />
+                android:maxLength="3"
+                android:ems="3" />
 
             <TextView
                 android:id="@+id/order_times_per_day_label"
@@ -105,8 +105,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
-                android:maxLength="2"
-                android:ems="2" />
+                android:maxLength="3"
+                android:ems="3" />
 
             <TextView
                 android:id="@+id/order_give_for_days_label"
