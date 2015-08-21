@@ -59,6 +59,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 "patient_uuid", mPatientUuid);
         if (mPatientUuid != null) {
             EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
+            getDialog().dismiss();
         }
     }
 
@@ -67,6 +68,12 @@ public class GoToPatientDialogFragment extends DialogFragment {
         View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mPatientId.addTextChangedListener(new IdWatcher());
+        mPatientSearchResult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSubmit();
+            }
+        });
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.go_to_patient_title)
                 .setPositiveButton(R.string.go_to_patient_go, new DialogInterface.OnClickListener() {
