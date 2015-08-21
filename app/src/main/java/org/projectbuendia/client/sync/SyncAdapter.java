@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -185,18 +186,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
-        LOG.i("Beginning network synchronization");
-        reportProgress(0, R.string.sync_in_progress);
-
-        BuendiaProvider buendiaProvider =
-                (BuendiaProvider) (provider.getLocalContentProvider());
-        SQLiteDatabaseTransactionHelper dbTransactionHelper =
-                buendiaProvider.getDbTransactionHelper();
-        LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
-        dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
-
-        TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
-
         // Decide which phases to do.  If FULL_SYNC is set or no phases
         // are specified, do them all.
         Set<SyncPhase> phases = new HashSet<>();
@@ -209,6 +198,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Collections.addAll(phases, SyncPhase.values());
         }
 
+        LOG.i("Beginning network sync: %s", phases);
+        reportProgress(0, R.string.sync_in_progress);
+
+        BuendiaProvider buendiaProvider =
+                (BuendiaProvider) (provider.getLocalContentProvider());
+        SQLiteDatabaseTransactionHelper dbTransactionHelper =
+                buendiaProvider.getDbTransactionHelper();
+        LOG.i("Setting savepoint %s", SYNC_SAVEPOINT_NAME);
+        dbTransactionHelper.startNamedTransaction(SYNC_SAVEPOINT_NAME);
+
+        TimingLogger timings = new TimingLogger(LOG.tag, "onPerformSync");
+
         try {
             if (extras.getBoolean(SyncOption.FULL_SYNC.name())) {
                 Instant syncStartTime = Instant.now();
@@ -220,6 +221,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             for (SyncPhase phase : SyncPhase.values()) {
                 if (!phases.contains(phase)) break;
                 checkCancellation("before " + phase);
+                LOG.i("Starting " + phase);
                 reportProgress(0, PHASE_MESSAGES.get(phase));
 
                 switch (phase) {
@@ -341,9 +343,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void reportProgress(int progressIncrement, int stringResource) {
-        String progressString = getContext().getResources().getString(stringResource);
-        LOG.d("Sync progress checkpoint: +%d%%, %s", progressIncrement, progressString);
-        reportProgress(progressIncrement, progressString);
+        reportProgress(progressIncrement, getContext().getResources().getString(stringResource));
     }
 
     private void reportProgress(int progressIncrement) {
@@ -353,56 +353,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void updatePatients(SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
-        final ContentResolver contentResolver = getContext().getContentResolver();
-        
-        RequestFuture<List<Patient>> future = RequestFuture.newFuture();
-        App.getServer().listPatients("", "", "", future, future);
-        // Okay to block; this {@AbstractThreadedSyncAdapter} is executed in a background thread.
-        Map<String, ContentValues> patients = new HashMap<>();
-        for (Patient p : future.get()) {
-            checkCancellation("while receiving patients from server");
-            patients.put(p.id, AppPatient.fromNet(p).toContentValues());
-        }
-
-        // Get list of all items
-        Cursor c = contentResolver.query(Patients.CONTENT_URI, null, null, null, null);
-        checkCancellation("before merging patients");
-        LOG.i("Merging patients: " + c.getCount() + " local, " + patients.size() + " from server");
-
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        try {
-            while (c.moveToNext()) {
-                checkCancellation("while merging retrieved patients");
-                syncResult.stats.numEntries++;
-
-                String localId = Utils.getString(c, Patients._ID);
-                Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(localId).build();
-                ContentValues values = patients.remove(localId);
-                if (values != null) {
-                    // Update existing record
-                    LOG.i("  - will update: " + localId);
-                    ops.add(ContentProviderOperation.newUpdate(uri).withValues(values).build());
-                    syncResult.stats.numUpdates++;
-                } else {
-                    // Entry doesn't exist. Remove it from the database.
-                    LOG.i("  - will delete: " + localId);
-                    ops.add(ContentProviderOperation.newDelete(uri).build());
-                    syncResult.stats.numDeletes++;
-                }
-            }
-        } finally {
-            c.close();
-        }
-
-        for (ContentValues values : patients.values()) {
-            checkCancellation("while inserting new patients");
-            LOG.i("  - will insert: " + values.getAsString(Patients._ID));
-            ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
-            syncResult.stats.numInserts++;
-        }
-        checkCancellation("before applying patient merge");
+        ops.addAll(RpcToDb.getPatientUpdateOps(syncResult));
+        checkCancellation("while processing patient data from server");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
-        LOG.i("Finished updating patients");
+        LOG.i("Finished updating patients (" + ops.size() + " db ops)");
         mContentResolver.notifyChange(Patients.CONTENT_URI, null, false);
     }
 
@@ -415,7 +370,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
         for (Concept concept : conceptList.results) {
-            checkCancellation("Sync was canceled while determining concepts to insert.");
+            checkCancellation("while determining concepts to insert");
             // This is safe because we have implemented insert on the content provider
             // with replace.
             ContentValues conceptInsert = new ContentValues();
@@ -425,7 +380,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             conceptInserts.add(conceptInsert);
             syncResult.stats.numInserts++;
             for (Map.Entry<String, String> entry : concept.names.entrySet()) {
-                checkCancellation("Sync was canceled while determining concept names to insert.");
+                checkCancellation("while determining concept names to insert");
                 String locale = entry.getKey();
                 if (locale == null) {
                     LOG.e("null locale in concept name rpc for " + concept);
@@ -444,10 +399,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 syncResult.stats.numInserts++;
             }
         }
-        checkCancellation("Sync was canceled before inserting concepts.");
+        checkCancellation("before inserting concepts");
         provider.bulkInsert(Concepts.CONTENT_URI,
                 conceptInserts.toArray(new ContentValues[conceptInserts.size()]));
-        checkCancellation("Sync was canceled before inserting concept names.");
+        checkCancellation("before inserting concept names");
         provider.bulkInsert(ConceptNames.CONTENT_URI,
                 conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
     }
@@ -456,7 +411,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> ops = RpcToDb.locationsRpcToDb(syncResult);
-        checkCancellation("Sync was canceled before applying location updates.");
+        checkCancellation("before applying location updates");
         LOG.i("Applying batch update of locations.");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
         mContentResolver.notifyChange(Locations.CONTENT_URI, null, false);
@@ -470,10 +425,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<ChartStructure> future = RequestFuture.newFuture();
         chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
         final ChartStructure conceptList = future.get();
-        checkCancellation("Sync was canceled before applying chart structure deletions.");
+        checkCancellation("before applying chart structure deletions");
         // When we do a chart update, delete everything first.
         provider.delete(Charts.CONTENT_URI, null, null);
-        checkCancellation("Sync was canceled before applying chart structure insertions.");
+        checkCancellation("before applying chart structure insertions");
         syncResult.stats.numDeletes++;
         provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
     }
@@ -494,7 +449,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             c.close();
         }
 
-        checkCancellation("Sync was canceled before requesting observations.");
+        checkCancellation("before requesting observations");
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
         RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
@@ -502,7 +457,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         Instant lastSyncTime = getLastSyncTime(provider);
         Instant newSyncTime;
-        checkCancellation("Sync was canceled before updating observations.");
+        checkCancellation("before updating observations");
         if (incrementalFetch && lastSyncTime != null) {
             newSyncTime = updateIncrementalObservations(lastSyncTime, provider, syncResult,
                     chartServer, listFuture, timingLogger);
@@ -513,7 +468,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // This is only safe transactionally if we can rely on the entire sync being transactional.
         storeLastSyncTime(provider, newSyncTime);
 
-        checkCancellation("Sync was canceled before deleting temporary observations.");
+        checkCancellation("before deleting temporary observations");
         // Remove all temporary observations now we have the real ones
         provider.delete(Observations.CONTENT_URI,
                 Observations.TEMP_CACHE + "!=0",
@@ -526,9 +481,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> ops = RpcToDb.ordersRpcToDb(syncResult);
-        checkCancellation("Sync was canceled before applying order updates.");
-        LOG.i("Applying batch update of orders.");
+        checkCancellation("before applying order updates");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
+        LOG.i("Finished updating orders (" + ops.size() + " db ops)");
         mContentResolver.notifyChange(Orders.CONTENT_URI, null, false);
     }
 
@@ -570,7 +525,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
-        checkCancellation("Sync was canceled before processing observation RPC results.");
+        checkCancellation("before processing observation RPC results");
         for (PatientChart patientChart : patientChartList.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting future");
@@ -586,10 +541,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             timingLogger.addSplit("added obs to list");
         }
         timingLogger.addSplit("making operations");
-        checkCancellation("Sync was canceled before bulk deleting observations.");
+        checkCancellation("before bulk deleting observations");
         bulkDelete(provider, toDelete);
         timingLogger.addSplit("bulk deletes");
-        checkCancellation("Sync was canceled before bulk inserting observations.");
+        checkCancellation("before bulk inserting observations");
         provider.bulkInsert(Observations.CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
@@ -629,7 +584,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");
-        checkCancellation("Sync was canceled before processing observation RPC results.");
+        checkCancellation("before processing observation RPC results");
         for (PatientChart patientChart : patientChartList.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting incremental future");
@@ -645,7 +600,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
         timingLogger.addSplit("making operations");
         if (toInsert.size() > 0) {
-            checkCancellation("Sync was canceled before inserting incremental observations.");
+            checkCancellation("before inserting incremental observations");
             provider.bulkInsert(Observations.CONTENT_URI,
                     toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");

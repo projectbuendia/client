@@ -16,6 +16,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 
 import com.android.volley.toolbox.RequestFuture;
@@ -23,20 +24,25 @@ import com.android.volley.toolbox.RequestFuture;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.net.model.ChartGroup;
 import org.projectbuendia.client.net.model.ChartStructure;
 import org.projectbuendia.client.net.model.Encounter;
 import org.projectbuendia.client.net.model.Location;
 import org.projectbuendia.client.net.model.Order;
+import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
 import org.projectbuendia.client.sync.providers.Contracts.Locations;
 import org.projectbuendia.client.sync.providers.Contracts.Observations;
 import org.projectbuendia.client.sync.providers.Contracts.Orders;
+import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.providers.Contracts.Users;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,6 +85,60 @@ public class RpcToDb {
         return ops;
     }
 
+    /**
+     * Downloads all patients from the server and produces a list of the operations
+     * needed to bring the local database in sync with the server.
+     */
+    public static List<ContentProviderOperation> getPatientUpdateOps(SyncResult syncResult)
+            throws ExecutionException, InterruptedException {
+        final ContentResolver resolver = App.getInstance().getContentResolver();
+
+        LOG.i("Downloading all patients from server");
+        RequestFuture<List<Patient>> future = RequestFuture.newFuture();
+        App.getServer().listPatients("", "", "", future, future);
+        Map<String, ContentValues> cvs = new HashMap<>();
+        for (Patient patient : future.get()) {
+            cvs.put(patient.id, AppPatient.fromNet(patient).toContentValues());
+        }
+
+        Cursor c = resolver.query(Patients.CONTENT_URI, null, null, null, null);
+        LOG.i("Examining patients: " + c.getCount() + " local, " + cvs.size() + " from server");
+
+        List<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+                String localId = Utils.getString(c, Patients._ID);
+                Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(localId).build();
+                syncResult.stats.numEntries++;
+
+                ContentValues cv = cvs.remove(localId);
+                if (cv != null) {
+                    ContentValues localCv = new ContentValues();
+                    DatabaseUtils.cursorRowToContentValues(c, localCv);
+                    if (!cv.equals(localCv)) {  // record has changed on server
+                        LOG.i("  - will update: " + localId);
+                        ops.add(ContentProviderOperation.newUpdate(uri).withValues(cv).build());
+                        syncResult.stats.numUpdates++;
+                    }
+                } else {  // record doesn't exist on server
+                    LOG.i("  - will delete: " + localId);
+                    ops.add(ContentProviderOperation.newDelete(uri).build());
+                    syncResult.stats.numDeletes++;
+                }
+            }
+        } finally {
+            c.close();
+        }
+
+        for (ContentValues values : cvs.values()) {  // server has a new record
+            LOG.i("  - will insert: " + values.getAsString(Patients._ID));
+            ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
+            syncResult.stats.numInserts++;
+        }
+        
+        return ops;
+    }
+    
     /** Converts a chart data response into appropriate inserts in the chart table. */
     public static void observationsRpcToDb(
             PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
@@ -146,7 +206,7 @@ public class RpcToDb {
                 Orders.STOP_TIME
         }, null, null, null);
         try {
-            LOG.i("Merging in orders: client has %d, server has %d.", c.getCount(), ordersToStore.size());
+            LOG.i("Examining orders: %d local, %d from server.", c.getCount(), ordersToStore.size());
             // Scan all the locally stored orders, updating the orders we've just received.
             while (c.moveToNext()) {
                 String uuid = c.getString(c.getColumnIndex(Orders.UUID));

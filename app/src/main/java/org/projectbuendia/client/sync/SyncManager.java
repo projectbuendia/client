@@ -112,10 +112,10 @@ public class SyncManager {
                     EventBus.getDefault().post(new SyncFailedEvent());
                     break;
                 case IN_PROGRESS:
-                    LOG.i("Sync is continuing");
-                    int syncProgress = intent.getIntExtra(SYNC_PROGRESS, 0);
-                    String syncLabel = intent.getStringExtra(SYNC_PROGRESS_LABEL);
-                    EventBus.getDefault().post(new SyncProgressEvent(syncProgress, syncLabel));
+                    int increment = intent.getIntExtra(SYNC_PROGRESS, 0);
+                    String label = intent.getStringExtra(SYNC_PROGRESS_LABEL);
+                    LOG.d("Sync in progress (+ %d%%, %s)", increment, label);
+                    EventBus.getDefault().post(new SyncProgressEvent(increment, label));
                     break;
                 case CANCELED:
                     LOG.i("Sync was canceled.");

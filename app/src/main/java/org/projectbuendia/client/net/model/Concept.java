@@ -27,6 +27,6 @@ public class Concept {
     public Integer xform_id; // @nolint
     public ConceptType type;
 
-    /** A map from locales to the name in that locale. Eg en->heart, fr->couer, ... */
+    /** A map from locales to the name in that locale. Eg en->heart, fr->coeur, ... */
     public Map<String, String> names;
 }

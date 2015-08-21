@@ -263,6 +263,7 @@ public class AppModel {
         protected AppLocationTree doInBackground(Void... voids) {
             Cursor cursor = null;
             try {
+                // TODO: Ensure this cursor is closed.
                 cursor = mContentResolver.query(
                         Contracts.LocalizedLocations.getUri(mLocale),
                         null,
