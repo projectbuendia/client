@@ -33,7 +33,6 @@ import org.projectbuendia.client.net.model.Order;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.User;
-import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
 import org.projectbuendia.client.sync.providers.Contracts.Locations;
@@ -55,11 +54,11 @@ import java.util.concurrent.ExecutionException;
  * A helper class for turning the Java beans that are the result of chart RPC calls into
  * appropriate {@link ContentProviderOperation}s for inserting into the DB.
  */
-public class RpcToDb {
+public class DbSyncHelper {
     private static final Logger LOG = Logger.create();
 
     /** Converts a ChartStructure response into appropriate inserts in the chart table. */
-    public static ArrayList<ContentProviderOperation> chartStructureRpcToDb(
+    public static ArrayList<ContentProviderOperation> getChartUpdateOps(
             ChartStructure response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         if (response.uuid == null) {
@@ -140,8 +139,9 @@ public class RpcToDb {
     }
     
     /** Converts a chart data response into appropriate inserts in the chart table. */
-    public static void observationsRpcToDb(
-            PatientChart response, SyncResult syncResult, ArrayList<ContentValues> result) {
+    public static List<ContentValues> getObsValuesToInsert(
+            PatientChart response, SyncResult syncResult) {
+        List<ContentValues> cvs = new ArrayList<>();
         final String patientUuid = response.uuid;
         for (Encounter encounter : response.encounters) {
             if (encounter.uuid == null) {
@@ -166,7 +166,7 @@ public class RpcToDb {
                     ContentValues values = new ContentValues(base);
                     values.put(Observations.CONCEPT_UUID, conceptUuid);
                     values.put(Observations.VALUE, entry.getValue().toString());
-                    result.add(values);
+                    cvs.add(values);
                     syncResult.stats.numInserts++;
                 }
             }
@@ -175,18 +175,19 @@ public class RpcToDb {
                     ContentValues values = new ContentValues(base);
                     values.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
                     values.put(Observations.VALUE, orderUuid);
-                    result.add(values);
+                    cvs.add(values);
                     syncResult.stats.numInserts++;
                 }
             }
         }
+        return cvs;
     }
 
     /**
      * Gets orders from the server and returns a list of operations that will
      * update the database with the new orders and edits to existing orders.
      */
-    public static ArrayList<ContentProviderOperation> ordersRpcToDb(SyncResult syncResult)
+    public static ArrayList<ContentProviderOperation> getOrderUpdateOps(SyncResult syncResult)
             throws ExecutionException, InterruptedException {
         // Request all orders from the server.
         RequestFuture<List<Order>> future = RequestFuture.newFuture();
@@ -248,7 +249,7 @@ public class RpcToDb {
     }
 
     /** Given a set of users, replaces the current set of users with users from that set. */
-    public static ArrayList<ContentProviderOperation> userSetFromRpcToDb(
+    public static ArrayList<ContentProviderOperation> getUserUpdateOps(
             Set<User> response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         // Delete all users before inserting.
@@ -268,7 +269,7 @@ public class RpcToDb {
      * Requests locations from the server and transforms the response into an {@link ArrayList} of
      * {@link ContentProviderOperation}s for updating the database.
      */
-    public static ArrayList<ContentProviderOperation> locationsRpcToDb(SyncResult syncResult)
+    public static ArrayList<ContentProviderOperation> getLocationUpdateOps(SyncResult syncResult)
             throws ExecutionException, InterruptedException {
         final ContentResolver contentResolver = App.getInstance().getContentResolver();
 

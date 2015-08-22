@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -32,16 +31,12 @@ import android.util.TimingLogger;
 import com.android.volley.toolbox.RequestFuture;
 
 import org.joda.time.Instant;
-import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.net.model.ChartStructure;
 import org.projectbuendia.client.net.model.Concept;
 import org.projectbuendia.client.net.model.ConceptList;
-import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.PatientChartList;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
@@ -58,15 +53,12 @@ import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -175,8 +167,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         // change, however, any user-requested sync will instantly fail until the HealthMonitor has
         // made a determination that the server is definitely accessible.
         if (App.getInstance().getHealthMonitor().isApiUnavailable()) {
-            LOG.e("Sync failed: Buendia API is unavailable.");
+            LOG.e("Abort sync: Buendia API is unavailable.");
             getContext().sendBroadcast(syncFailedIntent);
+            return;
         }
 
         try {
@@ -354,7 +347,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
-        ops.addAll(RpcToDb.getPatientUpdateOps(syncResult));
+        ops.addAll(DbSyncHelper.getPatientUpdateOps(syncResult));
         checkCancellation("while processing patient data from server");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
         LOG.i("Finished updating patients (" + ops.size() + " db ops)");
@@ -410,7 +403,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void updateLocations(final ContentProviderClient provider, SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
-        ArrayList<ContentProviderOperation> ops = RpcToDb.locationsRpcToDb(syncResult);
+        ArrayList<ContentProviderOperation> ops = DbSyncHelper.getLocationUpdateOps(syncResult);
         checkCancellation("before applying location updates");
         LOG.i("Applying batch update of locations.");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
@@ -430,7 +423,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.delete(Charts.CONTENT_URI, null, null);
         checkCancellation("before applying chart structure insertions");
         syncResult.stats.numDeletes++;
-        provider.applyBatch(RpcToDb.chartStructureRpcToDb(conceptList, syncResult));
+        provider.applyBatch(DbSyncHelper.getChartUpdateOps(conceptList, syncResult));
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult,
@@ -480,7 +473,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void updateOrders(final ContentProviderClient provider, SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
-        ArrayList<ContentProviderOperation> ops = RpcToDb.ordersRpcToDb(syncResult);
+        ArrayList<ContentProviderOperation> ops = DbSyncHelper.getOrderUpdateOps(syncResult);
         checkCancellation("before applying order updates");
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
         LOG.i("Finished updating orders (" + ops.size() + " db ops)");
@@ -537,7 +530,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             toDelete.add(patientChart.uuid);
             timingLogger.addSplit("added delete to list");
             // Add the new observations
-            RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
+            toInsert.addAll(DbSyncHelper.getObsValuesToInsert(patientChart, syncResult));
             timingLogger.addSplit("added obs to list");
         }
         timingLogger.addSplit("making operations");
@@ -594,7 +587,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
             if (patientChart.encounters.length > 0) {
                 // Add the new observations
-                RpcToDb.observationsRpcToDb(patientChart, syncResult, toInsert);
+                toInsert.addAll(DbSyncHelper.getObsValuesToInsert(patientChart, syncResult));
                 timingLogger.addSplit("added incremental obs to list");
             }
         }

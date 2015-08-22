@@ -27,7 +27,7 @@ import net.sqlcipher.database.SQLiteException;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.net.model.NewUser;
 import org.projectbuendia.client.net.model.User;
-import org.projectbuendia.client.sync.RpcToDb;
+import org.projectbuendia.client.sync.DbSyncHelper;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
@@ -117,7 +117,7 @@ public class UserStore {
         try {
             LOG.i("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
-            client.applyBatch(RpcToDb.userSetFromRpcToDb(userSet, new SyncResult()));
+            client.applyBatch(DbSyncHelper.getUserUpdateOps(userSet, new SyncResult()));
         } catch (RemoteException | OperationApplicationException e) {
             LOG.i("Rolling back savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.rollbackNamedTransaction(USER_SYNC_SAVEPOINT_NAME);

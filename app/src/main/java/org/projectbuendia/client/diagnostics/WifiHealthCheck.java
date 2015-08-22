@@ -55,7 +55,6 @@ public class WifiHealthCheck extends HealthCheck {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-
         return intentFilter;
     }
 
