@@ -80,6 +80,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
                 mFakeGlobalEventBus,
                 mFakeCrudEventBus,
                 mMockUi,
+                PATIENT_UUID_1,
                 mMockOdkResultSender,
                 mMockChartHelper,
                 null,
@@ -89,8 +90,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that suspend() unregisters from the event bus. */
     public void testSuspend_UnregistersFromEventBus() {
-        // GIVEN an initialized controller with patient set
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN an initialized controller
         mController.init();
         // WHEN the controller is suspended
         mController.suspend();
@@ -100,8 +100,6 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that init() requests a single patient from the app model. */
     public void testInit_RequestsPatientDetails() {
-        // GIVEN a patient was set
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
         // WHEN the controller is inited
         mController.init();
         // THEN it requests that patient's details be fetched
@@ -119,8 +117,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
                 .thenReturn(allObservations);
         when(mMockChartHelper.getMostRecentObservations(PATIENT_UUID_1))
                 .thenReturn(recentObservations);
-        // GIVEN patient is set and controller is initialized
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
         AppPatient patient = AppPatient.builder().build();
@@ -135,8 +132,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that the UI is given updated patient data when patient data is fetched. */
     public void testPatientDetailsLoaded_UpdatesUi() {
-        // GIVEN patient is set and controller is initalized
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
         AppPatient patient = AppPatient.builder().build();
@@ -147,8 +143,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that selecting a new general condition results in adding a new encounter. */
     public void testSetCondition_AddsEncounterForNewCondition() {
-        // GIVEN patient is set and controller is initalized
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN controller is initialized
         mController.init();
         // WHEN a new general condition is set from the dialog
         mController.setCondition(Concepts.GENERAL_CONDITION_PALLIATIVE_UUID);
@@ -161,8 +156,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */
     public void testAddObservation_showsLoadingDialog() {
-        // GIVEN patient is set, controller is initialized
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN controller is initialized
         mController.init();
         // WHEN 'add observation' is pressed
         mController.onAddObservationPressed();
@@ -172,8 +166,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that requesting an xform through clicking on a vital shows loading dialog. */
     public void testVitalClick_showsLoadingDialog() {
-        // GIVEN patient is set, controller is initialized
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN controller is initialized
         mController.init();
         // WHEN a vital is pressed
         mController.onAddObservationPressed("foo");
@@ -183,8 +176,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
 
     /** Tests that requesting an xform through clicking on test results shows loading dialog. */
     public void testTestResultsClick_showsLoadingDialog() {
-        // GIVEN patient is set, controller is initialized
-        mController.setPatient(PATIENT_UUID_1, PATIENT_NAME_1, PATIENT_ID_1);
+        // GIVEN controller is initialized
         mController.init();
         // WHEN test results are pressed
         mController.onAddTestResultsPressed();

@@ -239,21 +239,6 @@ public class PatientSearchControllerTest extends AndroidTestCase {
                 mFakeCrudEventBus, PatientDbFilters.getDefaultFilter(), "foo");
     }
 
-    /** Tests that the chart activity is launched for a patient when that patient is selected. */
-    public void testOnPatientSelected_launchesChartActivity() {
-        // GIVEN initialized PatientSearchController
-        // WHEN a patient is selected
-        AppPatient patient = AppPatient.builder()
-                .setUuid("1234")
-                .setGivenName("Bob")
-                .setFamilyName("Smith")
-                .setId("KH.1234")
-                .build();
-        mController.onPatientSelected(patient);
-        // THEN launch chart activity for that patient
-        verify(mMockUi).launchChartActivity("1234", "Bob", "Smith", "KH.1234");
-    }
-
     private TypedCursor<AppPatient> getFakeAppPatientCursor() {
         AppPatient patient = AppPatient.builder().build();
         return new FakeTypedCursor<AppPatient>(new AppPatient[] { patient });
