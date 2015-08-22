@@ -41,6 +41,9 @@ Wait a few minutes for the app to build (you can see progress in the status bar 
 
 The default setting for the server URL is configured in app/build.gradle.
 
+## Run tests
+
+
 ## Hardware
 
 In the field, we use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets. These are a good choice because they are waterproof, have a great screen, and have a reasonably-new version of Android.
