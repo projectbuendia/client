@@ -258,7 +258,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
                 delta.toContentValues().toString(), locationName);
 
         onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New Patient")).check(matches(isDisplayed()));
+        onView(withText("New patient")).check(matches(isDisplayed()));
         if (delta.id.isPresent()) {
             onView(withId(R.id.patient_creation_text_patient_id))
                     .perform(typeText(delta.id.get()));
@@ -450,7 +450,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
     protected void inUserLoginGoToPatientCreation() {
         inUserLoginGoToLocationSelection();
         onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New Patient")).check(matches(isDisplayed()));
+        onView(withText("New patient")).check(matches(isDisplayed()));
     }
 
 
