@@ -14,7 +14,6 @@ package org.projectbuendia.client.ui.lists;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
@@ -51,8 +50,8 @@ public class LocationListActivityTest extends FunctionalTestCase {
         inUserLoginGoToLocationSelection();
 
         // Enter settings view and return.
-        onView(withText("GU")).perform(click());
-        onView(withId(R.id.button_settings)).perform(click());
+        click(viewWithText("GU"));
+        click(viewWithId(R.id.button_settings));
         pressBack();
         inLocationSelectionCheckZonesAndTentsDisplayed();
     }
@@ -77,8 +76,8 @@ public class LocationListActivityTest extends FunctionalTestCase {
         inPatientListClickFirstPatient(); // open patient chart
 
         // Relocate the patient to C1.
-        onView(withId(R.id.action_relocate_patient)).perform(click());
-        onView(withText("C1")).perform(click());
+        click(viewWithId(R.id.action_relocate_patient));
+        click(viewWithText("C1"));
 
         pressBack(); // back to search fragment
         pressBack(); // back to tent selection screen

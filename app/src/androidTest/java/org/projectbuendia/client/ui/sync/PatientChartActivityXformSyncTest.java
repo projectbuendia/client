@@ -23,12 +23,8 @@ import org.projectbuendia.client.net.model.Patient;
 
 import java.util.UUID;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
 /** Tests the loading of the encounter xform from the patient chart activity. */
@@ -37,7 +33,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        onView(withText("Guest User")).perform(click());
+        click(viewWithText("Guest User"));
     }
 
     /**
@@ -51,26 +47,25 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),
                         mEventBus);
-        onView(withId(R.id.action_update_chart)).perform(click());
+        click(viewWithId(R.id.action_update_chart));
         Espresso.registerIdlingResources(xformIdlingResource);
         // This check is known to be particularly flaky.
-        checkViewDisplayedWithin(withText("Encounter"), 45000);
+        expectVisibleWithin(45000, viewWithText("Encounter"));
         screenshot("Xform Loaded");
-        onView(withText(R.string.form_entry_discard)).perform(click());
+        click(viewWithText(R.string.form_entry_discard));
     }
 
     private void loadChart() {
         waitForProgressFragment();
         // Open patient list.
-        onView(withId(R.id.action_search)).perform(click());
+        click(viewWithId(R.id.action_search));
         // waitForProgressFragment() doesn't quite work here as we're actually waiting on the
         // search button in the action bar to finish its loading task.
-        checkViewDisplayedSoon(withText(containsString("Triage (")));
+        expectVisibleSoon(viewThat(hasTextContaining("Triage (")));
         // Click first patient.
-        onData(is(AppPatient.class))
+        click(dataThat(is(AppPatient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0)
-                .perform(click());
+                .atPosition(0));
     }
 
     private AppPatientDelta getBasicDemoPatient() {

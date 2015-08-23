@@ -18,7 +18,6 @@ import org.projectbuendia.client.ui.matchers.UserMatchers;
 import java.util.Date;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
@@ -41,48 +40,48 @@ public class LoginActivityTest extends FunctionalTestCase {
         final String family = "Testfamily" + n;
 
         // Add new user
-        onView(withText("Add User")).perform(click());
+        click(viewWithText("Add User"));
         screenshot("After Add User Clicked");
-        onView(withId(R.id.add_user_given_name_tv)).perform(typeText(given));
-        onView(withId(R.id.add_user_family_name_tv)).perform(typeText(family));
+        type(given, viewWithId(R.id.add_user_given_name_tv));
+        type(family, viewWithId(R.id.add_user_family_name_tv));
         screenshot("After User Populated");
-        onView(withText("OK")).perform(click());
+        click(viewWithText("OK"));
         screenshot("After OK Pressed");
 
         waitForProgressFragment();
 
         // Click new user
-        onData(allOf(hasToString(equalTo("TT")), isDisplayed()));
+        expectVisible(dataThat(hasToString(equalTo("TT"))));
         screenshot("In User Selection");
-        onData(new UserMatchers.HasFullName(given + " " + family)).perform(click());
+        click(dataThat(new UserMatchers.HasFullName(given + " " + family)));
 
         // Should be logged in
-        onView(withText(R.string.title_location_list)).check(matches(isDisplayed()));
+        expectVisible(viewWithText(given + " " + family));
         screenshot("After User Selected");
-        onView(withText("TT")).perform(click());
-        onView(withText(given + " " + family)).check(matches(isDisplayed()));
+        click(viewWithText("TT"));
+        expectVisible(viewWithText(given + " " + family));
         screenshot("After User Selected in Action Bar");
     }
 
     /** Logs in as the guest user and logs out. */
     public void testGuestLoginLogout() {
         // Click guest user
-        onView(withText("GU")).check(matches(isDisplayed()));
+        expectVisible(viewWithText("GU"));
         screenshot("Test Start");
-        onView(withText("Guest User")).perform(click());
+        click(viewWithText("Guest User"));
 
         // Should be logged in; log out
-        onView(withText(R.string.title_location_list)).check(matches(isDisplayed()));
+        expectVisible(viewWithText(R.string.title_location_list));
         screenshot("After Guest User Clicked");
-        onView(withText("GU")).perform(click());
-        onView(withText("Guest User")).check(matches(isDisplayed()));
+        click(viewWithText("GU"));
+        expectVisible(viewWithText("Guest User"));
         screenshot("After Guest User Selected in Action Bar");
-        onView(withId(R.id.button_log_out)).perform(click());
+        click(viewWithId(R.id.button_log_out));
 
         waitForProgressFragment();
 
         // Should be back at the user list
-        onView(withText("Add User")).check(matches(isDisplayed()));
+        expectVisible(viewWithText("Add User"));
         screenshot("After Logout");
     }
 }

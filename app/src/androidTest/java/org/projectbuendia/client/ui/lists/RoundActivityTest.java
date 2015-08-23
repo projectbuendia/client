@@ -16,7 +16,6 @@ import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
@@ -30,9 +29,9 @@ public class RoundActivityTest extends FunctionalTestCase {
      */
     public void setUp() throws Exception {
         super.setUp();
-        onView(withText("Guest User")).perform(click());
+        click(viewWithText("Guest User"));
         waitForProgressFragment();
-        onView(withText("Triage")).perform(click());
+        click(viewWithText("Triage"));
     }
 
     /** Checks for a populated title. */
@@ -46,10 +45,9 @@ public class RoundActivityTest extends FunctionalTestCase {
     public void testAtLeastOnePatientDisplayed() {
         screenshot("Test Start");
         // Click the first patient
-        onData(is(AppPatient.class))
+        click(dataThat(is(AppPatient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0)
-                .perform(click());
+                .atPosition(0));
         screenshot("After Patient Clicked");
     }
 }

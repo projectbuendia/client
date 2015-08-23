@@ -15,11 +15,14 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.TextView;
 
 import com.google.android.apps.common.testing.ui.espresso.Espresso;
 import com.google.android.apps.common.testing.ui.espresso.IdlingResource;
 
+import org.odk.collect.android.views.MediaLayout;
+import org.odk.collect.android.views.ODKView;
+import org.odk.collect.android.widgets2.group.TableWidgetGroup;
+import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
@@ -28,31 +31,13 @@ import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.widget.DataGridView;
-import org.odk.collect.android.views.MediaLayout;
-import org.odk.collect.android.views.ODKView;
-import org.odk.collect.android.widgets2.group.TableWidgetGroup;
-import org.odk.collect.android.widgets2.selectone.ButtonsSelectOneWidget;
 
 import java.util.UUID;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasDescendant;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
-import static org.hamcrest.core.AnyOf.anyOf;
-import static org.projectbuendia.client.ui.matchers.ViewMatchers.hasBackground;
-import static org.projectbuendia.client.ui.matchers.ViewMatchers.inRow;
 
 /** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
@@ -68,9 +53,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /** Tests that the general condition dialog successfully changes general condition. */
     public void testGeneralConditionDialog_AppliesGeneralConditionChange() {
         inUserLoginGoToDemoPatientChart();
-        onView(withId(R.id.patient_chart_vital_general_parent)).perform(click());
+        click(viewWithId(R.id.patient_chart_vital_general_parent));
         screenshot("General Condition Dialog");
-        onView(withText(R.string.status_well)).perform(click());
+        click(viewWithText(R.string.status_well));
 
         // Wait for a sync operation to update the chart.
         EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
@@ -78,13 +63,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.registerIdlingResources(syncFinishedIdlingResource);
 
         // Check for updated vital view.
-        checkViewDisplayedSoon(withText(R.string.status_well));
+        expectVisibleSoon(viewWithText(R.string.status_well));
 
         // Check for updated chart view.
-        onView(allOf(
-                withText(R.string.status_short_desc_well),
-                not(withId(R.id.patient_chart_vital_general_condition_number))))
-                .check(matches(isDisplayed()));
+        expectVisible(viewThat(
+                hasText(R.string.status_short_desc_well),
+                not(hasId(R.id.patient_chart_vital_general_condition_number))));
     }
 
     /** Tests that the encounter form can be opened more than once. */
@@ -94,13 +78,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         openEncounterForm();
 
         // Dismiss
-        onView(withText("Discard")).perform(click());
+        click(viewWithText("Discard"));
 
         // Load the chart again
         openEncounterForm();
 
         // Dismiss
-        onView(withText("Discard")).perform(click());
+        click(viewWithText("Discard"));
     }
 
     /**
@@ -111,10 +95,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /*public void testPatientChart_ShowsCorrectAdmissionDate() {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
         inUserLoginGoToDemoPatientChart();
-        onView(allOf(
-                isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 6")))
-                .check(matches(isDisplayed()));
+        expectVisible(viewThat(
+                hasAncestor(hasId(R.id.attribute_admission_days)),
+                hasText("Day 6")));
         screenshot("Patient Chart");
     }*/
 
@@ -125,10 +108,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      */
     /*public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
         inUserLoginGoToDemoPatientChart();
-        onView(allOf(
-                isDescendantOfA(withId(R.id.attribute_symptoms_onset_days)),
-                withText("Day 8")))
-                .check(matches(isDisplayed()));
+        expectVisible(viewThat(
+                hasAncestor(hasId(R.id.attribute_symptoms_onset_days)),
+                hasText("Day 8")));
         screenshot("Patient Chart");
     }*/
 
@@ -139,7 +121,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
      */
      /*public void testPatientChart_ShowsAllDaysInChartWhenNoObservations() {
         inUserLoginGoToDemoPatientChart();
-        onView(withText(containsString("Today (Day 6)"))).check(matchesWithin(isDisplayed(), 5000));
+        expectVisibleWithin(5000, viewThat(hasTextContaining("Today (Day 6)")));
         screenshot("Patient Chart");
     }*/
 
@@ -170,13 +152,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Try to discard and give up.
         discardForm();
-        onView(withText(R.string.title_discard_observations)).check(matches(isDisplayed()));
-        onView(withText(R.string.no)).perform(click());
+        expectVisible(viewWithText(R.string.title_discard_observations));
+        click(viewWithText(R.string.no));
 
         // Try to discard and actually go back.
         discardForm();
-        onView(withText(R.string.title_discard_observations)).check(matches(isDisplayed()));
-        onView(withText(R.string.yes)).perform(click());
+        expectVisible(viewWithText(R.string.title_discard_observations));
+        click(viewWithText(R.string.yes));
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
@@ -186,17 +168,17 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerVisibleTextQuestion("Ebola L gene", "38");
         answerVisibleTextQuestion("Ebola Np gene", "35");
 
-        onView(withText("Save")).perform(click());
+        click(viewWithText("Save"));
 
         // Saving form should not work (can't check for a Toast within Espresso)
-        onView(withText(R.string.form_entry_save)).check(matches(isDisplayed()));
+        expectVisible(viewWithText(R.string.form_entry_save));
 
         // Try again with confirmation
         answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
 
         // Check that new values displayed.
-        checkViewDisplayedSoon(withText(containsString("38.0 / 35.0")));
+        expectVisibleSoon(viewThat(hasTextContaining("38.0 / 35.0")));
     }
 
     /** Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified. */
@@ -208,7 +190,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
 
-        checkViewDisplayedSoon(withText(containsString("NEG / NEG")));
+        expectVisibleSoon(viewThat(hasTextContaining("NEG / NEG")));
     }
 
     /**
@@ -244,7 +226,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         openEncounterForm();
         answerVisibleTextQuestion("Pulse", "74");
         answerVisibleTextQuestion("Respiratory rate", "23");
-        answerVisibleTextQuestion("Temperature", "36");
+        answerVisibleTextQuestion("Temperature", "36.1");
         saveForm();
         // Enter second set of observations for this encounter.
         openEncounterForm();
@@ -256,7 +238,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // Check that all values are now visible.
         checkVitalValueContains("Pulse", "74");
         checkVitalValueContains("Respiration", "23");
-        checkObservationValueEquals(0, "36.0", "Today"); // Temp
+        checkObservationValueEquals(0, "36.1", "Today"); // Temp
         checkObservationSet(5, "Today"); // Nausea
         checkObservationValueEquals(6, "2", "Today"); // Vomiting
         checkObservationValueEquals(7, "5", "Today"); // Diarrhoea
@@ -318,23 +300,23 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationSet(21, "Today"); // Back pain
         checkObservationSet(24, "Today"); // Nosebleed
 
-        onView(withText(containsString("Pregnant"))).check(matches(isDisplayed()));
-        onView(withText(containsString("IV Fitted"))).check(matches(isDisplayed()));
+        expectVisible(viewThat(hasTextContaining("Pregnant")));
+        expectVisible(viewThat(hasTextContaining("IV Fitted")));
 
         // TODO/completeness: exercise the Notes field
     }
 
     protected void openEncounterForm() {
-        checkViewDisplayedSoon(withId(R.id.action_update_chart));
+        expectVisibleSoon(viewWithId(R.id.action_update_chart));
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),
                         mEventBus);
-        onView(withId(R.id.action_update_chart)).perform(click());
+        click(viewWithId(R.id.action_update_chart));
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
-        checkViewDisplayedSoon(withText("Encounter"));
+        expectVisibleSoon(viewWithText("Encounter"));
     }
 
     protected void openPcrForm() {
@@ -342,32 +324,28 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),
                         mEventBus);
-        onView(withId(R.id.action_add_test_result)).perform(click());
+        click(viewWithId(R.id.action_add_test_result));
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).
-        checkViewDisplayedSoon(withText("Encounter"));
+        expectVisibleSoon(viewWithText("Encounter"));
     }
 
     private void discardForm() {
-        onView(withText("Discard")).perform(click());
+        click(viewWithText("Discard"));
     }
 
     private void saveForm() {
         IdlingResource xformWaiter = getXformSubmissionIdlingResource();
-        onView(withText("Save")).perform(click());
+        click(viewWithText("Save"));
         Espresso.registerIdlingResources(xformWaiter);
     }
 
     private void answerVisibleTextQuestion(String questionText, String answerText) {
-        onView(allOf(
-                isAssignableFrom(EditText.class),
-                hasSibling(allOf(
-                        isAssignableFrom(MediaLayout.class),
-                        hasDescendant(allOf(
-                                isAssignableFrom(TextView.class),
-                                withText(containsString(questionText))))))))
-                .perform(scrollTo(), typeText(answerText));
+        scrollToAndType(answerText, viewThat(
+                isA(EditText.class),
+                hasSibling(isA(MediaLayout.class),
+                        hasDescendant(hasTextContaining(questionText)))));
     }
 
     private void answerVisibleToggleQuestion(String questionText, String answerText) {
@@ -376,45 +354,37 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // field, the input event will actually be generated as the keyboard is hiding and will be
         // lost, but Espresso won't detect this case.
         Espresso.closeSoftKeyboard();
-        onView(allOf(
-                anyOf(isAssignableFrom(CheckBox.class), isAssignableFrom(RadioButton.class)),
-                isDescendantOfA(allOf(
-                        anyOf(
-                                isAssignableFrom(ButtonsSelectOneWidget.class),
-                                isAssignableFrom(TableWidgetGroup.class),
-                                isAssignableFrom(ODKView.class)),
-                        hasDescendant(withText(containsString(questionText))))),
-                withText(containsString(answerText))))
-                .perform(scrollTo(), click());
+
+        scrollToAndClick(viewThat(
+                isAnyOf(CheckBox.class, RadioButton.class),
+                hasAncestor(
+                        isAnyOf(ButtonsSelectOneWidget.class, TableWidgetGroup.class, ODKView.class),
+                        hasDescendant(hasTextContaining(questionText))),
+                hasTextContaining(answerText)));
     }
 
     private void checkObservationValueEquals(int row, String value, String dateKey) {
         // TODO/completeness: actually check dateKey
 
-        onView(allOf(
-                withText(value),
-                isDescendantOfA(inRow(row, ROW_HEIGHT)),
-                isDescendantOfA(isAssignableFrom(DataGridView.LinkableRecyclerView.class))))
-                .perform(scrollTo())
-                .check(matches(isDisplayed()));
+        scrollToAndExpectVisible(viewThat(
+                hasText(value),
+                hasAncestor(isInRow(row, ROW_HEIGHT)),
+                hasAncestor(isA(DataGridView.LinkableRecyclerView.class))));
     }
 
     private void checkObservationSet(int row, String dateKey) {
         // TODO/completeness: actually check dateKey
-        onView(allOf(
-                isDescendantOfA(inRow(row, ROW_HEIGHT)),
-                hasBackground(
-                        getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
-                isDescendantOfA(isAssignableFrom(DataGridView.LinkableRecyclerView.class))))
-                .perform(scrollTo())
-                .check(matches(isDisplayed()));
+        scrollToAndExpectVisible(viewThat(
+                hasAncestor(isInRow(row, ROW_HEIGHT)),
+                hasBackground(getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
+                hasAncestor(isA(DataGridView.LinkableRecyclerView.class))));
     }
 
     private void checkVitalValueContains(String vitalName, String vitalValue) {
         // Check for updated vital view.
-        checkViewDisplayedSoon(allOf(
-                withText(containsString(vitalValue)),
-                hasSibling(withText(containsString(vitalName)))));
+        expectVisibleSoon(viewThat(
+                hasTextContaining(vitalValue),
+                hasSibling(hasTextContaining(vitalName))));
     }
 
     private IdlingResource getXformSubmissionIdlingResource() {

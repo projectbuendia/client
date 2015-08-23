@@ -24,17 +24,16 @@ public class AppPatientMatchers {
      * Provides a {@link Matcher} that matches any patient with the given patient id.
      * @param id the id to match
      */
-    public static Matcher<Object> isPatientWithId(final Matcher<String> id) {
+    public static Matcher<Object> isPatientWithId(final String id) {
         return new BoundedMatcher<Object, AppPatient>(AppPatient.class) {
             @Override
             public void describeTo(Description description) {
-                description.appendText("is an AppPatient with id: ");
-                id.describeTo(description);
+                description.appendText("is an AppPatient with id " + id);
             }
 
             @Override
             public boolean matchesSafely(AppPatient patient) {
-                return id.matches(patient.id);
+                return id.equals(patient.id);
             }
         };
     }

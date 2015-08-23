@@ -135,7 +135,7 @@ def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs'
 
 // Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlLocalhost;
+def openmrsRootUrlDefault = openmrsRootUrlDev;
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
@@ -175,8 +175,10 @@ android {
         versionName versionString
         resValue 'string', 'app_version', versionString
 
-        testApplicationId appId + '.test'
+        // To run tests in Android Studio, you will need to open the run configuration and
+        // select GoogleInstrumentationTestRunner as the "Specific instrumentation runner".
         testInstrumentationRunner 'com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner'
+        testApplicationId appId + '.test'
 
         resValue 'string', 'openmrs_root_url_default', openmrsRootUrl
         resValue 'string', 'openmrs_user_default', openmrsUser

@@ -16,18 +16,8 @@ import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import java.util.Date;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.scrollTo;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDescendantOfA;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.AllOf.allOf;
 
 /** Tests for {@link NewPatientActivity}. */
 public class NewPatientActivityTest extends FunctionalTestCase {
@@ -37,15 +27,14 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         screenshot("Before Patient Populated");
         String given = "Given" + id;
         String family = "Family" + id;
-        onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText(id));
-        onView(withId(R.id.patient_creation_text_patient_given_name)).perform(typeText(given));
-        onView(withId(R.id.patient_creation_text_patient_family_name)).perform(typeText(family));
-        onView(withId(R.id.patient_creation_text_age))
-                .perform(typeText(id.substring(id.length() - 2)));
-        onView(withId(R.id.patient_creation_radiogroup_age_units_years)).perform(click());
-        onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
-        onView(withId(R.id.patient_creation_radiogroup_age_sex_male)).perform(click());
-        onView(withId(R.id.patient_creation_radiogroup_age_sex_female)).perform(click());
+        type(id, viewWithId(R.id.patient_creation_text_patient_id));
+        type(given, viewWithId(R.id.patient_creation_text_patient_given_name));
+        type(family, viewWithId(R.id.patient_creation_text_patient_family_name));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_text_age));
+        click(viewWithId(R.id.patient_creation_radiogroup_age_units_years));
+        click(viewWithId(R.id.patient_creation_radiogroup_age_units_months));
+        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
+        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
         screenshot("After Patient Populated");
     }
 
@@ -55,17 +44,17 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         screenshot("Test Start");
         String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
-        onView(withId(R.id.patient_creation_button_change_location)).perform(scrollTo(), click());
+        scrollToAndClick(viewWithId(R.id.patient_creation_button_change_location));
         screenshot("After Location Dialog Shown");
-        onView(withText("S1")).perform(click());
+        click(viewWithText("S1"));
         screenshot("After Location Selected");
-        onView(withText("Create")).perform(click());
+        click(viewWithText("Create"));
         screenshot("After Create Pressed");
 
         waitForProgressFragment();
 
         // The new patient should be visible in the list for tent S1
-        onView(withText("S1")).perform(click());
+        click(viewWithText("S1"));
         screenshot("In S1");
         inPatientListClickPatientWithId(id);
         screenshot("After Patient Clicked");
@@ -78,46 +67,45 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         String id = Long.toString(new Date().getTime() % 100000);
         populateNewPatientFieldsExceptLocation(id);
         screenshot("After Patient Populated");
-        onView(withText("Create")).perform(click());
+        click(viewWithText("Create"));
         screenshot("After Create Pressed");
 
         waitForProgressFragment();
 
         // The new patient should be visible in the list for Triage zone.
-        onView(withText("Triage")).perform(click());
+        click(viewWithText("Triage"));
         screenshot("In Triage");
         inPatientListClickPatientWithId(id);
         screenshot("After Patient Clicked");
 
         // The admission date should be visible right after adding a patient.
         // Flaky because of potential periodic syncs.
-        checkViewDisplayedWithin(allOf(
-                isDescendantOfA(withId(R.id.attribute_admission_days)),
-                withText("Day 1")), 90000);
+        expectVisibleWithin(90000, viewThat(
+                hasAncestor(withId(R.id.attribute_admission_days)),
+                hasText("Day 1")));
 
         // The symptom onset date should not be assigned a default value.
-        onView(allOf(
-                isDescendantOfA(withId(R.id.attribute_symptoms_onset_days)),
-                withText("–")))
-                .check(matches(isDisplayed()));
+        expectVisible(viewThat(
+                hasAncestor(withId(R.id.attribute_symptoms_onset_days)),
+                hasText("–")));
     }
 
     /** Tests that a confirmation prompt appears upon cancelling the form. */
     public void testNewPatientCancel() {
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
-        onView(withId(R.id.patient_creation_text_patient_id)).perform(typeText("xyz"));
+        type("xyz", viewWithId(R.id.patient_creation_text_patient_id));
         screenshot("After Id Added");
         pressBack(); // close the keyboard
         screenshot("After Keyboard Closed");
 
         // Attempting to back out of the activity should trigger a prompt
         pressBack();
-        onView(withText(containsString("Discard"))).check(matches(isDisplayed()));
+        expectVisible(viewThat(hasTextContaining("Discard")));
         screenshot("Discard Prompt");
 
         // Dismiss the prompt
-        onView(withText("Yes")).perform(click());
+        click(viewWithText("Yes"));
         screenshot("Discard Prompt Dismissed");
     }
 }

@@ -16,8 +16,6 @@ import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.test.ActivityInstrumentationTestCase2;
-import android.view.View;
 
 import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
 import com.google.android.apps.common.testing.testrunner.Stage;
@@ -28,7 +26,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
 
-import org.hamcrest.Matcher;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -36,13 +33,12 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.events.sync.SyncFinishedEvent;
-import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.net.model.Patient;
-import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.ui.login.LoginActivity;
+import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
+import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
@@ -52,19 +48,8 @@ import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isDialog;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatientWithId;
 
@@ -72,9 +57,8 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
  * Base class for functional tests that sets timeouts to be permissive, optionally logs in as a
  * user before continuing, and provides some utility functions for convenience.
  */
-public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginActivity> {
+public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
     private static final Logger LOG = Logger.create();
-    private static final int DEFAULT_VIEW_CHECKER_TIMEOUT = 30000;
 
     private boolean mWaitForUserSync = true;
 
@@ -120,7 +104,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         try {
             closeAllActivities();
         } catch (Exception e) {
-            LOG.e("Error tearing down test case, test isolation may be broken.", e);
+            LOG.e("Error tearing down test case; test isolation may be broken", e);
         }
     }
 
@@ -135,10 +119,11 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
             @Override
             public void run() {
                 java.util.Collection<Activity> activities =
-                        ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(
-                                Stage.RESUMED);
+                        ActivityLifecycleMonitorRegistry.getInstance()
+                                .getActivitiesInStage(Stage.RESUMED);
                 activity[0] = Iterables.getOnlyElement(activities);
-            }});
+            }
+        });
         return activity[0];
     }
 
@@ -182,11 +167,11 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         try {
             activity = getCurrentActivity();
         } catch (Throwable throwable) {
-            throw new IllegalStateException("Error retrieving current activity.", throwable);
+            throw new IllegalStateException("Error retrieving current activity", throwable);
         }
 
         if (!(activity instanceof FragmentActivity)) {
-            throw new IllegalStateException("Activity is not a FragmentActivity.");
+            throw new IllegalStateException("Activity is not a FragmentActivity");
         }
 
         FragmentActivity fragmentActivity = (FragmentActivity)activity;
@@ -215,34 +200,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         Espresso.registerIdlingResources(syncSucceededResource);
     }
 
-    protected void checkViewDisplayedSoon(Matcher<View> matcher) {
-        checkViewDisplayedWithin(matcher, DEFAULT_VIEW_CHECKER_TIMEOUT);
-    }
-
-    protected void checkViewDisplayedWithin(Matcher<View> matcher, int timeoutMs) {
-        long timeoutTime = System.currentTimeMillis() + timeoutMs;
-        boolean viewFound = false;
-        Throwable viewAssertionError = null;
-        while (timeoutTime > System.currentTimeMillis() && !viewFound) {
-            try {
-                onView(matcher).check(matches(isDisplayed()));
-                viewFound = true;
-            } catch (Throwable t) {
-                viewAssertionError = t;
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e1) {
-                    LOG.w("Sleep interrupted, yielding instead.");
-                    Thread.yield();
-                }
-            }
-        }
-
-        if (!viewFound) {
-            throw new RuntimeException(viewAssertionError);
-        }
-    }
-
     /**
      * Adds a new patient using the new patient form.  Assumes that the UI is
      * in the location selection activity, and leaves the UI in the same
@@ -257,74 +214,67 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         LOG.i("Adding patient: %s (location %s)",
                 delta.toContentValues().toString(), locationName);
 
-        onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New patient")).check(matches(isDisplayed()));
+        click(viewWithId(R.id.action_add));
+        expectVisible(viewWithText("New patient"));
         if (delta.id.isPresent()) {
-            onView(withId(R.id.patient_creation_text_patient_id))
-                    .perform(typeText(delta.id.get()));
+            type(delta.id.get(), viewWithId(R.id.patient_creation_text_patient_id));
         }
         if (delta.givenName.isPresent()) {
-            onView(withId(R.id.patient_creation_text_patient_given_name))
-                    .perform(typeText(delta.givenName.get()));
+            type(delta.givenName.get(), viewWithId(R.id.patient_creation_text_patient_given_name));
         }
         if (delta.familyName.isPresent()) {
-            onView(withId(R.id.patient_creation_text_patient_family_name))
-                    .perform(typeText(delta.familyName.get()));
+            type(delta.familyName.get(), viewWithId(R.id.patient_creation_text_patient_family_name));
         }
         if (delta.birthdate.isPresent()) {
             Period age = new Period(delta.birthdate.get().toLocalDate(), LocalDate.now());
             if (age.getYears() < 1) {
-                onView(withId(R.id.patient_creation_text_age))
-                        .perform(typeText(Integer.toString(age.getMonths())));
-                onView(withId(R.id.patient_creation_radiogroup_age_units_months)).perform(click());
+                type(age.getMonths(), viewWithId(R.id.patient_creation_text_age));
+                click(viewWithId(R.id.patient_creation_radiogroup_age_units_months));
             } else {
-                onView(withId(R.id.patient_creation_text_age))
-                        .perform(typeText(Integer.toString(age.getYears())));
-                onView(withId(R.id.patient_creation_radiogroup_age_units_years)).perform(click());
+                type(age.getYears(), viewWithId(R.id.patient_creation_text_age));
+                click(viewWithId(R.id.patient_creation_radiogroup_age_units_years));
             }
         }
         if (delta.gender.isPresent()) {
             if (delta.gender.get() == AppPatient.GENDER_MALE) {
-                onView(withId(R.id.patient_creation_radiogroup_age_sex_male)).perform(click());
+                click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
             } else if (delta.gender.get() == AppPatient.GENDER_FEMALE) {
-                onView(withId(R.id.patient_creation_radiogroup_age_sex_female)).perform(click());
+                click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
             }
         }
         if (delta.admissionDate.isPresent()) {
             // TODO/completeness: Support admission date in addNewPatient().
             // The following code is broken -- hopefully fixed by Espresso 2.0.
-            // onView(withId(R.id.patient_creation_admission_date)).perform(click());
+            // click(viewWithId(R.id.patient_creation_admission_date));
             // selectDateFromDatePickerDialog(mDemoPatient.admissionDate.get());
         }
         if (delta.firstSymptomDate.isPresent()) {
             // TODO/completeness: Support first symptoms date in addNewPatient().
             // The following code is broken -- hopefully fixed by Espresso 2.0.
-            // onView(withId(R.id.patient_creation_symptoms_onset_date)).perform(click());
+            // click(viewWithId(R.id.patient_creation_symptoms_onset_date));
             // selectDateFromDatePickerDialog(mDemoPatient.firstSymptomDate.get());
         }
         if (delta.assignedLocationUuid.isPresent()) {
             // TODO/completeness: Support assigned location in addNewPatient().
             // A little tricky as we need to select by UUID.
-            // onView(withId(R.id.patient_creation_button_change_location)).perform(click());
+            // click(viewWithId(R.id.patient_creation_button_change_location));
         }
         if (locationName != null) {
-            onView(withId(R.id.patient_creation_button_change_location)).perform(click());
-            onView(withText(locationName)).perform(click());
+            click(viewWithId(R.id.patient_creation_button_change_location));
+            click(viewWithText(locationName));
         }
 
         EventBusIdlingResource<ItemCreatedEvent<AppPatient>> resource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
-        onView(withId(R.id.patient_creation_button_create)).perform(click());
+        click(viewWithId(R.id.patient_creation_button_create));
         Espresso.registerIdlingResources(resource); // wait for patient to be created
     }
 
     // Broken, but hopefully fixed in Espresso 2.0.
     private void selectDateFromDatePickerDialog(DateTime dateTime) {
         selectDateFromDatePicker(dateTime);
-        onView(withText("Set"))
-                .inRoot(isDialog())
-                .perform(click());
+        click(viewWithText("Set").inRoot(isDialog()));
     }
 
     protected void selectDateFromDatePicker(
@@ -348,7 +298,6 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         String year = dateTime.toString("yyyy");
         String monthOfYear = dateTime.toString("MMM");
         String dayOfMonth = dateTime.toString("dd");
-
         selectDateFromDatePicker(year, monthOfYear, dayOfMonth);
     }
 
@@ -361,9 +310,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         LOG.i("%s: %s", spinnerName, value);
         LOG.i("numberPickerId: %d", numberPickerId);
         LOG.i("spinnerId: %d", spinnerId);
-        onView(allOf(withId(numberPickerId), withParent(withId(spinnerId))))
-                .check(matches(isDisplayed()))
-                .perform(typeText(value));
+        type(value, viewThat(hasId(numberPickerId), whoseParent(hasId(spinnerId))));
     }
 
     /**
@@ -410,7 +357,7 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
      * as it uses {@link #waitForProgressFragment()}.
      */
     protected void inUserLoginGoToLocationSelection() {
-        onView(withText("Guest User")).perform(click());
+        click(viewWithText("Guest User"));
         waitForProgressFragment(); // wait for locations to load
     }
 
@@ -424,10 +371,10 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
         inUserLoginGoToLocationSelection();
         // There may be a small delay before the search button becomes visible;
         // the button is not displayed while locations are loading.
-        checkViewDisplayedWithin(withId(R.id.action_search), 3000);
+        expectVisibleWithin(3000, viewThat(hasId(R.id.action_search)));
 
         // Tap the search button to open the list of all patients.
-        onView(withId(R.id.action_search)).perform(click());
+        click(viewWithId(R.id.action_search));
     }
 
     /**
@@ -449,59 +396,45 @@ public class FunctionalTestCase extends ActivityInstrumentationTestCase2<LoginAc
      */
     protected void inUserLoginGoToPatientCreation() {
         inUserLoginGoToLocationSelection();
-        onView(withId(R.id.action_add)).perform(click());
-        onView(withText("New patient")).check(matches(isDisplayed()));
+        click(viewWithId(R.id.action_add));
+        expectVisible(viewWithText("New patient"));
     }
 
 
     /** Checks that the expected zones and tents are shown. */
     protected void inLocationSelectionCheckZonesAndTentsDisplayed() {
         // Should be at location selection screen
-        checkViewDisplayedSoon(withText("ALL PRESENT PATIENTS"));
+        expectVisibleSoon(viewWithText("ALL PRESENT PATIENTS"));
 
         // Zones and tents should be visible
-        onView(withText("Triage")).check(matches(isDisplayed()));
-        onView(withText("S1")).check(matches(isDisplayed()));
-        onView(withText("S2")).check(matches(isDisplayed()));
-        onView(withText("P1")).check(matches(isDisplayed()));
-        onView(withText("P2")).check(matches(isDisplayed()));
-        onView(withText("C1")).check(matches(isDisplayed()));
-        onView(withText("C2")).check(matches(isDisplayed()));
-        onView(withText("Discharged")).check(matches(isDisplayed()));
+        expectVisible(viewWithText("Triage"));
+        expectVisible(viewWithText("S1"));
+        expectVisible(viewWithText("S2"));
+        expectVisible(viewWithText("P1"));
+        expectVisible(viewWithText("P2"));
+        expectVisible(viewWithText("C1"));
+        expectVisible(viewWithText("C2"));
+        expectVisible(viewWithText("Discharged"));
     }
 
     /** In the location selection activity, click a location tile. */
     protected void inLocationSelectionClickLocation(String name) {
-        onView(withText(name)).perform(click());
+        click(viewThat(hasText(name)));
         waitForProgressFragment(); // Wait for search fragment to load.
     }
 
     /** In a patient list, click the first patient. */
     protected void inPatientListClickFirstPatient() {
-        onData(is(AppPatient.class))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0)
-                .perform(click());
+        click(dataThat(is(AppPatient.class))
+                .inAdapterView(hasId(R.id.fragment_patient_list))
+                .atPosition(0));
     }
 
     /** In a patient list, click the patient with a specified ID. */
     protected void inPatientListClickPatientWithId(String id) {
-        onData(isPatientWithId(equalTo(id)))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0)
-                .perform(click());
-    }
-
-    private class SyncCounter {
-        public int inProgressSyncCount = 0;
-
-        public void onEventMainThread(SyncStartedEvent event) {
-            inProgressSyncCount++;
-        }
-
-        public void onEventMainThread(SyncFinishedEvent event) {
-            inProgressSyncCount--;
-        }
+        click(dataThat(isPatientWithId(id))
+                .inAdapterView(hasId(R.id.fragment_patient_list))
+                .atPosition(0));
     }
 
     /** Closes all activities on the stack. */

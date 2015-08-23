@@ -13,7 +13,6 @@ package org.projectbuendia.client.ui.sync;
 
 import org.projectbuendia.client.R;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
@@ -26,7 +25,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        onView(withText("Guest User")).perform(click());
+        click(viewWithText("Guest User"));
     }
 
     /** Tests that sync failure results in the sync failed dialog appearing. */
@@ -34,12 +33,12 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         setWifiEnabled(false);
         waitForSyncFailure();
 
-        checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
+        expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
         screenshot("After Sync Fails");
 
-        onView(withText(R.string.sync_failed_settings)).check(matches(isDisplayed()));
-        onView(withText(R.string.sync_failed_retry)).check(matches(isDisplayed()));
-        onView(withText("Back")).perform(click());
+        expectVisible(viewWithText(R.string.sync_failed_settings));
+        expectVisible(viewWithText(R.string.sync_failed_retry));
+        click(viewWithText("Back"));
         screenshot("Test Finish");
 
         cleanupWifi();
@@ -50,12 +49,12 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         setWifiEnabled(false);
         waitForSyncFailure();
 
-        checkViewDisplayedSoon(withText(R.string.sync_failed_dialog_message));
+        expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
 
-        onView(withText(R.string.sync_failed_back)).perform(click());
+        click(viewWithText(R.string.sync_failed_back));
         screenshot("After Sync Fails");
         waitForProgressFragment(); // Wait for user screen to display.
-        onView(withText("GU")).check(matches(isDisplayed()));
+        expectVisible(viewWithText("GU"));
         screenshot("Test Finish");
 
         cleanupWifi();
@@ -66,13 +65,13 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         setWifiEnabled(false);
         waitForSyncFailure();
 
-        checkViewDisplayedSoon(withText(R.string.sync_failed_settings));
+        expectVisibleSoon(viewWithText(R.string.sync_failed_settings));
         screenshot("After Sync Fails");
 
-        onView(withText(R.string.sync_failed_settings)).perform(click());
+        click(viewWithText(R.string.sync_failed_settings));
         screenshot("After Settings Clicked");
 
-        onView(withText("OpenMRS base URL")).check(matches(isDisplayed()));
+        expectVisible(viewWithText("OpenMRS base URL"));
 
         // Go back to user selection before cleaning up wifi, or a sync will start.
         pressBack();
@@ -89,15 +88,15 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         waitForSyncFailure();
         setWifiEnabled(false);
 
-        checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
+        expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");
 
-        onView(withText(R.string.sync_failed_retry)).perform(click());
+        click(viewWithText(R.string.sync_failed_retry));
 
         setWifiEnabled(true);
         Espresso.registerIdlingResources(new WifiStateIdlingResource());
         // Showing progress bar may be slow as the spinner may show while sync is still starting up.
-        checkViewDisplayedSoon(withId(R.id.progress_fragment_progress_bar));
+        expectVisibleSoon(viewWithId(R.id.progress_fragment_progress_bar));
         screenshot("After Retry Clicked");
     }*/
 
@@ -106,18 +105,18 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         waitForSyncFailure();
         setWifiEnabled(false);
 
-        checkViewDisplayedSoon(withText(R.string.sync_failed_retry));
+        expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
         screenshot("After Sync Failed");
 
         setWifiEnabled(true);
-        onView(withText(R.string.sync_failed_retry)).perform(click());
+        click(viewWithText(R.string.sync_failed_retry));
 
         waitForInitialSync();
         waitForProgressFragment();
         screenshot("After Retry Clicked");
 
         // Should be at location selection screen with locations available.
-        onView(withText("S1")).check(matches(isDisplayed()));
+        expectVisible(viewWithText("S1"));
 
         screenshot("After Sync Completed");
     }
@@ -133,15 +132,15 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
         setWifiEnabled(false);
         waitForSyncFailure();
 
-        checkViewDisplayedSoon(withText(R.string.sync_failed_settings));
+        expectVisibleSoon(viewWithText(R.string.sync_failed_settings));
         screenshot("After Sync Failed");
 
-        onView(withText(R.string.sync_failed_settings)).perform(click());
+        click(viewWithText(R.string.sync_failed_settings));
         screenshot("After Settings Clicked");
 
         setWifiEnabled(true);
         pressBack();
-        checkViewDisplayedSoon(withId(R.id.progress_fragment_progress_bar));
+        expectVisibleSoon(viewWithId(R.id.progress_fragment_progress_bar));
         screenshot("After Back Pressed");
 
         cleanupWifi();
