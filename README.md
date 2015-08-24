@@ -16,7 +16,7 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
   * Visit https://developer.android.com/sdk/installing/studio.html and follow the steps to install Android Studio.
 
 ##### (Optional) Tablet with Android 4.4.2 (KitKat) or higher
-  * We use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets in the field: they are waterproof, have a great screen, and come with KitKat.  Otherwise, we recommend at least a 10" tablet (the app is designed for 1200 x 1920 resolution).  Without a tablet, you can use an emulator (see below).
+  * We use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets in the field: they are waterproof, have a great screen, and come with KitKat.  Otherwise, we recommend at least a 10" tablet; the app is designed for 1200 x 1920 resolution.  Without a tablet, you can use an emulator (see below).
 
 
 ## Android Studio project setup
