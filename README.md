@@ -21,9 +21,9 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
         git clone --recursive https://github.com/projectbuendia/client
 
-2.  Launch Android Studio and click "Open an existing Android Studio project".
+2.  Launch Android Studio and click **Open an existing Android Studio project**.
 
-3.  Navigate to the root directory of your `client` repo and click "Choose".
+3.  Navigate to the root directory of your `client` repo and click **Choose**.
 
 4.  Wait a few minutes while Android Studio builds the project for the first time.
 
@@ -37,28 +37,36 @@ On your tablet, enable Developer options by opening the Settings app, selecting 
 
 Connect a USB cable from your computer to your tablet.  Click OK when asked if you want to allow USB debugging.
 
-Click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click OK.
+Click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click **OK**.
 
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
-By default, the client is built with its **OpenMRS base URL** set to `http://dev.projectbuendia.org:9000/openmrs`, which is an instance of OpenMRS with dummy data that we use for development.  To change this to a different URL, you can edit the `openmrsRootUrl` variable in `app/build.gradle`.
+## Changing the default OpenMRS server, username, and password
 
-## Using an emulator and a locally built OpenMRS server
+You can always manually change the OpenMRS server URL, username, and password on the Settings page in the app.  It's tedious to keep doing this every time the app is uninstalled and reinstalled, though.  To change the default values of these settings, which are built into the app, edit these lines in `app/build.gradle`:
+
+    def openmrsRootUrlDefault = openmrsRootUrlDev;
+    def openmrsUserDefault = 'buendia'
+    def openmrsPasswordDefault = 'buendia'
+    def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
+
+By default, the client is built with its **OpenMRS base URL** set to `http://dev.projectbuendia.org:9000/openmrs`, which is an instance of the OpenMRS server with dummy data that we use for development.  For release builds, we set this to `http://server:9000/openmrs`, which is the URL of the Edison server in real deployments.
 
 If you want to run the client with an OpenMRS server that you have built locally, you have three options:
 
-  1. Install and run your locally built server on a generally accessible website; run the client on a real tablet and set its **OpenMRS base URL** to point at that website
-  2. Run your server on your own laptop; assign your laptop an IP address that's reachable from the tablet; run the client on a real tablet and set its **OpenMRS base URL** to point at your laptop
-  3. Run your server on your own laptop; run the client in an Android emulator on your laptop
+  1. Install and run your locally built server on a website accessible on the Internet; run the client on a real tablet with Internet access and set its **OpenMRS base URL** to point at that website
+  2. Run your server on your own computer; assign your computer an IP address that's reachable from the tablet; run the client on a real tablet and set its **OpenMRS base URL** to point at your computer
+  3. Run your server on your own computer; run the client in an Android emulator on your computer
 
-Running the app in an Android emulator is usually much slower than on a real tablet, but it does let you develop without a separate tablet, and it is also the most convenient way to test the client against an OpenMRS server running on your own laptop.
+An Android emulator runs significantly slower than a real tablet, but in terms of setup it's usually the quickest way to get a locally built client running with a locally built OpenMRS server.
+
+## Using an emulator and a locally built OpenMRS server
 
 To set up an emulator with some settings that are known to work:
 
-  * Open **Tools** > **Android** > **AVD Manager**
+  * In Android Studio, open **Tools** > **Android** > **AVD Manager**
   * Click **Create Virtual Device**
-  * Click **New Hardware Profile**
-  * Select:
+  * Click **New Hardware Profile** and select:
       * Device Type: Phone/Tablet
       * Screensize: 10.1 inches
       * Resolution: 1200 x 1920 px
@@ -71,8 +79,7 @@ To set up an emulator with some settings that are known to work:
       * Default Skin: No Skin
   * Click **OK** and with your new hardware profile selected, click **Next**
   * For **System Image**, choose the KitKat image with API level 19 and Target Android 4.4.2 and click **OK**
-  * Click **Show Advanced Settings**
-  * Select:
+  * Click **Show Advanced Settings** and select:
       * Startup size and orientation:
           * Scale: Auto
           * Orientation: Portrait
