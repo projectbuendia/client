@@ -1,5 +1,7 @@
 # Buendia client app
 
+The Buendia app runs on tablets with KitKat (Android 4.4.2) or higher.
+
 Follow these instructions to get your system set up to do Buendia client development.
 See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more details about the app.
 
@@ -47,19 +49,24 @@ The client-side tests include both unit tests and functional tests, all located 
 
 You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  For the **Specific instrumentation runner**, select `GoogleInstrumentationTestRunner`.  Then you can run or debug this configuration to run the tests.  In the run configuration, you can choose the Target Device (**USB device** to use an attached tablet, or **Emulator** to use an emulator).
 
-## Building from the command line
+## Android SDK packages
 
-If you need to build the client just from the command line:
+If you're using Android Studio, you don't need to worry about this; it will take care of installing the necessary SDK packages (see Android Studio project setup above).  You only need to do this if you want to build the client from the command line.
 
-1.  Install the necessary Android SDK packages:
+The set of Android SDK packages needed to build the client is:
 
-        /opt/android-sdk-linux/tools/android update sdk --no-ui --all --filter android-21,build-tools-19.1.0,extra-android-support,extras-android-m2repository,platform-tools
+  * Android SDK Platform 5.0.1 (API level 21)
+  * Android SDK Build-tools, revision 19.1
+  * Android Support Library, revision 23
+  * Android Support Repository, revision 17
 
-2.  Then run gradle from the root of the client repository:
+You can install them using the graphical Android SDK Manager at `$ANDROID_HOME/tools/android`, or with the command:
 
-        ./gradlew clean assembleDebug
+    $ANDROID_HOME/tools/android update sdk --no-ui --all --filter android-21,build-tools-19.1.0,extra-android-support,extras-android-m2repository,platform-tools
 
-3.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
+`ANDROID_HOME` is usually `/opt/android-sdk-linux` on a Linux machine and `~/Library/Android/sdk` on a Mac.
+
+To build the client from the command line, go to the root of your client repository and run `./gradlew clean assembleDebug`.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
 
 ## Hardware
 
