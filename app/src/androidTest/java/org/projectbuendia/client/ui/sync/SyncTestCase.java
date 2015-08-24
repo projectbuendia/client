@@ -15,7 +15,7 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
+import android.support.test.espresso.Espresso;
 
 import net.sqlcipher.database.SQLiteException;
 

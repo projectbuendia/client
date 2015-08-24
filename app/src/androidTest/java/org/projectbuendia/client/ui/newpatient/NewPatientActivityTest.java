@@ -16,8 +16,8 @@ import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import java.util.Date;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.Espresso.pressBack;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 /** Tests for {@link NewPatientActivity}. */
 public class NewPatientActivityTest extends FunctionalTestCase {
@@ -81,12 +81,12 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         // The admission date should be visible right after adding a patient.
         // Flaky because of potential periodic syncs.
         expectVisibleWithin(90000, viewThat(
-                hasAncestor(withId(R.id.attribute_admission_days)),
+                hasAncestorThat(withId(R.id.attribute_admission_days)),
                 hasText("Day 1")));
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
-                hasAncestor(withId(R.id.attribute_symptoms_onset_days)),
+                hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
                 hasText("–")));
     }
 

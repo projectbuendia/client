@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.ui;
 
-import com.google.android.apps.common.testing.ui.espresso.IdlingResource;
+import android.support.test.espresso.IdlingResource;
 
 /** An {@link IdlingResource} that waits for a ProgressFragment to be ready before continuing. */
 public class ProgressFragmentIdlingResource implements IdlingResource {

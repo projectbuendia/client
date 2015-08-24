@@ -17,11 +17,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.google.android.apps.common.testing.testrunner.ActivityLifecycleMonitorRegistry;
-import com.google.android.apps.common.testing.testrunner.Stage;
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-import com.google.android.apps.common.testing.ui.espresso.IdlingPolicies;
-import com.google.android.apps.common.testing.ui.espresso.NoActivityResumedException;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingPolicies;
+import android.support.test.espresso.NoActivityResumedException;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
@@ -48,9 +48,10 @@ import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.pressBack;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.RootMatchers.isDialog;
+import static android.support.test.espresso.Espresso.pressBack;
+import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatientWithId;
 
 /**

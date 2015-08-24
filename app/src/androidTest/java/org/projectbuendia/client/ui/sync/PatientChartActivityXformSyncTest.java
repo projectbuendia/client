@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.ui.sync;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
+import android.support.test.espresso.Espresso;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
@@ -23,8 +23,8 @@ import org.projectbuendia.client.net.model.Patient;
 
 import java.util.UUID;
 
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
 /** Tests the loading of the encounter xform from the patient chart activity. */

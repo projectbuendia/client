@@ -16,8 +16,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-import com.google.android.apps.common.testing.ui.espresso.IdlingResource;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingResource;
 
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
@@ -34,10 +34,7 @@ import org.projectbuendia.client.widget.DataGridView;
 
 import java.util.UUID;
 
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.AllOf.allOf;
 
 /** Functional tests for {@link PatientChartActivity}. */
 @MediumTest
@@ -74,16 +71,12 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /** Tests that the encounter form can be opened more than once. */
     public void testPatientChart_CanOpenEncounterFormMultipleTimes() {
         inUserLoginGoToDemoPatientChart();
-        // Load the chart once
+        // Load the form once and dismiss it
         openEncounterForm();
-
-        // Dismiss
         click(viewWithText("Discard"));
 
-        // Load the chart again
+        // Load the form again and dismiss it
         openEncounterForm();
-
-        // Dismiss
         click(viewWithText("Discard"));
     }
 
@@ -96,7 +89,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         mDemoPatient.admissionDate = Optional.of(DateTime.now().minusDays(5));
         inUserLoginGoToDemoPatientChart();
         expectVisible(viewThat(
-                hasAncestor(hasId(R.id.attribute_admission_days)),
+                hasAncestorThat(hasId(R.id.attribute_admission_days)),
                 hasText("Day 6")));
         screenshot("Patient Chart");
     }*/
@@ -109,7 +102,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     /*public void testPatientChart_ShowsCorrectSymptomsOnsetDate() {
         inUserLoginGoToDemoPatientChart();
         expectVisible(viewThat(
-                hasAncestor(hasId(R.id.attribute_symptoms_onset_days)),
+                hasAncestorThat(hasId(R.id.attribute_symptoms_onset_days)),
                 hasText("Day 8")));
         screenshot("Patient Chart");
     }*/
@@ -132,7 +125,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         selectDateFromDatePicker("2015", "Jan", null);
-        answerVisibleTextQuestion("Temperature", "29.1");
+        answerTextQuestion("Temperature", "29.1");
         saveForm();
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
@@ -148,7 +141,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testDismissButtonShowsDialogWithChanges() {
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
-        answerVisibleTextQuestion("Temperature", "29.2");
+        answerTextQuestion("Temperature", "29.2");
 
         // Try to discard and give up.
         discardForm();
@@ -165,8 +158,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testPcr_requiresConfirmation() {
         inUserLoginGoToDemoPatientChart();
         openPcrForm();
-        answerVisibleTextQuestion("Ebola L gene", "38");
-        answerVisibleTextQuestion("Ebola Np gene", "35");
+        answerTextQuestion("Ebola L gene", "38");
+        answerTextQuestion("Ebola Np gene", "35");
 
         click(viewWithText("Save"));
 
@@ -174,7 +167,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         expectVisible(viewWithText(R.string.form_entry_save));
 
         // Try again with confirmation
-        answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
+        answerCodedQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
 
         // Check that new values displayed.
@@ -185,9 +178,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
     public void testPcr_showsNegFor40() {
         inUserLoginGoToDemoPatientChart();
         openPcrForm();
-        answerVisibleTextQuestion("Ebola L gene", "40");
-        answerVisibleTextQuestion("Ebola Np gene", "40");
-        answerVisibleToggleQuestion("confirm this lab test result", "Confirm Lab Test Results");
+        answerTextQuestion("Ebola L gene", "40");
+        answerTextQuestion("Ebola Np gene", "40");
+        answerCodedQuestion("confirm this lab test result", "Confirm Lab Test Results");
         saveForm();
 
         expectVisibleSoon(viewThat(hasTextContaining("NEG / NEG")));
@@ -208,9 +201,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
             String pulse = Integer.toString(i + 80);
             String temp = Integer.toString(i + 35) + ".0";
             String vomiting = Integer.toString(5 - i);
-            answerVisibleTextQuestion("Pulse", pulse);
-            answerVisibleTextQuestion("Temperature", temp);
-            answerVisibleTextQuestion("Vomiting", vomiting);
+            answerTextQuestion("Pulse", pulse);
+            answerTextQuestion("Temperature", temp);
+            answerTextQuestion("Vomiting", vomiting);
             saveForm();
 
             checkVitalValueContains("Pulse", pulse);
@@ -224,15 +217,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         inUserLoginGoToDemoPatientChart();
         // Enter first set of observations for this encounter.
         openEncounterForm();
-        answerVisibleTextQuestion("Pulse", "74");
-        answerVisibleTextQuestion("Respiratory rate", "23");
-        answerVisibleTextQuestion("Temperature", "36.1");
+        answerTextQuestion("Pulse", "74");
+        answerTextQuestion("Respiratory rate", "23");
+        answerTextQuestion("Temperature", "36.1");
         saveForm();
         // Enter second set of observations for this encounter.
         openEncounterForm();
-        answerVisibleToggleQuestion("Signs and Symptoms", "Nausea");
-        answerVisibleTextQuestion("Vomiting", "2");
-        answerVisibleTextQuestion("Diarrhoea", "5");
+        answerCodedQuestion("Signs and Symptoms", "Nausea");
+        answerTextQuestion("Vomiting", "2");
+        answerTextQuestion("Diarrhoea", "5");
         saveForm();
 
         // Check that all values are now visible.
@@ -249,29 +242,29 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // TODO/robustness: Get rid of magic numbers in these tests.
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
-        answerVisibleTextQuestion("Pulse", "80");
-        answerVisibleTextQuestion("Respiratory rate", "20");
-        answerVisibleTextQuestion("Temperature", "31");
-        answerVisibleTextQuestion("Weight", "90");
-        answerVisibleToggleQuestion("Signs and Symptoms", "Nausea");
-        answerVisibleTextQuestion("Vomiting", "4");
-        answerVisibleTextQuestion("Diarrhoea", "6");
-        answerVisibleToggleQuestion("Pain level", "Severe");
-        answerVisibleToggleQuestion("Pain (Detail)", "Headache");
-        answerVisibleToggleQuestion("Pain (Detail)", "Back pain");
-        answerVisibleToggleQuestion("Bleeding", "Yes");
-        answerVisibleToggleQuestion("Bleeding (Detail)", "Nosebleed");
-        answerVisibleToggleQuestion("Weakness", "Moderate");
-        answerVisibleToggleQuestion("Other Symptoms", "Red eyes");
-        answerVisibleToggleQuestion("Other Symptoms", "Hiccups");
-        answerVisibleToggleQuestion("Consciousness", "Responds to voice");
-        answerVisibleToggleQuestion("Mobility", "Assisted");
-        answerVisibleToggleQuestion("Diet", "Fluids");
-        answerVisibleToggleQuestion("Hydration", "Needs ORS");
-        answerVisibleToggleQuestion("Condition", "5");
-        answerVisibleToggleQuestion("Additional Details", "Pregnant");
-        answerVisibleToggleQuestion("Additional Details", "IV access present");
-        answerVisibleTextQuestion("Notes", "possible malaria");
+        answerTextQuestion("Pulse", "80");
+        answerTextQuestion("Respiratory rate", "20");
+        answerTextQuestion("Temperature", "31");
+        answerTextQuestion("Weight", "90");
+        answerCodedQuestion("Signs and Symptoms", "Nausea");
+        answerTextQuestion("Vomiting", "4");
+        answerTextQuestion("Diarrhoea", "6");
+        answerCodedQuestion("Pain level", "Severe");
+        answerCodedQuestion("Pain (Detail)", "Headache");
+        answerCodedQuestion("Pain (Detail)", "Back pain");
+        answerCodedQuestion("Bleeding", "Yes");
+        answerCodedQuestion("Bleeding (Detail)", "Nosebleed");
+        answerCodedQuestion("Weakness", "Moderate");
+        answerCodedQuestion("Other Symptoms", "Red eyes");
+        answerCodedQuestion("Other Symptoms", "Hiccups");
+        answerCodedQuestion("Consciousness", "Responds to voice");
+        answerCodedQuestion("Mobility", "Assisted");
+        answerCodedQuestion("Diet", "Fluids");
+        answerCodedQuestion("Hydration", "Needs ORS");
+        answerCodedQuestion("Condition", "5");
+        answerCodedQuestion("Additional Details", "Pregnant");
+        answerCodedQuestion("Additional Details", "IV access present");
+        answerTextQuestion("Notes", "possible malaria");
         saveForm();
 
         checkVitalValueContains("Pulse", "80");
@@ -341,14 +334,15 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         Espresso.registerIdlingResources(xformWaiter);
     }
 
-    private void answerVisibleTextQuestion(String questionText, String answerText) {
+    private void answerTextQuestion(String questionText, String answerText) {
         scrollToAndType(answerText, viewThat(
                 isA(EditText.class),
-                hasSibling(isA(MediaLayout.class),
-                        hasDescendant(hasTextContaining(questionText)))));
+                hasSiblingThat(
+                        isA(MediaLayout.class),
+                        hasDescendantThat(hasTextContaining(questionText)))));
     }
 
-    private void answerVisibleToggleQuestion(String questionText, String answerText) {
+    private void answerCodedQuestion(String questionText, String answerText) {
         // Close the soft keyboard before answering any toggle questions -- on rare occasions,
         // if Espresso answers one of these questions and is then instructed to type into another
         // field, the input event will actually be generated as the keyboard is hiding and will be
@@ -357,9 +351,9 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         scrollToAndClick(viewThat(
                 isAnyOf(CheckBox.class, RadioButton.class),
-                hasAncestor(
+                hasAncestorThat(
                         isAnyOf(ButtonsSelectOneWidget.class, TableWidgetGroup.class, ODKView.class),
-                        hasDescendant(hasTextContaining(questionText))),
+                        hasDescendantThat(hasTextContaining(questionText))),
                 hasTextContaining(answerText)));
     }
 
@@ -368,23 +362,23 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         scrollToAndExpectVisible(viewThat(
                 hasText(value),
-                hasAncestor(isInRow(row, ROW_HEIGHT)),
-                hasAncestor(isA(DataGridView.LinkableRecyclerView.class))));
+                hasAncestorThat(isInRow(row, ROW_HEIGHT)),
+                hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
     }
 
     private void checkObservationSet(int row, String dateKey) {
         // TODO/completeness: actually check dateKey
         scrollToAndExpectVisible(viewThat(
-                hasAncestor(isInRow(row, ROW_HEIGHT)),
+                hasAncestorThat(isInRow(row, ROW_HEIGHT)),
                 hasBackground(getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
-                hasAncestor(isA(DataGridView.LinkableRecyclerView.class))));
+                hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
     }
 
     private void checkVitalValueContains(String vitalName, String vitalValue) {
         // Check for updated vital view.
         expectVisibleSoon(viewThat(
                 hasTextContaining(vitalValue),
-                hasSibling(hasTextContaining(vitalName))));
+                hasSiblingThat(hasTextContaining(vitalName))));
     }
 
     private IdlingResource getXformSubmissionIdlingResource() {

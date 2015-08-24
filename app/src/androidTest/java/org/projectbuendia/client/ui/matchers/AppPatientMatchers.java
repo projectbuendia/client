@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.ui.matchers;
 
-import com.google.android.apps.common.testing.ui.espresso.matcher.BoundedMatcher;
+import android.support.test.espresso.matcher.BoundedMatcher;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

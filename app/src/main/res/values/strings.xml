@@ -140,7 +140,7 @@
     <string name="pregnant">Pregnant</string>
     <string name="iv_fitted">IV fitted</string>
     <string name="status_short_desc_unknown">-</string>
-    <string name="status_short_desc_well">1</string>
+    <string name=" status_short_desc_well">1</string>
     <string name="status_short_desc_unwell">2</string>
     <string name="status_short_desc_critical">3</string>
     <string name="status_short_desc_palliative">4</string>

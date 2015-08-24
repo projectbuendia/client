@@ -17,11 +17,11 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.view.View;
 
 import com.estimote.sdk.internal.Preconditions;
-import com.google.android.apps.common.testing.ui.espresso.DataInteraction;
-import com.google.android.apps.common.testing.ui.espresso.Espresso;
-import com.google.android.apps.common.testing.ui.espresso.ViewInteraction;
-import com.google.android.apps.common.testing.ui.espresso.action.ViewActions;
-import com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers;
+import android.support.test.espresso.DataInteraction;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.action.ViewActions;
+import android.support.test.espresso.matcher.ViewMatchers;
 import com.google.common.base.Joiner;
 
 import org.hamcrest.Description;
@@ -29,7 +29,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
 
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static org.hamcrest.Matchers.allOf;
 
 /** Matchers for {@link View}s. */
@@ -59,8 +59,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
         return Espresso.onView(matchers.length > 1 ? allOf(matchers) : matchers[0]);
     }
 
-    @SafeVarargs
-    public static DataInteraction dataThat(Matcher<Object>... matchers) {
+    public static DataInteraction dataThat(Matcher... matchers) {
         return Espresso.onData(matchers.length > 1 ? allOf(matchers) : matchers[0]);
     }
 
@@ -185,28 +184,28 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     }
 
     @SafeVarargs
-    public static Matcher<View> hasChild(Matcher<View>... matchers) {
+    public static Matcher<View> hasChildThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.withChild(matcher),
                 "has a child that {1}", matcher);
     }
 
     @SafeVarargs
-    public static Matcher<View> hasAncestor(Matcher<View>... matchers) {
+    public static Matcher<View> hasAncestorThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.isDescendantOfA(matcher),
                 "has an ancestor that {1}", matcher);
     }
 
     @SafeVarargs
-    public static Matcher<View> hasDescendant(Matcher<View>... matchers) {
+    public static Matcher<View> hasDescendantThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.hasDescendant(matcher),
                 "has a descendant that {1}", matcher);
     }
 
     @SafeVarargs
-    public static Matcher<View> hasSibling(Matcher<View>... matchers) {
+    public static Matcher<View> hasSiblingThat(Matcher<View>... matchers) {
         Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
         return new MatcherWithDescription<>(ViewMatchers.hasSibling(matcher),
                 "has a sibling that {1}", matcher);

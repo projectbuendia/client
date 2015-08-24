@@ -16,10 +16,10 @@ import org.projectbuendia.client.data.app.AppLocation;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.text.StringStartsWith.startsWith;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 
 /** Tests for {@link FilteredPatientListActivity}. */
 public class FilteredPatientListActivityTest extends FunctionalTestCase {
