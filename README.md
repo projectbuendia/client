@@ -1,6 +1,6 @@
 # Buendia client app
 
-The Buendia app runs on tablets with KitKat (Android 4.4.2) or higher.
+The Buendia app runs on tablets with Android 4.4.2 (KitKat) or higher.
 
 Follow these instructions to get your system set up to do Buendia client development.
 See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more details about the app.
@@ -14,6 +14,10 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 ##### Android Studio 1.2
   * Visit https://developer.android.com/sdk/installing/studio.html and follow the steps to install Android Studio.
+
+##### (Optional) Tablet with Android 4.4.2 (KitKat) or higher
+  * We use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets in the field: they are waterproof, have a great screen, and come with KitKat.  Otherwise, we recommend at least a 10" tablet (the app is designed for 1200 x 1920 resolution).  Without a tablet, you can use an emulator (see below).
+
 
 ## Android Studio project setup
 
@@ -135,9 +139,3 @@ The graphical Android SDK Manager at `$ANDROID_HOME/tools/android` will let you 
 `ANDROID_HOME` is usually `/opt/android-sdk-linux` on a Linux machine and `~/Library/Android/sdk` on a Mac.
 
 To build the client from the command line, go to the root of your `client` repo and run `./gradlew clean assembleDebug`.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
-
-## Hardware
-
-In the field, we use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets. These are a good choice because they are waterproof, have a great screen, and have a reasonably-new version of Android.
-
-For development we recommend you at least use a 10" tablet. The Sony tablet mentioned above would be ideal, but you could try another device or emulator (e.g. a Nexus 9 or Nexus 10) with a sufficient resolution (the app is designed for 1920x1200).
