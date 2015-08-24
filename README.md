@@ -49,12 +49,11 @@ You can run just the tests in a single file, or run all the tests under a given 
 
 ## Changing the default OpenMRS server settings
 
-You can always manually change the OpenMRS server URL, username, and password on the Settings page in the app.  It's tedious to keep doing this every time the app is uninstalled and reinstalled, though.  To change the default values of these settings, which are built into the app, edit these lines in `app/build.gradle`:
+You can always manually change the OpenMRS server URL, username, and password on the Settings page in the app.  It's tedious to keep doing this every time the app is uninstalled and reinstalled, though.  To change the default settings, which are built into the app, edit these lines in `app/build.gradle`:
 
     def openmrsRootUrlDefault = openmrsRootUrlDev;
     def openmrsUserDefault = 'buendia'
     def openmrsPasswordDefault = 'buendia'
-    def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
 
 By default, the client is built with its **OpenMRS base URL** set to `http://dev.projectbuendia.org:9000/openmrs`, which is an instance of the OpenMRS server with dummy data that we use for development.  For release builds, we set this to `http://server:9000/openmrs`, which is the URL of the Edison server in real deployments.
 
