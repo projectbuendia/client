@@ -63,7 +63,7 @@ If you want to run the client with an OpenMRS server that you have built locally
   2. Run OpenMRS on your own computer; assign your computer an IP address that's reachable from the tablet; run the client on a real tablet and set its **OpenMRS base URL** to point at your computer
   3. Run OpenMRS on your own computer; run the client in an Android emulator on your computer
 
-An Android emulator runs significantly slower than a real tablet, but in terms of setup it's usually the quickest way to get a locally built client running with a locally built OpenMRS server.
+An Android emulator runs significantly slower than a real tablet, but in terms of setup it's usually the quickest way to get a locally built client running with a locally built OpenMRS server.  Using a local client and local server also enables you to do development while completely offline.
 
 ## Using an emulator and a locally built OpenMRS server
 
