@@ -59,9 +59,9 @@ By default, the client is built with its **OpenMRS base URL** set to `http://dev
 
 If you want to run the client with an OpenMRS server that you have built locally, you have three options:
 
-  1. Install and run your locally built server on a website accessible on the Internet; run the client on a real tablet with Internet access and set its **OpenMRS base URL** to point at that website
-  2. Run your server on your own computer; assign your computer an IP address that's reachable from the tablet; run the client on a real tablet and set its **OpenMRS base URL** to point at your computer
-  3. Run your server on your own computer; run the client in an Android emulator on your computer
+  1. Deploy OpenMRS with your locally built server module on an Internet-accessible website; run the client on a real tablet with Internet access and set its **OpenMRS base URL** to point at that website
+  2. Run OpenMRS on your own computer; assign your computer an IP address that's reachable from the tablet; run the client on a real tablet and set its **OpenMRS base URL** to point at your computer
+  3. Run OpenMRS on your own computer; run the client in an Android emulator on your computer
 
 An Android emulator runs significantly slower than a real tablet, but in terms of setup it's usually the quickest way to get a locally built client running with a locally built OpenMRS server.
 
