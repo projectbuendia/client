@@ -41,7 +41,7 @@ Click the Run button (green triangle in the toolbar at the top).  For **Module**
 
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
-## Changing the default OpenMRS server, username, and password
+## Changing the default OpenMRS server settings
 
 You can always manually change the OpenMRS server URL, username, and password on the Settings page in the app.  It's tedious to keep doing this every time the app is uninstalled and reinstalled, though.  To change the default values of these settings, which are built into the app, edit these lines in `app/build.gradle`:
 
