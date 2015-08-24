@@ -107,7 +107,7 @@ To set up an emulator with some settings that are known to work:
           * Enable keyboard input: turn this off for a realistic simulation (on-screen soft keyboard); turn this on for the convenience of typing with your real keyboard instead of clicking the tablet keyboard
   * Click **Finish**
 
-The emulated tablet will not have access to the Internet, but it will see your computer at IP address 10.0.2.2.  So you'll need to run an OpenMRS server on your computer and then set the client's **OpenMRS base URL** to `http://10.0.2.2:9000/openmrs`.  If you edit `app/build.gradle` and change
+The emulated tablet will not have access to the Internet, but it will see your computer at IP address 10.0.2.2, so you'll need to run an OpenMRS server on your computer and then set the client's **OpenMRS base URL** to `http://10.0.2.2:9000/openmrs`.  If you edit `app/build.gradle` and change
 
     def openmrsRootUrlDefault = openmrsRootUrlDev;
 
@@ -119,7 +119,7 @@ the client will have its server URL set to `http://10.0.2.2:9000/openmrs` by def
 
 ## Android SDK packages
 
-If you're using Android Studio, you don't need to worry about this; it will take care of installing the necessary SDK packages (see Android Studio project setup above).  You only need to do this if you want to build the client from the command line.
+If you're using Android Studio, you don't need to worry about installing SDK packages; Android Studio will take care of it for you (see **Android Studio project setup** above).  You only need to install the packages yourself if you want to build the client from the command line.
 
 The set of Android SDK packages needed to build the client is:
 
@@ -128,7 +128,7 @@ The set of Android SDK packages needed to build the client is:
   * Android Support Library, revision 23
   * Android Support Repository, revision 17
 
-You can install them using the graphical Android SDK Manager at `$ANDROID_HOME/tools/android`, or with the command:
+The graphical Android SDK Manager at `$ANDROID_HOME/tools/android` will let you select and install these packages interactively; or you can install them all with the command:
 
     $ANDROID_HOME/tools/android update sdk --no-ui --all --filter android-21,build-tools-19.1.0,extra-android-support,extras-android-m2repository,platform-tools
 
