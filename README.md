@@ -47,6 +47,20 @@ The client-side tests include both unit tests and functional tests, all located 
 
 You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  For the **Specific instrumentation runner**, select `GoogleInstrumentationTestRunner`.  Then you can run or debug this configuration to run the tests.  In the run configuration, you can choose the Target Device (**USB device** to use an attached tablet, or **Emulator** to use an emulator).
 
+## Building from the command line
+
+If you need to build the client just from the command line:
+
+1.  Install the necessary Android SDK packages:
+
+        /opt/android-sdk-linux/tools/android update sdk --no-ui --all --filter android-21,build-tools-19.1.0,extra-android-support,extras-android-m2repository,platform-tools
+
+2.  Then run gradle from the root of the client repository:
+
+        ./gradlew clean assembleDebug
+
+3.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
+
 ## Hardware
 
 In the field, we use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets. These are a good choice because they are waterproof, have a great screen, and have a reasonably-new version of Android.
