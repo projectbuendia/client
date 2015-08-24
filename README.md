@@ -41,6 +41,12 @@ Click the Run button (green triangle in the toolbar at the top).  For **Module**
 
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
+## Client tests
+
+The client-side tests include both unit tests and functional tests, all located under the project's `androidTest` folder.  These tests run best on a real tablet attached to your computer.  (When run on an Android emulator, some tests work and some don't.)
+
+You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  It's necessary to set the **Specific instrumentation runner** to `AndroidJUnitTestRunner`.  Then you can run or debug this configuration to run the tests.
+
 ## Changing the default OpenMRS server settings
 
 You can always manually change the OpenMRS server URL, username, and password on the Settings page in the app.  It's tedious to keep doing this every time the app is uninstalled and reinstalled, though.  To change the default values of these settings, which are built into the app, edit these lines in `app/build.gradle`:
@@ -111,12 +117,6 @@ to
     def openmrsRootUrlDefault = openmrsRootUrlLocalhost;
 
 the client will have its server URL set to `http://10.0.2.2:9000/openmrs` by default.
-
-## Client tests
-
-The client-side tests include both unit tests and functional tests, all located under the project's `androidTest` folder.  These tests run either on a tablet attached to your computer running Android Studio, or in an Android emulator (AVD).
-
-You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  For the **Specific instrumentation runner**, select `GoogleInstrumentationTestRunner`.  Then you can run or debug this configuration to run the tests.  In the run configuration, you can choose the Target Device (**USB device** to use an attached tablet, or **Emulator** to use an emulator).
 
 ## Android SDK packages
 
