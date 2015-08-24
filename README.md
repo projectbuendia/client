@@ -19,7 +19,7 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 1.  Get the Buendia client source code:
 
-        git clone --recursive https://github.com/projectbuendia/client`
+        git clone --recursive https://github.com/projectbuendia/client
 
 2.  Launch Android Studio and click "Open an existing Android Studio project".
 
@@ -66,7 +66,7 @@ You can install them using the graphical Android SDK Manager at `$ANDROID_HOME/t
 
 `ANDROID_HOME` is usually `/opt/android-sdk-linux` on a Linux machine and `~/Library/Android/sdk` on a Mac.
 
-To build the client from the command line, go to the root of your client repository and run `./gradlew clean assembleDebug`.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
+To build the client from the command line, go to the root of your `client` repo and run `./gradlew clean assembleDebug`.  The resulting apk will be at `app/build/outputs/apk/app-debug.apk`.
 
 ## Hardware
 
