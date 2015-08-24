@@ -31,7 +31,7 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 You are now ready to develop the Buendia client in Android Studio.
 
-## Building and running the client
+## Building and running the client on a tablet
 
 On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in the Settings app under **Developer options**, turn on **USB debugging**.
 
@@ -41,7 +41,69 @@ Click the Run button (green triangle in the toolbar at the top).  For **Module**
 
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
-The default setting for the server URL is configured in app/build.gradle.
+By default, the client is built with its **OpenMRS base URL** set to `http://dev.projectbuendia.org:9000/openmrs`, which is an instance of OpenMRS with dummy data that we use for development.  To change this to a different URL, you can edit the `openmrsRootUrl` variable in `app/build.gradle`.
+
+## Using an emulator and a locally built OpenMRS server
+
+If you want to run the client with an OpenMRS server that you have built locally, you have three options:
+
+  1. Install and run your locally built server on a generally accessible website; run the client on a real tablet and set its **OpenMRS base URL** to point at that website
+  2. Run your server on your own laptop; assign your laptop an IP address that's reachable from the tablet; run the client on a real tablet and set its **OpenMRS base URL** to point at your laptop
+  3. Run your server on your own laptop; run the client in an Android emulator on your laptop
+
+Running the app in an Android emulator is usually much slower than on a real tablet, but it does let you develop without a separate tablet, and it is also the most convenient way to test the client against an OpenMRS server running on your own laptop.
+
+To set up an emulator with some settings that are known to work:
+
+  * Open **Tools** > **Android** > **AVD Manager**
+  * Click **Create Virtual Device**
+  * Click **New Hardware Profile**
+  * Select:
+      * Device Type: Phone/Tablet
+      * Screensize: 10.1 inches
+      * Resolution: 1200 x 1920 px
+      * Memory: RAM: 2 GB
+      * Input: no hardware buttons, no keyboard
+      * Navigation Style: None
+      * Supported device states: Portrait only
+      * Cameras: both front and back
+      * Sensors: all sensors (Accelerometer, Gyroscope, GPS, Proximity)
+      * Default Skin: No Skin
+  * Click **OK** and with your new hardware profile selected, click **Next**
+  * For **System Image**, choose the KitKat image with API level 19 and Target Android 4.4.2 and click **OK**
+  * Click **Show Advanced Settings**
+  * Select:
+      * Startup size and orientation:
+          * Scale: Auto
+          * Orientation: Portrait
+      * Camera:
+          * Front: None
+          * Back: None
+      * Network:
+          * Speed: Full
+          * Latency: None
+      * Emulated Performance:
+          * Host GPU: on
+          * Store a snapshot for faster startup: off
+      * Memory and Storage:
+          * RAM: 2 GB
+          * VM heap: 256 MB
+          * Internal Storage: 1 GB
+          * SD card: Studio-managed, 1 GB
+      * Custom skin definition: No Skin
+      * Keyboard:
+          * Enable keyboard input: turn this off for a realistic simulation (on-screen soft keyboard); turn this on for the convenience of typing with your real keyboard instead of clicking the tablet keyboard
+  * Click **Finish**
+
+The emulated tablet will not have access to the Internet, but it will see your computer at IP address 10.0.2.2.  So you'll need to run an OpenMRS server on your computer and then set the client's **OpenMRS base URL** to `http://10.0.2.2:9000/openmrs`.  If you edit `app/build.gradle` and change
+
+    def openmrsRootUrlDefault = openmrsRootUrlDev;
+
+to
+
+    def openmrsRootUrlDefault = openmrsRootUrlLocalhost;
+
+the client will have its server URL set to `http://10.0.2.2:9000/openmrs` by default.
 
 ## Client tests
 
