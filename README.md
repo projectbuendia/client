@@ -29,7 +29,7 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 You are now ready to develop the Buendia client in Android Studio.
 
-## Build and run the client
+## Building and running the client
 
 On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in the Settings app under **Developer options**, turn on **USB debugging**.
 
@@ -40,6 +40,12 @@ Click the Run button (green triangle in the toolbar at the top).  For **Module**
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
 The default setting for the server URL is configured in app/build.gradle.
+
+## Client tests
+
+The client-side tests include both unit tests and functional tests, all located under the project's `androidTest` folder.  These tests run either on a tablet attached to your computer running Android Studio, or in an Android emulator (AVD).
+
+You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  For the **Specific instrumentation runner**, select `GoogleInstrumentationTestRunner`.  Then you can run or debug this configuration to run the tests.  In the run configuration, you can choose the Target Device (**USB device** to use an attached tablet, or **Emulator** to use an emulator).
 
 ## Hardware
 
