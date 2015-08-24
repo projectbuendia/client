@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 
 import com.google.common.base.Optional;
@@ -245,7 +246,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
     /** Starts syncing observations more frequently while the user is viewing the chart. */
     private void startObservationSync() {
-        final Handler handler = new Handler();
+        final Handler handler = new Handler(Looper.getMainLooper());
         final int phaseId = mCurrentPhaseId;
 
         Runnable runnable = new Runnable() {
