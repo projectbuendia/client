@@ -41,7 +41,7 @@ class Value implements Comparable<Value> {
         observed = obs.encounterTime;
         present = obs.value != null;
         if (present) {
-            switch (getConceptType(obs.conceptUuid, obs.conceptType)) {
+            switch (getConceptType(obs.conceptUuid, obs.conceptType, obs.value)) {
                 case NUMERIC:
                     number = Double.valueOf(obs.value);
                     break;
@@ -134,7 +134,7 @@ class Value implements Comparable<Value> {
         BOOLEAN
     };
 
-    static Type getConceptType(String conceptUuid, ConceptType conceptType) {
+    static Type getConceptType(String conceptUuid, ConceptType conceptType, String value) {
         final Set<String> CODED_CONCEPTS = ImmutableSet.of(
                 Concepts.GENERAL_CONDITION_UUID,
                 Concepts.RESPONSIVENESS_UUID,
@@ -148,10 +148,15 @@ class Value implements Comparable<Value> {
                 Concepts.WEIGHT_UUID);
         final Set<String> TEXT_CONCEPTS = ImmutableSet.of(
                 Concepts.NOTES_UUID);
+        final Set<String> BOOLEAN_ANSWERS = ImmutableSet.of(
+                Concepts.YES_UUID,
+                Concepts.NO_UUID,
+                Concepts.UNKNOWN_UUID);
 
         if (NUMERIC_CONCEPTS.contains(conceptUuid)) return Type.NUMERIC;
         if (TEXT_CONCEPTS.contains(conceptUuid)) return Type.TEXT;
         if (CODED_CONCEPTS.contains(conceptUuid)) return Type.CODED;
+        if (BOOLEAN_ANSWERS.contains(value)) return Type.BOOLEAN;
         switch (conceptType) {
             case CODED:
                 return Type.CODED;
