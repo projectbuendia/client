@@ -48,6 +48,7 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Datab
                 + "     obs.encounter_time,"
                 + "     obs.concept_uuid,"
                 + "     names.name AS concept_name,"
+                + "     concepts.concept_type,"
                 // Localized value for concept values
                 + "     obs.value,"
                 + "     COALESCE(value_names.name, obs.value) AS localized_value"
@@ -65,6 +66,9 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Datab
 
                 + " INNER JOIN concept_names names"
                 + " ON obs.concept_uuid = names.concept_uuid"
+
+                + " INNER JOIN concepts"
+                + " ON obs.concept_uuid = concepts._id"
 
                 // Some of the results are CODED so value is a concept UUID
                 // Some are numeric so the value is fine.

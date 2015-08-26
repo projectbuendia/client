@@ -145,6 +145,7 @@ public class Contracts {
         String GROUP_NAME = "group_name";
         String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
         String CONCEPT_NAME = "concept_name";
+        String CONCEPT_TYPE = "concept_type";
         String VALUE = "value";
         String LOCALIZED_VALUE = "localized_value";
     }

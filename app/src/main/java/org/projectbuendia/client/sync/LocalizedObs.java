@@ -12,6 +12,7 @@
 package org.projectbuendia.client.sync;
 
 import org.joda.time.DateTime;
+import org.projectbuendia.client.net.model.ConceptType;
 
 import java.util.Objects;
 
@@ -31,6 +32,9 @@ public final class LocalizedObs {
 
     /** The UUID of the concept that was observed, unique and stable (suitable as a map key). */
     public final String conceptUuid;
+
+    /** The data type of the concept that was observed. */
+    public final ConceptType conceptType;
 
     /** The localized name of the concept that was observed. */
     public final String conceptName;
@@ -60,6 +64,7 @@ public final class LocalizedObs {
             String groupName,
             String conceptUuid,
             String conceptName,
+            String conceptType,
             @Nullable String value,
             @Nullable String localizedValue) {
         this.id = id;
@@ -67,6 +72,7 @@ public final class LocalizedObs {
         this.groupName = checkNotNull(groupName);
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptName = checkNotNull(conceptName);
+        this.conceptType = ConceptType.valueOf(conceptType);
         this.value = value;
         this.localizedValue = localizedValue;
     }
@@ -78,6 +84,7 @@ public final class LocalizedObs {
                 + ",group=" + groupName
                 + ",conceptUuid=" + conceptUuid
                 + ",conceptName=" + conceptName
+                + ",conceptType=" + conceptType
                 + ",value=" + localizedValue;
     }
 
@@ -89,6 +96,7 @@ public final class LocalizedObs {
                     && Objects.equals(groupName, o.groupName)
                     && Objects.equals(conceptUuid, o.conceptUuid)
                     && Objects.equals(conceptName, o.conceptName)
+                    && Objects.equals(conceptType, o.conceptType)
                     && Objects.equals(value, o.value)
                     && Objects.equals(localizedValue, o.localizedValue);
         } else {

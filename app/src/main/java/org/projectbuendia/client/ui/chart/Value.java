@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.net.model.ConceptType;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 
@@ -40,7 +41,7 @@ class Value implements Comparable<Value> {
         observed = obs.encounterTime;
         present = obs.value != null;
         if (present) {
-            switch (getConceptType(obs.conceptUuid)) {
+            switch (getConceptType(obs.conceptUuid, obs.conceptType)) {
                 case NUMERIC:
                     number = Double.valueOf(obs.value);
                     break;
@@ -133,7 +134,7 @@ class Value implements Comparable<Value> {
         BOOLEAN
     };
 
-    static Type getConceptType(String conceptUuid) {
+    static Type getConceptType(String conceptUuid, ConceptType conceptType) {
         final Set<String> CODED_CONCEPTS = ImmutableSet.of(
                 Concepts.GENERAL_CONDITION_UUID,
                 Concepts.RESPONSIVENESS_UUID,
@@ -151,6 +152,14 @@ class Value implements Comparable<Value> {
         if (NUMERIC_CONCEPTS.contains(conceptUuid)) return Type.NUMERIC;
         if (TEXT_CONCEPTS.contains(conceptUuid)) return Type.TEXT;
         if (CODED_CONCEPTS.contains(conceptUuid)) return Type.CODED;
+        switch (conceptType) {
+            case CODED:
+                return Type.CODED;
+            case NUMERIC:
+                return Type.NUMERIC;
+            case TEXT:
+                return Type.TEXT;
+        }
         return Type.BOOLEAN;
     }
 }

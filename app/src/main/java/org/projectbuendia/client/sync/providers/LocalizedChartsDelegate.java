@@ -52,6 +52,7 @@ public class LocalizedChartsDelegate implements ProviderDelegate<Database> {
                 + "     group_names.name AS group_name,"
                 + "     chart.concept_uuid,"
                 + "     names.name AS concept_name,"
+                + "     concepts.concept_type,"
                 // Localized value for concept values
                 + "     obs.value,"
                 + "     COALESCE(value_names.name, obs.value) AS localized_value"
@@ -62,6 +63,9 @@ public class LocalizedChartsDelegate implements ProviderDelegate<Database> {
 
                 + "     INNER JOIN concept_names group_names"
                 + "     ON chart.group_uuid = group_names.concept_uuid"
+
+                + "     INNER JOIN concepts"
+                + "     ON chart.concept_uuid = concepts._id"
 
                 + "     LEFT JOIN observations obs"
                 + "     ON chart.concept_uuid = obs.concept_uuid AND "

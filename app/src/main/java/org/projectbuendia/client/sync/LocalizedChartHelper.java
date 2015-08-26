@@ -19,6 +19,7 @@ import android.provider.BaseColumns;
 
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.net.model.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
@@ -88,6 +89,7 @@ public class LocalizedChartHelper {
                         cursor.getString(cursor.getColumnIndex("group_name")),
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
+                        cursor.getString(cursor.getColumnIndex("concept_type")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 ));
@@ -105,6 +107,7 @@ public class LocalizedChartHelper {
                         "",
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         "",
+                        ConceptType.NONE.name(),
                         cursor.getString(cursor.getColumnIndex("value")),
                         ""
                 ));
@@ -149,6 +152,7 @@ public class LocalizedChartHelper {
                         "", /* no group */
                         conceptUuid,
                         cursor.getString(cursor.getColumnIndex("concept_name")),
+                        cursor.getString(cursor.getColumnIndex("concept_type")),
                         cursor.getString(cursor.getColumnIndex("value")),
                         cursor.getString(cursor.getColumnIndex("localized_value"))
                 );
@@ -192,6 +196,7 @@ public class LocalizedChartHelper {
                         cursor.getString(cursor.getColumnIndex("group_name")),
                         cursor.getString(cursor.getColumnIndex("concept_uuid")),
                         cursor.getString(cursor.getColumnIndex("concept_name")),
+                        cursor.getString(cursor.getColumnIndex("concept_type")),
                         "", // no value
                         "" // no value
                 );
