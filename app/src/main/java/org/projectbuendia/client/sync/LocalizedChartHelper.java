@@ -16,6 +16,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.BaseColumns;
+import android.util.Pair;
 
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Concepts;
@@ -180,33 +181,30 @@ public class LocalizedChartHelper {
         return observations;
     }
 
-    /** Gets observations for an empty chart.  TODO/cleanup: Not sure this is needed? */
-    public List<LocalizedObs> getEmptyChart(String locale) {
-        Cursor cursor = null;
+    /** Gets a list of the concept UUIDs and names to show in the rows of the chart grid. */
+    public List<Pair<String, String>> getGridRows() {
+        Map<String, String> conceptNames = new HashMap<>();
+        Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
+                "locale = ?",  new String[] {ENGLISH_LOCALE}, null);
         try {
-            cursor = mContentResolver.query(
-                    Contracts.LocalizedCharts.getEmptyLocalizedChartUri(KNOWN_CHART_UUID, locale),
-                    null, null, null, null);
-
-            List<LocalizedObs> result = new ArrayList<>();
             while (cursor.moveToNext()) {
-                LocalizedObs obs = new LocalizedObs(
-                        cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
-                        0L,
-                        cursor.getString(cursor.getColumnIndex("group_name")),
-                        cursor.getString(cursor.getColumnIndex("concept_uuid")),
-                        cursor.getString(cursor.getColumnIndex("concept_name")),
-                        cursor.getString(cursor.getColumnIndex("concept_type")),
-                        "", // no value
-                        "" // no value
-                );
-                result.add(obs);
+                conceptNames.put(Utils.getString(cursor, "concept_uuid"),
+                        Utils.getString(cursor, "name"));
             }
-            return result;
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            cursor.close();
         }
+        List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
+        cursor = mContentResolver.query(Contracts.Charts.CONTENT_URI, null,
+                "chart_uuid = ?", new String[] {KNOWN_CHART_UUID}, "chart_row");
+        try {
+            while (cursor.moveToNext()) {
+                String uuid = Utils.getString(cursor, "concept_uuid");
+                conceptUuidsAndNames.add(new Pair<>(uuid, conceptNames.get(uuid)));
+            }
+        } finally {
+            cursor.close();
+        }
+        return conceptUuidsAndNames;
     }
 }

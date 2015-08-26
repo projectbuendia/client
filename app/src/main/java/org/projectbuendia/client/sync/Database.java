@@ -28,7 +28,7 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 18;
+    public static final int DATABASE_VERSION = 19;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "buendia.db";
@@ -127,7 +127,9 @@ public class Database extends SQLiteOpenHelper {
                 + "chart_uuid TEXT,"
                 + "chart_row INTEGER,"
                 + "group_uuid TEXT,"
-                + "concept_uuid INTEGER,"
+                + "group_name TEXT,"
+                + "concept_uuid TEXT,"
+                + "field_name TEXT"
                 + "UNIQUE (chart_uuid, concept_uuid)");
 
         SCHEMAS.put(Tables.USERS, ""

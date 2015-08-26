@@ -1,6 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.util.Pair;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
@@ -57,7 +58,8 @@ public class GridRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(List<LocalizedObs> observations, List<Order> orders,
+    public void render(List<Pair<String, String>> conceptUuidsAndNames,
+                       List<LocalizedObs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
         if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
@@ -68,7 +70,8 @@ public class GridRenderer {
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
-                observations, orders, admissionDate, firstSymptomsDate).getHtml();
+                conceptUuidsAndNames, observations, orders,
+                admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
         mView.loadData(html, "text/html; charset=utf-8", null);
@@ -79,6 +82,7 @@ public class GridRenderer {
     }
 
     class GridHtmlGenerator {
+        List<String> mConceptUuids;
         List<Order> mOrders;
         LocalDate mToday;
         LocalDate mAdmissionDate;
@@ -89,13 +93,17 @@ public class GridRenderer {
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
 
-        GridHtmlGenerator(List<LocalizedObs> observations, List<Order> orders,
+        GridHtmlGenerator(List<Pair<String, String>> conceptUuidsAndNames,
+                          List<LocalizedObs> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
             mToday = LocalDate.now(chronology);
             addObservations(observations);
             mOrders = orders;
+            for (Pair<String, String> uuidAndName : conceptUuidsAndNames) {
+                addRow(uuidAndName.first, uuidAndName.second);
+            }
         }
 
         void addObservations(List<LocalizedObs> observations) {

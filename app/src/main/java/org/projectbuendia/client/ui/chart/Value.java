@@ -35,6 +35,8 @@ class Value implements Comparable<Value> {
         // false for a coded value (type "Coded") that signifies a lack of a
         // symptom (condition normal); true for any other coded value
 
+    static final int MAX_ABBREV_CHARS = 3;
+
     public Value(LocalizedObs obs, Chronology chronology) {
         final Set<String> FALSE_CODED_VALUES = new ImmutableSet.Builder<String>().add(
                 Concepts.UNKNOWN_UUID).addAll(LocalizedChartHelper.NO_SYMPTOM_VALUES).build();
@@ -52,8 +54,8 @@ class Value implements Comparable<Value> {
                     uuid = obs.value;
                     name = obs.localizedValue;
                     int abbrevLength = name.indexOf('.');
-                    if (abbrevLength < 1 || abbrevLength > 2) {
-                        abbrevLength = 2;
+                    if (abbrevLength < 1 || abbrevLength > MAX_ABBREV_CHARS) {
+                        abbrevLength = MAX_ABBREV_CHARS;
                     }
                     abbrev = name.substring(0, abbrevLength);
                     // fall through to set bool as well

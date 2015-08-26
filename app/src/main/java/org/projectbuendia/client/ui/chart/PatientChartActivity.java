@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -573,12 +574,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientHistoryUi(
+                List<Pair<String, String>> conceptNamesAndUuids,
                 List<LocalizedObs> observations,
                 List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
             mGridRenderer.render(
-                    observations, orders, admissionDate, firstSymptomsDate, mController);
+                    conceptNamesAndUuids, observations, orders,
+                    admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }
 

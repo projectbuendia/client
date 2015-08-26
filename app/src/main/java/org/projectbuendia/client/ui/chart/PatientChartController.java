@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Pair;
 import android.view.MenuItem;
 
 import com.google.common.base.Optional;
@@ -125,6 +126,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updatePatientHistoryUi(
+                List<Pair<String, String>> conceptNamesAndUuids,
                 List<LocalizedObs> observations,
                 List<Order> orders,
                 LocalDate admissionDate,
@@ -427,7 +429,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mUi.updateLastObsTimeUi(mLastObsTime);
         mUi.updatePatientVitalsUi(
                 conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.updatePatientHistoryUi(mObservations, orders, admissionDate, firstSymptomsDate);
+        mUi.updatePatientHistoryUi(
+                mChartHelper.getGridRows(), mObservations, orders,
+                admissionDate, firstSymptomsDate);
     }
 
     /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
