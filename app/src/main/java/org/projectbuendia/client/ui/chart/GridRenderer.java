@@ -71,8 +71,8 @@ public class GridRenderer {
                 observations, orders, admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
-        mView.loadData(html, "text/html", null);
-        mView.loadData(html, "text/html", null);
+        mView.loadData(html, "text/html; charset=utf-8", null);
+        mView.loadData(html, "text/html; charset=utf-8", null);
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
