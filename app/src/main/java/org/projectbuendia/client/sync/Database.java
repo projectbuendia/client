@@ -129,7 +129,7 @@ public class Database extends SQLiteOpenHelper {
                 + "group_uuid TEXT,"
                 + "group_name TEXT,"
                 + "concept_uuid TEXT,"
-                + "field_name TEXT"
+                + "field_name TEXT,"
                 + "UNIQUE (chart_uuid, concept_uuid)");
 
         SCHEMAS.put(Tables.USERS, ""

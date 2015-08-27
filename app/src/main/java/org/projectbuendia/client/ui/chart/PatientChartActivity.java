@@ -98,8 +98,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     /** An enumeration of the XForms that can be launched from this activity. */
     enum XForm {
-        ADD_OBSERVATION("736b90ee-fda6-4438-a6ed-71acd36381f3", 0),
-        ADD_TEST_RESULTS("34d727a6-e515-4f27-ae91-703ba2c164ae", 1);
+        ADD_OBSERVATION("buendia-form-clinical_observation", 0),
+        ADD_TEST_RESULTS("buendia-form-ebola_lab_test", 1);
 
         public final String uuid;
         public final int formIndex;
