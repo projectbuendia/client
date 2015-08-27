@@ -280,7 +280,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
                 mArgMatchers[i].describeTo(argDescription);
                 args[i] = argDescription.toString();
             }
-            description.appendText(String.format(mFormat, args));
+            description.appendText(String.format(mFormat, (Object[]) args));
         }
     }
 
