@@ -46,6 +46,7 @@ import org.projectbuendia.client.data.res.ResStatus;
 import org.projectbuendia.client.data.res.ResVital;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.net.model.ConceptType;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -162,10 +163,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
     @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
 
+    @InjectView(R.id.patient_chart_weight_parent) ViewGroup mWeightParent;
+    @InjectView(R.id.patient_chart_vital_weight) TextView mWeight;
+    @InjectView(R.id.vital_name_weight) TextView mWeightName;
+
+    /*
     @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
     @InjectView(R.id.patient_chart_vital_general_condition_number) TextView mGeneralConditionNum;
     @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
     @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
+    */
 
     @InjectView(R.id.patient_chart_responsiveness_parent) ViewGroup mResponsivenessParent;
     @InjectView(R.id.patient_chart_vital_responsiveness) TextView mResponsiveness;
@@ -357,11 +364,13 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mController.onAddObservationPressed("The pain assessment field");
     }
 
+    /*
     @OnClick(R.id.patient_chart_general_condition_parent)
     void onGeneralConditionPressed(View v) {
         Utils.logUserAction("condition_pressed");
         mController.showAssignGeneralConditionDialog(this, mGeneralConditionUuid);
     }
+    */
 
     @OnClick({
             R.id.vital_diet,
@@ -409,13 +418,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             valueView.setTextColor(mVitalKnown.getForegroundColor());
             nameView.setTextColor(mVitalKnown.getForegroundColor());
 
-            // If the label begins with a one or two-character abbreviation
-            // followed by a period, display the abbreviation on its own line.
             String text = observation.localizedValue;
-            int abbrevLength = text.indexOf('.');
-            if (abbrevLength == 1 || abbrevLength == 2) {
-                text = text.substring(0, abbrevLength) + "\n"
-                        + text.substring(abbrevLength + 1).trim();
+            if (observation.conceptType == ConceptType.NUMERIC) {
+                text = String.format("%.1f", Float.parseFloat(observation.value));
+            } else {
+                // If the label begins with a one or two-character abbreviation
+                // followed by a period, display the abbreviation on its own line.
+                int abbrevLength = text.indexOf('.');
+                if (abbrevLength == 1 || abbrevLength == 2) {
+                    text = text.substring(0, abbrevLength) + "\n"
+                            + text.substring(abbrevLength + 1).trim();
+                }
             }
             valueView.setText(text);
         } else {
@@ -456,6 +469,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
             showObservation(mRespiration, observations.get(Concepts.RESPIRATION_UUID));
 
+            showObservationForViewGroup(
+                    mWeightParent, mWeightName, mWeight,
+                    observations.get(Concepts.WEIGHT_UUID));
             showObservationForViewGroup(
                     mResponsivenessParent, mResponsivenessName, mResponsiveness,
                     observations.get(Concepts.CONSCIOUS_STATE_UUID));
@@ -548,6 +564,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientConditionUi(String generalConditionUuid) {
+            /*
             mGeneralConditionUuid = generalConditionUuid;
             if (generalConditionUuid == null) {
                 mGeneralConditionUuid = null;
@@ -570,6 +587,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralCondition.setText(status.getMessage());
                 mGeneralConditionNum.setText(status.getShortDescription());
             }
+            */
         }
 
         @Override

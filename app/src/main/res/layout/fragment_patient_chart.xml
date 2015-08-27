@@ -15,7 +15,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/patient_chart_root"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="org.projectbuendia.client.ui.chart.PatientChartFragment">
 
@@ -146,10 +146,17 @@
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="160dp">
-
+<!--
             <include
                 layout="@layout/view_vital_general_condition"
                 android:id="@+id/patient_chart_general_condition_parent"
+                android:layout_width="0dp"
+                android:layout_height="144dp"
+                android:layout_margin="4dp" />
+-->
+            <include
+                layout="@layout/view_vital_weight"
+                android:id="@+id/patient_chart_weight_parent"
                 android:layout_width="0dp"
                 android:layout_height="144dp"
                 android:layout_margin="4dp" />
