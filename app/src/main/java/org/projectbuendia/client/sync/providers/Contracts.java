@@ -35,140 +35,78 @@ public class Contracts {
     }
 
     public enum Table {
-        PATIENTS("patients"),
-        CONCEPTS("concepts"),
+        CHARTS("charts"),
         CONCEPT_NAMES("concept_names"),
-        LOCATIONS("locations"),
+        CONCEPTS("concepts"),
         LOCATION_NAMES("location_names"),
+        LOCATIONS("locations"),
+        MISC("misc"),
         OBSERVATIONS("observations"),
         ORDERS("orders"),
-        CHARTS("charts"),
-        USERS("users"),
-        MISC("misc");
+        PATIENTS("patients"),
+        USERS("users");
 
         public String name;
         Table(String name) { this.name = name; }
         public String toString() { return name; }
     }
 
-    /** Columns for localized content. */
-    interface LocaleColumns {
-        /**
-         * Really a language, but as Android does not have LanguageCode, encoded as a
-         * java.util.Locale.toString(), eg en_US.
-         */
-        String LOCALE = "locale";
+    // Each interface below corresponds to one SQLite table.  The column names
+    // defined in the constants should match the schemas defined in Database.java.
 
-        /** The name of something in a given locale. */
+    public interface Charts extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("charts");
+        String GROUP_CONTENT_TYPE = buildGroupType("chart");
+        String ITEM_CONTENT_TYPE = buildItemType("chart");
+
+        String CHART_UUID = "chart_uuid";
+        String CHART_ROW = "chart_row";  // 0-based row number in the chart history grid
+        String CONCEPT_UUID = "concept_uuid";  // the concept displayed in that row
+        String GROUP_UUID = "group_uuid";  // UUID of a concept for a section grouping
+    }
+
+    public interface ConceptNames extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("concept-names");
+        String GROUP_CONTENT_TYPE = buildGroupType("concept-name");
+        String ITEM_CONTENT_TYPE = buildItemType("concept-name");
+
+        String CONCEPT_UUID = "concept_uuid";
+        String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
         String NAME = "name";
     }
 
-    /** Columns for a concept. */
-    interface BaseConceptColumns {
-        String CONCEPT_UUID = "concept_uuid";
+    public interface Concepts extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("concepts");
+        String GROUP_CONTENT_TYPE = buildGroupType("concept");
+        String ITEM_CONTENT_TYPE = buildItemType("concept");
+
+        String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
+        String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
     }
 
-    /** Columns for an XForms concept. */
-    interface ConceptColumns {
-        /**
-         * The id used to represent the concept in xforms (for client side parsing).
-         * In reality this is the openmrs ID, but the client doesn't need to know that.
-         */
-        String XFORM_ID = "xform_id";
+    public interface LocationNames extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("location-names");
+        String GROUP_CONTENT_TYPE = buildGroupType("location-name");
+        String ITEM_CONTENT_TYPE = buildItemType("location-name");
 
-        /** Type for a concept like numeric, coded, etc. */
-        String CONCEPT_TYPE = "concept_type";
+        String LOCATION_UUID = "location_uuid";
+        String LOCALE = "locale";  // a language encoded as a java.util.Locale.toString()
+        String NAME = "name";
     }
 
-    interface ChartColumns {
-        /** UUID for an encounter. */
-        String CHART_UUID = "chart_uuid";
+    public interface Locations extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("locations");
+        String GROUP_CONTENT_TYPE = buildGroupType("location");
+        String ITEM_CONTENT_TYPE = buildItemType("location");
 
-        /** Time for an encounter in seconds since epoch. */
-        String CHART_ROW = "chart_row";
-
-        /** UUID for a concept representing a group (section) in a chart. */
-        String GROUP_UUID = "group_uuid";
-
-        String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
-    }
-
-    public interface ObservationColumns {
-        String PATIENT_UUID = "patient_uuid";
-        String ENCOUNTER_UUID = "encounter_uuid";
-        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
-        String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
-        String VALUE = "value";  // concept value or order UUID
-
-        /**
-         * Value is either 0 or 1, where 1 means this observation is cached locally
-         * from a submitted XForm, rather than loaded from the server.
-         */
-        String TEMP_CACHE = "temp_cache";
-    }
-
-    public interface OrderColumns {
-        String UUID = "uuid";
-        String PATIENT_UUID = "patient_uuid";
-        String INSTRUCTIONS = "instructions";
-        String START_TIME = "start_time";  // seconds since epoch
-        String STOP_TIME = "stop_time";  // seconds since epoch
-        String[] ALL = {UUID, PATIENT_UUID, INSTRUCTIONS, START_TIME, STOP_TIME};
-    }
-
-    interface LocationColumns {
         String LOCATION_UUID = "location_uuid";
         String PARENT_UUID = "parent_uuid"; // parent location or null
     }
 
-    interface LocationNameColumns {
-        String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-    }
+    public interface Misc extends BaseColumns {
+        Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
+        String ITEM_CONTENT_TYPE = buildItemType("misc");
 
-    interface PatientColumns {
-        String GIVEN_NAME = "given_name";
-        String FAMILY_NAME = "family_name";
-        String UUID = "uuid";
-        String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-        String BIRTHDATE = "birthdate";
-        String GENDER = "gender";
-    }
-
-    interface PatientCountColumns {
-        String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-    }
-
-    interface LocalizedChartColumns {
-        String ENCOUNTER_TIME = ObservationColumns.ENCOUNTER_TIME;
-        String GROUP_NAME = "group_name";
-        String CONCEPT_UUID = BaseConceptColumns.CONCEPT_UUID;
-        String CONCEPT_NAME = "concept_name";
-        String CONCEPT_TYPE = "concept_type";
-        String VALUE = "value";
-        String LOCALIZED_VALUE = "localized_value";
-    }
-
-    interface UserColumns {
-        String UUID = "uuid";
-        String FULL_NAME = "full_name";
-    }
-
-    interface LocalizedLocationColumns {
-        String LOCATION_UUID = LocationColumns.LOCATION_UUID;
-        String PARENT_UUID = LocationColumns.PARENT_UUID;
-        String NAME = LocaleColumns.NAME;
-
-        /** The patient count for a single location, not including child locations. */
-        String PATIENT_COUNT = "patient_count";
-    }
-
-    interface Charts extends ChartColumns, BaseColumns {
-        Uri CONTENT_URI = buildContentUri("charts");
-        String GROUP_CONTENT_TYPE = buildGroupType("chart");
-        String ITEM_CONTENT_TYPE = buildItemType("chart");
-    }
-
-    interface MiscColumns {
         /**
          * The start time of the last full sync operation, according to the
          * local (client's) clock.  Since sync operations are transactional,
@@ -197,52 +135,82 @@ public class Contracts {
         String OBS_SYNC_TIME = "obs_sync_time";
     }
 
-    public interface ConceptNames extends BaseConceptColumns, LocaleColumns, BaseColumns {
-        Uri CONTENT_URI = buildContentUri("concept-names");
-        String GROUP_CONTENT_TYPE = buildGroupType("concept-name");
-        String ITEM_CONTENT_TYPE = buildItemType("concept-name");
-    }
-
-    public interface Concepts extends ConceptColumns, BaseColumns {
-        Uri CONTENT_URI = buildContentUri("concepts");
-        String GROUP_CONTENT_TYPE = buildGroupType("concept");
-        String ITEM_CONTENT_TYPE = buildItemType("concept");
-    }
-
-    public interface Locations extends LocationColumns, BaseColumns {
-        Uri CONTENT_URI = buildContentUri("locations");
-        String GROUP_CONTENT_TYPE = buildGroupType("location");
-        String ITEM_CONTENT_TYPE = buildItemType("location");
-    }
-
-    public interface LocationNames extends LocationNameColumns, LocaleColumns, BaseColumns {
-        Uri CONTENT_URI = buildContentUri("location-names");
-        String GROUP_CONTENT_TYPE = buildGroupType("location-name");
-        String ITEM_CONTENT_TYPE = buildItemType("location-name");
-    }
-
-    public interface Observations extends ObservationColumns, BaseColumns {
+    public interface Observations extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("observations");
         String GROUP_CONTENT_TYPE = buildGroupType("observation");
         String ITEM_CONTENT_TYPE = buildItemType("observation");
+
+        String PATIENT_UUID = "patient_uuid";
+        String ENCOUNTER_UUID = "encounter_uuid";
+        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
+        String CONCEPT_UUID = "concept_uuid";
+        String VALUE = "value";  // concept value or order UUID
+
+        /**
+         * temp_cache is 1 if this observation was written locally as a cached
+         * value from a submitted XForm, or 0 if it was loaded from the server.
+         */
+        String TEMP_CACHE = "temp_cache";
     }
 
-    public interface Orders extends OrderColumns, BaseColumns {
+    public interface Orders extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("orders");
         String GROUP_CONTENT_TYPE = buildGroupType("order");
         String ITEM_CONTENT_TYPE = buildItemType("order");
+
+        String UUID = "uuid";
+        String PATIENT_UUID = "patient_uuid";
+        String INSTRUCTIONS = "instructions";
+        String START_TIME = "start_time";  // seconds since epoch
+        String STOP_TIME = "stop_time";  // seconds since epoch
     }
 
-    public interface Patients extends PatientColumns, BaseColumns {
+    public interface Patients extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("patients");
         String GROUP_CONTENT_TYPE = buildGroupType("patient");
         String ITEM_CONTENT_TYPE = buildItemType("patient");
+
+        String UUID = "uuid";
+        String GIVEN_NAME = "given_name";
+        String FAMILY_NAME = "family_name";
+        String LOCATION_UUID = "location_uuid";
+        String BIRTHDATE = "birthdate";
+        String GENDER = "gender";
     }
 
-    public interface PatientCounts extends PatientCountColumns {
-        Uri CONTENT_URI = buildContentUri("patient-counts");
-        String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
-        String ITEM_CONTENT_TYPE = buildItemType("patient-count");
+    public interface Users extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("users");
+        String GROUP_CONTENT_TYPE = buildGroupType("user");
+        String ITEM_CONTENT_TYPE = buildItemType("user");
+
+        String UUID = "uuid";
+        String FULL_NAME = "full_name";
+    }
+
+    // Each interface below describes a derived view implemented by a
+    // ProviderDelegate.  The column name constants should match the result
+    // columns returned by the query() method of the corresponding ProviderDelegate.
+
+    public interface LocalizedLocations extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("localized-locations");
+        String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
+        String ITEM_CONTENT_TYPE = buildItemType("localized-location");
+
+        String LOCATION_UUID = "location_uuid";
+        String PARENT_UUID = "parent_uuid";
+        String NAME = "name";
+        /** Patient count for a location, not including child locations. */
+        String PATIENT_COUNT = "patient_count";
+    }
+
+    interface LocalizedChartColumns {
+        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
+        String GROUP_NAME = "group_name";
+        String CONCEPT_UUID = "concept_uuid";
+        String CONCEPT_NAME = "concept_name";
+        String CONCEPT_TYPE = "concept_type";
+        String VALUE = "value";
+        String LOCALIZED_VALUE = "localized_value";
     }
 
     public interface LocalizedCharts extends LocalizedChartColumns {
@@ -253,31 +221,26 @@ public class Contracts {
     }
 
     public interface MostRecentLocalizedCharts extends LocalizedChartColumns {
-        Uri CONTENT_URI = buildContentUri("most-recent-localized-charts");
+        Uri CONTENT_URI = buildContentUri("latest-localized-charts");
         String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
         String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
-
     }
 
-    public interface LocalizedLocations extends LocalizedLocationColumns {
-        Uri CONTENT_URI = buildContentUri("localized-locations");
-        String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
-        String ITEM_CONTENT_TYPE = buildItemType("localized-location");
+    public interface PatientCounts extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("patient-counts");
+        String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
+        String ITEM_CONTENT_TYPE = buildItemType("patient-count");
 
+        String LOCATION_UUID = "location_uuid";
+        // BaseColumns defines _COUNT.
     }
 
-    public interface Users extends UserColumns, BaseColumns {
-        Uri CONTENT_URI = buildContentUri("users");
-        String GROUP_CONTENT_TYPE = buildGroupType("user");
-        String ITEM_CONTENT_TYPE = buildItemType("user");
+    /** Returns the content URI for the localized locations for a given locale. */
+    public static Uri getLocalizedLocationsUri(String locale) {
+        return LocalizedLocations.CONTENT_URI.buildUpon()
+                .appendPath(locale)
+                .build();
     }
-
-    public interface Misc extends MiscColumns, BaseColumns {
-        Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
-        String ITEM_CONTENT_TYPE = buildItemType("misc");
-    }
-
 
     /**
      * Returns the content URI for a localized chart for a given chart UUID, patient UUID, and
@@ -293,32 +256,12 @@ public class Contracts {
     }
 
     /**
-     * Returns the content URI for an empty localized chart for a given chart UUID and locale.
-     */
-    public static Uri getEmptyLocalizedChartUri(
-            String chartUuid, String locale) {
-        String FAKE_PATIENT_UUID = "fake-patient";
-        return LocalizedCharts.CONTENT_URI.buildUpon()
-                .appendPath(chartUuid)
-                .appendPath(locale)
-                .appendPath(FAKE_PATIENT_UUID) // Don't expect to match any real observations.
-                .build();
-    }
-
-    /**
      * Returns the content URI for the most recent localized chart for a given patient UUID and
      * locale.
      */
     public static Uri getMostRecentChartUri(String patientUuid, String locale) {
         return MostRecentLocalizedCharts.CONTENT_URI.buildUpon()
                 .appendPath(patientUuid)
-                .appendPath(locale)
-                .build();
-    }
-
-    /** Returns the content URL for the localized locations for a given locale. */
-    public static Uri getLocalizedLocationsUri(String locale) {
-        return LocalizedLocations.CONTENT_URI.buildUpon()
                 .appendPath(locale)
                 .build();
     }

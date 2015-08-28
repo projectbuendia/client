@@ -20,7 +20,7 @@ public final class EncounterUuidFilter extends SimpleSelectionFilter<AppEncounte
 
     @Override
     public String getSelectionString() {
-        return Contracts.ObservationColumns.ENCOUNTER_UUID + "=?";
+        return Contracts.Observations.ENCOUNTER_UUID + " = ?";
     }
 
     @Override

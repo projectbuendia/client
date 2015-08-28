@@ -30,7 +30,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Encounter;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.sync.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
@@ -47,11 +47,11 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     private static final Logger LOG = Logger.create();
 
     private static final String[] ENCOUNTER_PROJECTION = new String[] {
-            Contracts.ObservationColumns.CONCEPT_UUID,
-            Contracts.ObservationColumns.ENCOUNTER_TIME,
-            Contracts.ObservationColumns.ENCOUNTER_UUID,
-            Contracts.ObservationColumns.PATIENT_UUID,
-            Contracts.ObservationColumns.VALUE
+            Observations.CONCEPT_UUID,
+            Observations.ENCOUNTER_TIME,
+            Observations.ENCOUNTER_UUID,
+            Observations.PATIENT_UUID,
+            Observations.VALUE
     };
 
     private final TaskFactory mTaskFactory;
@@ -122,7 +122,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         AppEncounter appEncounter = AppEncounter.fromNet(mPatient.uuid, encounter);
         ContentValues[] values = appEncounter.toContentValuesArray();
         if (values.length > 0) {
-            int inserted = mContentResolver.bulkInsert(Contracts.Observations.CONTENT_URI, values);
+            int inserted = mContentResolver.bulkInsert(Observations.CONTENT_URI, values);
 
             if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
@@ -162,7 +162,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
         FetchItemTask<AppEncounter> task = mTaskFactory.newFetchSingleAsyncTask(
-                Contracts.Observations.CONTENT_URI,
+                Observations.CONTENT_URI,
                 ENCOUNTER_PROJECTION,
                 new EncounterUuidFilter(),
                 mUuid,

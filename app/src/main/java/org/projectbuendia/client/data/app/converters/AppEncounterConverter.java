@@ -16,7 +16,7 @@ import android.database.Cursor;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.data.app.AppEncounter.AppObservation;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.sync.providers.Contracts.Observations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,15 +40,15 @@ public class AppEncounterConverter implements AppTypeConverter<AppEncounter> {
     @Override
     public AppEncounter fromCursor(Cursor cursor) {
         final String encounterUuid = cursor.getString(
-                cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_UUID));
+                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
         final long timestamp = cursor.getLong(
-                cursor.getColumnIndex(Contracts.ObservationColumns.ENCOUNTER_TIME));
+                cursor.getColumnIndex(Observations.ENCOUNTER_TIME));
         List<AppObservation> observationList = new ArrayList<>();
         cursor.move(-1);
         while (cursor.moveToNext()) {
-            String value = cursor.getString(cursor.getColumnIndex(Contracts.ObservationColumns.VALUE));
+            String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
             observationList.add(new AppObservation(
-                    cursor.getString(cursor.getColumnIndex(Contracts.ObservationColumns.CONCEPT_UUID)),
+                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
                     value, AppObservation.estimatedTypeFor(value)
             ));
         }

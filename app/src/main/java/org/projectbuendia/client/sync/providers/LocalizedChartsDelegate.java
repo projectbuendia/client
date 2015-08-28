@@ -16,7 +16,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.sync.Database;
 
 import java.util.List;

@@ -19,7 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.model.Encounter;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.sync.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
@@ -143,20 +143,20 @@ public class AppEncounter extends AppTypeBase<String> {
         for (int i = 0; i < observations.length; i++) {
             AppObservation obs = observations[i];
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, obs.conceptUuid);
-            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestampSec);
-            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_UUID, encounterUuid);
-            contentValues.put(Contracts.ObservationColumns.PATIENT_UUID, patientUuid);
-            contentValues.put(Contracts.ObservationColumns.VALUE, obs.value);
+            contentValues.put(Observations.CONCEPT_UUID, obs.conceptUuid);
+            contentValues.put(Observations.ENCOUNTER_TIME, timestampSec);
+            contentValues.put(Observations.ENCOUNTER_UUID, encounterUuid);
+            contentValues.put(Observations.PATIENT_UUID, patientUuid);
+            contentValues.put(Observations.VALUE, obs.value);
             valuesArray[i] = contentValues;
         }
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(Contracts.ObservationColumns.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
-            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_TIME, timestampSec);
-            contentValues.put(Contracts.ObservationColumns.ENCOUNTER_UUID, encounterUuid);
-            contentValues.put(Contracts.ObservationColumns.PATIENT_UUID, patientUuid);
-            contentValues.put(Contracts.ObservationColumns.VALUE, orderUuids[i]);
+            contentValues.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
+            contentValues.put(Observations.ENCOUNTER_TIME, timestampSec);
+            contentValues.put(Observations.ENCOUNTER_UUID, encounterUuid);
+            contentValues.put(Observations.PATIENT_UUID, patientUuid);
+            contentValues.put(Observations.VALUE, orderUuids[i]);
             valuesArray[observations.length + i] = contentValues;
         }
         return valuesArray;
