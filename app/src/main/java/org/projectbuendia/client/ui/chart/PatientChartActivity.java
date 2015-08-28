@@ -11,7 +11,6 @@
 
 package org.projectbuendia.client.ui.chart;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +42,6 @@ import org.projectbuendia.client.data.app.AppLocation;
 import org.projectbuendia.client.data.app.AppLocationTree;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.res.ResStatus;
 import org.projectbuendia.client.data.res.ResVital;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.model.Concepts;
@@ -83,9 +81,9 @@ import de.greenrobot.event.EventBus;
 /** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final Logger LOG = Logger.create();
-    // Minimum PCR Np or L value to be considered negative. 39.95 is chosen as the threshold here
-    // as it would be displayed as 40.0 (and values slightly below 40.0 may be the result of
-    // rounding errors).
+    // Minimum PCR Np or L value to be considered negative (displayed as "NEG").
+    // 39.95 is chosen as the threshold as it would be displayed as 40.0
+    // (and values slightly below 40.0 may be the result of rounding errors).
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
     // Note the general condition uuid when retrieved so that it can be passed to the controller.
@@ -97,38 +95,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         caller.startActivity(intent);
     }
 
-    /** An enumeration of the XForms that can be launched from this activity. */
-    enum XForm {
-        ADD_OBSERVATION("buendia-form-clinical_observation", 0),
-        ADD_TEST_RESULTS("buendia-form-ebola_lab_test", 1);
-
+    /** XForms that can be launched from this activity. */
+    public static class XForm {
         public final String uuid;
         public final int formIndex;
 
-        XForm(String uuid, int formIndex) {
+        public XForm(String uuid, int formIndex) {
             this.uuid = uuid;
             this.formIndex = formIndex;
-        }
-    }
-
-    /** An object that encapsulates a {@link Activity#startActivityForResult} request code. */
-    static class RequestCode {
-
-        public final XForm form;
-        public final int requestIndex;
-
-        public RequestCode(XForm form, int requestIndex) {
-            this.form = form;
-            this.requestIndex = requestIndex;
-        }
-
-        public RequestCode(int code) {
-            this.form = XForm.values()[(code >> 8) & 0xFF];
-            this.requestIndex = code & 0xFF;
-        }
-
-        public int getCode() {
-            return ((form.formIndex & 0xFF) << 8) | (requestIndex & 0xFF);
         }
     }
 
@@ -341,9 +315,19 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 });
 
-        for (AppForm form : mLocalizedChartHelper.getForms()) {
-            menu.add(form.name);
-        }
+        for (final AppForm form : mLocalizedChartHelper.getForms()) {
+            MenuItem item = menu.add(form.name);
+            item.setOnMenuItemClickListener(
+                    new MenuItem.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem menuItem) {
+                            mController.onOpenFormPressed(form.uuid);
+                            return true;
+                        }
+                    }
+            );
+            }
+
     }
 
     @Override
@@ -648,9 +632,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public synchronized void fetchAndShowXform(
-                XForm form,
-                int code,
-                Patient patient,
+                int requestCode, String formUuid, Patient patient,
                 PrepopulatableFields fields) {
             if (mIsFetchingXform) {
                 return;
@@ -658,7 +640,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                    PatientChartActivity.this, form.uuid, code, patient, fields);
+                    PatientChartActivity.this, formUuid, requestCode, patient, fields);
         }
 
         @Override

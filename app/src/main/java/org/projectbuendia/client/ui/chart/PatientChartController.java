@@ -29,6 +29,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.data.app.AppEncounter.AppObservation;
+import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppLocationTree;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppOrder;
@@ -72,10 +73,11 @@ import javax.annotation.Nullable;
 final class PatientChartController implements GridRenderer.GridJsInterface {
 
     private static final Logger LOG = Logger.create();
-
     private static final boolean DEBUG = true;
-
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
+    static final String OBSERVATION_FORM_UUID = "buendia-form-clinical_observation";
+    static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
+
 
     /**
      * Period between observation syncs while the chart view is active.  It would be nice for
@@ -146,9 +148,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
-                PatientChartActivity.XForm form,
-                int code,
-                Patient patient,
+                int requestCode, String formUuid, Patient patient,
                 PrepopulatableFields fields);
 
         void reEnableFetch();
@@ -210,6 +210,43 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mMainThreadHandler = mainThreadHandler;
     }
 
+    /** Represents an instance of a form being opened by the user. */
+    class FormRequest {
+        public final String formUuid;
+        public final String patientUuid;
+        public final int requestIndex;
+
+        public FormRequest(String formUuid, String patientUuid, int index) {
+            this.formUuid = formUuid;
+            this.patientUuid = patientUuid;
+            this.requestIndex = index;
+        }
+    }
+
+    // Every form request made by this controller is kept in this list until
+    // the form is closed.
+    List<FormRequest> mFormRequests = new ArrayList<>();
+
+    FormRequest newFormRequest(String formUuid, String patientUuid) {
+        // Find an empty slot in the array of all existing form requests.
+        int requestIndex = 0;
+        while (requestIndex < mFormRequests.size() && mFormRequests.get(requestIndex) != null) {
+            requestIndex++;
+        }
+        if (requestIndex >= mFormRequests.size()) {
+            mFormRequests.add(null);
+        }
+        FormRequest request = new FormRequest(formUuid, patientUuid, requestIndex);
+        mFormRequests.set(requestIndex, request);
+        return request;
+    }
+
+    FormRequest popFormRequest(int requestIndex) {
+        FormRequest request = mFormRequests.get(requestIndex);
+        mFormRequests.set(requestIndex, null);
+        return request;
+    }
+
     /**
      * Returns the state of the controller. This should be saved to preserve it over activity
      * restarts.
@@ -269,41 +306,20 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         handler.postDelayed(runnable, OBSERVATION_SYNC_PERIOD_MILLIS);
     }
 
-    public void onXFormResult(int code, int resultCode, Intent data) {
-        PatientChartActivity.RequestCode requestCode =
-                new PatientChartActivity.RequestCode(code);
-
-        String patientUuid = getAndClearPatientUuidForRequestCode(code);
-        if (patientUuid == null) {
-            LOG.e("Received unknown request code: " + code);
+    public void onXFormResult(int requestCode, int resultCode, Intent data) {
+        FormRequest request = popFormRequest(requestCode);
+        if (request == null) {
+            LOG.e("Unknown form request code: " + requestCode);
             return;
         }
 
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         String action = (resultCode == Activity.RESULT_CANCELED)
                 ? "form_discard_pressed" : "form_save_pressed";
-        switch (requestCode.form) {
-            case ADD_OBSERVATION:
-                Utils.logUserAction(action,
-                        "form", "round",
-                        "patient_uuid", patientUuid);
-                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
-                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
-                break;
-            case ADD_TEST_RESULTS:
-                Utils.logUserAction(action,
-                        "form", "lab_test",
-                        "patient_uuid", patientUuid);
-                // This will fire an SubmitXformSucceededEvent or a SubmitXformFailedEvent.
-                mOdkResultSender.sendOdkResultToServer(patientUuid, resultCode, data);
-                break;
-            default:
-                LOG.e(
-                        "Received an ODK result for a form that we do not know about: '%1$s'. This "
-                                + "indicates programmer error.", requestCode.form.toString());
-                shouldShowSubmissionDialog = false;
-                break;
-        }
+        Utils.logUserAction(action,
+                "form", request.formUuid,
+                "patient_uuid", request.patientUuid);
+        mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
         mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
     }
 
@@ -350,12 +366,10 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         fields.targetGroup = targetGroup;
 
         mUi.showFormLoadingDialog(true);
+        FormRequest request = newFormRequest(OBSERVATION_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                PatientChartActivity.XForm.ADD_OBSERVATION,
-                savePatientUuidForRequestCode(
-                        PatientChartActivity.XForm.ADD_OBSERVATION, mPatientUuid),
-                OdkConverter.toOdkPatient(mPatient),
-                fields);
+                request.requestIndex, request.formUuid,
+                OdkConverter.toOdkPatient(mPatient), fields);
     }
 
     public void onAddTestResultsPressed() {
@@ -369,12 +383,27 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         }
 
         mUi.showFormLoadingDialog(true);
+        FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                PatientChartActivity.XForm.ADD_TEST_RESULTS,
-                savePatientUuidForRequestCode(
-                        PatientChartActivity.XForm.ADD_TEST_RESULTS, mPatientUuid),
-                OdkConverter.toOdkPatient(mPatient),
-                fields);
+                request.requestIndex, request.formUuid,
+                OdkConverter.toOdkPatient(mPatient), fields);
+    }
+
+    public void onOpenFormPressed(String formUuid) {
+        PrepopulatableFields fields = new PrepopulatableFields();
+        fields.locationName = "Triage";
+
+        User user = App.getUserManager().getActiveUser();
+        if (user != null) {
+            fields.clinicianName = user.fullName;
+        }
+
+        Utils.logUserAction("form_opener_pressed", "form", formUuid);
+        mUi.showFormLoadingDialog(true);
+        FormRequest request = newFormRequest(formUuid, mPatientUuid);
+        mUi.fetchAndShowXform(
+                request.requestIndex, request.formUuid,
+                OdkConverter.toOdkPatient(mPatient), fields);
     }
 
     @android.webkit.JavascriptInterface
@@ -432,14 +461,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mUi.updatePatientHistoryUi(
                 mChartHelper.getGridRows(), mObservations, orders,
                 admissionDate, firstSymptomsDate);
-    }
-
-    /** Returns a requestCode that can be sent to ODK Xform activity representing the given UUID. */
-    private int savePatientUuidForRequestCode(PatientChartActivity.XForm form, String patientUuid) {
-        mPatientUuids[mNextIndex] = patientUuid;
-        int requestCode = new PatientChartActivity.RequestCode(form, mNextIndex).getCode();
-        mNextIndex = (mNextIndex + 1) % MAX_ODK_REQUESTS;
-        return requestCode;
     }
 
     public void showAssignGeneralConditionDialog(
@@ -509,20 +530,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         menuItem.setEnabled(false);
         mAssignLocationDialog.show();
-    }
-
-    /**
-     * Converts a requestCode that was previously sent to the ODK Xform activity back to a patient
-     * UUID.
-     *
-     * <p>Also removes details of that requestCode from the controller's state.
-     */
-    @Nullable
-    private String getAndClearPatientUuidForRequestCode(int code) {
-        PatientChartActivity.RequestCode requestCode = new PatientChartActivity.RequestCode(code);
-        String patientUuid = mPatientUuids[requestCode.requestIndex];
-        mPatientUuids[requestCode.requestIndex] = null;
-        return patientUuid;
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
