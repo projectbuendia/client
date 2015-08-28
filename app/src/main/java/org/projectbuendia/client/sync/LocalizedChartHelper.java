@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.util.Pair;
 
+import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.model.ConceptType;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /** A simple helper class for retrieving and localizing data from patient charts. */
 public class LocalizedChartHelper {
@@ -207,5 +210,25 @@ public class LocalizedChartHelper {
             cursor.close();
         }
         return conceptUuidsAndNames;
+    }
+
+    public List<AppForm> getForms() {
+        Cursor cursor = mContentResolver.query(
+                Contracts.Forms.CONTENT_URI, null, null, null, null);
+        SortedSet<AppForm> forms = new TreeSet<>();
+        try {
+            while (cursor.moveToNext()) {
+                forms.add(new AppForm(
+                        Utils.getString(cursor, Contracts.Forms._ID),
+                        Utils.getString(cursor, Contracts.Forms.UUID),
+                        Utils.getString(cursor, Contracts.Forms.NAME),
+                        Utils.getString(cursor, Contracts.Forms.VERSION)));
+            }
+        } finally {
+            cursor.close();
+        }
+        List<AppForm> sortedForms = new ArrayList<>();
+        sortedForms.addAll(forms);
+        return sortedForms;
     }
 }

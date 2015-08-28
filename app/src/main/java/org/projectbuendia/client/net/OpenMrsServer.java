@@ -35,6 +35,7 @@ import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.model.Encounter;
+import org.projectbuendia.client.net.model.Form;
 import org.projectbuendia.client.net.model.Location;
 import org.projectbuendia.client.net.model.NewUser;
 import org.projectbuendia.client.net.model.Order;
@@ -570,6 +571,35 @@ public class OpenMrsServer implements Server {
                             LOG.e(e, "Failed to parse response");
                         }
                         successListener.onResponse(orders);
+                    }
+                },
+                wrapErrorListener(errorListener)
+        );
+        request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
+    }
+
+    @Override
+    public void listForms(final Response.Listener<List<Form>> successListener,
+                          Response.ErrorListener errorListener) {
+        OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
+                mConnectionDetails,
+                "/xform",
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        ArrayList<Form> forms = new ArrayList<>();
+                        try {
+                            JSONArray results = response.getJSONArray("results");
+                            for (int i = 0; i < results.length(); i++) {
+                                JSONObject result = results.getJSONObject(i);
+                                forms.add(mGson.fromJson(result.toString(), Form.class));
+                            }
+                        } catch (JSONException e) {
+                            LOG.e(e, "Failed to parse response");
+                        }
+                        successListener.onResponse(forms);
                     }
                 },
                 wrapErrorListener(errorListener)

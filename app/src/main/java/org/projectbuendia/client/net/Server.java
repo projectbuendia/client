@@ -20,6 +20,7 @@ import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.net.model.Encounter;
+import org.projectbuendia.client.net.model.Form;
 import org.projectbuendia.client.net.model.Location;
 import org.projectbuendia.client.net.model.NewUser;
 import org.projectbuendia.client.net.model.Order;
@@ -118,6 +119,10 @@ public interface Server {
     public void listUsers(@Nullable String filterQueryTerm,
                           Response.Listener<List<User>> userListener,
                           Response.ErrorListener errorListener);
+
+    /** Lists all published forms. */
+    void listForms(Response.Listener<List<Form>> userListener,
+                   Response.ErrorListener errorListener);
 
     /**
      * Adds a new location to the server.

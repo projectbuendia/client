@@ -23,16 +23,19 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.net.model.ChartGroup;
 import org.projectbuendia.client.net.model.ChartStructure;
 import org.projectbuendia.client.net.model.Encounter;
+import org.projectbuendia.client.net.model.Form;
 import org.projectbuendia.client.net.model.Location;
 import org.projectbuendia.client.net.model.Order;
 import org.projectbuendia.client.net.model.Patient;
 import org.projectbuendia.client.net.model.PatientChart;
 import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
 import org.projectbuendia.client.sync.providers.Contracts.Locations;
@@ -80,6 +83,41 @@ public class DbSyncHelper {
                         .build());
                 syncResult.stats.numInserts++;
             }
+        }
+        return ops;
+    }
+
+    public static List<ContentProviderOperation> getFormUpdateOps(SyncResult syncResult)
+        throws ExecutionException, InterruptedException {
+        final ContentResolver resolver = App.getInstance().getContentResolver();
+
+        LOG.i("Listing all forms on server");
+        RequestFuture<List<Form>> future = RequestFuture.newFuture();
+        App.getServer().listForms(future, future);
+        Map<String, ContentValues> cvs = new HashMap<>();
+        for (Form form : future.get()) {
+            cvs.put(form.id, AppForm.fromNet(form).toContentValues());
+        }
+
+        Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
+        LOG.i("Examining forms: " + c.getCount() + " local, " + cvs.size() + " from server");
+
+        List<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+                String localId = Utils.getString(c, Contracts.Forms._ID);
+                Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(localId).build();
+                LOG.i("  - will delete: " + localId);
+                ops.add(ContentProviderOperation.newDelete(uri).build());
+            }
+        } finally {
+            c.close();
+        }
+
+        for (ContentValues values : cvs.values()) {  // server has a new record
+            LOG.i("  - will insert: " + values.getAsString(Contracts.Forms._ID));
+            ops.add(ContentProviderOperation.newInsert(Contracts.Forms.CONTENT_URI).withValues(values).build());
+            syncResult.stats.numInserts++;
         }
         return ops;
     }

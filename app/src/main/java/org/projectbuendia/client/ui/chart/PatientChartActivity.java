@@ -38,6 +38,7 @@ import org.odk.collect.android.model.PrepopulatableFields;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppLocation;
 import org.projectbuendia.client.data.app.AppLocationTree;
 import org.projectbuendia.client.data.app.AppModel;
@@ -339,6 +340,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                         return true;
                     }
                 });
+
+        for (AppForm form : mLocalizedChartHelper.getForms()) {
+            menu.add(form.name);
+        }
     }
 
     @Override

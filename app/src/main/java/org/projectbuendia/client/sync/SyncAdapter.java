@@ -83,7 +83,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         SYNC_CONCEPTS,
         SYNC_PATIENTS,
         SYNC_OBSERVATIONS,
-        SYNC_ORDERS
+        SYNC_ORDERS,
+        SYNC_FORMS
     }
 
     /** UI messages to show while each phase of the sync is in progress. */
@@ -96,6 +97,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         PHASE_MESSAGES.put(SyncPhase.SYNC_PATIENTS, R.string.syncing_patients);
         PHASE_MESSAGES.put(SyncPhase.SYNC_OBSERVATIONS, R.string.syncing_observations);
         PHASE_MESSAGES.put(SyncPhase.SYNC_ORDERS, R.string.syncing_orders);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_FORMS, R.string.syncing_forms);
     }
 
     enum SyncOption {
@@ -263,6 +265,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     case SYNC_ORDERS:
                         updateOrders(provider, syncResult);
                         break;
+
+                    // Forms: We always fetch all forms.  This is okay because
+                    // there are only a few forms, usually less than 10.
+                    case SYNC_FORMS:
+                        updateForms(provider, syncResult);
+                        break;
                 }
                 timings.addSplit(phase.name() + " phase completed");
                 reportProgress(progressIncrement, PHASE_MESSAGES.get(phase));
@@ -352,6 +360,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
         LOG.i("Finished updating patients (" + ops.size() + " db ops)");
         mContentResolver.notifyChange(Patients.CONTENT_URI, null, false);
+    }
+
+    private void updateForms(ContentProviderClient provider, SyncResult syncResult)
+            throws InterruptedException, ExecutionException, RemoteException,
+            OperationApplicationException {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        ops.addAll(DbSyncHelper.getFormUpdateOps(syncResult));
+        checkCancellation("while downloading form list from server");
+        mContentResolver.applyBatch(Contracts.CONTENT_AUTHORITY, ops);
+        LOG.i("Finished updating forms (" + ops.size() + " db ops)");
+        mContentResolver.notifyChange(Contracts.Forms.CONTENT_URI, null, false);
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)

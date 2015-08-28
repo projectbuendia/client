@@ -38,6 +38,7 @@ public class Contracts {
         CHARTS("charts"),
         CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
+        FORMS("forms"),
         LOCATION_NAMES("location_names"),
         LOCATIONS("locations"),
         MISC("misc"),
@@ -82,6 +83,16 @@ public class Contracts {
 
         String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
         String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
+    }
+
+    public interface Forms extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("forms");
+        String GROUP_CONTENT_TYPE = buildGroupType("form");
+        String ITEM_CONTENT_TYPE = buildItemType("form");
+
+        String UUID = "uuid";
+        String NAME = "name";
+        String VERSION = "version";
     }
 
     public interface LocationNames extends BaseColumns {
@@ -187,9 +198,9 @@ public class Contracts {
         String FULL_NAME = "full_name";
     }
 
-    // Each interface below describes a derived view implemented by a
-    // ProviderDelegate.  The column name constants should match the result
-    // columns returned by the query() method of the corresponding ProviderDelegate.
+    // Each interface below describes a derived view implemented by a custom
+    // ProviderDelegate.  The column name constants should match the columns
+    // returned by the query() method of the corresponding ProviderDelegate.
 
     public interface LocalizedLocations extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("localized-locations");
@@ -213,6 +224,7 @@ public class Contracts {
         String LOCALIZED_VALUE = "localized_value";
     }
 
+    // TODO: rename to LocalizedObservations
     public interface LocalizedCharts extends LocalizedChartColumns {
         Uri CONTENT_URI = buildContentUri("localized-charts");
         String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
@@ -233,6 +245,7 @@ public class Contracts {
 
         String LOCATION_UUID = "location_uuid";
         // BaseColumns defines _COUNT.
+        // TODO: just use a column named "count", not a mysterious "_count"
     }
 
     /** Returns the content URI for the localized locations for a given locale. */

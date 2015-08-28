@@ -28,7 +28,7 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 19;
+    public static final int DATABASE_VERSION = 21;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "buendia.db";
@@ -92,6 +92,12 @@ public class Database extends SQLiteOpenHelper {
                 + "name TEXT,"
                 + "UNIQUE (concept_uuid, locale)");
 
+        SCHEMAS.put(Table.FORMS, ""
+                + "_id INTEGER PRIMARY KEY NOT NULL,"
+                + "uuid TEXT,"
+                + "name TEXT,"
+                + "version TEXT");
+
         SCHEMAS.put(Table.LOCATIONS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "location_uuid TEXT,"
@@ -122,6 +128,7 @@ public class Database extends SQLiteOpenHelper {
                 + "start_time INTEGER,"
                 + "stop_time INTEGER");
 
+        // TODO: rename to chart_rows
         SCHEMAS.put(Table.CHARTS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "chart_uuid TEXT,"
@@ -137,6 +144,7 @@ public class Database extends SQLiteOpenHelper {
                 + "uuid TEXT,"
                 + "full_name TEXT");
 
+        // TODO: store misc as key-value rows, not one row
         SCHEMAS.put(Table.MISC, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "full_sync_start_time INTEGER,"
