@@ -27,6 +27,6 @@
     <string name="pref_desc_incremental_observation_update">This is much quicker but still experimental.</string>
     <string name="pref_title_require_wifi">Require wi-fi connection</string>
     <string name="pref_desc_require_wifi">For developers.  Turn this off when running the app with emulated networking.</string>
-    <string name="pref_title_clear_database">Clear the local database</string>
-    <string name="pref_desc_clear_database">For developers.  Clears the local database and forces a fresh sync.</string>
+    <string name="clear_data_button">Apply and clear local data</string>
+
 </resources>

@@ -15,7 +15,8 @@
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
 
     <!-- the server to use for OpenMRS -->
-    <EditTextPreference
+
+    <org.projectbuendia.client.widget.EditAndClearDataPreference
         android:key="openmrs_root_url"
         android:title="@string/pref_title_openmrs_root_url"
         android:defaultValue="@string/openmrs_root_url_default"
@@ -26,7 +27,7 @@
         android:maxLines="1" />
 
     <!-- The user to use for OpenMRS requests -->
-    <EditTextPreference
+    <org.projectbuendia.client.widget.EditAndClearDataPreference
         android:key="openmrs_user"
         android:title="@string/pref_title_openmrs_user"
         android:defaultValue="@string/openmrs_user_default"
@@ -37,7 +38,7 @@
         android:maxLines="1" />
 
     <!-- The password to use for OpenMRS requests -->
-    <EditTextPreference
+    <org.projectbuendia.client.widget.EditAndClearDataPreference
         android:key="openmrs_password"
         android:title="@string/pref_title_openmrs_password"
         android:defaultValue="@string/openmrs_password_default"
@@ -92,10 +93,5 @@
         android:title="@string/pref_title_require_wifi"
         android:summary="@string/pref_desc_require_wifi"
         android:defaultValue="@bool/require_wifi_default" />
-
-    <org.projectbuendia.client.widget.ClearDatabasePreference
-        android:key="clear_database"
-        android:title="@string/pref_title_clear_database"
-        android:summary="@string/pref_desc_clear_database" />
 
 </PreferenceScreen>

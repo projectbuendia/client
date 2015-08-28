@@ -19,22 +19,19 @@ import android.text.InputType;
 import android.util.AttributeSet;
 
 import org.projectbuendia.client.App;
+import org.projectbuendia.client.R;
 import org.projectbuendia.client.sync.Database;
 
-/** Custom Android preference widget for clearing the database. */
-public class ClearDatabasePreference extends EditTextPreference {
-    public ClearDatabasePreference(Context context, AttributeSet attrs) {
+/** Custom Android preference widget that clears the database if new text is entered. */
+public class EditAndClearDataPreference extends EditTextPreference {
+    public EditAndClearDataPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setPositiveButtonText(R.string.clear_data_button);
     }
 
     public void onDialogClosed(boolean positive) {
         if (positive) {
             new Database(App.getInstance().getApplicationContext()).clear();
         }
-    }
-
-    @Override
-    public String getText() {
-        return "Are you sure you want to clear the local database?";
     }
 }
