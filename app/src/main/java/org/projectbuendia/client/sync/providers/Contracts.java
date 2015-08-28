@@ -20,7 +20,6 @@ import org.projectbuendia.client.BuildConfig;
 /** The external contracts for {@link BuendiaProvider}. */
 @SuppressWarnings("unused")
 public class Contracts {
-
     public static final String CONTENT_AUTHORITY = BuildConfig.CONTENT_AUTHORITY;
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
@@ -163,12 +162,10 @@ public class Contracts {
         String PATIENT_COUNT = "patient_count";
     }
 
-    public static class Charts implements ChartColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("charts");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("chart");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("chart");
-
-        private Charts() {}
+    interface Charts extends ChartColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("charts");
+        String GROUP_CONTENT_TYPE = buildGroupType("chart");
+        String ITEM_CONTENT_TYPE = buildItemType("chart");
     }
 
     interface MiscColumns {
@@ -200,153 +197,129 @@ public class Contracts {
         String OBS_SYNC_TIME = "obs_sync_time";
     }
 
-    public static class ConceptNames implements BaseConceptColumns, LocaleColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("concept-names");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("concept-name");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("concept-name");
-
-        private ConceptNames() {}
+    public interface ConceptNames extends BaseConceptColumns, LocaleColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("concept-names");
+        String GROUP_CONTENT_TYPE = buildGroupType("concept-name");
+        String ITEM_CONTENT_TYPE = buildItemType("concept-name");
     }
 
-    public static class Concepts implements ConceptColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("concepts");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("concept");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("concept");
-
-        private Concepts() {}
+    public interface Concepts extends ConceptColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("concepts");
+        String GROUP_CONTENT_TYPE = buildGroupType("concept");
+        String ITEM_CONTENT_TYPE = buildItemType("concept");
     }
 
-    public static class Locations implements LocationColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("locations");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("location");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("location");
-
-        private Locations() {}
+    public interface Locations extends LocationColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("locations");
+        String GROUP_CONTENT_TYPE = buildGroupType("location");
+        String ITEM_CONTENT_TYPE = buildItemType("location");
     }
 
-    public static class LocationNames implements LocationNameColumns, LocaleColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("location-names");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("location-name");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("location-name");
-
-        private LocationNames() {}
+    public interface LocationNames extends LocationNameColumns, LocaleColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("location-names");
+        String GROUP_CONTENT_TYPE = buildGroupType("location-name");
+        String ITEM_CONTENT_TYPE = buildItemType("location-name");
     }
 
-    public static class Observations implements ObservationColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("observations");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("observation");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("observation");
-
-        private Observations() {}
+    public interface Observations extends ObservationColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("observations");
+        String GROUP_CONTENT_TYPE = buildGroupType("observation");
+        String ITEM_CONTENT_TYPE = buildItemType("observation");
     }
 
-    public static class Orders implements OrderColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("orders");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("order");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("order");
-
-        private Orders() {}
+    public interface Orders extends OrderColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("orders");
+        String GROUP_CONTENT_TYPE = buildGroupType("order");
+        String ITEM_CONTENT_TYPE = buildItemType("order");
     }
 
-    public static class Patients implements PatientColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("patients");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("patient");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("patient");
-
-        private Patients() {}
+    public interface Patients extends PatientColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("patients");
+        String GROUP_CONTENT_TYPE = buildGroupType("patient");
+        String ITEM_CONTENT_TYPE = buildItemType("patient");
     }
 
-    public static class PatientCounts implements PatientCountColumns {
-        public static final Uri CONTENT_URI = buildContentUri("patient-counts");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("patient-count");
-
-        private PatientCounts() {}
+    public interface PatientCounts extends PatientCountColumns {
+        Uri CONTENT_URI = buildContentUri("patient-counts");
+        String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
+        String ITEM_CONTENT_TYPE = buildItemType("patient-count");
     }
 
-    public static class LocalizedCharts implements LocalizedChartColumns {
-        public static final Uri CONTENT_URI = buildContentUri("localized-charts");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
-        private static final String FAKE_PATIENT_UUID = "fake-patient";
+    public interface LocalizedCharts extends LocalizedChartColumns {
+        Uri CONTENT_URI = buildContentUri("localized-charts");
+        String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
+        String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
 
-        /**
-         * Returns the content URI for a localized chart for a given chart UUID, patient UUID, and
-         * locale.
-         */
-        public static Uri getLocalizedChartUri(
-                String chartUuid, String patientUuid, String locale) {
-            return CONTENT_URI.buildUpon()
-                    .appendPath(chartUuid)
-                    .appendPath(locale)
-                    .appendPath(patientUuid)
-                    .build();
-        }
-
-        /**
-         * Returns the content URI for an empty localized chart for a given chart UUID and locale.
-         */
-        public static Uri getEmptyLocalizedChartUri(
-                String chartUuid, String locale) {
-            return CONTENT_URI.buildUpon()
-                    .appendPath(chartUuid)
-                    .appendPath(locale)
-                    .appendPath(FAKE_PATIENT_UUID) // Don't expect to match any real observations.
-                    .build();
-        }
-
-        private LocalizedCharts() {}
     }
 
-    public static class MostRecentLocalizedCharts implements LocalizedChartColumns {
-        public static final Uri CONTENT_URI = buildContentUri("most-recent-localized-charts");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
+    public interface MostRecentLocalizedCharts extends LocalizedChartColumns {
+        Uri CONTENT_URI = buildContentUri("most-recent-localized-charts");
+        String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
+        String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
 
-        /**
-         * Returns the content URI for the most recent localized chart for a given patient UUID and
-         * locale.
-         */
-        public static Uri getMostRecentChartUri(String patientUuid, String locale) {
-            return CONTENT_URI.buildUpon()
-                    .appendPath(patientUuid)
-                    .appendPath(locale)
-                    .build();
-        }
-
-        private MostRecentLocalizedCharts() {}
     }
 
-    public static class LocalizedLocations implements LocalizedLocationColumns {
-        public static final Uri CONTENT_URI = buildContentUri("localized-locations");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("localized-location");
+    public interface LocalizedLocations extends LocalizedLocationColumns {
+        Uri CONTENT_URI = buildContentUri("localized-locations");
+        String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
+        String ITEM_CONTENT_TYPE = buildItemType("localized-location");
 
-        /** Returns the content URL for the localized locations for a given locale. */
-        public static Uri getUri(String locale) {
-            return CONTENT_URI.buildUpon()
-                    .appendPath(locale)
-                    .build();
-        }
-
-        private LocalizedLocations() {}
     }
 
-    public static class Users implements UserColumns, BaseColumns {
-        public static final Uri CONTENT_URI = buildContentUri("users");
-        public static final String GROUP_CONTENT_TYPE = buildGroupType("user");
-        public static final String ITEM_CONTENT_TYPE = buildItemType("user");
-
-        private Users() {}
+    public interface Users extends UserColumns, BaseColumns {
+        Uri CONTENT_URI = buildContentUri("users");
+        String GROUP_CONTENT_TYPE = buildGroupType("user");
+        String ITEM_CONTENT_TYPE = buildItemType("user");
     }
 
-    public static class Misc implements MiscColumns, BaseColumns {
-        public static final Uri CONTENT_URI =
+    public interface Misc extends MiscColumns, BaseColumns {
+        Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath("misc").appendPath("0").build();
-        public static final String ITEM_CONTENT_TYPE = buildItemType("misc");
-
-        private Misc() {}
+        String ITEM_CONTENT_TYPE = buildItemType("misc");
     }
 
-    private Contracts() {}
+
+    /**
+     * Returns the content URI for a localized chart for a given chart UUID, patient UUID, and
+     * locale.
+     */
+    public static Uri getLocalizedChartUri(
+            String chartUuid, String patientUuid, String locale) {
+        return LocalizedCharts.CONTENT_URI.buildUpon()
+                .appendPath(chartUuid)
+                .appendPath(locale)
+                .appendPath(patientUuid)
+                .build();
+    }
+
+    /**
+     * Returns the content URI for an empty localized chart for a given chart UUID and locale.
+     */
+    public static Uri getEmptyLocalizedChartUri(
+            String chartUuid, String locale) {
+        String FAKE_PATIENT_UUID = "fake-patient";
+        return LocalizedCharts.CONTENT_URI.buildUpon()
+                .appendPath(chartUuid)
+                .appendPath(locale)
+                .appendPath(FAKE_PATIENT_UUID) // Don't expect to match any real observations.
+                .build();
+    }
+
+    /**
+     * Returns the content URI for the most recent localized chart for a given patient UUID and
+     * locale.
+     */
+    public static Uri getMostRecentChartUri(String patientUuid, String locale) {
+        return MostRecentLocalizedCharts.CONTENT_URI.buildUpon()
+                .appendPath(patientUuid)
+                .appendPath(locale)
+                .build();
+    }
+
+    /** Returns the content URL for the localized locations for a given locale. */
+    public static Uri getLocalizedLocationsUri(String locale) {
+        return LocalizedLocations.CONTENT_URI.buildUpon()
+                .appendPath(locale)
+                .build();
+    }
 }

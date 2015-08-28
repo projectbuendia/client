@@ -265,7 +265,7 @@ public class AppModel {
             try {
                 // TODO: Ensure this cursor is closed.
                 cursor = mContentResolver.query(
-                        Contracts.LocalizedLocations.getUri(mLocale),
+                        Contracts.getLocalizedLocationsUri(mLocale),
                         null,
                         null,
                         null,

@@ -80,7 +80,7 @@ public class LocalizedChartHelper {
 
             // Get all the regular observations with localized names.
             cursor = mContentResolver.query(
-                    Contracts.LocalizedCharts.getLocalizedChartUri(
+                    Contracts.getLocalizedChartUri(
                             KNOWN_CHART_UUID, patientUuid, locale),
                     null, null, null, null);
             while (cursor.moveToNext()) {
@@ -140,7 +140,7 @@ public class LocalizedChartHelper {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                    Contracts.MostRecentLocalizedCharts.getMostRecentChartUri(patientUuid, locale),
+                    Contracts.getMostRecentChartUri(patientUuid, locale),
                     null, null, null, null);
 
             Map<String, LocalizedObs> result = Maps.newLinkedHashMap();
