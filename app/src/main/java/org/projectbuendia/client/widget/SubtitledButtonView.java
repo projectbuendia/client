@@ -98,7 +98,12 @@ public class SubtitledButtonView extends LinearLayout {
     public SubtitledButtonView setTextColor(int color) {
         mTitleView.setTextColor(color);
         mSubtitleView.setTextColor(color);
+        return this;
+    }
 
+    /** Sets the text color of the subtitle. */
+    public SubtitledButtonView setSubtitleColor(int color) {
+        mSubtitleView.setTextColor(color);
         return this;
     }
 

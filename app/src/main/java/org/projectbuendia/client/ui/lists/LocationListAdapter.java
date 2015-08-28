@@ -77,12 +77,15 @@ public class LocationListAdapter extends ArrayAdapter<AppLocation> {
         ResZone.Resolved zone = Zone.getResZone(
                 location.parentUuid).resolve(mContext.getResources());
 
+        int count = mLocationTree.getTotalPatientCount(location);
         holder.mButton.setTitle(location.toString());
-        holder.mButton.setSubtitle(
-                PatientCountDisplay.getPatientCountSubtitle(
-                        mContext, mLocationTree.getTotalPatientCount(location)));
+        holder.mButton.setSubtitle("" + count);
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());
         holder.mButton.setTextColor(zone.getForegroundColor());
+        if (count == 0) {
+            int fg = zone.getForegroundColor();
+            holder.mButton.setSubtitleColor(0x40000000 | fg & 0x00ffffff);
+        }
 
         if (mSelectedLocationUuid.isPresent()
                 && mSelectedLocationUuid.get().equals(location.uuid)) {
