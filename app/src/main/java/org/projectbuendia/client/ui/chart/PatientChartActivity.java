@@ -315,6 +315,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     }
                 });
 
+        boolean clinicalObservationFormEnabled = false;
+        boolean ebolaLabTestFormEnabled = false;
         for (final AppForm form : mLocalizedChartHelper.getForms()) {
             MenuItem item = menu.add(form.name);
             item.setOnMenuItemClickListener(
@@ -326,8 +328,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                         }
                     }
             );
+            if (form.uuid.equals(PatientChartController.OBSERVATION_FORM_UUID)) {
+                clinicalObservationFormEnabled = true;
             }
-
+            if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
+                ebolaLabTestFormEnabled = true;
+            }
+        }
+        updateChart.setVisible(clinicalObservationFormEnabled);
+        addTestResult.setVisible(ebolaLabTestFormEnabled);
+        Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
     @Override
