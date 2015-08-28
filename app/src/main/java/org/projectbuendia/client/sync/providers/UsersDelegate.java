@@ -18,7 +18,7 @@ import android.net.Uri;
 
 import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.QueryBuilder;
-import org.projectbuendia.client.sync.providers.Contracts.Tables;
+import org.projectbuendia.client.sync.providers.Contracts.Table;
 
 /** A {@link ProviderDelegate} that provides read-write access to users. */
 class UsersDelegate implements ProviderDelegate<Database> {
@@ -37,7 +37,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Cursor cursor = new QueryBuilder(Tables.USERS)
+        Cursor cursor = new QueryBuilder(Table.USERS)
                 .where(selection, selectionArgs)
                 .orderBy(sortOrder)
                 .select(dbHelper.getReadableDatabase(), projection);
@@ -50,7 +50,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
         long id = dbHelper.getWritableDatabase()
-                .replaceOrThrow(Tables.USERS, null, values);
+                .replaceOrThrow(Table.USERS.name, null, values);
         contentResolver.notifyChange(uri, null, false);
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
@@ -70,7 +70,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public int delete(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(Tables.USERS)
+        int count = new QueryBuilder(Table.USERS)
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
@@ -81,7 +81,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public int update(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(Tables.USERS)
+        int count = new QueryBuilder(Table.USERS)
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);

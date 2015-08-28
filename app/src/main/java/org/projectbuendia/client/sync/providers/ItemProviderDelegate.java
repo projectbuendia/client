@@ -26,14 +26,14 @@ import org.projectbuendia.client.sync.QueryBuilder;
 public class ItemProviderDelegate implements ProviderDelegate<Database> {
 
     protected final String mName;
-    protected final String mTableName;
+    protected final Contracts.Table mTable;
     protected final String mType;
     protected final String mIdColumn;
 
     /** Creates an instance of {@link ItemProviderDelegate}. */
-    public ItemProviderDelegate(String name, String tableName, String idColumn) {
+    public ItemProviderDelegate(String name, Contracts.Table table, String idColumn) {
         mName = name;
-        mTableName = tableName;
+        mTable = table;
         mIdColumn = idColumn;
         mType = ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + mName;
     }
@@ -47,7 +47,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Cursor cursor = new QueryBuilder(mTableName)
+        Cursor cursor = new QueryBuilder(mTable)
                 .where(mIdColumn + "=?", uri.getLastPathSegment())
                 .where(selection, selectionArgs)
                 .orderBy(sortOrder)
@@ -75,7 +75,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
     public int delete(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(mTableName)
+        int count = new QueryBuilder(mTable)
                 .where(mIdColumn + "=?", uri.getLastPathSegment())
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
@@ -87,7 +87,7 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
     public int update(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(mTableName)
+        int count = new QueryBuilder(mTable)
                 .where(mIdColumn + "=?", uri.getLastPathSegment())
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);

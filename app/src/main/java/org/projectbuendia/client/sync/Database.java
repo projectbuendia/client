@@ -16,7 +16,7 @@ import android.content.Context;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
-import org.projectbuendia.client.sync.providers.Contracts.Tables;
+import org.projectbuendia.client.sync.providers.Contracts.Table;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -69,9 +69,9 @@ public class Database extends SQLiteOpenHelper {
      * A map of SQL table schemas, with one entry per table.  The values should
      * be strings that take the place of X in a "CREATE TABLE foo (X)" statement.
      */
-    static final Map<String, String> SCHEMAS = new HashMap();
+    static final Map<Table, String> SCHEMAS = new HashMap();
     static {
-        SCHEMAS.put(Tables.PATIENTS, ""
+        SCHEMAS.put(Table.PATIENTS, ""
                 + "_id TEXT PRIMARY KEY NOT NULL,"
                 + "given_name TEXT,"
                 + "family_name TEXT,"
@@ -80,31 +80,31 @@ public class Database extends SQLiteOpenHelper {
                 + "birthdate TEXT,"
                 + "gender TEXT");
 
-        SCHEMAS.put(Tables.CONCEPTS, ""
+        SCHEMAS.put(Table.CONCEPTS, ""
                 + "_id TEXT PRIMARY KEY NOT NULL,"
                 + "xform_id INTEGER UNIQUE NOT NULL,"
                 + "concept_type TEXT");
 
-        SCHEMAS.put(Tables.CONCEPT_NAMES, ""
+        SCHEMAS.put(Table.CONCEPT_NAMES, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "concept_uuid TEXT,"
                 + "locale TEXT,"
                 + "name TEXT,"
                 + "UNIQUE (concept_uuid, locale)");
 
-        SCHEMAS.put(Tables.LOCATIONS, ""
+        SCHEMAS.put(Table.LOCATIONS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "location_uuid TEXT,"
                 + "parent_uuid TEXT");
 
-        SCHEMAS.put(Tables.LOCATION_NAMES, ""
+        SCHEMAS.put(Table.LOCATION_NAMES, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "location_uuid TEXT,"
                 + "locale TEXT,"
                 + "name TEXT,"
                 + "UNIQUE (location_uuid, locale)");
 
-        SCHEMAS.put(Tables.OBSERVATIONS, ""
+        SCHEMAS.put(Table.OBSERVATIONS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "patient_uuid TEXT,"
                 + "encounter_uuid TEXT,"
@@ -114,7 +114,7 @@ public class Database extends SQLiteOpenHelper {
                 + "temp_cache INTEGER," // really boolean
                 + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
-        SCHEMAS.put(Tables.ORDERS, ""
+        SCHEMAS.put(Table.ORDERS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "uuid TEXT,"
                 + "patient_uuid TEXT,"
@@ -122,7 +122,7 @@ public class Database extends SQLiteOpenHelper {
                 + "start_time INTEGER,"
                 + "stop_time INTEGER");
 
-        SCHEMAS.put(Tables.CHARTS, ""
+        SCHEMAS.put(Table.CHARTS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "chart_uuid TEXT,"
                 + "chart_row INTEGER,"
@@ -132,12 +132,12 @@ public class Database extends SQLiteOpenHelper {
                 + "field_name TEXT,"
                 + "UNIQUE (chart_uuid, concept_uuid)");
 
-        SCHEMAS.put(Tables.USERS, ""
+        SCHEMAS.put(Table.USERS, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "uuid TEXT,"
                 + "full_name TEXT");
 
-        SCHEMAS.put(Tables.MISC, ""
+        SCHEMAS.put(Table.MISC, ""
                 + "_id INTEGER PRIMARY KEY NOT NULL,"
                 + "full_sync_start_time INTEGER,"
                 + "full_sync_end_time INTEGER,"
@@ -150,7 +150,7 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        for (String table : Tables.ALL) {
+        for (Table table : Table.values()) {
             db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
         }
     }
@@ -159,7 +159,7 @@ public class Database extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache of data on the server, so its upgrade
         // policy is to discard all the data and start over.
-        for (String table : Tables.ALL) {
+        for (Table table : Table.values()) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
         }
         onCreate(db);

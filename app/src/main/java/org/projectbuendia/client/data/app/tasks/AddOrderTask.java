@@ -107,7 +107,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
         mBus.register(new CreationEventSubscriber());
         FetchItemTask<AppOrder> task = mTaskFactory.newFetchSingleAsyncTask(
                 Contracts.Orders.CONTENT_URI,
-                Contracts.OrderColumns.ALL,
+                null,
                 new UuidFilter(),
                 mUuid,
                 mConverters.order,

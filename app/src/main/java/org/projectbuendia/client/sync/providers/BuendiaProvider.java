@@ -12,7 +12,7 @@
 package org.projectbuendia.client.sync.providers;
 
 import org.projectbuendia.client.sync.Database;
-import org.projectbuendia.client.sync.providers.Contracts.Tables;
+import org.projectbuendia.client.sync.providers.Contracts.Table;
 
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
 public class BuendiaProvider extends DelegatingProvider<Database> {
@@ -31,78 +31,78 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                 Contracts.Charts.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Charts.GROUP_CONTENT_TYPE,
-                        Tables.CHARTS));
+                        Table.CHARTS));
         registry.registerDelegate(
                 Contracts.Concepts.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Concepts.GROUP_CONTENT_TYPE,
-                        Tables.CONCEPTS));
+                        Table.CONCEPTS));
         registry.registerDelegate(
                 Contracts.ConceptNames.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.ConceptNames.GROUP_CONTENT_TYPE,
-                        Tables.CONCEPT_NAMES));
+                        Table.CONCEPT_NAMES));
         registry.registerDelegate(
                 Contracts.Locations.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Locations.GROUP_CONTENT_TYPE,
-                        Tables.LOCATIONS));
+                        Table.LOCATIONS));
         registry.registerDelegate(
                 Contracts.LocationNames.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.LocationNames.GROUP_CONTENT_TYPE,
-                        Tables.LOCATION_NAMES));
+                        Table.LOCATION_NAMES));
         registry.registerDelegate(
                 Contracts.Observations.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Observations.GROUP_CONTENT_TYPE,
-                        Tables.OBSERVATIONS));
+                        Table.OBSERVATIONS));
         registry.registerDelegate(
                 Contracts.Orders.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Orders.GROUP_CONTENT_TYPE,
-                        Tables.ORDERS));
+                        Table.ORDERS));
         registry.registerDelegate(
                 Contracts.Patients.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Patients.GROUP_CONTENT_TYPE,
-                        Tables.PATIENTS));
+                        Table.PATIENTS));
         registry.registerDelegate(
                 Contracts.Users.CONTENT_URI.getPath(),
                 new GroupProviderDelegate(
                         Contracts.Users.GROUP_CONTENT_TYPE,
-                        Tables.USERS));
+                        Table.USERS));
 
         // Providers for individual things (e.g., user with a specific ID).
         registry.registerDelegate(
                 Contracts.Locations.CONTENT_URI.getPath() + "/*",
                 new ItemProviderDelegate(
                         Contracts.Locations.ITEM_CONTENT_TYPE,
-                        Tables.LOCATIONS,
+                        Table.LOCATIONS,
                         Contracts.Locations.LOCATION_UUID));
         registry.registerDelegate(
                 Contracts.LocationNames.CONTENT_URI.getPath() + "/*",
                 new InsertableItemProviderDelegate(
                         Contracts.LocationNames.ITEM_CONTENT_TYPE,
-                        Tables.LOCATION_NAMES,
+                        Table.LOCATION_NAMES,
                         Contracts.Locations.LOCATION_UUID));
         registry.registerDelegate(
                 Contracts.Orders.CONTENT_URI.getPath() + "/*",
                 new InsertableItemProviderDelegate(
                         Contracts.Orders.ITEM_CONTENT_TYPE,
-                        Tables.ORDERS,
+                        Table.ORDERS,
                         Contracts.Orders.UUID));
         registry.registerDelegate(
                 Contracts.Patients.CONTENT_URI.getPath() + "/*",
                 new ItemProviderDelegate(
                         Contracts.Patients.ITEM_CONTENT_TYPE,
-                        Tables.PATIENTS,
+                        Table.PATIENTS,
                         Contracts.Patients._ID));
         registry.registerDelegate(
                 Contracts.Users.CONTENT_URI.getPath() + "/*",
                 new ItemProviderDelegate(
                         Contracts.Users.ITEM_CONTENT_TYPE,
-                        Tables.USERS,
+                        Table.USERS,
                         Contracts.Users._ID));
 
         // Custom providers, usually with special logic.
@@ -123,7 +123,7 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
                 Contracts.Misc.CONTENT_URI.getPath(),
                 new InsertableItemProviderDelegate(
                         Contracts.Misc.ITEM_CONTENT_TYPE,
-                        Tables.MISC,
+                        Table.MISC,
                         Contracts.Misc._ID));
 
         return registry;

@@ -30,11 +30,11 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
 
     private static final String BULK_INSERT_SAVEPOINT = "GROUP_PROVIDER_DELEGATE_BULK_INSERT";
     private final String mType;
-    private final String mTableName;
+    private final Contracts.Table mTable;
 
-    public GroupProviderDelegate(String type, String tableName) {
+    public GroupProviderDelegate(String type, Contracts.Table table) {
         mType = type;
-        mTableName = tableName;
+        mTable = table;
     }
 
     @Override
@@ -46,7 +46,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public Cursor query(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Cursor cursor = new QueryBuilder(mTableName).where(selection, selectionArgs)
+        Cursor cursor = new QueryBuilder(mTable).where(selection, selectionArgs)
                 .orderBy(sortOrder)
                 .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
@@ -57,7 +57,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public Uri insert(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values) {
-        long id = dbHelper.getWritableDatabase().replaceOrThrow(mTableName, null, values);
+        long id = dbHelper.getWritableDatabase().replaceOrThrow(mTable.name, null, values);
         contentResolver.notifyChange(uri, null, false);
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
@@ -75,7 +75,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
 
         ContentValues first = allValues[0];
         String[] columns = first.keySet().toArray(new String[first.size()]);
-        SQLiteStatement statement = makeInsertStatement(db, mTableName, columns);
+        SQLiteStatement statement = makeInsertStatement(db, mTable.name, columns);
         dbTransactionHelper.startNamedTransaction(BULK_INSERT_SAVEPOINT);
         try {
             Object[] bindings = new Object[first.size()];
@@ -114,7 +114,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public int delete(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(mTableName)
+        int count = new QueryBuilder(mTable)
                 .where(selection, selectionArgs)
                 .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
@@ -125,7 +125,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
     public int update(
             Database dbHelper, ContentResolver contentResolver, Uri uri,
             ContentValues values, String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(mTableName)
+        int count = new QueryBuilder(mTable)
                 .where(selection, selectionArgs)
                 .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);
@@ -134,8 +134,8 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
 
     private SQLiteStatement makeInsertStatement(
             SQLiteDatabase db, String table, String [] columns) {
-        // I kind of hoped this would be provided by SQLiteDatase or DatabaseHelper,
-        // But it doesn't seem to be. Innards copied from SQLiteDabase.insertWithOnConflict
+        // I kind of hoped this would be provided by SQLiteDatabase or DatabaseHelper,
+        // But it doesn't seem to be. Innards copied from SQLiteDatabase.insertWithOnConflict
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT OR REPLACE ");
         sql.append(" INTO ");

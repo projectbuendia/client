@@ -35,22 +35,21 @@ public class Contracts {
         return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
     }
 
-    public interface Tables {
-        String PATIENTS = "patients";
-        String CONCEPTS = "concepts";
-        String CONCEPT_NAMES = "concept_names";
-        String LOCATIONS = "locations";
-        String LOCATION_NAMES = "location_names";
-        String OBSERVATIONS = "observations";
-        String ORDERS = "orders";
-        String CHARTS = "charts";
-        String USERS = "users";
-        String MISC = "misc";
+    public enum Table {
+        PATIENTS("patients"),
+        CONCEPTS("concepts"),
+        CONCEPT_NAMES("concept_names"),
+        LOCATIONS("locations"),
+        LOCATION_NAMES("location_names"),
+        OBSERVATIONS("observations"),
+        ORDERS("orders"),
+        CHARTS("charts"),
+        USERS("users"),
+        MISC("misc");
 
-        String[] ALL = {
-                PATIENTS, CONCEPTS, CONCEPT_NAMES, LOCATIONS,
-                LOCATION_NAMES, OBSERVATIONS, ORDERS, CHARTS, USERS, MISC
-        };
+        public String name;
+        Table(String name) { this.name = name; }
+        public String toString() { return name; }
     }
 
     /** Columns for localized content. */

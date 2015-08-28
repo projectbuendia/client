@@ -27,8 +27,8 @@ import java.util.List;
  */
 public class InsertableItemProviderDelegate extends ItemProviderDelegate {
 
-    public InsertableItemProviderDelegate(String name, String tableName, String idColumn) {
-        super(name, tableName, idColumn);
+    public InsertableItemProviderDelegate(String name, Contracts.Table table, String idColumn) {
+        super(name, table, idColumn);
     }
 
     @Override
@@ -39,14 +39,14 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
         // Perform an upsert operation, not replacing any values of fields not being explicitly
         // updated.
         dbHelper.getWritableDatabase().updateWithOnConflict(
-                mTableName,
+                mTable.name,
                 values,
                 mIdColumn + "=?",
                 new String[] {uri.getLastPathSegment()},
                 SQLiteDatabase.CONFLICT_IGNORE
         );
         dbHelper.getWritableDatabase().insertWithOnConflict(
-                mTableName,
+                mTable.name,
                 null,
                 values,
                 SQLiteDatabase.CONFLICT_IGNORE
