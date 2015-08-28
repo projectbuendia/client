@@ -129,11 +129,14 @@ def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/open
 def openmrsRootUrlEdison = 'http://server:9000/openmrs'
 
 // OpenMRS root URL for host machine when client runs in an emulator (AVD).
-def openmrsRootUrlLocalhost = 'http://10.0.2.2:9000/openmrs'
+def openmrsRootUrlEmulatorHost = 'http://10.0.2.2:9000/openmrs'
+
+// OpenMRS root URL for the server on the Fantastica wifi network.
+def openmrsRootUrlFantastica = 'http://192.168.1.161:9000/openmrs'
 
 // Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlDev;
+def openmrsRootUrlDefault = openmrsRootUrlFantastica;
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
@@ -144,6 +147,7 @@ def openmrsRootUrl = project.openmrsRootUrl ?: openmrsRootUrlDefault
 def openmrsUser = project.openmrsUser ?: openmrsUserDefault
 def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
 def packageServerRootUrl = project.packageServerRootUrl ?: packageServerRootUrlDefault
+def requireWifi = "true"
 
 logger.info('Default preference values:')
 logger.info("OpenMRS root URL: ${openmrsRootUrl}")
@@ -182,6 +186,7 @@ android {
         resValue 'string', 'openmrs_user_default', openmrsUser
         resValue 'string', 'openmrs_password_default', openmrsPassword
         resValue 'string', 'package_server_root_url_default', packageServerRootUrl
+        resValue 'bool', 'require_wifi_default', requireWifi
 
         // Allow different sync adapters to be defined for debug and release builds.
         resValue 'string', 'content_authority', contentAuthority

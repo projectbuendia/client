@@ -77,7 +77,7 @@
     <CheckBoxPreference
         android:key="incremental_observation_update"
         android:title="@string/pref_title_incremental_observation_update"
-        android:summary="@string/pref_desc_xform_update_client_cache"
+        android:summary="@string/pref_desc_incremental_observation_update"
         android:defaultValue="@bool/incremental_observation_update_default" />
 
     <!-- The delay interval in seconds between looking for APK updates -->
@@ -85,5 +85,12 @@
         android:key="apk_update_interval_secs"
         android:title="@string/pref_title_apk_update_interval_secs"
         android:defaultValue="90" /> <!-- default to 1.5 minutes -->
+
+    <!-- Whether to assume that no wifi means no network at all -->
+    <CheckBoxPreference
+        android:key="require_wifi"
+        android:title="@string/pref_title_require_wifi"
+        android:summary="@string/pref_desc_require_wifi"
+        android:defaultValue="@bool/require_wifi_default" />
 
 </PreferenceScreen>

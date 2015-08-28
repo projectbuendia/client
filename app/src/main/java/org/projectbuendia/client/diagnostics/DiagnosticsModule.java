@@ -43,7 +43,7 @@ public class DiagnosticsModule {
             OpenMrsConnectionDetails connectionDetails,
             AppSettings settings) {
         return ImmutableSet.of(
-                new WifiHealthCheck(application),
+                new WifiHealthCheck(application, settings),
                 new BuendiaApiHealthCheck(application, connectionDetails),
                 new UpdateServerHealthCheck(application, settings));
     }

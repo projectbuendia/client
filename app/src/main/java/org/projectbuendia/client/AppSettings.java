@@ -102,4 +102,11 @@ public class AppSettings {
     public void setSyncAccountInitialized(boolean value) {
         mSharedPreferences.edit().putBoolean("sync_account_initialized", value).commit();
     }
+
+    /** Gets the flag controlling whether to assume no wifi means no network. */
+    public boolean getRequireWifi() {
+        return mSharedPreferences.getBoolean("require_wifi",
+                mResources.getBoolean(R.bool.require_wifi_default));
+    }
+
 }

@@ -20,29 +20,31 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 
+import org.projectbuendia.client.AppSettings;
+
 /** A {@link HealthCheck} that checks whether the current device is connected to a wifi network. */
 public class WifiHealthCheck extends HealthCheck {
 
-    private static final IntentFilter sWifiStateChangedIntentFilter =
-            getIntentFilter();
+    private static final IntentFilter sWifiStateChangedIntentFilter = getIntentFilter();
 
     private final WifiManager mWifiManager;
     private final ConnectivityManager mConnectivityManager;
     private final WifiChangeBroadcastReceiver mWifiStateChangedReceiver;
+    private final AppSettings mSettings;
 
-    protected WifiHealthCheck(Application application) {
+    protected WifiHealthCheck(Application application, AppSettings settings) {
         super(application);
 
         mWifiManager = (WifiManager) application.getSystemService(Context.WIFI_SERVICE);
         mConnectivityManager =
                 (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
         mWifiStateChangedReceiver = new WifiChangeBroadcastReceiver();
+        mSettings = settings;
     }
 
     @Override
     protected void startImpl() {
         mApplication.registerReceiver(mWifiStateChangedReceiver, sWifiStateChangedIntentFilter);
-
         checkWifiState();
     }
 
@@ -86,7 +88,8 @@ public class WifiHealthCheck extends HealthCheck {
         // We will get an event that lets us update the set of active issues whenever
         // the wifi state changes, so we can be confident that the API is definitely
         // unavailable whenever either of the wifi-related issues is active.
-        return mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED)
-                || mActiveIssues.contains(HealthIssue.WIFI_DISABLED);
+        return mSettings.getRequireWifi() && (
+                mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
+                mActiveIssues.contains(HealthIssue.WIFI_DISABLED));
     }
 }
