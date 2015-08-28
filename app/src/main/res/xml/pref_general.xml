@@ -93,4 +93,9 @@
         android:summary="@string/pref_desc_require_wifi"
         android:defaultValue="@bool/require_wifi_default" />
 
+    <org.projectbuendia.client.widget.ClearDatabasePreference
+        android:key="clear_database"
+        android:title="@string/pref_title_clear_database"
+        android:summary="@string/pref_desc_clear_database" />
+
 </PreferenceScreen>
