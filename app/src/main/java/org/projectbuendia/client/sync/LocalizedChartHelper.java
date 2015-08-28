@@ -100,7 +100,8 @@ public class LocalizedChartHelper {
             // Also get observations representing executed orders.
             cursor = mContentResolver.query(
                     Contracts.Observations.CONTENT_URI, null,
-                    "concept_uuid = ?", new String[] {AppModel.ORDER_EXECUTED_CONCEPT_UUID}, null);
+                    "concept_uuid = ? and patient_uuid = ?",
+                    new String[] {AppModel.ORDER_EXECUTED_CONCEPT_UUID, patientUuid}, null);
             while (cursor.moveToNext()) {
                 results.add(new LocalizedObs(
                         cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
