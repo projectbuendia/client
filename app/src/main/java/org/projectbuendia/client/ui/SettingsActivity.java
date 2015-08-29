@@ -23,13 +23,16 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.ui.login.LoginActivity;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -48,6 +51,7 @@ public class SettingsActivity extends PreferenceActivity {
      * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    @Inject AppModel mAppModel;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, SettingsActivity.class));
@@ -56,6 +60,7 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
         setupActionBar();
     }
 
@@ -99,6 +104,15 @@ public class SettingsActivity extends PreferenceActivity {
         setupSimplePreferencesScreen();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!mAppModel.isFullModelAvailable()) {
+            // The database was cleared; go back to the login activity.
+            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        }
+    }
+
     /**
      * Shows the simplified settings UI if the device configuration dictates
      * that a simplified, single-pane UI should be shown.
@@ -111,6 +125,7 @@ public class SettingsActivity extends PreferenceActivity {
         // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
         // Load the preference definitions.
         addPreferencesFromResource(R.xml.pref_general);
+        addPreferencesFromResource(R.xml.pref_developer);
 
         // Show the values of preferences in their summary lines, per the Android Design guidelines.
         showValueAsSummary(findPreference("openmrs_root_url"));
@@ -194,6 +209,21 @@ public class SettingsActivity extends PreferenceActivity {
             showValueAsSummary(findPreference("openmrs_user"));
             showValueAsSummary(findPreference("package_server_root_url"));
             showValueAsSummary(findPreference("apk_update_interval_secs"));
+        }
+    }
+
+    /**
+     * This fragment shows developer preferences only. It is used when the
+     * activity is showing a two-pane settings UI.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class DeveloperPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            // Load the preference definitions.
+            addPreferencesFromResource(R.xml.pref_developer);
         }
     }
 }

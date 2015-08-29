@@ -23,6 +23,7 @@ import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseActivity;
+import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
@@ -72,7 +73,8 @@ import dagger.Provides;
                 SingleLocationFragment.class,
                 UpdateNotificationController.class,
                 LoginActivity.class,
-                LoginFragment.class
+                LoginFragment.class,
+                SettingsActivity.class
         },
         staticInjections = {
                 SyncAccountService.class

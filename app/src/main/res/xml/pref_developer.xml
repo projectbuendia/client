@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Whether to save filled in forms locally. Normally we won't want to (the file system will fill up
+     but it is useful when developing or debugging -->
+    <CheckBoxPreference
+        android:key="keep_form_instances_locally"
+        android:title="@string/pref_title_store_form_instances"
+        android:summary="@string/pref_desc_store_form_instances"
+        android:defaultValue="@bool/keep_form_instances_locally_default" />
+
+    <!-- Whether to instantly update the local cache when an xform is submitted locally -->
+    <CheckBoxPreference
+        android:key="xform_update_client_cache"
+        android:title="@string/pref_title_xform_update_client_cache"
+        android:summary="@string/pref_desc_xform_update_client_cache"
+        android:defaultValue="@bool/xform_update_client_cache_default" />
+
+    <!-- Whether to instantly update the observations cache incrementally -->
+    <CheckBoxPreference
+        android:key="incremental_observation_update"
+        android:title="@string/pref_title_incremental_observation_update"
+        android:summary="@string/pref_desc_incremental_observation_update"
+        android:defaultValue="@bool/incremental_observation_update_default" />
+
+    <!-- Whether to assume that no wifi means no network at all -->
+    <CheckBoxPreference
+        android:key="require_wifi"
+        android:title="@string/pref_title_require_wifi"
+        android:summary="@string/pref_desc_require_wifi"
+        android:defaultValue="@bool/require_wifi_default" />
+
+</PreferenceScreen>
