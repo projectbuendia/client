@@ -167,7 +167,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /** A listener that updates a preference's summary to match its value. */
-    private static final Preference.OnPreferenceChangeListener sListener =
+    private static final Preference.OnPreferenceChangeListener sSummaryListener =
             new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference pref, Object value) {
@@ -178,52 +178,44 @@ public class SettingsActivity extends PreferenceActivity {
 
     /**
      * Shows a preference's string value on its summary line (below the title
-     * of the preference), and keep the summary updated when the value changes.
-     *
-     * @see #sListener
+     * of the preference), and keeps the summary updated when the value changes.
      */
     private static void showValueAsSummary(Preference pref) {
         // Set the listener to watch for value changes.
-        pref.setOnPreferenceChangeListener(sListener);
+        pref.setOnPreferenceChangeListener(sSummaryListener);
 
         // Trigger the listener immediately with the preference's current value.
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-        sListener.onPreferenceChange(pref, prefs.getAll().get(pref.getKey()));
+        sSummaryListener.onPreferenceChange(pref, prefs.getAll().get(pref.getKey()));
     }
 
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
+    /** When the UI has two panes, this fragment shows just the general settings. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            // Load the preference definitions.
             addPreferencesFromResource(R.xml.pref_general);
 
             // Show the values of preferences in their summary lines.
             showValueAsSummary(findPreference("openmrs_root_url"));
             showValueAsSummary(findPreference("openmrs_user"));
             showValueAsSummary(findPreference("package_server_root_url"));
-            showValueAsSummary(findPreference("apk_update_interval_secs"));
         }
     }
 
-    /**
-     * This fragment shows developer preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
+    /** When the UI has two panes, this fragment shows just the developer settings. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class DeveloperPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            // Load the preference definitions.
             addPreferencesFromResource(R.xml.pref_developer);
+
+            // Show the values of preferences in their summary lines.
+            showValueAsSummary(findPreference("apk_update_interval_secs"));
         }
     }
 }

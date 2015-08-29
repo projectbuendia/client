@@ -34,5 +34,5 @@
     <!-- The title for the preference for choosing the URL for the package server -->
     <string name="pref_title_package_server_url">Package server URL</string>
     <!-- The title for the preference for choosing how often to check for updates -->
-    <string name="pref_title_apk_update_interval_secs">APK update interval (s)</string>
+    <string name="pref_title_apk_update_interval_secs">Interval between checks for an APK update (seconds)</string>
 </resources>
