@@ -27,6 +27,20 @@
     overflow-y: auto;
   }
 
+  #new-column {
+    position: absolute;
+    top: 0;
+    background: white;
+    z-index: 50;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  #new-column th {
+    padding: 8px 16px;
+    border-right: 0.667px solid #999;
+  }
+
   #new-header th {
     display: table-cell;
     padding: 8px 0 8px 16px;
