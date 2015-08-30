@@ -6,6 +6,12 @@
 
 <style>
   body { margin: 0; }
+  #container {
+    height: 600px;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: relative;
+  }
   table { border-collapse: collapse; border-right: 0.667px solid #999; }
   tr:nth-child(even) { background: #f8f8f8; }
   th, td {
@@ -55,6 +61,7 @@
       <th>
         {{row.heading}}
       </th>
+<div id="container">
       {% for column in columns %}
         <td class="{{column.start == nowColumnStart ? "now" : ""}}">
           {% set values = get_values(row=row, column=column) %}
@@ -122,4 +129,5 @@
       <button onclick="controller.onNewOrderPressed()">+ New Order</button>
     </th>
   </tr>
-</table>
+</table>        <th colspan="{{columns.size + 1}}">
+</div>
