@@ -135,3 +135,31 @@
     </tfoot>
   </table>
 </div>
+
+<script>
+  function load() {
+    var container = document.getElementById('container');
+    var table = document.getElementById('table');
+
+    var headItens = document.querySelectorAll('#table thead th');
+    var headClone = document.createElement('table');
+    headClone.id = "new-header";
+    var headRow = document.createElement('thead');
+
+    for (i = 0; i< headItens.length; i++) {
+      var offsetWidth = headItens[i].offsetWidth;
+      var offsetHeight = headItens[i].offsetHeight;
+      var newNode = headItens[i].cloneNode(true);
+      newNode.style.width = offsetWidth + "px";
+      newNode.style.height = offsetHeight + "px";
+
+
+      headRow.appendChild(newNode);
+    }
+    headClone.appendChild(headRow);
+    container.appendChild(headClone);
+
+  }
+
+  window.onload = load;
+</script>
