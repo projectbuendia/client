@@ -136,29 +136,25 @@ public class BuendiaApiHealthCheck extends HealthCheck {
             }
 
             try {
-                String uriString = mConnectionDetails.getBuendiaApiUrl() + HEALTH_CHECK_ENDPOINT;
-                Uri uri = Uri.parse(uriString);
-                if (uri.getHost() == null) {
-                    LOG.w("The configured OpenMRS API URL '%1$s' is invalid.", uriString);
+                Uri uri = Uri.parse(mConnectionDetails.getBuendiaApiUrl() + HEALTH_CHECK_ENDPOINT);
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpGet httpGet = new HttpGet(uri.toString());
+                if (httpGet.getURI().getHost() == null) {
+                    LOG.w("Configured OpenMRS server URL is invalid: %s", uri);
                     reportIssue(HealthIssue.SERVER_CONFIGURATION_INVALID);
                     return;
                 }
 
                 try {
-                    HttpClient httpClient = new DefaultHttpClient();
-                    HttpGet httpGet = new HttpGet(uri.toString());
                     httpGet.addHeader(BasicScheme.authenticate(
                             new UsernamePasswordCredentials(
                                     mConnectionDetails.getUser(),
                                     mConnectionDetails.getPassword()),
                             "UTF-8", false));
-
                     HttpResponse httpResponse = httpClient.execute(httpGet);
                     if (httpResponse.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-                        LOG.w(
-                                "The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
-                                uriString,
-                                httpResponse.getStatusLine().getStatusCode());
+                        LOG.w("The OpenMRS URL '%1$s' returned unexpected error code: %2$s",
+                              uri, httpResponse.getStatusLine().getStatusCode());
                         switch (httpResponse.getStatusLine().getStatusCode()) {
                             case HttpURLConnection.HTTP_INTERNAL_ERROR:
                                 reportIssue(HealthIssue.SERVER_INTERNAL_ISSUE);
@@ -174,13 +170,12 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                         }
                         return;
                     }
-                } catch (UnknownHostException e) {
+                } catch (UnknownHostException | IllegalArgumentException e) {
+                    LOG.w("OpenMRS server unreachable: %s", uri);
                     reportIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
                     return;
                 } catch (IOException e) {
-                    LOG.w(
-                            "Could not perform OpenMRS health check using URL '%1$s'.",
-                            uriString);
+                    LOG.w("Could not perform OpenMRS health check using URL: %s", uri);
                     return;
                 }
 

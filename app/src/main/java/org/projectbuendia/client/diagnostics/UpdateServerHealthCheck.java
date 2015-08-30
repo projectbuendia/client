@@ -75,9 +75,14 @@ public class UpdateServerHealthCheck extends HealthCheck {
 
         private void performCheck() {
             Uri uri = Uri.parse(mSettings.getPackageServerUrl(HEALTH_CHECK_ENDPOINT));
-
             HttpClient httpClient = new DefaultHttpClient();
             HttpGet getRequest = new HttpGet(uri.toString());
+            if (getRequest.getURI().getHost() == null) {
+                LOG.w("Configured package server URL is invalid: %s", uri);
+                reportIssue(HealthIssue.SERVER_CONFIGURATION_INVALID);
+                return;
+            }
+
             try {
                 HttpResponse response = httpClient.execute(getRequest);
                 switch (response.getStatusLine().getStatusCode()) {
@@ -94,8 +99,8 @@ public class UpdateServerHealthCheck extends HealthCheck {
                     default:
                         LOG.w("Update server check failed for URI %1$s.", uri);
                 }
-            } catch (UnknownHostException e) {
-                LOG.d("Update server unreachable");
+            } catch (UnknownHostException | IllegalArgumentException e) {
+                LOG.w("Update server unreachable: %s", uri);
                 reportIssue(HealthIssue.UPDATE_SERVER_HOST_UNREACHABLE);
             } catch (IOException e) {
                 LOG.w(e, "Update server check failed for URI %1$s.", uri);

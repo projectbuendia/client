@@ -32,6 +32,7 @@ import org.projectbuendia.client.ui.login.LoginActivity;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 /**
@@ -123,15 +124,10 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
-        // Load the preference definitions.
         addPreferencesFromResource(R.xml.pref_general);
+        addPreferencesFromResource(R.xml.pref_advanced);
         addPreferencesFromResource(R.xml.pref_developer);
-
-        // Show the values of preferences in their summary lines, per the Android Design guidelines.
-        showValueAsSummary(findPreference("openmrs_root_url"));
-        showValueAsSummary(findPreference("openmrs_user"));
-        showValueAsSummary(findPreference("package_server_root_url"));
-        showValueAsSummary(findPreference("apk_update_interval_secs"));
+        initPrefs(this);
     }
 
     @Override
@@ -166,27 +162,96 @@ public class SettingsActivity extends PreferenceActivity {
         }
     }
 
-    /** A listener that updates a preference's summary to match its value. */
-    private static final Preference.OnPreferenceChangeListener sSummaryListener =
+    static final String[] prefKeys = {
+            "server",
+            "openmrs_user",
+            "openmrs_password",
+            "openmrs_root_url",
+            "package_server_root_url",
+            "apk_update_interval_secs",
+            "keep_form_instances_locally",
+            "xform_update_client_cache",
+            "incremental_observation_update",
+            "require_wifi"
+    };
+
+    static boolean updatingPrefValues = false;
+
+    static void updatePrefSummary(Preference pref, Object value) {
+        String str = value.toString();
+        switch (pref.getKey()) {
+            case "server":
+            case "openmrs_user":
+            case "openmrs_root_url":
+            case "package_server_root_url":
+            case "apk_update_interval_secs":
+                pref.setSummary(str);
+        }
+    }
+
+    /** A listener that performs updates when any preference's value changes. */
+    static final Preference.OnPreferenceChangeListener sPrefListener =
             new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference pref, Object value) {
-                    pref.setSummary("" + value);
+                    updatePrefSummary(pref, value);
+                    if (updatingPrefValues) return true; // prevent endless recursion
+
+                    SharedPreferences prefs =
+                            PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+                    String server = prefs.getString("server", "");
+                    String str = "" + value;
+                    try {
+                        updatingPrefValues = true;
+                        switch (pref.getKey()) {
+                            case "server":
+                                if (!str.equals("")) {
+                                    prefs.edit().putString("openmrs_root_url",
+                                            "http://" + value + ":9000/openmrs")
+                                            .putString("package_server_root_url",
+                                                    "http://" + value + ":9001/")
+                                            .apply();
+                                }
+                                break;
+                            case "openmrs_root_url":
+                                if (!str.equals("http://" + server + ":9000/openmrs")) {
+                                    prefs.edit().putString("server", "").apply();
+                                }
+                                break;
+                            case "package_server_root_url":
+                                if (!str.equals("http://" + server + ":9001/")) {
+                                    prefs.edit().putString("server", "").apply();
+                                }
+                                break;
+                        }
+                    } finally {
+                        updatingPrefValues = false;
+                    }
                     return true;
                 }
             };
 
-    /**
-     * Shows a preference's string value on its summary line (below the title
-     * of the preference), and keeps the summary updated when the value changes.
-     */
-    private static void showValueAsSummary(Preference pref) {
-        // Set the listener to watch for value changes.
-        pref.setOnPreferenceChangeListener(sSummaryListener);
+    /** Sets up all the preferences in an activity. */
+    private static void initPrefs(PreferenceActivity activity) {
+        for (String key : prefKeys) {
+            initPref(activity.findPreference(key));
+        }
+    }
 
-        // Trigger the listener immediately with the preference's current value.
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-        sSummaryListener.onPreferenceChange(pref, prefs.getAll().get(pref.getKey()));
+    /** Sets up all the preferences in a fragment. */
+    private static void initPrefs(PreferenceFragment fragment) {
+        for (String key : prefKeys) {
+            initPref(fragment.findPreference(key));
+        }
+    }
+
+    /** Sets up the listener and summary for a preference. */
+    private static void initPref(@Nullable Preference pref) {
+        if (pref != null) {
+            pref.setOnPreferenceChangeListener(sPrefListener);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+            updatePrefSummary(pref, prefs.getAll().get(pref.getKey()));
+        }
     }
 
     /** When the UI has two panes, this fragment shows just the general settings. */
@@ -195,27 +260,29 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
             addPreferencesFromResource(R.xml.pref_general);
-
-            // Show the values of preferences in their summary lines.
-            showValueAsSummary(findPreference("openmrs_root_url"));
-            showValueAsSummary(findPreference("openmrs_user"));
-            showValueAsSummary(findPreference("package_server_root_url"));
+            initPrefs(this);
         }
     }
 
+    /** When the UI has two panes, this fragment shows just the advanced settings. */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class AdvancedPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_advanced);
+            initPrefs(this);
+        }
+    }
     /** When the UI has two panes, this fragment shows just the developer settings. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class DeveloperPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
             addPreferencesFromResource(R.xml.pref_developer);
-
-            // Show the values of preferences in their summary lines.
-            showValueAsSummary(findPreference("apk_update_interval_secs"));
+            initPrefs(this);
         }
     }
 }

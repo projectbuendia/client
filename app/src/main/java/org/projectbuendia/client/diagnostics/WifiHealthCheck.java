@@ -61,6 +61,11 @@ public class WifiHealthCheck extends HealthCheck {
     }
 
     private void checkWifiState() {
+        if (!mSettings.getRequireWifi()) {
+            resolveIssue(HealthIssue.WIFI_DISABLED);
+            resolveIssue(HealthIssue.WIFI_NOT_CONNECTED);
+            return;
+        }
         int wifiState = mWifiManager.getWifiState();
         if (wifiState != WifiManager.WIFI_STATE_ENABLING
                 && wifiState != WifiManager.WIFI_STATE_ENABLED) {
