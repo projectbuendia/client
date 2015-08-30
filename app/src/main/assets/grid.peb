@@ -184,6 +184,24 @@
     headClone.appendChild(headRow);
     container.appendChild(headClone);
 
+
+    var columnItens = document.querySelectorAll('#table tbody tr th');
+    var columnClone = document.createElement('table');
+    columnClone.style.top = headItens[0].offsetHeight + "px";
+
+    for (i = 0; i< columnItens.length - 1; i++) {
+      var offsetWidth = columnItens[i].offsetWidth;
+      var offsetHeight = columnItens[i].offsetHeight;
+      var newNode = columnItens[i].cloneNode(true);
+      newNode.style.width = offsetWidth + "px";
+      newNode.style.height = offsetHeight + "px";
+
+      var columnRow = document.createElement('tr');
+      columnRow.appendChild(newNode);
+      columnClone.appendChild(columnRow);
+    }
+    columnClone.id = "new-column";
+    container.appendChild(columnClone);
   }
 
   window.onload = load;
