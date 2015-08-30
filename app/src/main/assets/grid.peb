@@ -46,88 +46,92 @@
   .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
 </style>
 
-<table>
-  <tr class="heading">
-    <th></th>
-    {% for column in columns %}
-      <th class="{{column.start == nowColumnStart ? "now" : ""}}">
-        {{column.headingHtml | raw}}
-      </th>
-    {% endfor %}
-  </tr>
-
-  {% for row in rows %}
-    <tr class="obs">
-      <th>
-        {{row.heading}}
-      </th>
 <div id="container">
+  <table id="table">
+    <thead class="heading">
+      <th></th>
       {% for column in columns %}
-        <td class="{{column.start == nowColumnStart ? "now" : ""}}">
-          {% set values = get_values(row=row, column=column) %}
-          {% if values is not empty %}
-            {% set last = values | last %}
-            {% if last.number != null %}
-              {{values | avg | numberformat("#.#")}}
-            {% elseif last.abbrev != null %}
-              {{last.abbrev}}
-            {% elseif last.text != null %}
-              <div onclick="alert(''
-                {%- for value in values -%}
-                  + '---- '
-                  + {{value.observed | dateformat("dd MMM 'at' HH:mm") | js}}
-                  + ' ----\n'
-                  + {{value.text | js}}
-                  + '\n\n'
-                {%- endfor -%})">&#x1f4dd;</div>
-            {% elseif last.bool != null %}
-              {{(values | max).bool ? "&#x25cf;" : "" | raw}}
-            {% endif %}
-          {% endif %}
-        </td>
+        <th class="{{column.start == nowColumnStart ? "now" : ""}}">
+          {{column.headingHtml | raw}}
+        </th>
       {% endfor %}
-    </tr>
-  {% endfor %}
+    </thead>
 
-  <tr>
-    <th class="gutter" colspan="{{columns.size + 1}}">
-      Orders
-    </th>
-  </tr>
-
-  {% for order in orders %}
-    <tr class="order">
-      <th>
-        {{order.instructions}}
-      </th>
-      {% set previousActive = false %}
-      {% set future = false %}
-      {% for column in columns %}
-        <td class="{{column.start == nowColumnStart ? "now" : ""}}">
-          {% set active = intervals_overlap(order.interval, column.interval) %}
-          {% if previousActive and not active %}
-            <div class="stop">Stop</div>
-          {% elseif active %}
-            {% if future %}
-              <div class="future active">&#x25cf;</div>
-            {% else %}
-              {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
-              <div class="past active"
-                  onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
-                  >{{count}}</div>
-            {% endif %}
-          {% endif %}
-          {% set previousActive = active %}
-          {% set future = future or column.start == nowColumnStart %}
-        </td>
+    <tbody>
+      {% for row in rows %}
+        <tr class="obs">
+          <th>
+            {{row.heading}}
+          </th>
+          {% for column in columns %}
+            <td class="{{column.start == nowColumnStart ? "now" : ""}}">
+              {% set values = get_values(row=row, column=column) %}
+              {% if values is not empty %}
+                {% set last = values | last %}
+                {% if last.number != null %}
+                  {{values | avg | numberformat("#.#")}}
+                {% elseif last.abbrev != null %}
+                  {{last.abbrev}}
+                {% elseif last.text != null %}
+                  <div onclick="alert(''
+                    {%- for value in values -%}
+                      + '---- '
+                      + {{value.observed | dateformat("dd MMM 'at' HH:mm") | js}}
+                      + ' ----\n'
+                      + {{value.text | js}}
+                      + '\n\n'
+                    {%- endfor -%})">&#x1f4dd;</div>
+                {% elseif last.bool != null %}
+                  {{(values | max).bool ? "&#x25cf;" : "" | raw}}
+                {% endif %}
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
       {% endfor %}
-    </tr>
-  {% endfor %}
 
-  <tr>
-    <th colspan="{{columns.size + 1}}">
-      <button onclick="controller.onNewOrderPressed()">+ New Order</button>
-    </th>
-  </tr>
-</table>        <th colspan="{{columns.size + 1}}">
+      <tr>
+        <th class="gutter" colspan="{{columns.size + 1}}">
+          Orders
+        </th>
+      </tr>
+
+      {% for order in orders %}
+        <tr class="order">
+          <th>
+            {{order.instructions}}
+          </th>
+          {% set previousActive = false %}
+          {% set future = false %}
+          {% for column in columns %}
+            <td class="{{column.start == nowColumnStart ? "now" : ""}}">
+              {% set active = intervals_overlap(order.interval, column.interval) %}
+              {% if previousActive and not active %}
+                <div class="stop">Stop</div>
+              {% elseif active %}
+                {% if future %}
+                  <div class="future active">&#x25cf;</div>
+                {% else %}
+                  {% set count = get_order_execution_count(order_uuid=order.uuid, column=column) %}
+                  <div class="past active"
+                      onclick="controller.onOrderCellPressed('{{order.uuid}}', {{column.start.getMillis}})"
+                      >{{count}}</div>
+                {% endif %}
+              {% endif %}
+              {% set previousActive = active %}
+              {% set future = future or column.start == nowColumnStart %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <th colspan="{{columns.size + 1}}">
+          <button onclick="controller.onNewOrderPressed()">+ New Order</button>
+        </th>
+      </tr>
+    </tfoot>
+  </table>
 </div>
