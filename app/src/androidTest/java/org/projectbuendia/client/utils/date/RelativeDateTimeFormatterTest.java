@@ -22,15 +22,15 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
 
     private RelativeDateTimeFormatter mFormatter;
     private DateTime mNow;
+    private LocalDate mToday;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mFormatter = RelativeDateTimeFormatter.builder()
-                .withCasing(RelativeDateTimeFormatter.Casing.LOWER_CASE)
-                .build();
+        mFormatter = new RelativeDateTimeFormatter();
         mNow = DateTime.parse("2000-01-01T12:00Z");
+        mToday = LocalDate.parse("2000-01-01");
     }
 
     public void testFormat_rightNow() throws Exception {
@@ -41,20 +41,19 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
         assertEquals("in the future", mFormatter.format(mNow, mNow.plusDays(1)));
     }
 
-    public void testFormat_today() throws Exception {
-        assertEquals("today", mFormatter.format(mNow, mNow.minusHours(1)));
+    public void testFormat_60minutesAgo() throws Exception {
+        assertEquals("60 minutes ago", mFormatter.format(mNow, mNow.minusHours(1)));
     }
 
     public void testFormat_yesterday() throws Exception {
-        assertEquals("yesterday", mFormatter.format(mNow, mNow.minusDays(1)));
+        assertEquals("yesterday", mFormatter.format(mToday, mToday.minusDays(1)));
     }
 
     public void testFormat_daysAgo() throws Exception {
         assertEquals("2 days ago", mFormatter.format(mNow, mNow.minusDays(2)));
     }
 
-    /** Tests that format produces 'today' for identical {@link LocalDate} objects. */
     public void testFormatLocalDate_today() {
-        assertEquals("today", mFormatter.format(mNow.toLocalDate(), mNow.toLocalDate()));
+        assertEquals("today", mFormatter.format(mToday, mToday));
     }
 }

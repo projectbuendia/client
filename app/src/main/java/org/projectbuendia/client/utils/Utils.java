@@ -288,6 +288,12 @@ public class Utils {
         return getLong(c, columnName, null);
     }
 
+    /** Gets a nullable long value (in millis) from a cursor as a DateTime. */
+    public static DateTime getDateTime(Cursor c, String columnName) {
+        Long millis = getLong(c, columnName);
+        return millis == null ? null : new DateTime(millis);
+    }
+
     /** Converts a nullable LocalDate to a yyyy-mm-dd String. */
     public static @Nullable String toString(@Nullable LocalDate date) {
         return date == null ? null : date.toString();

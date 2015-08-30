@@ -25,11 +25,17 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.sync.providers.Contracts.Patients;
+import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -41,6 +47,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         return new GoToPatientDialogFragment();
     }
 
+    @Inject AppModel mAppModel;
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
 
@@ -50,6 +57,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
         mInflater = LayoutInflater.from(getActivity());
     }
 
@@ -98,9 +106,8 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 mPatientUuid = null;
                 mPatientSearchResult.setText("");
             } else {
-                Cursor cursor = getActivity().getContentResolver().query(
-                        Patients.CONTENT_URI, null, "_id = ?", new String[]{id}, null);
-                try {
+                try (Cursor cursor = getActivity().getContentResolver().query(
+                        Patients.CONTENT_URI, null, "_id = ?", new String[]{id}, null)) {
                     if (cursor.moveToNext()) {
                         String uuid = Utils.getString(cursor, Patients.UUID, null);
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
@@ -111,11 +118,17 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         mPatientSearchResult.setText(givenName + " " + familyName +
                                 " (" + gender + ", " + Utils.birthdateToAge(birthdate) + ")");
                     } else {
+                        String message = getResources().getString(R.string.go_to_patient_no_data);
+                        DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
+                        if (lastSyncTime != null) {
+                            message = getResources().getString(
+                                    R.string.go_to_patient_not_found_as_of_time,
+                                    new RelativeDateTimeFormatter().format(lastSyncTime));
+                        }
                         mPatientUuid = null;
-                        mPatientSearchResult.setText(getResources().getString(R.string.go_to_patient_not_found));
+                        mPatientSearchResult.setText(message);
+                        // TODO: Immediately check for this patient on the server.
                     }
-                } finally {
-                    cursor.close();
                 }
             }
             ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)

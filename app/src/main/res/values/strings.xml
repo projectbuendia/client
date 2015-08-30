@@ -111,7 +111,9 @@
 
     <string name="go_to_patient_title">Go to patient chart</string>
     <string name="go_to_patient_id_label">Patient ID</string>
-    <string name="go_to_patient_not_found">No such patient</string>
+    <string name="go_to_patient_no_data">No data loaded from server yet</string>
+    <string name="go_to_patient_not_found_as_of_time">No such patient as of %s</string>
+    <string name="go_to_patient_not_found">No such patient on server</string>
     <string name="go_to_patient_go">Go to chart</string>
 
     <string name="patient_creation_id_label">ID</string>
