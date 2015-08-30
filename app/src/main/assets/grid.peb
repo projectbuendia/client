@@ -216,6 +216,16 @@
     }
     columnClone.id = "new-column";
     container.appendChild(columnClone);
+
+    var tableHeader = document.getElementById('new-header');
+    var tableColumn = document.getElementById('new-column');
+
+    function adjustPositions() {
+      tableHeader.style.top = this.scrollTop + "px";
+      tableColumn.style.left = this.scrollLeft + "px";
+    }
+
+    container.onscroll = adjustPositions;
   }
 
   window.onload = load;
