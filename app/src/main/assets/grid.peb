@@ -12,6 +12,28 @@
     overflow-y: auto;
     position: relative;
   }
+
+  #new-header {
+    position: absolute;
+    top: 0;
+    background: white;
+    z-index: 100;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  #new-header thead {
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  #new-header th {
+    display: table-cell;
+    padding: 8px 0 8px 16px;
+    border-bottom: 0.667px solid #999;
+    box-sizing: border-box;
+  }
+
   table { border-collapse: collapse; border-right: 0.667px solid #999; }
   tr:nth-child(even) { background: #f8f8f8; }
   th, td {
