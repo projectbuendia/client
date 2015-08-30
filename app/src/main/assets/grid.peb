@@ -175,6 +175,9 @@
       newNode.style.width = offsetWidth + "px";
       newNode.style.height = offsetHeight + "px";
 
+      var div = document.createElement('div');
+      div.style.width = offsetWidth - 16 + "px";
+      newNode.appendChild(div);
 
       headRow.appendChild(newNode);
     }
