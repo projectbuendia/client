@@ -318,18 +318,23 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void getPatient(String patientId,
+    public void getPatient(final String patientId,
                            final Response.Listener<Patient> patientListener,
                            final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails,
-                "/patient/" + patientId,
+                "/patient?id=" + patientId,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            patientListener.onResponse(patientFromJson(response));
+                            JSONArray results = response.getJSONArray("results");
+                            if (results != null && results.length() > 0) {
+                                patientListener.onResponse(patientFromJson(results.getJSONObject(0)));
+                            } else {
+                                patientListener.onResponse(null);
+                            }
                         } catch (JSONException e) {
                             LOG.e(e, "Failed to parse response");
                             errorListener.onErrorResponse(

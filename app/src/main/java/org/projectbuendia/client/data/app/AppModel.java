@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 import org.projectbuendia.client.data.app.converters.AppTypeConverter;
 import org.projectbuendia.client.data.app.converters.AppTypeConverters;
 import org.projectbuendia.client.data.app.tasks.AddPatientTask;
+import org.projectbuendia.client.data.app.tasks.DownloadSinglePatientTask;
 import org.projectbuendia.client.data.app.tasks.TaskFactory;
 import org.projectbuendia.client.data.app.tasks.AppUpdatePatientTask;
 import org.projectbuendia.client.data.app.tasks.FetchItemTask;
@@ -112,6 +113,12 @@ public class AppModel {
                 mConverters.location,
                 bus);
         task.execute();
+    }
+
+    /** Asynchronously downloads one patient from the server and saves it locally. */
+    public void downloadSinglePatient(CrudEventBus bus, String patientId) {
+        bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
+        mTaskFactory.newDownloadSinglePatientTask(patientId, bus).execute();
     }
 
     /**

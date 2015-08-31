@@ -19,8 +19,24 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
  */
 public class ItemFetchFailedEvent {
     public final String error;
+    public final String id;
+    public final Throwable cause;
 
     public ItemFetchFailedEvent(String error) {
         this.error = error;
+        this.id = null;
+        this.cause = null;
+    }
+
+    public ItemFetchFailedEvent(String error, String id) {
+        this.error = error;
+        this.id = id;
+        this.cause = null;
+    }
+
+    public ItemFetchFailedEvent(String error, String id, Throwable cause) {
+        this.error = error;
+        this.id = id;
+        this.cause = cause;
     }
 }

@@ -51,6 +51,12 @@ public class TaskFactory {
                 this, mConverters, mServer, mContentResolver, patientDelta, bus);
     }
 
+    public DownloadSinglePatientTask newDownloadSinglePatientTask(
+            String patientId, CrudEventBus bus) {
+        return new DownloadSinglePatientTask(
+                this, mConverters, mServer, mContentResolver, patientId, bus);
+    }
+
     /** Creates a new {@link AppUpdatePatientTask}. */
     public AppUpdatePatientTask newUpdatePatientAsyncTask(
             AppPatient originalPatient, AppPatientDelta patientDelta, CrudEventBus bus) {

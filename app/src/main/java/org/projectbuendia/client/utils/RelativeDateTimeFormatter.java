@@ -46,7 +46,7 @@ public class RelativeDateTimeFormatter {
         if (dateTime.isAfter(anchor)) {
             return "in the future";
         }
-        Period period = new Period(anchor, dateTime);
+        Period period = new Period(dateTime, anchor);
         int daysAgo = period.toStandardDays().getDays();
         int hoursAgo = period.toStandardHours().getHours();
         int minutesAgo = period.toStandardMinutes().getMinutes();

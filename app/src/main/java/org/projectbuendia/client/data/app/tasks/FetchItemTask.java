@@ -68,7 +68,7 @@ public class FetchItemTask<T extends AppTypeBase> extends AsyncTask<Void, Void, 
                     null);
 
             if (cursor == null || !cursor.moveToFirst()) {
-                return new ItemFetchFailedEvent("empty response from provider");
+                return new ItemFetchFailedEvent("no results");
             }
 
             return new ItemFetchedEvent<>(mConverter.fromCursor(cursor));

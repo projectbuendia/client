@@ -30,12 +30,18 @@ import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
+import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -48,17 +54,22 @@ public class GoToPatientDialogFragment extends DialogFragment {
     }
 
     @Inject AppModel mAppModel;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
 
     private LayoutInflater mInflater;
     String mPatientUuid;
+    CrudEventBus mBus;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         mInflater = LayoutInflater.from(getActivity());
+        mBus = mCrudEventBusProvider.get();
+        mBus.register(this);
+
     }
 
     public void onSubmit() {
@@ -107,7 +118,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 mPatientSearchResult.setText("");
             } else {
                 try (Cursor cursor = getActivity().getContentResolver().query(
-                        Patients.CONTENT_URI, null, "_id = ?", new String[]{id}, null)) {
+                        Patients.CONTENT_URI, null, "_id = ?", new String[] {id}, null)) {
                     if (cursor.moveToNext()) {
                         String uuid = Utils.getString(cursor, Patients.UUID, null);
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
@@ -127,12 +138,36 @@ public class GoToPatientDialogFragment extends DialogFragment {
                         }
                         mPatientUuid = null;
                         mPatientSearchResult.setText(message);
-                        // TODO: Immediately check for this patient on the server.
+
+                        // Immediately check for this patient on the server.
+                        mAppModel.downloadSinglePatient(mBus, id);
                     }
                 }
             }
             ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
                     .setEnabled(mPatientUuid != null);
+        }
+    }
+
+    public void onEventMainThread(ItemFetchedEvent<AppPatient> event) {
+        String id = mPatientId.getText().toString().trim();
+        AppPatient patient = event.item;
+        if (id.equals(patient.id)) {  // server returned the patient we were looking for
+            mPatientUuid = patient.uuid;
+            mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
+                    " (" + patient.gender + ", " + Utils.birthdateToAge(patient.birthdate) + ")");
+
+            // Perform incremental observation sync to get the patient's admission date
+            // and any other recent observations.
+            SyncAccountService.startIncrementalObsSync();
+        }
+    }
+
+    public void onEventMainThread(ItemFetchFailedEvent event) {
+        String id = mPatientId.getText().toString().trim();
+        if (id.equals(event.id)) {  // server returned empty results for the ID we sought
+            mPatientUuid = null;
+            mPatientSearchResult.setText(getResources().getString(R.string.go_to_patient_not_found));
         }
     }
 }
