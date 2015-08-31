@@ -99,11 +99,11 @@ public class GridRenderer {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
             mToday = LocalDate.now(chronology);
-            addObservations(observations);
             mOrders = orders;
             for (Pair<String, String> uuidAndName : conceptUuidsAndNames) {
                 addRow(uuidAndName.first, uuidAndName.second);
             }
+            addObservations(observations);
         }
 
         void addObservations(List<LocalizedObs> observations) {
