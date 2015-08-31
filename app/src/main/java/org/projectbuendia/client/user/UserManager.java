@@ -106,12 +106,9 @@ public class UserManager {
         mAutoCancelEnabled = autoCancelEnabled;
     }
 
-    /**
-     * Manually resets the UserManager for testing purposes, since it may retain sync state between
-     * tests.
-     * TODO: Remove when daggered.
-     */
+    /** Resets the UserManager to its initial empty state. */
     public void reset() {
+        mKnownUsers.clear();
         mSynced = false;
     }
 
