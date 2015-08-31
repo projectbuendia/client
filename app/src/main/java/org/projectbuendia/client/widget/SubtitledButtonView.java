@@ -59,14 +59,11 @@ public class SubtitledButtonView extends LinearLayout {
         int defaultTextColor = resources.getColor(R.color.view_subtitled_button_text_color);
         int defaultSubtitleTextColor = resources.getColor(
                 R.color.view_subtitled_button_subtitle_text_color);
-        float defaultTitleTextSize = resources.getDimension(
-                R.dimen.view_subtitled_button_title_text_size);
         boolean defaultIsSquare = resources.getBoolean(
                 R.bool.view_subtitled_button_is_square);
         TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.SubtitledButtonView, defStyleAttr, 0 /*defStyleRes*/);
         String subtitle;
-        float titleTextSize;
         String title;
         int subtitleTextColor;
         int textColor;
@@ -77,9 +74,6 @@ public class SubtitledButtonView extends LinearLayout {
                     R.styleable.SubtitledButtonView_subtitledButtonSubtitleTextColor,
                     defaultSubtitleTextColor);
             title = a.getString(R.styleable.SubtitledButtonView_subtitledButtonTitle);
-            titleTextSize = a.getDimension(
-                    R.styleable.SubtitledButtonView_subtitledButtonTitleTextSize,
-                    defaultTitleTextSize);
             subtitle = a.getString(R.styleable.SubtitledButtonView_subtitledButtonSubtitle);
             mIsSquare = a.getBoolean(R.styleable.SubtitledButtonView_subtitledButtonIsSquare,
                     defaultIsSquare);
@@ -88,7 +82,6 @@ public class SubtitledButtonView extends LinearLayout {
         }
 
         mTitleView.setTextColor(textColor);
-        mTitleView.setTextSize(titleTextSize);
         mTitleView.setText(title);
         mSubtitleView.setTextColor(subtitleTextColor);
         mSubtitleView.setText(subtitle);
