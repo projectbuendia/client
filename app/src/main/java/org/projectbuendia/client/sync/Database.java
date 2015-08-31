@@ -167,11 +167,16 @@ public class Database extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache of data on the server, so its upgrade
         // policy is to discard all the data and start over.
-        clear();
+        clear(db);
     }
 
     public void clear() {
-        SQLiteDatabase db = getWritableDatabase();
+        // Never call clear() from onUpgrade, as getWritableDatabase can trigger
+        // onUpgrade leading to endless recursion.
+        clear(getWritableDatabase());
+    }
+
+    public void clear(SQLiteDatabase db) {
         for (Table table : Table.values()) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
         }
