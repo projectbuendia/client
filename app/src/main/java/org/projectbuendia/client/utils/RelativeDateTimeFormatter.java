@@ -16,95 +16,44 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
 /**
- * An object that pretty-prints JODA {@link LocalDate}s using relative phrases such as "4 days ago"
- * or "yesterday".
+ * An object that pretty-prints JODA {@link LocalDate}s using relative phrases
+ * such as "4 days ago" or "yesterday".
  */
 public class RelativeDateTimeFormatter {
+    public RelativeDateTimeFormatter() { }
 
-    public enum Casing {
-
-        LOWER_CASE(
-                "right now",
-                "in the future",
-                "today",
-                "yesterday",
-                "%1$s days ago"),
-        SENTENCE_CASE(
-                "Right now",
-                "In the future",
-                "Today",
-                "Yesterday",
-                "%1$s days ago"),
-        TITLE_CASE(
-                "Right Now",
-                "In the Future",
-                "Today",
-                "Yesterday",
-                "%1$s Days Ago");
-
-        public final String rightNow;
-        public final String inTheFuture;
-        public final String today;
-        public final String yesterday;
-        public final String daysAgo;
-
-        Casing(
-                String rightNow, String inTheFuture, String today, String yesterday,
-                String daysAgo) {
-            this.rightNow = rightNow;
-            this.inTheFuture = inTheFuture;
-            this.today = today;
-            this.yesterday = yesterday;
-            this.daysAgo = daysAgo;
-        }
+    public String format(LocalDate date) {
+        return format(date, LocalDate.now());
     }
 
-    public static class Builder {
-
-        private Casing mCasing;
-
-        public Builder withCasing(Casing casing) {
-            mCasing = casing;
-            return this;
+    /** Formats a representation of {@code date} relative to {@code anchor}. */
+    public String format(LocalDate date, LocalDate anchor) {
+        if (date.isAfter(anchor)) {
+            return "in the future";
         }
-
-        public RelativeDateTimeFormatter build() {
-            return new RelativeDateTimeFormatter(mCasing);
-        }
+        Period period = new Period(date, anchor);
+        int daysAgo = period.toStandardDays().getDays();
+        return daysAgo > 1 ? daysAgo + " days ago" :
+                daysAgo == 1 ? "yesterday" : "today";
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public String format(DateTime dateTime) {
+        return format(dateTime, DateTime.now());
     }
 
-    private final Casing mCasing;
-
-    private RelativeDateTimeFormatter(Casing casing) {
-        mCasing = casing;
-    }
-
-    public String format(LocalDate now, LocalDate other) {
-        // Ensure DateTimes don't match so that we exclude the 'right now' case.
-        return format(now.toDateTimeAtStartOfDay().plusMinutes(1), other.toDateTimeAtStartOfDay());
-    }
-
-    /** Returns a formatted representation of {@code other}, relative to {@code now}. */
-    public String format(DateTime now, DateTime other) {
-        if (other.isEqual(now)) {
-            return mCasing.rightNow;
+    /** Formats a representation of {@code dateTime} relative to {@code anchor}. */
+    public String format(DateTime dateTime, DateTime anchor) {
+        if (dateTime.isAfter(anchor)) {
+            return "in the future";
         }
+        Period period = new Period(anchor, dateTime);
+        int daysAgo = period.toStandardDays().getDays();
+        int hoursAgo = period.toStandardHours().getHours();
+        int minutesAgo = period.toStandardMinutes().getMinutes();
 
-        if (other.isAfter(now)) {
-            return mCasing.inTheFuture;
-        }
-
-        int daysAgo = new Period(other, now).toStandardDays().getDays();
-        if (daysAgo == 0) {
-            return mCasing.today;
-        } else if (daysAgo == 1) {
-            return mCasing.yesterday;
-        } else {
-            return String.format(mCasing.daysAgo, daysAgo);
-        }
+        return daysAgo > 1 ? daysAgo + " days ago" :
+                hoursAgo > 1 ? hoursAgo + " hours ago" :
+                        minutesAgo > 1 ? minutesAgo + " min ago" :
+                                "right now";
     }
 }

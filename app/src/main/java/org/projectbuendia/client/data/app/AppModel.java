@@ -36,6 +36,7 @@ import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import de.greenrobot.event.NoSubscriberEvent;
 
@@ -71,36 +72,30 @@ public class AppModel {
      * the app.
      */
     public boolean isFullModelAvailable() {
+        return getLastFullSyncTime() != null;
+    }
+
+    public DateTime getLastFullSyncTime() {
         // The sync process is transactional, but in rare cases, a sync may complete without ever
-        // having started--this is the case if user data is cleared midsync, for example. To check
+        // having started--this is the case if user data is cleared mid-sync, for example. To check
         // that a sync actually completed, we look at the FULL_SYNC_START_TIME and
         // FULL_SYNC_END_TIME columns in the Misc table, which are written to as the first and
         // last operations of a complete sync. If both of these fields are present, and the last
         // end time is greater than the last start time, then a full sync must have completed.
-        Cursor c = null;
-        try {
-            c = mContentResolver.query(
-                    Contracts.Misc.CONTENT_URI,
-                    new String[]{
-                            Contracts.Misc.FULL_SYNC_START_TIME,
-                            Contracts.Misc.FULL_SYNC_END_TIME,
-                            Contracts.Misc.OBS_SYNC_TIME
-                    },
-                    null,
-                    null,
-                    null);
+        try (Cursor c = mContentResolver.query(
+                Contracts.Misc.CONTENT_URI, null, null, null, null)) {
             LOG.d("Sync timing result count: %d", c.getCount());
             if (c.moveToNext()) {
-                LOG.d("Sync timings -- FULL_SYNC_START(%d), FULL_SYNC_END(%d), OBS_SYNC_TIME(%d)",
-                        c.getLong(0), c.getLong(1), c.getLong(2));
-                return !c.isNull(0) && !c.isNull(1) && c.getLong(1) >= c.getLong(0);
-            } else {
-                return false;
+                DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_TIME);
+                DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_TIME);
+                DateTime obsSyncEnd = Utils.getDateTime(c, Contracts.Misc.OBS_SYNC_TIME);
+                LOG.i("full_sync_start_time = %s, full_sync_end_time = %s, obs_sync_time = %s",
+                        fullSyncStart, fullSyncEnd, obsSyncEnd);
+                if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
+                    return fullSyncEnd;
+                }
             }
-        } finally {
-            if (c != null) {
-                c.close();
-            }
+            return null;
         }
     }
 

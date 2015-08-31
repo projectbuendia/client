@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <org.projectbuendia.client.widget.EditAndClearDataPreference
+        android:key="openmrs_root_url"
+        android:title="@string/pref_title_openmrs_root_url"
+        android:defaultValue="@string/openmrs_root_url_default"
+        android:selectAllOnFocus="true"
+        android:inputType="text"
+        android:capitalize="none"
+        android:singleLine="true"
+        android:maxLines="1" />
+
+    <!-- The server URL to use for software update packages -->
+    <EditTextPreference
+        android:key="package_server_root_url"
+        android:title="@string/pref_title_package_server_url"
+        android:defaultValue="@string/package_server_root_url_default"
+        android:selectAllOnFocus="true"
+        android:inputType="text"
+        android:capitalize="none"
+        android:singleLine="true"
+        android:maxLines="1" />
+
+    <!-- The delay interval in seconds between looking for APK updates -->
+    <org.projectbuendia.client.widget.EditIntegerPreference
+        android:key="apk_update_interval_secs"
+        android:title="@string/pref_title_apk_update_interval_secs"
+        android:defaultValue="90" /> <!-- default to 1.5 minutes -->
+
+</PreferenceScreen>

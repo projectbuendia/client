@@ -30,6 +30,7 @@ public class EditAndClearDataPreference extends EditTextPreference {
     }
 
     public void onDialogClosed(boolean positive) {
+        super.onDialogClosed(positive);
         if (positive) {
             new Database(App.getInstance().getApplicationContext()).clear();
         }

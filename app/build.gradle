@@ -119,34 +119,38 @@ logger.info("Version code: ${versionInteger}")
 // This is where to look for the .apk signing key.
 def releaseRepoRoot = file('../../release/')
 
-// OpenMRS instance for development (kept at tip of dev branch).
-def openmrsRootUrlDev = 'http://dev.projectbuendia.org:9000/openmrs'
+// OpenMRS server for development (kept at tip of dev branch).
+def serverDev = 'dev.projectbuendia.org';
 
-// OpenMRS instance for integration testing server.
-def openmrsRootUrlIntegration = 'http://integration.projectbuendia.org:9000/openmrs'
+// OpenMRS server for integration testing.
+def serverIntegration = 'integration.projectbuendia.org';
 
-// OpenMRS root URL for Edison on local network (default for dev tablets).
-def openmrsRootUrlEdison = 'http://server:9000/openmrs'
+// Edison server on the local network.
+def serverEdison = 'server';
 
-// OpenMRS root URL for host machine when client runs in an emulator (AVD).
-def openmrsRootUrlEmulatorHost = 'http://10.0.2.2:9000/openmrs'
+// Host machine when client runs in an emulator (AVD).
+def serverEmulatorHost = '10.0.2.2';
 
-// OpenMRS root URL for the server on the Fantastica wifi network.
-def openmrsRootUrlFantastica = 'http://192.168.1.161:9000/openmrs'
+// Server on the Fantastica wifi network.
+def serverFantastica = '192.168.1.161';
 
 // Just for development.  In production builds, these should be overridden
 // using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
-def openmrsRootUrlDefault = openmrsRootUrlFantastica;
+def serverDefault = serverDev;
+def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs';
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
-def packageServerRootUrlDefault = 'http://packages.projectbuendia.org:9001/'
+def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001/';
 
 // Apply overrides such as -PopenmrsRootUrl=url etc.
 project.metaClass.propertyMissing = { null }
-def openmrsRootUrl = project.openmrsRootUrl ?: openmrsRootUrlDefault
+def server = project.server ?: serverDefault;
+def openmrsRootUrl = project.server ? 'http://' + project.server + ':9000/openmrs'
+    : project.openmrsRootUrl ?: openmrsRootUrlDefault
 def openmrsUser = project.openmrsUser ?: openmrsUserDefault
 def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
-def packageServerRootUrl = project.packageServerRootUrl ?: packageServerRootUrlDefault
+def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001/'
+    : project.packageServerRootUrl ?: packageServerRootUrlDefault
 def requireWifi = "true"
 
 logger.info('Default preference values:')
@@ -182,6 +186,7 @@ android {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         testApplicationId appId + '.test'
 
+        resValue 'string', 'server_default', server
         resValue 'string', 'openmrs_root_url_default', openmrsRootUrl
         resValue 'string', 'openmrs_user_default', openmrsUser
         resValue 'string', 'openmrs_password_default', openmrsPassword

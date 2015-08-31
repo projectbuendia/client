@@ -12,6 +12,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TableLayout
@@ -32,15 +33,18 @@
                 android:digits="0123456789"
                 android:ems="10"
                 android:id="@+id/go_to_patient_id"
-                android:layout_column="1" />
+                android:layout_column="1"
+                tools:text="23" />
         </TableRow>
         <TableRow
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_marginTop="32sp">
             <TextView
-                android:layout_column="1"
-                android:id="@+id/go_to_patient_result" />
+                android:layout_column="0"
+                android:layout_span="2"
+                android:id="@+id/go_to_patient_result"
+                tools:text="No such patient as of 48 min ago" />
         </TableRow>
     </TableLayout>
 </LinearLayout>

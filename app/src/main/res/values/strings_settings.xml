@@ -10,16 +10,21 @@
     specific language governing permissions and limitations under the License.
 -->
 <resources>
+    <!-- UI strings related to settings (see default_settings.xml for default values) -->
     <string name="title_activity_settings">Settings</string>
-
-    <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
+    <string name="pref_header_advanced">Advanced</string>
     <string name="pref_header_developer">Developer</string>
 
-    <!-- Open MRS preferences -->
+    <string name="pref_title_server">Buendia server</string>
+    <string name="pref_title_openmrs_user">OpenMRS username</string>
+    <string name="pref_title_openmrs_password">OpenMRS password</string>
     <string name="pref_title_openmrs_root_url">OpenMRS base URL</string>
+    <string name="pref_title_package_server_url">Package server URL</string>
+
+    <string name="pref_title_apk_update_interval_secs">Interval between checks for an APK update (seconds)</string>
     <string name="pref_title_store_form_instances">Store form instances locally</string>
     <string name="pref_desc_store_form_instances">Normally forms will be deleted after being sent to the server. Select this to keep them for debugging.</string>
     <string name="pref_title_xform_update_client_cache">Update local observations on submission</string>
