@@ -171,8 +171,8 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public void clear() {
-        // Never call clear() from onUpgrade, as getWritableDatabase can trigger
-        // onUpgrade leading to endless recursion.
+        // Never call zero-argument clear() from onUpgrade, as getWritableDatabase
+        // can trigger onUpgrade, leading to endless recursion.
         clear(getWritableDatabase());
     }
 
