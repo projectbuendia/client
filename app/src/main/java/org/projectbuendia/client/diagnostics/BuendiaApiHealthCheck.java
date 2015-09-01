@@ -23,6 +23,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.projectbuendia.client.model.Concepts;
@@ -174,8 +175,10 @@ public class BuendiaApiHealthCheck extends HealthCheck {
                     LOG.w("OpenMRS server unreachable: %s", uri);
                     reportIssue(HealthIssue.SERVER_HOST_UNREACHABLE);
                     return;
+                } catch (HttpHostConnectException e) {
+                    LOG.w("OpenMRS server connection refused: %s", e.getHost());
                 } catch (IOException e) {
-                    LOG.w("Could not perform OpenMRS health check using URL: %s", uri);
+                    LOG.w("OpenMRS server health check failed: %s", uri);
                     return;
                 }
 

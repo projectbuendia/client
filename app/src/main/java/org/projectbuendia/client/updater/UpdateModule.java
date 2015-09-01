@@ -33,14 +33,14 @@ public class UpdateModule {
 
     @Provides
     @Singleton
-    UpdateServer providePackageServer(Application application, AppSettings settings) {
-        return new UpdateServer(VolleySingleton.getInstance(application), settings);
+    PackageServer providePackageServer(Application application, AppSettings settings) {
+        return new PackageServer(VolleySingleton.getInstance(application), settings);
     }
 
     @Provides
     @Singleton
     UpdateManager provideUpdateManager(
-            Application application, UpdateServer server, AppSettings settings) {
+            Application application, PackageServer server, AppSettings settings) {
         return new UpdateManager(application, server, settings);
     }
 }

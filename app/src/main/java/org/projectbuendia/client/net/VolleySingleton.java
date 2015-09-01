@@ -25,6 +25,14 @@ public class VolleySingleton {
     private static final Logger LOG = Logger.create();
     private static VolleySingleton sInstance;
     private final RequestQueue mRequestQueue;
+    private static final String[] sMethodNames = new String[6];
+    static {
+        sMethodNames[Request.Method.GET] = "GET";
+        sMethodNames[Request.Method.POST] = "POST";
+        sMethodNames[Request.Method.PUT] = "PUT";
+        sMethodNames[Request.Method.DELETE] = "DELETE";
+        sMethodNames[Request.Method.HEAD] = "HEAD";
+    }
 
     private VolleySingleton(Context context) {
         // getApplicationContext() is key, it keeps you from leaking the
@@ -50,12 +58,18 @@ public class VolleySingleton {
         return mRequestQueue;
     }
 
+    /** Gets the string name of a Request.Method constant. */
+    public static String getMethodName(int method) {
+        String methodName = method < sMethodNames.length ? sMethodNames[method] : null;
+        return methodName == null ? "" + method : methodName;
+    }
+
     /**
      * A convenience method for adding a request to the Volley request queue getting all singleton
      * handling and contexts correct.
      */
     public <T> void addToRequestQueue(Request<T> req) {
-        LOG.i("queueing request: " + req.getMethod() + " " + req.getUrl());
+        LOG.i("%s %s", getMethodName(req.getMethod()), req.getUrl());
         getRequestQueue().add(req);
     }
 }

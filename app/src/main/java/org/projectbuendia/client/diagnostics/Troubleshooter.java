@@ -104,7 +104,7 @@ public class Troubleshooter {
 
             actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
             actionsBuilder.addAll(getConfigurationTroubleshootingActions());
-            actionsBuilder.addAll(getUpdateServerTroubleshootingActions());
+            actionsBuilder.addAll(getPackageServerTroubleshootingActions());
 
             ImmutableSet<TroubleshootingAction> actions = actionsBuilder.build();
 
@@ -153,12 +153,12 @@ public class Troubleshooter {
         return actions;
     }
 
-    private Set<TroubleshootingAction> getUpdateServerTroubleshootingActions() {
+    private Set<TroubleshootingAction> getPackageServerTroubleshootingActions() {
         Set<TroubleshootingAction> actions = new HashSet<>();
-        if (mActiveIssues.contains(HealthIssue.UPDATE_SERVER_HOST_UNREACHABLE)) {
-            actions.add(TroubleshootingAction.CHECK_UPDATE_SERVER_REACHABILITY);
-        } else if (mActiveIssues.contains(HealthIssue.UPDATE_SERVER_INDEX_NOT_FOUND)) {
-            actions.add(TroubleshootingAction.CHECK_UPDATE_SERVER_CONFIGURATION);
+        if (mActiveIssues.contains(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE)) {
+            actions.add(TroubleshootingAction.CHECK_PACKAGE_SERVER_REACHABILITY);
+        } else if (mActiveIssues.contains(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND)) {
+            actions.add(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION);
         }
         return actions;
     }

@@ -107,7 +107,7 @@ public class DbSyncHelper {
             while (c.moveToNext()) {
                 String localId = Utils.getString(c, Contracts.Forms._ID);
                 Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(localId).build();
-                LOG.i("  - will delete: " + localId);
+                LOG.i("  - will delete form " + localId);
                 ops.add(ContentProviderOperation.newDelete(uri).build());
             }
         } finally {
@@ -115,7 +115,7 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert: " + values.getAsString(Contracts.Forms._ID));
+            LOG.i("  - will insert form " + values.getAsString(Contracts.Forms._ID));
             ops.add(ContentProviderOperation.newInsert(Contracts.Forms.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -130,7 +130,6 @@ public class DbSyncHelper {
             throws ExecutionException, InterruptedException {
         final ContentResolver resolver = App.getInstance().getContentResolver();
 
-        LOG.i("Downloading all patients from server");
         RequestFuture<List<Patient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
@@ -153,12 +152,12 @@ public class DbSyncHelper {
                     ContentValues localCv = new ContentValues();
                     DatabaseUtils.cursorRowToContentValues(c, localCv);
                     if (!cv.equals(localCv)) {  // record has changed on server
-                        LOG.i("  - will update: " + localId);
+                        LOG.i("  - will update patient " + localId);
                         ops.add(ContentProviderOperation.newUpdate(uri).withValues(cv).build());
                         syncResult.stats.numUpdates++;
                     }
                 } else {  // record doesn't exist on server
-                    LOG.i("  - will delete: " + localId);
+                    LOG.i("  - will delete patient " + localId);
                     ops.add(ContentProviderOperation.newDelete(uri).build());
                     syncResult.stats.numDeletes++;
                 }
@@ -168,7 +167,7 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert: " + values.getAsString(Patients._ID));
+            LOG.i("  - will insert patient " + values.getAsString(Patients._ID));
             ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -183,13 +182,13 @@ public class DbSyncHelper {
         final String patientUuid = response.uuid;
         for (Encounter encounter : response.encounters) {
             if (encounter.uuid == null) {
-                LOG.e("Encounter uuid was null for " + patientUuid);
+                LOG.e("Patient %s has an encounter with uuid = null", patientUuid);
                 continue;
             }
             final String encounterUuid = encounter.uuid;
             DateTime timestamp = encounter.timestamp;
             if (timestamp == null) {
-                LOG.e("Encounter timestamp was null for " + encounterUuid);
+                LOG.e("Encounter %s has timestamp = null", encounterUuid);
                 continue;
             }
             final int encounterTime = (int) (timestamp.getMillis() / 1000); // seconds since epoch
@@ -332,29 +331,25 @@ public class DbSyncHelper {
         LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
-
-        HashMap<String, Location> locationsMap = new HashMap<>();
+        Map<String, Location> locationsMap = new HashMap<>();
         for (Location location : locations) {
             locationsMap.put(location.uuid, location);
         }
 
         // Get list of all items
-        LOG.i("Fetching local entries for merge");
         Uri uri = Locations.CONTENT_URI; // Location tree
         Uri namesUri = LocationNames.CONTENT_URI; // Location names
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
         Cursor namesCur = contentResolver.query(namesUri, namesProjection, null, null, null);
         assert namesCur != null;
-        LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
-        LOG.i("Found " + locations.size() + " external entries. Computing merge solution...");
+        LOG.i("Examining locations: %d local, %d from server", c.getCount(), locations.size());
 
         String id;
         String parentId;
 
         // Build map of location names from the database.
-        HashMap<String, HashMap<String, String>> dbLocationNames =
-                new HashMap<>();
+        Map<String, Map<String, String>> dbLocationNames = new HashMap<>();
         while (namesCur.moveToNext()) {
             String locationId = namesCur.getString(
                     namesCur.getColumnIndex(LocationNames.LOCATION_UUID));
@@ -387,21 +382,19 @@ public class DbSyncHelper {
                 locationsMap.remove(id);
 
                 // Grab the names stored in the database for this location.
-                HashMap<String, String> locationNames = dbLocationNames.get(id);
+                Map<String, String> locationNames = dbLocationNames.get(id);
 
                 // Check to see if the entry needs to be updated
                 Uri existingUri = uri.buildUpon().appendPath(String.valueOf(id)).build();
 
                 if (location.parent_uuid != null && !location.parent_uuid.equals(parentId)) {
                     // Update existing record
-                    LOG.i("Scheduling update: " + existingUri);
+                    LOG.i("  - will update location " + id);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
                             .withValue(Locations.LOCATION_UUID, id)
                             .withValue(Locations.PARENT_UUID, parentId)
                             .build());
                     syncResult.stats.numUpdates++;
-                } else {
-                    LOG.i("No action required for " + existingUri);
                 }
 
                 if (location.names != null
@@ -410,10 +403,10 @@ public class DbSyncHelper {
                             String.valueOf(id)).build();
                     // Update location names by deleting any existing location names and
                     // repopulating.
-                    LOG.i("Scheduling location names update: " + existingNamesUri);
                     batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
                     syncResult.stats.numDeletes++;
                     for (String locale : location.names.keySet()) {
+
                         batch.add(ContentProviderOperation.newInsert(existingNamesUri)
                                 .withValue(LocationNames.LOCATION_UUID, id)
                                 .withValue(LocationNames.LOCALE, locale)
@@ -424,13 +417,11 @@ public class DbSyncHelper {
                 }
             } else {
                 // Entry doesn't exist. Remove it from the database.
+                LOG.i("  - will delete location " + id);
                 Uri deleteUri = uri.buildUpon().appendPath(id).build();
-                LOG.i("Scheduling delete: " + deleteUri);
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
-
                 Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
-                LOG.i("Scheduling delete: " + namesDeleteUri);
                 batch.add(ContentProviderOperation.newDelete(namesDeleteUri).build());
                 syncResult.stats.numDeletes++;
             }
@@ -438,7 +429,7 @@ public class DbSyncHelper {
         c.close();
 
         for (Location location : locationsMap.values()) {
-            LOG.i("Scheduling insert: entry_id=" + location.uuid);
+            LOG.i("  - will insert location " + location.uuid);
             batch.add(ContentProviderOperation.newInsert(Locations.CONTENT_URI)
                     .withValue(Locations.LOCATION_UUID, location.uuid)
                     .withValue(Locations.PARENT_UUID, location.parent_uuid)

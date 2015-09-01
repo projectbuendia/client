@@ -41,7 +41,7 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 /**
- * An object that manages auto-updating of the application from a configurable update server.
+ * An object that manages auto-updating of the application from a configurable package server.
  *
  * <p>This class requires that all methods be called from the main thread.
  */
@@ -70,7 +70,7 @@ public class UpdateManager {
     private final Object mLock = new Object();
 
     private final Application mApplication;
-    private final UpdateServer mServer;
+    private final PackageServer mServer;
 
     private final PackageManager mPackageManager;
     private final LexicographicVersion mCurrentVersion;
@@ -89,9 +89,9 @@ public class UpdateManager {
     // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
 
-    UpdateManager(Application application, UpdateServer updateServer, AppSettings settings) {
+    UpdateManager(Application application, PackageServer packageServer, AppSettings settings) {
         mApplication = application;
-        mServer = updateServer;
+        mServer = packageServer;
         mSettings = settings;
         mPackageManager = application.getPackageManager();
         mDownloadManager =

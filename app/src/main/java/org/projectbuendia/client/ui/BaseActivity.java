@@ -11,14 +11,12 @@
 
 package org.projectbuendia.client.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
@@ -243,29 +241,29 @@ public abstract class BaseActivity extends FragmentActivity {
                     }
                 });
                 break;
-            case CHECK_UPDATE_SERVER_REACHABILITY:
-                message.setText(R.string.troubleshoot_update_server_unreachable);
+            case CHECK_PACKAGE_SERVER_REACHABILITY:
+                message.setText(R.string.troubleshoot_package_server_unreachable);
                 action.setText(R.string.troubleshoot_action_more_info);
                 action.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         showMoreInfoDialog(
                                 action,
-                                getString(R.string.troubleshoot_update_server_unreachable),
+                                getString(R.string.troubleshoot_package_server_unreachable),
                                 getString(R.string.troubleshoot_update_server_unreachable_details),
                                 true);
                     }
                 });
                 break;
-            case CHECK_UPDATE_SERVER_CONFIGURATION:
-                message.setText(R.string.troubleshoot_update_server_misconfigured);
+            case CHECK_PACKAGE_SERVER_CONFIGURATION:
+                message.setText(R.string.troubleshoot_package_server_misconfigured);
                 action.setText(R.string.troubleshoot_action_more_info);
                 action.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         showMoreInfoDialog(
                                 action,
-                                getString(R.string.troubleshoot_update_server_misconfigured),
+                                getString(R.string.troubleshoot_package_server_misconfigured),
                                 getString(
                                         R.string.troubleshoot_update_server_misconfigured_details),
                                 true);

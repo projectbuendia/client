@@ -22,8 +22,8 @@ import org.projectbuendia.client.net.VolleySingleton;
 
 import java.util.List;
 
-/** Encapsulates requests to the update server. */
-public class UpdateServer {
+/** Encapsulates requests to the package server. */
+public class PackageServer {
 
     /**
      * The package server's module name for updates to this app.  A name of "foo"
@@ -35,7 +35,7 @@ public class UpdateServer {
     private final VolleySingleton mVolley;
     private final AppSettings mSettings;
 
-    public UpdateServer(VolleySingleton volley, AppSettings settings) {
+    public PackageServer(VolleySingleton volley, AppSettings settings) {
         mVolley = volley;
         mSettings = settings;
     }

@@ -45,7 +45,7 @@ public class DiagnosticsModule {
         return ImmutableSet.of(
                 new WifiHealthCheck(application, settings),
                 new BuendiaApiHealthCheck(application, connectionDetails),
-                new UpdateServerHealthCheck(application, settings));
+                new PackageServerHealthCheck(application, settings));
     }
 
     @Provides

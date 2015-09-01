@@ -193,7 +193,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Collections.addAll(phases, SyncPhase.values());
         }
 
-        LOG.i("Beginning network sync: %s", phases);
+        LOG.i("Requested phases are: %s", phases);
         reportProgress(0, R.string.sync_in_progress);
 
         BuendiaProvider buendiaProvider =
@@ -216,7 +216,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             for (SyncPhase phase : SyncPhase.values()) {
                 if (!phases.contains(phase)) break;
                 checkCancellation("before " + phase);
-                LOG.i("Starting " + phase);
+                LOG.i("--- Begin %s ---", phase);
                 reportProgress(0, PHASE_MESSAGES.get(phase));
 
                 switch (phase) {
@@ -306,7 +306,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             dbTransactionHelper.close();
         }
         timings.dumpToLog();
-        LOG.i("Network synchronization complete");
 
         // Fire a broadcast indicating that sync has completed.
         Intent syncCompletedIntent =

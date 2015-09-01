@@ -99,7 +99,6 @@ public class UserStore {
     public Set<User> syncKnownUsers()
             throws ExecutionException, InterruptedException, RemoteException,
             OperationApplicationException {
-        LOG.i("Getting user list from server");
         RequestFuture<List<User>> future = RequestFuture.newFuture();
         App.getServer().listUsers(null, future, future);
         List<User> users = future.get();

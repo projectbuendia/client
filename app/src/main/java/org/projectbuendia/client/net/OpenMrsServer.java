@@ -399,13 +399,13 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void listUsers(@Nullable String filterQueryTerm,
+    public void listUsers(@Nullable String searchQuery,
                           final Response.Listener<List<User>> userListener,
                           Response.ErrorListener errorListener) {
-        String query = filterQueryTerm != null ? filterQueryTerm : "";
+        String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
                 mConnectionDetails,
-                "/user?q=" + Utils.urlEncode(query),
+                "/user" + query,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override

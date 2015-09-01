@@ -20,6 +20,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.utils.Logger;
@@ -27,8 +28,8 @@ import org.projectbuendia.client.utils.Logger;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-/** A {@link HealthCheck} that checks whether the update server is up and running. */
-public class UpdateServerHealthCheck extends HealthCheck {
+/** A {@link HealthCheck} that checks whether the package server is up and running. */
+public class PackageServerHealthCheck extends HealthCheck {
 
     private static final Logger LOG = Logger.create();
 
@@ -43,7 +44,7 @@ public class UpdateServerHealthCheck extends HealthCheck {
     private Handler mHandler;
     private AppSettings mSettings;
 
-    UpdateServerHealthCheck(Application application, AppSettings settings) {
+    PackageServerHealthCheck(Application application, AppSettings settings) {
         super(application);
         mSettings = settings;
     }
@@ -52,7 +53,7 @@ public class UpdateServerHealthCheck extends HealthCheck {
     protected void startImpl() {
         synchronized (mLock) {
             if (mHandlerThread == null) {
-                mHandlerThread = new HandlerThread("Buendia Update Server Health Check");
+                mHandlerThread = new HandlerThread("Buendia Package Server Health Check");
                 mHandlerThread.start();
                 mHandler = new Handler(mHandlerThread.getLooper());
                 mHandler.post(mHealthCheckRunnable);
@@ -87,23 +88,25 @@ public class UpdateServerHealthCheck extends HealthCheck {
                 HttpResponse response = httpClient.execute(getRequest);
                 switch (response.getStatusLine().getStatusCode()) {
                     case HttpStatus.SC_OK:
-                        LOG.d("Update server check completed, OK.");
+                        LOG.d("Package server check completed, OK.");
                         resolveAllIssues();
                         return;
                     case HttpStatus.SC_NOT_FOUND:
-                        LOG.d("Update server check completed, 404.");
-                        // The update server is reachable if we get a 404.
-                        resolveIssue(HealthIssue.UPDATE_SERVER_HOST_UNREACHABLE);
-                        reportIssue(HealthIssue.UPDATE_SERVER_INDEX_NOT_FOUND);
+                        LOG.d("Package server check completed, 404.");
+                        // The package server is reachable if we get a 404.
+                        resolveIssue(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE);
+                        reportIssue(HealthIssue.PACKAGE_SERVER_INDEX_NOT_FOUND);
                         return;
                     default:
-                        LOG.w("Update server check failed for URI %1$s.", uri);
+                        LOG.w("Package server check failed for URI %1$s.", uri);
                 }
             } catch (UnknownHostException | IllegalArgumentException e) {
-                LOG.w("Update server unreachable: %s", uri);
-                reportIssue(HealthIssue.UPDATE_SERVER_HOST_UNREACHABLE);
+                LOG.w("Package server unreachable: %s", uri);
+                reportIssue(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE);
+            } catch (HttpHostConnectException e) {
+                LOG.w("Package server connection refused: %s", e.getHost());
             } catch (IOException e) {
-                LOG.w(e, "Update server check failed for URI %1$s.", uri);
+                LOG.w(e, "Package server check failed: %s", uri);
             }
         }
 
