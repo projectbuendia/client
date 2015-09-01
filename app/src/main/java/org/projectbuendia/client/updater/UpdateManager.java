@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.android.volley.NoConnectionError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
@@ -304,17 +305,15 @@ public class UpdateManager {
 
         @Override
         public void onErrorResponse(VolleyError error) {
-            String failure;
-            if (error == null || error.networkResponse == null) {
-                failure = "a network error";
-            } else {
-                failure = String.valueOf(error.networkResponse.statusCode);
+            String message = "Server failed; will retry shortly";
+            if (error != null && error.networkResponse != null) {
+                message = "Server failed (" + error.networkResponse.statusCode + "); will retry shortly";
             }
-
-            LOG.w(
-                    error,
-                    "Server failed with " + failure + " while fetching package index.  Retry will "
-                            + "occur shortly.");
+            if (error instanceof NoConnectionError) {
+                LOG.w(message + " - " + error);
+            } else {
+                LOG.w(error, message);
+            }
             // assume no update is available
             EventBus.getDefault().post(new UpdateNotAvailableEvent());
         }

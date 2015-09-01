@@ -193,7 +193,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Collections.addAll(phases, SyncPhase.values());
         }
 
-        LOG.i("Requested phases are: %s", phases);
+        LOG.i("Requested phases are: %s%s", phases,
+                extras.getBoolean(SyncOption.INCREMENTAL_OBS.name()) ?
+                        " (with INCREMENTAL_OBS)" : "");
         reportProgress(0, R.string.sync_in_progress);
 
         BuendiaProvider buendiaProvider =
