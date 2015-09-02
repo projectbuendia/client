@@ -353,7 +353,7 @@ public class Utils {
         int years = age.getYears(), months = age.getMonths();
         return years == 0 ? "" + months + " mo" :
             months == 0 || years >= 5 ? "" + years + " y" :
-                "" + years + " y" + months + " mo";
+                "" + years + " y " + months + " mo";
     }
 
     /**
