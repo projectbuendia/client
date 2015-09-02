@@ -348,13 +348,12 @@ public class Utils {
 
     /** Converts a birthdate to a string describing age in months or years. */
     public static String birthdateToAge(LocalDate birthdate) {
-        // TODO: Localization
+        // TODO/i18n
         Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 5) {
-            return "" + age.getYears() + " y";
-        } else {
-            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
-        }
+        int years = age.getYears(), months = age.getMonths();
+        return years == 0 ? "" + months + " mo" :
+            months == 0 || years >= 5 ? "" + years + " y" :
+                "" + years + " y" + months + " mo";
     }
 
     /**
