@@ -138,7 +138,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
-                    android:minEms="3"
+                    android:minEms="2"
                     android:maxLength="3"
                     android:singleLine="true"
                     android:inputType="numberDecimal"
@@ -156,7 +156,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
-                    android:minEms="3"
+                    android:minEms="2"
                     android:maxLength="3"
                     android:singleLine="true"
                     android:inputType="numberDecimal"
@@ -269,7 +269,7 @@
                         android:layout_margin="5dp"
                         android:gravity="center"
                         android:background="#CCCCCC"
-                        android:text="@string/patient_creation_clear_symptoms_onset_date"/>
+                        android:text="@string/patient_creation_clear_symptom_onset_date"/>
 
                 </FrameLayout>
             </LinearLayout>
