@@ -18,23 +18,16 @@ import android.os.IBinder;
 /** A service that holds a singleton SyncAdapter and provides it to the OS on request. */
 public class SyncAdapterService extends Service {
 
-    private static SyncAdapter sInstance = null;
-    private static final Object sLock = new Object();
+    private SyncAdapter mSyncAdapter = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (sInstance == null) {
-            synchronized (sLock) {
-                if (sInstance == null) {
-                    sInstance = new SyncAdapter(getApplicationContext(), true);
-                }
-            }
-        }
+        mSyncAdapter = new SyncAdapter(getApplicationContext(), true);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return sInstance.getSyncAdapterBinder();
+        return mSyncAdapter.getSyncAdapterBinder();
     }
 }
