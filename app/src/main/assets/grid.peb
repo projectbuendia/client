@@ -34,10 +34,13 @@
     font-weight: bold;
   }
   button { font-size: 100%; }
+  tr.order th { max-width: 16em; overflow: hide; }
   tr.order td { vertical-align: center: text-align: center; }
   tr.order td div { margin: auto auto; width: 90%; height: 90%; }
   .future { font-size: 75%; color: #999; }
   .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
+  #neworder { color: #09e; font-weight: bold; text-transform: uppercase;
+  font-size: 75%; padding: 1em 0; }
 </style>
 
 <table>
@@ -98,7 +101,9 @@
       {% for column in columns %}
         <td class="{{column.start == nowColumnStart ? "now" : ""}}">
           {% set active = intervals_overlap(order.interval, column.interval) %}
-          {% if previousActive and not active %}
+          {% if order.stop == null and previousActive %}
+            <div class="future">&nbsp;</div>
+          {% elseif order.stop != null and previousActive and not active %}
             <div class="stop">Stop</div>
           {% elseif active %}
             {% if future %}
@@ -119,7 +124,7 @@
 
   <tr>
     <th colspan="{{columns.size + 1}}">
-      <button onclick="controller.onNewOrderPressed()">+ New Order</button>
+      <div id="neworder" onclick="controller.onNewOrderPressed()">Add a New Order</button>
     </th>
   </tr>
 </table>
