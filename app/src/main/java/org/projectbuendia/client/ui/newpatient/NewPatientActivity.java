@@ -18,7 +18,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -121,7 +120,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
                 .setNegativeButton(R.string.no, null)
                 .create();
 
-        setContentView(R.layout.activity_patient_creation);
+        setContentView(R.layout.activity_new_patient);
         ButterKnife.inject(this);
 
         DateTime now = DateTime.now();
