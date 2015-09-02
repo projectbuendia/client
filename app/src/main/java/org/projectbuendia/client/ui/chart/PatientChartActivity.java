@@ -358,10 +358,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*
     @OnClick(R.id.patient_chart_pain_parent)
     void onSpecialPressed(View v) {
         mController.onAddObservationPressed("The pain assessment field");
     }
+    */
 
     /*
     @OnClick(R.id.patient_chart_general_condition_parent)
@@ -371,6 +373,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
     */
 
+    /*
     @OnClick({
             R.id.vital_diet,
             R.id.vital_food_drink,
@@ -386,6 +389,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     void onSignsAndSymptomsPressed(View v) {
         mController.onAddObservationPressed("Vital signs");
     }
+    */
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
