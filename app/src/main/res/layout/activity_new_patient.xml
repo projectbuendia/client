@@ -134,35 +134,40 @@
                 android:gravity="center_vertical">
 
                 <EditText
-                    android:id="@+id/patient_creation_text_age"
+                    android:id="@+id/patient_creation_age_years"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
+                    android:layout_marginEnd="12dp"
                     android:minEms="3"
                     android:maxLength="3"
                     android:singleLine="true"
-                    android:inputType="number" />
+                    android:inputType="numberDecimal"
+                    android:digits="0123456789" />
 
-                <RadioGroup
-                    android:id="@+id/patient_creation_radiogroup_age_units"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
+                <TextView
+                    android:layout_height="85dp"
+                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="48dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/patient_creation_age_years" />
 
-                    <RadioButton
-                        android:id="@+id/patient_creation_radiogroup_age_units_years"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/patient_creation_age_years"/>
+                <EditText
+                    android:id="@+id/patient_creation_age_months"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:minEms="3"
+                    android:maxLength="3"
+                    android:singleLine="true"
+                    android:inputType="numberDecimal"
+                    android:digits="0123456789" />
 
-                    <RadioButton
-                        android:id="@+id/patient_creation_radiogroup_age_units_months"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/patient_creation_age_months"/>
-
-                </RadioGroup>
+                <TextView
+                    android:layout_height="85dp"
+                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/patient_creation_age_months" />
 
             </LinearLayout>
 

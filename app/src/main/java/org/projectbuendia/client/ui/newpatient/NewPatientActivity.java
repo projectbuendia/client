@@ -69,8 +69,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_creation_text_patient_id) EditText mId;
     @InjectView(R.id.patient_creation_text_patient_given_name) EditText mGivenName;
     @InjectView(R.id.patient_creation_text_patient_family_name) EditText mFamilyName;
-    @InjectView(R.id.patient_creation_text_age) EditText mAge;
-    @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
+    @InjectView(R.id.patient_creation_age_years) EditText mAgeYears;
+    @InjectView(R.id.patient_creation_age_months) EditText mAgeMonths;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
     @InjectView(R.id.patient_creation_admission_date) EditText mAdmissionDate;
     @InjectView(R.id.patient_creation_symptoms_onset_date) EditText mSymptomsOnsetDate;
@@ -252,8 +252,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         mId.setEnabled(enable);
         mGivenName.setEnabled(enable);
         mFamilyName.setEnabled(enable);
-        mAge.setEnabled(enable);
-        mAgeUnits.setEnabled(enable);
+        mAgeYears.setEnabled(enable);
+        mAgeMonths.setEnabled(enable);
         mSex.setEnabled(enable);
         mAdmissionDate.setEnabled(enable);
         mSymptomsOnsetDate.setEnabled(enable);
@@ -262,8 +262,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         mCancelButton.setEnabled(enable);
         mCreateButton.setText(enable ? R.string.patient_creation_create
                 : R.string.patient_creation_create_busy);
-        setFocus(mId, mGivenName, mFamilyName, mAge);
-        showKeyboard(mId, mGivenName, mFamilyName, mAge);
+        setFocus(mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
+        showKeyboard(mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
     }
 
     /** Gives focus to the first of the given views that has an error. */
@@ -315,8 +315,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
                 mId.getText().toString(),
                 mGivenName.getText().toString(),
                 mFamilyName.getText().toString(),
-                mAge.getText().toString(),
-                getAgeUnits(),
+                mAgeYears.getText().toString(),
+                mAgeMonths.getText().toString(),
                 getSex(),
                 getAdmissionDate(),
                 getSymptomsOnsetDate(),
@@ -339,18 +339,6 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             return true;
         } else {
             return super.onKeyDown(keyCode, event);
-        }
-    }
-
-    private int getAgeUnits() {
-        int checkedAgeUnitsId = mAgeUnits.getCheckedRadioButtonId();
-        switch (checkedAgeUnitsId) {
-            case R.id.patient_creation_radiogroup_age_units_years:
-                return NewPatientController.AGE_YEARS;
-            case R.id.patient_creation_radiogroup_age_units_months:
-                return NewPatientController.AGE_MONTHS;
-            default:
-                return NewPatientController.AGE_UNKNOWN;
         }
     }
 
@@ -424,8 +412,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
                 case NewPatientController.Ui.FIELD_FAMILY_NAME:
                     mFamilyName.setError(message);
                     break;
-                case NewPatientController.Ui.FIELD_AGE:
-                    mAge.setError(message);
+                case NewPatientController.Ui.FIELD_AGE_YEARS:
+                    mAgeYears.setError(message);
                     break;
                 case NewPatientController.Ui.FIELD_ADMISSION_DATE:
                     // TODO: setError doesn't show a message because this field doesn't focus
@@ -439,9 +427,6 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
                     break;
                 case NewPatientController.Ui.FIELD_LOCATION:
                     //TODO: Using setError doesn't really work properly. Implement a better UI
-                    // fallthrough
-                case NewPatientController.Ui.FIELD_AGE_UNITS:
-                    //TODO: implement errors for age unit
                     // fallthrough
                 case NewPatientController.Ui.FIELD_SEX:
                     //TODO: implement errors for sex
@@ -460,7 +445,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             mId.setError(null);
             mGivenName.setError(null);
             mFamilyName.setError(null);
-            mAge.setError(null);
+            mAgeYears.setError(null);
+            mAgeMonths.setError(null);
             mAdmissionDate.setError(null);
             mSymptomsOnsetDate.setError(null);
             // TODO: If the validation error indicators for age units

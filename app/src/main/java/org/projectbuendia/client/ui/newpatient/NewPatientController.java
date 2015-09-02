@@ -51,8 +51,8 @@ final class NewPatientController {
         static final int FIELD_ID = 1;
         static final int FIELD_GIVEN_NAME = 2;
         static final int FIELD_FAMILY_NAME = 3;
-        static final int FIELD_AGE = 4;
-        static final int FIELD_AGE_UNITS = 5;
+        static final int FIELD_AGE_YEARS = 4;
+        static final int FIELD_AGE_MONTHS = 5;
         static final int FIELD_SEX = 6;
         static final int FIELD_LOCATION = 7;
         static final int FIELD_ADMISSION_DATE = 8;
@@ -109,39 +109,35 @@ final class NewPatientController {
     }
 
     public boolean createPatient(
-            String id, String givenName, String familyName, String age, int ageUnits, int sex,
-            LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
+            String id, String givenName, String familyName, String ageYears, String ageMonths,
+            int sex, LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
-        if (id == null || id.equals("")) {
+        id = id.trim();
+        givenName = givenName.trim();
+        familyName = familyName.trim();
+        ageYears = ageYears.trim();
+        ageMonths = ageMonths.trim();
+        if (id.isEmpty()) {
             mUi.showValidationError(Ui.FIELD_ID, R.string.patient_validation_missing_id);
             hasValidationErrors = true;
         }
-        if (age == null || age.equals("")) {
-            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_missing_age);
+        if (ageYears.isEmpty() && ageMonths.isEmpty()) {
+            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_validation_missing_age);
+            hasValidationErrors = true;
+        }
+        int years = 0, months = 0;
+        try {
+            years = ageYears.isEmpty() ? 0 : Integer.parseInt(ageYears);
+            months = ageMonths.isEmpty() ? 0 : Integer.parseInt(ageMonths);
+        } catch (Throwable e) {  // shouldn't happen (text field only allows digits)
+            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_validation_missing_age);
             hasValidationErrors = true;
         }
         if (admissionDate == null) {
             mUi.showValidationError(
                     Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
-            hasValidationErrors = true;
-        }
-        int ageInt = 0;
-        try {
-            ageInt = Integer.parseInt(age);
-        } catch (NumberFormatException e) {
-            mUi.showValidationError(
-                    Ui.FIELD_AGE, R.string.patient_validation_whole_number_age_required);
-            hasValidationErrors = true;
-        }
-        if (ageInt < 0) {
-            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_negative_age);
-            hasValidationErrors = true;
-        }
-        if (ageUnits != AGE_YEARS && ageUnits != AGE_MONTHS) {
-            mUi.showValidationError(
-                    Ui.FIELD_AGE_UNITS, R.string.patient_validation_select_years_or_months);
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
@@ -168,7 +164,8 @@ final class NewPatientController {
         patientDelta.id = Optional.of(id);
         patientDelta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
         patientDelta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
-        patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
+        patientDelta.birthdate = Optional.of(
+                DateTime.now().minusYears(years).minusMonths(months));
         patientDelta.gender = Optional.of(sex);
         patientDelta.assignedLocationUuid =
                 Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION_UUID));
@@ -178,18 +175,6 @@ final class NewPatientController {
         mModel.addPatient(mCrudEventBus, patientDelta);
 
         return true;
-    }
-
-    private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {
-        DateTime now = DateTime.now();
-        switch (ageUnits) {
-            case AGE_YEARS:
-                return now.minusYears(ageInt);
-            case AGE_MONTHS:
-                return now.minusMonths(ageInt);
-            default:
-                return null;
-        }
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.

@@ -120,8 +120,8 @@
     <string name="patient_creation_given_name_label">Given name</string>
     <string name="patient_creation_family_name_label">Family name</string>
     <string name="patient_creation_age_label">Age</string>
-    <string name="patient_creation_age_years">Years</string>
-    <string name="patient_creation_age_months">Months</string>
+    <string name="patient_creation_age_years">years</string>
+    <string name="patient_creation_age_months">months</string>
     <string name="patient_creation_sex_label">Sex</string>
     <string name="patient_creation_location_label">Location</string>
     <string name="patient_creation_location_assign">Assign location</string>
@@ -278,7 +278,6 @@
     <string name="age_filter_description">Under %d years</string>
     <string name="filter_group_default_name">Multiple filters</string>
 
-    <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
     <string name="patient_validation_missing_age">Please enter the age.</string>
     <string name="patient_validation_missing_family_name">Please enter the family name.</string>
     <string name="patient_validation_missing_given_name">Please enter the given name.</string>
