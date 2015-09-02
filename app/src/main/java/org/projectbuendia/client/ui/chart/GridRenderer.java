@@ -72,10 +72,17 @@ public class GridRenderer {
         String html = new GridHtmlGenerator(
                 conceptUuidsAndNames, observations, orders,
                 admissionDate, firstSymptomsDate).getHtml();
+
+
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
-        mView.loadData(html, "text/html; charset=utf-8", null);
-        mView.loadData(html, "text/html; charset=utf-8", null);
+        //mView.loadData(html, "text/html; charset=utf-8", null);
+        //mView.loadData(html, "text/html; charset=utf-8", null);
+
+        /*
+         * New method to load html for the grid. TODO: See if we can delete the commented lines above.
+         */
+        mView.loadDataWithBaseURL("file:///android_asset/www/", html, "text/html; charset=utf-8", "utf-8", null);
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
