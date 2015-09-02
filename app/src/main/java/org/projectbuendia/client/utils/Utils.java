@@ -350,7 +350,7 @@ public class Utils {
     public static String birthdateToAge(LocalDate birthdate) {
         // TODO: Localization
         Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 2) {
+        if (age.getYears() >= 5) {
             return "" + age.getYears() + " y";
         } else {
             return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
