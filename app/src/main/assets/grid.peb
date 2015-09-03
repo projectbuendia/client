@@ -87,7 +87,7 @@
 
   <tr>
     <th class="gutter" colspan="{{columns.size + 1}}">
-      Orders
+      Treatments
     </th>
   </tr>
 
@@ -124,7 +124,7 @@
 
   <tr>
     <th colspan="{{columns.size + 1}}">
-      <div id="neworder" onclick="controller.onNewOrderPressed()">Add a New Order</button>
+      <div id="neworder" onclick="controller.onNewOrderPressed()">Add a New Treatment</button>
     </th>
   </tr>
 </table>

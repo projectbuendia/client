@@ -67,8 +67,7 @@
     <string name="one_present_patient">1 present patient</string>
     <string name="n_present_patients">%d present patients</string>
 
-    <string name="title_new_order">New order</string>
-    <string name="order_instructions">Order</string>
+    <string name="title_new_order">New treatment</string>
     <string name="order_medication">Medication</string>
     <string name="order_dosage">Dosage</string>
     <string name="order_frequency">Frequency</string>
