@@ -13,8 +13,8 @@
     padding: 8px 0;
     text-align: left;
     vertical-align: baseline;
-    background-image:
-      linear-gradient(90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 67%, transparent 67%);
+    background-image: linear-gradient(
+        90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 67%, transparent 67%);
     background-size: 1px 100%;
     background-repeat: no-repeat;
     background-position: left;
@@ -69,8 +69,20 @@
           {{row.heading}}
         </th>
         {% for column in columns %}
-          <td class="{{column.start == nowColumnStart ? "now" : ""}}">
-            {% set values = get_values(row=row, column=column) %}
+          {% set values = get_values(row=row, column=column) %}
+          <td class="{{column.start == nowColumnStart ? "now" : ""}}"
+             onclick="popup({{row.heading | js}},
+            {% if values is empty %}
+              []
+            {% else %}
+              [ {%- for value in values -%}
+                [{% if value.name != null %}{{value.name | js}}
+                {% elseif value.text != null %}{{value.text | js}}
+                {% elseif value.number != null %}{{value.number | js}}
+                {% else %}{{value.bool ? "'Yes'" : "'No'"}}{% endif %},
+                {{value.observed | dateformat("HH:mm") | js}}],
+              {%- endfor -%} ]
+            {% endif %} )">
             {% if values is not empty %}
               {% set last = values | last %}
               {% if last.number != null %}
@@ -139,4 +151,29 @@
       </th>
     </tr>
   </tbody>
+
+  <script>
+    function popup(name, values) {
+      var dialog = document.getElementById('obs-dialog');
+      var html = '<h2>' + name + '</h2>';
+      var text = name + '\n\n';
+      if (values.length > 0) {
+        for (var i = 0; i < values.length; i++) {
+          var value = values[i][0], observed = values[i][1];
+          html += '<b>' + value + '</b> at ' + observed + '<br>';
+          text += value + ' at ' + observed + '\n';
+        }
+        html += '&nbsp;<br>Comments <input type="text" size="40">';
+      } else {
+        html += 'No observations.';
+        text += 'No observations.';
+      }
+      alert(text);
+      return;
+      dialog.innerHTML = html;
+      dialog.showModal();
+    }
+  </script>
 </table>
+
+<dialog id="obs-dialog">Hello</dialog>
