@@ -158,10 +158,10 @@ public class OrderDialogFragment extends DialogFragment {
                             days == 1 ? R.string.order_give_for_day :
                                     R.string.order_give_for_days);
             mDurationLabel.setText(getResources().getString(
-                    days == 0 ? R.string.order_duration_indefinitely :
-                            days == 1 ? R.string.order_duration_today :
-                                    days == 2 ? R.string.order_duration_today_and_tomorrow :
-                                            R.string.order_duration_today_through_date
+                    days == 0 ? R.string.order_duration_unspecified :
+                            days == 1 ? R.string.order_duration_stop_after_today :
+                                    days == 2 ? R.string.order_duration_stop_after_tomorrow :
+                                            R.string.order_duration_stop_after_date
             ).replace("%s", Utils.toShortString(lastDay)));
         }
     }

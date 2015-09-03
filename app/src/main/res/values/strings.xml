@@ -77,10 +77,10 @@
     <string name="order_give_for">Give for</string>
     <string name="order_give_for_days">days</string>
     <string name="order_give_for_day">day</string>
-    <string name="order_duration_today">(today only)</string>
-    <string name="order_duration_today_and_tomorrow">(today and tomorrow)</string>
-    <string name="order_duration_today_through_date">(today through %s)</string>
-    <string name="order_duration_indefinitely">(indefinitely)</string>
+    <string name="order_duration_stop_after_today">(stop after today)</string>
+    <string name="order_duration_stop_after_tomorrow">(stop after tomorrow)</string>
+    <string name="order_duration_stop_after_date">(stop after %s)</string>
+    <string name="order_duration_unspecified">(no specific duration)</string>
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
 

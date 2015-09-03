@@ -127,7 +127,7 @@
                 android:layout_span="2"
                 android:layout_width="400dip"
                 android:layout_gravity="top|start"
-                android:text="@string/order_duration_indefinitely"
+                android:text="@string/order_duration_unspecified"
                 android:layout_marginStart="12sp" />
         </TableRow>
     </TableLayout>
