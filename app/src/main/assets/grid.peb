@@ -134,7 +134,7 @@
     {% endfor %}
 
     <tr>
-      <td id="neworder" colspan="{{columns.size + 1}}" onclick="controller.onNewOrderPressed()">
+      <th id="neworder" colspan="{{columns.size + 1}}" onclick="controller.onNewOrderPressed()">
         Add a New Treatment
       </th>
     </tr>
