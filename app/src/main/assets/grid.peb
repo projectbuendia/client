@@ -6,11 +6,7 @@
 
 <style>
   body { margin: 0; }
-  table {
-    border-collapse: collapse;
-    border-right: 0.667px solid #999;
-    background: #fff;  // opaque so that frozen headers are opaque
-  }
+  table { background: #fff; }  /* opaque so that frozen headers are opaque */
   th, td {
     font-weight: normal;
     font-size: 2.4em;
@@ -18,10 +14,10 @@
     text-align: left;
     vertical-align: baseline;
     background-image: linear-gradient(
-        90deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 67%, transparent 67%);
+        90deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
     background-size: 1px 100%;
     background-repeat: no-repeat;
-    background-position: left;
+    background-position: right;
   }
   th { white-space: nowrap; padding: 8px 16px; }
 
@@ -36,17 +32,25 @@
     text-transform: uppercase;
     font-size: 1.8em;
     font-weight: bold;
+    background: #fff;
   }
   tbody + tbody th[scope="rowgroup"] {
-    padding-top: 3.2em;
+    padding-top: 3.6em;
   }
+  th[scope="row"] { max-width: 16em; overflow: hidden; }
 
-  .order th { max-width: 16em; overflow: hidden; }
-  .order td { vertical-align: center: text-align: center; }
-  .order .future { font-size: 75%; color: #999; }
+  .order .future { font-size: 75%; color: #999; vertical-align: center; }
   .order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
-  #neworder { color: #09e; font-weight: bold; text-transform: uppercase;
-      font-size: 1.8em; padding-top: 1em; padding-bottom: 3em; }
+
+  .command {
+    color: #09e;
+    background: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 1.8em;
+    padding-top: 1em;
+    padding-bottom: 3em;
+  }
 </style>
 
 <script src="jquery-1.5.1.min.js"></script>
@@ -57,7 +61,7 @@ $(document).ready(function() {
 });
 </script>
 
-<table id="grid">
+<table id="grid" cellspacing="0" cellpadding="0">
   <thead>
     <tr>
       <th></th>
@@ -158,7 +162,7 @@ $(document).ready(function() {
     {% endfor %}
 
     <tr>
-      <th id="neworder" onclick="controller.onNewOrderPressed()">
+      <th class="command" onclick="controller.onNewOrderPressed()">
         Add a New Treatment
       </th>
     </tr>
@@ -187,5 +191,3 @@ $(document).ready(function() {
     }
   </script>
 </table>
-
-<dialog id="obs-dialog">Hello</dialog>
