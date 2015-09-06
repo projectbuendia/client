@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.matchesPatientDelta;
 
 /** Tests for {@link NewPatientController}. */
-public class PatientCreationControllerTest extends AndroidTestCase {
+public class NewPatientControllerTest extends AndroidTestCase {
     private static final String VALID_ID = "123";
     private static final String VALID_GIVEN_NAME = "Jane";
     private static final String VALID_FAMILY_NAME = "Doe";
