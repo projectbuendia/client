@@ -76,7 +76,11 @@ class Value implements Comparable<Value> {
         return 0;
     }
 
-    /** Gets a number specifying the ordering of coded values. */
+    /**
+     * Gets a number specifying the ordering of coded values.  These are
+     * arranged from least to most severe so that using the Pebble "max" filter
+     * will select the most severe value from a list of values.
+     */
     public Integer getCodedValueOrdering() {
         final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
                 .put(Concepts.NO_UUID, 0)
