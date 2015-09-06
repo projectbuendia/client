@@ -133,8 +133,8 @@
       
             // set the width and height of the corner
             if (cornerHeader) {
-                cornerHeader.find("th>div").width(table.find("th>div").eq(0).width()+fudge);
-                cornerHeader.find("th>div").height(table.find("th>div").eq(0).height());
+                cornerHeader.find("th>div").width(table.find("th").eq(0).width()+fudge);
+                cornerHeader.find("th>div").height(table.find("th").eq(0).height());
             }
       
             // set the width and height of the frozen column headers
