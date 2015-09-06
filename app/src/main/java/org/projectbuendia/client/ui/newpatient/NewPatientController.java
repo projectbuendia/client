@@ -37,10 +37,6 @@ final class NewPatientController {
 
     private static final Logger LOG = Logger.create();
 
-    static final int AGE_UNKNOWN = 0;
-    static final int AGE_YEARS = 1;
-    static final int AGE_MONTHS = 2;
-
     static final int SEX_UNKNOWN = 0;
     static final int SEX_MALE = 1;
     static final int SEX_FEMALE = 2;
@@ -72,8 +68,9 @@ final class NewPatientController {
         /** Invoked when the server RPC to create a patient fails. */
         void showErrorMessage(String errorString);
 
-        /** Invoked when the server RPC to create a patient succeeds. */
-        void quitActivity();
+        /** Invoked when the server RPC to create a patient succeeds.
+         * @param patientUuid*/
+        void finishAndGoToPatientChart(String patientUuid);
     }
 
     private final Ui mUi;
@@ -160,20 +157,19 @@ final class NewPatientController {
             return false;
         }
 
-        AppPatientDelta patientDelta = new AppPatientDelta();
-        patientDelta.id = Optional.of(id);
-        patientDelta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
-        patientDelta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
-        patientDelta.birthdate = Optional.of(
+        AppPatientDelta delta = new AppPatientDelta();
+        delta.id = Optional.of(id);
+        delta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
+        delta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
+        delta.birthdate = Optional.of(
                 DateTime.now().minusYears(years).minusMonths(months));
-        patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid =
-                Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION_UUID));
-        patientDelta.admissionDate = Optional.of(admissionDate);
-        patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
+        delta.gender = Optional.of(sex);
+        delta.assignedLocationUuid = Optional.of(
+                Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION_UUID));
+        delta.admissionDate = Optional.of(admissionDate);
+        delta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
-        mModel.addPatient(mCrudEventBus, patientDelta);
-
+        mModel.addPatient(mCrudEventBus, delta);
         return true;
     }
 
@@ -190,7 +186,7 @@ final class NewPatientController {
 
         public void onEventMainThread(ItemCreatedEvent<AppPatient> event) {
             Utils.logEvent("add_patient_succeeded");
-            mUi.quitActivity();
+            mUi.finishAndGoToPatientChart(event.item.uuid);
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {

@@ -47,8 +47,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
     private static final String VALID_ID = "123";
     private static final String VALID_GIVEN_NAME = "Jane";
     private static final String VALID_FAMILY_NAME = "Doe";
-    private static final String VALID_AGE = "56";
-    private static final int VALID_AGE_UNITS = NewPatientController.AGE_YEARS;
+    private static final String VALID_AGE_YEARS = "56";
     private static final int VALID_SEX = NewPatientController.SEX_FEMALE;
     private static final LocalDate VALID_ADMISSION_DATE = LocalDate.now().minusDays(5);
     private static final LocalDate VALID_SYMPTOMS_ONSET_DATE = LocalDate.now().minusDays(8);
@@ -125,10 +124,10 @@ public class PatientCreationControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN a patient is successfully added
-        AppPatient patient = AppPatient.builder().build();
+        AppPatient patient = AppPatient.builder().setUuid("foo").build();
         mFakeCrudEventBus.post(new ItemCreatedEvent<>(patient));
-        // THEN controller tries to quit the activity
-        verify(mMockUi).quitActivity();
+        // THEN controller tries to finish the activity
+        verify(mMockUi).finishAndGoToPatientChart("foo");
     }
 
     /** Tests that all fields are set correctly when adding a fully-populated patient. */
@@ -211,7 +210,7 @@ public class PatientCreationControllerTest extends AndroidTestCase {
                 VALID_GIVEN_NAME,
                 VALID_FAMILY_NAME,
                 "-1",
-                VALID_AGE_UNITS,
+                "",
                 VALID_SEX,
                 VALID_ADMISSION_DATE,
                 VALID_SYMPTOMS_ONSET_DATE,
@@ -229,8 +228,8 @@ public class PatientCreationControllerTest extends AndroidTestCase {
                 VALID_ID,
                 VALID_GIVEN_NAME,
                 VALID_FAMILY_NAME,
-                VALID_AGE,
-                -1,
+                "",
+                "",
                 VALID_SEX,
                 VALID_ADMISSION_DATE,
                 VALID_SYMPTOMS_ONSET_DATE,
@@ -358,57 +357,39 @@ public class PatientCreationControllerTest extends AndroidTestCase {
                 argThat(matchesPatientDelta(patientDelta)));
     }
 
-    private void createPatientFromAppPatientDelta(AppPatientDelta appPatientDelta) {
-        int age = -1;
-        int ageUnit = -1;
-        if (appPatientDelta.birthdate.isPresent()) {
-            Period agePeriod = new Period(appPatientDelta.birthdate.get(), DateTime.now());
-            if (agePeriod.getYears() < 1) {
-                age = agePeriod.getMonths();
-                ageUnit = NewPatientController.AGE_MONTHS;
-            } else {
-                age = agePeriod.getYears();
-                ageUnit = NewPatientController.AGE_YEARS;
-            }
+    private void createPatientFromAppPatientDelta(AppPatientDelta delta) {
+        String ageYears = "";
+        String ageMonths = "";
+        if (delta.birthdate.isPresent()) {
+            Period agePeriod = new Period(delta.birthdate.get(), DateTime.now());
+            ageYears = "" + agePeriod.getYears();
+            ageMonths = "" + agePeriod.getMonths();
         }
 
         mNewPatientController.createPatient(
-                appPatientDelta.id.orNull(),
-                appPatientDelta.givenName.orNull(),
-                appPatientDelta.familyName.orNull(),
-                age == -1 ? null : Integer.toString(age),
-                ageUnit,
-                appPatientDelta.gender.get(),
-                appPatientDelta.admissionDate.orNull(),
-                appPatientDelta.firstSymptomDate.orNull(),
-                appPatientDelta.assignedLocationUuid.orNull()
+                delta.id.orNull(),
+                delta.givenName.orNull(),
+                delta.familyName.orNull(),
+                ageYears,
+                ageMonths,
+                delta.gender.get(),
+                delta.admissionDate.orNull(),
+                delta.firstSymptomDate.orNull(),
+                delta.assignedLocationUuid.orNull()
         );
     }
 
     private AppPatientDelta getValidAppPatientDelta() {
-        AppPatientDelta appPatientDelta = new AppPatientDelta();
-        appPatientDelta.id = Optional.of(VALID_ID);
-        appPatientDelta.givenName = Optional.of(VALID_GIVEN_NAME);
-        appPatientDelta.familyName = Optional.of(VALID_FAMILY_NAME);
-        appPatientDelta.birthdate = Optional.of(getBirthdateFromAge(
-                Integer.parseInt(VALID_AGE), VALID_AGE_UNITS));
-        appPatientDelta.gender = Optional.of(VALID_SEX);
-        appPatientDelta.admissionDate = Optional.of(VALID_ADMISSION_DATE);
-        appPatientDelta.firstSymptomDate = Optional.of(VALID_SYMPTOMS_ONSET_DATE);
-        appPatientDelta.assignedLocationUuid = Optional.of(VALID_LOCATION_UUID);
-
-        return appPatientDelta;
-    }
-
-    private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {
-        DateTime now = DateTime.now();
-        switch (ageUnits) {
-            case NewPatientController.AGE_YEARS:
-                return now.minusYears(ageInt);
-            case NewPatientController.AGE_MONTHS:
-                return now.minusMonths(ageInt);
-            default:
-                throw new IllegalArgumentException("Unknown age unit");
-        }
+        AppPatientDelta delta = new AppPatientDelta();
+        delta.id = Optional.of(VALID_ID);
+        delta.givenName = Optional.of(VALID_GIVEN_NAME);
+        delta.familyName = Optional.of(VALID_FAMILY_NAME);
+        delta.birthdate = Optional.of(
+                DateTime.now().minusYears(Integer.parseInt(VALID_AGE_YEARS)));
+        delta.gender = Optional.of(VALID_SEX);
+        delta.admissionDate = Optional.of(VALID_ADMISSION_DATE);
+        delta.firstSymptomDate = Optional.of(VALID_SYMPTOMS_ONSET_DATE);
+        delta.assignedLocationUuid = Optional.of(VALID_LOCATION_UUID);
+        return delta;
     }
 }

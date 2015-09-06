@@ -41,6 +41,7 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.model.Zone;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
@@ -468,10 +469,11 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void quitActivity() {
+        public void finishAndGoToPatientChart(String patientUuid) {
             mIsCreatePending = false;
             BigToast.show(NewPatientActivity.this, R.string.patient_creation_success);
             finish();
+            PatientChartActivity.start(NewPatientActivity.this, patientUuid);
         }
     }
 
