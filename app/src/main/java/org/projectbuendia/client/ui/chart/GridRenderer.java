@@ -194,7 +194,7 @@ public class GridRenderer {
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
             context.put("orders", mOrders);
-            return renderTemplate("assets/grid.peb", context);
+            return renderTemplate("assets/grid.html", context);
         }
 
         /** Renders a Pebble template. */

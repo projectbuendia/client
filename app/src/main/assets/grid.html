@@ -1,10 +1,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<!-- Specify font sizes in em (1 em = 10 sp). -->
-<!-- Specify margins and paddings in px (1 px = 1 dp). -->
-<!-- Specify borders using background-image: linear-gradient. -->
-
 <style>
+  /* Specify font sizes in em (1 em = 10 sp). */
+  /* Specify margins and paddings in px (1 px = 1 dp). */
+
   body { margin: 0; }
   table { background: #fff; }  /* opaque so that frozen headers are opaque */
   th, td {
@@ -13,22 +12,26 @@
     padding: 8px 0;
     text-align: left;
     vertical-align: baseline;
+
+    /* Use linear-gradient to get a border thickness of 1 device pixel. */
     background-image: linear-gradient(
         90deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
     background-size: 1px 100%;
     background-repeat: no-repeat;
     background-position: right;
   }
-  th { white-space: nowrap; padding: 8px 16px; }
 
-  thead th { text-align: center; font-size: 1.8em; }
-  .obs td, .order td { text-align: center; min-width: 3em; }
-
+  /* Row and column shading */
   .now { font-weight: bold; background: #e0f0ff; }
   tr:nth-child(even) { background: #f8f8f8; }
   tr:nth-child(even) .now { background: #d8e8f8; }
 
-  th[scope="rowgroup"] {
+  /* Column headers */
+  thead th { text-align: center; font-size: 1.8em; padding: 8px 0; }
+
+  /* Row headers */
+  tbody th { white-space: nowrap; padding: 8px 16px; }
+  tbody th[scope="rowgroup"] {
     text-transform: uppercase;
     font-size: 1.8em;
     font-weight: bold;
@@ -39,9 +42,10 @@
   }
   th[scope="row"] { max-width: 16em; overflow: hidden; }
 
+  /* Cells */
+  .obs td, .order td { text-align: center; min-width: 3em; }
   .order .future { font-size: 75%; color: #999; vertical-align: center; }
   .order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
-
   .command {
     color: #09e;
     background: #fff;
@@ -61,12 +65,14 @@ $(document).ready(function() {
 });
 </script>
 
+<!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
+
 <table id="grid" cellspacing="0" cellpadding="0">
   <thead>
     <tr>
       <th></th>
       {% for column in columns %}
-        <th class="{{column.start == nowColumnStart ? "now" : ""}}" scope="col">
+        <th class="{{column.start == nowColumnStart ? 'now' : ''}}" scope="col">
           {{column.headingHtml | raw}}
         </th>
       {% endfor %}
@@ -86,7 +92,7 @@ $(document).ready(function() {
         </th>
         {% for column in columns %}
           {% set values = get_values(row=row, column=column) %}
-          <td class="{{column.start == nowColumnStart ? "now" : ""}}"
+          <td class="{{column.start == nowColumnStart ? 'now' : ''}}"
              onclick="popup({{row.heading | js}},
             {% if values is empty %}
               []
@@ -95,27 +101,27 @@ $(document).ready(function() {
                 [{% if value.name != null %}{{value.name | js}}
                 {% elseif value.text != null %}{{value.text | js}}
                 {% elseif value.number != null %}{{value.number | js}}
-                {% else %}{{value.bool ? "'Yes'" : "'No'"}}{% endif %},
-                {{value.observed | dateformat("HH:mm") | js}}],
+                {% else %}{{value.bool ? '\'Yes\'' : '\'No\''}}{% endif %},
+                {{value.observed | dateformat('HH:mm') | js}}],
               {%- endfor -%} ]
             {% endif %} )">
             {% if values is not empty %}
               {% set last = values | last %}
               {% if last.number != null %}
-                {{values | avg | numberformat("#.#")}}
+                {{values | avg | numberformat('#.#')}}
               {% elseif last.abbrev != null %}
                 {{last.abbrev}}
               {% elseif last.text != null %}
                 <div onclick="alert(''
                   {%- for value in values -%}
                     + '---- '
-                    + {{value.observed | dateformat("dd MMM 'at' HH:mm") | js}}
+                    + {{value.observed | dateformat('dd MMM \'at\' HH:mm') | js}}
                     + ' ----\n'
                     + {{value.text | js}}
                     + '\n\n'
                   {%- endfor -%})">&#x1f4dd;</div>
               {% elseif last.bool != null %}
-                {{(values | max).bool ? "&#x25cf;" : "" | raw}}
+                {{(values | max).bool ? '&#x25cf;' : '' | raw}}
               {% endif %}
             {% endif %}
           </td>
@@ -138,7 +144,7 @@ $(document).ready(function() {
         {% set previousActive = false %}
         {% set future = false %}
         {% for column in columns %}
-          <td class="{{column.start == nowColumnStart ? "now" : ""}}">
+          <td class="{{column.start == nowColumnStart ? 'now' : ''}}">
             {% set active = intervals_overlap(order.interval, column.interval) %}
             {% if order.stop == null and previousActive %}
               <div class="future">&nbsp;</div>
