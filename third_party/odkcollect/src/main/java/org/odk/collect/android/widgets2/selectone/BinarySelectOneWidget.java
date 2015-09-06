@@ -18,6 +18,7 @@ import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -113,21 +114,35 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
         inputManager.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 
+    /** Tries to determine whether a choice is the "yes" answer. */
+    private boolean isYesChoice(SelectChoice choice) {
+        return choice.getValue().startsWith("1065^") ||
+                choice.getLabelInnerText().trim().toLowerCase().startsWith("yes");
+    }
+
     private void setYesNoChoices(FormEntryPrompt prompt) {
         List<SelectChoice> choices = prompt.getSelectChoices();
-        switch (choices.size()) {
-            case 2:
-                mYesChoice = choices.get(0);
-                mNoChoice = choices.get(1);
-                break;
-            case 3:
-                mYesChoice = choices.get(1);
-                mNoChoice = choices.get(2);
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "The select choices in the current prompt must be either (in order): yes, "
-                                + "no; or unknown, yes, and no.");
+        if (choices.size() != 2) {
+            throw new IllegalArgumentException(String.format(
+                    "Need exactly two choices but question \"%s\" has %d",
+                    mPrompt.getLongText(), choices.size()));
         }
+
+        // Find the "yes" answer and ensure it is unique.
+        List<Integer> yesChoices = new ArrayList<>();
+        for (int i = 0; i < choices.size(); i++) {
+            if (isYesChoice(choices.get(i))) {
+                yesChoices.add(i);
+            }
+        }
+        if (yesChoices.size() != 1) {
+            throw new IllegalArgumentException(String.format(
+                    "Did not find a unique \"yes\" choice for question \"%s\"",
+                    mPrompt.getLongText()));
+        }
+
+        int yesIndex = yesChoices.get(0);
+        mYesChoice = choices.get(yesIndex);
+        mNoChoice = choices.get(1 - yesIndex);
     }
 }
