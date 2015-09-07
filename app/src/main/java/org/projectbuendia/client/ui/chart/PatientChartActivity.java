@@ -55,10 +55,12 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
+import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
+import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
@@ -234,6 +236,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         mVitalUnknown = ResVital.UNKNOWN.resolve(getResources());
         mVitalKnown = ResVital.KNOWN.resolve(getResources());
+
+        mPatientLocationView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Utils.logUserAction("location_view_pressed");
+                mController.showAssignLocationDialog(PatientChartActivity.this);
+            }
+        });
     }
 
     @Override
@@ -277,24 +287,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         mController.onAddTestResultsPressed();
-                        return true;
-                    }
-                }
-        );
-
-        final MenuItem assignLocation = menu.findItem(R.id.action_relocate_patient);
-        assignLocation.setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_map_marker)
-                        .color(0xCCFFFFFF)
-                        .sizeDp(36));
-        assignLocation.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        Utils.logUserAction("location_button_pressed");
-                        mController.showAssignLocationDialog(
-                                PatientChartActivity.this, assignLocation);
                         return true;
                     }
                 }

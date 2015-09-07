@@ -496,39 +496,36 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
     }
 
-    public void showAssignLocationDialog(
-            Context context,
-            final MenuItem menuItem) {
+    public void showAssignLocationDialog(Context context) {
+        if (mAssignLocationDialog != null) return;
+
         AssignLocationDialog.LocationSelectedCallback callback =
                 new AssignLocationDialog.LocationSelectedCallback() {
-
                     @Override
                     public boolean onLocationSelected(String locationUuid) {
-                        AppPatientDelta patientDelta = new AppPatientDelta();
-                        patientDelta.assignedLocationUuid = Optional.of(locationUuid);
-
-                        mAppModel.updatePatient(mCrudEventBus, mPatient, patientDelta);
+                        AppPatientDelta delta = new AppPatientDelta();
+                        delta.assignedLocationUuid = Optional.of(locationUuid);
+                        mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
                         Utils.logUserAction("location_assigned");
                         return false;
                     }
                 };
 
-        Runnable reEnableButton = new Runnable() {
+        Runnable onDismiss = new Runnable() {
             @Override
             public void run() {
-                menuItem.setEnabled(true);
+                mAssignLocationDialog = null;
             }
         };
+
         mAssignLocationDialog = new AssignLocationDialog(
                 context,
                 mAppModel,
                 LocaleSelector.getCurrentLocale().getLanguage(),
-                reEnableButton,
+                onDismiss,
                 mCrudEventBus,
                 Optional.of(mPatient.locationUuid),
                 callback);
-
-        menuItem.setEnabled(false);
         mAssignLocationDialog.show();
     }
 

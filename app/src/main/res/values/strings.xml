@@ -47,7 +47,7 @@
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
-    <string name="action_go_to">#</string>
+    <string name="action_go_to">ID</string>
     <string name="title_location_list">Locations</string>
     <string name="today">Today</string>
     <string name="today_date">Today, %s</string>
