@@ -19,8 +19,4 @@
     <item android:id="@+id/action_update_chart"
           android:showAsAction="ifRoom"
           android:title="@string/action_update_chart"/>
-
-    <item android:id="@+id/action_add_test_result"
-          android:showAsAction="ifRoom"
-          android:title="@string/action_add_test_result"/>
 </menu>

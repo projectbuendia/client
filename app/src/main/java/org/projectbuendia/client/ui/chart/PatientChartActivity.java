@@ -244,6 +244,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mController.showAssignLocationDialog(PatientChartActivity.this);
             }
         });
+        mPcr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mController.onAddTestResultsPressed();
+            }
+        });
     }
 
     @Override
@@ -275,22 +281,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                         return true;
                     }
                 });
-
-        final MenuItem addTestResult = menu.findItem(R.id.action_add_test_result);
-        addTestResult.setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_flask)
-                        .color(0xCCFFFFFF)
-                        .sizeDp(36));
-        addTestResult.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        mController.onAddTestResultsPressed();
-                        return true;
-                    }
-                }
-        );
 
         MenuItem updateChart = menu.findItem(R.id.action_update_chart);
         updateChart.setIcon(
@@ -328,7 +318,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         }
         updateChart.setVisible(clinicalObservationFormEnabled);
-        addTestResult.setVisible(ebolaLabTestFormEnabled);
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
