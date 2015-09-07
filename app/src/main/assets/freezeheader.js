@@ -5,7 +5,7 @@
 
   Copyright (c) 2011 Brent Muir
 
-  Licensed under the MIT license ( http://www.opensource.org/licenses/mit-license )
+  Licensed under the MIT license (http://www.opensource.org/licenses/mit-license)
 
   Version 0.6.1 (with modifications for Project Buendia)
 
@@ -32,24 +32,18 @@
 
 */
 
-(function( $ ){
-
+(function ($) {
     var methods = {
-
-        init : function( options ) {
-
-            var settings = {
-                'top'  : true,
-                'left' : false
-            };
+        'init': function (options) {
+            var settings = {'top': true, 'left': false};
             if (options) { $.extend(settings, options); }
 
-            return this.each(function(){
+            return this.each(function () {
                 var $this = $(this);
                 var data = $this.data('freezeHeader');
 
                 // If the plugin hasn't been initialized yet
-                if ( ! data ) {
+                if (! data) {
                     var topHeader = null;
                     var leftHeader = null;
                     var cornerHeader = null;
@@ -86,7 +80,7 @@
                             .appendTo(document.body);
                     }
 
-                    $this.data('freezeHeader', { top: topHeader, left: leftHeader, corner: cornerHeader} );
+                    $this.data('freezeHeader', { top: topHeader, left: leftHeader, corner: cornerHeader});
                 }
                 $(window).bind('resize.freezeHeader', { table: $this }, methods.resize);
                 $(window).bind('scroll.freezeHeader', { table: $this }, methods.scroll);
@@ -94,9 +88,8 @@
             });
         }, // end init()
 
-
-        destroy : function( ) {
-            return this.each(function(){
+        'destroy': function () {
+            return this.each(function () {
                 var $this = $(this);
                 var data = $this.data('freezeHeader');
 
@@ -111,8 +104,7 @@
             })
         },
 
-
-        resize : function( event ) {
+        'resize': function (event) {
             var table = event.data.table;
             var topHeader = table.data('freezeHeader').top;
             var leftHeader = table.data('freezeHeader').left;
@@ -145,13 +137,13 @@
                     // the divs in a row might have varying heights, so find the largest one
                     // use getComputedStyle where we can because FF uses fractional heights and
                     // height() only returns whole pixels
-                    tdDivs.each(function() {
+                    tdDivs.each(function () {
                         if (typeof window.getComputedStyle == 'function') {
                             height = window.getComputedStyle(this,"").getPropertyValue("height").replace("px", "");
                         } else {
                             height = $(this).height();
                         }
-                        maxHeight = Math.max( maxHeight, height );
+                        maxHeight = Math.max(maxHeight, height);
                     });
                     $(this).children().children().eq(0).height(maxHeight + "px"); // need to add px to get FF to recognise fraction
 
@@ -169,8 +161,7 @@
             $(window).trigger('scroll');
         }, // end resize()
 
-
-        scroll : function( event ) {
+        'scroll': function (event) {
             var table = event.data.table;
             var topHeader = table.data('freezeHeader').top;
             var leftHeader = table.data('freezeHeader').left;
@@ -221,17 +212,16 @@
             }
 
         } // end scroll()
-
     };
 
-    $.fn.freezeHeader = function( method ) {
-        if ( methods[method] ) {
-            return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
-        } else if ( typeof method === 'object' || ! method ) {
-            return methods.init.apply( this, arguments );
+    $.fn.freezeHeader = function (method) {
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === 'object' || ! method) {
+            return methods.init.apply(this, arguments);
         } else {
-            $.error( 'Method ' +  method + ' does not exist on jQuery.freezeHeader' );
+            $.error('Method ' +  method + ' does not exist on jQuery.freezeHeader');
         }
     };
 
-})( jQuery );
+})(jQuery);
