@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Pair;
-import android.view.MenuItem;
 
 import com.google.common.base.Optional;
 
@@ -29,7 +28,6 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.data.app.AppEncounter.AppObservation;
-import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppLocationTree;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppOrder;
@@ -128,7 +126,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updatePatientHistoryUi(
-                List<Pair<String, String>> conceptNamesAndUuids,
+                List<Pair<String, String>> tileConceptUuidsAndNames,
+                Map<String, LocalizedObs> latestObservations,
+                List<Pair<String, String>> gridConceptUuidsAndNames,
                 List<LocalizedObs> observations,
                 List<Order> orders,
                 LocalDate admissionDate,
@@ -459,7 +459,8 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mUi.updatePatientVitalsUi(
                 conceptsToLatestObservations, admissionDate, firstSymptomsDate);
         mUi.updatePatientHistoryUi(
-                mChartHelper.getGridRows(), mObservations, orders,
+                mChartHelper.getTileConcepts(), conceptsToLatestObservations,
+                mChartHelper.getGridRowConcepts(), mObservations, orders,
                 admissionDate, firstSymptomsDate);
     }
 

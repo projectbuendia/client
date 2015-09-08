@@ -75,21 +75,21 @@
                             .children("tbody").remove().end()
                             .appendTo(document.body)
                             .wrap("<div>").parent()
-                            .css({position: 'absolute',
-                                  top: $this.offset().top,
-                                  left: $this.offset().left});
+                            .css({position: 'fixed', visibility: 'hidden'});
                     }
 
                     if (settings.left && settings.top) {
                         cornerHeader = topHeader.clone(false) // skip a few steps by cloning topHeader
                             .find("th:nth-child(n+2)").remove().end()
-                            .appendTo(document.body);
+                            .appendTo(document.body)
+                            .css({position: 'fixed', visibility: 'hidden'});
                     }
 
                     $this.data('freezeHeader', {top: topHeader, left: leftHeader, corner: cornerHeader});
                 }
                 $(window).bind('resize.freezeHeader', {table: $this}, methods.resize);
                 $(window).bind('scroll.freezeHeader', {table: $this}, methods.scroll);
+                $('#grid-scroller').bind('scroll.freezeHeader', {table: $this}, methods.scroll);
                 $(window).trigger('resize'); // force a resize event to calculate all widths/heights
             });
         }, // end init()
@@ -195,7 +195,7 @@
             var leftHeader = freezeHeader.left;
             var cornerHeader = freezeHeader.corner;
             var scrollTop = $(window).scrollTop();
-            var scrollLeft = $(window).scrollLeft();
+            var scrollLeft = $(window).scrollLeft() + $('#grid-scroller').scrollLeft();
 
             // To avoid flickering, use position fixed and hide whenever we can
             if (topHeader) {
@@ -210,18 +210,8 @@
                          left: metrics.tableLeft - scrollLeft});
             }
 
-            if (leftHeader) {
-                var headerLeft = Math.min(Math.max(0, metrics.tableLeft - scrollLeft),
-                                          metrics.tableRight - scrollLeft);
-                leftHeader.css(
-                    (scrollLeft < metrics.tableLeft) ?
-                        {visibility: 'hidden'} :
-                        {visibility: 'visible',
-                         position: 'fixed',
-                         top: metrics.tableTop - scrollTop,
-                         left: headerLeft});
-            }
-
+            var headerLeft = Math.min(Math.max(0, metrics.tableLeft - scrollLeft),
+                                      metrics.tableRight - scrollLeft);
             if (cornerHeader) {
                 cornerHeader.css(
                     (scrollTop < metrics.tableTop || scrollLeft < metrics.tableLeft) ?

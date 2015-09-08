@@ -38,7 +38,8 @@ import java.util.TreeSet;
 /** A simple helper class for retrieving and localizing data from patient charts. */
 public class LocalizedChartHelper {
 
-    public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+    public static final String CHART_GRID_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+    public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
     public static final String ENGLISH_LOCALE = "en";
 
     /** UUIDs for concepts that mean everything is normal; there is no worrying symptom. */
@@ -84,7 +85,7 @@ public class LocalizedChartHelper {
             // Get all the regular observations with localized names.
             cursor = mContentResolver.query(
                     Contracts.getLocalizedChartUri(
-                            KNOWN_CHART_UUID, patientUuid, locale),
+                            CHART_GRID_UUID, patientUuid, locale),
                     null, null, null, null);
             while (cursor.moveToNext()) {
                 results.add(new LocalizedObs(
@@ -185,8 +186,8 @@ public class LocalizedChartHelper {
         return observations;
     }
 
-    /** Gets a list of the concept UUIDs and names to show in the rows of the chart grid. */
-    public List<Pair<String, String>> getGridRows() {
+    /** Gets a list of the concept UUIDs and names to show in the chart tiles. */
+    public List<Pair<String, String>> getTileConcepts() {
         Map<String, String> conceptNames = new HashMap<>();
         Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
                 "locale = ?",  new String[] {ENGLISH_LOCALE}, null);
@@ -200,7 +201,34 @@ public class LocalizedChartHelper {
         }
         List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
         cursor = mContentResolver.query(Contracts.Charts.CONTENT_URI, null,
-                "chart_uuid = ?", new String[] {KNOWN_CHART_UUID}, "chart_row");
+                "chart_uuid = ?", new String[] {CHART_TILES_UUID}, "chart_row");
+        try {
+            while (cursor.moveToNext()) {
+                String uuid = Utils.getString(cursor, "concept_uuid");
+                conceptUuidsAndNames.add(new Pair<>(uuid, conceptNames.get(uuid)));
+            }
+        } finally {
+            cursor.close();
+        }
+        return conceptUuidsAndNames;
+    }
+
+    /** Gets a list of the concept UUIDs and names to show in the rows of the chart grid. */
+    public List<Pair<String, String>> getGridRowConcepts() {
+        Map<String, String> conceptNames = new HashMap<>();
+        Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
+                "locale = ?",  new String[] {ENGLISH_LOCALE}, null);
+        try {
+            while (cursor.moveToNext()) {
+                conceptNames.put(Utils.getString(cursor, "concept_uuid"),
+                        Utils.getString(cursor, "name"));
+            }
+        } finally {
+            cursor.close();
+        }
+        List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
+        cursor = mContentResolver.query(Contracts.Charts.CONTENT_URI, null,
+                "chart_uuid = ?", new String[] {CHART_GRID_UUID}, "chart_row");
         try {
             while (cursor.moveToNext()) {
                 String uuid = Utils.getString(cursor, "concept_uuid");

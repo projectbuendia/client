@@ -88,24 +88,10 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // (and values slightly below 40.0 may be the result of rounding errors).
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
 
-    // Note the general condition uuid when retrieved so that it can be passed to the controller.
-    private String mGeneralConditionUuid;
-
     public static void start(Context caller, String uuid) {
         Intent intent = new Intent(caller, PatientChartActivity.class);
         intent.putExtra("uuid", uuid);
         caller.startActivity(intent);
-    }
-
-    /** XForms that can be launched from this activity. */
-    public static class XForm {
-        public final String uuid;
-        public final int formIndex;
-
-        public XForm(String uuid, int formIndex) {
-            this.uuid = uuid;
-            this.formIndex = formIndex;
-        }
     }
 
     private static final String KEY_CONTROLLER_STATE = "controllerState";
@@ -115,9 +101,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     // TODO: Refactor.
     private boolean mIsFetchingXform = false;
-
-    private ResVital.Resolved mVitalUnknown;
-    private ResVital.Resolved mVitalKnown;
 
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
@@ -139,34 +122,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
     @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
-
-    @InjectView(R.id.patient_chart_weight_parent) ViewGroup mWeightParent;
-    @InjectView(R.id.patient_chart_vital_weight) TextView mWeight;
-    @InjectView(R.id.vital_name_weight) TextView mWeightName;
-
-    /*
-    @InjectView(R.id.patient_chart_general_condition_parent) ViewGroup mGeneralConditionParent;
-    @InjectView(R.id.patient_chart_vital_general_condition_number) TextView mGeneralConditionNum;
-    @InjectView(R.id.patient_chart_vital_general_condition) TextView mGeneralCondition;
-    @InjectView(R.id.vital_name_general_condition) TextView mGeneralConditionName;
-    */
-
-    @InjectView(R.id.patient_chart_responsiveness_parent) ViewGroup mResponsivenessParent;
-    @InjectView(R.id.patient_chart_vital_responsiveness) TextView mResponsiveness;
-    @InjectView(R.id.vital_name_responsiveness) TextView mResponsivenessName;
-
-    @InjectView(R.id.patient_chart_mobility_parent) ViewGroup mMobilityParent;
-    @InjectView(R.id.patient_chart_vital_mobility) TextView mMobility;
-    @InjectView(R.id.vital_name_mobility) TextView mMobilityName;
-
-    @InjectView(R.id.patient_chart_pain_parent) ViewGroup mPainParent;
-    @InjectView(R.id.patient_chart_vital_pain) TextView mPain;
-    @InjectView(R.id.vital_name_pain) TextView mPainName;
-
-    @InjectView(R.id.vital_diet) VitalView mDiet;
-    @InjectView(R.id.vital_food_drink) VitalView mHydration;
-    @InjectView(R.id.vital_pulse) VitalView mPulse;
-    @InjectView(R.id.vital_respiration) VitalView mRespiration;
 
     @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
@@ -233,9 +188,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        mVitalUnknown = ResVital.UNKNOWN.resolve(getResources());
-        mVitalKnown = ResVital.KNOWN.resolve(getResources());
 
         mPatientLocationView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -378,55 +330,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
     }
 
-    /** Updates a {@link VitalView} to display a new observation value. */
-    private void showObservation(VitalView view, @Nullable LocalizedObs observation) {
-        if (observation != null) {
-            view.setBackgroundColor(mVitalKnown.getBackgroundColor());
-            view.setTextColor(mVitalKnown.getForegroundColor());
-
-            view.setValue(observation.localizedValue);
-        } else {
-            view.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-            view.setTextColor(mVitalUnknown.getForegroundColor());
-
-            view.setValue("-");
-        }
-    }
-
-    /** Updates a {@link ViewGroup} to display a new observation value. */
-    private void showObservationForViewGroup(
-            ViewGroup parent, TextView nameView, TextView valueView,
-            @Nullable LocalizedObs observation) {
-        if (observation != null && observation.localizedValue != null) {
-            parent.setBackgroundColor(mVitalKnown.getBackgroundColor());
-            valueView.setTextColor(mVitalKnown.getForegroundColor());
-            nameView.setTextColor(mVitalKnown.getForegroundColor());
-
-            String text = observation.localizedValue;
-            if (observation.conceptType == ConceptType.NUMERIC) {
-                text = String.format("%.1f", Float.parseFloat(observation.value));
-            } else {
-                // If the label begins with a one or two-character abbreviation
-                // followed by a period, display the abbreviation on its own line.
-                int abbrevLength = text.indexOf('.');
-                if (abbrevLength == 1 || abbrevLength == 2) {
-                    text = text.substring(0, abbrevLength) + "\n"
-                            + text.substring(abbrevLength + 1).trim();
-                }
-            }
-            valueView.setText(text);
-        } else {
-            parent.setBackgroundColor(mVitalUnknown.getBackgroundColor());
-            valueView.setTextColor(mVitalUnknown.getForegroundColor());
-            nameView.setTextColor(mVitalUnknown.getForegroundColor());
-
-            valueView.setText("–"); // en dash
-        }
-        if (observation != null) {
-            nameView.setText(observation.conceptName);
-        }
-    }
-
     private final class Ui implements PatientChartController.Ui {
         @Override
         public void setTitle(String title) {
@@ -448,35 +351,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public void updatePatientVitalsUi(Map<String, LocalizedObs> observations,
                                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             // TODO: Localize strings in this function.
-            showObservation(mDiet, observations.get(Concepts.FLUIDS_UUID));
-            showObservation(mHydration, observations.get(Concepts.HYDRATION_UUID));
-            showObservation(mPulse, observations.get(Concepts.PULSE_UUID));
-            showObservation(mRespiration, observations.get(Concepts.RESPIRATION_UUID));
-
-            showObservationForViewGroup(
-                    mWeightParent, mWeightName, mWeight,
-                    observations.get(Concepts.WEIGHT_UUID));
-            showObservationForViewGroup(
-                    mResponsivenessParent, mResponsivenessName, mResponsiveness,
-                    observations.get(Concepts.CONSCIOUS_STATE_UUID));
-            showObservationForViewGroup(
-                    mMobilityParent, mMobilityName, mMobility,
-                    observations.get(Concepts.MOBILITY_UUID));
-            showObservationForViewGroup(
-                    mPainParent, mPainName, mPain, observations.get(Concepts.PAIN_UUID));
-
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
             mPatientAdmissionDaysView.setValue(
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mPatientSymptomOnsetDaysView.setValue(
                     day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
-
-            // General Condition
-            LocalizedObs observation = observations.get(Concepts.GENERAL_CONDITION_UUID);
-            if (observation != null) {
-                updatePatientConditionUi(observation.value);
-            }
 
             // PCR
             LocalizedObs pcrLObservation = observations.get(Concepts.PCR_L_UUID);
@@ -529,17 +409,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
+            LocalizedObs obs;
 
-            observation = observations.get(Concepts.PREGNANCY_UUID);
-            if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
+            obs = observations.get(Concepts.PREGNANCY_UUID);
+            if (obs != null && Concepts.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.pregnant));
             }
-
-            observation = observations.get(Concepts.IV_UUID);
-            if (observation != null && Concepts.YES_UUID.equals(observation.value)) {
+            obs = observations.get(Concepts.IV_UUID);
+            if (obs != null && Concepts.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
-
             mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
         }
 
@@ -573,13 +452,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientHistoryUi(
-                List<Pair<String, String>> conceptNamesAndUuids,
+                List<Pair<String, String>> tileConceptUuidsAndNames,
+                Map<String, LocalizedObs> latestObservations,
+                List<Pair<String, String>> gridConceptUuidsAndNames,
                 List<LocalizedObs> observations,
                 List<Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate) {
             mGridRenderer.render(
-                    conceptNamesAndUuids, observations, orders,
+                    tileConceptUuidsAndNames, latestObservations,
+                    gridConceptUuidsAndNames, observations, orders,
                     admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }

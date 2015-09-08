@@ -58,10 +58,13 @@ public class GridRenderer {
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(List<Pair<String, String>> conceptUuidsAndNames,
+    public void render(List<Pair<String, String>> tileConceptUuidsAndNames,
+                       Map<String, LocalizedObs> latestObservations,
+                       List<Pair<String, String>> gridConceptUuidsAndNames,
                        List<LocalizedObs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
+
         if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
             return;  // nothing has changed; no need to render again
         }
@@ -70,7 +73,8 @@ public class GridRenderer {
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
-                conceptUuidsAndNames, observations, orders,
+                tileConceptUuidsAndNames, latestObservations,
+                gridConceptUuidsAndNames, observations, orders,
                 admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
@@ -84,25 +88,33 @@ public class GridRenderer {
     }
 
     class GridHtmlGenerator {
-        List<String> mConceptUuids;
+        List<String> mTileConceptUuids;
+        List<String> mGridConceptUuids;
         List<Order> mOrders;
         LocalDate mToday;
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
+        List<Tile> mTiles = new ArrayList<>();
         List<Row> mRows = new ArrayList<>();
         Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
 
-        GridHtmlGenerator(List<Pair<String, String>> conceptUuidsAndNames,
+        GridHtmlGenerator(List<Pair<String, String>> tileConceptUuidsAndNames,
+                          Map<String, LocalizedObs> latestObservations,
+                          List<Pair<String, String>> gridConceptUuidsAndNames,
                           List<LocalizedObs> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
             mToday = LocalDate.now(chronology);
             mOrders = orders;
-            for (Pair<String, String> uuidAndName : conceptUuidsAndNames) {
+            for (Pair<String, String> uuidAndName : tileConceptUuidsAndNames) {
+                mTiles.add(new Tile(uuidAndName.first, uuidAndName.second,
+                        new Value(latestObservations.get(uuidAndName.first), chronology)));
+            }
+            for (Pair<String, String> uuidAndName : gridConceptUuidsAndNames) {
                 addRow(uuidAndName.first, uuidAndName.second);
             }
             addObservations(observations);
@@ -190,6 +202,7 @@ public class GridRenderer {
             }
 
             Map<String, Object> context = new HashMap<>();
+            context.put("tiles", mTiles);
             context.put("rows", mRows);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);

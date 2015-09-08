@@ -42,6 +42,7 @@ import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -130,7 +131,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updatePatientHistoryUi(
-                new ArrayList<Pair<String, String>>(), allObservations, ImmutableList.<Order>of(), null, null);
+                new ArrayList<Pair<String, String>>(), new HashMap<String, LocalizedObs>(),
+                new ArrayList<Pair<String, String>>(), allObservations,
+                ImmutableList.<Order>of(), null, null);
         verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
     }
 

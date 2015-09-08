@@ -70,7 +70,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final Logger LOG = Logger.create();
 
-    public static final String KNOWN_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+    public static final String GRID_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+    public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
 
     /**
      * Keys in the extras bundle used to select which sync phases to do.
@@ -436,14 +437,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             OperationApplicationException {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<ChartStructure> future = RequestFuture.newFuture();
-        chartServer.getChartStructure(KNOWN_CHART_UUID, future, future); // errors handled by caller
+        chartServer.getChartStructure(GRID_CHART_UUID, future, future); // errors handled by caller
         final ChartStructure conceptList = future.get();
-        checkCancellation("before applying chart structure deletions");
+        RequestFuture<ChartStructure> future2 = RequestFuture.newFuture();
+        chartServer.getChartStructure(CHART_TILES_UUID, future2, future2); // errors handled by caller
+        final ChartStructure tilesList = future2.get();
+
         // When we do a chart update, delete everything first.
+        checkCancellation("before applying chart structure deletions");
         provider.delete(Charts.CONTENT_URI, null, null);
-        checkCancellation("before applying chart structure insertions");
         syncResult.stats.numDeletes++;
+
+        // Insert the rows from both charts.
+        checkCancellation("before applying chart structure insertions");
         provider.applyBatch(DbSyncHelper.getChartUpdateOps(conceptList, syncResult));
+        provider.applyBatch(DbSyncHelper.getChartUpdateOps(tilesList, syncResult));
     }
 
     private void updateObservations(final ContentProviderClient provider, SyncResult syncResult,
