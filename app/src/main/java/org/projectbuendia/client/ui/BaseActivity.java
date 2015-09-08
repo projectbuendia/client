@@ -15,10 +15,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -71,6 +74,34 @@ public abstract class BaseActivity extends FragmentActivity {
 
         super.onPause();
         App.getInstance().getHealthMonitor().stop();
+    }
+
+    public void adjustFontScale(int delta) {
+        Configuration config = getResources().getConfiguration();
+        config.fontScale = (float) Math.max(0.85, Math.min(1.3, config.fontScale + delta*0.15));
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        finish();
+        startActivity(getIntent());
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    adjustFontScale(1);
+                }
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    adjustFontScale(-1);
+                }
+                return true;
+            default:
+                return super.dispatchKeyEvent(event);
+        }
     }
 
     @Override
