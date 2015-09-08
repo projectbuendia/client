@@ -33,6 +33,8 @@
 */
 
 (function ($) {
+    var frameRequested = false;
+
     var methods = {
         'init': function (options) {
             var settings = {'top': true, 'left': false};
@@ -63,7 +65,9 @@
                         leftHeader = $this.clone(false)
                             .find("th:nth-child(n+2), td:nth-child(n+2)").remove().end()
                             .appendTo(document.body).wrap("<div>").parent()
-                            .css({ position: 'absolute', top: $this.offset().top, left: $this.offset().left });
+                            .css({position: 'absolute',
+                                  top: $this.offset().top,
+                                  left: $this.offset().left});
                     }
 
                     if (settings.top) {
@@ -71,7 +75,9 @@
                             .children("tbody").remove().end()
                             .appendTo(document.body)
                             .wrap("<div>").parent()
-                            .css({ position: 'absolute', top: $this.offset().top, left: $this.offset().left });
+                            .css({position: 'absolute',
+                                  top: $this.offset().top,
+                                  left: $this.offset().left});
                     }
 
                     if (settings.left && settings.top) {
@@ -80,10 +86,10 @@
                             .appendTo(document.body);
                     }
 
-                    $this.data('freezeHeader', { top: topHeader, left: leftHeader, corner: cornerHeader});
+                    $this.data('freezeHeader', {top: topHeader, left: leftHeader, corner: cornerHeader});
                 }
-                $(window).bind('resize.freezeHeader', { table: $this }, methods.resize);
-                $(window).bind('scroll.freezeHeader', { table: $this }, methods.scroll);
+                $(window).bind('resize.freezeHeader', {table: $this}, methods.resize);
+                $(window).bind('scroll.freezeHeader', {table: $this}, methods.scroll);
                 $(window).trigger('resize'); // force a resize event to calculate all widths/heights
             });
         }, // end init()
@@ -162,56 +168,65 @@
         }, // end resize()
 
         'scroll': function (event) {
-            var table = event.data.table;
-            var topHeader = table.data('freezeHeader').top;
-            var leftHeader = table.data('freezeHeader').left;
-            var cornerHeader = table.data('freezeHeader').corner;
+            if (!frameRequested) {
+                frameRequested = true;
+                window.requestAnimationFrame(function() {
+                    methods.update(event.data.table);
+                });
+            }
+        },
+
+        'update': function (table) {
+            var freezeHeader = table.data('freezeHeader');
+            var topHeader = freezeHeader.top;
+            var leftHeader = freezeHeader.left;
+            var cornerHeader = freezeHeader.corner;
             var scrollTop = $(window).scrollTop();
             var scrollLeft = $(window).scrollLeft();
-            var tableTop = table.offset().top;
-            var tableLeft = table.offset().left;
-
-            if (topHeader) {
-                var tableBottom = tableTop + table.height() - topHeader.height()
-                    - table.attr("rows")[table.attr("rows").length-1].offsetHeight;
-            }
-            if (leftHeader) {
-                var tableRight = tableLeft + table.width() - leftHeader.width()
-                    - table.attr("rows")[0].cells[table.attr("rows")[0].cells.length-1].offsetWidth;
-            }
+            var tableOffset = table.offset();
+            var tableTop = tableOffset.top;
+            var tableLeft = tableOffset.left;
+            var rows = table.attr('rows');
 
             // To avoid flickering, use position fixed and hide whenever we can
             if (topHeader) {
+                var tableBottom = tableTop + table.height() - topHeader.height();
+                var headerTop = Math.min(Math.max(0, tableTop - scrollTop),
+                                         tableBottom - scrollTop);
                 topHeader.css(
                     (scrollTop < tableTop) ?
-                        { visibility: 'hidden' } :
-                        { visibility: 'visible',
-                          position: 'fixed',
-                          top: Math.min(Math.max(0, tableTop - scrollTop), tableBottom - scrollTop),
-                          left: tableLeft - scrollLeft });
+                        {visibility: 'hidden'} :
+                        {visibility: 'visible',
+                         position: 'fixed',
+                         top: headerTop,
+                         left: tableLeft - scrollLeft});
             }
 
             if (leftHeader) {
+                var tableRight = tableLeft + table.width() - leftHeader.width();
+                var headerLeft = Math.min(Math.max(0, tableLeft - scrollLeft),
+                                          tableRight - scrollLeft);
                 leftHeader.css(
                     (scrollLeft < tableLeft) ?
-                        { visibility: 'hidden' } :
-                        { visibility: 'visible',
-                          position: 'fixed',
-                          top: tableTop - scrollTop,
-                          left: Math.min(Math.max(0, tableLeft - scrollLeft), tableRight - scrollLeft) });
+                        {visibility: 'hidden'} :
+                        {visibility: 'visible',
+                         position: 'fixed',
+                         top: tableTop - scrollTop,
+                         left: headerLeft});
             }
 
             if (cornerHeader) {
                 cornerHeader.css(
                     (scrollTop < tableTop || scrollLeft < tableLeft) ?
-                        { visibility: 'hidden' } :
-                        { visibility: 'visible',
-                          position: 'fixed',
-                          top: Math.min(Math.max(0, tableTop - scrollTop), tableBottom - scrollTop),
-                          left: Math.min(Math.max(0, tableLeft - scrollLeft), tableRight - scrollLeft) });
+                        {visibility: 'hidden'} :
+                        {visibility: 'visible',
+                         position: 'fixed',
+                         top: headerTop,
+                         left: headerLeft});
             }
 
-        } // end scroll()
+            frameRequested = false;
+        }
     };
 
     $.fn.freezeHeader = function (method) {
