@@ -1,6 +1,7 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -68,7 +69,14 @@ public class GridRenderer {
         if (observations.equals(mLastRenderedObs) && orders.equals(mLastRenderedOrders)) {
             return;  // nothing has changed; no need to render again
         }
-        mView.getSettings().setDefaultFontSize(10);  // define 1 em to be equal to 10 sp
+
+        // setDefaultFontSize is supposed to take a size in sp, but in practice
+        // the fonts don't change size when the user font size preference changes.
+        // So, we apply the scaling factor explicitly, defining 1 em to be 10 sp.
+        DisplayMetrics metrics = mResources.getDisplayMetrics();
+        float defaultFontSize = 10 * metrics.scaledDensity / metrics.density;
+        mView.getSettings().setDefaultFontSize((int) defaultFontSize);
+
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
@@ -82,6 +90,7 @@ public class GridRenderer {
         // mView.loadData(html, "text/html; charset=utf-8", null);
         mView.loadDataWithBaseURL("file:///android_asset/", html,
                 "text/html; charset=utf-8", "utf-8", null);
+        mView.setWebContentsDebuggingEnabled(true);
 
         mLastRenderedObs = observations;
         mLastRenderedOrders = orders;
