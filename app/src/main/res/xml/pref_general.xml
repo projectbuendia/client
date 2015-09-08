@@ -14,7 +14,7 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
 
-    <!-- the server to use for OpenMRS -->
+    <!-- The hostname to use as both OpenMRS server and package server -->
 
     <org.projectbuendia.client.widget.EditAndClearDataPreference
         android:key="server"
@@ -22,6 +22,7 @@
         android:defaultValue="@string/server_default"
         android:selectAllOnFocus="true"
         android:inputType="text"
+        android:digits="abcdefghijklmnopqrstuvwxyz0123456789."
         android:capitalize="none"
         android:singleLine="true"
         android:maxLines="1" />

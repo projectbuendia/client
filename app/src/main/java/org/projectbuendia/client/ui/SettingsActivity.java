@@ -206,10 +206,11 @@ public class SettingsActivity extends PreferenceActivity {
                         switch (pref.getKey()) {
                             case "server":
                                 if (!str.equals("")) {
-                                    prefs.edit().putString("openmrs_root_url",
-                                            "http://" + value + ":9000/openmrs")
+                                    prefs.edit()
+                                            .putString("openmrs_root_url",
+                                                    "http://" + str + ":9000/openmrs")
                                             .putString("package_server_root_url",
-                                                    "http://" + value + ":9001/")
+                                                    "http://" + str + ":9001")
                                             .apply();
                                 }
                                 break;
@@ -219,7 +220,7 @@ public class SettingsActivity extends PreferenceActivity {
                                 }
                                 break;
                             case "package_server_root_url":
-                                if (!str.equals("http://" + server + ":9001/")) {
+                                if (!str.equals("http://" + server + ":9001")) {
                                     prefs.edit().putString("server", "").apply();
                                 }
                                 break;

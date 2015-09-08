@@ -140,7 +140,7 @@ def serverDefault = serverDev;
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs';
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
-def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001/';
+def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001';
 
 // Apply overrides such as -PopenmrsRootUrl=url etc.
 project.metaClass.propertyMissing = { null }
@@ -149,7 +149,7 @@ def openmrsRootUrl = project.server ? 'http://' + project.server + ':9000/openmr
     : project.openmrsRootUrl ?: openmrsRootUrlDefault
 def openmrsUser = project.openmrsUser ?: openmrsUserDefault
 def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
-def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001/'
+def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001'
     : project.packageServerRootUrl ?: packageServerRootUrlDefault
 def requireWifi = "true"
 
