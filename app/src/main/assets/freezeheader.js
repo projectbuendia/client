@@ -163,6 +163,18 @@
                 });
             }
 
+            var metrics = {
+                tableTop: table.offset().top,
+                tableLeft: table.offset().left,
+                tableHeight: table.height(),
+                topHeaderHeight: topHeader ? topHeader.height() : 0,
+                tableWidth: table.width(),
+                leftHeaderWidth: leftHeader ? leftHeader.width() : 0
+            };
+            metrics.tableBottom = metrics.tableTop + metrics.tableHeight - metrics.topHeaderHeight;
+            metrics.tableRight = metrics.tableLeft + metrics.tableWidth - metrics.leftHeaderWidth;
+            table.data('freezeHeaderMetrics', metrics);
+
             // trigger a scroll event because a resize may reposition some elements
             $(window).trigger('scroll');
         }, // end resize()
@@ -178,46 +190,41 @@
 
         'update': function (table) {
             var freezeHeader = table.data('freezeHeader');
+            var metrics = table.data('freezeHeaderMetrics');
             var topHeader = freezeHeader.top;
             var leftHeader = freezeHeader.left;
             var cornerHeader = freezeHeader.corner;
             var scrollTop = $(window).scrollTop();
             var scrollLeft = $(window).scrollLeft();
-            var tableOffset = table.offset();
-            var tableTop = tableOffset.top;
-            var tableLeft = tableOffset.left;
-            var rows = table.attr('rows');
 
             // To avoid flickering, use position fixed and hide whenever we can
             if (topHeader) {
-                var tableBottom = tableTop + table.height() - topHeader.height();
-                var headerTop = Math.min(Math.max(0, tableTop - scrollTop),
-                                         tableBottom - scrollTop);
+                var headerTop = Math.min(Math.max(0, metrics.tableTop - scrollTop),
+                                         metrics.tableBottom - scrollTop);
                 topHeader.css(
-                    (scrollTop < tableTop) ?
+                    (scrollTop < metrics.tableTop) ?
                         {visibility: 'hidden'} :
                         {visibility: 'visible',
                          position: 'fixed',
                          top: headerTop,
-                         left: tableLeft - scrollLeft});
+                         left: metrics.tableLeft - scrollLeft});
             }
 
             if (leftHeader) {
-                var tableRight = tableLeft + table.width() - leftHeader.width();
-                var headerLeft = Math.min(Math.max(0, tableLeft - scrollLeft),
-                                          tableRight - scrollLeft);
+                var headerLeft = Math.min(Math.max(0, metrics.tableLeft - scrollLeft),
+                                          metrics.tableRight - scrollLeft);
                 leftHeader.css(
-                    (scrollLeft < tableLeft) ?
+                    (scrollLeft < metrics.tableLeft) ?
                         {visibility: 'hidden'} :
                         {visibility: 'visible',
                          position: 'fixed',
-                         top: tableTop - scrollTop,
+                         top: metrics.tableTop - scrollTop,
                          left: headerLeft});
             }
 
             if (cornerHeader) {
                 cornerHeader.css(
-                    (scrollTop < tableTop || scrollLeft < tableLeft) ?
+                    (scrollTop < metrics.tableTop || scrollLeft < metrics.tableLeft) ?
                         {visibility: 'hidden'} :
                         {visibility: 'visible',
                          position: 'fixed',
