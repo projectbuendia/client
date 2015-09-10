@@ -78,10 +78,13 @@ public abstract class BaseActivity extends FragmentActivity {
 
     public void adjustFontScale(int delta) {
         Configuration config = getResources().getConfiguration();
-        config.fontScale = (float) Math.max(0.85, Math.min(1.3, config.fontScale + delta*0.15));
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        finish();
-        startActivity(getIntent());
+        float newScale = (float) Math.max(0.7, Math.min(1.3, config.fontScale + delta*0.15));
+        if (newScale != config.fontScale) {
+            config.fontScale = newScale;
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+            finish();
+            startActivity(getIntent());
+        }
     }
 
     @Override
