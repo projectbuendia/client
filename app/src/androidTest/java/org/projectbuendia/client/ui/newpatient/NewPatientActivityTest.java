@@ -30,9 +30,8 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         type(id, viewWithId(R.id.patient_creation_text_patient_id));
         type(given, viewWithId(R.id.patient_creation_text_patient_given_name));
         type(family, viewWithId(R.id.patient_creation_text_patient_family_name));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_text_age));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_units_years));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_units_months));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_age_years));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_age_months));
         click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
         click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
         screenshot("After Patient Populated");

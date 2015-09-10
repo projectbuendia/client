@@ -317,7 +317,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
                 new EventBusIdlingResource<FetchXformSucceededEvent>(
                         UUID.randomUUID().toString(),
                         mEventBus);
-        click(viewWithId(R.id.action_add_test_result));
+        click(viewWithId(R.id.attribute_pcr));
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).

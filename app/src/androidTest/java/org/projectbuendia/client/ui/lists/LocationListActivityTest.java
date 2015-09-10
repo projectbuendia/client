@@ -76,7 +76,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
         inPatientListClickFirstPatient(); // open patient chart
 
         // Relocate the patient to C1.
-        click(viewWithId(R.id.action_relocate_patient));
+        click(viewWithId(R.id.attribute_location));
         click(viewWithText("C1"));
 
         pressBack(); // back to search fragment

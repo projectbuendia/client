@@ -228,13 +228,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         }
         if (delta.birthdate.isPresent()) {
             Period age = new Period(delta.birthdate.get().toLocalDate(), LocalDate.now());
-            if (age.getYears() < 1) {
-                type(age.getMonths(), viewWithId(R.id.patient_creation_text_age));
-                click(viewWithId(R.id.patient_creation_radiogroup_age_units_months));
-            } else {
-                type(age.getYears(), viewWithId(R.id.patient_creation_text_age));
-                click(viewWithId(R.id.patient_creation_radiogroup_age_units_years));
-            }
+            type(age.getMonths(), viewWithId(R.id.patient_creation_age_months));
+            type(age.getYears(), viewWithId(R.id.patient_creation_age_years));
         }
         if (delta.gender.isPresent()) {
             if (delta.gender.get() == AppPatient.GENDER_MALE) {
