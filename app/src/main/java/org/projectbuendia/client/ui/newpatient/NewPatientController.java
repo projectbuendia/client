@@ -18,16 +18,16 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -54,7 +54,7 @@ final class NewPatientController {
         static final int FIELD_ADMISSION_DATE = 8;
         static final int FIELD_SYMPTOMS_ONSET_DATE = 9;
 
-        void setLocationTree(AppLocationTree locationTree);
+        void setLocationTree(LocationTree locationTree);
 
         /** Adds a validation error message for a specific field. */
         void showValidationError(int field, int messageResource, String... messageArgs);
@@ -79,7 +79,7 @@ final class NewPatientController {
 
     private final EventSubscriber mEventBusSubscriber;
 
-    private AppLocationTree mLocationTree;
+    private LocationTree mLocationTree;
 
     public NewPatientController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
         mUi = ui;
@@ -157,7 +157,7 @@ final class NewPatientController {
             return false;
         }
 
-        AppPatientDelta delta = new AppPatientDelta();
+        PatientDelta delta = new PatientDelta();
         delta.id = Optional.of(id);
         delta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
         delta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
@@ -165,7 +165,7 @@ final class NewPatientController {
                 DateTime.now().minusYears(years).minusMonths(months));
         delta.gender = Optional.of(sex);
         delta.assignedLocationUuid = Optional.of(
-                Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION_UUID));
+                Utils.valueOrDefault(locationUuid, Zones.DEFAULT_LOCATION_UUID));
         delta.admissionDate = Optional.of(admissionDate);
         delta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
@@ -184,7 +184,7 @@ final class NewPatientController {
             mLocationTree = event.tree;
         }
 
-        public void onEventMainThread(ItemCreatedEvent<AppPatient> event) {
+        public void onEventMainThread(ItemCreatedEvent<Patient> event) {
             Utils.logEvent("add_patient_succeeded");
             mUi.finishAndGoToPatientChart(event.item.uuid);
         }

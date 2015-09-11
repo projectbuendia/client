@@ -71,7 +71,7 @@
         android:layout_marginTop="0dp"
         android:orientation="horizontal">
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_admission_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
             app:attributeName="Since admission"
             app:attributeValue="–"/>
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_symptoms_onset_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
             app:attributeName="Since symptom onset"
             app:attributeValue="–"/>
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
             app:attributeName="Location"
             app:attributeValue="–"/>
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_pcr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

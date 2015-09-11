@@ -16,8 +16,8 @@ import android.test.AndroidTestCase;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
@@ -58,7 +58,7 @@ public class PatientFilterControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientFilterController, after setupActionBarAsync called
         mController.setupActionBarAsync();
         // WHEN location tree fetched
-        AppLocationTree tree = FakeAppLocationTreeFactory.build();
+        LocationTree tree = FakeAppLocationTreeFactory.build();
         AppLocationTreeFetchedEvent event = new AppLocationTreeFetchedEvent(tree);
         mFakeCrudEventBus.post(event);
         // THEN location filters passed to the Ui

@@ -17,9 +17,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
@@ -28,7 +28,7 @@ import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.LoadingState;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -46,7 +46,7 @@ final class LocationListController {
      * The depth of locations to display. Only locations at this depth in the location tree will be
      * displayed.
      */
-    private static final int LOCATIONS_DEPTH = AppLocationTree.ABSOLUTE_DEPTH_TENT;
+    private static final int LOCATIONS_DEPTH = LocationTree.ABSOLUTE_DEPTH_TENT;
 
     public interface Ui {
 
@@ -54,7 +54,7 @@ final class LocationListController {
 
         void switchToPatientList();
 
-        void openSingleLocation(AppLocation location);
+        void openSingleLocation(Location location);
 
         void showSyncFailedDialog(boolean show);
 
@@ -65,7 +65,7 @@ final class LocationListController {
 
     public interface LocationFragmentUi {
 
-        void setLocations(AppLocationTree locationTree, List<AppLocation> locations);
+        void setLocations(LocationTree locationTree, List<Location> locations);
 
         void setPresentPatientCount(int patientCount);
 
@@ -91,9 +91,9 @@ final class LocationListController {
     private final SyncManager mSyncManager;
     private final PatientSearchController mPatientSearchController;
 
-    @Nullable private AppLocationTree mAppLocationTree;
-    @Nullable private AppLocation mTriageZone;
-    @Nullable private AppLocation mDischargedZone;
+    @Nullable private LocationTree mLocationTree;
+    @Nullable private Location mTriageZone;
+    @Nullable private Location mDischargedZone;
 
     // True when the data model is unavailable and either a sync is already in progress or has been
     // requested by this controller.
@@ -126,7 +126,7 @@ final class LocationListController {
         mCrudEventBus.register(mEventBusSubscriber);
         LOG.d("init: isLocationTreeValid() = " + isLocationTreeValid());
 
-        // Get or update mAppLocationTree.
+        // Get or update mLocationTree.
         if (mAppModel.isFullModelAvailable()) {
             LOG.i("Data model is available in init(); loading location tree from local DB");
             mWaitingOnSync = false;
@@ -144,9 +144,9 @@ final class LocationListController {
         updateUi();
     }
 
-    /** Returns true if a non-empty AppLocationTree has been loaded from the local database. */
+    /** Returns true if a non-empty LocationTree has been loaded from the local database. */
     private boolean isLocationTreeValid() {
-        return mAppLocationTree != null && mAppLocationTree.getRoot() != null;
+        return mLocationTree != null && mLocationTree.getRoot() != null;
     }
 
     public void onSyncRetry() {
@@ -173,8 +173,8 @@ final class LocationListController {
     public void suspend() {
         LOG.d("Controller suspended.");
 
-        if (mAppLocationTree != null) {
-            mAppLocationTree.close();
+        if (mLocationTree != null) {
+            mLocationTree.close();
         }
         mCrudEventBus.unregister(mEventBusSubscriber);
         mEventBus.unregister(mEventBusSubscriber);
@@ -205,7 +205,7 @@ final class LocationListController {
     }
 
     /** Call when the user presses a location. */
-    public void onLocationSelected(AppLocation location) {
+    public void onLocationSelected(Location location) {
         Utils.logUserAction("location_pressed", "location", location.name);
         mUi.openSingleLocation(location);
     }
@@ -218,19 +218,19 @@ final class LocationListController {
 
             if (hasValidTree) {
                 int dischargedPatientCount = (mDischargedZone == null)
-                        ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone);
+                        ? 0 : mLocationTree.getTotalPatientCount(mDischargedZone);
                 int totalPatientCount =
-                        mAppLocationTree.getTotalPatientCount(mAppLocationTree.getRoot());
+                        mLocationTree.getTotalPatientCount(mLocationTree.getRoot());
                 fragmentUi.setLocations(
-                        mAppLocationTree,
-                        mAppLocationTree.getDescendantsAtDepth(LOCATIONS_DEPTH).asList());
+                    mLocationTree,
+                        mLocationTree.getDescendantsAtDepth(LOCATIONS_DEPTH).asList());
                 fragmentUi.setPresentPatientCount(totalPatientCount - dischargedPatientCount);
                 fragmentUi.setDischargedPatientCount(
                         (mDischargedZone == null)
-                                ? 0 : mAppLocationTree.getTotalPatientCount(mDischargedZone));
+                                ? 0 : mLocationTree.getTotalPatientCount(mDischargedZone));
                 fragmentUi.setTriagePatientCount(
                         (mTriageZone == null)
-                                ? 0 : mAppLocationTree.getTotalPatientCount(mTriageZone));
+                                ? 0 : mLocationTree.getTotalPatientCount(mTriageZone));
             }
         }
     }
@@ -321,10 +321,10 @@ final class LocationListController {
         }
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
-            if (mAppLocationTree != null) {
-                mAppLocationTree.close();
+            if (mLocationTree != null) {
+                mLocationTree.close();
             }
-            mAppLocationTree = event.tree;
+            mLocationTree = event.tree;
             if (!isLocationTreeValid()) {
                 LOG.i("Found no locations in the local datastore; continuing to wait on sync.");
                 return;
@@ -332,13 +332,13 @@ final class LocationListController {
             mWaitingOnSync = false;
 
             LOG.i("Received a valid location tree.");
-            for (AppLocation zone :
-                    mAppLocationTree.getChildren(mAppLocationTree.getRoot())) {
+            for (Location zone :
+                    mLocationTree.getChildren(mLocationTree.getRoot())) {
                 switch (zone.uuid) {
-                    case Zone.TRIAGE_ZONE_UUID:
+                    case Zones.TRIAGE_ZONE_UUID:
                         mTriageZone = zone;
                         break;
-                    case Zone.DISCHARGED_ZONE_UUID:
+                    case Zones.DISCHARGED_ZONE_UUID:
                         mDischargedZone = zone;
                         break;
                     default:
@@ -351,7 +351,7 @@ final class LocationListController {
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
             // TODO/deprecate: Remove -- likely unnecessary.
-            mPatientSearchController.setLocations(mAppLocationTree);
+            mPatientSearchController.setLocations(mLocationTree);
         }
     }
 }

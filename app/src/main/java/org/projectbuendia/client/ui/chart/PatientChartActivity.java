@@ -32,18 +32,17 @@ import com.joanzapata.android.iconify.Iconify;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
-import org.odk.collect.android.model.Patient;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppForm;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -60,7 +59,7 @@ import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
-import org.projectbuendia.client.widget.PatientAttributeView;
+import org.projectbuendia.client.widgets.PatientAttributeView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -245,7 +244,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         boolean clinicalObservationFormEnabled = false;
         boolean ebolaLabTestFormEnabled = false;
-        for (final AppForm form : mLocalizedChartHelper.getForms()) {
+        for (final Form form : mLocalizedChartHelper.getForms()) {
             MenuItem item = menu.add(form.name);
             item.setOnMenuItemClickListener(
                     new MenuItem.OnMenuItemClickListener() {
@@ -460,8 +459,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mRootView.invalidate();
         }
 
-        public void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient) {
-            AppLocation location = locationTree.findByUuid(patient.locationUuid);
+        public void updatePatientLocationUi(LocationTree locationTree, Patient patient) {
+            Location location = locationTree.findByUuid(patient.locationUuid);
             String locationText = location == null ? "Unknown" : location.toString();
 
             mPatientLocationView.setValue(locationText);
@@ -472,15 +471,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         }
 
         @Override
-        public void updatePatientDetailsUi(AppPatient patient) {
+        public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
             mPatientFullNameView.setText(
                     patient.id + ": " + patient.givenName + " " + patient.familyName);
 
             List<String> labels = new ArrayList<>();
-            if (patient.gender == AppPatient.GENDER_MALE) {
+            if (patient.gender == Patient.GENDER_MALE) {
                 labels.add("M");
-            } else if (patient.gender == AppPatient.GENDER_FEMALE) {
+            } else if (patient.gender == Patient.GENDER_FEMALE) {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
@@ -500,15 +499,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public synchronized void fetchAndShowXform(
-                int requestCode, String formUuid, Patient patient,
-                PrepopulatableFields fields) {
+                int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
+                Preset preset) {
             if (mIsFetchingXform) {
                 return;
             }
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                    PatientChartActivity.this, formUuid, requestCode, patient, fields);
+                    PatientChartActivity.this, formUuid, requestCode, patient, preset);
         }
 
         @Override

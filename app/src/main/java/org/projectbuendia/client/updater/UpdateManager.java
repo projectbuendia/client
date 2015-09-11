@@ -32,7 +32,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.UpdateAvailableEvent;
 import org.projectbuendia.client.events.UpdateNotAvailableEvent;
 import org.projectbuendia.client.events.UpdateReadyToInstallEvent;
-import org.projectbuendia.client.model.UpdateInfo;
+import org.projectbuendia.client.net.json.JsonUpdateInfo;
 import org.projectbuendia.client.utils.LexicographicVersion;
 import org.projectbuendia.client.utils.Logger;
 
@@ -290,10 +290,10 @@ public class UpdateManager {
 
     /** A listener that receives the index of available .apk files from the package server. */
     private class PackageIndexReceivedListener
-            implements Response.Listener<List<UpdateInfo>>, Response.ErrorListener {
+            implements Response.Listener<List<JsonUpdateInfo>>, Response.ErrorListener {
 
         @Override
-        public void onResponse(List<UpdateInfo> response) {
+        public void onResponse(List<JsonUpdateInfo> response) {
             synchronized (mLock) {
                 mLastAvailableUpdateInfo =
                         AvailableUpdateInfo.fromResponse(mCurrentVersion, response);

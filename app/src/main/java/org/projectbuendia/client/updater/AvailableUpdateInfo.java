@@ -13,7 +13,7 @@ package org.projectbuendia.client.updater;
 
 import android.net.Uri;
 
-import org.projectbuendia.client.model.UpdateInfo;
+import org.projectbuendia.client.net.json.JsonUpdateInfo;
 import org.projectbuendia.client.utils.LexicographicVersion;
 import org.projectbuendia.client.utils.Logger;
 
@@ -48,7 +48,7 @@ public class AvailableUpdateInfo {
 
     /** Creates an instance of {@link AvailableUpdateInfo} from a server response. */
     public static AvailableUpdateInfo fromResponse(
-            LexicographicVersion currentVersion, List<UpdateInfo> response) {
+            LexicographicVersion currentVersion, List<JsonUpdateInfo> response) {
         if (response == null) {
             LOG.w("The update info response is null.");
             return getInvalid(currentVersion);
@@ -61,7 +61,7 @@ public class AvailableUpdateInfo {
 
         // The package server is responsible for sorting the index in
         // order by increasing version number, so the last is the highest.
-        UpdateInfo latestUpdateInfo = response.get(response.size() - 1);
+        JsonUpdateInfo latestUpdateInfo = response.get(response.size() - 1);
 
         LexicographicVersion version = latestUpdateInfo.getParsedVersion();
         if (version == null) {

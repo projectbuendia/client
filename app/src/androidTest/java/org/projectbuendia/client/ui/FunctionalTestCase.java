@@ -30,8 +30,8 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
@@ -205,12 +205,12 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * in the location selection activity, and leaves the UI in the same
      * activity.  Note: this function will not work during {@link #setUp()}
      * as it relies on {@link #waitForProgressFragment()}.
-     * @param delta an AppPatientDelta containing the data for the new patient;
+     * @param delta an PatientDelta containing the data for the new patient;
      *     use Optional.absent() to leave fields unset
      * @param locationName the name of a location to assign to the new patient,
      *     or null to leave unset (assumes this name is unique among locations)
      */
-    protected void inLocationSelectionAddNewPatient(AppPatientDelta delta, String locationName) {
+    protected void inLocationSelectionAddNewPatient(PatientDelta delta, String locationName) {
         LOG.i("Adding patient: %s (location %s)",
                 delta.toContentValues().toString(), locationName);
 
@@ -231,9 +231,9 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             type(age.getYears(), viewWithId(R.id.patient_creation_age_years));
         }
         if (delta.gender.isPresent()) {
-            if (delta.gender.get() == AppPatient.GENDER_MALE) {
+            if (delta.gender.get() == Patient.GENDER_MALE) {
                 click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
-            } else if (delta.gender.get() == AppPatient.GENDER_FEMALE) {
+            } else if (delta.gender.get() == Patient.GENDER_FEMALE) {
                 click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
             }
         }
@@ -259,7 +259,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             click(viewWithText(locationName));
         }
 
-        EventBusIdlingResource<ItemCreatedEvent<AppPatient>> resource =
+        EventBusIdlingResource<ItemCreatedEvent<Patient>> resource =
                 new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
         click(viewWithId(R.id.patient_creation_button_create));
@@ -319,7 +319,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             return;
         }
 
-        AppPatientDelta delta = new AppPatientDelta();
+        PatientDelta delta = new PatientDelta();
         String id = "" + (System.currentTimeMillis() % 100000);
         delta.id = Optional.of(id);
         delta.givenName = Optional.of("Given" + id);
@@ -327,8 +327,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
         delta.gender = Optional.of(JsonPatient.GENDER_FEMALE);
         delta.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
-        // Setting location within the AppPatientDelta is not yet supported.
-        // delta.assignedLocationUuid = Optional.of(Zone.TRIAGE_ZONE_UUID);
+        // Setting location within the PatientDelta is not yet supported.
+        // delta.assignedLocationUuid = Optional.of(Zones.TRIAGE_ZONE_UUID);
 
         inUserLoginGoToLocationSelection();
         inLocationSelectionAddNewPatient(delta, "S1"); // add the patient
@@ -420,7 +420,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
 
     /** In a patient list, click the first patient. */
     protected void inPatientListClickFirstPatient() {
-        click(dataThat(is(AppPatient.class))
+        click(dataThat(is(Patient.class))
                 .inAdapterView(hasId(R.id.fragment_patient_list))
                 .atPosition(0));
     }

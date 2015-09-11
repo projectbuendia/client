@@ -23,9 +23,9 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.data.app.AppForm;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.net.json.JsonChart;
 import org.projectbuendia.client.net.json.JsonChartSection;
 import org.projectbuendia.client.net.json.JsonEncounter;
@@ -96,7 +96,7 @@ public class DbSyncHelper {
         App.getServer().listForms(future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
         for (JsonForm form : future.get()) {
-            cvs.put(form.id, AppForm.fromNet(form).toContentValues());
+            cvs.put(form.id, Form.fromJson(form).toContentValues());
         }
 
         Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
@@ -134,7 +134,7 @@ public class DbSyncHelper {
         App.getServer().listPatients("", "", "", future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
         for (JsonPatient patient : future.get()) {
-            cvs.put(patient.id, AppPatient.fromNet(patient).toContentValues());
+            cvs.put(patient.id, Patient.fromJson(patient).toContentValues());
         }
 
         Cursor c = resolver.query(Patients.CONTENT_URI, null, null, null, null);

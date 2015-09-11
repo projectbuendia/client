@@ -23,14 +23,14 @@ import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.FakeEventBus;
 
 import static org.mockito.Matchers.any;
@@ -51,7 +51,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
     private static final int VALID_SEX = NewPatientController.SEX_FEMALE;
     private static final LocalDate VALID_ADMISSION_DATE = LocalDate.now().minusDays(5);
     private static final LocalDate VALID_SYMPTOMS_ONSET_DATE = LocalDate.now().minusDays(8);
-    private static final String VALID_LOCATION_UUID = Zone.SUSPECT_ZONE_UUID;
+    private static final String VALID_LOCATION_UUID = Zones.SUSPECT_ZONE_UUID;
 
 
     private NewPatientController mNewPatientController;
@@ -102,7 +102,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN location tree is fetched
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeCrudEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN controller passes the location to the UI
         verify(mMockUi).setLocationTree(locationTree);
@@ -124,7 +124,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN a patient is successfully added
-        AppPatient patient = AppPatient.builder().setUuid("foo").build();
+        Patient patient = Patient.builder().setUuid("foo").build();
         mFakeCrudEventBus.post(new ItemCreatedEvent<>(patient));
         // THEN controller tries to finish the activity
         verify(mMockUi).finishAndGoToPatientChart("foo");
@@ -135,7 +135,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN patient creation is requested with all fields
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller forwards request to model with correct fields
         verify(mMockAppModel).addPatient(
@@ -147,7 +147,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
     public void testCreatePatient_clearsOldValidationErrors() {
         // GIVEN an initialized controller with previously-entered incorrect data
         mNewPatientController.init();
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.id = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // WHEN new data is added and 'create' is pressed
@@ -162,7 +162,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields but id are populated
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.id = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller fails to add the patient
@@ -174,7 +174,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields but given name are populated
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.givenName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller adds the patient with a default given name
@@ -189,7 +189,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields but family name are populated
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.familyName = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller adds the patient with a default family name
@@ -243,7 +243,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields but gender are populated
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.gender = Optional.of(-1);
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller fails to add the patient
@@ -255,7 +255,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields but admission date are populated
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.admissionDate = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller fails to add the patient
@@ -267,7 +267,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated, admission date is in the future
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.admissionDate = Optional.of(LocalDate.now().plusDays(5));
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller fails to add the patient
@@ -279,7 +279,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated, admission date is in the past
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.admissionDate = Optional.of(LocalDate.now().minusDays(5));
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation
@@ -293,7 +293,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated except symptoms onset date
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.firstSymptomDate = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation with no symptoms onset date
@@ -307,7 +307,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated, symptoms onset date is in the future
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.firstSymptomDate = Optional.of(LocalDate.now().plusDays(5));
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller fails to add the patient
@@ -319,7 +319,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated, symptoms onset date is in the past
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.firstSymptomDate = Optional.of(LocalDate.now().minusDays(5));
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation
@@ -333,11 +333,11 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated except location
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.assignedLocationUuid = Optional.absent();
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation, defaulting to Triage
-        patientDelta.assignedLocationUuid = Optional.of(Zone.TRIAGE_ZONE_UUID);
+        patientDelta.assignedLocationUuid = Optional.of(Zones.TRIAGE_ZONE_UUID);
         verify(mMockAppModel).addPatient(
                 any(FakeEventBus.class),
                 argThat(matchesPatientDelta(patientDelta)));
@@ -348,7 +348,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller
         mNewPatientController.init();
         // WHEN all fields are populated and given name contains unicode characters
-        AppPatientDelta patientDelta = getValidAppPatientDelta();
+        PatientDelta patientDelta = getValidAppPatientDelta();
         patientDelta.givenName = Optional.of("ஸ்றீனிவாஸ ராமானுஜன் ஐயங்கார்");
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation
@@ -357,7 +357,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
                 argThat(matchesPatientDelta(patientDelta)));
     }
 
-    private void createPatientFromAppPatientDelta(AppPatientDelta delta) {
+    private void createPatientFromAppPatientDelta(PatientDelta delta) {
         String ageYears = "";
         String ageMonths = "";
         if (delta.birthdate.isPresent()) {
@@ -379,8 +379,8 @@ public class NewPatientControllerTest extends AndroidTestCase {
         );
     }
 
-    private AppPatientDelta getValidAppPatientDelta() {
-        AppPatientDelta delta = new AppPatientDelta();
+    private PatientDelta getValidAppPatientDelta() {
+        PatientDelta delta = new PatientDelta();
         delta.id = Optional.of(VALID_ID);
         delta.givenName = Optional.of(VALID_GIVEN_NAME);
         delta.familyName = Optional.of(VALID_FAMILY_NAME);

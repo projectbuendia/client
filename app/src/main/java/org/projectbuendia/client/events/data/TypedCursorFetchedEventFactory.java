@@ -11,10 +11,10 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppUser;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.User;
+import org.projectbuendia.client.models.TypedCursor;
 
 /** A factory that creates instances of subclasses of {@link TypedCursorFetchedEvent}. */
 public class TypedCursorFetchedEventFactory {
@@ -28,12 +28,12 @@ public class TypedCursorFetchedEventFactory {
     public static <T> TypedCursorFetchedEvent<?> createEvent(
             Class<T> clazz,
             TypedCursor<T> cursor) {
-        if (clazz.equals(AppPatient.class)) {
-            return new AppPatientsFetchedEvent((TypedCursor<AppPatient>) cursor);
-        } else if (clazz.equals(AppUser.class)) {
-            return new AppUsersFetchedEvent((TypedCursor<AppUser>) cursor);
-        } else if (clazz.equals(AppLocation.class)) {
-            return new AppLocationsFetchedEvent((TypedCursor<AppLocation>) cursor);
+        if (clazz.equals(Patient.class)) {
+            return new AppPatientsFetchedEvent((TypedCursor<Patient>) cursor);
+        } else if (clazz.equals(User.class)) {
+            return new AppUsersFetchedEvent((TypedCursor<User>) cursor);
+        } else if (clazz.equals(Location.class)) {
+            return new AppLocationsFetchedEvent((TypedCursor<Location>) cursor);
         } else {
             throw new IllegalArgumentException(
                     "Unable to create an event for unknown type " + clazz.getName());

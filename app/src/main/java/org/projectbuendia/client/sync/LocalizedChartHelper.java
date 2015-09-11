@@ -18,9 +18,9 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.util.Pair;
 
-import org.projectbuendia.client.data.app.AppForm;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
@@ -240,13 +240,13 @@ public class LocalizedChartHelper {
         return conceptUuidsAndNames;
     }
 
-    public List<AppForm> getForms() {
+    public List<Form> getForms() {
         Cursor cursor = mContentResolver.query(
                 Contracts.Forms.CONTENT_URI, null, null, null, null);
-        SortedSet<AppForm> forms = new TreeSet<>();
+        SortedSet<Form> forms = new TreeSet<>();
         try {
             while (cursor.moveToNext()) {
-                forms.add(new AppForm(
+                forms.add(new Form(
                         Utils.getString(cursor, Contracts.Forms._ID),
                         Utils.getString(cursor, Contracts.Forms.UUID),
                         Utils.getString(cursor, Contracts.Forms.NAME),
@@ -255,7 +255,7 @@ public class LocalizedChartHelper {
         } finally {
             cursor.close();
         }
-        List<AppForm> sortedForms = new ArrayList<>();
+        List<Form> sortedForms = new ArrayList<>();
         sortedForms.addAll(forms);
         return sortedForms;
     }

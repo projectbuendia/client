@@ -29,11 +29,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.data.app.AppEncounter;
-import org.projectbuendia.client.data.app.AppOrder;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.net.json.JsonEncounter;
 import org.projectbuendia.client.net.json.JsonForm;
 import org.projectbuendia.client.net.json.JsonLocation;
@@ -145,7 +145,7 @@ public class OpenMrsServer implements Server {
 
     @Override
     public void addPatient(
-            AppPatientDelta patientDelta,
+            PatientDelta patientDelta,
             final Response.Listener<JsonPatient> successListener,
             final Response.ErrorListener errorListener) {
         JSONObject json = new JSONObject();
@@ -179,7 +179,7 @@ public class OpenMrsServer implements Server {
     @Override
     public void updatePatient(
             String patientUuid,
-            AppPatientDelta patientDelta,
+            PatientDelta patientDelta,
             final Response.Listener<JsonPatient> successListener,
             final Response.ErrorListener errorListener) {
         JSONObject json = new JSONObject();
@@ -250,8 +250,8 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void addEncounter(AppPatient patient,
-                             AppEncounter encounter,
+    public void addEncounter(Patient patient,
+                             Encounter encounter,
                              final Response.Listener<JsonEncounter> successListener,
                              final Response.ErrorListener errorListener) {
         JSONObject json;
@@ -283,7 +283,7 @@ public class OpenMrsServer implements Server {
     }
 
     @Override
-    public void addOrder(AppOrder order,
+    public void addOrder(Order order,
                          final Response.Listener<JsonOrder> successListener,
                          final Response.ErrorListener errorListener) {
         JSONObject json;

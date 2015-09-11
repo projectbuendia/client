@@ -22,13 +22,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationComparator;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
-import org.projectbuendia.client.data.res.ResStatus;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationComparator;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.client.resolvables.ResStatus;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.Utils;
@@ -45,18 +45,18 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link AppPatient}'s,
+ * A {@link BaseExpandableListAdapter} that wraps a {@link TypedCursor} of {@link Patient}'s,
  * displaying these patients grouped by location and filtered by a specified
  * {@link org.projectbuendia.client.filter.db.SimpleSelectionFilter}.
  */
 public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     protected final Context mContext;
 
-    private final HashMap<AppLocation, List<AppPatient>> mPatientsByLocation;
-    private final AppLocationTree mLocationTree;
+    private final HashMap<Location, List<Patient>> mPatientsByLocation;
+    private final LocationTree mLocationTree;
     private final LocalizedChartHelper mLocalizedChartHelper;
 
-    private AppLocation[] mLocations;
+    private Location[] mLocations;
     private Map<String, Map<String, LocalizedObs>> mObservations;
 
     /**
@@ -64,10 +64,10 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      *
      * @param context an activity context
      */
-    public PatientListTypedCursorAdapter(Context context, AppLocationTree locationTree) {
+    public PatientListTypedCursorAdapter(Context context, LocationTree locationTree) {
         mContext = context;
 
-        mPatientsByLocation = new HashMap<AppLocation, List<AppPatient>>();
+        mPatientsByLocation = new HashMap<Location, List<Patient>>();
 
         mLocationTree = locationTree;
         mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
@@ -120,7 +120,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(
             int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        AppLocation location = (AppLocation)getGroup(groupPosition);
+        Location location = (Location)getGroup(groupPosition);
 
         int patientCount = getChildrenCount(groupPosition);
         String tentName = location.toString();
@@ -146,7 +146,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     public View getChildView(
             int groupPosition, int childPosition, boolean isLastChild, View convertView,
             ViewGroup parent) {
-        AppPatient patient = (AppPatient) getChild(groupPosition, childPosition);
+        Patient patient = (Patient) getChild(groupPosition, childPosition);
 
         // Show pregnancy status and condition if present.
         boolean pregnant = false;
@@ -178,11 +178,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
                 patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));
 
         holder.mPatientGender.setVisibility(
-                patient.gender == AppPatient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
+                patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
 
-        if (patient.gender != AppPatient.GENDER_UNKNOWN) {
+        if (patient.gender != Patient.GENDER_UNKNOWN) {
             holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
-                    patient.gender == AppPatient.GENDER_MALE ? R.drawable.ic_gender_male
+                    patient.gender == Patient.GENDER_MALE ? R.drawable.ic_gender_male
                             : pregnant ? R.drawable.ic_gender_female_pregnant
                             : R.drawable.ic_gender_female
             ));
@@ -224,7 +224,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      * Updates the adapter to show all patients from the given cursor.  (Does not
      * take ownership; the original owner remains responsible for closing it.)
      */
-    public void setPatients(TypedCursor<AppPatient> cursor) {
+    public void setPatients(TypedCursor<Patient> cursor) {
         mPatientsByLocation.clear();
         if (mObservations != null) {
             mObservations.clear();
@@ -235,18 +235,18 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
         // Add all patients from cursor.
         for (int i = 0; i < count; i++) {
-            AppPatient patient = cursor.get(i);
+            Patient patient = cursor.get(i);
             addPatient(patient);
             patientUuids[i] = patient.uuid;
         }
 
         // Produce a sorted list of all the locations that have patients.
-        mLocations = new AppLocation[mPatientsByLocation.size()];
+        mLocations = new Location[mPatientsByLocation.size()];
         mPatientsByLocation.keySet().toArray(mLocations);
-        Arrays.sort(mLocations, new AppLocationComparator(mLocationTree));
+        Arrays.sort(mLocations, new LocationComparator(mLocationTree));
 
         // Sort the patient lists within each location using the default comparator.
-        for (List<AppPatient> patients : mPatientsByLocation.values()) {
+        for (List<Patient> patients : mPatientsByLocation.values()) {
             Collections.sort(patients);
         }
 
@@ -268,11 +268,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     // Add a single patient to relevant data structures.
-    private void addPatient(AppPatient patient) {
-        AppLocation location = mLocationTree.findByUuid(patient.locationUuid);
+    private void addPatient(Patient patient) {
+        Location location = mLocationTree.findByUuid(patient.locationUuid);
         if (location != null) {  // shouldn't be null, but better to be safe
             if (!mPatientsByLocation.containsKey(location)) {
-                mPatientsByLocation.put(location, new ArrayList<AppPatient>());
+                mPatientsByLocation.put(location, new ArrayList<Patient>());
             }
             mPatientsByLocation.get(location).add(patient);
         }

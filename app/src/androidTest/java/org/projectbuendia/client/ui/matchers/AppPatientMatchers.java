@@ -15,44 +15,44 @@ import android.support.test.espresso.matcher.BoundedMatcher;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 
-/** Matchers for {@link AppPatient} objects. */
+/** Matchers for {@link Patient} objects. */
 public class AppPatientMatchers {
     /**
      * Provides a {@link Matcher} that matches any patient with the given patient id.
      * @param id the id to match
      */
     public static Matcher<Object> isPatientWithId(final String id) {
-        return new BoundedMatcher<Object, AppPatient>(AppPatient.class) {
+        return new BoundedMatcher<Object, Patient>(Patient.class) {
             @Override
             public void describeTo(Description description) {
-                description.appendText("is an AppPatient with id " + id);
+                description.appendText("is an Patient with id " + id);
             }
 
             @Override
-            public boolean matchesSafely(AppPatient patient) {
+            public boolean matchesSafely(Patient patient) {
                 return id.equals(patient.id);
             }
         };
     }
 
     /**
-     * Matches {@link AppPatientDelta} objects based on their JSON representations. It is assumed
+     * Matches {@link PatientDelta} objects based on their JSON representations. It is assumed
      * that these JSON representations are stable and include all relevant fields, so two
-     * {@link AppPatientDelta} objects with the same JSON representation should represent the
+     * {@link PatientDelta} objects with the same JSON representation should represent the
      * same patient.
      */
-    public static Matcher<AppPatientDelta> matchesPatientDelta(final AppPatientDelta other) {
-        return new BoundedMatcher<AppPatientDelta, AppPatientDelta>(AppPatientDelta.class) {
+    public static Matcher<PatientDelta> matchesPatientDelta(final PatientDelta other) {
+        return new BoundedMatcher<PatientDelta, PatientDelta>(PatientDelta.class) {
             @Override
             public void describeTo(Description description) {
-                description.appendText("matches appPatientDelta: " + other.toString());
+                description.appendText("matches patientDelta: " + other.toString());
             }
 
             @Override
-            public boolean matchesSafely(AppPatientDelta patientDelta) {
+            public boolean matchesSafely(PatientDelta patientDelta) {
                 return other.toString().equals(patientDelta.toString());
             }
         };

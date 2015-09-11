@@ -21,12 +21,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.res.ResZone;
-import org.projectbuendia.client.model.Zone;
-import org.projectbuendia.client.utils.PatientCountDisplay;
-import org.projectbuendia.client.widget.SubtitledButtonView;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.resolvables.ResZone;
+import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import java.util.List;
 
@@ -34,16 +33,16 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /** {@link ArrayAdapter} for displaying a list of locations. */
-public class LocationListAdapter extends ArrayAdapter<AppLocation> {
+public class LocationListAdapter extends ArrayAdapter<Location> {
 
     private final Context mContext;
-    private final AppLocationTree mLocationTree;
+    private final LocationTree mLocationTree;
     private Optional<String> mSelectedLocationUuid;
 
     public LocationListAdapter(
             Context context,
-            List<AppLocation> locations,
-            AppLocationTree locationTree,
+            List<Location> locations,
+            LocationTree locationTree,
             Optional<String> selectedLocation) {
         super(context, R.layout.listview_cell_location_selection, locations);
         mContext = context;
@@ -71,11 +70,11 @@ public class LocationListAdapter extends ArrayAdapter<AppLocation> {
             view.setTag(holder);
         }
 
-        AppLocation location = getItem(position);
+        Location location = getItem(position);
         // TODO/generalize: Make this more robust. Currently, this line only works if 'location' is
         // a tent; otherwise zone is ResZone.UNKNOWN
-        ResZone.Resolved zone = Zone.getResZone(
-                location.parentUuid).resolve(mContext.getResources());
+        ResZone.Resolved zone = Zones.getResZone(
+            location.parentUuid).resolve(mContext.getResources());
 
         int count = mLocationTree.getTotalPatientCount(location);
         holder.mButton.setTitle(location.toString());

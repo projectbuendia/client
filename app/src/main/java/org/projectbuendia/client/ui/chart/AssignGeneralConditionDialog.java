@@ -20,7 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Concepts;
 
 import javax.annotation.Nullable;
 

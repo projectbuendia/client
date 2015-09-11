@@ -13,7 +13,7 @@ import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
 import org.odk.collect.android.activities.FormEntryActivity;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.common.TypedWidget;
@@ -90,7 +90,7 @@ public class BinarySelectOneWidget extends TypedWidget<SelectOneData> {
         }
 
         int typedAnswer = (Integer) answer;
-        if (typedAnswer == PrepopulatableFields.YES) {
+        if (typedAnswer == Preset.YES) {
             mCheckBox.setChecked(true);
         }
 

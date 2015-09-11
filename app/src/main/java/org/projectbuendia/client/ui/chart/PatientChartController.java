@@ -24,41 +24,38 @@ import com.google.common.base.Optional;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppEncounter;
-import org.projectbuendia.client.data.app.AppEncounter.AppObservation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppOrder;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
-import org.projectbuendia.client.data.odk.OdkConverter;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
-import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
-import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
+import org.projectbuendia.client.events.actions.OrderExecutionSaveRequestedEvent;
+import org.projectbuendia.client.events.actions.OrderSaveRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Encounter.Observation;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
-import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
-import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
-import org.odk.collect.android.model.Patient;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,11 +94,11 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
-    private AppPatient mPatient = AppPatient.builder().build();
-    private AppLocationTree mLocationTree;
+    private Patient mPatient = Patient.builder().build();
+    private LocationTree mLocationTree;
     private DateTime mLastObsTime = null;
     private String mPatientUuid = "";
-    private Map<String, Order> mOrdersByUuid;
+    private Map<String, org.projectbuendia.client.sync.Order> mOrdersByUuid;
     private List<LocalizedObs> mObservations;
 
     // This value is incremented whenever the controller is activated or suspended.
@@ -122,7 +119,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void updatePatientConditionUi(String generalConditionUuid);
 
         /** Updates the UI with the patient's location. */
-        void updatePatientLocationUi(AppLocationTree locationTree, AppPatient patient);
+        void updatePatientLocationUi(LocationTree locationTree, Patient patient);
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updatePatientHistoryUi(
@@ -130,7 +127,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                 Map<String, LocalizedObs> latestObservations,
                 List<Pair<String, String>> gridConceptUuidsAndNames,
                 List<LocalizedObs> observations,
-                List<Order> orders,
+                List<org.projectbuendia.client.sync.Order> orders,
                 LocalDate admissionDate,
                 LocalDate firstSymptomsDate);
 
@@ -138,7 +135,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void updateLastObsTimeUi(DateTime lastObsTime);
 
         /** Updates the UI with the patient's personal details (name, gender, etc.). */
-        void updatePatientDetailsUi(AppPatient patient);
+        void updatePatientDetailsUi(Patient patient);
 
         /** Displays an error message with the given resource id. */
         void showError(int errorMessageResource);
@@ -148,14 +145,14 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
-                int requestCode, String formUuid, Patient patient,
-                PrepopulatableFields fields);
+                int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
+                Preset preset);
 
         void reEnableFetch();
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showNewOrderDialog(String patientUuid);
-        void showOrderExecutionDialog(Order order, Interval interval, List<DateTime> executionTimes);
+        void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval interval, List<DateTime> executionTimes);
     }
 
     private final EventBusRegistrationInterface mDefaultEventBus;
@@ -339,15 +336,15 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             return;
         }
 
-        PrepopulatableFields fields = new PrepopulatableFields();
-        fields.locationName = "Triage";
+        Preset preset = new Preset();
+        preset.locationName = "Triage";
 
         JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed",
                 "form", "round",
                 "group", targetGroup);
         if (user != null) {
-            fields.clinicianName = user.fullName;
+            preset.clinicianName = user.fullName;
         }
 
         Map<String, LocalizedObs> observations =
@@ -355,55 +352,55 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         if (observations.containsKey(Concepts.PREGNANCY_UUID)
                 && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
-            fields.pregnant = PrepopulatableFields.YES;
+            preset.pregnant = Preset.YES;
         }
 
         if (observations.containsKey(Concepts.IV_UUID)
                 && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
-            fields.ivFitted = PrepopulatableFields.YES;
+            preset.ivFitted = Preset.YES;
         }
 
-        fields.targetGroup = targetGroup;
+        preset.targetGroup = targetGroup;
 
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(OBSERVATION_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                request.requestIndex, request.formUuid,
-                OdkConverter.toOdkPatient(mPatient), fields);
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
     }
 
     public void onAddTestResultsPressed() {
-        PrepopulatableFields fields = new PrepopulatableFields();
-        fields.locationName = "Triage";
+        Preset preset = new Preset();
+        preset.locationName = "Triage";
 
         JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed", "form", "lab_test");
         if (user != null) {
-            fields.clinicianName = user.fullName;
+            preset.clinicianName = user.fullName;
         }
 
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(EBOLA_LAB_TEST_FORM_UUID, mPatientUuid);
         mUi.fetchAndShowXform(
-                request.requestIndex, request.formUuid,
-                OdkConverter.toOdkPatient(mPatient), fields);
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
     }
 
     public void onOpenFormPressed(String formUuid) {
-        PrepopulatableFields fields = new PrepopulatableFields();
-        fields.locationName = "Triage";
+        Preset preset = new Preset();
+        preset.locationName = "Triage";
 
         JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
-            fields.clinicianName = user.fullName;
+            preset.clinicianName = user.fullName;
         }
 
         Utils.logUserAction("form_opener_pressed", "form", formUuid);
         mUi.showFormLoadingDialog(true);
         FormRequest request = newFormRequest(formUuid, mPatientUuid);
         mUi.fetchAndShowXform(
-                request.requestIndex, request.formUuid,
-                OdkConverter.toOdkPatient(mPatient), fields);
+            request.requestIndex, request.formUuid,
+            mPatient.toOdkPatient(), preset);
     }
 
     @android.webkit.JavascriptInterface
@@ -413,7 +410,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
     @android.webkit.JavascriptInterface
     public void onOrderCellPressed(String orderUuid, long startMillis) {
-        Order order = mOrdersByUuid.get(orderUuid);
+        org.projectbuendia.client.sync.Order order = mOrdersByUuid.get(orderUuid);
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
@@ -443,9 +440,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         for (LocalizedObs obs : mObservations) {
             mLastObsTime = Utils.max(mLastObsTime, obs.encounterTime);
         }
-        List<Order> orders = mChartHelper.getOrders(mPatientUuid);
+        List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
         mOrdersByUuid = new HashMap<>();
-        for (Order order : orders) {
+        for (org.projectbuendia.client.sync.Order order : orders) {
             mOrdersByUuid.put(order.uuid, order);
         }
         LOG.d("Showing " + mObservations.size() + " observations and "
@@ -484,17 +481,17 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
-        AppEncounter appEncounter = new AppEncounter(
+        Encounter encounter = new Encounter(
                 mPatientUuid,
                 null, // encounter UUID, which the server will generate
                 DateTime.now(),
-                new AppObservation[] {
-                        new AppObservation(
+                new Observation[] {
+                        new Observation(
                                 Concepts.GENERAL_CONDITION_UUID,
                                 newConditionUuid,
-                                AppObservation.Type.NON_DATE)
+                                Observation.Type.NON_DATE)
                 }, null);
-        mAppModel.addEncounter(mCrudEventBus, mPatient, appEncounter);
+        mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
     }
 
     public void showAssignLocationDialog(Context context) {
@@ -504,7 +501,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                 new AssignLocationDialog.LocationSelectedCallback() {
                     @Override
                     public boolean onLocationSelected(String locationUuid) {
-                        AppPatientDelta delta = new AppPatientDelta();
+                        PatientDelta delta = new PatientDelta();
                         delta.assignedLocationUuid = Optional.of(locationUuid);
                         mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
                         Utils.logUserAction("location_assigned");
@@ -586,7 +583,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         // We get a ItemFetchedEvent when the initial patient data is loaded
         // from SQLite or after an edit has been successfully posted to the server.
         public void onEventMainThread(ItemFetchedEvent event) {
-            if (event.item instanceof AppPatient) {
+            if (event.item instanceof Patient) {
                 // When the patient's location is changed, the location dialog stays
                 // open while we wait for the patient edit to be posted to the server.
                 // Now that the patient has been posted, close the dialog.
@@ -595,11 +592,11 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                     mAssignLocationDialog = null;
                 }
 
-                // Update the parts of the UI that use data in the AppPatient.
-                mPatient = (AppPatient) event.item;
+                // Update the parts of the UI that use data in the Patient.
+                mPatient = (Patient) event.item;
                 mUi.updatePatientDetailsUi(mPatient);
                 updatePatientLocationUi();
-            } else if (event.item instanceof AppEncounter) {
+            } else if (event.item instanceof Encounter) {
                 // When the patient's condition is changed, the condition dialog stays
                 // open while we wait for the observation to be posted to the server.
                 // Now that the encounter has been posted, close the dialog.
@@ -704,12 +701,12 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                 stop = stopDate.toDateTimeAtStartOfDay().minusSeconds(1);
             }
 
-            mAppModel.addOrder(mCrudEventBus, new AppOrder(
+            mAppModel.addOrder(mCrudEventBus, new Order(
                     null, event.patientUuid, event.instructions, start, stop));
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
-            Order order = mOrdersByUuid.get(event.orderUuid);
+            org.projectbuendia.client.sync.Order order = mOrdersByUuid.get(event.orderUuid);
             if (order != null) {
                 mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
             }

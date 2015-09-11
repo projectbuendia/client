@@ -29,8 +29,8 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
@@ -149,9 +149,9 @@ public class GoToPatientDialogFragment extends DialogFragment {
         }
     }
 
-    public void onEventMainThread(ItemFetchedEvent<AppPatient> event) {
+    public void onEventMainThread(ItemFetchedEvent<Patient> event) {
         String id = mPatientId.getText().toString().trim();
-        AppPatient patient = event.item;
+        Patient patient = event.item;
         if (id.equals(patient.id)) {  // server returned the patient we were looking for
             mPatientUuid = patient.uuid;
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +

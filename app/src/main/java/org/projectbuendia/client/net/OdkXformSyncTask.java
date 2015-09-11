@@ -213,9 +213,9 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
 
             // do the equivalent of DownloadFormsTask.findExistingOrCreateNewUri() or
             // DiskSyncTask step 4 to insert the file into the database
-            ContentValues contentValues;
+            ContentValues cv;
             try {
-                contentValues = DiskSyncTask.buildContentValues(proposedPath);
+                cv = DiskSyncTask.buildContentValues(proposedPath);
             } catch (IllegalArgumentException e) {
                 // yuck, but this is what it throws on a bad parse
                 LOG.e(e, "Failed to parse: " + proposedPath);
@@ -227,8 +227,8 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
                 ContentResolver contentResolver =
                         Collect.getInstance().getApplication().getContentResolver();
                 // Always replace existing forms.
-                contentValues.put(FormsProviderAPI.SQL_INSERT_OR_REPLACE, true);
-                contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, contentValues);
+                cv.put(FormsProviderAPI.SQL_INSERT_OR_REPLACE, true);
+                contentResolver.insert(FormsProviderAPI.FormsColumns.CONTENT_URI, cv);
             } catch (SQLException e) {
                 LOG.i(e, "failed to insert fetched file");
             }

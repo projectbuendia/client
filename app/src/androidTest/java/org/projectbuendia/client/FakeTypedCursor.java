@@ -16,7 +16,7 @@ import android.net.Uri;
 
 import com.google.common.collect.Iterators;
 
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.TypedCursor;
 
 import java.util.Iterator;
 

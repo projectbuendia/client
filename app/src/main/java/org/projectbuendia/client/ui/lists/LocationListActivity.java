@@ -24,8 +24,8 @@ import javax.inject.Provider;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
@@ -174,7 +174,7 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
         }
 
         @Override
-        public void openSingleLocation(AppLocation location) {
+        public void openSingleLocation(Location location) {
             SingleLocationActivity.start(LocationListActivity.this,
                     location.uuid, location.name, location.patientCount);
         }

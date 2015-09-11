@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**

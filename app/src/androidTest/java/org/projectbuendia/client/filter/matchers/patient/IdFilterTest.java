@@ -13,7 +13,7 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.test.InstrumentationTestCase;
 
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 
 /** Tests for {@link IdFilter}. */
 public class IdFilterTest extends InstrumentationTestCase {
@@ -60,7 +60,7 @@ public class IdFilterTest extends InstrumentationTestCase {
         assertTrue(mIdFilter.matches(getPatientWithId("abc"), "ABC"));
     }
 
-    private AppPatient getPatientWithId(String id) {
-        return AppPatient.builder().setId(id).build();
+    private Patient getPatientWithId(String id) {
+        return Patient.builder().setId(id).build();
     }
 }

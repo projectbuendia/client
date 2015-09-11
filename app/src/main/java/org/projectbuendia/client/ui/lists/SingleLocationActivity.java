@@ -16,8 +16,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 
 /** A patient list for a single location. */
@@ -47,7 +47,7 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
     }
 
     @Override
-    protected void setPatients(TypedCursor<AppPatient> patients) {
+    protected void setPatients(TypedCursor<Patient> patients) {
         mPatientCount = patients.getCount();
         setTitle(PatientCountDisplay.getPatientCountTitle(this, mPatientCount, mLocationName));
     }

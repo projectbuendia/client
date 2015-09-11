@@ -14,11 +14,10 @@ package org.projectbuendia.client.ui.lists;
 import java.util.List;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.ProgressFragment;
-import org.projectbuendia.client.utils.PatientCountDisplay;
-import org.projectbuendia.client.widget.SubtitledButtonView;
+import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -119,7 +118,7 @@ public final class LocationListFragment extends ProgressFragment {
         }
 
         @Override
-        public void setLocations(AppLocationTree locationTree, List<AppLocation> locations) {
+        public void setLocations(LocationTree locationTree, List<Location> locations) {
             mAdapter = new LocationListAdapter(
                     getActivity(), locations, locationTree, Optional.<String>absent());
             mLocationGrid.setAdapter(mAdapter);

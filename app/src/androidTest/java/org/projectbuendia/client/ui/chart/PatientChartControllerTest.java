@@ -21,16 +21,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppEncounter;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.FetchXformFailedEvent;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -123,7 +123,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
-        AppPatient patient = AppPatient.builder().build();
+        Patient patient = Patient.builder().build();
         mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
         // TODO: When the handler UI updating hack in PatientChartController is removed, this can
         // also be removed.
@@ -141,7 +141,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // GIVEN controller is initialized
         mController.init();
         // WHEN that patient's details are loaded
-        AppPatient patient = AppPatient.builder().build();
+        Patient patient = Patient.builder().build();
         mFakeCrudEventBus.post(new ItemFetchedEvent<>(patient));
         // THEN the controller updates the UI
         verify(mMockUi).updatePatientDetailsUi(patient);
@@ -156,8 +156,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // THEN a new encounter is added
         verify(mMockAppModel).addEncounter(
                 any(CrudEventBus.class),
-                any(AppPatient.class),
-                any(AppEncounter.class));
+                any(Patient.class),
+                any(Encounter.class));
     }
 
     /** Tests that requesting an xform through clicking 'add observation' shows loading dialog. */

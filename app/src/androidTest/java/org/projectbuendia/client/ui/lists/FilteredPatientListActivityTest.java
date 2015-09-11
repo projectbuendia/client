@@ -12,8 +12,8 @@
 package org.projectbuendia.client.ui.lists;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -53,11 +53,11 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         // There should be patients in both Triage and S1.
         expectVisibleSoon(viewThat(hasTextMatchingRegex("Triage \\((No|[0-9]+) patients?\\)")));
 
-        expectVisible(dataThat(is(AppLocation.class), hasToString(startsWith("S1")))
+        expectVisible(dataThat(is(Location.class), hasToString(startsWith("S1")))
                 .inAdapterView(withId(R.id.fragment_patient_list)));
 
         // Click the first patient
-        click(dataThat(is(AppPatient.class))
+        click(dataThat(is(Patient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0));
         screenshot("After Patient Clicked");

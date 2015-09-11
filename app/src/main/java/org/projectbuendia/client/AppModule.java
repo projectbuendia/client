@@ -15,7 +15,7 @@ import android.app.Application;
 import android.content.ContentResolver;
 import android.preference.PreferenceManager;
 
-import org.projectbuendia.client.data.app.AppModelModule;
+import org.projectbuendia.client.models.AppModelModule;
 import org.projectbuendia.client.diagnostics.DiagnosticsModule;
 import org.projectbuendia.client.events.EventsModule;
 import org.projectbuendia.client.net.NetModule;

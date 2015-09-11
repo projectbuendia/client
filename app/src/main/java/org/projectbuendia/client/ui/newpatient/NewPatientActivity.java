@@ -33,12 +33,12 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.res.ResZone;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
@@ -82,7 +82,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
     private String mLocationUuid;
     private boolean mIsCreatePending = false;
 
-    private AppLocationTree mLocationTree;
+    private LocationTree mLocationTree;
 
     private AssignLocationDialog.LocationSelectedCallback mLocationSelectedCallback;
 
@@ -165,7 +165,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             return;
         }
 
-        AppLocation location = mLocationTree.findByUuid(mLocationUuid);
+        Location location = mLocationTree.findByUuid(mLocationUuid);
 
         if (location == null || location.parentUuid == null) {
             // This can apparently happen, on rare occasions, for an unknown reason. In this
@@ -184,7 +184,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             //return;
         }
 
-        ResZone resZone = Zone.getResZone(location.parentUuid);
+        ResZone resZone = Zones.getResZone(location.parentUuid);
 
         if (resZone == null) {
 
@@ -395,7 +395,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
     private final class Ui implements NewPatientController.Ui {
 
         @Override
-        public void setLocationTree(AppLocationTree locationTree) {
+        public void setLocationTree(LocationTree locationTree) {
             mLocationTree = locationTree;
             updateLocationUi();
         }

@@ -16,8 +16,8 @@ import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.net.json.JsonPatient;
 
@@ -63,13 +63,13 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         // search button in the action bar to finish its loading task.
         expectVisibleSoon(viewThat(hasTextContaining("Triage (")));
         // Click first patient.
-        click(dataThat(is(AppPatient.class))
+        click(dataThat(is(Patient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))
                 .atPosition(0));
     }
 
-    private AppPatientDelta getBasicDemoPatient() {
-        AppPatientDelta newPatient = new AppPatientDelta();
+    private PatientDelta getBasicDemoPatient() {
+        PatientDelta newPatient = new PatientDelta();
         newPatient.familyName = Optional.of("XformSyncTest");
         newPatient.givenName = Optional.of("TestPatientFor");
         newPatient.gender = Optional.of(JsonPatient.GENDER_FEMALE);

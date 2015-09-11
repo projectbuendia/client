@@ -15,10 +15,10 @@ import android.support.annotation.Nullable;
 
 import com.android.volley.Response;
 
-import org.projectbuendia.client.data.app.AppEncounter;
-import org.projectbuendia.client.data.app.AppOrder;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.json.JsonEncounter;
 import org.projectbuendia.client.net.json.JsonForm;
 import org.projectbuendia.client.net.json.JsonLocation;
@@ -55,14 +55,14 @@ public interface Server {
 
     /** Adds a patient. */
     void addPatient(
-            AppPatientDelta patientDelta,
+            PatientDelta patientDelta,
             Response.Listener<JsonPatient> successListener,
             Response.ErrorListener errorListener);
 
     /** Updates a patient. */
     public void updatePatient(
             String patientId,
-            AppPatientDelta patientDelta,
+            PatientDelta patientDelta,
             Response.Listener<JsonPatient> successListener,
             Response.ErrorListener errorListener);
 
@@ -83,8 +83,8 @@ public interface Server {
      * @param encounter the encounter to add
      */
     void addEncounter(
-            AppPatient patient,
-            AppEncounter encounter,
+            Patient patient,
+            Encounter encounter,
             Response.Listener<JsonEncounter> successListener,
             Response.ErrorListener errorListener);
 
@@ -164,7 +164,7 @@ public interface Server {
                            Response.ErrorListener errorListener);
 
     /** Adds an order for a patient. */
-    void addOrder(AppOrder order,
+    void addOrder(Order order,
                   Response.Listener<JsonOrder> successListener,
                   Response.ErrorListener errorListener);
 

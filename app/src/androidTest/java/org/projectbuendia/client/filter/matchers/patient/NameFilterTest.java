@@ -13,7 +13,7 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.test.InstrumentationTestCase;
 
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.utils.Utils;
 
 /** Tests for {@link NameFilter}. */
@@ -130,8 +130,8 @@ public class NameFilterTest extends InstrumentationTestCase {
         assertFalse(mNameFilter.matches(getPatientWithName("John", "Doe"), "-"));
     }
 
-    private AppPatient getPatientWithName(String givenName, String familyName) {
-        return AppPatient.builder()
+    private Patient getPatientWithName(String givenName, String familyName) {
+        return Patient.builder()
                 .setGivenName(Utils.nameOrUnknown(givenName))
                 .setFamilyName(Utils.nameOrUnknown(familyName))
                 .build();

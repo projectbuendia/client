@@ -15,7 +15,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.model.UpdateInfo;
+import org.projectbuendia.client.net.json.JsonUpdateInfo;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.net.GsonRequest;
 import org.projectbuendia.client.net.VolleySingleton;
@@ -47,12 +47,12 @@ public class PackageServer {
      * @param errorListener the callback to be invoked if the request fails
      */
     public void getPackageIndex(
-            Response.Listener<List<UpdateInfo>> listener,
+            Response.Listener<List<JsonUpdateInfo>> listener,
             Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
                 GsonRequest.withArrayResponse(
                         mSettings.getPackageServerUrl("/" + MODULE_NAME + ".json"),
-                        UpdateInfo.class,
+                        JsonUpdateInfo.class,
                         null /* headers */,
                         listener,
                         errorListener

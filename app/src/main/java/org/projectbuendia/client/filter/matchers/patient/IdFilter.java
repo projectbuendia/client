@@ -13,13 +13,13 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.support.annotation.Nullable;
 
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
 
 /** Matches based on user-specified patient id. */
-public final class IdFilter implements MatchingFilter<AppPatient> {
+public final class IdFilter implements MatchingFilter<Patient> {
     @Override
-    public boolean matches(@Nullable AppPatient object, CharSequence constraint) {
+    public boolean matches(@Nullable Patient object, CharSequence constraint) {
         if (object == null || object.id == null) {
             return false;
         }

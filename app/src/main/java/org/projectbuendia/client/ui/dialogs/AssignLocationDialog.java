@@ -22,13 +22,13 @@ import android.widget.GridView;
 import com.google.common.base.Optional;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.lists.LocationListAdapter;
 import org.projectbuendia.client.utils.Logger;
@@ -59,7 +59,7 @@ public final class AssignLocationDialog
     private final Optional<String> mCurrentLocationUuid;
     private final LocationSelectedCallback mLocationSelectedCallback;
     private ProgressDialog mProgressDialog;
-    private AppLocationTree mLocationTree;
+    private LocationTree mLocationTree;
     private boolean mRegistered;
 
     // TODO: Consider making this an event bus event rather than a callback so that we don't
@@ -161,13 +161,13 @@ public final class AssignLocationDialog
         mAppModel.fetchLocationTree(mEventBus, mLocale);
     }
 
-    private void setTents(AppLocationTree locationTree) {
+    private void setTents(LocationTree locationTree) {
         if (mGridView != null) {
-            List<AppLocation> locations = new ArrayList<>(
-                    locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT));
-            AppLocation triageZone = locationTree.findByUuid(Zone.TRIAGE_ZONE_UUID);
+            List<Location> locations = new ArrayList<>(
+                    locationTree.getDescendantsAtDepth(LocationTree.ABSOLUTE_DEPTH_TENT));
+            Location triageZone = locationTree.findByUuid(Zones.TRIAGE_ZONE_UUID);
             locations.add(0, triageZone);
-            AppLocation dischargedZone = locationTree.findByUuid(Zone.DISCHARGED_ZONE_UUID);
+            Location dischargedZone = locationTree.findByUuid(Zones.DISCHARGED_ZONE_UUID);
             locations.add(dischargedZone);
             mAdapter = new LocationListAdapter(
                     mContext, locations, locationTree, mCurrentLocationUuid);
@@ -218,7 +218,7 @@ public final class AssignLocationDialog
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
             if (event.tree.getRoot() == null) {
-                LOG.d("AppLocationTree has a null root, suggesting something went wrong.");
+                LOG.d("LocationTree has a null root, suggesting something went wrong.");
                 return;
             }
 

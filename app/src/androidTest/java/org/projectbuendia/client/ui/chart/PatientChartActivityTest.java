@@ -30,7 +30,7 @@ import org.projectbuendia.client.events.sync.SyncFinishedEvent;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.widget.DataGridView;
+import org.projectbuendia.client.widgets.DataGridView;
 
 import java.util.UUID;
 

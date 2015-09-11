@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.filter.db.patient;
 
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 
 /**
@@ -25,7 +25,7 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
  *         Concepts.YES_UUID);      // Value
  * </code>
  */
-public final class ConceptFilter extends SimpleSelectionFilter<AppPatient> {
+public final class ConceptFilter extends SimpleSelectionFilter<Patient> {
     // WHERE subclause returning only the UUIDs of patients that had a given
     // concept whose latest observed value was the given value.
     private static final String CONCEPT_SUBQUERY = ""

@@ -20,9 +20,9 @@ import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
@@ -123,7 +123,7 @@ public class PatientListFragment extends ProgressFragment implements
         }
     }
 
-    public PatientListTypedCursorAdapter getAdapterInstance(AppLocationTree locationTree) {
+    public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
         return new PatientListTypedCursorAdapter(getActivity(), locationTree);
     }
 
@@ -158,7 +158,7 @@ public class PatientListFragment extends ProgressFragment implements
             int groupPosition,
             int childPosition,
             long id) {
-        AppPatient patient = (AppPatient)mPatientAdapter.getChild(groupPosition, childPosition);
+        Patient patient = (Patient)mPatientAdapter.getChild(groupPosition, childPosition);
         Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
         mController.onPatientSelected(patient);
         return true;
@@ -182,13 +182,13 @@ public class PatientListFragment extends ProgressFragment implements
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
         @Override
-        public void setLocationTree(AppLocationTree locationTree) {
+        public void setLocationTree(LocationTree locationTree) {
             mPatientAdapter = getAdapterInstance(locationTree);
             mListView.setAdapter(mPatientAdapter);
         }
 
         @Override
-        public void setPatients(TypedCursor<AppPatient> patients) {
+        public void setPatients(TypedCursor<Patient> patients) {
             if (mPatientAdapter != null) {
                 mPatientAdapter.setPatients(patients);
             }

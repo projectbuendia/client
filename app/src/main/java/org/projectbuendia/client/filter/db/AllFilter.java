@@ -11,10 +11,10 @@
 
 package org.projectbuendia.client.filter.db;
 
-import org.projectbuendia.client.data.app.AppTypeBase;
+import org.projectbuendia.client.models.Base;
 
 /** A pass-through filter that matches all results. */
-public final class AllFilter<T extends AppTypeBase> extends SimpleSelectionFilter<T> {
+public final class AllFilter<T extends Base> extends SimpleSelectionFilter<T> {
     @Override
     public String getSelectionString() {
         return "";

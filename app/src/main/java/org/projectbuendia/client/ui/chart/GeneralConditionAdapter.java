@@ -21,8 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.res.ResStatus;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.resolvables.ResStatus;
+import org.projectbuendia.client.models.Concepts;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

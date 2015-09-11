@@ -11,18 +11,18 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
- * An event bus event indicating that {@link AppLocation}s have been fetched from the data store.
+ * An event bus event indicating that {@link Location}s have been fetched from the data store.
  *
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class AppLocationsFetchedEvent extends TypedCursorFetchedEvent<AppLocation> {
+public class AppLocationsFetchedEvent extends TypedCursorFetchedEvent<Location> {
 
-    AppLocationsFetchedEvent(TypedCursor<AppLocation> cursor) {
+    AppLocationsFetchedEvent(TypedCursor<Location> cursor) {
         super(cursor);
     }
 }

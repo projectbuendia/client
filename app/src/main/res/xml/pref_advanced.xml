@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <org.projectbuendia.client.widget.EditAndClearDataPreference
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
         android:key="openmrs_root_url"
         android:title="@string/pref_title_openmrs_root_url"
         android:defaultValue="@string/openmrs_root_url_default"
@@ -23,7 +23,7 @@
         android:maxLines="1" />
 
     <!-- The delay interval in seconds between looking for APK updates -->
-    <org.projectbuendia.client.widget.EditIntegerPreference
+    <org.projectbuendia.client.widgets.EditIntegerPreference
         android:key="apk_update_interval_secs"
         android:title="@string/pref_title_apk_update_interval_secs"
         android:defaultValue="90" /> <!-- default to 1.5 minutes -->

@@ -27,7 +27,7 @@ import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.login.LoginActivity;
 
 import java.util.List;

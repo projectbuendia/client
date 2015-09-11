@@ -21,8 +21,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeSyncManager;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
@@ -110,7 +110,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN the location tree is loaded and sync is not in progress
         mFakeSyncManager.setSyncing(false);
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller hides the progress spinner
         verify(mMockFragmentUi).setBusyLoading(false);
@@ -123,7 +123,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN the location tree is loaded but sync is still in progress
         mFakeSyncManager.setSyncing(true);
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller does not hide the progress spinner
         verify(mMockFragmentUi).setBusyLoading(true);
@@ -136,7 +136,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN the location tree is loaded AND sync has completed
         mFakeSyncManager.setSyncing(true);
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the progress spinner
@@ -167,7 +167,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.attachFragmentUi(mMockFragmentUi);
         mFakeEventBus.post(new SyncFailedEvent());
         // WHEN the location tree is loaded and a sync succeeds
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         mFakeEventBus.post(new SyncSucceededEvent());
         // THEN the controller hides the sync failed dialog
@@ -181,7 +181,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location tree is loaded after sync completed
         mFakeEventBus.post(new SyncSucceededEvent());
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        LocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller starts a new sync
         assertTrue(mFakeSyncManager.isSyncActive());
@@ -193,7 +193,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location tree is loaded
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        LocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the loading dialog is not hidden
         verify(mMockUi, times(0)).showSyncFailedDialog(false);
@@ -205,7 +205,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN an empty location tree is loaded
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        LocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the loading dialog is not hidden
         verify(mMockFragmentUi).setBusyLoading(true);
@@ -218,7 +218,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.init();
         mController.attachFragmentUi(mMockFragmentUi);
         // WHEN a populated location tree is loaded
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // THEN the controller does not start a new sync
         assertTrue(!mFakeSyncManager.isSyncActive());
@@ -232,7 +232,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller with a location tree, with a sync in progress
         mFakeSyncManager.setSyncing(true);
         mController.init();
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
@@ -248,7 +248,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         // GIVEN an initialized controller with a location tree, with a sync in progress
         mFakeSyncManager.setSyncing(true);
         mController.init();
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
+        LocationTree locationTree = FakeAppLocationTreeFactory.emptyTree();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a fragment is attached
         mController.attachFragmentUi(mMockFragmentUi);
@@ -290,7 +290,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mController.init();
         // WHEN user initiates a sync cancellation right before the data model is fetched
         mFakeEventBus.post(new SyncCancelRequestedEvent());
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         mFakeEventBus.post(new SyncCanceledEvent());
         // THEN the activity is closed
@@ -311,7 +311,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     public void testSyncProgress_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location tree
         mController.init();
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a periodic sync reports progress
         mFakeEventBus.post(new SyncProgressEvent(10, "Foo synced"));
@@ -323,7 +323,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     public void testSyncFailed_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location tree
         mController.init();
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a periodic sync fails
         mFakeEventBus.post(new SyncFailedEvent());
@@ -335,7 +335,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
     public void testSyncStarted_ignoredWhenDataModelAvailable() {
         // GIVEN an initialized controller with a location tree
         mController.init();
-        AppLocationTree locationTree = FakeAppLocationTreeFactory.build();
+        LocationTree locationTree = FakeAppLocationTreeFactory.build();
         mFakeEventBus.post(new AppLocationTreeFetchedEvent(locationTree));
         // WHEN a periodic sync starts
         mFakeEventBus.post(new SyncStartedEvent());

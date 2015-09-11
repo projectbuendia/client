@@ -24,9 +24,9 @@ import com.joanzapata.android.iconify.Iconify;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.sync.SyncManager;
@@ -175,13 +175,13 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         mSearchController.suspend();
     }
 
-    protected void setPatients(TypedCursor<AppPatient> patients) {
+    protected void setPatients(TypedCursor<Patient> patients) {
         // By default, do nothing.
     }
 
     private final class SearchUi implements PatientSearchController.Ui {
         @Override
-        public void setPatients(TypedCursor<AppPatient> patients) {
+        public void setPatients(TypedCursor<Patient> patients) {
             // Delegate to implementers.
             BaseSearchablePatientListActivity.this.setPatients(patients);
         }

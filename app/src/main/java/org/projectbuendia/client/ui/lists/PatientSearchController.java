@@ -14,10 +14,10 @@ package org.projectbuendia.client.ui.lists;
 import android.util.Log;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
@@ -50,12 +50,12 @@ public class PatientSearchController {
     private static final boolean DEBUG = true;
 
     public interface Ui {
-        void setPatients(TypedCursor<AppPatient> patients);
+        void setPatients(TypedCursor<Patient> patients);
     }
 
     public interface FragmentUi {
-        void setLocationTree(AppLocationTree locationTree);
-        void setPatients(TypedCursor<AppPatient> patients);
+        void setLocationTree(LocationTree locationTree);
+        void setPatients(TypedCursor<Patient> patients);
         void showSpinner(boolean show);
     }
 
@@ -67,7 +67,7 @@ public class PatientSearchController {
     private final Set<FragmentUi> mFragmentUis = new HashSet<>();
     private final String mLocale;
 
-    private AppLocationTree mLocationTree;
+    private LocationTree mLocationTree;
     private String mRootLocationUuid;
 
     private SimpleSelectionFilter mFilter;
@@ -79,9 +79,9 @@ public class PatientSearchController {
 
     private boolean mWaitingOnLocationTree = false;
 
-    private final MatchingFilter<AppPatient> mSearchFilter =
-            new MatchingFilterGroup<AppPatient>(OR, new IdFilter(), new NameFilter());
-    private TypedCursor<AppPatient> mPatientsCursor;
+    private final MatchingFilter<Patient> mSearchFilter =
+            new MatchingFilterGroup<Patient>(OR, new IdFilter(), new NameFilter());
+    private TypedCursor<Patient> mPatientsCursor;
     private final SyncSubscriber mSyncSubscriber;
 
     /**
@@ -191,8 +191,8 @@ public class PatientSearchController {
         }
 
         if (mPatientsCursor != null) {
-            FilteredCursorWrapper<AppPatient> filteredCursorWrapper =
-                    new FilteredCursorWrapper<AppPatient>(
+            FilteredCursorWrapper<Patient> filteredCursorWrapper =
+                    new FilteredCursorWrapper<Patient>(
                             mPatientsCursor, mSearchFilter, mFilterQueryTerm);
             fragmentUi.setPatients(filteredCursorWrapper);
         }
@@ -217,9 +217,9 @@ public class PatientSearchController {
     /**
      * Responds to a patient being selected.
      *
-     * @param patient the selected {@link org.projectbuendia.client.data.app.AppPatient}
+     * @param patient the selected {@link Patient}
      */
-    public void onPatientSelected(AppPatient patient) {
+    public void onPatientSelected(Patient patient) {
         EventBus.getDefault().post(new PatientChartRequestedEvent(patient.uuid));
     }
 
@@ -263,8 +263,8 @@ public class PatientSearchController {
      * Manually sets the locations for this controller, which is useful if locations have been
      * updated from an outside context.
      */
-    public void setLocations(AppLocationTree appLocationTree) {
-        mLocationTree = appLocationTree;
+    public void setLocations(LocationTree locationTree) {
+        mLocationTree = locationTree;
     }
 
     private SimpleSelectionFilter getLocationSubfilter() {
@@ -322,8 +322,8 @@ public class PatientSearchController {
     }
 
     private void updatePatients() {
-        FilteredCursorWrapper<AppPatient> filteredCursorWrapper =
-                new FilteredCursorWrapper<AppPatient>(
+        FilteredCursorWrapper<Patient> filteredCursorWrapper =
+                new FilteredCursorWrapper<Patient>(
                         mPatientsCursor, mSearchFilter, mFilterQueryTerm);
         mUi.setPatients(filteredCursorWrapper);
         for (FragmentUi fragmentUi : mFragmentUis) {
@@ -333,7 +333,7 @@ public class PatientSearchController {
     }
 
     private final class FilterSubscriber {
-        public void onEventMainThread(TypedCursorFetchedEvent<AppPatient> event) {
+        public void onEventMainThread(TypedCursorFetchedEvent<Patient> event) {
             mCrudEventBus.unregister(this);
 
             // If a patient cursor was already open, close it.

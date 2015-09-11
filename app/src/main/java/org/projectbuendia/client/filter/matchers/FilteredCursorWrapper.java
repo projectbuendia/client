@@ -14,7 +14,7 @@ package org.projectbuendia.client.filter.matchers;
 import android.database.ContentObserver;
 import android.net.Uri;
 
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.TypedCursor;
 
 import java.util.ArrayList;
 import java.util.Iterator;
