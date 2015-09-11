@@ -9,15 +9,20 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-/**
- * A simple Java bean for JSON/Gson encoding/decoding, defining how the patient chart should be
- * displayed, giving the grouping and ordering of fields.
- */
-public class ChartStructure {
-    public String version; // should this be int? String? Should be comparable.
+import java.util.Map;
+
+/** JSON representation of an OpenMRS Concept */
+public class JsonConcept {
+
     public String uuid;
-    /** The groups that results should be displayed in, in order. */
-    public ChartGroup[] groups;
+
+    /** Server-side ID, needed for some XForms tasks. */
+    public Integer xform_id;
+
+    public ConceptType type;
+
+    /** A map from locales to localized names, e.g. {'en': 'heart', 'fr': 'coeur'} */
+    public Map<String, String> names;
 }

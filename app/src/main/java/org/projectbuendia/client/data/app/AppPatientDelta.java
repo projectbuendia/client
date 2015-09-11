@@ -22,7 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.model.Concepts;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.Logger;
@@ -59,7 +59,7 @@ public class AppPatientDelta {
             }
             if (gender.isPresent()) {
                 json.put(
-                        Server.PATIENT_GENDER_KEY, gender.get() == Patient.GENDER_MALE ? "M" : "F");
+                        Server.PATIENT_GENDER_KEY, gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
             }
             if (birthdate.isPresent()) {
                 json.put(
@@ -124,7 +124,7 @@ public class AppPatientDelta {
         if (gender.isPresent()) {
             contentValues.put(
                     Contracts.Patients.GENDER,
-                    gender.get() == Patient.GENDER_MALE ? "M" : "F");
+                    gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
         }
         if (birthdate.isPresent()) {
             contentValues.put(

@@ -19,13 +19,13 @@ import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.data.app.AppOrder;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
-import org.projectbuendia.client.net.model.Encounter;
-import org.projectbuendia.client.net.model.Form;
-import org.projectbuendia.client.net.model.Location;
-import org.projectbuendia.client.net.model.NewUser;
-import org.projectbuendia.client.net.model.Order;
-import org.projectbuendia.client.net.model.Patient;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonEncounter;
+import org.projectbuendia.client.net.json.JsonForm;
+import org.projectbuendia.client.net.json.JsonLocation;
+import org.projectbuendia.client.net.json.JsonNewUser;
+import org.projectbuendia.client.net.json.JsonOrder;
+import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.net.json.JsonUser;
 
 import java.util.List;
 
@@ -56,24 +56,24 @@ public interface Server {
     /** Adds a patient. */
     void addPatient(
             AppPatientDelta patientDelta,
-            Response.Listener<Patient> patientListener,
+            Response.Listener<JsonPatient> successListener,
             Response.ErrorListener errorListener);
 
     /** Updates a patient. */
     public void updatePatient(
             String patientId,
             AppPatientDelta patientDelta,
-            Response.Listener<Patient> patientListener,
+            Response.Listener<JsonPatient> successListener,
             Response.ErrorListener errorListener);
 
     /**
      * Creates a new user.
      *
-     * @param user the NewUser to add
+     * @param user the JsonNewUser to add
      */
     public void addUser(
-            NewUser user,
-            Response.Listener<User> userListener,
+            JsonNewUser user,
+            Response.Listener<JsonUser> successListener,
             Response.ErrorListener errorListener);
 
     /**
@@ -85,7 +85,7 @@ public interface Server {
     void addEncounter(
             AppPatient patient,
             AppEncounter encounter,
-            Response.Listener<Encounter> encounterListener,
+            Response.Listener<JsonEncounter> successListener,
             Response.ErrorListener errorListener);
 
     /**
@@ -97,7 +97,7 @@ public interface Server {
      */
     public void getPatient(
             String patientId,
-            Response.Listener<Patient> patientListener,
+            Response.Listener<JsonPatient> successListener,
             Response.ErrorListener errorListener);
 
     /**
@@ -112,16 +112,16 @@ public interface Server {
     public void listPatients(@Nullable String filterState,
                              @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
-                             Response.Listener<List<Patient>> patientListener,
+                             Response.Listener<List<JsonPatient>> successListener,
                              Response.ErrorListener errorListener);
 
     /** Lists all existing users. */
     public void listUsers(@Nullable String filterQueryTerm,
-                          Response.Listener<List<User>> userListener,
+                          Response.Listener<List<JsonUser>> successListener,
                           Response.ErrorListener errorListener);
 
     /** Lists all published forms. */
-    void listForms(Response.Listener<List<Form>> userListener,
+    void listForms(Response.Listener<List<JsonForm>> successListener,
                    Response.ErrorListener errorListener);
 
     /**
@@ -129,11 +129,11 @@ public interface Server {
      *
      * @param location uuid must not be set, parent_uuid must be set, and the names map must have a
      *                 name for at least one locale.
-     * @param locationListener the listener to be informed of the newly added location
+     * @param successListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
      */
-    public void addLocation(Location location,
-                            final Response.Listener<Location> locationListener,
+    public void addLocation(JsonLocation location,
+                            final Response.Listener<JsonLocation> successListener,
                             final Response.ErrorListener errorListener);
 
     /**
@@ -141,11 +141,11 @@ public interface Server {
      *
      * @param location the location, only uuid and new locale names for the location will be used,
      *                 but ideally the other arguments should be correct
-     * @param locationListener the listener to be informed of the newly added location
+     * @param successListener the listener to be informed of the newly added location
      * @param errorListener listener to be informed of any errors
      */
-    public void updateLocation(Location location,
-                               final Response.Listener<Location> locationListener,
+    public void updateLocation(JsonLocation location,
+                               final Response.Listener<JsonLocation> successListener,
                                final Response.ErrorListener errorListener);
 
     /**
@@ -156,16 +156,16 @@ public interface Server {
                                final Response.ErrorListener errorListener);
 
     /** Lists all locations. */
-    public void listLocations(Response.Listener<List<Location>> locationListener,
+    public void listLocations(Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener);
 
     /** Lists all existing orders. */
-    public void listOrders(Response.Listener<List<Order>> successListener,
+    public void listOrders(Response.Listener<List<JsonOrder>> successListener,
                            Response.ErrorListener errorListener);
 
     /** Adds an order for a patient. */
     void addOrder(AppOrder order,
-                  Response.Listener<Order> successListener,
+                  Response.Listener<JsonOrder> successListener,
                   Response.ErrorListener errorListener);
 
     /** Cancels all pending requests. */

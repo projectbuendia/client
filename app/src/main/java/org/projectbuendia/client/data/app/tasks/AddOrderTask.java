@@ -26,7 +26,7 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Order;
+import org.projectbuendia.client.net.json.JsonOrder;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
@@ -70,10 +70,10 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
     @Override
     protected OrderAddFailedEvent doInBackground(Void... params) {
-        RequestFuture<Order> future = RequestFuture.newFuture();
+        RequestFuture<JsonOrder> future = RequestFuture.newFuture();
 
         mServer.addOrder(mOrder, future, future);
-        Order order;
+        JsonOrder order;
         try {
             order = future.get();
         } catch (InterruptedException e) {

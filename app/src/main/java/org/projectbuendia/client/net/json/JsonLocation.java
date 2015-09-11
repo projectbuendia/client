@@ -9,12 +9,21 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-public class Order {
+import java.util.Map;
+
+/** JSON representation of an OpenMRS Location */
+public class JsonLocation {
+
+    // Note: this class is constructed by reflection by Gson.
+
     public String uuid;
-    public String patient_uuid;
-    public String instructions;
-    public Long start;
-    public Long stop;
+    public String parent_uuid;
+
+    /** A map of locales to localized names. */
+    public Map<String, String> names;
+
+    public JsonLocation() {
+    }
 }

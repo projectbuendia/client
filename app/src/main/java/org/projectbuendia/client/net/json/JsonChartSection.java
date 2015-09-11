@@ -9,9 +9,17 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-/** A list of concepts provided by the server. */
-public class ConceptList {
-    public Concept [] results;
+/** Represents a group of related concepts in a chart (a 'Section' in OpenMRS). */
+public class JsonChartSection {
+
+    /** Used to look up the localized section name in the concept dictionary. */
+    public String uuid;
+
+    /**
+     * The uuids of concepts in this group, in the order they should be displayed.
+     * The uuid can be used to look up the concept's name and type in the concept dictionary.
+     */
+    public String[] concepts;
 }

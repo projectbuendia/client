@@ -25,8 +25,8 @@ import com.android.volley.toolbox.RequestFuture;
 import net.sqlcipher.database.SQLiteException;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.net.model.NewUser;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonNewUser;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.DbSyncHelper;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts.Users;
@@ -46,7 +46,7 @@ public class UserStore {
     private static final String USER_SYNC_SAVEPOINT_NAME = "USER_SYNC_SAVEPOINT";
 
     /** Loads the known users from local store. */
-    public Set<User> loadKnownUsers()
+    public Set<JsonUser> loadKnownUsers()
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         Cursor cursor = null;
@@ -72,10 +72,10 @@ public class UserStore {
             // Initiate users from database data and return the result.
             int fullNameColumn = cursor.getColumnIndex(Users.FULL_NAME);
             int uuidColumn = cursor.getColumnIndex(Users.UUID);
-            Set<User> result = new HashSet<>();
+            Set<JsonUser> result = new HashSet<>();
             while (cursor.moveToNext()) {
-                User user =
-                        new User(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
+                JsonUser user =
+                        new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
                 result.add(user);
             }
             return result;
@@ -93,13 +93,13 @@ public class UserStore {
     }
 
     /** Syncs known users with the server. */
-    public Set<User> syncKnownUsers()
+    public Set<JsonUser> syncKnownUsers()
             throws ExecutionException, InterruptedException, RemoteException,
             OperationApplicationException {
-        RequestFuture<List<User>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
         App.getServer().listUsers(null, future, future);
-        List<User> users = future.get();
-        HashSet<User> userSet = new HashSet<>();
+        List<JsonUser> users = future.get();
+        HashSet<JsonUser> userSet = new HashSet<>();
         userSet.addAll(users);
 
         LOG.i("Got %d users from server; updating local database", users.size());
@@ -128,10 +128,10 @@ public class UserStore {
     }
 
     /** Adds a new user, both locally and on the server. */
-    public User addUser(NewUser user) throws VolleyError {
+    public JsonUser addUser(JsonNewUser user) throws VolleyError {
         // Define a container for the results.
         class Result {
-            public User user = null;
+            public JsonUser user = null;
             public VolleyError error = null;
         }
 
@@ -142,9 +142,9 @@ public class UserStore {
         final CountDownLatch latch = new CountDownLatch(1);
         App.getServer().addUser(
                 user,
-                new Response.Listener<User>() {
+                new Response.Listener<JsonUser>() {
                     @Override
-                    public void onResponse(User response) {
+                    public void onResponse(JsonUser response) {
                         result.user = response;
                         latch.countDown();
                     }
@@ -186,7 +186,7 @@ public class UserStore {
     }
 
     /** Deletes a user, both locally and on the server. */
-    public User deleteUser(User user) {
+    public JsonUser deleteUser(JsonUser user) {
         throw new UnsupportedOperationException();
     }
 }

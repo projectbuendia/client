@@ -9,24 +9,10 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-import java.util.Map;
-
-/**
- * A single medical concept, usually a question or answer in an observation for a patient, which can
- * be used for Gson/JSON encoding/decoding. Stores localization and type information.
- */
-public class Concept {
-
+/** JSON representation of a single patient's set of encounters; call Serializers.registerTo before use. */
+public class JsonPatientRecord {
     public String uuid;
-    /**
-     * The server side id. Prefer the UUID for sending to the server, but this is needed for some
-     * xforms tasks.
-     */
-    public Integer xform_id; // @nolint
-    public ConceptType type;
-
-    /** A map from locales to the name in that locale. Eg en->heart, fr->coeur, ... */
-    public Map<String, String> names;
+    public JsonEncounter[] encounters;
 }

@@ -9,24 +9,12 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-import java.util.Map;
+import org.joda.time.DateTime;
 
-/** A simple Java bean representing a location which can be used for JSON/Gson decoding/encoding. */
-public class Location {
-
-    // Note: this class is constructed by reflection by Gson.
-
-    public String uuid;
-    public String parent_uuid; // @nolint
-
-    /**
-     * Map from locales to the name of the location in that locale.
-     */
-    public Map<String, String> names;
-
-    public Location() {
-    }
-
+/** JSON representation of a set of patient records returned by the server. */
+public class JsonPatientRecordResponse {
+    public JsonPatientRecord[] results;
+    public DateTime snapshotTime;
 }

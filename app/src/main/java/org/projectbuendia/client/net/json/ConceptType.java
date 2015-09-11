@@ -9,17 +9,15 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-/** Represents a group of related concepts in a chart (a 'Section' in OpenMRS). */
-public class ChartGroup {
+import com.google.gson.annotations.SerializedName;
 
-    /** Used to look up the localized name in the concept dictionary. */
-    public String uuid;
-
-    /**
-     * The uuid of concepts in this group, in the order they should be displayed.
-     * The uuid can be used to look up the localized name (and type) in the concept dictionary.
-     */
-    public String [] concepts;
+/** OpenMRS concept types (used for JSON representation and elsewhere) */
+public enum ConceptType {
+    @SerializedName("numeric") NUMERIC,
+    @SerializedName("coded") CODED,
+    @SerializedName("text") TEXT,
+    @SerializedName("date") DATE,
+    @SerializedName("none") NONE
 }

@@ -34,11 +34,11 @@ import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.net.OpenMrsChartServer;
-import org.projectbuendia.client.net.model.ChartStructure;
-import org.projectbuendia.client.net.model.Concept;
-import org.projectbuendia.client.net.model.ConceptList;
-import org.projectbuendia.client.net.model.PatientChart;
-import org.projectbuendia.client.net.model.PatientChartList;
+import org.projectbuendia.client.net.json.JsonChart;
+import org.projectbuendia.client.net.json.JsonConcept;
+import org.projectbuendia.client.net.json.JsonConceptResponse;
+import org.projectbuendia.client.net.json.JsonPatientRecord;
+import org.projectbuendia.client.net.json.JsonPatientRecordResponse;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
@@ -378,12 +378,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)
             throws InterruptedException, ExecutionException, RemoteException {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        RequestFuture<ConceptList> future = RequestFuture.newFuture();
+        RequestFuture<JsonConceptResponse> future = RequestFuture.newFuture();
         chartServer.getConcepts(future, future); // errors handled by caller
-        final ConceptList conceptList = future.get();
         ArrayList<ContentValues> conceptInserts = new ArrayList<>();
         ArrayList<ContentValues> conceptNameInserts = new ArrayList<>();
-        for (Concept concept : conceptList.results) {
+        for (JsonConcept concept : future.get().results) {
             checkCancellation("while determining concepts to insert");
             // This is safe because we have implemented insert on the content provider
             // with replace.
@@ -436,12 +435,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             throws InterruptedException, ExecutionException, RemoteException,
             OperationApplicationException {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
-        RequestFuture<ChartStructure> future = RequestFuture.newFuture();
+        RequestFuture<JsonChart> future = RequestFuture.newFuture();
         chartServer.getChartStructure(GRID_CHART_UUID, future, future); // errors handled by caller
-        final ChartStructure conceptList = future.get();
-        RequestFuture<ChartStructure> future2 = RequestFuture.newFuture();
+        final JsonChart conceptList = future.get();
+        RequestFuture<JsonChart> future2 = RequestFuture.newFuture();
         chartServer.getChartStructure(CHART_TILES_UUID, future2, future2); // errors handled by caller
-        final ChartStructure tilesList = future2.get();
+        final JsonChart tilesList = future2.get();
 
         // When we do a chart update, delete everything first.
         checkCancellation("before applying chart structure deletions");
@@ -473,7 +472,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         checkCancellation("before requesting observations");
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         // Get the charts asynchronously using volley.
-        RequestFuture<PatientChartList> listFuture = RequestFuture.newFuture();
+        RequestFuture<JsonPatientRecordResponse> listFuture = RequestFuture.newFuture();
 
         TimingLogger timingLogger = new TimingLogger(LOG.tag, "obs update");
         Instant lastSyncTime = getLastSyncTime(provider);
@@ -535,30 +534,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private Instant updateAllObservations(
             ContentProviderClient provider, SyncResult syncResult, OpenMrsChartServer chartServer,
-            RequestFuture<PatientChartList> listFuture, TimingLogger timingLogger)
+            RequestFuture<JsonPatientRecordResponse> future, TimingLogger timingLogger)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting all charts");
-        chartServer.getAllCharts(listFuture, listFuture);
+        chartServer.getAllCharts(future, future);
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
-        final PatientChartList patientChartList =
-                listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
+        final JsonPatientRecordResponse response =
+                future.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got response ");
         timingLogger.addSplit("Get all charts RPC");
         checkCancellation("before processing observation RPC results");
-        for (PatientChart patientChart : patientChartList.results) {
+        for (JsonPatientRecord record : response.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting future");
-            if (patientChart.uuid == null) {
+            if (record.uuid == null) {
                 LOG.e("null patient id in observation response");
                 continue;
             }
             // Delete all existing observations for the patient.
-            toDelete.add(patientChart.uuid);
+            toDelete.add(record.uuid);
             timingLogger.addSplit("added delete to list");
             // Add the new observations
-            toInsert.addAll(DbSyncHelper.getObsValuesToInsert(patientChart, syncResult));
+            toInsert.addAll(DbSyncHelper.getObsValuesToInsert(record, syncResult));
             timingLogger.addSplit("added obs to list");
         }
         timingLogger.addSplit("making operations");
@@ -569,8 +568,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.bulkInsert(Observations.CONTENT_URI,
                 toInsert.toArray(new ContentValues[toInsert.size()]));
         timingLogger.addSplit("bulk inserts");
-        return patientChartList.snapshotTime == null ? null :
-                patientChartList.snapshotTime.toInstant();
+        return response.snapshotTime == null ? null :
+                response.snapshotTime.toInstant();
     }
 
     private void bulkDelete(ContentProviderClient provider, ArrayList<String> toDelete)
@@ -595,27 +594,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private Instant updateIncrementalObservations(Instant lastSyncTime,
             ContentProviderClient provider, SyncResult syncResult, OpenMrsChartServer chartServer,
-            RequestFuture<PatientChartList> listFuture, TimingLogger timingLogger)
+            RequestFuture<JsonPatientRecordResponse> listFuture, TimingLogger timingLogger)
             throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting incremental charts");
         chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
-        final PatientChartList patientChartList =
+        final JsonPatientRecordResponse response =
                 listFuture.get(OBSERVATIONS_TIMEOUT_SECS, TimeUnit.SECONDS);
         LOG.d("got incremental response");
         timingLogger.addSplit("Get incremental charts RPC");
         checkCancellation("before processing observation RPC results");
-        for (PatientChart patientChart : patientChartList.results) {
+        for (JsonPatientRecord record : response.results) {
             // As we are doing multiple request in parallel, deal with exceptions in the loop.
             timingLogger.addSplit("awaiting incremental future");
-            if (patientChart.uuid == null) {
+            if (record.uuid == null) {
                 LOG.e("null patient id in observation response");
                 continue;
             }
-            if (patientChart.encounters.length > 0) {
+            if (record.encounters.length > 0) {
                 // Add the new observations
-                toInsert.addAll(DbSyncHelper.getObsValuesToInsert(patientChart, syncResult));
+                toInsert.addAll(DbSyncHelper.getObsValuesToInsert(record, syncResult));
                 timingLogger.addSplit("added incremental obs to list");
             }
         }
@@ -626,8 +625,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     toInsert.toArray(new ContentValues[toInsert.size()]));
             timingLogger.addSplit("bulk inserts");
         }
-        return patientChartList.snapshotTime == null ? null :
-                patientChartList.snapshotTime.toInstant();
+        return response.snapshotTime == null ? null :
+                response.snapshotTime.toInstant();
     }
 
     private void updateUsers(final ContentProviderClient provider, SyncResult syncResult)

@@ -17,7 +17,7 @@ import android.support.annotation.NonNull;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.model.Order;
+import org.projectbuendia.client.net.json.JsonOrder;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 import javax.annotation.Nullable;
@@ -57,7 +57,7 @@ public final class AppOrder extends AppTypeBase<String> implements Comparable<Ap
         return result;
     }
 
-    public static AppOrder fromNet(Order order) {
+    public static AppOrder fromNet(JsonOrder order) {
         return new AppOrder(
                 order.uuid,
                 order.patient_uuid,

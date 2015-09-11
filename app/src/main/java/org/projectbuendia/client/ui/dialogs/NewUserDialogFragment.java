@@ -25,7 +25,7 @@ import android.widget.EditText;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.model.NewUser;
+import org.projectbuendia.client.net.json.JsonNewUser;
 import org.projectbuendia.client.utils.Utils;
 
 import butterknife.ButterKnife;
@@ -107,7 +107,7 @@ public class NewUserDialogFragment extends DialogFragment {
                                             return;
                                         }
 
-                                        App.getUserManager().addUser(new NewUser(
+                                        App.getUserManager().addUser(new JsonNewUser(
                                                 givenName, familyName
                                         ));
                                         if (mActivityUi != null) {

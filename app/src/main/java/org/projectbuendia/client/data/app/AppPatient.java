@@ -15,7 +15,7 @@ import android.content.ContentValues;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.model.Zone;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 
@@ -50,8 +50,8 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
         return new Builder();
     }
 
-    /** Creates an instance of {@link AppPatient} from a network {@link Patient} object. */
-    public static AppPatient fromNet(Patient patient) {
+    /** Creates an instance of {@link AppPatient} from a network {@link JsonPatient} object. */
+    public static AppPatient fromNet(JsonPatient patient) {
         return builder()
                 .setId(patient.id)
                 .setUuid(patient.uuid)
@@ -85,7 +85,7 @@ public final class AppPatient extends AppTypeBase<String> implements Comparable<
                 familyName);
         contentValues.put(
                 Contracts.Patients.GENDER,
-                gender == Patient.GENDER_MALE ? "M" : "F");
+                gender == JsonPatient.GENDER_MALE ? "M" : "F");
         contentValues.put(
                 Contracts.Patients.BIRTHDATE,
                 Utils.toString(birthdate));

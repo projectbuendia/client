@@ -21,7 +21,7 @@ import android.util.Pair;
 import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.model.Concepts;
-import org.projectbuendia.client.net.model.ConceptType;
+import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 

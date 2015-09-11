@@ -26,15 +26,15 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.data.app.AppForm;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.net.model.ChartGroup;
-import org.projectbuendia.client.net.model.ChartStructure;
-import org.projectbuendia.client.net.model.Encounter;
-import org.projectbuendia.client.net.model.Form;
-import org.projectbuendia.client.net.model.Location;
-import org.projectbuendia.client.net.model.Order;
-import org.projectbuendia.client.net.model.Patient;
-import org.projectbuendia.client.net.model.PatientChart;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonChart;
+import org.projectbuendia.client.net.json.JsonChartSection;
+import org.projectbuendia.client.net.json.JsonEncounter;
+import org.projectbuendia.client.net.json.JsonForm;
+import org.projectbuendia.client.net.json.JsonLocation;
+import org.projectbuendia.client.net.json.JsonOrder;
+import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.net.json.JsonPatientRecord;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
@@ -60,25 +60,25 @@ import java.util.concurrent.ExecutionException;
 public class DbSyncHelper {
     private static final Logger LOG = Logger.create();
 
-    /** Converts a ChartStructure response into appropriate inserts in the chart table. */
+    /** Converts a JsonChart response into appropriate inserts in the chart table. */
     public static ArrayList<ContentProviderOperation> getChartUpdateOps(
-            ChartStructure response, SyncResult syncResult) {
+            JsonChart response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         if (response.uuid == null) {
             LOG.e("null chart uuid when fetching chart structure");
         }
         int chartRow = 0;
-        for (ChartGroup group : response.groups) {
-            if (group.uuid == null) {
+        for (JsonChartSection section : response.groups) {
+            if (section.uuid == null) {
                 LOG.e("null group uuid for chart " + response.uuid);
                 continue;
             }
-            for (String conceptUuid : group.concepts) {
+            for (String conceptUuid : section.concepts) {
                 ops.add(ContentProviderOperation
                         .newInsert(Charts.CONTENT_URI)
                         .withValue(Charts.CHART_UUID, response.uuid)
                         .withValue(Charts.CHART_ROW, chartRow++)
-                        .withValue(Charts.GROUP_UUID, group.uuid)
+                        .withValue(Charts.GROUP_UUID, section.uuid)
                         .withValue(Charts.CONCEPT_UUID, conceptUuid)
                         .build());
                 syncResult.stats.numInserts++;
@@ -92,10 +92,10 @@ public class DbSyncHelper {
         final ContentResolver resolver = App.getInstance().getContentResolver();
 
         LOG.i("Listing all forms on server");
-        RequestFuture<List<Form>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonForm>> future = RequestFuture.newFuture();
         App.getServer().listForms(future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
-        for (Form form : future.get()) {
+        for (JsonForm form : future.get()) {
             cvs.put(form.id, AppForm.fromNet(form).toContentValues());
         }
 
@@ -130,10 +130,10 @@ public class DbSyncHelper {
             throws ExecutionException, InterruptedException {
         final ContentResolver resolver = App.getInstance().getContentResolver();
 
-        RequestFuture<List<Patient>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonPatient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
-        for (Patient patient : future.get()) {
+        for (JsonPatient patient : future.get()) {
             cvs.put(patient.id, AppPatient.fromNet(patient).toContentValues());
         }
 
@@ -177,10 +177,10 @@ public class DbSyncHelper {
     
     /** Converts a chart data response into appropriate inserts in the chart table. */
     public static List<ContentValues> getObsValuesToInsert(
-            PatientChart response, SyncResult syncResult) {
+            JsonPatientRecord response, SyncResult syncResult) {
         List<ContentValues> cvs = new ArrayList<>();
         final String patientUuid = response.uuid;
-        for (Encounter encounter : response.encounters) {
+        for (JsonEncounter encounter : response.encounters) {
             if (encounter.uuid == null) {
                 LOG.e("Patient %s has an encounter with uuid = null", patientUuid);
                 continue;
@@ -227,10 +227,10 @@ public class DbSyncHelper {
     public static ArrayList<ContentProviderOperation> getOrderUpdateOps(SyncResult syncResult)
             throws ExecutionException, InterruptedException {
         // Request all orders from the server.
-        RequestFuture<List<Order>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonOrder>> future = RequestFuture.newFuture();
         App.getServer().listOrders(future, future);
-        Map<String, Order> ordersToStore = new HashMap<>();
-        for (Order order : future.get()) {
+        Map<String, JsonOrder> ordersToStore = new HashMap<>();
+        for (JsonOrder order : future.get()) {
             ordersToStore.put(order.uuid, order);
         }
 
@@ -249,7 +249,7 @@ public class DbSyncHelper {
             while (c.moveToNext()) {
                 String uuid = c.getString(c.getColumnIndex(Orders.UUID));
                 Uri uri = Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
-                Order order = ordersToStore.get(uuid);
+                JsonOrder order = ordersToStore.get(uuid);
                 if (order != null) {  // apply update to a local order
                     LOG.v("  - will update order " + uuid);
                     ops.add(ContentProviderOperation.newUpdate(uri)
@@ -271,7 +271,7 @@ public class DbSyncHelper {
         }
 
         // Store all the remaining received orders as new orders.
-        for (Order order : ordersToStore.values()) {
+        for (JsonOrder order : ordersToStore.values()) {
             LOG.v("  - will insert order " + order.uuid);
             ops.add(ContentProviderOperation.newInsert(Orders.CONTENT_URI)
                     .withValue(Orders.UUID, order.uuid)
@@ -287,12 +287,12 @@ public class DbSyncHelper {
 
     /** Given a set of users, replaces the current set of users with users from that set. */
     public static ArrayList<ContentProviderOperation> getUserUpdateOps(
-            Set<User> response, SyncResult syncResult) {
+            Set<JsonUser> response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         // Delete all users before inserting.
         ops.add(ContentProviderOperation.newDelete(Users.CONTENT_URI).build());
         // TODO: Update syncResult delete counts.
-        for (User user : response) {
+        for (JsonUser user : response) {
             ops.add(ContentProviderOperation.newInsert(Users.CONTENT_URI)
                     .withValue(Users.UUID, user.id)
                     .withValue(Users.FULL_NAME, user.fullName)
@@ -322,18 +322,18 @@ public class DbSyncHelper {
         };
 
         LOG.d("Before network call");
-        RequestFuture<List<Location>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonLocation>> future = RequestFuture.newFuture();
         App.getServer().listLocations(future, future);
 
         // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
         // background thread
-        List<Location> locations = future.get();
+        List<JsonLocation> locations = future.get();
         LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
-        Map<String, Location> locationsMap = new HashMap<>();
-        for (Location location : locations) {
-            locationsMap.put(location.uuid, location);
+        Map<String, JsonLocation> locationsByUuid = new HashMap<>();
+        for (JsonLocation location : locations) {
+            locationsByUuid.put(location.uuid, location);
         }
 
         // Get list of all items
@@ -376,10 +376,10 @@ public class DbSyncHelper {
             id = c.getString(c.getColumnIndex(Locations.LOCATION_UUID));
             parentId = c.getString(c.getColumnIndex(Locations.PARENT_UUID));
 
-            Location location = locationsMap.get(id);
+            JsonLocation location = locationsByUuid.get(id);
             if (location != null) {
                 // Entry exists. Remove from entry map to prevent insert later.
-                locationsMap.remove(id);
+                locationsByUuid.remove(id);
 
                 // Grab the names stored in the database for this location.
                 Map<String, String> locationNames = dbLocationNames.get(id);
@@ -428,7 +428,7 @@ public class DbSyncHelper {
         }
         c.close();
 
-        for (Location location : locationsMap.values()) {
+        for (JsonLocation location : locationsByUuid.values()) {
             LOG.i("  - will insert location " + location.uuid);
             batch.add(ContentProviderOperation.newInsert(Locations.CONTENT_URI)
                     .withValue(Locations.LOCATION_UUID, location.uuid)

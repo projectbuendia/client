@@ -12,9 +12,9 @@
 package org.projectbuendia.client.ui.matchers;
 
 import org.mockito.ArgumentMatcher;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 
-/** Matchers for {@link User} objects. */
+/** Matchers for {@link JsonUser} objects. */
 public class UserMatchers {
     private UserMatchers() {}
 
@@ -29,11 +29,11 @@ public class UserMatchers {
         /** Matches any user with the specified full name. */
         @Override
         public boolean matches(Object user) {
-            if (!(user instanceof User)) {
+            if (!(user instanceof JsonUser)) {
                 return false;
             }
 
-            return ((User)user).fullName.equals(mFullName);
+            return ((JsonUser)user).fullName.equals(mFullName);
         }
     }
 }

@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
 import com.google.common.base.MoreObjects;
 
@@ -17,10 +17,8 @@ import org.joda.time.LocalDate;
 
 import java.io.Serializable;
 
-/**
- * A simple Java bean for representing a patient which can be used for JSON/Gson encoding/decoding.
- */
-public class Patient implements Serializable {
+/** JSON representation of an OpenMRS Patient. */
+public class JsonPatient implements Serializable {
     public static final int GENDER_UNKNOWN = 0;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
@@ -31,9 +29,9 @@ public class Patient implements Serializable {
     public String family_name;
     public String gender;  // must be "M" or "F"
     public LocalDate birthdate;
-    public Location assigned_location;
+    public JsonLocation assigned_location; // TODO: make this a plain uuid; API change
 
-    public Patient() {}
+    public JsonPatient() {}
 
     @Override
     public String toString() {

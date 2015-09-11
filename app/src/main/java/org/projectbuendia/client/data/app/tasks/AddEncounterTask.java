@@ -29,7 +29,7 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Encounter;
+import org.projectbuendia.client.net.json.JsonEncounter;
 import org.projectbuendia.client.sync.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
@@ -84,12 +84,12 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
     @Override
     protected EncounterAddFailedEvent doInBackground(Void... params) {
-        RequestFuture<Encounter> encounterFuture = RequestFuture.newFuture();
+        RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
 
-        mServer.addEncounter(mPatient, mEncounter, encounterFuture, encounterFuture);
-        Encounter encounter;
+        mServer.addEncounter(mPatient, mEncounter, future, future);
+        JsonEncounter encounter;
         try {
-            encounter = encounterFuture.get();
+            encounter = future.get();
         } catch (InterruptedException e) {
             return new EncounterAddFailedEvent(EncounterAddFailedEvent.Reason.INTERRUPTED, e);
         } catch (ExecutionException e) {

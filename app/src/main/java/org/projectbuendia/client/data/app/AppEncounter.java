@@ -18,7 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Encounter;
+import org.projectbuendia.client.net.json.JsonEncounter;
 import org.projectbuendia.client.sync.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
@@ -164,9 +164,9 @@ public class AppEncounter extends AppTypeBase<String> {
 
     /**
      * Creates an instance of {@link AppEncounter} from a network
-     * {@link org.projectbuendia.client.net.model.Encounter} object and corresponding patient UUID.
+     * {@link JsonEncounter} object and corresponding patient UUID.
      */
-    public static AppEncounter fromNet(String patientUuid, Encounter encounter) {
+    public static AppEncounter fromNet(String patientUuid, JsonEncounter encounter) {
         List<AppObservation> observationList = new ArrayList<AppObservation>();
         if (encounter.observations != null) {
             for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {

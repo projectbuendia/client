@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -25,10 +25,10 @@ import org.joda.time.DateTime;
 import java.lang.reflect.Type;
 
 /**
- * Gson serializer for custom types like Joda DateTime. Largely copied from
+ * Gson serializers for custom types like Joda DateTime. Largely copied from
  * https://sites.google.com/site/gson/gson-user-guide#TOC-Serializing-and-Deserializing-Generic-Types
  */
-public class CustomSerialization {
+public class Serializers {
 
     public static void registerTo(GsonBuilder gson) {
         gson.registerTypeAdapter(DateTime.class, new DateTimeSerializer());

@@ -9,15 +9,9 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-/**
- * A simple Java bean representing a JSON object used to encode information about encounters
- * (between a patient and clinician) and the observations made there.
- *
- * <p>Must call {@link CustomSerialization#registerTo(com.google.gson.GsonBuilder)} before use.
- */
-public class PatientChart {
-    public String uuid;
-    public Encounter[] encounters;
+/** A list of concept results returned by the server. */
+public class JsonConceptResponse {
+    public JsonConcept[] results;
 }

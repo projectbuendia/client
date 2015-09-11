@@ -35,7 +35,7 @@ import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
@@ -51,7 +51,6 @@ import de.greenrobot.event.EventBus;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isA;
 import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatientWithId;
 
 /**
@@ -326,7 +325,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         delta.givenName = Optional.of("Given" + id);
         delta.familyName = Optional.of("Family" + id);
         delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
-        delta.gender = Optional.of(Patient.GENDER_FEMALE);
+        delta.gender = Optional.of(JsonPatient.GENDER_FEMALE);
         delta.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
         // Setting location within the AppPatientDelta is not yet supported.
         // delta.assignedLocationUuid = Optional.of(Zone.TRIAGE_ZONE_UUID);

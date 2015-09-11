@@ -47,7 +47,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.model.Concepts;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -342,7 +342,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         PrepopulatableFields fields = new PrepopulatableFields();
         fields.locationName = "Triage";
 
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed",
                 "form", "round",
                 "group", targetGroup);
@@ -376,7 +376,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         PrepopulatableFields fields = new PrepopulatableFields();
         fields.locationName = "Triage";
 
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed", "form", "lab_test");
         if (user != null) {
             fields.clinicianName = user.fullName;
@@ -393,7 +393,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         PrepopulatableFields fields = new PrepopulatableFields();
         fields.locationName = "Triage";
 
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
         if (user != null) {
             fields.clinicianName = user.fullName;
         }

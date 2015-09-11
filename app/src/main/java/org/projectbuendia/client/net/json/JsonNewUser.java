@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -18,7 +18,7 @@ import java.util.UUID;
  * Represents a request to create a new user, which does not necessarily match the
  * visible fields for that user during retrieval (for example, the user's password).
  */
-public class NewUser implements Serializable {
+public class JsonNewUser implements Serializable {
     private static final String DEFAULT_PASSWORD = "Password123";
 
     public String username;
@@ -27,7 +27,7 @@ public class NewUser implements Serializable {
     public String password;
 
     /** Creates a user with generated username and a default password. */
-    public NewUser() {
+    public JsonNewUser() {
         this.password = DEFAULT_PASSWORD;
         this.username = generateUsername();
     }
@@ -36,7 +36,7 @@ public class NewUser implements Serializable {
      * Creates a user with generated username, default password, and the specified given and
      * family names.
      */
-    public NewUser(String givenName, String familyName) {
+    public JsonNewUser(String givenName, String familyName) {
         this();
         this.givenName = givenName;
         this.familyName = familyName;

@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAsyncTaskRunner;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 
 import com.google.common.collect.ImmutableSet;
@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
 /** Tests for {@link UserManager}. */
 public final class UserManagerTest extends InstrumentationTestCase {
 
-    private static final User USER = new User("id", "name");
+    private static final JsonUser USER = new JsonUser("id", "name");
 
     private UserManager mUserManager;
     private FakeEventBus mFakeEventBus;
@@ -71,7 +71,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
     /** Tests that an event is posted when users fail to load. */
     public void testLoadKnownUsers_GeneratesEventOnFailure() throws Exception {
         // GIVEN the user store returns an empty set of users
-        when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.<User>of());
+        when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.<JsonUser>of());
         // WHEN loadKnownUsers is called and the async task is run
         mUserManager.loadKnownUsers();
         mFakeAsyncTaskRunner.runUntilEmpty();

@@ -12,7 +12,7 @@
 package org.projectbuendia.client.sync;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.net.model.ConceptType;
+import org.projectbuendia.client.net.json.ConceptType;
 
 import java.util.Objects;
 

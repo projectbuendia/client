@@ -15,7 +15,7 @@ import android.content.ContentValues;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.model.Form;
+import org.projectbuendia.client.net.json.JsonForm;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 import javax.annotation.concurrent.Immutable;
@@ -35,7 +35,7 @@ public final class AppForm extends AppTypeBase<String> implements Comparable<App
         this.version = version;
     }
 
-    public static AppForm fromNet(Form form) {
+    public static AppForm fromNet(JsonForm form) {
         return new AppForm(form.id, form.uuid, form.name, form.version);
     }
 

@@ -9,21 +9,11 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-import com.google.gson.annotations.SerializedName;
-
-/** An enumeration of concept types. */
-public enum ConceptType {
-
-    @SerializedName("numeric")
-    NUMERIC,
-    @SerializedName("coded")
-    CODED,
-    @SerializedName("text")
-    TEXT,
-    @SerializedName("date")
-    DATE,
-    @SerializedName("none")
-    NONE,
+public class JsonForm {
+    public String id;
+    public String uuid;
+    public String name;
+    public String version;
 }

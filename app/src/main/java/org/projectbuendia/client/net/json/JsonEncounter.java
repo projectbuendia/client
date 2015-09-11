@@ -9,29 +9,18 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
 import org.joda.time.DateTime;
 
 import java.util.Map;
 
-/**
- * A single encounter between a patient and a clinician in a patient chart, which can be used for
- * GSON/JSON encoding/decoding.
- *
- * <p>Must call {@link CustomSerialization#registerTo(com.google.gson.GsonBuilder)} before use.
- */
-public class Encounter {
-    /** The uuid of the encounter. */
+/** JSON representation of an OpenMRS Encounter; call Serializers.registerTo before use. */
+public class JsonEncounter {
     public String uuid;
     public DateTime timestamp;
-    public String enterer_id; // @nolint
-    /**
-     * Keys are uuid strings for the concept representing the concept observed. Values are the
-     * value observed. To find out what the type is the type in the concept dictionary must be
-     * inspected. Common values are doubles and String representing concept uuids of coded concepts.
-     */
+    public String enterer_id;
+    /** A {conceptUuid: value} map, where value can be a number, string, or answer UUID. */
     public Map<Object, Object> observations;
     public String[] order_uuids;  // orders executed during this encounter
-
 }

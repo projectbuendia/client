@@ -9,11 +9,15 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-public class Form {
-    public String id;
+/**
+ * A simple Java bean for JSON/Gson encoding/decoding, defining how the patient chart should be
+ * displayed, giving the grouping and ordering of fields.
+ */
+public class JsonChart {
+    public String version; // should this be int? String? Should be comparable.
     public String uuid;
-    public String name;
-    public String version;
+    /** The groups that results should be displayed in, in order. */
+    public JsonChartSection[] groups; // TODO: rename this to "sections"; API change
 }

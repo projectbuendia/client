@@ -25,7 +25,7 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 
@@ -69,12 +69,12 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
 
     @Override
     protected ItemFetchFailedEvent doInBackground(Void... params) {
-        RequestFuture<Patient> patientFuture = RequestFuture.newFuture();
+        RequestFuture<JsonPatient> patientFuture = RequestFuture.newFuture();
 
         // Try to download the specified patient from the server.
         LOG.i("Downloading single patient %s from server...", mPatientId);
         mServer.getPatient(mPatientId, patientFuture, patientFuture);
-        Patient patient;
+        JsonPatient patient;
         try {
             patient = patientFuture.get();
         } catch (InterruptedException e) {

@@ -22,7 +22,7 @@ import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.dialogs.NewUserDialogFragment;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -53,7 +53,7 @@ public final class LoginController {
 
         void showSpinner(boolean show);
 
-        void showUsers(List<User> users);
+        void showUsers(List<JsonUser> users);
     }
 
     private final EventBusRegistrationInterface mEventBus;
@@ -61,7 +61,7 @@ public final class LoginController {
     private final FragmentUi mFragmentUi;
     private final DialogActivityUi mDialogUi = new DialogActivityUi();
     private final UserManager mUserManager;
-    private final List<User> mUsersSortedByName = new ArrayList<>();
+    private final List<JsonUser> mUsersSortedByName = new ArrayList<>();
     private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
     private final Troubleshooter mTroubleshooter;
 
@@ -122,7 +122,7 @@ public final class LoginController {
     }
 
     /** Call when the user taps to select a user. */
-    public void onUserSelected(User user) {
+    public void onUserSelected(JsonUser user) {
         mUserManager.setActiveUser(user);
         Utils.logUserAction("logged_in");
         mUi.showTentSelectionScreen();
@@ -143,7 +143,7 @@ public final class LoginController {
             LOG.d("Loaded list of " + event.knownUsers.size() + " users");
             mUsersSortedByName.clear();
             mUsersSortedByName
-                    .addAll(Ordering.from(User.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
+                    .addAll(Ordering.from(JsonUser.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
             mFragmentUi.showUsers(mUsersSortedByName);
             mFragmentUi.showSpinner(false);
             mUi.showSyncFailedDialog(false);
@@ -157,7 +157,7 @@ public final class LoginController {
         public void onEventMainThread(UserAddedEvent event) {
             mUi.showSyncFailedDialog(false);  // Just in case.
             LOG.d("User added");
-            insertIntoSortedList(mUsersSortedByName, User.COMPARATOR_BY_NAME, event.addedUser);
+            insertIntoSortedList(mUsersSortedByName, JsonUser.COMPARATOR_BY_NAME, event.addedUser);
             mFragmentUi.showUsers(mUsersSortedByName);
             mFragmentUi.showSpinner(false);
         }

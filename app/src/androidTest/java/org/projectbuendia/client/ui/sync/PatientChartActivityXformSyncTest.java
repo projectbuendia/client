@@ -19,7 +19,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 
 import java.util.UUID;
 
@@ -72,7 +72,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         AppPatientDelta newPatient = new AppPatientDelta();
         newPatient.familyName = Optional.of("XformSyncTest");
         newPatient.givenName = Optional.of("TestPatientFor");
-        newPatient.gender = Optional.of(Patient.GENDER_FEMALE);
+        newPatient.gender = Optional.of(JsonPatient.GENDER_FEMALE);
         newPatient.id = Optional.of(UUID.randomUUID().toString().substring(30));
         newPatient.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
         return newPatient;

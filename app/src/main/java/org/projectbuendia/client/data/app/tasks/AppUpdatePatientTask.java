@@ -28,7 +28,7 @@ import org.projectbuendia.client.events.data.ItemUpdatedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 import java.util.concurrent.ExecutionException;
@@ -72,7 +72,7 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
 
     @Override
     protected PatientUpdateFailedEvent doInBackground(Void... params) {
-        RequestFuture<Patient> patientFuture = RequestFuture.newFuture();
+        RequestFuture<JsonPatient> patientFuture = RequestFuture.newFuture();
 
         mServer.updatePatient(mUuid, mPatientDelta, patientFuture, patientFuture);
         try {

@@ -19,7 +19,7 @@ import android.widget.GridView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
@@ -85,7 +85,7 @@ public class LoginFragment extends ProgressFragment {
         }
 
         @Override
-        public void showUsers(List<User> users) {
+        public void showUsers(List<JsonUser> users) {
             mUserListAdapter.setNotifyOnChange(false);
             mUserListAdapter.clear();
             mUserListAdapter.addAll(users);

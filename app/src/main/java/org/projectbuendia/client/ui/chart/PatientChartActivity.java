@@ -42,10 +42,8 @@ import org.projectbuendia.client.data.app.AppLocation;
 import org.projectbuendia.client.data.app.AppLocationTree;
 import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.res.ResVital;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.model.Concepts;
-import org.projectbuendia.client.net.model.ConceptType;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -55,17 +53,14 @@ import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.OdkActivityLauncher;
 import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
-import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
-import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.widget.PatientAttributeView;
-import org.projectbuendia.client.widget.VitalView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +72,6 @@ import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 /** Activity displaying a patient's vitals and chart history. */

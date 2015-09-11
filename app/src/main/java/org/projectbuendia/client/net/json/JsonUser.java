@@ -9,29 +9,29 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
 import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-/** A simple Java bean representing a user, which can be used for JSON/Gson encoding/decoding. */
-public class User implements Serializable, Comparable<User> {
+/** JSON reprsentation of a user (an OpenMRS Provider). */
+public class JsonUser implements Serializable, Comparable<JsonUser> {
     private static final String GUEST_ACCOUNT_NAME = "Guest User";
 
-    public static final Comparator<User> COMPARATOR_BY_ID = new Comparator<User>() {
+    public static final Comparator<JsonUser> COMPARATOR_BY_ID = new Comparator<JsonUser>() {
 
         @Override
-        public int compare(User a, User b) {
+        public int compare(JsonUser a, JsonUser b) {
             return a.id.compareTo(b.id);
         }
     };
 
-    public static final Comparator<User> COMPARATOR_BY_NAME = new Comparator<User>() {
+    public static final Comparator<JsonUser> COMPARATOR_BY_NAME = new Comparator<JsonUser>() {
 
         @Override
-        public int compare(User a, User b) {
+        public int compare(JsonUser a, JsonUser b) {
             // Special case: the guest account should always appear first if present.
             int aSection = a.isGuestUser() ? 1 : 2;
             int bSection = b.isGuestUser() ? 1 : 2;
@@ -46,21 +46,21 @@ public class User implements Serializable, Comparable<User> {
     public String fullName;
 
     /** Default constructor for serialization. */
-    public User() {
+    public JsonUser() {
         // Intentionally blank.
     }
 
     /** Creates a user with the given unique id and full name. */
-    public User(String id, String fullName) {
+    public JsonUser(String id, String fullName) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(fullName);
         this.id = id;
         this.fullName = fullName;
     }
 
-    public static User fromNewUser(NewUser newUser) {
+    public static JsonUser fromNewUser(JsonNewUser newUser) {
         String fullName = newUser.givenName + " " + newUser.familyName;
-        return new User(newUser.username, fullName);
+        return new JsonUser(newUser.username, fullName);
     }
 
     /** Returns the user's initials, using the first letter of each word of the user's full name. */
@@ -77,7 +77,7 @@ public class User implements Serializable, Comparable<User> {
     }
 
     @Override
-    public int compareTo(User other) {
+    public int compareTo(JsonUser other) {
         return COMPARATOR_BY_ID.compare(this, other);
     }
 

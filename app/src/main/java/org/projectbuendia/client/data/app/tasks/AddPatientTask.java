@@ -28,7 +28,7 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.model.Patient;
+import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
@@ -73,10 +73,10 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
     @Override
     protected PatientAddFailedEvent doInBackground(Void... params) {
-        RequestFuture<Patient> patientFuture = RequestFuture.newFuture();
+        RequestFuture<JsonPatient> patientFuture = RequestFuture.newFuture();
 
         mServer.addPatient(mPatientDelta, patientFuture, patientFuture);
-        Patient patient;
+        JsonPatient patient;
         try {
             patient = patientFuture.get();
         } catch (InterruptedException e) {

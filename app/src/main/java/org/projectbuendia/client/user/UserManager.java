@@ -27,8 +27,8 @@ import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
 import org.projectbuendia.client.events.user.UserDeleteFailedEvent;
 import org.projectbuendia.client.events.user.UserDeletedEvent;
-import org.projectbuendia.client.net.model.NewUser;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonNewUser;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.utils.AsyncTaskRunner;
 import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.Logger;
@@ -81,12 +81,12 @@ public class UserManager {
     private final EventBusInterface mEventBus;
     private final AsyncTaskRunner mAsyncTaskRunner;
 
-    private final Set<User> mKnownUsers = new HashSet<>();
+    private final Set<JsonUser> mKnownUsers = new HashSet<>();
     private boolean mSynced = false;
     private boolean mAutoCancelEnabled = false;
     private boolean mIsDirty = false;
     @Nullable private AsyncTask mLastTask;
-    @Nullable private User mActiveUser;
+    @Nullable private JsonUser mActiveUser;
 
     UserManager(
             UserStore userStore,
@@ -168,7 +168,7 @@ public class UserManager {
     }
 
     /** Returns the current active user or {@code null} if no user is active. */
-    @Nullable public User getActiveUser() {
+    @Nullable public JsonUser getActiveUser() {
         return mActiveUser;
     }
 
@@ -182,8 +182,8 @@ public class UserManager {
      * set and an {@link ActiveUserUnsetEvent} if the active user was unset successfully; these
      * events will be posted even if the active user did not change.
      */
-    public boolean setActiveUser(@Nullable User activeUser) {
-        @Nullable User previousActiveUser = mActiveUser;
+    public boolean setActiveUser(@Nullable JsonUser activeUser) {
+        @Nullable JsonUser previousActiveUser = mActiveUser;
         if (activeUser == null) {
             mActiveUser = null;
             mEventBus.post(new ActiveUserUnsetEvent(
@@ -207,7 +207,7 @@ public class UserManager {
      * <p>This method will post a {@link UserAddedEvent} if the user was added successfully and a
      * {@link UserAddFailedEvent} otherwise.
      */
-    public void addUser(NewUser user) {
+    public void addUser(JsonNewUser user) {
         checkNotNull(user);
         // TODO: Validate user.
         mAsyncTaskRunner.runTask(new AddUserTask(user));
@@ -219,7 +219,7 @@ public class UserManager {
      * <p>This method will post a {@link UserDeletedEvent} if the user was deleted successfully and
      * a {@link UserDeleteFailedEvent} otherwise.
      */
-    public void deleteUser(User user) {
+    public void deleteUser(JsonUser user) {
         checkNotNull(user);
         // TODO: Validate user.
         mAsyncTaskRunner.runTask(new DeleteUserTask(user));
@@ -229,14 +229,14 @@ public class UserManager {
      * Called when users are retrieved from the server, in order to send events and update user
      * state as necessary.
      */
-    private void onUsersSynced(Set<User> syncedUsers) throws UserSyncException {
+    private void onUsersSynced(Set<JsonUser> syncedUsers) throws UserSyncException {
         if (syncedUsers == null || syncedUsers.isEmpty()) {
             throw new UserSyncException("Set of users retrieved from server is null or empty.");
         }
 
-        ImmutableSet<User> addedUsers =
+        ImmutableSet<JsonUser> addedUsers =
                 ImmutableSet.copyOf(Sets.difference(syncedUsers, mKnownUsers));
-        ImmutableSet<User> deletedUsers =
+        ImmutableSet<JsonUser> deletedUsers =
                 ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedUsers));
 
         mKnownUsers.clear();
@@ -260,9 +260,9 @@ public class UserManager {
      *
      * <p>Forces a network sync if the database has not been downloaded yet.
      */
-    private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<User>> {
+    private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<JsonUser>> {
         @Override
-        protected Set<User> doInBackground(Object... unusedObjects) {
+        protected Set<JsonUser> doInBackground(Object... unusedObjects) {
             if (mAutoCancelEnabled) {
                 cancel(true);
                 return null;
@@ -287,7 +287,7 @@ public class UserManager {
         }
 
         @Override
-        protected void onPostExecute(Set<User> knownUsers) {
+        protected void onPostExecute(Set<JsonUser> knownUsers) {
             mKnownUsers.clear();
             if (knownUsers != null) {
                 mKnownUsers.addAll(knownUsers);
@@ -304,10 +304,10 @@ public class UserManager {
     }
 
     /** Syncs the user list with the server. */
-    private final class SyncKnownUsersTask extends AsyncTask<Void, Void, Set<User>> {
+    private final class SyncKnownUsersTask extends AsyncTask<Void, Void, Set<JsonUser>> {
 
         @Override
-        protected Set<User> doInBackground(Void... voids) {
+        protected Set<JsonUser> doInBackground(Void... voids) {
             try {
                 return mUserStore.syncKnownUsers();
             } catch (Exception e) {
@@ -318,7 +318,7 @@ public class UserManager {
         }
 
         @Override
-        protected void onPostExecute(Set<User> syncedUsers) {
+        protected void onPostExecute(Set<JsonUser> syncedUsers) {
             if (syncedUsers == null) {
                 mEventBus.post(
                         new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
@@ -335,18 +335,18 @@ public class UserManager {
     }
 
     /**Adds a user to the database asynchronously. */
-    private final class AddUserTask extends AsyncTask<Void, Void, User> {
+    private final class AddUserTask extends AsyncTask<Void, Void, JsonUser> {
 
-        private final NewUser mUser;
+        private final JsonNewUser mUser;
         private boolean mAlreadyExists;
         private boolean mFailedToConnect;
 
-        public AddUserTask(NewUser user) {
+        public AddUserTask(JsonNewUser user) {
             mUser = checkNotNull(user);
         }
 
         @Override
-        protected User doInBackground(Void... voids) {
+        protected JsonUser doInBackground(Void... voids) {
             try {
                 return mUserStore.addUser(mUser);
             } catch (VolleyError e) {
@@ -362,7 +362,7 @@ public class UserManager {
         }
 
         @Override
-        protected void onPostExecute(User addedUser) {
+        protected void onPostExecute(JsonUser addedUser) {
             if (addedUser != null) {
                 mKnownUsers.add(addedUser);
                 mEventBus.post(new UserAddedEvent(addedUser));
@@ -383,9 +383,9 @@ public class UserManager {
 
     /** Deletes a user from the database asynchronously. */
     private final class DeleteUserTask extends AsyncTask<Void, Void, Boolean> {
-        private final User mUser;
+        private final JsonUser mUser;
 
-        public DeleteUserTask(User user) {
+        public DeleteUserTask(JsonUser user) {
             mUser = checkNotNull(user);
         }
 

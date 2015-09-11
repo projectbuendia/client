@@ -9,12 +9,12 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.model;
+package org.projectbuendia.client.net.json;
 
-import org.joda.time.DateTime;
-
-/** Simple wrapper bean to help in parsing results for multiple patients. */
-public class PatientChartList {
-    public PatientChart [] results;
-    public DateTime snapshotTime;
+public class JsonOrder {
+    public String uuid;
+    public String patient_uuid;
+    public String instructions;
+    public Long start;
+    public Long stop;
 }

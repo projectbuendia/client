@@ -27,7 +27,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Colorizer;
@@ -47,7 +47,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     @Inject Colorizer mUserColorizer;
 
-    private User mLastActiveUser;
+    private JsonUser mLastActiveUser;
     private Menu mMenu;
     private MenuPopupWindow mPopupWindow;
 
@@ -64,7 +64,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
      */
     @Override
     public final void onCreate(Bundle savedInstanceState) {
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
         if (user == null) {
             super.onCreate(savedInstanceState);
 
@@ -186,7 +186,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
     }
 
     private void updateActiveUser() {
-        User user = App.getUserManager().getActiveUser();
+        JsonUser user = App.getUserManager().getActiveUser();
 
         if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
             LOG.w("The user has switched. I don't know how to deal with that right now");
@@ -241,7 +241,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         public void showAsDropDown(View anchor) {
             super.showAsDropDown(anchor);
 
-            User user = App.getUserManager().getActiveUser();
+            JsonUser user = App.getUserManager().getActiveUser();
             if (user == null) {
                 // TODO: Handle no user.
                 return;
