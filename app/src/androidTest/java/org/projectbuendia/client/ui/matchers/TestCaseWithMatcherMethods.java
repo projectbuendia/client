@@ -172,6 +172,12 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
         };
     }
 
+    // Names of Espresso matchers form expressions that don't make any grammatical sense,
+    // such as withParent(withSibling(isVisible())).  Instead of prepositional
+    // phrases like "withFoo", matcher names should be verb phrases like "hasFoo" or
+    // connecting verb phrases ending in "That", yielding more readable expressions
+    // such as whoseParent(hasSiblingThat(isVisible())).
+
     public static Matcher<View> hasId(int id) {
         return new MatcherWithDescription<>(ViewMatchers.withId(id), "has ID " + id);
     }
