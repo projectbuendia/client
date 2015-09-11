@@ -127,8 +127,8 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         // After updating a patient, we fetch the patient from the database. The
         // result of the fetch determines if adding a patient was truly successful
         // and propagates a new event to report success/failure.
-        mTaskFactory.newFetchSingleAsyncTask(
-                Patients.CONTENT_URI, null, new UuidFilter(), mUuid,
-                mConverterPack.patient, mBus).execute();
+        mTaskFactory.newFetchItemTask(
+            Patients.CONTENT_URI, null, new UuidFilter(), mUuid,
+            mConverterPack.patient, mBus).execute();
     }
 }

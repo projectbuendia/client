@@ -105,13 +105,13 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
         // Otherwise, start a fetch task to fetch the order from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemTask<Order> task = mTaskFactory.newFetchSingleAsyncTask(
-                Contracts.Orders.CONTENT_URI,
-                null,
-                new UuidFilter(),
-                mUuid,
-                mConverterPack.order,
-                mBus);
+        FetchItemTask<Order> task = mTaskFactory.newFetchItemTask(
+            Contracts.Orders.CONTENT_URI,
+            null,
+            new UuidFilter(),
+            mUuid,
+            mConverterPack.order,
+            mBus);
         task.execute();
     }
 

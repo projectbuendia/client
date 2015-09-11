@@ -66,13 +66,14 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
     /** Creates a new {@link AddEncounterTask}. */
     public AddEncounterTask(
-            TaskFactory taskFactory,
-            ConverterPack converters,
-            Server server,
-            ContentResolver contentResolver,
-            Patient patient,
-            Encounter encounter,
-            CrudEventBus bus) {
+        TaskFactory taskFactory,
+        ConverterPack converters,
+        Server server,
+        ContentResolver contentResolver,
+        Patient patient,
+        Encounter encounter,
+        CrudEventBus bus
+    ) {
         mTaskFactory = taskFactory;
         mConverterPack = converters;
         mServer = server;
@@ -160,13 +161,13 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
         // Otherwise, start a fetch task to fetch the encounter from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemTask<Encounter> task = mTaskFactory.newFetchSingleAsyncTask(
-                Observations.CONTENT_URI,
-                ENCOUNTER_PROJECTION,
-                new EncounterUuidFilter(),
-                mUuid,
-                new EncounterConverter(mPatient.uuid),
-                mBus);
+        FetchItemTask<Encounter> task = mTaskFactory.newFetchItemTask(
+            Observations.CONTENT_URI,
+            ENCOUNTER_PROJECTION,
+            new EncounterUuidFilter(),
+            mUuid,
+            new EncounterConverter(mPatient.uuid),
+            mBus);
         task.execute();
     }
 

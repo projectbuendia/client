@@ -113,13 +113,13 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new UpdateEventSubscriber());
-        FetchItemTask<Patient> task = mTaskFactory.newFetchSingleAsyncTask(
-                Contracts.Patients.CONTENT_URI,
-                null,
-                new UuidFilter(),
-                mUuid,
-                mConverterPack.patient,
-                mBus);
+        FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
+            Contracts.Patients.CONTENT_URI,
+            null,
+            new UuidFilter(),
+            mUuid,
+            mConverterPack.patient,
+            mBus);
         task.execute();
     }
 

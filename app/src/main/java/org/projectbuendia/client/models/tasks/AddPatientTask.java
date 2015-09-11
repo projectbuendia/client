@@ -145,7 +145,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
-        FetchItemTask<Patient> task = mTaskFactory.newFetchSingleAsyncTask(
+        FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
                 Contracts.Patients.CONTENT_URI,
                 null,
                 new UuidFilter(),

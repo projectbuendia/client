@@ -53,9 +53,6 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         // There should be patients in both Triage and S1.
         expectVisibleSoon(viewThat(hasTextMatchingRegex("Triage \\((No|[0-9]+) patients?\\)")));
 
-        expectVisible(dataThat(is(Location.class), hasToString(startsWith("S1")))
-                .inAdapterView(withId(R.id.fragment_patient_list)));
-
         // Click the first patient
         click(dataThat(is(Patient.class))
                 .inAdapterView(withId(R.id.fragment_patient_list))

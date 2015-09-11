@@ -22,7 +22,6 @@ import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.AppUpdatePatientTask;
-import org.projectbuendia.client.models.tasks.FetchItemTask;
 import org.projectbuendia.client.events.CleanupSubscriber;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
@@ -131,7 +130,7 @@ public class AppModel {
      * with the {@link Patient} on the specified event bus when complete.
      */
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
-        mTaskFactory.newFetchSingleAsyncTask(
+        mTaskFactory.newFetchItemTask(
             Contracts.Patients.CONTENT_URI, null, new UuidFilter(), uuid,
             mConverterPack.patient, bus).execute();
     }

@@ -80,13 +80,13 @@ public class TaskFactory {
 
 
     /** Creates a new {@link FetchItemTask}. */
-    public <T extends Base<?>> FetchItemTask<T> newFetchSingleAsyncTask(
-            Uri contentUri,
-            String[] projectionColumns,
-            SimpleSelectionFilter filter,
-            String constraint,
-            Converter<T> converter,
-            CrudEventBus bus) {
+    public <T extends Base<?>> FetchItemTask<T> newFetchItemTask(
+        Uri contentUri,
+        String[] projectionColumns,
+        SimpleSelectionFilter filter,
+        String constraint,
+        Converter<T> converter,
+        CrudEventBus bus) {
         return new FetchItemTask<>(
                 mContentResolver, contentUri, projectionColumns, filter, constraint, converter,
                 bus);
