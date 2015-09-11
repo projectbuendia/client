@@ -33,7 +33,7 @@
 */
 
 (function ($) {
-    var frameRequested = false;
+    var updatePending = false;
 
     var methods = {
         'init': function (options) {
@@ -75,14 +75,14 @@
                             .children("tbody").remove().end()
                             .appendTo(document.body)
                             .wrap("<div>").parent()
-                            .css({position: 'fixed', visibility: 'hidden'});
+                            .css({position: 'fixed', top: '0', left: '0', visibility: 'hidden'});
                     }
 
                     if (settings.left && settings.top) {
                         cornerHeader = topHeader.clone(false) // skip a few steps by cloning topHeader
                             .find("th:nth-child(n+2)").remove().end()
                             .appendTo(document.body)
-                            .css({position: 'fixed', visibility: 'hidden'});
+                            .css({position: 'fixed', top: '0', left: '0', visibility: 'hidden'});
                     }
 
                     $this.data('freezeHeader', {top: topHeader, left: leftHeader, corner: cornerHeader});
@@ -180,49 +180,38 @@
         }, // end resize()
 
         'scroll': function (event) {
-            if (!frameRequested) {
-                frameRequested = true;
+            if (!updatePending) {
+                updatePending = true;
+                var table = event.data.table;
+                var freezeHeader = table.data('freezeHeader');
+                var metrics = table.data('freezeHeaderMetrics');
+                var topHeader = freezeHeader.top[0];
+                var cornerHeader = freezeHeader.corner[0];
                 window.requestAnimationFrame(function() {
-                    methods.update(event.data.table);
+                    methods.update(topHeader, cornerHeader, metrics);
+                    updatePending = false;
                 });
             }
         },
 
-        'update': function (table) {
-            var freezeHeader = table.data('freezeHeader');
-            var metrics = table.data('freezeHeaderMetrics');
-            var topHeader = freezeHeader.top;
-            var leftHeader = freezeHeader.left;
-            var cornerHeader = freezeHeader.corner;
+        'update': function (topHeader, cornerHeader, metrics) {
             var scrollTop = $(window).scrollTop();
             var scrollLeft = $(window).scrollLeft() + $('#grid-scroller').scrollLeft();
-
-            // To avoid flickering, use position fixed and hide whenever we can
-            if (topHeader) {
-                var headerTop = Math.min(Math.max(0, metrics.tableTop - scrollTop),
-                                         metrics.tableBottom - scrollTop);
-                topHeader.css(
-                    (scrollTop < metrics.tableTop) ?
-                        {visibility: 'hidden'} :
-                        {visibility: 'visible',
-                         position: 'fixed',
-                         top: headerTop,
-                         left: metrics.tableLeft - scrollLeft});
-            }
-
+            var headerTop = Math.min(Math.max(0, metrics.tableTop - scrollTop),
+                                     metrics.tableBottom - scrollTop);
             var headerLeft = Math.min(Math.max(0, metrics.tableLeft - scrollLeft),
                                       metrics.tableRight - scrollLeft);
-            if (cornerHeader) {
-                cornerHeader.css(
-                    (scrollTop < metrics.tableTop || scrollLeft < metrics.tableLeft) ?
-                        {visibility: 'hidden'} :
-                        {visibility: 'visible',
-                         position: 'fixed',
-                         top: headerTop,
-                         left: headerLeft});
-            }
 
-            frameRequested = false;
+            topHeader.style.webkitTransform = 'translate(' +
+                (metrics.tableLeft - scrollLeft) + 'px,' + headerTop + 'px)';
+            topHeader.style.visibility = (scrollTop < metrics.tableTop) ?
+                'hidden' : 'visible';
+
+            cornerHeader.style.webkitTransform = 'translate(' +
+                headerLeft + 'px,' + headerTop + 'px)';
+            cornerHeader.style.visibility =
+                (scrollTop < metrics.tableTop || scrollLeft < metrics.tableLeft) ?
+                'hidden' : 'visible';
         }
     };
 
