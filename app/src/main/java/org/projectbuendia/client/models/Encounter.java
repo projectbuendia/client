@@ -167,19 +167,17 @@ public class Encounter extends Base<String> {
      * {@link JsonEncounter} object and corresponding patient UUID.
      */
     public static Encounter fromJson(String patientUuid, JsonEncounter encounter) {
-        List<Observation> list = new ArrayList<Observation>();
+        List<Observation> observations = new ArrayList<Observation>();
         if (encounter.observations != null) {
             for (Map.Entry<Object, Object> observation : encounter.observations.entrySet()) {
-                list.add(new Observation(
+                observations.add(new Observation(
                     (String) observation.getKey(),
                     (String) observation.getValue(),
                     Observation.estimatedTypeFor((String) observation.getValue())
                 ));
             }
         }
-        Observation[] observations = new Observation[list.size()];
-        list.toArray(observations);
         return new Encounter(patientUuid, encounter.uuid, encounter.timestamp,
-                observations, encounter.order_uuids);
+                observations.toArray(new Observation[observations.size()]), encounter.order_uuids);
     }
 }

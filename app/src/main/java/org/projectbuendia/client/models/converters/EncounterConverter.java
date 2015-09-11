@@ -43,17 +43,16 @@ public class EncounterConverter implements Converter<Encounter> {
                 cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
         final long timestamp = cursor.getLong(
                 cursor.getColumnIndex(Observations.ENCOUNTER_TIME));
-        List<Observation> observationList = new ArrayList<>();
+        List<Observation> observations = new ArrayList<>();
         cursor.move(-1);
         while (cursor.moveToNext()) {
             String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
-            observationList.add(new Observation(
-                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
-                    value, Observation.estimatedTypeFor(value)
+            observations.add(new Observation(
+                cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
+                value, Observation.estimatedTypeFor(value)
             ));
         }
-        Observation[] observations = new Observation[observationList.size()];
-        observationList.toArray(observations);
-        return new Encounter(mPatientUuid, encounterUuid, new DateTime(timestamp), observations, null);
+        return new Encounter(mPatientUuid, encounterUuid, new DateTime(timestamp),
+            observations.toArray(new Observation[observations.size()]), null);
     }
 }
