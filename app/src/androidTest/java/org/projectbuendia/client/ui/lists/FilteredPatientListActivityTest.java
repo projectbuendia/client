@@ -40,7 +40,7 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
     public void testFilterMenu() {
         openPatientList();
         screenshot("Test Start");
-        click(viewWithText("All Present Patients"));
+        click(viewWithText("All present patients"));
         expectVisible(viewWithText("Triage"));
         expectVisible(viewWithText("Pregnant"));
         screenshot("In Filter Menu");
