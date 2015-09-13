@@ -234,7 +234,7 @@ public class Utils {
      * @param value the nullable value
      * @param defaultValue the default
      */
-    public static <T extends Object> T valueOrDefault(@Nullable T value, T defaultValue) {
+    public static <T> T valueOrDefault(@Nullable T value, T defaultValue) {
         return value == null ? defaultValue : value;
     }
 

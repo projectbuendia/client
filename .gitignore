@@ -28,7 +28,8 @@ crashlytics-build.properties
 local.properties
 
 # Android Studio files (https://intellij-support.jetbrains.com/entries/23393067)
-.idea/
+.idea/*
+!.idea/inspectionProfiles
 
 # User-specific configuration files
 *.iml
