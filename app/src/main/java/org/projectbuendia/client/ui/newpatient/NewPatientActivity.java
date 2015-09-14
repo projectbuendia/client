@@ -307,9 +307,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
 
     // TODO: This is very similar to FormEntryActivity; consolidate.
     private void showAlertDialog() {
-        if (mAlertDialog == null) {
-            return;
-        }
+        if (mAlertDialog == null) return;
 
         mAlertDialog.show();
 
@@ -343,9 +341,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
     }
 
     @OnClick(R.id.patient_creation_button_create) void onCreateClick() {
-        if (mIsCreatePending) {
-            return;
-        }
+        if (mIsCreatePending) return;
 
         setUiEnabled(false);
         mIsCreatePending = mController.createPatient(

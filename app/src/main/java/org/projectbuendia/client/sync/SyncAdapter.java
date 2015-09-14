@@ -441,9 +441,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor c = provider.query(
             uri, new String[] {Patients.UUID}, null, null, null);
         try {
-            if (c.getCount() < 1) {
-                return;
-            }
+            if (c.getCount() < 1) return;
         } finally {
             c.close();
         }

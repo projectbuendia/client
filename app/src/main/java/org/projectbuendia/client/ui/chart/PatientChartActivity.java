@@ -498,9 +498,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         public synchronized void fetchAndShowXform(
             int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
             Preset preset) {
-            if (mIsFetchingXform) {
-                return;
-            }
+            if (mIsFetchingXform) return;
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(

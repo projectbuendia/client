@@ -132,9 +132,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
 
         @Override
         public void run() {
-            if (!isRunning.get()) {
-                return;
-            }
+            if (!isRunning.get()) return;
 
             try {
                 Uri uri = Uri.parse(mConnectionDetails.getBuendiaApiUrl() + HEALTH_CHECK_ENDPOINT);

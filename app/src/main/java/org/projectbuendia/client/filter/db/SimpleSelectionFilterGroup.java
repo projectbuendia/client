@@ -76,9 +76,7 @@ public final class SimpleSelectionFilterGroup<T extends Base>
             // Ignore empty or null selection strings, which could
             // otherwise result in rogue AND's/OR's.
             String selectionString = filter.getSelectionString();
-            if (selectionString == null || selectionString.isEmpty()) {
-                continue;
-            }
+            if (selectionString == null || selectionString.isEmpty()) continue;
 
             sb.append(prefix);
             sb.append(" ");

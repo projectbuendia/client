@@ -302,9 +302,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
      */
     public void onAddObservationPressed(String targetGroup) {
         // Don't acknowledge this action if a dialog is showing
-        if (dialogShowing()) {
-            return;
-        }
+        if (dialogShowing()) return;
 
         Preset preset = new Preset();
         preset.locationName = "Triage";

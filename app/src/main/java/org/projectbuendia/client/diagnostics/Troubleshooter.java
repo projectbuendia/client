@@ -123,9 +123,7 @@ public class Troubleshooter {
 
             if (mLastTroubleshootingActionsChangedEvent != null) {
                 // If nothing's changed since the last time we checked, don't post a new event.
-                if (mLastTroubleshootingActionsChangedEvent.actions.equals(actions)) {
-                    return;
-                }
+                if (mLastTroubleshootingActionsChangedEvent.actions.equals(actions)) return;
 
                 mEventBus.removeStickyEvent(mLastTroubleshootingActionsChangedEvent);
             }

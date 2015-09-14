@@ -211,9 +211,7 @@ public class OdkActivityLauncher {
         int resultCode,
         Intent data) {
 
-        if (resultCode == Activity.RESULT_CANCELED) {
-            return;
-        }
+        if (resultCode == Activity.RESULT_CANCELED) return;
 
         if (data == null || data.getData() == null) {
             // Cancelled.
@@ -417,34 +415,24 @@ public class OdkActivityLauncher {
         HashSet<Integer> xformConceptIds = new HashSet<>();
         for (int i = 0; i < savedRoot.getNumChildren(); i++) {
             TreeElement group = savedRoot.getChildAt(i);
-            if (group.getNumChildren() == 0) {
-                continue;
-            }
+            if (group.getNumChildren() == 0) continue;
             for (int j = 0; j < group.getNumChildren(); j++) {
                 TreeElement question = group.getChildAt(j);
                 TreeElement openmrsConcept = question.getAttribute(null, "openmrs_concept");
                 TreeElement openmrsDatatype = question.getAttribute(null, "openmrs_datatype");
-                if (openmrsConcept == null || openmrsDatatype == null) {
-                    continue;
-                }
+                if (openmrsConcept == null || openmrsDatatype == null) continue;
                 // Get the concept for the question.
                 // eg "5088^Temperature (C)^99DCT"
                 String encodedConcept = (String) openmrsConcept.getValue().getValue();
                 Integer id = getConceptId(xformConceptIds, encodedConcept);
-                if (id == null) {
-                    continue;
-                }
+                if (id == null) continue;
                 // Also get for the answer if a coded question
                 String value;
                 TreeElement valueChild = question.getChild("value", 0);
                 IAnswerData answer = valueChild.getValue();
-                if (answer == null) {
-                    continue;
-                }
+                if (answer == null) continue;
                 Object answerObject = answer.getValue();
-                if (answerObject == null) {
-                    continue;
-                }
+                if (answerObject == null) continue;
                 if ("CWE".equals(openmrsDatatype.getValue().getValue())) {
                     value = getConceptId(xformConceptIds, answerObject.toString()).toString();
                 } else {
@@ -542,9 +530,7 @@ public class OdkActivityLauncher {
             instanceCursor = caller.getContentResolver().query(
                 CONTENT_URI, new String[] {_ID, INSTANCE_FILE_PATH, JR_FORM_ID}, selection,
                 selectionArgs, sortOrder);
-            if (instanceCursor.getCount() == 0) {
-                return;
-            }
+            if (instanceCursor.getCount() == 0) return;
             instanceCursor.moveToFirst();
 
             // The URI code mostly copied from InstanceChooserList.onListItemClicked()

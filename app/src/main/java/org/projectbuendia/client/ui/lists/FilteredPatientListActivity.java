@@ -67,9 +67,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != ODK_ACTIVITY_REQUEST) {
-            return;
-        }
+        if (requestCode != ODK_ACTIVITY_REQUEST) return;
         OdkActivityLauncher.sendOdkResultToServer(
             this, mSettings, /* create a new patient */ null,
             false, resultCode, data);

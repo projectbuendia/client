@@ -102,9 +102,7 @@ public class NewUserDialogFragment extends DialogFragment {
                                     "valid", "" + valid,
                                     "given_name", givenName,
                                     "family_name", familyName);
-                                if (!valid) {
-                                    return;
-                                }
+                                if (!valid) return;
 
                                 App.getUserManager().addUser(new JsonNewUser(
                                     givenName, familyName

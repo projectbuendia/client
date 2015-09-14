@@ -92,9 +92,7 @@ public final class AssignGeneralConditionDialog
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (mAdapter == null) {
-            return;
-        }
+        if (mAdapter == null) return;
 
         String newConditionUuid = mAdapter.getItem(position);
         mAdapter.setSelectedConditionUuid(newConditionUuid);

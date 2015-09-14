@@ -91,9 +91,7 @@ public class LocationTree implements Observable {
 
         // Then, create a mapping from location UUIDs to their parents.
         for (Location location : uuidsToLocations.values()) {
-            if (location.parentUuid == null) {
-                continue;
-            }
+            if (location.parentUuid == null) continue;
             Location parent = uuidsToLocations.get(location.parentUuid);
             if (parent == null) {
                 // TODO: Consider making this a warning rather than an exception.

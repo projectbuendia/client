@@ -91,9 +91,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     private void initializeWrapperView() {
-        if (mWrapperView != null) {
-            return;
-        }
+        if (mWrapperView != null) return;
 
         mWrapperView =
             (LinearLayout) getLayoutInflater().inflate(R.layout.view_status_wrapper, null);

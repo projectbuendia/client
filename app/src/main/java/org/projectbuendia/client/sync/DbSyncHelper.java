@@ -357,9 +357,7 @@ public class DbSyncHelper {
                 namesCur.getColumnIndex(LocationNames.LOCALE));
             String name = namesCur.getString(
                 namesCur.getColumnIndex(LocationNames.NAME));
-            if (locationId == null || locale == null || name == null) {
-                continue;
-            }
+            if (locationId == null || locale == null || name == null) continue;
 
             if (!dbLocationNames.containsKey(locationId)) {
                 dbLocationNames.put(locationId, new HashMap<String, String>());

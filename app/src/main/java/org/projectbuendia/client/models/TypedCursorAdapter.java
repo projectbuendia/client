@@ -99,9 +99,7 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
      * attached {@link TypedCursor} if it exists.
      */
     public void changeTypedCursor(TypedCursor<T> newTypedCursor) {
-        if (mTypedCursor == newTypedCursor) {
-            return;
-        }
+        if (mTypedCursor == newTypedCursor) return;
 
         if (mTypedCursor != null) {
             mTypedCursor.close();

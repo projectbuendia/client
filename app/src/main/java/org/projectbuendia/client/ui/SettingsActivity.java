@@ -240,9 +240,7 @@ public class SettingsActivity extends PreferenceActivity {
      * that a simplified, single-pane UI should be shown.
      */
     private void setupSimplePreferencesScreen() {
-        if (!isSimplePreferences(this)) {
-            return;
-        }
+        if (!isSimplePreferences(this)) return;
 
         // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
         addPreferencesFromResource(R.xml.pref_general);
