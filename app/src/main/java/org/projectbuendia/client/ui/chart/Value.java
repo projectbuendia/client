@@ -45,7 +45,7 @@ class Value implements Comparable<Value> {
         observed = obs.encounterTime;
         present = obs.value != null;
         if (present) {
-            switch (getConceptType(obs.conceptUuid, obs.conceptType, obs.value)) {
+            switch (getValueType(obs.conceptUuid, obs.conceptType, obs.value)) {
                 case NUMERIC:
                     number = Double.valueOf(obs.value);
                     break;
@@ -71,18 +71,21 @@ class Value implements Comparable<Value> {
         }
     }
 
-    static Type getConceptType(String conceptUuid, ConceptType conceptType, String value) {
+    static Type getValueType(String conceptUuid, ConceptType conceptType, String value) {
         final Set<String> CODED_CONCEPTS = ImmutableSet.of(
             Concepts.GENERAL_CONDITION_UUID,
             Concepts.RESPONSIVENESS_UUID,
             Concepts.MOBILITY_UUID,
             Concepts.PAIN_UUID,
-            Concepts.WEAKNESS_UUID);
+            Concepts.WEAKNESS_UUID,
+            "777000003AAAAAAAAAAAAAAAAAAAAAAAAAAA");
         final Set<String> NUMERIC_CONCEPTS = ImmutableSet.of(
             Concepts.TEMPERATURE_UUID,
             Concepts.VOMITING_UUID,
             Concepts.DIARRHEA_UUID,
-            Concepts.WEIGHT_UUID);
+            Concepts.WEIGHT_UUID,
+            Concepts.PULSE_UUID,
+            Concepts.RESPIRATION_UUID);
         final Set<String> TEXT_CONCEPTS = ImmutableSet.of(
             Concepts.NOTES_UUID);
         final Set<String> BOOLEAN_ANSWERS = ImmutableSet.of(
@@ -169,12 +172,11 @@ class Value implements Comparable<Value> {
         }
     }
 
-    ;
-
-    enum Type {
+    public static enum Type {
         NUMERIC,
         TEXT,
         CODED,
-        BOOLEAN
+        BOOLEAN,
+        DATE
     }
 }

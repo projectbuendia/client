@@ -6,7 +6,6 @@ import android.util.Pair;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import com.mitchellbosecke.pebble.PebbleEngine;
 
@@ -17,7 +16,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
@@ -120,7 +119,7 @@ public class GridRenderer {
             mOrders = orders;
             for (Pair<String, String> uuidAndName : tileConceptUuidsAndNames) {
                 mTiles.add(new Tile(uuidAndName.first, uuidAndName.second,
-                    new Value(latestObservations.get(uuidAndName.first), chronology)));
+                                    latestObservations.get(uuidAndName.first)));
             }
             for (Pair<String, String> uuidAndName : gridConceptUuidsAndNames) {
                 addRow(uuidAndName.first, uuidAndName.second);
@@ -131,7 +130,8 @@ public class GridRenderer {
         void addRow(String conceptUuid, String conceptName) {
             Row row = mRowsByUuid.get(conceptUuid);
             if (row == null) {
-                row = new Row(conceptUuid, conceptName);
+                row = new Row(conceptUuid, conceptName, "" + Value.getValueType(conceptUuid,
+                    ConceptType.NONE, null));
                 mRows.add(row);
                 mRowsByUuid.put(conceptUuid, row);
             }
@@ -141,11 +141,10 @@ public class GridRenderer {
             for (LocalizedObs obs : observations) {
                 if (obs.value == null) continue;
 
-                Value value = new Value(obs, chronology);
-                mDays.add(value.observed.toLocalDate());
-                Column column = getColumnContainingTime(value.observed);
-                if (value.present) {
-                    addValue(column, obs.conceptUuid, value);
+                mDays.add(obs.encounterTime.toLocalDate());
+                Column column = getColumnContainingTime(obs.encounterTime);
+                if (obs.value != null && !obs.value.isEmpty()) {
+                    addObs(column, obs);
                 }
 
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
@@ -154,12 +153,6 @@ public class GridRenderer {
                         obs.value, count == null ? 1 : count + 1);
                 } else {
                     addRow(obs.conceptUuid, obs.conceptName);
-                }
-
-                // If this is any bleeding site, also show a dot in the "any bleeding" row.
-                // Note value.bool is a Boolean; if (value.bool) can crash without the null check!
-                if (value.bool != null && value.bool && Concepts.BLEEDING_SITES_NAME.equals(obs.groupName)) {
-                    column.values.put(Concepts.BLEEDING_UUID, ImmutableSortedSet.of(value));
                 }
             }
         }
@@ -179,11 +172,11 @@ public class GridRenderer {
             return mColumnsByStartMillis.get(startMillis);
         }
 
-        void addValue(Column column, String conceptUuid, Value value) {
-            if (!column.values.containsKey(conceptUuid)) {
-                column.values.put(conceptUuid, new TreeSet<>(Value.BY_OBS_TIME));
+        void addObs(Column column, LocalizedObs obs) {
+            if (!column.obsMap.containsKey(obs.conceptUuid)) {
+                column.obsMap.put(obs.conceptUuid, new TreeSet<>(LocalizedObs.BY_OBS_TIME));
             }
-            column.values.get(conceptUuid).add(value);
+            column.obsMap.get(obs.conceptUuid).add(obs);
         }
 
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)

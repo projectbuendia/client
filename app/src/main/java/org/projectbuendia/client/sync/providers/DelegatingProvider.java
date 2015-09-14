@@ -26,7 +26,7 @@ abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentPro
     protected ContentResolver mContentResolver;
     protected T mDatabaseHelper;
 
-    @Overridepublic boolean onCreate() {
+    @Override public boolean onCreate() {
         mRegistry = getRegistry();
         mDatabaseHelper = getDatabaseHelper();
         mContentResolver = getContext().getContentResolver();
@@ -38,11 +38,11 @@ abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentPro
 
     protected abstract T getDatabaseHelper();
 
-    @Overridepublic String getType(Uri uri) {
+    @Override public String getType(Uri uri) {
         return mRegistry.getDelegate(uri).getType();
     }
 
-    @Overridepublic Cursor query(
+    @Override public Cursor query(
         Uri uri, String[] projection, String selection, String[] selectionArgs,
         String sortOrder) {
         return mRegistry.getDelegate(uri)
@@ -51,22 +51,22 @@ abstract class DelegatingProvider<T extends SQLiteOpenHelper> extends ContentPro
                 selectionArgs, sortOrder);
     }
 
-    @Overridepublic Uri insert(Uri uri, ContentValues values) {
+    @Override public Uri insert(Uri uri, ContentValues values) {
         return mRegistry.getDelegate(uri)
             .insert(mDatabaseHelper, mContentResolver, uri, values);
     }
 
-    @Overridepublic int bulkInsert(Uri uri, ContentValues[] values) {
+    @Override public int bulkInsert(Uri uri, ContentValues[] values) {
         return mRegistry.getDelegate(uri)
             .bulkInsert(mDatabaseHelper, mContentResolver, uri, values);
     }
 
-    @Overridepublic int delete(Uri uri, String selection, String[] selectionArgs) {
+    @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
         return mRegistry.getDelegate(uri)
             .delete(mDatabaseHelper, mContentResolver, uri, selection, selectionArgs);
     }
 
-    @Overridepublic int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    @Override public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return mRegistry.getDelegate(uri)
             .update(
                 mDatabaseHelper, mContentResolver, uri, values, selection, selectionArgs);

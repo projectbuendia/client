@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Utility methods. */
@@ -218,20 +219,13 @@ public class Utils {
         }
     }
 
-    /**
-     * Returns the specified name or a sentinel representing an unknown name, if the name is null.
-     * @param name the nullable name
-     */
-    public static String nameOrUnknown(@Nullable String name) {
+    /** Returns the specified name or a sentinel representing an unknown name, if the name is null. */
+    public static @Nonnull String nameOrUnknown(@Nullable String name) {
         return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
     }
 
-    /**
-     * Returns a value if that value is not null, or a specified default value otherwise.
-     * @param value        the nullable value
-     * @param defaultValue the default
-     */
-    public static <T> T valueOrDefault(@Nullable T value, T defaultValue) {
+    /** Returns a value if that value is not null, or a specified default value otherwise. */
+    public static @Nonnull <T> T valueOrDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value == null ? defaultValue : value;
     }
 

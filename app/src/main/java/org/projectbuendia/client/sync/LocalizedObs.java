@@ -14,6 +14,7 @@ package org.projectbuendia.client.sync;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.net.json.ConceptType;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -22,6 +23,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
 public final class LocalizedObs {
+    public static final Comparator<LocalizedObs> BY_OBS_TIME = new Comparator<LocalizedObs>() {
+        @Override public int compare(LocalizedObs left, LocalizedObs right) {
+            return left.encounterTime.compareTo(right.encounterTime);
+        }
+    };
+
     public final long id;
 
     /** The time of the encounter in which this observation was taken. */

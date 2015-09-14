@@ -96,24 +96,9 @@ $(document).ready(function() {
   {% for tile in tiles %}
     {% if loop.index % 4 == 0 %}<tr>{% endif %}
     <td class="tile" width="25%">
-      <div class="heading">{{ tile.heading }}</div>
-      <div class="value">
-        {% set value = tile.value %}
-        {% if value.number != null %}
-          {{value.number | numberformat('#.#')}}
-        {% elseif value.abbrev != null %}
-          {{value.abbrev}}
-        {% elseif value.text != null %}
-          {{value.text}}
-        {% elseif value.bool != null %}
-          {{value.bool ? 'Yes' : 'No'}}
-        {% else %}
-          &#x2013;
-        {% endif %}
-      </div>
-      {% if value.abbrev != null %}
-        <div class="caption">{{value.name}}</div>
-      {% endif %}
+      <div class="heading">{{tile.heading}}</div>
+      <div class="value">{{tile.obs | obsformat(tile.format)}}</div>
+      <div class="caption">{{tile.obs | obsformat(tile.captionFormat)}}</div>
     </td>
     {% if loop.index % 4 == 3 or loop.index == tiles.size - 1 %}</tr>{% endif %}
   {% endfor %}
@@ -144,37 +129,29 @@ $(document).ready(function() {
             {{row.heading}}
           </th>
           {% for column in columns %}
-            {% set values = get_values(row=row, column=column) %}
+            {% set values = get_all(row=row, column=column) %}
             <td class="{{column.start == nowColumnStart ? 'now' : ''}}"
                onclick="popup({{row.heading | js}},
               {% if values is empty %}
                 []
               {% else %}
                 [ {%- for value in values -%}
-                  [{% if value.name != null %}{{value.name | js}}
-                  {% elseif value.text != null %}{{value.text | js}}
-                  {% elseif value.number != null %}{{value.number | js}}
-                  {% else %}{{value.bool ? '\'Yes\'' : '\'No\''}}{% endif %},
-                  {{value.observed | dateformat('HH:mm') | js}}],
+                  [{{value | obsformat(row.format) | js}},
+                   {{value | obsformat('{1,encounter_time,HH:mm}') | js}}],
                 {%- endfor -%} ]
               {% endif %} )">
               {% if values is not empty %}
-                {% set last = values | last %}
-                {% if last.number != null %}
-                  {{values | avg | numberformat('#.#')}}
-                {% elseif last.abbrev != null %}
-                  {{last.abbrev}}
-                {% elseif last.text != null %}
+                {% if row.type == 'TEXT' %}
                   <div onclick="alert(''
-                    {%- for value in values -%}
-                      + '---- '
-                      + {{value.observed | dateformat('dd MMM \'at\' HH:mm') | js}}
-                      + ' ----\n'
-                      + {{value.text | js}}
-                      + '\n\n'
-                    {%- endfor -%})">&#x1f4dd;</div>
-                {% elseif last.bool != null %}
-                  {{(values | max).bool ? '&#x25cf;' : '' | raw}}
+                        {%- for value in values -%}
+                          + '---- '
+                          + {{value.encounterTime | dateformat('dd MMM \'at\' HH:mm') | js}}
+                          + ' ----\n'
+                          + {{value.value | js}}
+                          + '\n\n'
+                        {%- endfor -%})">&#x1f4dd;</div>
+                {% else %}
+                  {{values | last | obsformat(row.format)}}
                 {% endif %}
               {% endif %}
             </td>
