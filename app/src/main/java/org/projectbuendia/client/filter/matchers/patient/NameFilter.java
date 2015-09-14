@@ -27,8 +27,7 @@ import java.util.regex.Pattern;
 public final class NameFilter implements MatchingFilter<Patient> {
     private static final Pattern DASH_REGEX = Pattern.compile("^\\p{Pd}*$");
 
-    @Override
-    public boolean matches(@Nullable Patient patient, CharSequence constraint) {
+    @Override public boolean matches(@Nullable Patient patient, CharSequence constraint) {
         if (patient == null) {
             return false;
         }

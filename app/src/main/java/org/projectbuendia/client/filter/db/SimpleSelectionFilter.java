@@ -32,8 +32,7 @@ public abstract class SimpleSelectionFilter<T extends Base> {
      */
     public abstract String[] getSelectionArgs(CharSequence constraint);
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return getDescription();
     }
 

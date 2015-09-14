@@ -28,13 +28,11 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public static final String TYPE =
         ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + NAME;
 
-    @Override
-    public String getType() {
+    @Override public String getType() {
         return TYPE;
     }
 
-    @Override
-    public Cursor query(
+    @Override public Cursor query(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = new QueryBuilder(Table.USERS)
@@ -45,8 +43,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
         return cursor;
     }
 
-    @Override
-    public int bulkInsert(
+    @Override public int bulkInsert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues[] values) {
         // TODO: optimise this.
@@ -56,8 +53,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
         return values.length;
     }
 
-    @Override
-    public Uri insert(
+    @Override public Uri insert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values) {
         long id = dbHelper.getWritableDatabase()
@@ -66,8 +62,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
 
-    @Override
-    public int delete(
+    @Override public int delete(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         String selection, String[] selectionArgs) {
         int count = new QueryBuilder(Table.USERS)
@@ -77,8 +72,7 @@ class UsersDelegate implements ProviderDelegate<Database> {
         return count;
     }
 
-    @Override
-    public int update(
+    @Override public int update(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values, String selection, String[] selectionArgs) {
         int count = new QueryBuilder(Table.USERS)

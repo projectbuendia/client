@@ -25,8 +25,7 @@ public enum ResTemperatureRange implements Resolvable<ResTemperatureRange.Resolv
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    @Override
-    public Resolved resolve(Resources resources) {
+    @Override public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResTemperatureRange.Resolved.class);
     }
 

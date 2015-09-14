@@ -17,8 +17,7 @@ import static android.support.test.espresso.Espresso.pressBack;
 
 /** Test cases for handling when the initial sync fails on the location selection screen. */
 public class LocationSelectionFailingSyncTest extends SyncTestCase {
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
 
         click(viewWithText("Guest User"));

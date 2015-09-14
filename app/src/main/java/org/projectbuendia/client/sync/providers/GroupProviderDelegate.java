@@ -37,13 +37,11 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         mTable = table;
     }
 
-    @Override
-    public String getType() {
+    @Override public String getType() {
         return mType;
     }
 
-    @Override
-    public Cursor query(
+    @Override public Cursor query(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = new QueryBuilder(mTable).where(selection, selectionArgs)
@@ -53,8 +51,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         return cursor;
     }
 
-    @Override
-    public Uri insert(
+    @Override public Uri insert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values) {
         long id = dbHelper.getWritableDatabase().replaceOrThrow(mTable.name, null, values);
@@ -62,8 +59,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         return uri.buildUpon().appendPath(Long.toString(id)).build();
     }
 
-    @Override
-    public int bulkInsert(
+    @Override public int bulkInsert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues[] allValues) {
         if (allValues.length == 0) {
@@ -138,8 +134,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         return db.compileStatement(sql.toString());
     }
 
-    @Override
-    public int delete(
+    @Override public int delete(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         String selection, String[] selectionArgs) {
         int count = new QueryBuilder(mTable)
@@ -149,8 +144,7 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         return count;
     }
 
-    @Override
-    public int update(
+    @Override public int update(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values, String selection, String[] selectionArgs) {
         int count = new QueryBuilder(mTable)

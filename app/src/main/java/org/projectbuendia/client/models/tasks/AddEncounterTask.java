@@ -83,8 +83,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         mBus = bus;
     }
 
-    @Override
-    protected EncounterAddFailedEvent doInBackground(Void... params) {
+    @Override protected EncounterAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonEncounter> future = RequestFuture.newFuture();
 
         mServer.addEncounter(mPatient, mEncounter, future, future);
@@ -140,8 +139,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         return null;
     }
 
-    @Override
-    protected void onPostExecute(EncounterAddFailedEvent event) {
+    @Override protected void onPostExecute(EncounterAddFailedEvent event) {
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);

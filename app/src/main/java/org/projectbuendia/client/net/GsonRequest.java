@@ -96,8 +96,7 @@ public class GsonRequest<T> extends Request<T> {
             url, clazz, true, headers, (Response.Listener<T>) listener, errorListener);
     }
 
-    @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
+    @Override public Map<String, String> getHeaders() throws AuthFailureError {
         return mHeaders != null ? mHeaders : super.getHeaders();
     }
 
@@ -105,18 +104,15 @@ public class GsonRequest<T> extends Request<T> {
         return mGson;
     }
 
-    @Override
-    protected void deliverResponse(T response) {
+    @Override protected void deliverResponse(T response) {
         mListener.onResponse(response);
     }
 
-    @Override
-    protected Map<String, String> getParams() {
+    @Override protected Map<String, String> getParams() {
         return mBody;
     }
 
-    @Override
-    protected Response<T> parseNetworkResponse(NetworkResponse response) {
+    @Override protected Response<T> parseNetworkResponse(NetworkResponse response) {
         try {
             String json = new String(
                 response.data,

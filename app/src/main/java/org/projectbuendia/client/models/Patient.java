@@ -71,8 +71,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         return cv;
     }
 
-    @Override
-    public int compareTo(Patient other) {
+    @Override public int compareTo(Patient other) {
         return Utils.alphanumericComparator.compare(id, other.id);
     }
 

@@ -25,8 +25,7 @@ public final class DefaultCrudEventBus implements CrudEventBus {
     private final Set<Object> mSubscribers;
     private CleanupSubscriber mCleanupSubscriber;
 
-    @Override
-    public void register(Object subscriber) {
+    @Override public void register(Object subscriber) {
         if (subscriber instanceof CleanupSubscriber) {
             throw new IllegalArgumentException(
                 "CleanupSubscribers must be registered with registerCleanupSubscriber().");
@@ -39,8 +38,7 @@ public final class DefaultCrudEventBus implements CrudEventBus {
         }
     }
 
-    @Override
-    public void unregister(Object subscriber) {
+    @Override public void unregister(Object subscriber) {
         if (subscriber instanceof CleanupSubscriber) {
             throw new IllegalArgumentException(
                 "CleanupSubscribers must be unregistered with unregisterCleanupSubscriber().");
@@ -57,13 +55,11 @@ public final class DefaultCrudEventBus implements CrudEventBus {
         }
     }
 
-    @Override
-    public void post(Object event) {
+    @Override public void post(Object event) {
         mWrapped.post(event);
     }
 
-    @Override
-    public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
+    @Override public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
         synchronized (mSubscribersLock) {
             if (mCleanupSubscriber != null) {
                 mWrapped.unregister(subscriber);
@@ -74,8 +70,7 @@ public final class DefaultCrudEventBus implements CrudEventBus {
         }
     }
 
-    @Override
-    public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {
+    @Override public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {
         // The registered CleanupSubscriber may call this method; however, Java synchronized blocks
         // are reentrant so synchronizing again is okay.
         synchronized (mSubscribersLock) {

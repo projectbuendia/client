@@ -55,8 +55,7 @@ public class PatientFilterControllerTest extends AndroidTestCase {
             argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 

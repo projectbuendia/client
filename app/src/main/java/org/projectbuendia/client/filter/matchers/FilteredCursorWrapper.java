@@ -46,56 +46,46 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
         }
     }
 
-    @Override
-    public Uri getNotificationUri() {
+    @Override public Uri getNotificationUri() {
         return mCursor.getNotificationUri();
     }
 
-    @Override
-    public void registerContentObserver(ContentObserver observer) {
+    @Override public void registerContentObserver(ContentObserver observer) {
         mCursor.registerContentObserver(observer);
     }
 
-    @Override
-    public void unregisterContentObserver(ContentObserver observer) {
+    @Override public void unregisterContentObserver(ContentObserver observer) {
         mCursor.unregisterContentObserver(observer);
     }
 
-    @Override
-    public void close() {
+    @Override public void close() {
         mCursor.close();
     }
 
-    @Override
-    public Iterator<T> iterator() {
+    @Override public Iterator<T> iterator() {
         return new Iterator<T>() {
             private int mPosition = -1;
 
-            @Override
-            public boolean hasNext() {
+            @Override public boolean hasNext() {
                 return mPosition + 1 < getCount();
             }
 
-            @Override
-            public T next() {
+            @Override public T next() {
                 mPosition++;
                 return get(mPosition);
             }
 
-            @Override
-            public void remove() {
+            @Override public void remove() {
                 throw new UnsupportedOperationException();
             }
         };
     }
 
-    @Override
-    public int getCount() {
+    @Override public int getCount() {
         return mIndices.size();
     }
 
-    @Override
-    public T get(int position) {
+    @Override public T get(int position) {
         return mCursor.get(mIndices.get(position));
     }
 }

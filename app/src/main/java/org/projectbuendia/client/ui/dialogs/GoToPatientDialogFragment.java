@@ -61,8 +61,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         return new GoToPatientDialogFragment();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         mInflater = LayoutInflater.from(getActivity());
@@ -71,22 +70,19 @@ public class GoToPatientDialogFragment extends DialogFragment {
 
     }
 
-    @Override
-    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.go_to_patient_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mPatientId.addTextChangedListener(new IdWatcher());
         mPatientSearchResult.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 onSubmit();
             }
         });
         return new AlertDialog.Builder(getActivity())
             .setTitle(R.string.go_to_patient_title)
             .setPositiveButton(R.string.go_to_patient_go, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
+                @Override public void onClick(DialogInterface dialogInterface, int i) {
                     onSubmit();
                 }
             })
@@ -128,16 +124,13 @@ public class GoToPatientDialogFragment extends DialogFragment {
     }
 
     class IdWatcher implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence c, int x, int y, int z) {
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {
         }
 
-        @Override
-        public void onTextChanged(CharSequence c, int x, int y, int z) {
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {
         }
 
-        @Override
-        public void afterTextChanged(Editable editable) {
+        @Override public void afterTextChanged(Editable editable) {
             String id = mPatientId.getText().toString().trim();
             if (id.isEmpty()) {
                 mPatientUuid = null;

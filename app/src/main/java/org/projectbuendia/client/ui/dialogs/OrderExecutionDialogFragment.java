@@ -76,21 +76,18 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         return f;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @Override
-    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_execution_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
 
         updateUi(false);
         mMarkToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+            @Override public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 updateUi(checked);
             }
         });
@@ -98,8 +95,7 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
             .setTitle(getResources().getString(R.string.order_execution_title))
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
+                @Override public void onClick(DialogInterface dialogInterface, int i) {
                     onSubmit();
                 }
             })

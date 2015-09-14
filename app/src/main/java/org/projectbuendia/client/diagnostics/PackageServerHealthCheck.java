@@ -45,8 +45,7 @@ public class PackageServerHealthCheck extends HealthCheck {
     private AppSettings mSettings;
     private final Runnable mHealthCheckRunnable = new Runnable() {
 
-        @Override
-        public void run() {
+        @Override public void run() {
             performCheck();
 
             synchronized (mLock) {
@@ -98,8 +97,7 @@ public class PackageServerHealthCheck extends HealthCheck {
         mSettings = settings;
     }
 
-    @Override
-    protected void startImpl() {
+    @Override protected void startImpl() {
         synchronized (mLock) {
             if (mHandlerThread == null) {
                 mHandlerThread = new HandlerThread("Buendia Package Server Health Check");
@@ -110,8 +108,7 @@ public class PackageServerHealthCheck extends HealthCheck {
         }
     }
 
-    @Override
-    protected void stopImpl() {
+    @Override protected void stopImpl() {
         synchronized (mLock) {
             if (mHandlerThread != null) {
                 mHandlerThread.quit();

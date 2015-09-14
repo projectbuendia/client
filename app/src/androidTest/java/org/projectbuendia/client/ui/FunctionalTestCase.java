@@ -70,8 +70,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         super(LoginActivity.class);
     }
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         // Give additional leeway for idling resources, as sync may be slow, especially on Edisons.
         // Increased to 5 minutes as certain operations (like initial sync) may take an exceedingly
         // long time.
@@ -95,8 +94,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         mWaitForUserSync = waitForUserSync;
     }
 
-    @Override
-    public void tearDown() {
+    @Override public void tearDown() {
         // Remove activities from the stack until the app is closed.  If we don't do this, the test
         // runner sometimes has trouble launching the activity to start the next test.
         try {
@@ -134,8 +132,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         getInstrumentation().waitForIdleSync();
         final Activity[] activity = new Activity[1];
         runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 java.util.Collection<Activity> activities =
                     ActivityLifecycleMonitorRegistry.getInstance()
                         .getActivitiesInStage(Stage.RESUMED);

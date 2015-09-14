@@ -253,8 +253,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         verify(mMockUi).showFormSubmissionDialog(false);
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 
@@ -277,8 +276,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private final class FakeHandler implements MinimalHandler {
         private final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
 
-        @Override
-        public void post(Runnable runnable) {
+        @Override public void post(Runnable runnable) {
             mTasks.add(runnable);
         }
 

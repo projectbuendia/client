@@ -29,14 +29,12 @@ public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdap
         super(context, locationTree);
     }
 
-    @Override
-    public View getGroupView(
+    @Override public View getGroupView(
         int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         return newGroupView();
     }
 
-    @Override
-    protected View newGroupView() {
+    @Override protected View newGroupView() {
         return LayoutInflater.from(mContext).inflate(
             R.layout.patient_list_empty_group_header, null);
     }

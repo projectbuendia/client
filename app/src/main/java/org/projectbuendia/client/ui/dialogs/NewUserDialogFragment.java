@@ -54,14 +54,12 @@ public class NewUserDialogFragment extends DialogFragment {
         mActivityUi = activityUi;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @Override
-    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.dialog_fragment_add_new_user, null);
         ButterKnife.inject(this, fragment);
 
@@ -74,14 +72,12 @@ public class NewUserDialogFragment extends DialogFragment {
 
         final AlertDialog dialog = dialogBuilder.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
+            @Override public void onShow(DialogInterface dialogInterface) {
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE)
                     .setOnClickListener(
                         new View.OnClickListener() {
 
-                            @Override
-                            public void onClick(View view) {
+                            @Override public void onClick(View view) {
                                 // Validate the user.
                                 String givenName = mGivenName.getText() == null ? ""
                                     : mGivenName.getText().toString().trim();

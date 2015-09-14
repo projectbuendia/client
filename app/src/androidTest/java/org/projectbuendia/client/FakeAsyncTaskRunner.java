@@ -25,8 +25,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /** A fake {@link AsyncTaskRunner} for use in tests. */
 public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
     private static final Executor EXECUTOR = new Executor() {
-        @Override
-        public void execute(Runnable command) {
+        @Override public void execute(Runnable command) {
             command.run();
         }
     };
@@ -50,8 +49,7 @@ public final class FakeAsyncTaskRunner implements AsyncTaskRunner {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public <ParamsT, ProgressT, ResultT> void runTask(
+    @Override public <ParamsT, ProgressT, ResultT> void runTask(
         AsyncTask<ParamsT, ProgressT, ResultT> asyncTask, ParamsT... params) {
         mQueuedTasks.add(Pair.create(
             (AsyncTask<Object, Object, Object>) asyncTask,

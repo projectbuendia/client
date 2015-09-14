@@ -33,8 +33,7 @@ public class ScrollViewCompatibleGridView extends GridView {
         super(context, attrs, defStyleAttr);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED) {
             // This number would normally be negative, but because makeMeasureSpec masks off the
             // most significant bits to store the mode, it ends up being the largest possible number

@@ -79,8 +79,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
         mConnectionDetails = connectionDetails;
     }
 
-    @Override
-    protected void startImpl() {
+    @Override protected void startImpl() {
         synchronized (mLock) {
             if (mHandlerThread == null) {
                 mHandlerThread = new HandlerThread("Buendia API Health Check");
@@ -98,8 +97,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
         }
     }
 
-    @Override
-    protected void stopImpl() {
+    @Override protected void stopImpl() {
         synchronized (mLock) {
             if (mRunnable != null) {
                 mRunnable.isRunning.set(false);
@@ -130,8 +128,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
             mHandler = handler;
         }
 
-        @Override
-        public void run() {
+        @Override public void run() {
             if (!isRunning.get()) return;
 
             try {

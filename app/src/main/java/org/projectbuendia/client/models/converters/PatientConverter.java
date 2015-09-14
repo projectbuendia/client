@@ -23,8 +23,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class PatientConverter implements Converter<Patient> {
 
-    @Override
-    public Patient fromCursor(Cursor cursor) {
+    @Override public Patient fromCursor(Cursor cursor) {
         return Patient.builder()
             .setId(Utils.getString(cursor, Patients._ID))
             .setUuid(Utils.getString(cursor, Patients.UUID))

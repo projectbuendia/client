@@ -42,8 +42,7 @@ public class LoginFragment extends ProgressFragment {
     @Inject Colorizer mUserColorizer;
     @InjectView(R.id.users) GridView mUserGrid;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
 
@@ -52,8 +51,7 @@ public class LoginFragment extends ProgressFragment {
         mUserListAdapter = new UserListAdapter(getActivity(), mUserColorizer);
     }
 
-    @Override
-    public View onCreateView(
+    @Override public View onCreateView(
         LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         ButterKnife.inject(this, v);
@@ -78,13 +76,11 @@ public class LoginFragment extends ProgressFragment {
 
     private class FragmentUi implements LoginController.FragmentUi {
 
-        @Override
-        public void showSpinner(boolean show) {
+        @Override public void showSpinner(boolean show) {
             changeState(show ? State.LOADING : State.LOADED);
         }
 
-        @Override
-        public void showUsers(List<JsonUser> users) {
+        @Override public void showUsers(List<JsonUser> users) {
             mUserListAdapter.setNotifyOnChange(false);
             mUserListAdapter.clear();
             mUserListAdapter.addAll(users);

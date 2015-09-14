@@ -24,8 +24,7 @@ public final class KnownUsersLoadFailedEvent {
         this.reason = reason;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (!(obj instanceof KnownUsersLoadFailedEvent)) {
             return false;
         }
@@ -34,13 +33,11 @@ public final class KnownUsersLoadFailedEvent {
         return other.reason == reason;
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return reason;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return KnownUsersLoadFailedEvent.class.getSimpleName() + "(" + reason + ")";
     }
 }

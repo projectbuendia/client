@@ -23,13 +23,11 @@ import java.util.List;
 /** A {@link ProviderDelegate} that provides query access to all localized locations. */
 public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Database> {
 
-    @Override
-    public String getType() {
+    @Override public String getType() {
         return Contracts.LocalizedCharts.GROUP_CONTENT_TYPE;
     }
 
-    @Override
-    public Cursor query(
+    @Override public Cursor query(
         Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
         String selection, String[] selectionArgs, String sortOrder) {
         // Decode the uri, expected:
@@ -86,30 +84,26 @@ public class MostRecentLocalizedChartsDelegate implements ProviderDelegate<Datab
             .rawQuery(query, new String[] {patientUuid, locale, patientUuid, locale});
     }
 
-    @Override
-    public Uri insert(
+    @Override public Uri insert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int bulkInsert(
+    @Override public int bulkInsert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues[] values) {
         throw new UnsupportedOperationException(
             "Bulk insert is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int delete(
+    @Override public int delete(
         Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
         String[] selectionArgs) {
         throw new UnsupportedOperationException("Delete is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int update(
+    @Override public int update(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("Update is not supported for URI '" + uri + "'.");

@@ -75,18 +75,15 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
         return mUuid;
     }
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return mTentSelectionString;
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         return mTentSelectionArgs;
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return mDescription;
     }
 }

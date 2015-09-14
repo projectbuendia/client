@@ -25,13 +25,11 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
         return new SQLiteDatabaseTransactionHelper(getDatabaseHelper());
     }
 
-    @Override
-    protected Database getDatabaseHelper() {
+    @Override protected Database getDatabaseHelper() {
         return new Database(getContext());
     }
 
-    @Override
-    protected ProviderDelegateRegistry<Database> getRegistry() {
+    @Override protected ProviderDelegateRegistry<Database> getRegistry() {
         ProviderDelegateRegistry<Database> registry = new ProviderDelegateRegistry<>();
 
         // Providers for groups of things (e.g., all charts).

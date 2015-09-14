@@ -46,21 +46,18 @@ public class EventBusIdlingResource<T> implements IdlingResource {
         mEventBus.register(mSubscriber);
     }
 
-    @Override
-    public String getName() {
+    @Override public String getName() {
         return mName;
     }
 
-    @Override
-    public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
+    @Override public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
         mResourceCallback = resourceCallback;
         if (isIdleNow()) {
             mResourceCallback.onTransitionToIdle();
         }
     }
 
-    @Override
-    public boolean isIdleNow() {
+    @Override public boolean isIdleNow() {
         return mEventFired;
     }
 

@@ -16,15 +16,13 @@ import android.test.InstrumentationTestCase;
 /** Tests for {@link MatchingFilterGroup}. */
 public class MatchingFilterGroupTest extends InstrumentationTestCase {
     private static final MatchingFilter<String> PREFIX_FILTER = new MatchingFilter<String>() {
-        @Override
-        public boolean matches(String object, CharSequence constraint) {
+        @Override public boolean matches(String object, CharSequence constraint) {
             return object.startsWith(constraint.toString());
         }
     };
 
     private static final MatchingFilter<String> SUFFIX_FILTER = new MatchingFilter<String>() {
-        @Override
-        public boolean matches(String object, CharSequence constraint) {
+        @Override public boolean matches(String object, CharSequence constraint) {
             return object.endsWith(constraint.toString());
         }
     };

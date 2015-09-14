@@ -26,13 +26,11 @@ import java.lang.reflect.Type;
 /** Provides custom Gson serialization for {@link LocalDate} objects. */
 public class LocalDateSerializer implements JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
 
-    @Override
-    public JsonElement serialize(LocalDate date, Type type, JsonSerializationContext context) {
+    @Override public JsonElement serialize(LocalDate date, Type type, JsonSerializationContext context) {
         return new JsonPrimitive(date.toString());
     }
 
-    @Override
-    public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+    @Override public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext context)
         throws JsonParseException {
         String text = json.getAsString();
         try {

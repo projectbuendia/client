@@ -24,8 +24,7 @@ public final class KnownUsersLoadedEvent {
         this.knownUsers = knownUsers;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (!(obj instanceof KnownUsersLoadedEvent)) {
             return false;
         }
@@ -34,8 +33,7 @@ public final class KnownUsersLoadedEvent {
         return knownUsers.equals(other.knownUsers);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return knownUsers.hashCode();
     }
 }

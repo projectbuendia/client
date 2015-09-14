@@ -50,8 +50,7 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
 
     }
 
-    @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    @Override public View getDropDownView(int position, View convertView, ViewGroup parent) {
         if (isSectionBorder(position)) {
             return getSectionBorder(convertView, parent);
         }
@@ -91,8 +90,7 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         }
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    @Override public View getView(int position, View convertView, ViewGroup parent) {
         if (isSectionBorder(position)) {
             return getSectionBorder(convertView, parent);
         }
@@ -109,8 +107,7 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         return view;
     }
 
-    @Override
-    public int getViewTypeCount() {
+    @Override public int getViewTypeCount() {
         return 2;
     }
 

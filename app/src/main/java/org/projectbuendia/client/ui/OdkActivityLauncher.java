@@ -102,8 +102,7 @@ public class OdkActivityLauncher {
         @Nullable final Preset fields) {
         new OpenMrsXformsConnection(App.getConnectionDetails()).listXforms(
             new Response.Listener<List<OpenMrsXformIndexEntry>>() {
-                @Override
-                public void onResponse(final List<OpenMrsXformIndexEntry> response) {
+                @Override public void onResponse(final List<OpenMrsXformIndexEntry> response) {
                     if (response.isEmpty()) {
                         LOG.i("No forms found");
                         EventBus.getDefault().post(new FetchXformFailedEvent(
@@ -112,8 +111,7 @@ public class OdkActivityLauncher {
                     }
                     // Cache all the forms into the ODK form cache
                     new OdkXformSyncTask(new OdkXformSyncTask.FormWrittenListener() {
-                        @Override
-                        public void formWritten(File path, String uuid) {
+                        @Override public void formWritten(File path, String uuid) {
                             LOG.i("wrote form " + path);
                             showOdkCollect(
                                 callingActivity,
@@ -126,8 +124,7 @@ public class OdkActivityLauncher {
                 }
             }, new Response.ErrorListener() {
 
-                @Override
-                public void onErrorResponse(VolleyError error) {
+                @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Fetching xform list failed.");
                     FetchXformFailedEvent.Reason reason =
                         FetchXformFailedEvent.Reason.SERVER_UNKNOWN;
@@ -268,8 +265,7 @@ public class OdkActivityLauncher {
 
             sendFormToServer(patientUuid, readFromPath(instancePath),
                 new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+                    @Override public void onResponse(JSONObject response) {
                         LOG.i("Created new encounter successfully on server"
                             + response.toString());
 
@@ -308,8 +304,7 @@ public class OdkActivityLauncher {
         connection.postXformInstance(patientUuid, xml,
             successListener,
             new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
+                @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Did not submit form to server successfully");
 
                     SubmitXformFailedEvent.Reason reason =
@@ -577,8 +572,7 @@ public class OdkActivityLauncher {
         }
 
         loaderTask.setFormLoaderListener(new FormLoaderListener() {
-            @Override
-            public void loadingComplete(FormLoaderTask task) {
+            @Override public void loadingComplete(FormLoaderTask task) {
                 // This was extracted from FormEntryActivity.loadingComplete()
                 FormController formController = task.getFormController();
                 Collect.getInstance().setFormController(formController);
@@ -589,12 +583,10 @@ public class OdkActivityLauncher {
                 caller.startActivity(intent);
             }
 
-            @Override
-            public void loadingError(String errorMsg) {
+            @Override public void loadingError(String errorMsg) {
             }
 
-            @Override
-            public void onProgressStep(String stepMessage) {
+            @Override public void onProgressStep(String stepMessage) {
             }
         });
         loaderTask.execute(formPath);
@@ -602,8 +594,7 @@ public class OdkActivityLauncher {
 
     private static Response.ErrorListener getErrorListenerForTag(final String tag) {
         return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+            @Override public void onErrorResponse(VolleyError error) {
                 LOG.e(error.toString());
             }
         };

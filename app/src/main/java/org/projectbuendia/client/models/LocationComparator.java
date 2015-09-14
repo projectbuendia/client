@@ -24,8 +24,7 @@ public class LocationComparator implements Comparator<Location> {
         mTree = tree;
     }
 
-    @Override
-    public int compare(Location lhs, Location rhs) {
+    @Override public int compare(Location lhs, Location rhs) {
         List<Location> pathA = mTree.getAncestorsStartingFromRoot(lhs);
         List<Location> pathB = mTree.getAncestorsStartingFromRoot(rhs);
         for (int i = 0; i < Math.min(pathA.size(), pathB.size()); i++) {

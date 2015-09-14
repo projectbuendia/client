@@ -113,8 +113,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         caller.startActivity(intent);
     }
 
-    @Override
-    public void onExtendOptionsMenu(Menu menu) {
+    @Override public void onExtendOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
@@ -122,8 +121,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
+                @Override public boolean onMenuItemClick(MenuItem menuItem) {
                     Utils.logUserAction("go_to_patient_pressed");
                     GoToPatientDialogFragment.newInstance()
                         .show(getSupportFragmentManager(), null);
@@ -139,8 +137,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         updateChart.setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
+                @Override public boolean onMenuItemClick(MenuItem item) {
                     mController.onAddObservationPressed();
                     return true;
                 }
@@ -152,8 +149,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             MenuItem item = menu.add(form.name);
             item.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
+                    @Override public boolean onMenuItemClick(MenuItem menuItem) {
                         mController.onOpenFormPressed(form.uuid);
                         return true;
                     }
@@ -170,8 +166,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         Utils.showIf(mPcr, ebolaLabTestFormEnabled);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // Go back rather than reloading the activity, so that the patient list retains its
@@ -182,8 +177,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.fragment_patient_chart);
 
@@ -212,8 +206,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mGridRenderer = new GridRenderer(mGridWebView, getResources());
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
-            @Override
-            public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
+            @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
                 OdkActivityLauncher.sendOdkResultToServer(
                     PatientChartActivity.this, mSettings,
                     patientUuid, mSettings.getXformUpdateClientCache(), resultCode, data);
@@ -222,8 +215,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
 
-            @Override
-            public void post(Runnable runnable) {
+            @Override public void post(Runnable runnable) {
                 mHandler.post(runnable);
             }
         };
@@ -243,28 +235,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mPatientLocationView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 Utils.logUserAction("location_view_pressed");
                 mController.showAssignLocationDialog(PatientChartActivity.this);
             }
         });
         mPcr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 mController.onAddTestResultsPressed();
             }
         });
     }
 
-    @Override
-    protected void onStartImpl() {
+    @Override protected void onStartImpl() {
         super.onStartImpl();
         mController.init();
     }
 
-    @Override
-    protected void onStopImpl() {
+    @Override protected void onStopImpl() {
         mController.suspend();
         super.onStopImpl();
     }
@@ -302,14 +290,12 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
     */
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mIsFetchingXform = false;
         mController.onXFormResult(requestCode, resultCode, data);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
     }
@@ -321,13 +307,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     }
 
     private final class Ui implements PatientChartController.Ui {
-        @Override
-        public void setTitle(String title) {
+        @Override public void setTitle(String title) {
             PatientChartActivity.this.setTitle(title);
         }
 
-        @Override
-        public void updateLastObsTimeUi(DateTime lastObsTime) {
+        @Override public void updateLastObsTimeUi(DateTime lastObsTime) {
             if (lastObsTime == null) {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
                 mLastObservationLabel.setVisibility(View.GONE);
@@ -337,8 +321,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         }
 
-        @Override
-        public void updatePatientVitalsUi(Map<String, LocalizedObs> observations,
+        @Override public void updatePatientVitalsUi(Map<String, LocalizedObs> observations,
                                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
@@ -412,8 +395,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
         }
 
-        @Override
-        public void updatePatientConditionUi(String generalConditionUuid) {
+        @Override public void updatePatientConditionUi(String generalConditionUuid) {
             /*
             mGeneralConditionUuid = generalConditionUuid;
             if (generalConditionUuid == null) {
@@ -440,8 +422,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             */
         }
 
-        @Override
-        public void updatePatientHistoryUi(
+        @Override public void updatePatientHistoryUi(
             List<Pair<String, String>> tileConceptUuidsAndNames,
             Map<String, LocalizedObs> latestObservations,
             List<Pair<String, String>> gridConceptUuidsAndNames,
@@ -467,8 +448,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     .sizeDp(36));
         }
 
-        @Override
-        public void updatePatientDetailsUi(Patient patient) {
+        @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
             mPatientFullNameView.setText(
                 patient.id + ": " + patient.givenName + " " + patient.familyName);
@@ -484,18 +464,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 
-        @Override
-        public void showError(int errorMessageResource, Object... args) {
+        @Override public void showError(int errorMessageResource, Object... args) {
             BigToast.show(PatientChartActivity.this, getString(errorMessageResource, args));
         }
 
-        @Override
-        public void showError(int errorMessageResource) {
+        @Override public void showError(int errorMessageResource) {
             BigToast.show(PatientChartActivity.this, errorMessageResource);
         }
 
-        @Override
-        public synchronized void fetchAndShowXform(
+        @Override public synchronized void fetchAndShowXform(
             int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
             Preset preset) {
             if (mIsFetchingXform) return;
@@ -505,29 +482,24 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 PatientChartActivity.this, formUuid, requestCode, patient, preset);
         }
 
-        @Override
-        public void reEnableFetch() {
+        @Override public void reEnableFetch() {
             mIsFetchingXform = false;
         }
 
-        @Override
-        public void showFormLoadingDialog(boolean show) {
+        @Override public void showFormLoadingDialog(boolean show) {
             Utils.showDialogIf(mFormLoadingDialog, show);
         }
 
-        @Override
-        public void showFormSubmissionDialog(boolean show) {
+        @Override public void showFormSubmissionDialog(boolean show) {
             Utils.showDialogIf(mFormSubmissionDialog, show);
         }
 
-        @Override
-        public void showNewOrderDialog(String patientUuid) {
+        @Override public void showNewOrderDialog(String patientUuid) {
             OrderDialogFragment.newInstance(patientUuid, null)
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override
-        public void showOrderExecutionDialog(
+        @Override public void showOrderExecutionDialog(
             Order order, Interval interval, List<DateTime> executionTimes) {
             OrderExecutionDialogFragment.newInstance(order, interval, executionTimes)
                 .show(getSupportFragmentManager(), null);

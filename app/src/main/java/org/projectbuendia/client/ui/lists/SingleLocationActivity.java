@@ -34,8 +34,7 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
         caller.startActivity(intent);
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
 
         mLocationUuid = getIntent().getStringExtra("uuid");
@@ -46,8 +45,7 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
         getSearchController().setLocationFilter(mLocationUuid);
     }
 
-    @Override
-    protected void setPatients(TypedCursor<Patient> patients) {
+    @Override protected void setPatients(TypedCursor<Patient> patients) {
         mPatientCount = patients.getCount();
         setTitle(PatientCountDisplay.getPatientCountTitle(this, mPatientCount, mLocationName));
     }

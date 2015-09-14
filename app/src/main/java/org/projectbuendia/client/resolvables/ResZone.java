@@ -26,8 +26,7 @@ public enum ResZone implements Resolvable<ResZone.Resolved> {
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    @Override
-    public Resolved resolve(Resources resources) {
+    @Override public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResZone.Resolved.class);
     }
 

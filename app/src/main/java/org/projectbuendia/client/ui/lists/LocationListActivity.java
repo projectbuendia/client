@@ -51,40 +51,34 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
         caller.startActivity(new Intent(caller, LocationListActivity.class));
     }
 
-    @Override
-    public void onResumeImpl() {
+    @Override public void onResumeImpl() {
         super.onResumeImpl();
         mController.init();
     }
 
-    @Override
-    public void onPauseImpl() {
+    @Override public void onPauseImpl() {
         super.onPauseImpl();
         mController.suspend();
     }
 
-    @Override
-    public void onExtendOptionsMenu(Menu menu) {
+    @Override public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
+            @Override public boolean onMenuItemActionExpand(MenuItem item) {
                 mController.onSearchPressed();
                 return true;
             }
 
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
+            @Override public boolean onMenuItemActionCollapse(MenuItem item) {
                 mController.onSearchCancelled();
                 return true;
             }
         });
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         App.getInstance().inject(this);
 
@@ -107,24 +101,21 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
             .setMessage(R.string.sync_failed_dialog_message)
             .setNegativeButton(
                 R.string.sync_failed_back, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    @Override public void onClick(DialogInterface dialog, int which) {
                         Utils.logEvent("sync_failed_back_pressed");
                         finish();
                     }
                 })
             .setNeutralButton(
                 R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    @Override public void onClick(DialogInterface dialog, int which) {
                         Utils.logEvent("sync_failed_settings_pressed");
                         SettingsActivity.start(LocationListActivity.this);
                     }
                 })
             .setPositiveButton(
                 R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    @Override public void onClick(DialogInterface dialog, int which) {
                         Utils.logEvent("sync_failed_retry_pressed");
                         mController.onSyncRetry();
                     }
@@ -145,36 +136,30 @@ public final class LocationListActivity extends BaseSearchablePatientListActivit
     }
 
     private final class Ui implements LocationListController.Ui {
-        @Override
-        public void switchToLocationList() {
+        @Override public void switchToLocationList() {
             getSupportFragmentManager().popBackStack();
         }
 
-        @Override
-        public void switchToPatientList() {
+        @Override public void switchToPatientList() {
             getSupportFragmentManager().beginTransaction()
                 .replace(R.id.location_selection_container, new PatientListFragment())
                 .addToBackStack(null)
                 .commit();
         }
 
-        @Override
-        public void showSyncFailedDialog(boolean show) {
+        @Override public void showSyncFailedDialog(boolean show) {
             Utils.showDialogIf(mSyncFailedDialog, show);
         }
 
-        @Override
-        public void setLoadingState(LoadingState loadingState) {
+        @Override public void setLoadingState(LoadingState loadingState) {
             LocationListActivity.this.setLoadingState(loadingState);
         }
 
-        @Override
-        public void finish() {
+        @Override public void finish() {
             LocationListActivity.this.finish();
         }
 
-        @Override
-        public void openSingleLocation(Location location) {
+        @Override public void openSingleLocation(Location location) {
             SingleLocationActivity.start(LocationListActivity.this,
                 location.uuid, location.name, location.patientCount);
         }

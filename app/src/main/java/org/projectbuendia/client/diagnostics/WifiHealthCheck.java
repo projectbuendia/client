@@ -32,8 +32,7 @@ public class WifiHealthCheck extends HealthCheck {
     private final WifiChangeBroadcastReceiver mWifiStateChangedReceiver;
     private final AppSettings mSettings;
 
-    @Override
-    public boolean isApiUnavailable() {
+    @Override public boolean isApiUnavailable() {
         // We will get an event that lets us update the set of active issues whenever
         // the wifi state changes, so we can be confident that the API is definitely
         // unavailable whenever either of the wifi-related issues is active.
@@ -59,8 +58,7 @@ public class WifiHealthCheck extends HealthCheck {
         return intentFilter;
     }
 
-    @Override
-    protected void startImpl() {
+    @Override protected void startImpl() {
         mApplication.registerReceiver(mWifiStateChangedReceiver, sWifiStateChangedIntentFilter);
         checkWifiState();
     }
@@ -86,14 +84,12 @@ public class WifiHealthCheck extends HealthCheck {
         }
     }
 
-    @Override
-    protected void stopImpl() {
+    @Override protected void stopImpl() {
         mApplication.unregisterReceiver(mWifiStateChangedReceiver);
     }
 
     private class WifiChangeBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
+        @Override public void onReceive(Context context, Intent intent) {
             checkWifiState();
         }
     }

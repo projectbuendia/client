@@ -68,8 +68,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
         mBus = bus;
     }
 
-    @Override
-    protected OrderAddFailedEvent doInBackground(Void... params) {
+    @Override protected OrderAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonOrder> future = RequestFuture.newFuture();
 
         mServer.addOrder(mOrder, future, future);
@@ -95,8 +94,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
         return null;
     }
 
-    @Override
-    protected void onPostExecute(OrderAddFailedEvent event) {
+    @Override protected void onPostExecute(OrderAddFailedEvent event) {
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);

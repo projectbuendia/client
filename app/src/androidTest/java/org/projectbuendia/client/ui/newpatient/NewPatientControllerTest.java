@@ -385,8 +385,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
             argThat(matchesPatientDelta(patientDelta)));
     }
 
-    @Override
-    protected void setUp() {
+    @Override protected void setUp() {
         MockitoAnnotations.initMocks(this);
         mFakeCrudEventBus = new FakeEventBus();
         mNewPatientController =

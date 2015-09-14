@@ -37,8 +37,7 @@ public class EncounterConverter implements Converter<Encounter> {
         mPatientUuid = patientUuid;
     }
 
-    @Override
-    public Encounter fromCursor(Cursor cursor) {
+    @Override public Encounter fromCursor(Cursor cursor) {
         final String encounterUuid = cursor.getString(
             cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
         final long timestamp = cursor.getLong(

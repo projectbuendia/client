@@ -48,8 +48,7 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
         assertEquals("today", mFormatter.format(mToday, mToday));
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         super.setUp();
 
         mFormatter = new RelativeDateTimeFormatter();

@@ -52,8 +52,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
      * <p>If the backing {@link Cursor} is a database cursor, calling this method may be expensive.
      * Wherever possible, prefer to iterate.
      */
-    @Override
-    public int getCount() {
+    @Override public int getCount() {
         if (mCursor.isClosed()) {
             return 0;
         }
@@ -61,8 +60,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
         return mCursor.getCount();
     }
 
-    @Override
-    public T get(int position) {
+    @Override public T get(int position) {
         if (mCursor.isClosed()) {
             return null;
         }
@@ -84,40 +82,33 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
         return convertedItem;
     }
 
-    @Override
-    public Uri getNotificationUri() {
+    @Override public Uri getNotificationUri() {
         return mCursor.isClosed() ? null : mCursor.getNotificationUri();
     }
 
-    @Override
-    public Iterator<T> iterator() {
+    @Override public Iterator<T> iterator() {
         return new LazyConverterIterator();
     }
 
-    @Override
-    public void close() {
+    @Override public void close() {
         mCursor.close();
     }
 
-    @Override
-    public void registerContentObserver(ContentObserver observer) {
+    @Override public void registerContentObserver(ContentObserver observer) {
         mCursor.registerContentObserver(observer);
     }
 
-    @Override
-    public void unregisterContentObserver(ContentObserver observer) {
+    @Override public void unregisterContentObserver(ContentObserver observer) {
         mCursor.unregisterContentObserver(observer);
     }
 
     private class LazyConverterIterator implements Iterator<T> {
 
-        @Override
-        public boolean hasNext() {
+        @Override public boolean hasNext() {
             return !mCursor.isLast() && !mCursor.isAfterLast();
         }
 
-        @Override
-        public T next() {
+        @Override public T next() {
             if (!mCursor.moveToNext()) {
                 throw new IllegalStateException("Cannot move cursor past its last entry.");
             }
@@ -133,8 +124,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
             return convertedItem;
         }
 
-        @Override
-        public void remove() {
+        @Override public void remove() {
             throw new UnsupportedOperationException(
                 "Elements cannot be removed from an iterator backed by a cursor.");
         }

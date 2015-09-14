@@ -70,8 +70,7 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
         this.mPassword = connectionDetails.getPassword();
     }
 
-    @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
+    @Override public Map<String, String> getHeaders() throws AuthFailureError {
         // TODO: work out how to do Auth properly
         HashMap<String, String> params = new HashMap<>();
         OpenMrsConnectionDetails.addAuthHeader(mUsername, mPassword, params);

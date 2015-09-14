@@ -73,8 +73,7 @@ public class OpenMrsServer implements Server {
         mGson = gson;
     }
 
-    @Override
-    public void logToServer(List<String> pairs) {
+    @Override public void logToServer(List<String> pairs) {
         // To avoid filling the server logs with big messy stack traces, let's make a dummy
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
@@ -97,16 +96,14 @@ public class OpenMrsServer implements Server {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, urlPath + ";" + Joiner.on(";").join(params), null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                 }
             }, null);
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_SHORT, 0, 1));
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void addPatient(
+    @Override public void addPatient(
         PatientDelta patientDelta,
         final Response.Listener<JsonPatient> successListener,
         final Response.ErrorListener errorListener) {
@@ -122,8 +119,7 @@ public class OpenMrsServer implements Server {
             "/patient",
             json,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         successListener.onResponse(patientFromJson(response));
                     } catch (JSONException e) {
@@ -158,8 +154,7 @@ public class OpenMrsServer implements Server {
     private Response.ErrorListener wrapErrorListener(
         final Response.ErrorListener errorListener) {
         return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+            @Override public void onErrorResponse(VolleyError error) {
                 String message = error.getMessage();
                 try {
                     if (error.networkResponse != null
@@ -187,8 +182,7 @@ public class OpenMrsServer implements Server {
         };
     }
 
-    @Override
-    public void updatePatient(
+    @Override public void updatePatient(
         String patientUuid,
         PatientDelta patientDelta,
         final Response.Listener<JsonPatient> successListener,
@@ -203,8 +197,7 @@ public class OpenMrsServer implements Server {
             "/patient/" + patientUuid,
             json,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         successListener.onResponse(patientFromJson(response));
                     } catch (JSONException e) {
@@ -220,8 +213,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void addUser(
+    @Override public void addUser(
         final JsonNewUser user,
         final Response.Listener<JsonUser> successListener,
         final Response.ErrorListener errorListener) {
@@ -243,8 +235,7 @@ public class OpenMrsServer implements Server {
             "/user",
             requestBody,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         successListener.onResponse(userFromJson(response));
                     } catch (JSONException e) {
@@ -264,8 +255,7 @@ public class OpenMrsServer implements Server {
         return new JsonUser(object.getString("user_id"), object.getString("full_name"));
     }
 
-    @Override
-    public void addEncounter(Patient patient,
+    @Override public void addEncounter(Patient patient,
                              Encounter encounter,
                              final Response.Listener<JsonEncounter> successListener,
                              final Response.ErrorListener errorListener) {
@@ -281,8 +271,7 @@ public class OpenMrsServer implements Server {
             "/patientencounters",
             json,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         successListener.onResponse(encounterFromJson(response));
                     } catch (JSONException e) {
@@ -301,8 +290,7 @@ public class OpenMrsServer implements Server {
         return mGson.fromJson(object.toString(), JsonEncounter.class);
     }
 
-    @Override
-    public void addOrder(Order order,
+    @Override public void addOrder(Order order,
                          final Response.Listener<JsonOrder> successListener,
                          final Response.ErrorListener errorListener) {
         JSONObject json;
@@ -319,8 +307,7 @@ public class OpenMrsServer implements Server {
             "/order",
             json,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         successListener.onResponse(
                             mGson.fromJson(response.toString(), JsonOrder.class));
@@ -336,8 +323,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void getPatient(final String patientId,
+    @Override public void getPatient(final String patientId,
                            final Response.Listener<JsonPatient> successListener,
                            final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
@@ -345,8 +331,7 @@ public class OpenMrsServer implements Server {
             "/patient?id=" + patientId,
             null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         JSONArray results = response.getJSONArray("results");
                         if (results != null && results.length() > 0) {
@@ -366,13 +351,11 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void updatePatientLocation(String patientId, String newLocationId) {
+    @Override public void updatePatientLocation(String patientId, String newLocationId) {
         // TODO: Implement or remove (currently handled by updatePatient).
     }
 
-    @Override
-    public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
+    @Override public void listPatients(@Nullable String filterState, @Nullable String filterLocation,
                              @Nullable String filterQueryTerm,
                              final Response.Listener<List<JsonPatient>> successListener,
                              Response.ErrorListener errorListener) {
@@ -382,8 +365,7 @@ public class OpenMrsServer implements Server {
             "/patient?q=" + Utils.urlEncode(query),
             null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     ArrayList<JsonPatient> patients = new ArrayList<>();
                     try {
                         JSONArray results = response.getJSONArray("results");
@@ -403,8 +385,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void listUsers(@Nullable String searchQuery,
+    @Override public void listUsers(@Nullable String searchQuery,
                           final Response.Listener<List<JsonUser>> successListener,
                           Response.ErrorListener errorListener) {
         String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
@@ -413,8 +394,7 @@ public class OpenMrsServer implements Server {
             "/user" + query,
             null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     ArrayList<JsonUser> users = new ArrayList<>();
                     try {
                         JSONArray results = response.getJSONArray("results");
@@ -433,8 +413,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void addLocation(JsonLocation location,
+    @Override public void addLocation(JsonLocation location,
                             final Response.Listener<JsonLocation> successListener,
                             final Response.ErrorListener errorListener) {
         JSONObject requestBody;
@@ -461,8 +440,7 @@ public class OpenMrsServer implements Server {
             "/location",
             requestBody,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     successListener.onResponse(parseLocationJson(response));
                 }
             },
@@ -475,8 +453,7 @@ public class OpenMrsServer implements Server {
         return mGson.fromJson(object.toString(), JsonLocation.class);
     }
 
-    @Override
-    public void updateLocation(JsonLocation location,
+    @Override public void updateLocation(JsonLocation location,
                                final Response.Listener<JsonLocation> successListener,
                                final Response.ErrorListener errorListener) {
 
@@ -501,8 +478,7 @@ public class OpenMrsServer implements Server {
             "/location/" + location.uuid,
             requestBody,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     successListener.onResponse(parseLocationJson(response));
                 }
             },
@@ -512,8 +488,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void deleteLocation(String locationUuid,
+    @Override public void deleteLocation(String locationUuid,
                                final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
@@ -526,8 +501,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void listLocations(final Response.Listener<List<JsonLocation>> successListener,
+    @Override public void listLocations(final Response.Listener<List<JsonLocation>> successListener,
                               Response.ErrorListener errorListener) {
 
 
@@ -535,8 +509,7 @@ public class OpenMrsServer implements Server {
             mConnectionDetails, "/location",
             null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     ArrayList<JsonLocation> result = new ArrayList<>();
                     try {
                         JSONArray results = response.getJSONArray("results");
@@ -557,15 +530,13 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void listOrders(final Response.Listener<List<JsonOrder>> successListener,
+    @Override public void listOrders(final Response.Listener<List<JsonOrder>> successListener,
                            Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails, "/order",
             null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     ArrayList<JsonOrder> orders = new ArrayList<>();
                     try {
                         JSONArray results = response.getJSONArray("results");
@@ -585,16 +556,14 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void listForms(final Response.Listener<List<JsonForm>> successListener,
+    @Override public void listForms(final Response.Listener<List<JsonForm>> successListener,
                           Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
             "/xform",
             null,
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     ArrayList<JsonForm> forms = new ArrayList<>();
                     try {
                         JSONArray results = response.getJSONArray("results");
@@ -614,8 +583,7 @@ public class OpenMrsServer implements Server {
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
-    @Override
-    public void cancelPendingRequests() {
+    @Override public void cancelPendingRequests() {
         // TODO: Implement or deprecate. The way this was implemented before, where a string
         // was the tag, is not safe. Only the class that initiated a request (and its delegates)
         // should be able to cancel that request.

@@ -123,19 +123,16 @@ public class SyncAccountService extends Service {
         ContentResolver.requestSync(getAccount(), Contracts.CONTENT_AUTHORITY, b);
     }
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         LOG.i("Service created");
         mAuthenticator = new Authenticator(this);
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         LOG.i("Service destroyed");
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
+    @Override public IBinder onBind(Intent intent) {
         return mAuthenticator.getIBinder();
     }
 

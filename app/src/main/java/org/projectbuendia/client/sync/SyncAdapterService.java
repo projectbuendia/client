@@ -20,14 +20,12 @@ public class SyncAdapterService extends Service {
 
     private SyncAdapter mSyncAdapter = null;
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         super.onCreate();
         mSyncAdapter = new SyncAdapter(getApplicationContext(), true);
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
+    @Override public IBinder onBind(Intent intent) {
         return mSyncAdapter.getSyncAdapterBinder();
     }
 }

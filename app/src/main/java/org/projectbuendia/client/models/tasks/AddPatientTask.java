@@ -71,8 +71,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         mBus = bus;
     }
 
-    @Override
-    protected PatientAddFailedEvent doInBackground(Void... params) {
+    @Override protected PatientAddFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> future = RequestFuture.newFuture();
 
         mServer.addPatient(mPatientDelta, future, future);
@@ -129,8 +128,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             + fieldName);
     }
 
-    @Override
-    protected void onPostExecute(PatientAddFailedEvent event) {
+    @Override protected void onPostExecute(PatientAddFailedEvent event) {
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);

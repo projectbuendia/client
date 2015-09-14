@@ -29,8 +29,7 @@ import static org.hamcrest.Matchers.is;
 
 /** Tests the loading of the encounter xform from the patient chart activity. */
 public class PatientChartActivityXformSyncTest extends SyncTestCase {
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
 
         click(viewWithText("Guest User"));

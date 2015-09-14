@@ -78,8 +78,7 @@ public enum ResStatus implements Resolvable<ResStatus.Resolved> {
     public final int foregroundColorId;
     public final int shortDescriptionId;
 
-    @Override
-    public Resolved resolve(Resources resources) {
+    @Override public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResStatus.Resolved.class);
     }
 

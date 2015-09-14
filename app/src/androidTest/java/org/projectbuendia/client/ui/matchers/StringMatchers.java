@@ -25,13 +25,11 @@ public class StringMatchers {
      */
     public static Matcher<String> matchesRegex(final String regex) {
         return new TypeSafeMatcher<String>() {
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("matches regex: " + regex);
             }
 
-            @Override
-            public boolean matchesSafely(String specimen) {
+            @Override public boolean matchesSafely(String specimen) {
                 return Pattern.matches(regex, specimen);
             }
         };

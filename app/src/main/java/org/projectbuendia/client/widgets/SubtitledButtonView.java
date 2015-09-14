@@ -122,8 +122,7 @@ public class SubtitledButtonView extends LinearLayout {
         return this;
     }
 
-    @Override
-    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    @Override public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (!mIsSquare) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;

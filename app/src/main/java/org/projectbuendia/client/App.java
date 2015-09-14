@@ -56,8 +56,7 @@ public class App extends Application {
         return sConnectionDetails;
     }
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
 

@@ -239,8 +239,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         final int phaseId = mCurrentPhaseId;
 
         Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 // This runnable triggers itself in a cycle, each run calling postDelayed()
                 // to schedule the next run.  Each such cycle belongs to a phase, identified
                 // by phaseId; once the current phase is exited the cycle stops.  Thus, when the
@@ -415,8 +414,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
             new AssignGeneralConditionDialog.ConditionSelectedCallback() {
 
-                @Override
-                public boolean onNewConditionSelected(String newConditionUuid) {
+                @Override public boolean onNewConditionSelected(String newConditionUuid) {
                     setCondition(newConditionUuid);
                     Utils.logUserAction("condition_assigned");
                     return false;
@@ -448,8 +446,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         AssignLocationDialog.LocationSelectedCallback callback =
             new AssignLocationDialog.LocationSelectedCallback() {
-                @Override
-                public boolean onLocationSelected(String locationUuid) {
+                @Override public boolean onLocationSelected(String locationUuid) {
                     PatientDelta delta = new PatientDelta();
                     delta.assignedLocationUuid = Optional.of(locationUuid);
                     mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
@@ -459,8 +456,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             };
 
         Runnable onDismiss = new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 mAssignLocationDialog = null;
             }
         };
@@ -622,8 +618,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             // should change this to use a background thread. Either an async task or using
             // CrudEventBus events.
             mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
+                @Override public void run() {
                     updatePatientObsUi();
                 }
             });
@@ -636,8 +631,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         public void onEventMainThread(SubmitXformSucceededEvent event) {
             mMainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
+                @Override public void run() {
                     updatePatientObsUi();
                     mUi.showFormSubmissionDialog(false);
                 }

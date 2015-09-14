@@ -52,13 +52,11 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
         + " WHERE location_names.locale = ?"
         + " GROUP BY locations.location_uuid";
 
-    @Override
-    public String getType() {
+    @Override public String getType() {
         return Contracts.LocalizedLocations.GROUP_CONTENT_TYPE;
     }
 
-    @Override
-    public Cursor query(
+    @Override public Cursor query(
         Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
         String selection, String[] selectionArgs, String sortOrder) {
         // URI expected to be of form ../localized-locations/{locale}.
@@ -71,30 +69,26 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
         return dbHelper.getReadableDatabase().rawQuery(QUERY, new String[] {locale});
     }
 
-    @Override
-    public Uri insert(
+    @Override public Uri insert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int bulkInsert(
+    @Override public int bulkInsert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues[] values) {
         throw new UnsupportedOperationException(
             "Bulk insert is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int delete(
+    @Override public int delete(
         Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
         String[] selectionArgs) {
         throw new UnsupportedOperationException("Delete is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int update(
+    @Override public int update(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("Update is not supported for URI '" + uri + "'.");

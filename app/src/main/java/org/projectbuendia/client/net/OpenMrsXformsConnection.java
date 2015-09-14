@@ -56,8 +56,7 @@ public class OpenMrsXformsConnection {
             "/xform/" + uuid + "?v=full",
             null, // null implies GET
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     try {
                         String xml = response.getString("xml");
                         resultListener.onResponse(xml);
@@ -85,8 +84,7 @@ public class OpenMrsXformsConnection {
         Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xform", // list all forms
             null, // null implies GET
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     LOG.i("got forms: " + response);
                     ArrayList<OpenMrsXformIndexEntry> result = new ArrayList<>();
                     try {
@@ -166,8 +164,7 @@ public class OpenMrsXformsConnection {
             mConnectionDetails, "/xforminstance",
             postBody, // non-null implies POST
             new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
+                @Override public void onResponse(JSONObject response) {
                     resultListener.onResponse(response);
                 }
             }, errorListener

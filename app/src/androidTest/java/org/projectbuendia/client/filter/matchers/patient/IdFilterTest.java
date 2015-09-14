@@ -19,8 +19,7 @@ import org.projectbuendia.client.models.Patient;
 public class IdFilterTest extends InstrumentationTestCase {
     private IdFilter mIdFilter;
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
         mIdFilter = new IdFilter();
     }

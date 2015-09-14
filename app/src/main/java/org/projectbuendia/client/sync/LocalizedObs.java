@@ -77,8 +77,7 @@ public final class LocalizedObs {
         this.localizedValue = localizedValue;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "id=" + id
             + ",time=" + encounterTime
             + ",group=" + groupName
@@ -88,8 +87,7 @@ public final class LocalizedObs {
             + ",value=" + localizedValue;
     }
 
-    @Override
-    public boolean equals(Object other) {
+    @Override public boolean equals(Object other) {
         if (other instanceof LocalizedObs) {
             LocalizedObs o = (LocalizedObs) other;
             return Objects.equals(encounterTime, o.encounterTime)

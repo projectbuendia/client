@@ -30,18 +30,15 @@ public class FakeSyncManager extends SyncManager {
         mSyncing = syncing;
     }
 
-    @Override
-    public boolean isSyncPending() {
+    @Override public boolean isSyncPending() {
         return false;
     }
 
-    @Override
-    public boolean isSyncActive() {
+    @Override public boolean isSyncActive() {
         return mSyncing;
     }
 
-    @Override
-    public void startFullSync() {
+    @Override public void startFullSync() {
         mSyncing = true;
     }
 }

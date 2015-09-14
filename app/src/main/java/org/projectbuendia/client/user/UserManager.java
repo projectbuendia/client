@@ -268,8 +268,7 @@ public class UserManager {
      * <p>Forces a network sync if the database has not been downloaded yet.
      */
     private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<JsonUser>> {
-        @Override
-        protected Set<JsonUser> doInBackground(Object... unusedObjects) {
+        @Override protected Set<JsonUser> doInBackground(Object... unusedObjects) {
             if (mAutoCancelEnabled) {
                 cancel(true);
                 return null;
@@ -286,15 +285,13 @@ public class UserManager {
             }
         }
 
-        @Override
-        protected void onCancelled() {
+        @Override protected void onCancelled() {
             LOG.w("Load users task cancelled");
             mEventBus.post(
                 new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_CANCELLED));
         }
 
-        @Override
-        protected void onPostExecute(Set<JsonUser> knownUsers) {
+        @Override protected void onPostExecute(Set<JsonUser> knownUsers) {
             mKnownUsers.clear();
             if (knownUsers != null) {
                 mKnownUsers.addAll(knownUsers);
@@ -313,8 +310,7 @@ public class UserManager {
     /** Syncs the user list with the server. */
     private final class SyncKnownUsersTask extends AsyncTask<Void, Void, Set<JsonUser>> {
 
-        @Override
-        protected Set<JsonUser> doInBackground(Void... voids) {
+        @Override protected Set<JsonUser> doInBackground(Void... voids) {
             try {
                 return mUserStore.syncKnownUsers();
             } catch (Exception e) {
@@ -324,8 +320,7 @@ public class UserManager {
             }
         }
 
-        @Override
-        protected void onPostExecute(Set<JsonUser> syncedUsers) {
+        @Override protected void onPostExecute(Set<JsonUser> syncedUsers) {
             if (syncedUsers == null) {
                 mEventBus.post(
                     new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
@@ -352,8 +347,7 @@ public class UserManager {
             mUser = checkNotNull(user);
         }
 
-        @Override
-        protected JsonUser doInBackground(Void... voids) {
+        @Override protected JsonUser doInBackground(Void... voids) {
             try {
                 return mUserStore.addUser(mUser);
             } catch (VolleyError e) {
@@ -368,8 +362,7 @@ public class UserManager {
             }
         }
 
-        @Override
-        protected void onPostExecute(JsonUser addedUser) {
+        @Override protected void onPostExecute(JsonUser addedUser) {
             if (addedUser != null) {
                 mKnownUsers.add(addedUser);
                 mEventBus.post(new UserAddedEvent(addedUser));
@@ -396,8 +389,7 @@ public class UserManager {
             mUser = checkNotNull(user);
         }
 
-        @Override
-        protected Boolean doInBackground(Void... voids) {
+        @Override protected Boolean doInBackground(Void... voids) {
             try {
                 mUserStore.deleteUser(mUser);
             } catch (Exception e) {
@@ -408,8 +400,7 @@ public class UserManager {
             return true;
         }
 
-        @Override
-        protected void onPostExecute(Boolean success) {
+        @Override protected void onPostExecute(Boolean success) {
             if (success) {
                 mKnownUsers.remove(mUser);
                 mEventBus.post(new UserDeletedEvent(mUser));

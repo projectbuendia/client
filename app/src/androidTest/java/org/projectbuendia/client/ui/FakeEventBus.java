@@ -44,8 +44,7 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
     private final Set<Object> mRegisteredReceivers = new HashSet<>();
     private final List<Object> mEventLog = Lists.newArrayList();
 
-    @Override
-    public void register(Object receiver) {
+    @Override public void register(Object receiver) {
         for (Method method : receiver.getClass().getMethods()) {
             // We only support a subset of the event bus functionality, so we check methods on the
             // receiver match a whitelist of supported methods. This should ensure the tests fail
@@ -64,8 +63,7 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
         mRegisteredReceivers.add(receiver);
     }
 
-    @Override
-    public void unregister(Object receiver) {
+    @Override public void unregister(Object receiver) {
         mRegisteredReceivers.remove(receiver);
     }
 
@@ -87,8 +85,7 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
         return ImmutableList.copyOf(mEventLog);
     }
 
-    @Override
-    public void post(Object event) {
+    @Override public void post(Object event) {
         mEventLog.add(event);
         // Clone the receivers set so receivers can unregister themselves after responding to an
         // event.
@@ -111,11 +108,9 @@ public final class FakeEventBus implements EventBusInterface, CrudEventBus {
         }
     }
 
-    @Override
-    public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
+    @Override public void registerCleanupSubscriber(CleanupSubscriber subscriber) {
     }
 
-    @Override
-    public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {
+    @Override public void unregisterCleanupSubscriber(CleanupSubscriber subscriber) {
     }
 }

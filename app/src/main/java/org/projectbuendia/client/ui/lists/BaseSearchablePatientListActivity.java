@@ -66,8 +66,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         return mSearchController;
     }
 
-    @Override
-    public void onExtendOptionsMenu(Menu menu) {
+    @Override public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 
         MenuInflater inflater = getMenuInflater();
@@ -76,8 +75,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         menu.findItem(R.id.action_add).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
+                @Override public boolean onMenuItemClick(MenuItem menuItem) {
                     Utils.logEvent("add_patient_pressed");
                     NewPatientActivity.start(BaseSearchablePatientListActivity.this);
                     return true;
@@ -87,8 +85,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
+                @Override public boolean onMenuItemClick(MenuItem menuItem) {
                     Utils.logUserAction("go_to_patient_pressed");
                     GoToPatientDialogFragment.newInstance()
                         .show(getSupportFragmentManager(), null);
@@ -126,24 +123,21 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
+            @Override public boolean onQueryTextSubmit(String query) {
                 InputMethodManager mgr = (InputMethodManager) getSystemService(
                     Context.INPUT_METHOD_SERVICE);
                 mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
                 return true;
             }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
+            @Override public boolean onQueryTextChange(String newText) {
                 mSearchController.onQuerySubmitted(newText);
                 return true;
             }
         });
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
@@ -162,15 +156,13 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         ButterKnife.inject(this);
     }
 
-    @Override
-    protected void onResumeImpl() {
+    @Override protected void onResumeImpl() {
         super.onResumeImpl();
         mSearchController.init();
         mSearchController.loadSearchResults();
     }
 
-    @Override
-    protected void onPauseImpl() {
+    @Override protected void onPauseImpl() {
         super.onPauseImpl();
         mSearchController.suspend();
     }
@@ -180,16 +172,14 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     }
 
     private final class SearchUi implements PatientSearchController.Ui {
-        @Override
-        public void setPatients(TypedCursor<Patient> patients) {
+        @Override public void setPatients(TypedCursor<Patient> patients) {
             // Delegate to implementers.
             BaseSearchablePatientListActivity.this.setPatients(patients);
         }
     }
 
     private class CancelButtonListener implements MenuItem.OnMenuItemClickListener {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
+        @Override public boolean onMenuItemClick(MenuItem item) {
             mEventBus.post(new SyncCancelRequestedEvent());
             return true;
         }

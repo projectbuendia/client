@@ -90,8 +90,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         caller.startActivity(new Intent(caller, NewPatientActivity.class));
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             showAlertDialog();
             return true;
@@ -100,8 +99,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         }
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
@@ -115,8 +113,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             .setPositiveButton(R.string.yes,
                 new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int i) {
+                    @Override public void onClick(DialogInterface dialog, int i) {
                         finish();
                     }
                 })
@@ -212,8 +209,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         mLocationText.setTextColor(zone.getForegroundColor());
     }
 
-    @Override
-    protected void onStartImpl() {
+    @Override protected void onStartImpl() {
         super.onStartImpl();
         mController.init();
         setUiEnabled(true);  // UI may have been disabled previously.
@@ -260,8 +256,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         return (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 
-    @Override
-    protected void onStopImpl() {
+    @Override protected void onStopImpl() {
         mController.suspend();
         super.onStopImpl();
     }
@@ -277,8 +272,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         final View button = findViewById(R.id.patient_creation_button_change_location);
         button.setEnabled(false);
         Runnable reEnableButton = new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 button.setEnabled(true);
             }
         };
@@ -379,14 +373,12 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
 
     private final class Ui implements NewPatientController.Ui {
 
-        @Override
-        public void setLocationTree(LocationTree locationTree) {
+        @Override public void setLocationTree(LocationTree locationTree) {
             mLocationTree = locationTree;
             updateLocationUi();
         }
 
-        @Override
-        public void showValidationError(int field, int messageResource, String... messageArgs) {
+        @Override public void showValidationError(int field, int messageResource, String... messageArgs) {
             String message = getString(messageResource, (Object[]) messageArgs);
             switch (field) {
                 case NewPatientController.Ui.FIELD_ID:
@@ -426,8 +418,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             }
         }
 
-        @Override
-        public void clearValidationErrors() {
+        @Override public void clearValidationErrors() {
             mId.setError(null);
             mGivenName.setError(null);
             mFamilyName.setError(null);
@@ -440,21 +431,18 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             // for the above fields, they should be cleared as well.
         }
 
-        @Override
-        public void showErrorMessage(int errorResource) {
+        @Override public void showErrorMessage(int errorResource) {
             showErrorMessage(getString(errorResource));
         }
 
-        @Override
-        public void showErrorMessage(String errorString) {
+        @Override public void showErrorMessage(String errorString) {
             mIsCreatePending = false;
             setUiEnabled(true);
             BigToast.show(
                 NewPatientActivity.this, R.string.patient_creation_error, errorString);
         }
 
-        @Override
-        public void finishAndGoToPatientChart(String patientUuid) {
+        @Override public void finishAndGoToPatientChart(String patientUuid) {
             mIsCreatePending = false;
             BigToast.show(NewPatientActivity.this, R.string.patient_creation_success);
             finish();
@@ -471,8 +459,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             mLocalDate = defaultDate;
         }
 
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        @Override public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             LocalDate date = new LocalDate()
                 .withYear(year)
                 .withMonthOfYear(monthOfYear + 1)

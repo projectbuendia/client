@@ -55,21 +55,18 @@ public class OrderDialogFragment extends DialogFragment {
         return f;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @Override
-    public void onResume() {
+    @Override public void onResume() {
         super.onResume();
         // Replace the existing button listener so we can control whether the dialog is dismissed.
         final AlertDialog dialog = (AlertDialog) getDialog();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
             new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+                @Override public void onClick(View view) {
                     onSubmit(dialog);
                 }
             }
@@ -125,8 +122,7 @@ public class OrderDialogFragment extends DialogFragment {
         field.requestFocus();
     }
 
-    @Override
-    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
         View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
         ButterKnife.inject(this, fragment);
         mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
@@ -144,16 +140,13 @@ public class OrderDialogFragment extends DialogFragment {
     }
 
     class DurationDaysWatcher implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence c, int x, int y, int z) {
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {
         }
 
-        @Override
-        public void onTextChanged(CharSequence c, int x, int y, int z) {
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {
         }
 
-        @Override
-        public void afterTextChanged(Editable editable) {
+        @Override public void afterTextChanged(Editable editable) {
             String text = mGiveForDays.getText().toString().trim();
             int days = text.isEmpty() ? 0 : Integer.parseInt(text);
             LocalDate lastDay = LocalDate.now().plusDays(days - 1);

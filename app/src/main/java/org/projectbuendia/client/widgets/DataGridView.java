@@ -38,8 +38,7 @@ public class DataGridView {
     private static final OnInternalScrollListener DO_NOTHING_LISTENER =
         new OnInternalScrollListener() {
 
-            @Override
-            public void onInternalScrollBy(int dx, int dy) {
+            @Override public void onInternalScrollBy(int dx, int dy) {
             }
         };
     private final Context mContext;
@@ -87,8 +86,7 @@ public class DataGridView {
             mDataGridAdapter, mLayoutInflater));
         rowHeaders.setLayoutManager(rowHeaderLayoutManager);
         rowHeaders.setInternalScrollListener(new OnInternalScrollListener() {
-            @Override
-            public void onInternalScrollBy(int dx, int dy) {
+            @Override public void onInternalScrollBy(int dx, int dy) {
                 verticalScrollview.scrollBy(0, dy);
                 logScrollActions(0, dy);
             }
@@ -101,8 +99,7 @@ public class DataGridView {
         columnHeaders.setAdapter(new ColumnHeaderAdapter(mDataGridAdapter, mLayoutInflater));
         columnHeaders.setLayoutManager(columnHeaderLayoutManager);
         columnHeaders.setInternalScrollListener(new OnInternalScrollListener() {
-            @Override
-            public void onInternalScrollBy(int dx, int dy) {
+            @Override public void onInternalScrollBy(int dx, int dy) {
                 cells.scrollBy(dx, 0);
                 logScrollActions(dx, 0);
             }
@@ -118,15 +115,13 @@ public class DataGridView {
         cells.setLayoutManager(layoutManager);
         cells.setAdapter(cellAdapter);
         cells.setInternalScrollListener(new OnInternalScrollListener() {
-            @Override
-            public void onInternalScrollBy(int dx, int dy) {
+            @Override public void onInternalScrollBy(int dx, int dy) {
                 columnHeaders.scrollBy(dx, 0);
                 logScrollActions(dx, 0);
             }
         });
         verticalScrollview.setInternalScrollListener(new OnInternalScrollListener() {
-            @Override
-            public void onInternalScrollBy(int dx, int dy) {
+            @Override public void onInternalScrollBy(int dx, int dy) {
                 rowHeaders.scrollBy(0, dy);
                 logScrollActions(0, dy);
             }
@@ -167,14 +162,12 @@ public class DataGridView {
             mInternalScrollListener = Preconditions.checkNotNull(l);
         }
 
-        @Override
-        public void scrollBy(int x, int y) {
+        @Override public void scrollBy(int x, int y) {
             mExternallyScrolled = true;
             super.scrollBy(x, y);
         }
 
-        @Override
-        protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        @Override protected void onScrollChanged(int l, int t, int oldl, int oldt) {
             super.onScrollChanged(l, t, oldl, oldt);
             // Due to overscrolling, some onScrollChanged events might be sent twice. Hence we
             // cannot rely on the diff "l - oldl" and instead do the tracking ourselves.
@@ -205,8 +198,7 @@ public class DataGridView {
             super(context, attrs);
             setOnScrollListener(new OnScrollListener() {
 
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                @Override public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
                     if (!mExternallyScrolled) {
                         mInternalScrollListener.onInternalScrollBy(dx, dy);
@@ -217,8 +209,7 @@ public class DataGridView {
             });
         }
 
-        @Override
-        public void scrollBy(int x, int y) {
+        @Override public void scrollBy(int x, int y) {
             mExternallyScrolled = true;
             super.scrollBy(x, y);
         }
@@ -273,16 +264,14 @@ public class DataGridView {
             this.mLayoutInflater = checkNotNull(layoutInflater);
         }
 
-        @Override
-        public int getItemViewType(int position) {
+        @Override public int getItemViewType(int position) {
             // Setting row backgrounds is expensive, so only reuse item views with the right
             // background color.
             int rowIndex = position%mDataGridAdapter.getRowCount();
             return rowIndex%2;
         }
 
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mLayoutInflater.inflate(
                 R.layout.data_grid_cell_chart_text, parent, false /* attachToRoot */);
             ViewStub viewStub = (ViewStub) view.findViewById(R.id.data_grid_cell_chart_viewstub);
@@ -290,8 +279,7 @@ public class DataGridView {
             return new CellViewHolder(view, viewStub);
         }
 
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             int columnIndex = position/mDataGridAdapter.getRowCount();
             int rowIndex = position%mDataGridAdapter.getRowCount();
             CellViewHolder viewHolder = (CellViewHolder) holder;
@@ -308,8 +296,7 @@ public class DataGridView {
             }
         }
 
-        @Override
-        public int getItemCount() {
+        @Override public int getItemCount() {
             return mDataGridAdapter.getColumnCount()*mDataGridAdapter.getRowCount();
         }
     }
@@ -323,15 +310,13 @@ public class DataGridView {
             this.mLayoutInflater = checkNotNull(layoutInflater);
         }
 
-        @Override
-        public int getItemViewType(int position) {
+        @Override public int getItemViewType(int position) {
             // Setting row backgrounds is expensive, so only reuse item views with the right
             // background color.
             return position%2;
         }
 
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mLayoutInflater.inflate(
                 R.layout.data_grid_row_header_chart, parent, false /* attachToRoot */);
             TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
@@ -339,15 +324,13 @@ public class DataGridView {
             return new ViewHolder(view, textView);
         }
 
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             int rowIndex = position;
             mDataGridAdapter.fillRowHeader(
                 rowIndex, holder.itemView, ((ViewHolder) holder).textView);
         }
 
-        @Override
-        public int getItemCount() {
+        @Override public int getItemCount() {
             return mDataGridAdapter.getRowCount();
         }
     }
@@ -361,23 +344,20 @@ public class DataGridView {
             this.mLayoutInflater = (layoutInflater);
         }
 
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = mLayoutInflater.inflate(
                 R.layout.data_grid_column_header_chart, parent, false /* attachToRoot */);
             TextView textView = (TextView) view.findViewById(R.id.data_grid_header_text);
             return new ViewHolder(view, textView);
         }
 
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             mDataGridAdapter.fillColumnHeader(
                 (mDataGridAdapter.getColumnCount() - (position*2) - 2),
                 ((ViewHolder) holder).textView);
         }
 
-        @Override
-        public int getItemCount() {
+        @Override public int getItemCount() {
             return mDataGridAdapter.getColumnCount()/2;
         }
     }

@@ -18,8 +18,7 @@ import org.projectbuendia.client.models.Patient;
 
 /** Matches based on user-specified patient id. */
 public final class IdFilter implements MatchingFilter<Patient> {
-    @Override
-    public boolean matches(@Nullable Patient object, CharSequence constraint) {
+    @Override public boolean matches(@Nullable Patient object, CharSequence constraint) {
         if (object == null || object.id == null) {
             return false;
         }

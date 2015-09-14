@@ -202,8 +202,7 @@ public class AppModel {
             mBus = bus;
         }
 
-        @Override
-        @SuppressWarnings("unused") // Called by reflection from event bus.
+        @Override @SuppressWarnings("unused") // Called by reflection from event bus.
         public void onEvent(NoSubscriberEvent event) {
             if (event.originalEvent instanceof TypedCursorFetchedEvent<?>) {
                 // If no subscribers were registered for a DataFetchedEvent, then the TypedCursor in
@@ -216,8 +215,7 @@ public class AppModel {
             mBus.unregisterCleanupSubscriber(this);
         }
 
-        @Override
-        public void onAllUnregistered() {
+        @Override public void onAllUnregistered() {
             mBus.unregisterCleanupSubscriber(this);
         }
     }
@@ -240,8 +238,7 @@ public class AppModel {
             mBus = bus;
         }
 
-        @Override
-        protected LocationTree doInBackground(Void... voids) {
+        @Override protected LocationTree doInBackground(Void... voids) {
             Cursor cursor = null;
             try {
                 // TODO: Ensure this cursor is closed.
@@ -263,8 +260,7 @@ public class AppModel {
             }
         }
 
-        @Override
-        protected void onPostExecute(LocationTree result) {
+        @Override protected void onPostExecute(LocationTree result) {
             mBus.post(new AppLocationTreeFetchedEvent(result));
         }
     }
@@ -300,8 +296,7 @@ public class AppModel {
             mBus = bus;
         }
 
-        @Override
-        protected TypedCursor<T> doInBackground(Void... voids) {
+        @Override protected TypedCursor<T> doInBackground(Void... voids) {
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(
@@ -321,8 +316,7 @@ public class AppModel {
             }
         }
 
-        @Override
-        protected void onPostExecute(TypedCursor<T> result) {
+        @Override protected void onPostExecute(TypedCursor<T> result) {
             mBus.post(TypedCursorFetchedEventFactory.createEvent(mClazz, result));
         }
     }

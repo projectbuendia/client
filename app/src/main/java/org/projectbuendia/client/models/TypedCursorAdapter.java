@@ -27,8 +27,7 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
         mTypedCursor = typedCursor;
     }
 
-    @Override
-    public int getCount() {
+    @Override public int getCount() {
         return mTypedCursor == null ? 0 : mTypedCursor.getCount();
     }
 
@@ -38,8 +37,7 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
      * <p>The ID of an item will be the value of its {@link Base#id} field if its ID is a
      * byte, short, int, or long; otherwise, it will be the hash of that value.
      */
-    @Override
-    public long getItemId(int position) {
+    @Override public long getItemId(int position) {
         if (mTypedCursor == null) {
             return 0;
         }
@@ -62,13 +60,11 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
         }
     }
 
-    @Override
-    public boolean hasStableIds() {
+    @Override public boolean hasStableIds() {
         return true;
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    @Override public View getView(int position, View convertView, ViewGroup parent) {
         if (mTypedCursor == null) {
             throw new IllegalStateException(
                 "Cannot get a view when no backing lazy array has been set.");
@@ -89,8 +85,7 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
 
     // TODO: Provide a mechanism to filter, similar to Cursor.
 
-    @Override
-    public T getItem(int position) {
+    @Override public T getItem(int position) {
         return mTypedCursor == null ? null : mTypedCursor.get(position);
     }
 

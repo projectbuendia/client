@@ -28,18 +28,15 @@ public class PresentFilter extends SimpleSelectionFilter<Patient> {
     private static final String SELECTION_STRING = Contracts.Patients.LOCATION_UUID + "!=?";
     private static final String[] SELECTION_ARGS = new String[] {Zones.DISCHARGED_ZONE_UUID};
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return SELECTION_STRING;
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         return SELECTION_ARGS;
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return App.getInstance().getString(R.string.present_filter_description);
     }
 }

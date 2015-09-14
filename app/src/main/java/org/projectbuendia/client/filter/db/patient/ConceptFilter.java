@@ -65,18 +65,15 @@ public final class ConceptFilter extends SimpleSelectionFilter<Patient> {
         mConceptValueUuid = conceptValueUuid;
     }
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return CONCEPT_SUBQUERY;
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         return new String[] {mConceptUuid, mConceptValueUuid};
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return mDescription;
     }
 }

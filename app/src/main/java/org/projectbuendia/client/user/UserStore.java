@@ -143,15 +143,13 @@ public class UserStore {
         App.getServer().addUser(
             user,
             new Response.Listener<JsonUser>() {
-                @Override
-                public void onResponse(JsonUser response) {
+                @Override public void onResponse(JsonUser response) {
                     result.user = response;
                     latch.countDown();
                 }
             },
             new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
+                @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "Unexpected error adding user");
                     result.error = error;
                     latch.countDown();

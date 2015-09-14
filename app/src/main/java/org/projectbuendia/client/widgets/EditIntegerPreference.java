@@ -45,13 +45,11 @@ public class EditIntegerPreference extends EditTextPreference {
         init();
     }
 
-    @Override
-    public String getText() {
+    @Override public String getText() {
         return mInteger != null ? mInteger.toString() : null;
     }
 
-    @Override
-    public void setText(String text) {
+    @Override public void setText(String text) {
         boolean wasBlocking = shouldDisableDependents();
         mInteger = parseIntOrNull(text);
         if (mInteger == null) {
@@ -67,8 +65,7 @@ public class EditIntegerPreference extends EditTextPreference {
         }
     }
 
-    @Override
-    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
+    @Override protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         Integer newValue;
         if (restoreValue) {
             if (!shouldPersist()) {

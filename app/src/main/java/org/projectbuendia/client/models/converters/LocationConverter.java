@@ -19,8 +19,7 @@ import org.projectbuendia.client.sync.providers.Contracts;
 /** An {@link Converter} that converts {@link Location}s. */
 public class LocationConverter implements Converter<Location> {
 
-    @Override
-    public Location fromCursor(Cursor cursor) {
+    @Override public Location fromCursor(Cursor cursor) {
         return new Location(
             cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.LOCATION_UUID)),
             cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.PARENT_UUID)),

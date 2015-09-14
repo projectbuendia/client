@@ -53,8 +53,7 @@ public class Utils {
      * sort according to numeric value; strings sort according to string value.
      */
     public static Comparator<Object> nullIntStrComparator = new Comparator<Object>() {
-        @Override
-        public int compare(Object a, Object b) {
+        @Override public int compare(Object a, Object b) {
             BigInteger intA = toBigInteger(a);
             BigInteger intB = toBigInteger(b);
             if (intA != null && intB != null) {
@@ -73,8 +72,7 @@ public class Utils {
      */
     public static Comparator<List<Object>> nullIntStrListComparator =
         new Comparator<List<Object>>() {
-            @Override
-            public int compare(List<Object> a, List<Object> b) {
+            @Override public int compare(List<Object> a, List<Object> b) {
                 for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
                     int result = nullIntStrComparator.compare(a.get(i), b.get(i));
                     if (result != 0) {
@@ -104,8 +102,7 @@ public class Utils {
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
      */
     public static Comparator<String> alphanumericComparator = new Comparator<String>() {
-        @Override
-        public int compare(String a, String b) {
+        @Override public int compare(String a, String b) {
             String aNormalized = Normalizer.normalize(a == null ? "" : a, Normalizer.Form.NFC);
             String bNormalized = Normalizer.normalize(b == null ? "" : b, Normalizer.Form.NFC);
             List<Object> aParts = getParts(aNormalized);

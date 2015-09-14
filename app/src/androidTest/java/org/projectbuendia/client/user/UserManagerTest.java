@@ -67,8 +67,7 @@ public final class UserManagerTest extends InstrumentationTestCase {
             new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 

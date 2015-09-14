@@ -25,8 +25,7 @@ public class UserMatchers {
         }
 
         /** Matches any user with the specified full name. */
-        @Override
-        public boolean matches(Object user) {
+        @Override public boolean matches(Object user) {
             if (!(user instanceof JsonUser)) {
                 return false;
             }

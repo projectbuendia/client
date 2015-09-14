@@ -28,42 +28,36 @@ public class PebbleExtension extends AbstractExtension {
         "get_order_execution_count", new GetOrderExecutionCountFunction(),
         "intervals_overlap", new IntervalsOverlapFunction());
 
-    @Override
-    public Map<String, Filter> getFilters() {
+    @Override public Map<String, Filter> getFilters() {
         return filters;
     }
 
-    @Override
-    public Map<String, Function> getFunctions() {
+    @Override public Map<String, Function> getFunctions() {
         return functions;
     }
 
     abstract static class NullaryFilter implements Filter {
-        @Override
-        public List<String> getArgumentNames() {
+        @Override public List<String> getArgumentNames() {
             return null;
         }
     }
 
     static class MinFilter extends NullaryFilter {
-        @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        @Override public Object apply(Object input, Map<String, Object> args) {
             Collection<Comparable> values = (Collection<Comparable>) input;
             return values == null || values.isEmpty() ? null : Collections.min(values);
         }
     }
 
     static class MaxFilter extends NullaryFilter {
-        @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        @Override public Object apply(Object input, Map<String, Object> args) {
             Collection<Comparable> values = (Collection<Comparable>) input;
             return values == null || values.isEmpty() ? null : Collections.max(values);
         }
     }
 
     static class AvgFilter extends NullaryFilter {
-        @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        @Override public Object apply(Object input, Map<String, Object> args) {
             Collection<Value> values = (Collection<Value>) input;
             if (values == null || values.isEmpty()) return null;
             double sum = 0;
@@ -80,8 +74,7 @@ public class PebbleExtension extends AbstractExtension {
 
     /** Converts a Java null, boolean, integer, double, string, or DateTime to a JavaScript expression. */
     static class JsFilter extends NullaryFilter {
-        @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        @Override public Object apply(Object input, Map<String, Object> args) {
             if (input instanceof Boolean) {
                 return ((Boolean) input) ? "true" : "false";
             } else if (input instanceof Integer || input instanceof Double) {
@@ -97,26 +90,22 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     static class DateFormatFilter implements Filter {
-        @Override
-        public List<String> getArgumentNames() {
+        @Override public List<String> getArgumentNames() {
             return ImmutableList.of("pattern");
         }
 
-        @Override
-        public Object apply(Object input, Map<String, Object> args) {
+        @Override public Object apply(Object input, Map<String, Object> args) {
             String pattern = (String) args.get("pattern");
             return DateTimeFormat.forPattern(pattern).print((DateTime) input);
         }
     }
 
     static class GetValuesFunction implements Function {
-        @Override
-        public List<String> getArgumentNames() {
+        @Override public List<String> getArgumentNames() {
             return ImmutableList.of("row", "column");
         }
 
-        @Override
-        public Object execute(Map<String, Object> args) {
+        @Override public Object execute(Map<String, Object> args) {
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
             return column.values.get(row.conceptUuid);
@@ -124,13 +113,11 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     static class GetOrderExecutionCountFunction implements Function {
-        @Override
-        public List<String> getArgumentNames() {
+        @Override public List<String> getArgumentNames() {
             return ImmutableList.of("order_uuid", "column");
         }
 
-        @Override
-        public Object execute(Map<String, Object> args) {
+        @Override public Object execute(Map<String, Object> args) {
             String orderUuid = (String) args.get("order_uuid");
             Column column = (Column) args.get("column");
             Integer count = column.orderExecutionCounts.get(orderUuid);
@@ -139,13 +126,11 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     static class IntervalsOverlapFunction implements Function {
-        @Override
-        public List<String> getArgumentNames() {
+        @Override public List<String> getArgumentNames() {
             return ImmutableList.of("a", "b");
         }
 
-        @Override
-        public Object execute(Map<String, Object> args) {
+        @Override public Object execute(Map<String, Object> args) {
             Interval a = (Interval) args.get("a");
             Interval b = (Interval) args.get("b");
             return a.overlaps(b);

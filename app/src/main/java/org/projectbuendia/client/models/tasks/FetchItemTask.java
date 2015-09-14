@@ -56,8 +56,7 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
         mBus = bus;
     }
 
-    @Override
-    protected Object doInBackground(Void... params) {
+    @Override protected Object doInBackground(Void... params) {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
@@ -79,8 +78,7 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
         }
     }
 
-    @Override
-    protected void onPostExecute(Object result) {
+    @Override protected void onPostExecute(Object result) {
         mBus.post(result);
     }
 }

@@ -48,29 +48,25 @@ public final class LocationListFragment extends ProgressFragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_location_selection);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         ButterKnife.inject(this, view);
         return view;
     }
 
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
+    @Override public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         mController = ((LocationListActivity) getActivity()).getController();
         mController.attachFragmentUi(mUi);
     }
 
-    @Override
-    public void onDestroyView() {
+    @Override public void onDestroyView() {
         mController.detachFragmentUi(mUi);
         super.onDestroyView();
     }
@@ -101,48 +97,40 @@ public final class LocationListFragment extends ProgressFragment {
     }
 
     private final class Ui implements LocationListController.LocationFragmentUi {
-        @Override
-        public void setDischargedPatientCount(int patientCount) {
+        @Override public void setDischargedPatientCount(int patientCount) {
             setPatientCount(mDischargedButton, patientCount);
         }
 
-        @Override
-        public void setTriagePatientCount(int patientCount) {
+        @Override public void setTriagePatientCount(int patientCount) {
             setPatientCount(mTriageButton, patientCount);
         }
 
-        @Override
-        public void setPresentPatientCount(int patientCount) {
+        @Override public void setPresentPatientCount(int patientCount) {
             setPatientCount(mAllPatientsButton, patientCount);
         }
 
-        @Override
-        public void setLocations(LocationTree locationTree, List<Location> locations) {
+        @Override public void setLocations(LocationTree locationTree, List<Location> locations) {
             mAdapter = new LocationListAdapter(
                 getActivity(), locations, locationTree, Optional.<String> absent());
             mLocationGrid.setAdapter(mAdapter);
         }
 
-        @Override
-        public void setBusyLoading(boolean busy) {
+        @Override public void setBusyLoading(boolean busy) {
             changeState(busy ? State.LOADING : State.LOADED);
         }
 
-        @Override
-        public void showIncrementalSyncProgress(int progress, @Nullable String label) {
+        @Override public void showIncrementalSyncProgress(int progress, @Nullable String label) {
             incrementProgressBy(progress);
             if (label != null) {
                 setProgressLabel(label);
             }
         }
 
-        @Override
-        public void resetSyncProgress() {
+        @Override public void resetSyncProgress() {
             switchToCircularProgressBar();
         }
 
-        @Override
-        public void showSyncCancelRequested() {
+        @Override public void showSyncCancelRequested() {
             setProgressLabel(getString(R.string.cancelling_sync));
         }
     }

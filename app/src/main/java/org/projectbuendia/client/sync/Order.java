@@ -35,8 +35,7 @@ public final class Order {
         return Utils.toInterval(start, stop);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "<Order uuid=" + uuid
             + ", instructions=" + instructions
             + ", start=" + start
@@ -44,8 +43,7 @@ public final class Order {
             + ">";
     }
 
-    @Override
-    public boolean equals(Object other) {
+    @Override public boolean equals(Object other) {
         if (!(other instanceof Order)) {
             return false;
         }

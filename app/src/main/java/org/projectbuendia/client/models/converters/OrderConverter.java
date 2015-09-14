@@ -22,8 +22,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class OrderConverter implements Converter<Order> {
 
-    @Override
-    public Order fromCursor(Cursor cursor) {
+    @Override public Order fromCursor(Cursor cursor) {
         return new Order(
             cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
             cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),

@@ -133,8 +133,7 @@ public final class LoginController {
 
     public final class DialogActivityUi implements NewUserDialogFragment.ActivityUi {
 
-        @Override
-        public void showSpinner(boolean show) {
+        @Override public void showSpinner(boolean show) {
             mFragmentUi.showSpinner(show);
         }
     }

@@ -41,8 +41,7 @@ public class GroupedListView extends ExpandableListView {
 
         // Ignore clicks on groups by default.
         setOnGroupClickListener(new OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
+            @Override public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
                 return true;
             }
@@ -50,20 +49,17 @@ public class GroupedListView extends ExpandableListView {
     }
 
     // Everything is expanded all the time.
-    @Override
-    public boolean isGroupExpanded(int groupPosition) {
+    @Override public boolean isGroupExpanded(int groupPosition) {
         return true;
     }
 
     // Expand all groups when an adapter is set or when any data changes (which may involve adding
     // a group).
-    @Override
-    public void setAdapter(final ExpandableListAdapter adapter) {
+    @Override public void setAdapter(final ExpandableListAdapter adapter) {
         super.setAdapter(adapter);
         expandAllGroups(adapter);
         adapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
+            @Override public void onChanged() {
                 expandAllGroups(adapter);
             }
         });

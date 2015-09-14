@@ -67,8 +67,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         mBus = bus;
     }
 
-    @Override
-    protected ItemFetchFailedEvent doInBackground(Void... params) {
+    @Override protected ItemFetchFailedEvent doInBackground(Void... params) {
         RequestFuture<JsonPatient> future = RequestFuture.newFuture();
 
         // Try to download the specified patient from the server.
@@ -116,8 +115,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         return null;
     }
 
-    @Override
-    protected void onPostExecute(ItemFetchFailedEvent event) {
+    @Override protected void onPostExecute(ItemFetchFailedEvent event) {
         // If an error occurred, post the error event.
         if (event != null) {
             mBus.post(event);

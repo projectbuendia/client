@@ -35,8 +35,7 @@ final class UserListAdapter extends ArrayAdapter<JsonUser> {
         mColorizer = colorizer;
     }
 
-    @Override
-    public View getView(int position, View view, ViewGroup parent) {
+    @Override public View getView(int position, View view, ViewGroup parent) {
         ItemViewHolder holder;
         if (view != null) {
             holder = (ItemViewHolder) view.getTag();

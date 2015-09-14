@@ -31,8 +31,7 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
         super(name, table, idColumn);
     }
 
-    @Override
-    public Uri insert(
+    @Override public Uri insert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values) {
         values.put(mIdColumn, uri.getLastPathSegment());

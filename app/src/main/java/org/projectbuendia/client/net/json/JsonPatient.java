@@ -34,8 +34,7 @@ public class JsonPatient implements Serializable {
     public JsonPatient() {
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("uuid", uuid)
             .add("id", id)

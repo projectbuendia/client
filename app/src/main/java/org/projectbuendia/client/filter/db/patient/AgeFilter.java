@@ -26,19 +26,16 @@ final class AgeFilter extends SimpleSelectionFilter<Patient> {
         mYears = years;
     }
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return Contracts.Patients.BIRTHDATE + " > ?";
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         LocalDate earliestBirthdate = LocalDate.now().minusYears(mYears);
         return new String[] {earliestBirthdate.toString()};
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return App.getInstance().getString(R.string.age_filter_description, mYears);
     }
 }

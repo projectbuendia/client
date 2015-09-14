@@ -288,8 +288,7 @@ public class UpdateManager {
     private class PackageIndexReceivedListener
         implements Response.Listener<List<JsonUpdateInfo>>, Response.ErrorListener {
 
-        @Override
-        public void onResponse(List<JsonUpdateInfo> response) {
+        @Override public void onResponse(List<JsonUpdateInfo> response) {
             synchronized (mLock) {
                 mLastAvailableUpdateInfo =
                     AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
@@ -299,8 +298,7 @@ public class UpdateManager {
             }
         }
 
-        @Override
-        public void onErrorResponse(VolleyError error) {
+        @Override public void onErrorResponse(VolleyError error) {
             String message = "Server failed; will retry shortly";
             if (error != null && error.networkResponse != null) {
                 message = "Server failed (" + error.networkResponse.statusCode + "); will retry shortly";
@@ -321,8 +319,7 @@ public class UpdateManager {
      */
     private class DownloadUpdateReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
+        @Override public void onReceive(Context context, Intent intent) {
             synchronized (mDownloadLock) {
                 if (!isDownloadInProgress()) {
                     LOG.e(

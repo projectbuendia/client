@@ -25,8 +25,7 @@ public class SingleLocationFragment extends PatientListFragment {
         super();
     }
 
-    @Override
-    public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
+    @Override public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
         return new SingleLocationPatientListAdapter(getActivity(), locationTree);
     }
 }

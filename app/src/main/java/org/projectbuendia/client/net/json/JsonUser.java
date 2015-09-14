@@ -21,8 +21,7 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     public String id;
     public static final Comparator<JsonUser> COMPARATOR_BY_ID = new Comparator<JsonUser>() {
 
-        @Override
-        public int compare(JsonUser a, JsonUser b) {
+        @Override public int compare(JsonUser a, JsonUser b) {
             return a.id.compareTo(b.id);
         }
     };
@@ -30,8 +29,7 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
     private static final String GUEST_ACCOUNT_NAME = "Guest User";
     public static final Comparator<JsonUser> COMPARATOR_BY_NAME = new Comparator<JsonUser>() {
 
-        @Override
-        public int compare(JsonUser a, JsonUser b) {
+        @Override public int compare(JsonUser a, JsonUser b) {
             // Special case: the guest account should always appear first if present.
             int aSection = a.isGuestUser() ? 1 : 2;
             int bSection = b.isGuestUser() ? 1 : 2;
@@ -73,8 +71,7 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
         }
     }
 
-    @Override
-    public int compareTo(JsonUser other) {
+    @Override public int compareTo(JsonUser other) {
         return COMPARATOR_BY_ID.compare(this, other);
     }
 

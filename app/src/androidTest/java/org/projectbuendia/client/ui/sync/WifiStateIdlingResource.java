@@ -58,21 +58,18 @@ public class WifiStateIdlingResource implements IdlingResource {
         return intentFilter;
     }
 
-    @Override
-    public String getName() {
+    @Override public String getName() {
         return mName;
     }
 
-    @Override
-    public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
+    @Override public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
         mResourceCallback = resourceCallback;
         if (isIdleNow()) {
             onIdleTransition();
         }
     }
 
-    @Override
-    public boolean isIdleNow() {
+    @Override public boolean isIdleNow() {
         if (ONE_TIME_ONLY && mIdleTransitionOccurred) {
             return true;
         }
@@ -99,8 +96,7 @@ public class WifiStateIdlingResource implements IdlingResource {
     }
 
     private class WifiChangeBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
+        @Override public void onReceive(Context context, Intent intent) {
             if (isIdleNow()) {
                 onIdleTransition();
             }

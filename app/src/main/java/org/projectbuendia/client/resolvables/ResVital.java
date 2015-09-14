@@ -24,8 +24,7 @@ public enum ResVital implements Resolvable<ResVital.Resolved> {
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    @Override
-    public Resolved resolve(Resources resources) {
+    @Override public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResVital.Resolved.class);
     }
 

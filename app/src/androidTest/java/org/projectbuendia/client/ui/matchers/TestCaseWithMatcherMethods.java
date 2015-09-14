@@ -141,16 +141,14 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     public static Matcher<View> isAnyOf(final Class<? extends View>... classes) {
         Preconditions.checkArgument(classes.length >= 1);
         return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View obj) {
+            @Override public boolean matchesSafely(View obj) {
                 for (Class cls : classes) {
                     if (cls.isInstance(obj)) return true;
                 }
                 return false;
             }
 
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 String[] names = new String[classes.length];
                 for (int i = 0; i < classes.length; i++) {
                     names[i] = classes[i].getSimpleName();
@@ -236,8 +234,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     /** Matcher that matches any view in the given row, assuming all rows have the specified height. */
     public static TypeSafeMatcher<View> isInRow(final int rowNumber, final int rowHeight) {
         return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
+            @Override public boolean matchesSafely(View view) {
                 return view.getY() >= getMinY() && view.getY() < getMaxY();
             }
 
@@ -249,8 +246,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
                 return rowNumber*rowHeight;
             }
 
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("has " + getMinY() + " <= y < " + getMaxY());
             }
         };
@@ -259,8 +255,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     /** Matcher that matches any view in the given column, assuming all columns have the specified with. */
     public static TypeSafeMatcher<View> isInColumn(final int colNumber, final int colWidth) {
         return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
+            @Override public boolean matchesSafely(View view) {
                 return view.getX() >= getMinX() && view.getX() < getMaxX();
             }
 
@@ -272,8 +267,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
                 return colNumber*colWidth;
             }
 
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("has " + getMinX() + " <= x < " + getMaxX());
             }
         };
@@ -282,15 +276,13 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     /** Matcher that matches any view with the given background drawable. */
     public static TypeSafeMatcher<View> hasBackground(final Drawable background) {
         return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
+            @Override public boolean matchesSafely(View view) {
                 return background != null && view.getBackground() != null &&
                     background.getConstantState().equals(
                         view.getBackground().getConstantState());
             }
 
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("has background " + background.toString());
             }
         };
@@ -299,16 +291,14 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     /** Matcher that matches a view with the background drawable specified by ID. */
     public static TypeSafeMatcher<View> hasBackground(final int resourceId) {
         return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
+            @Override public boolean matchesSafely(View view) {
                 Drawable background = view.getResources().getDrawable(resourceId);
                 return background != null && view.getBackground() != null &&
                     background.getConstantState().equals(
                         view.getBackground().getConstantState());
             }
 
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("has drawable resource " + resourceId + " as its background");
             }
         };

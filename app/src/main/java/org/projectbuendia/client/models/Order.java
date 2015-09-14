@@ -57,8 +57,7 @@ public final class Order extends Base<String> implements Comparable<Order> {
             order.start, order.stop);
     }
 
-    @Override
-    public int compareTo(@NonNull Order other) {
+    @Override public int compareTo(@NonNull Order other) {
         int result = start.compareTo(other.start);
         result = result != 0 ? result : instructions.compareTo(other.instructions);
         return result;

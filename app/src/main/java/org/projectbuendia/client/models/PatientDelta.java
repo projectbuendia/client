@@ -65,8 +65,7 @@ public class PatientDelta {
         return cv;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         JSONObject jsonObject = new JSONObject();
         if (toJson(jsonObject)) {
             return jsonObject.toString();

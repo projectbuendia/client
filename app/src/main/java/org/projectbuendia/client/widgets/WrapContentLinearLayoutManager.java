@@ -29,8 +29,7 @@ public class WrapContentLinearLayoutManager extends LinearLayoutManager {
         super(context, orientation, reverseLayout);
     }
 
-    @Override
-    public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state,
+    @Override public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state,
                           int widthSpec, int heightSpec) {
         super.onMeasure(recycler, state, widthSpec, heightSpec);
         final int widthMode = View.MeasureSpec.getMode(widthSpec);

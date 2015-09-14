@@ -227,8 +227,7 @@ public class LoginControllerTest extends AndroidTestCase {
         verify(mMockUserManager, times(1)).loadKnownUsers();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 

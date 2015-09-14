@@ -26,13 +26,11 @@ public class AppPatientMatchers {
      */
     public static Matcher<Object> isPatientWithId(final String id) {
         return new BoundedMatcher<Object, Patient>(Patient.class) {
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("is an Patient with id " + id);
             }
 
-            @Override
-            public boolean matchesSafely(Patient patient) {
+            @Override public boolean matchesSafely(Patient patient) {
                 return id.equals(patient.id);
             }
         };
@@ -46,13 +44,11 @@ public class AppPatientMatchers {
      */
     public static Matcher<PatientDelta> matchesPatientDelta(final PatientDelta other) {
         return new BoundedMatcher<PatientDelta, PatientDelta>(PatientDelta.class) {
-            @Override
-            public void describeTo(Description description) {
+            @Override public void describeTo(Description description) {
                 description.appendText("matches patientDelta: " + other.toString());
             }
 
-            @Override
-            public boolean matchesSafely(PatientDelta patientDelta) {
+            @Override public boolean matchesSafely(PatientDelta patientDelta) {
                 return other.toString().equals(patientDelta.toString());
             }
         };

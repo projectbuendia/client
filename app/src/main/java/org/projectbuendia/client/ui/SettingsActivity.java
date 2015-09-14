@@ -68,8 +68,7 @@ public class SettingsActivity extends PreferenceActivity {
     /** A listener that performs updates when any preference's value changes. */
     static final Preference.OnPreferenceChangeListener sPrefListener =
         new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference pref, Object value) {
+            @Override public boolean onPreferenceChange(Preference pref, Object value) {
                 updatePrefSummary(pref, value);
                 if (updatingPrefValues)
                     return true; // prevent endless recursion
@@ -114,8 +113,7 @@ public class SettingsActivity extends PreferenceActivity {
         caller.startActivity(new Intent(caller, SettingsActivity.class));
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
@@ -133,13 +131,11 @@ public class SettingsActivity extends PreferenceActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onIsMultiPane() {
+    @Override public boolean onIsMultiPane() {
         return isXLargeTablet(this) && !isSimplePreferences(this);
     }
 
-    @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @Override @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
         if (!isSimplePreferences(this)) {
             loadHeadersFromResource(R.xml.pref_headers, target);
@@ -149,8 +145,7 @@ public class SettingsActivity extends PreferenceActivity {
     /** When the UI has two panes, this fragment shows just the general settings. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
+        @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             initPrefs(this);
@@ -160,8 +155,7 @@ public class SettingsActivity extends PreferenceActivity {
     /** When the UI has two panes, this fragment shows just the advanced settings. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class AdvancedPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
+        @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_advanced);
             initPrefs(this);
@@ -171,8 +165,7 @@ public class SettingsActivity extends PreferenceActivity {
     /** When the UI has two panes, this fragment shows just the developer settings. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class DeveloperPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
+        @Override public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_developer);
             initPrefs(this);
@@ -207,8 +200,7 @@ public class SettingsActivity extends PreferenceActivity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         setupActionBar();
@@ -223,13 +215,11 @@ public class SettingsActivity extends PreferenceActivity {
         }
     }
 
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
+    @Override protected boolean isValidFragment(String fragmentName) {
         return true;
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
+    @Override protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
         setupSimplePreferencesScreen();
@@ -275,8 +265,7 @@ public class SettingsActivity extends PreferenceActivity {
             & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
-    @Override
-    protected void onPause() {
+    @Override protected void onPause() {
         super.onPause();
         if (!mAppModel.isFullModelAvailable()) {
             // The database was cleared; go back to the login activity.

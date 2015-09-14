@@ -70,16 +70,14 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
     public ProgressFragment() {
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mShortAnimationDuration = getResources().getInteger(
             android.R.integer.config_shortAnimTime);
     }
 
-    @Override
-    public void onErrorResponse(VolleyError error) {
+    @Override public void onErrorResponse(VolleyError error) {
         changeErrorState(error.toString());
         Log.e("server", new String(error.networkResponse.data, Charsets.UTF_8));
     }
@@ -102,14 +100,12 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         }
     }
 
-    @Override
-    public void onDestroy() {
+    @Override public void onDestroy() {
         super.onDestroy();
         App.getServer().cancelPendingRequests();
     }
 
-    @Override
-    public View onCreateView(
+    @Override public View onCreateView(
         LayoutInflater inflater,
         @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState) {
@@ -152,8 +148,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
         return mFrame;
     }
 
-    @Override
-    public void onDestroyView() {
+    @Override public void onDestroyView() {
         super.onDestroyView();
         if (mFrame != null) {
             mFrame.removeAllViewsInLayout();
@@ -231,8 +226,7 @@ public abstract class ProgressFragment extends Fragment implements Response.Erro
                 .alpha(0f)
                 .setDuration(mShortAnimationDuration)
                 .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
+                    @Override public void onAnimationEnd(Animator animation) {
                         outView.setVisibility(View.GONE);
                     }
                 });

@@ -66,8 +66,7 @@ public final class SimpleSelectionFilterGroup<T extends Base>
      * Dynamically build the selection string by combining the selection strings
      * of the filters in this group.
      */
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         StringBuilder sb = new StringBuilder();
 
         String prefix = "";
@@ -93,8 +92,7 @@ public final class SimpleSelectionFilterGroup<T extends Base>
      * single array.
      * @param constraint the constraint passed into the top-level filter
      */
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         List<String> allArgs = new ArrayList<>();
         for (SimpleSelectionFilter filter : mFilters) {
             Collections.addAll(allArgs, filter.getSelectionArgs(constraint));
@@ -106,8 +104,7 @@ public final class SimpleSelectionFilterGroup<T extends Base>
         return allArgsArray;
     }
 
-    @Override
-    public String getDescription() {
+    @Override public String getDescription() {
         return mName;
     }
 
@@ -121,8 +118,7 @@ public final class SimpleSelectionFilterGroup<T extends Base>
         return this;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return mName;
     }
 }

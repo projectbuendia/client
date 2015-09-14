@@ -325,8 +325,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         verify(mMockFragmentUi, times(0)).resetSyncProgress();
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Override protected void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
 

@@ -18,13 +18,11 @@ import org.projectbuendia.client.sync.providers.Contracts;
 /** Matches only the encounter with the given UUID. */
 public final class EncounterUuidFilter extends SimpleSelectionFilter<Encounter> {
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return Contracts.Observations.ENCOUNTER_UUID + " = ?";
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
         return new String[] {constraint.toString()};
     }
 }

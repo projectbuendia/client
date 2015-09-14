@@ -41,8 +41,7 @@ public class LoginActivity extends BaseActivity {
     private AlertDialog mSyncFailedDialog;
     @Inject Troubleshooter mTroubleshooter;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
 
@@ -65,14 +64,12 @@ public class LoginActivity extends BaseActivity {
             .setTitle(getString(R.string.sync_failed_dialog_title))
             .setMessage(R.string.user_sync_failed_dialog_message)
             .setNegativeButton(R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                @Override public void onClick(DialogInterface dialog, int which) {
                     SettingsActivity.start(LoginActivity.this);
                 }
             })
             .setPositiveButton(R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                @Override public void onClick(DialogInterface dialog, int which) {
                     mController.onSyncRetry();
                 }
             })
@@ -87,15 +84,13 @@ public class LoginActivity extends BaseActivity {
         return mController;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    @Override public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.login, menu);
 
         menu.findItem(R.id.action_add_user).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
+                @Override public boolean onMenuItemClick(MenuItem item) {
                     mController.onAddUserPressed();
                     return true;
                 }
@@ -105,8 +100,7 @@ public class LoginActivity extends BaseActivity {
         menu.findItem(R.id.settings).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
+                @Override public boolean onMenuItemClick(MenuItem item) {
                     mController.onSettingsPressed();
                     return true;
                 }
@@ -116,42 +110,35 @@ public class LoginActivity extends BaseActivity {
         return true;
     }
 
-    @Override
-    protected void onResume() {
+    @Override protected void onResume() {
         super.onResume();
         mController.init();
     }
 
-    @Override
-    protected void onPause() {
+    @Override protected void onPause() {
         mController.suspend();
         super.onPause();
     }
 
     private final class Ui implements LoginController.Ui {
-        @Override
-        public void showAddNewUserDialog() {
+        @Override public void showAddNewUserDialog() {
             NewUserDialogFragment.newInstance(mController.getDialogUi())
                 .show(getSupportFragmentManager(), null);
         }
 
-        @Override
-        public void showSettings() {
+        @Override public void showSettings() {
             SettingsActivity.start(LoginActivity.this);
         }
 
-        @Override
-        public void showErrorToast(int stringResourceId) {
+        @Override public void showErrorToast(int stringResourceId) {
             BigToast.show(LoginActivity.this, getString(stringResourceId));
         }
 
-        @Override
-        public void showSyncFailedDialog(boolean show) {
+        @Override public void showSyncFailedDialog(boolean show) {
             Utils.showDialogIf(mSyncFailedDialog, show);
         }
 
-        @Override
-        public void showTentSelectionScreen() {
+        @Override public void showTentSelectionScreen() {
             LocationListActivity.start(LoginActivity.this);
         }
     }

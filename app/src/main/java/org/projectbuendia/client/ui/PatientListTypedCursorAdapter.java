@@ -72,8 +72,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
     }
 
-    @Override
-    public int getGroupCount() {
+    @Override public int getGroupCount() {
         if (mPatientsByLocation == null) {
             return 0;
         }
@@ -81,23 +80,19 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return mPatientsByLocation.size();
     }
 
-    @Override
-    public long getGroupId(int groupPosition) {
+    @Override public long getGroupId(int groupPosition) {
         return groupPosition;
     }
 
-    @Override
-    public long getChildId(int groupPosition, int childPosition) {
+    @Override public long getChildId(int groupPosition, int childPosition) {
         return childPosition;
     }
 
-    @Override
-    public boolean hasStableIds() {
+    @Override public boolean hasStableIds() {
         return false;
     }
 
-    @Override
-    public View getGroupView(
+    @Override public View getGroupView(
         int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         Location location = (Location) getGroup(groupPosition);
 
@@ -117,13 +112,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
-    @Override
-    public Object getGroup(int groupPosition) {
+    @Override public Object getGroup(int groupPosition) {
         return mLocations[groupPosition];
     }
 
-    @Override
-    public int getChildrenCount(int groupPosition) {
+    @Override public int getChildrenCount(int groupPosition) {
         Object patientsForLocation = getGroup(groupPosition);
         if (mPatientsByLocation == null || patientsForLocation == null) {
             return 0;
@@ -136,8 +129,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return LayoutInflater.from(mContext).inflate(R.layout.listview_tent_header, null);
     }
 
-    @Override
-    public View getChildView(
+    @Override public View getChildView(
         int groupPosition, int childPosition, boolean isLastChild, View convertView,
         ViewGroup parent) {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
@@ -201,8 +193,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
-    @Override
-    public Object getChild(int groupPosition, int childPosition) {
+    @Override public Object getChild(int groupPosition, int childPosition) {
         return mPatientsByLocation.get(getGroup(groupPosition)).get(childPosition);
     }
 
@@ -214,8 +205,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return view;
     }
 
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
+    @Override public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
 
@@ -265,14 +255,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
-        @Override
-        protected Void doInBackground(String... params) {
+        @Override protected Void doInBackground(String... params) {
             mObservations = mLocalizedChartHelper.getMostRecentObservationsBatch(params, "en");
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void result) {
+        @Override protected void onPostExecute(Void result) {
             notifyDataSetChanged();
         }
     }

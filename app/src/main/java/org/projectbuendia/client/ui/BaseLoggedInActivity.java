@@ -62,8 +62,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
      * <p/>
      * <p>Instead of overriding this method, override {@link #onCreateImpl}.
      */
-    @Override
-    public final void onCreate(Bundle savedInstanceState) {
+    @Override public final void onCreate(Bundle savedInstanceState) {
         JsonUser user = App.getUserManager().getActiveUser();
         if (user == null) {
             super.onCreate(savedInstanceState);
@@ -86,8 +85,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public final boolean onCreateOptionsMenu(Menu menu) {
+    @Override public final boolean onCreateOptionsMenu(Menu menu) {
         if (!mIsCreated) {
             return true;
         }
@@ -102,8 +100,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 mPopupWindow.showAsDropDown(userView);
             }
         });
@@ -142,8 +139,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         PatientChartActivity.start(this, event.uuid);
     }
 
-    @Override
-    protected final void onStart() {
+    @Override protected final void onStart() {
         if (!mIsCreated) {
             super.onStart();
 
@@ -157,8 +153,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onStart();
     }
 
-    @Override
-    protected final void onResume() {
+    @Override protected final void onResume() {
         if (!mIsCreated) {
             super.onResume();
 
@@ -175,8 +170,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onResume();
     }
 
-    @Override
-    protected final void onPause() {
+    @Override protected final void onPause() {
         if (!mIsCreated) {
             super.onPause();
 
@@ -197,8 +191,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onPause();
     }
 
-    @Override
-    protected final void onStop() {
+    @Override protected final void onStop() {
         if (!mIsCreated) {
             super.onStop();
 
@@ -253,8 +246,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             setBackgroundDrawable(new BitmapDrawable());
         }
 
-        @Override
-        public void showAsDropDown(View anchor) {
+        @Override public void showAsDropDown(View anchor) {
             super.showAsDropDown(anchor);
 
             JsonUser user = App.getUserManager().getActiveUser();

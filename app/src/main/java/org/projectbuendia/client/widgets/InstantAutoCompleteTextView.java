@@ -39,13 +39,11 @@ public class InstantAutoCompleteTextView extends AutoCompleteTextView {
     }
 
 
-    @Override
-    public boolean enoughToFilter() {
+    @Override public boolean enoughToFilter() {
         return true;
     }
 
-//    @Override
-//    protected void onFocusChanged(
+//    @Override //    protected void onFocusChanged(
 //            boolean focused, int direction, Rect previouslyFocusedRect) {
 //        super.onFocusChanged(focused, direction, previouslyFocusedRect);
 //        if (focused) {

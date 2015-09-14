@@ -16,8 +16,7 @@ import org.projectbuendia.client.R;
 
 /** Test cases for handling user sync failure on the user login screen. */
 public class UserLoginFailingSyncTest extends SyncTestCase {
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         setWaitForUserSync(false);
         // TODO/cleanup: Remove all this manual UserManager management once daggered.
         App.getInstance().getUserManager().reset();
@@ -27,8 +26,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
         super.setUp();
     }
 
-    @Override
-    public void tearDown() {
+    @Override public void tearDown() {
         App.getInstance().getUserManager().setAutoCancelEnabled(false);
         super.tearDown();
     }

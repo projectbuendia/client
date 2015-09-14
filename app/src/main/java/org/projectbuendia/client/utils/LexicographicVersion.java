@@ -43,8 +43,7 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return new LexicographicVersion(raw, parts);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return mRaw;
     }
 
@@ -52,8 +51,7 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return compareTo(other) > 0;
     }
 
-    @Override
-    public int compareTo(LexicographicVersion other) {
+    @Override public int compareTo(LexicographicVersion other) {
         Preconditions.checkNotNull(other);
         if (this == other) {
             return 0;
@@ -83,8 +81,7 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return compareTo(other) <= 0;
     }
 
-    @Override
-    public boolean equals(Object other) {
+    @Override public boolean equals(Object other) {
         if (this == other) {
             return true;
         }
@@ -94,8 +91,7 @@ public class LexicographicVersion implements Comparable<LexicographicVersion> {
         return compareTo((LexicographicVersion) other) == 0;
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Objects.hash(mParts);
     }
 

@@ -160,8 +160,7 @@ public final class AssignLocationDialog
         mProgressDialog.dismiss();
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         String locationUuid = mAdapter.getItem(position).uuid;
         mAdapter.setSelectedLocationUuid(Optional.fromNullable(locationUuid));
@@ -189,8 +188,7 @@ public final class AssignLocationDialog
 
     // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
-    @Override
-    public void onDismiss(DialogInterface dialog) {
+    @Override public void onDismiss(DialogInterface dialog) {
         if (mRegistered) {
             mEventBus.unregister(mEventBusSubscriber);
         }

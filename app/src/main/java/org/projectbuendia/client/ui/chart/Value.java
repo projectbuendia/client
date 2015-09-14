@@ -118,8 +118,7 @@ class Value implements Comparable<Value> {
      * @param other The other Value to compare to.
      * @return
      */
-    @Override
-    public int compareTo(@NonNull Value other) {
+    @Override public int compareTo(@NonNull Value other) {
         if (bool != null && other.bool != null) {
             return bool.compareTo(other.bool);
         }
@@ -165,8 +164,7 @@ class Value implements Comparable<Value> {
 
     /** A comparator that orders values from first to last observation time. */
     public static class ObsTimeComparator implements Comparator<Value> {
-        @Override
-        public int compare(Value left, Value right) {
+        @Override public int compare(Value left, Value right) {
             return left.observed.compareTo(right.observed);
         }
     }

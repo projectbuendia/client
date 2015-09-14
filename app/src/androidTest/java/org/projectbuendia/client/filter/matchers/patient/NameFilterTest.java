@@ -20,8 +20,7 @@ import org.projectbuendia.client.utils.Utils;
 public class NameFilterTest extends InstrumentationTestCase {
     private NameFilter mNameFilter;
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
         mNameFilter = new NameFilter();
     }

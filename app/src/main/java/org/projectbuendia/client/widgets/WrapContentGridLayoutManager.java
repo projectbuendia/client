@@ -28,8 +28,7 @@ final class WrapContentGridLayoutManager extends GridLayoutManager {
         super(context, spanCount, orientation, reverseLayout);
     }
 
-    @Override
-    public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state,
+    @Override public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state,
                           int widthSpec, int heightSpec) {
         final int heightMode = View.MeasureSpec.getMode(heightSpec);
         if (heightMode != View.MeasureSpec.UNSPECIFIED) {

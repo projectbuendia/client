@@ -41,8 +41,7 @@ public class SyncTestCase extends FunctionalTestCase {
     // be successful right away.
     private static final int MAX_DATABASE_CLEAR_RETRIES = 10;
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         // Clearing the database can be flaky if previous tests are temporarily holding a DB lock,
         // so try a few times before failing.
         boolean cleared = false;

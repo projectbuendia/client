@@ -219,18 +219,15 @@ public class LocationTree implements Observable {
         return count;
     }
 
-    @Override
-    public void registerContentObserver(ContentObserver observer) {
+    @Override public void registerContentObserver(ContentObserver observer) {
         mCursor.registerContentObserver(observer);
     }
 
-    @Override
-    public void unregisterContentObserver(ContentObserver observer) {
+    @Override public void unregisterContentObserver(ContentObserver observer) {
         mCursor.unregisterContentObserver(observer);
     }
 
-    @Override
-    public void close() {
+    @Override public void close() {
         mCursor.close();
     }
 

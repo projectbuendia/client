@@ -23,8 +23,7 @@ import java.util.Iterator;
 /** Tests for {@link FilteredCursorWrapper}. */
 public class FilteredCursorWrapperTest extends InstrumentationTestCase {
     private static final MatchingFilter<String> SUBSTRING_FILTER = new MatchingFilter<String>() {
-        @Override
-        public boolean matches(String object, CharSequence constraint) {
+        @Override public boolean matches(String object, CharSequence constraint) {
             return object.contains(constraint);
         }
     };

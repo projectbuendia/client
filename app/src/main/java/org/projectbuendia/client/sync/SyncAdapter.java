@@ -134,15 +134,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver = context.getContentResolver();
     }
 
-    @Override
-    public void onSyncCanceled() {
+    @Override public void onSyncCanceled() {
         mIsSyncCanceled = true;
         LOG.i("Detecting a sync cancellation, canceling sync soon.");
     }
 
     /** Not thread-safe but, by default, this will never be called multiple times in parallel. */
-    @Override
-    public void onPerformSync(
+    @Override public void onPerformSync(
         Account account,
         Bundle extras,
         String authority,

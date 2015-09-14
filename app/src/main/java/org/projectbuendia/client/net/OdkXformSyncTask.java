@@ -79,8 +79,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
         }
     }
 
-    @Override
-    protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
+    @Override protected Void doInBackground(OpenMrsXformIndexEntry... formInfos) {
 
         OpenMrsXformsConnection openMrsXformsConnection =
             new OpenMrsXformsConnection(App.getConnectionDetails());
@@ -140,15 +139,13 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             // Doesn't exist, so insert it
             // Fetch the file from OpenMRS
             openMrsXformsConnection.getXform(formInfo.uuid, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
+                @Override public void onResponse(String response) {
                     LOG.i("adding form to db " + response);
                     new AddFormToDbAsyncTask(mFormWrittenListener, formInfo.uuid, isUpdate)
                         .execute(new FormToWrite(response, proposedPath));
                 }
             }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
+                @Override public void onErrorResponse(VolleyError error) {
                     LOG.e(error, "failed to fetch file");
                     EventBus.getDefault().post(new FetchXformFailedEvent(
                         FetchXformFailedEvent.Reason.SERVER_FAILED_TO_FETCH, error));
@@ -202,8 +199,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             mUpdate = update;
         }
 
-        @Override
-        protected File doInBackground(FormToWrite[] params) {
+        @Override protected File doInBackground(FormToWrite[] params) {
             Preconditions.checkArgument(params.length != 0);
 
             String form = params[0].form;
@@ -238,8 +234,7 @@ public class OdkXformSyncTask extends AsyncTask<OpenMrsXformIndexEntry, Void, Vo
             return proposedPath;
         }
 
-        @Override
-        protected void onPostExecute(File path) {
+        @Override protected void onPostExecute(File path) {
             super.onPostExecute(path);
             if (mFormWrittenListener != null && path != null) {
                 mFormWrittenListener.formWritten(path, mUuid);

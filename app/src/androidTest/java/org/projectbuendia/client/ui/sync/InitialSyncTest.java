@@ -21,8 +21,7 @@ import java.util.UUID;
 /** Test case for behavior during and immediately after an initial sync. */
 public class InitialSyncTest extends SyncTestCase {
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
         click(viewWithText("Guest User"));
     }
