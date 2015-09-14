@@ -26,8 +26,8 @@ public class OrderSaveRequestedEvent {
     public final Integer durationDays;
 
     public OrderSaveRequestedEvent(
-            @Nullable String previousOrderUuid, String patientUuid,
-            String instructions, @Nullable Integer durationDays) {
+        @Nullable String previousOrderUuid, String patientUuid,
+        String instructions, @Nullable Integer durationDays) {
         this.previousOrderUuid = previousOrderUuid;
         this.patientUuid = patientUuid;
         this.instructions = instructions;

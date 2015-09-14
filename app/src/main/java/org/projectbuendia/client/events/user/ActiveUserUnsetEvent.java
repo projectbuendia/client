@@ -18,7 +18,7 @@ public class ActiveUserUnsetEvent {
 
     /**
      * Indicates that the reason is unknown.
-     *
+     * <p/>
      * <p>This value should not generally be used.
      */
     public static final int REASON_UNKNOWN = 0;
@@ -26,9 +26,7 @@ public class ActiveUserUnsetEvent {
     /** Indicates that the active user was unset because the unset method was invoked. */
     public static final int REASON_UNSET_INVOKED = 1;
 
-    /**
-     * Indicates that the active user was unset because the active user was deleted from the server.
-     */
+    /** Indicates that the active user was unset because the active user was deleted from the server. */
     public static final int REASON_USER_DELETED = 2;
 
     /**
@@ -43,9 +41,8 @@ public class ActiveUserUnsetEvent {
 
     /**
      * Creates a new {@link ActiveUserUnsetEvent}.
-     *
      * @param previousActiveUser the previous active user
-     * @param reason the reason why the active user was unset
+     * @param reason             the reason why the active user was unset
      */
     public ActiveUserUnsetEvent(JsonUser previousActiveUser, int reason) {
         this.previousActiveUser = previousActiveUser;

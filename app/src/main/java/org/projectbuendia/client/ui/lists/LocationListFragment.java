@@ -11,14 +11,6 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import java.util.List;
-
-import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.ui.ProgressFragment;
-import org.projectbuendia.client.widgets.SubtitledButtonView;
-
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -27,6 +19,14 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 
 import com.google.common.base.Optional;
+
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.ui.ProgressFragment;
+import org.projectbuendia.client.widgets.SubtitledButtonView;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -46,26 +46,6 @@ public final class LocationListFragment extends ProgressFragment {
 
     public LocationListFragment() {
         // Required empty public constructor
-    }
-
-    @OnItemClick(R.id.location_selection_locations)
-    void onLocationGridClicked(int position) {
-        mController.onLocationSelected(mAdapter.getItem(position));
-    }
-
-    @OnClick(R.id.location_selection_all_patients)
-    void onAllPatientsClicked(View v) {
-        FilteredPatientListActivity.start(getActivity());
-    }
-
-    @OnClick(R.id.location_selection_discharged)
-    void onDischargedClicked(View v) {
-        mController.onDischargedPressed();
-    }
-
-    @OnClick(R.id.location_selection_triage)
-    void onTriageClicked(View v) {
-        mController.onTriagePressed();
     }
 
     @Override
@@ -101,6 +81,25 @@ public final class LocationListFragment extends ProgressFragment {
         button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
     }
 
+    @OnItemClick(R.id.location_selection_locations)
+    void onLocationGridClicked(int position) {
+        mController.onLocationSelected(mAdapter.getItem(position));
+    }
+
+    @OnClick(R.id.location_selection_all_patients)
+    void onAllPatientsClicked(View v) {
+        FilteredPatientListActivity.start(getActivity());
+    }
+
+    @OnClick(R.id.location_selection_discharged)
+    void onDischargedClicked(View v) {
+        mController.onDischargedPressed();
+    }
+
+    @OnClick(R.id.location_selection_triage) void onTriageClicked(View v) {
+        mController.onTriagePressed();
+    }
+
     private final class Ui implements LocationListController.LocationFragmentUi {
         @Override
         public void setDischargedPatientCount(int patientCount) {
@@ -120,7 +119,7 @@ public final class LocationListFragment extends ProgressFragment {
         @Override
         public void setLocations(LocationTree locationTree, List<Location> locations) {
             mAdapter = new LocationListAdapter(
-                    getActivity(), locations, locationTree, Optional.<String>absent());
+                getActivity(), locations, locationTree, Optional.<String> absent());
             mLocationGrid.setAdapter(mAdapter);
         }
 

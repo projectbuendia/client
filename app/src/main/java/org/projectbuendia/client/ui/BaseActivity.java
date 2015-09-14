@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -53,41 +52,6 @@ public abstract class BaseActivity extends FragmentActivity {
     private FrameLayout mStatusContent;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        App.getInstance().inject(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        EventBus.getDefault().registerSticky(this);
-        App.getInstance().getHealthMonitor().start();
-        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
-    }
-
-    @Override
-    protected void onPause() {
-        EventBus.getDefault().unregister(this);
-
-        super.onPause();
-        App.getInstance().getHealthMonitor().stop();
-    }
-
-    public void adjustFontScale(int delta) {
-        Configuration config = getResources().getConfiguration();
-        float newScale = (float) Math.max(0.7, Math.min(1.3, config.fontScale + delta*0.15));
-        if (newScale != config.fontScale) {
-            config.fontScale = newScale;
-            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-            finish();
-            startActivity(getIntent());
-        }
-    }
-
-    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
@@ -107,12 +71,38 @@ public abstract class BaseActivity extends FragmentActivity {
         }
     }
 
+    public void adjustFontScale(int delta) {
+        Configuration config = getResources().getConfiguration();
+        float newScale = (float) Math.max(0.7, Math.min(1.3, config.fontScale + delta*0.15));
+        if (newScale != config.fontScale) {
+            config.fontScale = newScale;
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+            finish();
+            startActivity(getIntent());
+        }
+    }
+
     @Override
     public void setContentView(int layoutResId) {
         initializeWrapperView();
 
         mInnerContent.removeAllViews();
         getLayoutInflater().inflate(layoutResId, mInnerContent);
+    }
+
+    private void initializeWrapperView() {
+        if (mWrapperView != null) {
+            return;
+        }
+
+        mWrapperView =
+            (LinearLayout) getLayoutInflater().inflate(R.layout.view_status_wrapper, null);
+        super.setContentView(mWrapperView);
+
+        mInnerContent =
+            (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
+        mStatusContent =
+            (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
     }
 
     @Override
@@ -131,30 +121,14 @@ public abstract class BaseActivity extends FragmentActivity {
         mInnerContent.addView(view, params);
     }
 
-    /**
-     * Sets the view to be shown in the status bar.
-     *
-     * <p>The status bar is always a fixed height (80dp). Any view passed to this method should fit
-     * that height.
-     */
-    public void setStatusView(View view) {
-        initializeWrapperView();
-
-        mStatusContent.removeAllViews();
-
-        if (view != null) {
-            mStatusContent.addView(view);
-        }
+    /** Gets the visibility of the status bar. */
+    public int getStatusVisibility() {
+        return mStatusContent.getVisibility();
     }
 
     /** Sets the visibility of the status bar. */
     public void setStatusVisibility(int visibility) {
         mStatusContent.setVisibility(visibility);
-    }
-
-    /** Gets the visibility of the status bar. */
-    public int getStatusVisibility() {
-        return mStatusContent.getVisibility();
     }
 
     /** Called when the set of troubleshooting actions changes. */
@@ -232,10 +206,10 @@ public abstract class BaseActivity extends FragmentActivity {
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
-                                action,
-                                getString(R.string.troubleshoot_server_unreachable),
-                                getString(R.string.troubleshoot_server_unreachable_details),
-                                true);
+                            action,
+                            getString(R.string.troubleshoot_server_unreachable),
+                            getString(R.string.troubleshoot_server_unreachable_details),
+                            true);
                     }
                 });
                 break;
@@ -250,10 +224,10 @@ public abstract class BaseActivity extends FragmentActivity {
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
-                                action,
-                                getString(R.string.troubleshoot_server_unstable),
-                                getString(R.string.troubleshoot_server_unstable_details),
-                                false);
+                            action,
+                            getString(R.string.troubleshoot_server_unstable),
+                            getString(R.string.troubleshoot_server_unstable_details),
+                            false);
                     }
                 });
                 break;
@@ -268,10 +242,10 @@ public abstract class BaseActivity extends FragmentActivity {
                         // this message. This will require that injection be hooked up through to
                         // this inner class, which may be complicated.
                         showMoreInfoDialog(
-                                action,
-                                getString(R.string.troubleshoot_server_not_responding),
-                                getString(R.string.troubleshoot_server_not_responding_details),
-                                false);
+                            action,
+                            getString(R.string.troubleshoot_server_not_responding),
+                            getString(R.string.troubleshoot_server_not_responding_details),
+                            false);
                     }
                 });
                 break;
@@ -282,10 +256,10 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override
                     public void onClick(View v) {
                         showMoreInfoDialog(
-                                action,
-                                getString(R.string.troubleshoot_package_server_unreachable),
-                                getString(R.string.troubleshoot_update_server_unreachable_details),
-                                true);
+                            action,
+                            getString(R.string.troubleshoot_package_server_unreachable),
+                            getString(R.string.troubleshoot_update_server_unreachable_details),
+                            true);
                     }
                 });
                 break;
@@ -296,11 +270,11 @@ public abstract class BaseActivity extends FragmentActivity {
                     @Override
                     public void onClick(View v) {
                         showMoreInfoDialog(
-                                action,
-                                getString(R.string.troubleshoot_package_server_misconfigured),
-                                getString(
-                                        R.string.troubleshoot_update_server_misconfigured_details),
-                                true);
+                            action,
+                            getString(R.string.troubleshoot_package_server_misconfigured),
+                            getString(
+                                R.string.troubleshoot_update_server_misconfigured_details),
+                            true);
                     }
                 });
                 break;
@@ -313,46 +287,79 @@ public abstract class BaseActivity extends FragmentActivity {
         setStatusVisibility(View.VISIBLE);
     }
 
+    /**
+     * Sets the view to be shown in the status bar.
+     * <p/>
+     * <p>The status bar is always a fixed height (80dp). Any view passed to this method should fit
+     * that height.
+     */
+    public void setStatusView(View view) {
+        initializeWrapperView();
+
+        mStatusContent.removeAllViews();
+
+        if (view != null) {
+            mStatusContent.addView(view);
+        }
+    }
+
     private void showMoreInfoDialog(final View triggeringView, String title, String message,
                                     boolean includeSettingsButton) {
         triggeringView.setEnabled(false);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(BaseActivity.this)
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(title)
-                .setMessage(message)
-                .setNeutralButton(android.R.string.ok, null)
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        triggeringView.setEnabled(true);
-                    }
-                });
+            .setIcon(android.R.drawable.ic_dialog_info)
+            .setTitle(title)
+            .setMessage(message)
+            .setNeutralButton(android.R.string.ok, null)
+            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    triggeringView.setEnabled(true);
+                }
+            });
         if (includeSettingsButton) {
             builder.setPositiveButton(R.string.troubleshoot_action_check_settings,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            SettingsActivity.start(BaseActivity.this);
-                        }
-                    });
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SettingsActivity.start(BaseActivity.this);
+                    }
+                });
         }
         builder.show();
     }
 
-    private void initializeWrapperView() {
-        if (mWrapperView != null) {
-            return;
-        }
+    /** The user has requested a download of the last known available software update. */
+    public static class DownloadRequestedEvent {
+    }
 
-        mWrapperView =
-                (LinearLayout) getLayoutInflater().inflate(R.layout.view_status_wrapper, null);
-        super.setContentView(mWrapperView);
+    /** The user has requested installation of the last downloaded software update. */
+    public static class InstallationRequestedEvent {
+    }
 
-        mInnerContent =
-                (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_inner_content);
-        mStatusContent =
-                (FrameLayout) mWrapperView.findViewById(R.id.status_wrapper_status_content);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        App.getInstance().inject(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        EventBus.getDefault().registerSticky(this);
+        App.getInstance().getHealthMonitor().start();
+        Utils.logEvent("resumed_activity", "class", this.getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onPause() {
+        EventBus.getDefault().unregister(this);
+
+        super.onPause();
+        App.getInstance().getHealthMonitor().stop();
     }
 
     protected class UpdateNotificationUi implements UpdateNotificationController.Ui {
@@ -406,11 +413,5 @@ public abstract class BaseActivity extends FragmentActivity {
             setStatusVisibility(View.GONE);
         }
     }
-
-    /** The user has requested a download of the last known available software update. */
-    public static class DownloadRequestedEvent { }
-
-    /** The user has requested installation of the last downloaded software update. */
-    public static class InstallationRequestedEvent { }
 }
 

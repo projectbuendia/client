@@ -19,10 +19,6 @@ import org.projectbuendia.client.sync.Database;
 public final class SQLiteDatabaseTransactionHelper { // @nolint
     private final Database mDbHelper;
 
-    SQLiteDatabaseTransactionHelper(Database dbHelper) {
-        mDbHelper = dbHelper;
-    }
-
     /** Closes the database resources in use by this object. */
     public void close() {
         mDbHelper.getWritableDatabase().close();
@@ -30,24 +26,22 @@ public final class SQLiteDatabaseTransactionHelper { // @nolint
 
     /**
      * Starts a named transaction by creating a savepoint with the given name.
-     *
      * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
      */
     public void startNamedTransaction(String savepointName) {
         SQLiteStatement statement =
-                mDbHelper.getWritableDatabase().compileStatement("SAVEPOINT " + savepointName);
+            mDbHelper.getWritableDatabase().compileStatement("SAVEPOINT " + savepointName);
         statement.execute();
         statement.close();
     }
 
     /**
      * Rolls back a named transaction by rolling back to a savepoint with the given name.
-     *
      * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
      */
     public void rollbackNamedTransaction(String savepointName) {
         SQLiteStatement statement =
-                mDbHelper.getWritableDatabase().compileStatement("ROLLBACK TO " + savepointName);
+            mDbHelper.getWritableDatabase().compileStatement("ROLLBACK TO " + savepointName);
         statement.execute();
         statement.close();
     }
@@ -56,14 +50,17 @@ public final class SQLiteDatabaseTransactionHelper { // @nolint
      * Releases a named transaction with the given name, removing the savepoint and effectively
      * committing or canceling the transaction, depending on whether or not
      * {@link #rollbackNamedTransaction(String)} was called.
-     *
      * @see <a>http://www.sqlite.org/lang_savepoint.html</a>.
      */
     public void releaseNamedTransaction(String savepointName) {
         SQLiteStatement statement =
-                mDbHelper.getWritableDatabase().compileStatement("RELEASE " + savepointName);
+            mDbHelper.getWritableDatabase().compileStatement("RELEASE " + savepointName);
         statement.execute();
         statement.close();
+    }
+
+    SQLiteDatabaseTransactionHelper(Database dbHelper) {
+        mDbHelper = dbHelper;
     }
 
 }

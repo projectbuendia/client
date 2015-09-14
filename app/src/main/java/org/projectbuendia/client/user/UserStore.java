@@ -47,13 +47,13 @@ public class UserStore {
 
     /** Loads the known users from local store. */
     public Set<JsonUser> loadKnownUsers()
-            throws InterruptedException, ExecutionException, RemoteException,
-            OperationApplicationException {
+        throws InterruptedException, ExecutionException, RemoteException,
+        OperationApplicationException {
         Cursor cursor = null;
         ContentProviderClient client = null;
         try {
             client = App.getInstance().getContentResolver()
-                    .acquireContentProviderClient(Users.CONTENT_URI);
+                .acquireContentProviderClient(Users.CONTENT_URI);
 
             // Request users from database.
             try {
@@ -75,7 +75,7 @@ public class UserStore {
             Set<JsonUser> result = new HashSet<>();
             while (cursor.moveToNext()) {
                 JsonUser user =
-                        new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
+                    new JsonUser(cursor.getString(uuidColumn), cursor.getString(fullNameColumn));
                 result.add(user);
             }
             return result;
@@ -94,8 +94,8 @@ public class UserStore {
 
     /** Syncs known users with the server. */
     public Set<JsonUser> syncKnownUsers()
-            throws ExecutionException, InterruptedException, RemoteException,
-            OperationApplicationException {
+        throws ExecutionException, InterruptedException, RemoteException,
+        OperationApplicationException {
         RequestFuture<List<JsonUser>> future = RequestFuture.newFuture();
         App.getServer().listUsers(null, future, future);
         List<JsonUser> users = future.get();
@@ -104,11 +104,11 @@ public class UserStore {
 
         LOG.i("Got %d users from server; updating local database", users.size());
         ContentProviderClient client = App.getInstance().getContentResolver()
-                .acquireContentProviderClient(Users.CONTENT_URI);
+            .acquireContentProviderClient(Users.CONTENT_URI);
         BuendiaProvider buendiaProvider =
-                (BuendiaProvider) (client.getLocalContentProvider());
+            (BuendiaProvider) (client.getLocalContentProvider());
         SQLiteDatabaseTransactionHelper dbTransactionHelper =
-                buendiaProvider.getDbTransactionHelper();
+            buendiaProvider.getDbTransactionHelper();
         try {
             LOG.d("Setting savepoint %s", USER_SYNC_SAVEPOINT_NAME);
             dbTransactionHelper.startNamedTransaction(USER_SYNC_SAVEPOINT_NAME);
@@ -141,22 +141,22 @@ public class UserStore {
         // returned.
         final CountDownLatch latch = new CountDownLatch(1);
         App.getServer().addUser(
-                user,
-                new Response.Listener<JsonUser>() {
-                    @Override
-                    public void onResponse(JsonUser response) {
-                        result.user = response;
-                        latch.countDown();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        LOG.e(error, "Unexpected error adding user");
-                        result.error = error;
-                        latch.countDown();
-                    }
-                });
+            user,
+            new Response.Listener<JsonUser>() {
+                @Override
+                public void onResponse(JsonUser response) {
+                    result.user = response;
+                    latch.countDown();
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    LOG.e(error, "Unexpected error adding user");
+                    result.error = error;
+                    latch.countDown();
+                }
+            });
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -170,7 +170,7 @@ public class UserStore {
         // Write the resulting user to the database.
         LOG.i("Updating user db with newly added user");
         ContentProviderClient client = App.getInstance().getContentResolver()
-                .acquireContentProviderClient(Users.CONTENT_URI);
+            .acquireContentProviderClient(Users.CONTENT_URI);
         try {
             ContentValues values = new ContentValues();
             values.put(Users.UUID, result.user.id);

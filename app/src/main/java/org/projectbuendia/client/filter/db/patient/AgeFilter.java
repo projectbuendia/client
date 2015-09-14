@@ -14,8 +14,8 @@ package org.projectbuendia.client.filter.db.patient;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 /** Matches only patients below a specified age in years. */
@@ -34,7 +34,7 @@ final class AgeFilter extends SimpleSelectionFilter<Patient> {
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
         LocalDate earliestBirthdate = LocalDate.now().minusYears(mYears);
-        return new String[] { earliestBirthdate.toString() };
+        return new String[] {earliestBirthdate.toString()};
     }
 
     @Override

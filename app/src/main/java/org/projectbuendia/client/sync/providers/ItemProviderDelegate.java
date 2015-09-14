@@ -45,52 +45,52 @@ public class ItemProviderDelegate implements ProviderDelegate<Database> {
 
     @Override
     public Cursor query(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = new QueryBuilder(mTable)
-                .where(mIdColumn + "=?", uri.getLastPathSegment())
-                .where(selection, selectionArgs)
-                .orderBy(sortOrder)
-                .select(dbHelper.getReadableDatabase(), projection);
+            .where(mIdColumn + "=?", uri.getLastPathSegment())
+            .where(selection, selectionArgs)
+            .orderBy(sortOrder)
+            .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
 
     @Override
     public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int bulkInsert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues[] allValues) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues[] allValues) {
         throw new UnsupportedOperationException(
-                "Bulk insert is not supported for URI '" + uri + "'.");
+            "Bulk insert is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int delete(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            String selection, String[] selectionArgs) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        String selection, String[] selectionArgs) {
         int count = new QueryBuilder(mTable)
-                .where(mIdColumn + "=?", uri.getLastPathSegment())
-                .where(selection, selectionArgs)
-                .delete(dbHelper.getWritableDatabase());
+            .where(mIdColumn + "=?", uri.getLastPathSegment())
+            .where(selection, selectionArgs)
+            .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
     @Override
     public int update(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values, String selection, String[] selectionArgs) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values, String selection, String[] selectionArgs) {
         int count = new QueryBuilder(mTable)
-                .where(mIdColumn + "=?", uri.getLastPathSegment())
-                .where(selection, selectionArgs)
-                .update(dbHelper.getWritableDatabase(), values);
+            .where(mIdColumn + "=?", uri.getLastPathSegment())
+            .where(selection, selectionArgs)
+            .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);
         return count;
     }

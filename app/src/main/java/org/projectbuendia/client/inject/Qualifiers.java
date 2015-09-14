@@ -25,14 +25,17 @@ public class Qualifiers {
     @Qualifier
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface HealthEventBus {}
+    public @interface HealthEventBus {
+    }
 
     // .events
 
     @Qualifier
     @Documented
     @Retention(RetentionPolicy.RUNTIME)
-    public @interface CrudEventBusBuilder {}
+    public @interface CrudEventBusBuilder {
+    }
 
-    private Qualifiers() {}
+    private Qualifiers() {
+    }
 }

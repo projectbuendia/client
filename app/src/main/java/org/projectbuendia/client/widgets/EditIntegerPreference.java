@@ -31,6 +31,10 @@ public class EditIntegerPreference extends EditTextPreference {
         init();
     }
 
+    private void init() {
+        getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
+    }
+
     public EditIntegerPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -39,34 +43,6 @@ public class EditIntegerPreference extends EditTextPreference {
     public EditIntegerPreference(Context context) {
         super(context);
         init();
-    }
-
-    private void init() {
-        getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
-    }
-
-    @Override
-    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
-        Integer newValue;
-        if (restoreValue) {
-            if (!shouldPersist()) {
-                newValue = mInteger;
-            } else {
-                PreferenceManager preferenceManager = getPreferenceManager();
-                SharedPreferences sharedPreferences = preferenceManager.getSharedPreferences();
-                String key = getKey();
-                // We have to do the contains check, as we can't do getInt(x, null) to get null.
-                newValue = sharedPreferences.contains(key)
-                        ? sharedPreferences.getInt(key, 0) : mInteger;
-            }
-        } else {
-            if (defaultValue instanceof Integer) {
-                newValue = (Integer) defaultValue;
-            } else {
-                newValue = defaultValue == null ? null : parseIntOrNull(defaultValue.toString());
-            }
-        }
-        this.setText(newValue == null ? null : newValue.toString());
     }
 
     @Override
@@ -89,6 +65,30 @@ public class EditIntegerPreference extends EditTextPreference {
         if (isBlocking != wasBlocking) {
             notifyDependencyChange(isBlocking);
         }
+    }
+
+    @Override
+    protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
+        Integer newValue;
+        if (restoreValue) {
+            if (!shouldPersist()) {
+                newValue = mInteger;
+            } else {
+                PreferenceManager preferenceManager = getPreferenceManager();
+                SharedPreferences sharedPreferences = preferenceManager.getSharedPreferences();
+                String key = getKey();
+                // We have to do the contains check, as we can't do getInt(x, null) to get null.
+                newValue = sharedPreferences.contains(key)
+                    ? sharedPreferences.getInt(key, 0) : mInteger;
+            }
+        } else {
+            if (defaultValue instanceof Integer) {
+                newValue = (Integer) defaultValue;
+            } else {
+                newValue = defaultValue == null ? null : parseIntOrNull(defaultValue.toString());
+            }
+        }
+        this.setText(newValue == null ? null : newValue.toString());
     }
 
     private Integer parseIntOrNull(String text) {

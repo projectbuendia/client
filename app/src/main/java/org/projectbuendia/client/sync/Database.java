@@ -70,97 +70,91 @@ public class Database extends SQLiteOpenHelper {
      * be strings that take the place of X in a "CREATE TABLE foo (X)" statement.
      */
     static final Map<Table, String> SCHEMAS = new HashMap();
+
     static {
         SCHEMAS.put(Table.PATIENTS, ""
-                + "_id TEXT PRIMARY KEY NOT NULL,"
-                + "given_name TEXT,"
-                + "family_name TEXT,"
-                + "uuid TEXT,"
-                + "location_uuid TEXT,"
-                + "birthdate TEXT,"
-                + "gender TEXT");
+            + "_id TEXT PRIMARY KEY NOT NULL,"
+            + "given_name TEXT,"
+            + "family_name TEXT,"
+            + "uuid TEXT,"
+            + "location_uuid TEXT,"
+            + "birthdate TEXT,"
+            + "gender TEXT");
 
         SCHEMAS.put(Table.CONCEPTS, ""
-                + "_id TEXT PRIMARY KEY NOT NULL,"
-                + "xform_id INTEGER UNIQUE NOT NULL,"
-                + "concept_type TEXT");
+            + "_id TEXT PRIMARY KEY NOT NULL,"
+            + "xform_id INTEGER UNIQUE NOT NULL,"
+            + "concept_type TEXT");
 
         SCHEMAS.put(Table.CONCEPT_NAMES, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "concept_uuid TEXT,"
-                + "locale TEXT,"
-                + "name TEXT,"
-                + "UNIQUE (concept_uuid, locale)");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "concept_uuid TEXT,"
+            + "locale TEXT,"
+            + "name TEXT,"
+            + "UNIQUE (concept_uuid, locale)");
 
         SCHEMAS.put(Table.FORMS, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "uuid TEXT,"
-                + "name TEXT,"
-                + "version TEXT");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "uuid TEXT,"
+            + "name TEXT,"
+            + "version TEXT");
 
         SCHEMAS.put(Table.LOCATIONS, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "location_uuid TEXT,"
-                + "parent_uuid TEXT");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "location_uuid TEXT,"
+            + "parent_uuid TEXT");
 
         SCHEMAS.put(Table.LOCATION_NAMES, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "location_uuid TEXT,"
-                + "locale TEXT,"
-                + "name TEXT,"
-                + "UNIQUE (location_uuid, locale)");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "location_uuid TEXT,"
+            + "locale TEXT,"
+            + "name TEXT,"
+            + "UNIQUE (location_uuid, locale)");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "patient_uuid TEXT,"
-                + "encounter_uuid TEXT,"
-                + "encounter_time INTEGER,"
-                + "concept_uuid INTEGER,"
-                + "value STRING,"
-                + "temp_cache INTEGER,"  // 0 or 1
-                + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "patient_uuid TEXT,"
+            + "encounter_uuid TEXT,"
+            + "encounter_time INTEGER,"
+            + "concept_uuid INTEGER,"
+            + "value STRING,"
+            + "temp_cache INTEGER,"  // 0 or 1
+            + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
         SCHEMAS.put(Table.ORDERS, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "uuid TEXT,"
-                + "patient_uuid TEXT,"
-                + "instructions TEXT,"
-                + "start_time INTEGER,"
-                + "stop_time INTEGER");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "uuid TEXT,"
+            + "patient_uuid TEXT,"
+            + "instructions TEXT,"
+            + "start_time INTEGER,"
+            + "stop_time INTEGER");
 
         // TODO: rename to chart_rows
         SCHEMAS.put(Table.CHARTS, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "chart_uuid TEXT,"
-                + "chart_row INTEGER,"
-                + "group_uuid TEXT,"
-                + "group_name TEXT,"
-                + "concept_uuid TEXT,"
-                + "field_name TEXT,"
-                + "UNIQUE (chart_uuid, concept_uuid)");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "chart_uuid TEXT,"
+            + "chart_row INTEGER,"
+            + "group_uuid TEXT,"
+            + "group_name TEXT,"
+            + "concept_uuid TEXT,"
+            + "field_name TEXT,"
+            + "UNIQUE (chart_uuid, concept_uuid)");
 
         SCHEMAS.put(Table.USERS, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "uuid TEXT,"
-                + "full_name TEXT");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "uuid TEXT,"
+            + "full_name TEXT");
 
         // TODO: store misc as key-value rows, not one row
         SCHEMAS.put(Table.MISC, ""
-                + "_id INTEGER PRIMARY KEY NOT NULL,"
-                + "full_sync_start_time INTEGER,"
-                + "full_sync_end_time INTEGER,"
-                + "obs_sync_time INTEGER");
+            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "full_sync_start_time INTEGER,"
+            + "full_sync_end_time INTEGER,"
+            + "obs_sync_time INTEGER");
     }
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        for (Table table : Table.values()) {
-            db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
-        }
     }
 
     @Override
@@ -170,12 +164,6 @@ public class Database extends SQLiteOpenHelper {
         clear(db);
     }
 
-    public void clear() {
-        // Never call zero-argument clear() from onUpgrade, as getWritableDatabase
-        // can trigger onUpgrade, leading to endless recursion.
-        clear(getWritableDatabase());
-    }
-
     public void clear(SQLiteDatabase db) {
         for (Table table : Table.values()) {
             db.execSQL("DROP TABLE IF EXISTS " + table);
@@ -183,11 +171,24 @@ public class Database extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public SQLiteDatabase getReadableDatabase() {
-        return super.getReadableDatabase(ENCRYPTION_PASSWORD);
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        for (Table table : Table.values()) {
+            db.execSQL("CREATE TABLE " + table + " (" + SCHEMAS.get(table) + ");");
+        }
+    }
+
+    public void clear() {
+        // Never call zero-argument clear() from onUpgrade, as getWritableDatabase
+        // can trigger onUpgrade, leading to endless recursion.
+        clear(getWritableDatabase());
     }
 
     public SQLiteDatabase getWritableDatabase() {
         return super.getWritableDatabase(ENCRYPTION_PASSWORD);
+    }
+
+    public SQLiteDatabase getReadableDatabase() {
+        return super.getReadableDatabase(ENCRYPTION_PASSWORD);
     }
 }

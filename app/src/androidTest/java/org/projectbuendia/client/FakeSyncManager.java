@@ -18,12 +18,12 @@ import org.projectbuendia.client.sync.SyncManager;
  * it is syncing.
  */
 public class FakeSyncManager extends SyncManager {
+    private boolean mSyncing;
+
     // TODO/refactor: Create common interface between SyncManager and this class.
     public FakeSyncManager() {
         super(null);
     }
-
-    private boolean mSyncing;
 
     /** Sets whether or not syncing should appear to be occurring. */
     public void setSyncing(boolean syncing) {

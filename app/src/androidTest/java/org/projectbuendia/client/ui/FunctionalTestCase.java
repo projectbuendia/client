@@ -14,14 +14,14 @@ package org.projectbuendia.client.ui;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-
-import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
-import android.support.test.runner.lifecycle.Stage;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingPolicies;
 import android.support.test.espresso.NoActivityResumedException;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.Stage;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.squareup.spoon.Spoon;
@@ -30,11 +30,11 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
@@ -59,14 +59,12 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
  */
 public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
     private static final Logger LOG = Logger.create();
-
-    private boolean mWaitForUserSync = true;
-
-    protected EventBusRegistrationInterface mEventBus;
     // For now, we create a new demo patient for tests using the real patient
     // creation UI on each test run (see {@link #inUserLoginInitDemoPatient()}).
     // TODO/robustness: Use externally preloaded demo data instead.
     protected static String sDemoPatientId = null;
+    private boolean mWaitForUserSync = true;
+    protected EventBusRegistrationInterface mEventBus;
 
     public FunctionalTestCase() {
         super(LoginActivity.class);
@@ -85,7 +83,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         // Wait for users to sync.
         if (mWaitForUserSync) {
             EventBusIdlingResource<KnownUsersLoadedEvent> resource =
-                    new EventBusIdlingResource<>("USERS", mEventBus);
+                new EventBusIdlingResource<>("USERS", mEventBus);
             Espresso.registerIdlingResources(resource);
         }
 
@@ -108,23 +106,16 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         }
     }
 
-    /**
-     * Determines the currently loaded activity, rather than {@link #getActivity()}, which will
-     * always return {@link LoginActivity}.
-     */
-    protected Activity getCurrentActivity() throws Throwable {
-        getInstrumentation().waitForIdleSync();
-        final Activity[] activity = new Activity[1];
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                java.util.Collection<Activity> activities =
-                        ActivityLifecycleMonitorRegistry.getInstance()
-                                .getActivitiesInStage(Stage.RESUMED);
-                activity[0] = Iterables.getOnlyElement(activities);
+    /** Closes all activities on the stack. */
+    protected void closeAllActivities() throws Exception {
+        try {
+            for (int i = 0; i < 20; i++) {
+                pressBack();
+                Thread.sleep(100);
             }
-        });
-        return activity[0];
+        } catch (NoActivityResumedException | InterruptedException e) {
+            // nothing left to close
+        }
     }
 
     protected void screenshot(String tag) {
@@ -136,58 +127,22 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     }
 
     /**
-     * Instructs espresso to wait for a {@link ProgressFragment} to finish loading. Espresso will
-     * also wait every subsequent time the {@link ProgressFragment} returns to the busy state, and
-     * will period check whether or not the fragment is currently idle.
+     * Determines the currently loaded activity, rather than {@link #getActivity()}, which will
+     * always return {@link LoginActivity}.
      */
-    protected void waitForProgressFragment(ProgressFragment progressFragment) {
-        // Use the ProgressFragment hashCode as the identifier so that multiple ProgressFragments
-        // can be tracked, but only one resource will be registered to each fragment.
-        ProgressFragmentIdlingResource idlingResource = new ProgressFragmentIdlingResource(
-                Integer.toString(progressFragment.hashCode()), progressFragment);
-        Espresso.registerIdlingResources(idlingResource);
-    }
-
-    /**
-     * Instructs espresso to wait for the {@link ProgressFragment} contained in the current
-     * activity to finish loading, if such a fragment is present. Espresso will also wait every
-     * subsequent time the {@link ProgressFragment} returns to the busy state, and
-     * will period check whether or not the fragment is currently idle.
-     *
-     * <p>If the current activity does not contain a progress fragment, then this function will
-     * throw an {@link IllegalArgumentException}.
-     *
-     * <p>Warning: This function will not work properly in setUp() as the current activity won't
-     * be available. If you need to call this function during setUp(), use
-     * {@link #waitForProgressFragment(ProgressFragment)}.
-     * TODO/robustness: Investigate why the current activity isn't available during setUp().
-     */
-    protected void waitForProgressFragment() {
-        Activity activity;
-        try {
-            activity = getCurrentActivity();
-        } catch (Throwable throwable) {
-            throw new IllegalStateException("Error retrieving current activity", throwable);
-        }
-
-        if (!(activity instanceof FragmentActivity)) {
-            throw new IllegalStateException("Activity is not a FragmentActivity");
-        }
-
-        FragmentActivity fragmentActivity = (FragmentActivity)activity;
-        try {
-            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
-                if (fragment instanceof ProgressFragment) {
-                    waitForProgressFragment((ProgressFragment) fragment);
-                    return;
-                }
+    protected Activity getCurrentActivity() throws Throwable {
+        getInstrumentation().waitForIdleSync();
+        final Activity[] activity = new Activity[1];
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                java.util.Collection<Activity> activities =
+                    ActivityLifecycleMonitorRegistry.getInstance()
+                        .getActivitiesInStage(Stage.RESUMED);
+                activity[0] = Iterables.getOnlyElement(activities);
             }
-        } catch (NullPointerException e) {
-            LOG.w("Unable to wait for ProgressFragment to initialize.");
-            return;
-        }
-
-        throw new IllegalStateException("Could not find a progress fragment to wait on.");
+        });
+        return activity[0];
     }
 
     /** Idles until sync has completed. */
@@ -196,7 +151,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         // EventBusIdlingResource<> only works for a single event.
         LOG.i("Registering resource to wait for initial sync.");
         EventBusIdlingResource<SyncSucceededEvent> syncSucceededResource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncSucceededResource);
     }
 
@@ -205,14 +160,14 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      * in the location selection activity, and leaves the UI in the same
      * activity.  Note: this function will not work during {@link #setUp()}
      * as it relies on {@link #waitForProgressFragment()}.
-     * @param delta an PatientDelta containing the data for the new patient;
-     *     use Optional.absent() to leave fields unset
+     * @param delta        an PatientDelta containing the data for the new patient;
+     *                     use Optional.absent() to leave fields unset
      * @param locationName the name of a location to assign to the new patient,
-     *     or null to leave unset (assumes this name is unique among locations)
+     *                     or null to leave unset (assumes this name is unique among locations)
      */
     protected void inLocationSelectionAddNewPatient(PatientDelta delta, String locationName) {
         LOG.i("Adding patient: %s (location %s)",
-                delta.toContentValues().toString(), locationName);
+            delta.toContentValues().toString(), locationName);
 
         click(viewWithId(R.id.action_add));
         expectVisible(viewWithText("New patient"));
@@ -260,7 +215,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         }
 
         EventBusIdlingResource<ItemCreatedEvent<Patient>> resource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
 
         click(viewWithId(R.id.patient_creation_button_create));
         Espresso.registerIdlingResources(resource); // wait for patient to be created
@@ -272,10 +227,17 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         click(viewWithText("Set").inRoot(isDialog()));
     }
 
+    protected void selectDateFromDatePicker(DateTime dateTime) {
+        String year = dateTime.toString("yyyy");
+        String monthOfYear = dateTime.toString("MMM");
+        String dayOfMonth = dateTime.toString("dd");
+        selectDateFromDatePicker(year, monthOfYear, dayOfMonth);
+    }
+
     protected void selectDateFromDatePicker(
-            @Nullable String year,
-            @Nullable String monthOfYear,
-            @Nullable String dayOfMonth) {
+        @Nullable String year,
+        @Nullable String monthOfYear,
+        @Nullable String dayOfMonth) {
         LOG.e("Year: %s, Month: %s, Day: %s", year, monthOfYear, dayOfMonth);
 
         if (year != null) {
@@ -289,19 +251,12 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         }
     }
 
-    protected void selectDateFromDatePicker(DateTime dateTime) {
-        String year = dateTime.toString("yyyy");
-        String monthOfYear = dateTime.toString("MMM");
-        String dayOfMonth = dateTime.toString("dd");
-        selectDateFromDatePicker(year, monthOfYear, dayOfMonth);
-    }
-
     // Broken, but hopefully fixed in Espresso 2.0.
     protected void setDateSpinner(String spinnerName, String value) {
         int numberPickerId =
-                Resources.getSystem().getIdentifier("numberpicker_input", "id", "android");
+            Resources.getSystem().getIdentifier("numberpicker_input", "id", "android");
         int spinnerId =
-                Resources.getSystem().getIdentifier(spinnerName, "id", "android");
+            Resources.getSystem().getIdentifier(spinnerName, "id", "android");
         LOG.i("%s: %s", spinnerName, value);
         LOG.i("numberPickerId: %d", numberPickerId);
         LOG.i("spinnerId: %d", spinnerId);
@@ -320,7 +275,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         }
 
         PatientDelta delta = new PatientDelta();
-        String id = "" + (System.currentTimeMillis() % 100000);
+        String id = "" + (System.currentTimeMillis()%100000);
         delta.id = Optional.of(id);
         delta.givenName = Optional.of("Given" + id);
         delta.familyName = Optional.of("Family" + id);
@@ -344,16 +299,6 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
      */
     protected void invalidateDemoPatient() {
         sDemoPatientId = null;
-    }
-
-    /**
-     * Navigates to the location selection activity from the user login
-     * activity.  Note: this function will not work during {@link #setUp()}
-     * as it uses {@link #waitForProgressFragment()}.
-     */
-    protected void inUserLoginGoToLocationSelection() {
-        click(viewWithText("Guest User"));
-        waitForProgressFragment(); // wait for locations to load
     }
 
     /**
@@ -395,6 +340,70 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         expectVisible(viewWithText("New patient"));
     }
 
+    /**
+     * Navigates to the location selection activity from the user login
+     * activity.  Note: this function will not work during {@link #setUp()}
+     * as it uses {@link #waitForProgressFragment()}.
+     */
+    protected void inUserLoginGoToLocationSelection() {
+        click(viewWithText("Guest User"));
+        waitForProgressFragment(); // wait for locations to load
+    }
+
+    /**
+     * Instructs espresso to wait for the {@link ProgressFragment} contained in the current
+     * activity to finish loading, if such a fragment is present. Espresso will also wait every
+     * subsequent time the {@link ProgressFragment} returns to the busy state, and
+     * will period check whether or not the fragment is currently idle.
+     * <p/>
+     * <p>If the current activity does not contain a progress fragment, then this function will
+     * throw an {@link IllegalArgumentException}.
+     * <p/>
+     * <p>Warning: This function will not work properly in setUp() as the current activity won't
+     * be available. If you need to call this function during setUp(), use
+     * {@link #waitForProgressFragment(ProgressFragment)}.
+     * TODO/robustness: Investigate why the current activity isn't available during setUp().
+     */
+    protected void waitForProgressFragment() {
+        Activity activity;
+        try {
+            activity = getCurrentActivity();
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Error retrieving current activity", throwable);
+        }
+
+        if (!(activity instanceof FragmentActivity)) {
+            throw new IllegalStateException("Activity is not a FragmentActivity");
+        }
+
+        FragmentActivity fragmentActivity = (FragmentActivity) activity;
+        try {
+            for (Fragment fragment : fragmentActivity.getSupportFragmentManager().getFragments()) {
+                if (fragment instanceof ProgressFragment) {
+                    waitForProgressFragment((ProgressFragment) fragment);
+                    return;
+                }
+            }
+        } catch (NullPointerException e) {
+            LOG.w("Unable to wait for ProgressFragment to initialize.");
+            return;
+        }
+
+        throw new IllegalStateException("Could not find a progress fragment to wait on.");
+    }
+
+    /**
+     * Instructs espresso to wait for a {@link ProgressFragment} to finish loading. Espresso will
+     * also wait every subsequent time the {@link ProgressFragment} returns to the busy state, and
+     * will period check whether or not the fragment is currently idle.
+     */
+    protected void waitForProgressFragment(ProgressFragment progressFragment) {
+        // Use the ProgressFragment hashCode as the identifier so that multiple ProgressFragments
+        // can be tracked, but only one resource will be registered to each fragment.
+        ProgressFragmentIdlingResource idlingResource = new ProgressFragmentIdlingResource(
+            Integer.toString(progressFragment.hashCode()), progressFragment);
+        Espresso.registerIdlingResources(idlingResource);
+    }
 
     /** Checks that the expected zones and tents are shown. */
     protected void inLocationSelectionCheckZonesAndTentsDisplayed() {
@@ -421,26 +430,14 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
     /** In a patient list, click the first patient. */
     protected void inPatientListClickFirstPatient() {
         click(dataThat(is(Patient.class))
-                .inAdapterView(hasId(R.id.fragment_patient_list))
-                .atPosition(0));
+            .inAdapterView(hasId(R.id.fragment_patient_list))
+            .atPosition(0));
     }
 
     /** In a patient list, click the patient with a specified ID. */
     protected void inPatientListClickPatientWithId(String id) {
         click(dataThat(isPatientWithId(id))
-                .inAdapterView(hasId(R.id.fragment_patient_list))
-                .atPosition(0));
-    }
-
-    /** Closes all activities on the stack. */
-    protected void closeAllActivities() throws Exception {
-        try {
-            for (int i = 0; i < 20; i++) {
-                pressBack();
-                Thread.sleep(100);
-            }
-        } catch (NoActivityResumedException | InterruptedException e) {
-            // nothing left to close
-        }
+            .inAdapterView(hasId(R.id.fragment_patient_list))
+            .atPosition(0));
     }
 }

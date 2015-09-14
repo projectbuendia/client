@@ -22,9 +22,9 @@ public class LocationConverter implements Converter<Location> {
     @Override
     public Location fromCursor(Cursor cursor) {
         return new Location(
-                cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.LOCATION_UUID)),
-                cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.PARENT_UUID)),
-                cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.NAME)),
-                cursor.getInt(cursor.getColumnIndex(Contracts.LocalizedLocations.PATIENT_COUNT)));
+            cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.LOCATION_UUID)),
+            cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.PARENT_UUID)),
+            cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.NAME)),
+            cursor.getInt(cursor.getColumnIndex(Contracts.LocalizedLocations.PATIENT_COUNT)));
     }
 }

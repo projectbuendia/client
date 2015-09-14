@@ -11,13 +11,13 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.TypedCursor;
 
 /**
  * Indicates that a single item has been fetched from the data store.
  * Should only be posted on a {@link DefaultCrudEventBus}.
- *
+ * <p/>
  * <p>Unlike {@link TypedCursorFetchedEvent}, this provides the fetched item
  * (rather than providing a {@link TypedCursor} to lazy-load fetched items).
  */

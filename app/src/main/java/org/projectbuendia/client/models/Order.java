@@ -26,11 +26,13 @@ import javax.annotation.concurrent.Immutable;
 /** An order in the app model. */
 @Immutable
 public final class Order extends Base<String> implements Comparable<Order> {
-    public final @Nullable String uuid;
+    public final
+    @Nullable String uuid;
     public final String patientUuid;
     public final String instructions;
     public final DateTime start;
-    public final @Nullable DateTime stop;
+    public final
+    @Nullable DateTime stop;
 
     public Order(@Nullable String uuid, String patientUuid,
                  String instructions, DateTime start, @Nullable DateTime stop) {
@@ -50,16 +52,16 @@ public final class Order extends Base<String> implements Comparable<Order> {
         this.stop = stopMillis == null ? null : new DateTime(stopMillis);
     }
 
+    public static Order fromJson(JsonOrder order) {
+        return new Order(order.uuid, order.patient_uuid, order.instructions,
+            order.start, order.stop);
+    }
+
     @Override
     public int compareTo(@NonNull Order other) {
         int result = start.compareTo(other.start);
         result = result != 0 ? result : instructions.compareTo(other.instructions);
         return result;
-    }
-
-    public static Order fromJson(JsonOrder order) {
-        return new Order(order.uuid, order.patient_uuid, order.instructions,
-                         order.start, order.stop);
     }
 
     public JSONObject toJson() throws JSONException {

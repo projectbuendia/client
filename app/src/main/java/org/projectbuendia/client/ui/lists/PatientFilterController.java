@@ -11,11 +11,11 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
-import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
+import org.projectbuendia.client.models.AppModel;
 
 /** A controller for setting up user-selectable filters in a patient list. */
 public class PatientFilterController {
@@ -31,14 +31,13 @@ public class PatientFilterController {
     /**
      * Creates a {@link PatientFilterController} with the specified UI implementation, event
      * bus, model, and locale.
-     *
-     * @param ui a {@link Ui} that will receive UI events
+     * @param ui           a {@link Ui} that will receive UI events
      * @param crudEventBus a {@link CrudEventBus} that will listen for filter events
-     * @param appModel an {@link AppModel} used to retrieve patients
-     * @param locale a language code/locale for presenting localized information (e.g. en)
+     * @param appModel     an {@link AppModel} used to retrieve patients
+     * @param locale       a language code/locale for presenting localized information (e.g. en)
      */
     public PatientFilterController(
-            Ui ui, CrudEventBus crudEventBus, AppModel appModel, String locale) {
+        Ui ui, CrudEventBus crudEventBus, AppModel appModel, String locale) {
         mUi = ui;
         mAppModel = appModel;
         mCrudEventBus = crudEventBus;

@@ -20,51 +20,51 @@ public class RequestFactory {
 
     private final RequestConfigurator mConfigurator;
 
-    RequestFactory(RequestConfigurator configurator) {
-        mConfigurator = configurator;
-    }
-
     /**
      * Returns an {@link OpenMrsJsonRequest} for a GET request to an API URL.
      * @param connectionDetails the {@link OpenMrsConnectionDetails} used to communicate with the
      *                          OpenMRS server
-     * @param urlSuffix the API url to request, relative to the API root
-     * @param jsonRequest a {@link JSONObject} containing the request body
-     * @param listener a {@link Response.Listener} for handling a successful request
-     * @param errorListener a {@link Response.ErrorListener} for handling a failed request
+     * @param urlSuffix         the API url to request, relative to the API root
+     * @param jsonRequest       a {@link JSONObject} containing the request body
+     * @param listener          a {@link Response.Listener} for handling a successful request
+     * @param errorListener     a {@link Response.ErrorListener} for handling a failed request
      * @return the configured {@link OpenMrsJsonRequest}
      */
     public OpenMrsJsonRequest newOpenMrsJsonRequest(
-            OpenMrsConnectionDetails connectionDetails,
-            String urlSuffix,
-            JSONObject jsonRequest,
-            Response.Listener<JSONObject> listener,
-            Response.ErrorListener errorListener) {
+        OpenMrsConnectionDetails connectionDetails,
+        String urlSuffix,
+        JSONObject jsonRequest,
+        Response.Listener<JSONObject> listener,
+        Response.ErrorListener errorListener) {
         return mConfigurator.configure(
-                new OpenMrsJsonRequest(
-                        connectionDetails, urlSuffix, jsonRequest, listener,errorListener));
+            new OpenMrsJsonRequest(
+                connectionDetails, urlSuffix, jsonRequest, listener, errorListener));
     }
 
     /**
      * Returns an {@link OpenMrsJsonRequest} for an arbitrary request.
      * @param connectionDetails the {@link OpenMrsConnectionDetails} used to communicate with the
      *                          OpenMRS server
-     * @param method the HTTP method
-     * @param url the absolute URL to request
-     * @param jsonRequest a {@link JSONObject} containing the request body
-     * @param listener a {@link Response.Listener} for handling a successful request
-     * @param errorListener a {@link Response.ErrorListener} for handling a failed request
+     * @param method            the HTTP method
+     * @param url               the absolute URL to request
+     * @param jsonRequest       a {@link JSONObject} containing the request body
+     * @param listener          a {@link Response.Listener} for handling a successful request
+     * @param errorListener     a {@link Response.ErrorListener} for handling a failed request
      * @return the configured {@link OpenMrsJsonRequest}
      */
     public OpenMrsJsonRequest newOpenMrsJsonRequest(
-            OpenMrsConnectionDetails connectionDetails,
-            int method,
-            String url,
-            JSONObject jsonRequest,
-            Response.Listener<JSONObject> listener,
-            Response.ErrorListener errorListener) {
+        OpenMrsConnectionDetails connectionDetails,
+        int method,
+        String url,
+        JSONObject jsonRequest,
+        Response.Listener<JSONObject> listener,
+        Response.ErrorListener errorListener) {
         return mConfigurator.configure(
-                new OpenMrsJsonRequest(
-                        connectionDetails, method, url, jsonRequest, listener,errorListener));
+            new OpenMrsJsonRequest(
+                connectionDetails, method, url, jsonRequest, listener, errorListener));
+    }
+
+    RequestFactory(RequestConfigurator configurator) {
+        mConfigurator = configurator;
     }
 }

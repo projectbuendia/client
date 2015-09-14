@@ -23,20 +23,13 @@ public final class DefaultCrudEventBus implements CrudEventBus {
 
     private final EventBus mWrapped;
     private final Set<Object> mSubscribers;
-
-    /** Creates a new {@link DefaultCrudEventBus} that wraps the specified {@link EventBus}. */
-    DefaultCrudEventBus(EventBus wrapped) {
-        mWrapped = wrapped;
-        mSubscribers = new HashSet<>();
-    }
-
     private CleanupSubscriber mCleanupSubscriber;
 
     @Override
     public void register(Object subscriber) {
         if (subscriber instanceof CleanupSubscriber) {
             throw new IllegalArgumentException(
-                    "CleanupSubscribers must be registered with registerCleanupSubscriber().");
+                "CleanupSubscribers must be registered with registerCleanupSubscriber().");
         }
 
         mWrapped.register(subscriber);
@@ -50,15 +43,15 @@ public final class DefaultCrudEventBus implements CrudEventBus {
     public void unregister(Object subscriber) {
         if (subscriber instanceof CleanupSubscriber) {
             throw new IllegalArgumentException(
-                    "CleanupSubscribers must be unregistered with unregisterCleanupSubscriber().");
+                "CleanupSubscribers must be unregistered with unregisterCleanupSubscriber().");
         }
 
         mWrapped.unregister(subscriber);
 
         synchronized (mSubscribersLock) {
             if (mSubscribers.remove(subscriber)
-                    && mCleanupSubscriber != null
-                    && mSubscribers.size() == 0) {
+                && mCleanupSubscriber != null
+                && mSubscribers.size() == 0) {
                 mCleanupSubscriber.onAllUnregistered();
             }
         }
@@ -88,12 +81,18 @@ public final class DefaultCrudEventBus implements CrudEventBus {
         synchronized (mSubscribersLock) {
             if (mCleanupSubscriber != subscriber) {
                 throw new IllegalStateException(
-                        "A CleanupSubscriber must be registered with registerCleanupSubscriber() "
-                                + "before it can be unregistered.");
+                    "A CleanupSubscriber must be registered with registerCleanupSubscriber() "
+                        + "before it can be unregistered.");
             }
 
             mWrapped.unregister(subscriber);
             mCleanupSubscriber = null;
         }
+    }
+
+    /** Creates a new {@link DefaultCrudEventBus} that wraps the specified {@link EventBus}. */
+    DefaultCrudEventBus(EventBus wrapped) {
+        mWrapped = wrapped;
+        mSubscribers = new HashSet<>();
     }
 }

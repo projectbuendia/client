@@ -16,9 +16,7 @@ import org.projectbuendia.client.utils.Utils;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Compares {@link Location}s based on specificity, logical zone order, and alphanumeric order.
- */
+/** Compares {@link Location}s based on specificity, logical zone order, and alphanumeric order. */
 public class LocationComparator implements Comparator<Location> {
     private LocationTree mTree;
 
@@ -34,8 +32,8 @@ public class LocationComparator implements Comparator<Location> {
             Location locationA = pathA.get(i);
             Location locationB = pathB.get(i);
             int result = (i == LocationTree.ABSOLUTE_DEPTH_ZONE)
-                    ? Zones.compare(locationA, locationB)
-                    : Utils.alphanumericComparator.compare(locationA.name, locationB.name);
+                ? Zones.compare(locationA, locationB)
+                : Utils.alphanumericComparator.compare(locationA.name, locationB.name);
             if (result != 0) {
                 return result;
             }

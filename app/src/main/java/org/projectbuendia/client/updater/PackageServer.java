@@ -15,10 +15,10 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.projectbuendia.client.AppSettings;
-import org.projectbuendia.client.net.json.JsonUpdateInfo;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.net.GsonRequest;
 import org.projectbuendia.client.net.VolleySingleton;
+import org.projectbuendia.client.net.json.JsonUpdateInfo;
 
 import java.util.List;
 
@@ -42,21 +42,20 @@ public class PackageServer {
 
     /**
      * Asynchronously issues a request to get the index of available Android updates.
-     *
-     * @param listener the callback to be invoked if the request succeeds
+     * @param listener      the callback to be invoked if the request succeeds
      * @param errorListener the callback to be invoked if the request fails
      */
     public void getPackageIndex(
-            Response.Listener<List<JsonUpdateInfo>> listener,
-            Response.ErrorListener errorListener) {
+        Response.Listener<List<JsonUpdateInfo>> listener,
+        Response.ErrorListener errorListener) {
         mVolley.addToRequestQueue(
-                GsonRequest.withArrayResponse(
-                        mSettings.getPackageServerUrl("/" + MODULE_NAME + ".json"),
-                        JsonUpdateInfo.class,
-                        null /* headers */,
-                        listener,
-                        errorListener
-                ).setRetryPolicy(
-                        new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f)));
+            GsonRequest.withArrayResponse(
+                mSettings.getPackageServerUrl("/" + MODULE_NAME + ".json"),
+                JsonUpdateInfo.class,
+                null /* headers */,
+                listener,
+                errorListener
+            ).setRetryPolicy(
+                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_MEDIUM, 1, 1f)));
     }
 }

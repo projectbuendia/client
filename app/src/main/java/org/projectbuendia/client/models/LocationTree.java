@@ -18,6 +18,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 
+import org.projectbuendia.client.utils.Logger;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,28 +27,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.projectbuendia.client.utils.Logger;
-
 /**
  * A tree containing a hierarchy of {@link Location} objects, where the root is assumed to be a
  * single medical center.
  */
 public class LocationTree implements Observable {
 
-    private static final Logger LOG = Logger.create();
-
     public static final int ABSOLUTE_DEPTH_ROOT = 0;
     public static final int ABSOLUTE_DEPTH_ZONE = 1;
     public static final int ABSOLUTE_DEPTH_TENT = 2;
     public static final int ABSOLUTE_DEPTH_BED = 3;
+    private static final Logger LOG = Logger.create();
+    private final TypedCursor<Location> mCursor;
+    private final Location mRoot;
+    private final Map<String, Location> mUuidsToLocations;
+    private final Map<String, Location> mUuidsToParents;
+    private final ImmutableSetMultimap<String, Location> mUuidsToChildren;
 
     /**
      * Creates a {@link LocationTree} from a {@link TypedCursor} of {@link Location}s.
      * If there are no locations in the local database, the location tree will have a null
      * root node (i.e. getRoot() == null).
-     *
+     * <p/>
      * <p>Callers must call {@link #close} when done with an instance of this class.
-     *
      * @throws IllegalArgumentException if the location tree contains multiple root nodes or if the
      *                                  the location tree has no root node or if the location tree
      *                                  contains any nodes whose parents are missing
@@ -56,7 +59,7 @@ public class LocationTree implements Observable {
         Map<String, Location> uuidsToLocations = new HashMap<>();
         Map<String, Location> uuidsToParents = new HashMap<>();
         ImmutableSetMultimap.Builder<String, Location> uuidsToChildrenBuilder =
-                ImmutableSetMultimap.builder();
+            ImmutableSetMultimap.builder();
 
         // First, create mappings from location UUIDs to the locations themselves and to their
         // children.
@@ -64,11 +67,11 @@ public class LocationTree implements Observable {
             if (location.parentUuid == null) {
                 if (root != null) {
                     LOG.w(
-                            "Creating location tree with multiple root nodes. Both location '"
-                                    + root.name + "' (UUID '" + root.uuid + "') and location '"
-                                    + location.name + "' (UUID '" + location.uuid + "') have "
-                                    + "no parent nodes. The first location will be considered "
-                                    + "the root node.");
+                        "Creating location tree with multiple root nodes. Both location '"
+                            + root.name + "' (UUID '" + root.uuid + "') and location '"
+                            + location.name + "' (UUID '" + location.uuid + "') have "
+                            + "no parent nodes. The first location will be considered "
+                            + "the root node.");
                 }
 
                 root = location;
@@ -83,7 +86,7 @@ public class LocationTree implements Observable {
             LOG.w("Creating a location tree with no root node. This tree has no data.");
 
             return new LocationTree(
-                    cursor, null, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
+                cursor, null, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
         }
 
         // Then, create a mapping from location UUIDs to their parents.
@@ -95,51 +98,22 @@ public class LocationTree implements Observable {
             if (parent == null) {
                 // TODO: Consider making this a warning rather than an exception.
                 throw new IllegalArgumentException(
-                        "Unable to create tree because a location's parent does not exist. "
-                                + "Location '" + location.name + "' (UUID '" + location.uuid
-                                + "' points to parent location with UUID '"
-                                + location.parentUuid + "', which does not exist.");
+                    "Unable to create tree because a location's parent does not exist. "
+                        + "Location '" + location.name + "' (UUID '" + location.uuid
+                        + "' points to parent location with UUID '"
+                        + location.parentUuid + "', which does not exist.");
             }
 
             uuidsToParents.put(location.uuid, parent);
         }
 
         return new LocationTree(
-                cursor, root, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
-    }
-
-    private final TypedCursor<Location> mCursor;
-    private final Location mRoot;
-    private final Map<String, Location> mUuidsToLocations;
-    private final Map<String, Location> mUuidsToParents;
-    private final ImmutableSetMultimap<String, Location> mUuidsToChildren;
-
-    private LocationTree(
-        TypedCursor<Location> cursor,
-        Location root,
-        Map<String, Location> uuidsToLocations,
-        Map<String, Location> uuidsToParents,
-        ImmutableSetMultimap<String, Location> uuidsToChildren) {
-        mCursor = cursor;
-        mRoot = root;
-        mUuidsToLocations = uuidsToLocations;
-        mUuidsToParents = uuidsToParents;
-        mUuidsToChildren = uuidsToChildren;
+            cursor, root, uuidsToLocations, uuidsToParents, uuidsToChildrenBuilder.build());
     }
 
     @Nullable
     public Location getRoot() {
         return mRoot;
-    }
-
-    /** Returns the parent of a given {@link Location}. */
-    @Nullable
-    public Location getParent(@Nullable Location location) {
-        if (location == null) {
-            return null;
-        }
-
-        return mUuidsToParents.get(location.uuid);
     }
 
     /**
@@ -152,12 +126,12 @@ public class LocationTree implements Observable {
         }
 
         ImmutableSet<Location> children = mUuidsToChildren.get(location.uuid);
-        return children == null ? ImmutableSet.<Location>of() : children;
+        return children == null ? ImmutableSet.<Location> of() : children;
     }
 
     /**
      * Returns the sorted descendants of the root location at the specified absolute depth.
-     *
+     * <p/>
      * <p>The named values {@link #ABSOLUTE_DEPTH_ROOT}, {@link #ABSOLUTE_DEPTH_ZONE},
      * {@link #ABSOLUTE_DEPTH_TENT}, and {@link #ABSOLUTE_DEPTH_BED} can be used for the
      * {@code level} parameter.
@@ -171,20 +145,20 @@ public class LocationTree implements Observable {
      * that location.
      */
     public ImmutableSortedSet<Location> getDescendantsAtDepth(
-            Location location, int relativeDepth) {
+        Location location, int relativeDepth) {
         if (location == null) {
             return ImmutableSortedSet.of();
         }
 
         if (relativeDepth == 0) {
             ImmutableSortedSet.Builder<Location> thisLocationSet =
-                    ImmutableSortedSet.orderedBy(new LocationComparator(this));
+                ImmutableSortedSet.orderedBy(new LocationComparator(this));
             thisLocationSet.add(location);
             return thisLocationSet.build();
         }
 
         ImmutableSortedSet.Builder<Location> descendants =
-                ImmutableSortedSet.orderedBy(new LocationComparator(this));
+            ImmutableSortedSet.orderedBy(new LocationComparator(this));
         for (Location child : getChildren(location)) {
             descendants.addAll(getDescendantsAtDepth(child, relativeDepth - 1));
         }
@@ -207,6 +181,16 @@ public class LocationTree implements Observable {
         return result;
     }
 
+    /** Returns the parent of a given {@link Location}. */
+    @Nullable
+    public Location getParent(@Nullable Location location) {
+        if (location == null) {
+            return null;
+        }
+
+        return mUuidsToParents.get(location.uuid);
+    }
+
     @Nullable
     public Location findByUuid(String uuid) {
         return mUuidsToLocations.get(uuid);
@@ -214,7 +198,6 @@ public class LocationTree implements Observable {
 
     /**
      * Returns a list of all AppLocations within a subtree rooted at the given {@link Location}.
-     *
      * @param subroot the Location that will form the root of the subtree
      * @return a List of AppLocations in a subtree with the given root
      */
@@ -223,13 +206,6 @@ public class LocationTree implements Observable {
         result.add(subroot);
         addChildrenToCollection(result, subroot);
         return result;
-    }
-
-    private void addChildrenToCollection(Collection<Location> collection, Location root) {
-        for (Location child : getChildren(root)) {
-            collection.add(child);
-            addChildrenToCollection(collection, child);
-        }
     }
 
     /** Returns the total number of patients in this location and its descendant locations. */
@@ -258,5 +234,25 @@ public class LocationTree implements Observable {
     @Override
     public void close() {
         mCursor.close();
+    }
+
+    private LocationTree(
+        TypedCursor<Location> cursor,
+        Location root,
+        Map<String, Location> uuidsToLocations,
+        Map<String, Location> uuidsToParents,
+        ImmutableSetMultimap<String, Location> uuidsToChildren) {
+        mCursor = cursor;
+        mRoot = root;
+        mUuidsToLocations = uuidsToLocations;
+        mUuidsToParents = uuidsToParents;
+        mUuidsToChildren = uuidsToChildren;
+    }
+
+    private void addChildrenToCollection(Collection<Location> collection, Location root) {
+        for (Location child : getChildren(root)) {
+            collection.add(child);
+            addChildrenToCollection(collection, child);
+        }
     }
 }

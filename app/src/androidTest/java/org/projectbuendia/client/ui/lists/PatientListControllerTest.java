@@ -31,15 +31,6 @@ public class PatientListControllerTest extends AndroidTestCase {
     @Mock private SyncManager mMockSyncManager;
     @Mock private PatientListController.Ui mMockUi;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-
-        mFakeEventBus = new FakeEventBus();
-        mController = new PatientListController(mMockUi, mMockSyncManager, mFakeEventBus);
-    }
-
     /** Tests whether refreshing results in a sync. */
     public void testRefresh_RequestsSync() {
         // GIVEN initialized PatientListController
@@ -149,5 +140,14 @@ public class PatientListControllerTest extends AndroidTestCase {
         mFakeEventBus.post(event);
         // THEN the refresh indicator disappears
         verify(mMockUi).stopRefreshAnimation();
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeEventBus = new FakeEventBus();
+        mController = new PatientListController(mMockUi, mMockSyncManager, mFakeEventBus);
     }
 }

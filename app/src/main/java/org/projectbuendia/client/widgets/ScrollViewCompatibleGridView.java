@@ -40,7 +40,7 @@ public class ScrollViewCompatibleGridView extends GridView {
             // most significant bits to store the mode, it ends up being the largest possible number
             // that we can provide
             heightMeasureSpec =
-                    MeasureSpec.makeMeasureSpec(0xFFFFFFFF, MeasureSpec.AT_MOST);
+                MeasureSpec.makeMeasureSpec(0xFFFFFFFF, MeasureSpec.AT_MOST);
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }

@@ -44,19 +44,19 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
 
     @Override
     public Cursor query(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = new QueryBuilder(mTable).where(selection, selectionArgs)
-                .orderBy(sortOrder)
-                .select(dbHelper.getReadableDatabase(), projection);
+            .orderBy(sortOrder)
+            .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
 
     @Override
     public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values) {
         long id = dbHelper.getWritableDatabase().replaceOrThrow(mTable.name, null, values);
         contentResolver.notifyChange(uri, null, false);
         return uri.buildUpon().appendPath(Long.toString(id)).build();
@@ -64,14 +64,14 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
 
     @Override
     public int bulkInsert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues[] allValues) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues[] allValues) {
         if (allValues.length == 0) {
             return 0;
         }
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         SQLiteDatabaseTransactionHelper dbTransactionHelper =
-                new SQLiteDatabaseTransactionHelper(dbHelper);
+            new SQLiteDatabaseTransactionHelper(dbHelper);
 
         ContentValues first = allValues[0];
         String[] columns = first.keySet().toArray(new String[first.size()]);
@@ -110,30 +110,8 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         return allValues.length;
     }
 
-    @Override
-    public int delete(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(mTable)
-                .where(selection, selectionArgs)
-                .delete(dbHelper.getWritableDatabase());
-        contentResolver.notifyChange(uri, null, false);
-        return count;
-    }
-
-    @Override
-    public int update(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values, String selection, String[] selectionArgs) {
-        int count = new QueryBuilder(mTable)
-                .where(selection, selectionArgs)
-                .update(dbHelper.getWritableDatabase(), values);
-        contentResolver.notifyChange(uri, null, false);
-        return count;
-    }
-
     private SQLiteStatement makeInsertStatement(
-            SQLiteDatabase db, String table, String [] columns) {
+        SQLiteDatabase db, String table, String[] columns) {
         // I kind of hoped this would be provided by SQLiteDatabase or DatabaseHelper,
         // But it doesn't seem to be. Innards copied from SQLiteDatabase.insertWithOnConflict
         StringBuilder sql = new StringBuilder();
@@ -158,5 +136,27 @@ class GroupProviderDelegate implements ProviderDelegate<Database> {
         sql.append(')');
 
         return db.compileStatement(sql.toString());
+    }
+
+    @Override
+    public int delete(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        String selection, String[] selectionArgs) {
+        int count = new QueryBuilder(mTable)
+            .where(selection, selectionArgs)
+            .delete(dbHelper.getWritableDatabase());
+        contentResolver.notifyChange(uri, null, false);
+        return count;
+    }
+
+    @Override
+    public int update(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values, String selection, String[] selectionArgs) {
+        int count = new QueryBuilder(mTable)
+            .where(selection, selectionArgs)
+            .update(dbHelper.getWritableDatabase(), values);
+        contentResolver.notifyChange(uri, null, false);
+        return count;
     }
 }

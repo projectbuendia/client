@@ -11,17 +11,17 @@
 
 package org.projectbuendia.client.filter.db.patient;
 
+import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 import java.util.List;
 
 /**
  * LocationUuidFilter matches all patients who reside in the specified subtree of locations.
- *
+ * <p/>
  * <p>For example, a LocationUuidFilter given a UUID of a zone will return all patients assigned to
  * that zone, tents within that zone, beds within those tents, etc.
  */
@@ -51,8 +51,8 @@ public final class LocationUuidFilter extends SimpleSelectionFilter<Patient> {
         // The code below may not scale well, but since the number of locations is expected to be
         // relatively small, this should be okay.
         StringBuilder sb = new StringBuilder()
-                .append(Contracts.Patients.LOCATION_UUID)
-                .append(" IN (");
+            .append(Contracts.Patients.LOCATION_UUID)
+            .append(" IN (");
         String prefix = "";
         for (int i = 0; i < allPossibleLocations.size(); i++) {
             sb.append(prefix).append("?");

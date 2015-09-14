@@ -22,11 +22,11 @@ import java.util.Iterator;
 
 /**
  * A {@link TypedCursor} that's backed by a {@link Converter} and a {@link Cursor}.
- *
+ * <p/>
  * <p>This data structure is NOT thread-safe. It should only be accessed from one thread at a time,
  * generally the main thread. Furthermore, only one {@link Iterator} should be created on it at a
  * time.
- *
+ * <p/>
  * <p>This data structure does NOT notify anyone when the data set changes (i.e., it does not
  * provide a mechanism to access {@link Cursor#registerDataSetObserver}). This is because the
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
@@ -48,7 +48,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * <p>If the backing {@link Cursor} is a database cursor, calling this method may be expensive.
      * Wherever possible, prefer to iterate.
      */
@@ -136,7 +136,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
         @Override
         public void remove() {
             throw new UnsupportedOperationException(
-                    "Elements cannot be removed from an iterator backed by a cursor.");
+                "Elements cannot be removed from an iterator backed by a cursor.");
         }
     }
 }

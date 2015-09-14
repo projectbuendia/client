@@ -15,10 +15,13 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
  * An event bus event indicating that adding an encounter failed.
- *
+ * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
 public class EncounterAddFailedEvent {
+    public final Reason reason;
+    public final Exception exception;
+
     public enum Reason {
         UNKNOWN,
         UNKNOWN_SERVER_ERROR,
@@ -29,9 +32,6 @@ public class EncounterAddFailedEvent {
         INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
         FAILED_TO_FETCH_SAVED_OBSERVATION
     }
-
-    public final Reason reason;
-    public final Exception exception;
 
     public EncounterAddFailedEvent(Reason reason, Exception exception) {
         this.reason = reason;

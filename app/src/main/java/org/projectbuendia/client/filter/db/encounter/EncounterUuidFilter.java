@@ -11,8 +11,8 @@
 
 package org.projectbuendia.client.filter.db.encounter;
 
-import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 /** Matches only the encounter with the given UUID. */
@@ -25,6 +25,6 @@ public final class EncounterUuidFilter extends SimpleSelectionFilter<Encounter> 
 
     @Override
     public String[] getSelectionArgs(CharSequence constraint) {
-        return new String[] { constraint.toString() };
+        return new String[] {constraint.toString()};
     }
 }

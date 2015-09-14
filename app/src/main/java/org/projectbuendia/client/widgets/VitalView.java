@@ -19,11 +19,12 @@ import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.lb.auto_fit_textview.AutoResizeTextView;
+
 import org.projectbuendia.client.R;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import com.lb.auto_fit_textview.AutoResizeTextView;
 
 /** A compound view that displays a patient vital in a colorful rectangle. */
 public class VitalView extends LinearLayout {
@@ -53,7 +54,7 @@ public class VitalView extends LinearLayout {
         int defaultTextColor = resources.getColor(R.color.view_vital_text_color);
 
         TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.VitalView, defStyleAttr, 0 /*defStyleRes*/);
+            attrs, R.styleable.VitalView, defStyleAttr, 0 /*defStyleRes*/);
         int vitalValueMaxLines;
         String value;
         String name;

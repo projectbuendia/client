@@ -55,55 +55,51 @@ public interface Server {
 
     /** Adds a patient. */
     void addPatient(
-            PatientDelta patientDelta,
-            Response.Listener<JsonPatient> successListener,
-            Response.ErrorListener errorListener);
+        PatientDelta patientDelta,
+        Response.Listener<JsonPatient> successListener,
+        Response.ErrorListener errorListener);
 
     /** Updates a patient. */
     public void updatePatient(
-            String patientId,
-            PatientDelta patientDelta,
-            Response.Listener<JsonPatient> successListener,
-            Response.ErrorListener errorListener);
+        String patientId,
+        PatientDelta patientDelta,
+        Response.Listener<JsonPatient> successListener,
+        Response.ErrorListener errorListener);
 
     /**
      * Creates a new user.
-     *
      * @param user the JsonNewUser to add
      */
     public void addUser(
-            JsonNewUser user,
-            Response.Listener<JsonUser> successListener,
-            Response.ErrorListener errorListener);
+        JsonNewUser user,
+        Response.Listener<JsonUser> successListener,
+        Response.ErrorListener errorListener);
 
     /**
      * Creates a new encounter for a given patient.
-     *
-     * @param patient the patient being observed
+     * @param patient   the patient being observed
      * @param encounter the encounter to add
      */
     void addEncounter(
-            Patient patient,
-            Encounter encounter,
-            Response.Listener<JsonEncounter> successListener,
-            Response.ErrorListener errorListener);
+        Patient patient,
+        Encounter encounter,
+        Response.Listener<JsonEncounter> successListener,
+        Response.ErrorListener errorListener);
 
     /**
      * Get the patient record for an existing patient. Currently we are just using a String-String
      * map for parameters, but this is a bit close in implementation details to the old Buendia UI
      * so it will probably need to be generalized in future.
-     *
      * @param patientId the unique patient id representing the patients
      */
     public void getPatient(
-            String patientId,
-            Response.Listener<JsonPatient> successListener,
-            Response.ErrorListener errorListener);
+        String patientId,
+        Response.Listener<JsonPatient> successListener,
+        Response.ErrorListener errorListener);
 
     /**
      * Updates the location of a patient.
-     *
-     * @param patientId the id of the patient to update
+     * @param patientId     the id of the patient to update
      * @param newLocationId the id of the new location that the patient is assigned to
      */
     public void updatePatientLocation(String patientId, String newLocationId);
@@ -126,11 +122,10 @@ public interface Server {
 
     /**
      * Adds a new location to the server.
-     *
-     * @param location uuid must not be set, parent_uuid must be set, and the names map must have a
-     *                 name for at least one locale.
+     * @param location        uuid must not be set, parent_uuid must be set, and the names map must have a
+     *                        name for at least one locale.
      * @param successListener the listener to be informed of the newly added location
-     * @param errorListener listener to be informed of any errors
+     * @param errorListener   listener to be informed of any errors
      */
     public void addLocation(JsonLocation location,
                             final Response.Listener<JsonLocation> successListener,
@@ -138,11 +133,10 @@ public interface Server {
 
     /**
      * Updates the names for a location on the server.
-     *
-     * @param location the location, only uuid and new locale names for the location will be used,
-     *                 but ideally the other arguments should be correct
+     * @param location        the location, only uuid and new locale names for the location will be used,
+     *                        but ideally the other arguments should be correct
      * @param successListener the listener to be informed of the newly added location
-     * @param errorListener listener to be informed of any errors
+     * @param errorListener   listener to be informed of any errors
      */
     public void updateLocation(JsonLocation location,
                                final Response.Listener<JsonLocation> successListener,

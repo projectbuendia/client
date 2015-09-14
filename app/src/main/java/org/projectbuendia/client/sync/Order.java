@@ -15,7 +15,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.projectbuendia.client.utils.Utils;
 
-import java.util.Date;
 import java.util.Objects;
 
 /** A simple bean class representing an observation with localized names and values. */
@@ -39,10 +38,10 @@ public final class Order {
     @Override
     public String toString() {
         return "<Order uuid=" + uuid
-                + ", instructions=" + instructions
-                + ", start=" + start
-                + ", stop=" + stop
-                + ">";
+            + ", instructions=" + instructions
+            + ", start=" + start
+            + ", stop=" + stop
+            + ">";
     }
 
     @Override
@@ -52,8 +51,8 @@ public final class Order {
         }
         Order o = (Order) other;
         return Objects.equals(uuid, o.uuid) &&
-                Objects.equals(instructions, o.instructions) &&
-                Objects.equals(start, o.start) &&
-                Objects.equals(stop, o.stop);
+            Objects.equals(instructions, o.instructions) &&
+            Objects.equals(start, o.start) &&
+            Objects.equals(stop, o.stop);
     }
 }

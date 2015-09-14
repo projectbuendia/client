@@ -24,11 +24,11 @@ import com.joanzapata.android.iconify.Iconify;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.LoadingState;
@@ -67,26 +67,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
     }
 
     @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
-        super.onCreateImpl(savedInstanceState);
-
-        App.getInstance().inject(this);
-        mSearchController = new PatientSearchController(
-                new SearchUi(),
-                mCrudEventBusProvider.get(),
-                new EventBusWrapper(mEventBus),
-                mAppModel,
-                mSyncManager,
-                mLocale);
-
-        mUpdateNotificationController = new UpdateNotificationController(
-                new UpdateNotificationUi()
-        );
-
-        ButterKnife.inject(this);
-    }
-
-    @Override
     public void onExtendOptionsMenu(Menu menu) {
         super.onExtendOptionsMenu(menu);
 
@@ -94,40 +74,40 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         inflater.inflate(R.menu.main, menu);
 
         menu.findItem(R.id.action_add).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
+            new MenuItem.OnMenuItemClickListener() {
 
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logEvent("add_patient_pressed");
-                        NewPatientActivity.start(BaseSearchablePatientListActivity.this);
-                        return true;
-                    }
-                });
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    Utils.logEvent("add_patient_pressed");
+                    NewPatientActivity.start(BaseSearchablePatientListActivity.this);
+                    return true;
+                }
+            });
 
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
+            new MenuItem.OnMenuItemClickListener() {
 
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("go_to_patient_pressed");
-                        GoToPatientDialogFragment.newInstance()
-                                .show(getSupportFragmentManager(), null);
-                        return true;
-                    }
-                });
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    Utils.logUserAction("go_to_patient_pressed");
+                    GoToPatientDialogFragment.newInstance()
+                        .show(getSupportFragmentManager(), null);
+                    return true;
+                }
+            });
 
         MenuItem search = menu.findItem(R.id.action_search);
         search.setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_search)
-                        .color(0xCCFFFFFF)
-                        .sizeDp(36));
+            new IconDrawable(this, Iconify.IconValue.fa_search)
+                .color(0xCCFFFFFF)
+                .sizeDp(36));
         search.setVisible(getLoadingState() == LoadingState.LOADED);
 
         MenuItem addPatient = menu.findItem(R.id.action_add);
         addPatient.setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_plus)
-                        .color(0xCCFFFFFF)
-                        .sizeDp(36));
+            new IconDrawable(this, Iconify.IconValue.fa_plus)
+                .color(0xCCFFFFFF)
+                .sizeDp(36));
         addPatient.setVisible(getLoadingState() == LoadingState.LOADED);
 
         mSearchView = (SearchView) search.getActionView();
@@ -135,21 +115,21 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
         MenuItem cancel = menu.findItem(R.id.action_cancel);
         cancel.setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_close)
-                        .color(0xCCFFFFFF)
-                        .sizeDp(36));
+            new IconDrawable(this, Iconify.IconValue.fa_close)
+                .color(0xCCFFFFFF)
+                .sizeDp(36));
         cancel.setOnMenuItemClickListener(mCancelListener);
         cancel.setVisible(getLoadingState() == LoadingState.SYNCING);
 
         InputMethodManager mgr =
-                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 InputMethodManager mgr = (InputMethodManager) getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
+                    Context.INPUT_METHOD_SERVICE);
                 mgr.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
                 return true;
             }
@@ -160,6 +140,26 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                 return true;
             }
         });
+    }
+
+    @Override
+    protected void onCreateImpl(Bundle savedInstanceState) {
+        super.onCreateImpl(savedInstanceState);
+
+        App.getInstance().inject(this);
+        mSearchController = new PatientSearchController(
+            new SearchUi(),
+            mCrudEventBusProvider.get(),
+            new EventBusWrapper(mEventBus),
+            mAppModel,
+            mSyncManager,
+            mLocale);
+
+        mUpdateNotificationController = new UpdateNotificationController(
+            new UpdateNotificationUi()
+        );
+
+        ButterKnife.inject(this);
     }
 
     @Override

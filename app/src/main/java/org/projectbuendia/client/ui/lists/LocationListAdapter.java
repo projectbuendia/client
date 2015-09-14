@@ -23,8 +23,8 @@ import com.google.common.base.Preconditions;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import java.util.List;
@@ -40,10 +40,10 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
     private Optional<String> mSelectedLocationUuid;
 
     public LocationListAdapter(
-            Context context,
-            List<Location> locations,
-            LocationTree locationTree,
-            Optional<String> selectedLocation) {
+        Context context,
+        List<Location> locations,
+        LocationTree locationTree,
+        Optional<String> selectedLocation) {
         super(context, R.layout.listview_cell_location_selection, locations);
         mContext = context;
         mLocationTree = locationTree;
@@ -54,10 +54,16 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         return mSelectedLocationUuid;
     }
 
+    public void setSelectedLocationUuid(Optional<String> locationUuid) {
+        mSelectedLocationUuid = locationUuid;
+
+        notifyDataSetChanged();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view;
         ViewHolder holder;
         if (convertView != null) {
@@ -87,19 +93,13 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         }
 
         if (mSelectedLocationUuid.isPresent()
-                && mSelectedLocationUuid.get().equals(location.uuid)) {
+            && mSelectedLocationUuid.get().equals(location.uuid)) {
             view.setBackgroundResource(R.color.zone_location_selected_padding);
         } else {
             view.setBackgroundResource(R.drawable.location_selector);
         }
 
         return view;
-    }
-
-    public void setSelectedLocationUuid(Optional<String> locationUuid) {
-        mSelectedLocationUuid = locationUuid;
-
-        notifyDataSetChanged();
     }
 
     static class ViewHolder {

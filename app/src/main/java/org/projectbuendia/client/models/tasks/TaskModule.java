@@ -25,11 +25,10 @@ import dagger.Provides;
 @Module(complete = false, library = true)
 public class TaskModule {
     @Provides
-    @Singleton
-    TaskFactory provideAppAsyncTaskFactory(
-            Server server,
-            ContentResolver contentResolver,
-            ConverterPack converters) {
+    @Singleton TaskFactory provideAppAsyncTaskFactory(
+        Server server,
+        ContentResolver contentResolver,
+        ConverterPack converters) {
         return new TaskFactory(converters, server, contentResolver);
     }
 }

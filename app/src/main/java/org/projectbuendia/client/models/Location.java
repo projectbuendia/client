@@ -15,9 +15,9 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * A location in the app model.
- *
+ * <p/>
  * <p>App model locations are always localized.
- *
+ * <p/>
  * <p>Patient counts represent the number of patients assigned directly to this location, and do
  * not include the number of patients in child locations. To get a recursive patient count, use
  * {@link LocationTree#getTotalPatientCount(Location)}.

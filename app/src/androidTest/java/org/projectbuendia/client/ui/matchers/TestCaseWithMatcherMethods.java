@@ -13,15 +13,15 @@ package org.projectbuendia.client.ui.matchers;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
-import android.test.ActivityInstrumentationTestCase2;
-import android.view.View;
-
-import com.estimote.sdk.internal.Preconditions;
 import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.action.ViewActions;
 import android.support.test.espresso.matcher.ViewMatchers;
+import android.test.ActivityInstrumentationTestCase2;
+import android.view.View;
+
+import com.estimote.sdk.internal.Preconditions;
 import com.google.common.base.Joiner;
 
 import org.hamcrest.Description;
@@ -46,12 +46,26 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
         return Espresso.onView(hasId(id));
     }
 
+    public static Matcher<View> hasId(int id) {
+        return new MatcherWithDescription<>(ViewMatchers.withId(id), "has ID " + id);
+    }
+
     public static ViewInteraction viewWithText(String text) {
         return Espresso.onView(hasText(text));
     }
 
+    public static Matcher<View> hasText(String text) {
+        return new MatcherWithDescription<>(ViewMatchers.withText(text),
+            "has the exact text \"" + text + "\"");
+    }
+
     public static ViewInteraction viewWithText(int resourceId) {
         return Espresso.onView(hasText(resourceId));
+    }
+
+    public static Matcher<View> hasText(int resourceId) {
+        return new MatcherWithDescription<>(ViewMatchers.withText(resourceId),
+            "has string resource " + resourceId + " as its text");
     }
 
     @SafeVarargs
@@ -66,11 +80,238 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     @SafeVarargs
     public static void expect(ViewInteraction vi, Matcher<View>... matchers) {
         vi.check(matches(matchers.length == 0 ? isVisible() :
-                matchers.length > 1 ? allOf(matchers) : matchers[0]));
+            matchers.length > 1 ? allOf(matchers) : matchers[0]));
     }
 
-    public static void expectVisible(ViewInteraction vi) {
+    public static Matcher<View> isVisible() {
+        return new MatcherWithDescription<>(ViewMatchers.isDisplayed(),
+            "is visible");
+    }
+
+    public static void expectVisible(DataInteraction di) {
+        di.check(matches(isVisible()));
+    }
+
+    public static void click(DataInteraction di) {
+        di.perform(ViewActions.click());
+    }
+
+    public static void scrollToAndClick(ViewInteraction vi) {
+        scrollTo(vi);
+        click(vi);
+    }
+
+    public static void scrollTo(ViewInteraction vi) {
+        vi.perform(ViewActions.scrollTo());
+    }
+
+    public static void click(ViewInteraction vi) {
+        vi.perform(ViewActions.click());
+    }
+
+    public static void scrollToAndType(Object obj, ViewInteraction vi) {
+        scrollTo(vi);
+        type(obj, vi);
+    }
+
+    public static void type(Object obj, ViewInteraction vi) {
+        vi.perform(ViewActions.typeText(obj.toString()));
+    }
+
+    // Matchers with better descriptions than those in espresso.matcher.ViewMatchers.
+
+    public static void scrollToAndExpectVisible(ViewInteraction vi) {
+        scrollTo(vi);
         vi.check(matches(isVisible()));
+    }
+
+    public static Matcher<View> isA(final Class<? extends View> cls) {
+        String name = cls.getSimpleName();
+        return new MatcherWithDescription<>(
+            ViewMatchers.isAssignableFrom(cls),
+            (name.matches("^[AEIOU]") ? "is an " : "is a ") + name);
+    }
+
+    // Names of Espresso matchers form expressions that don't make any grammatical sense,
+    // such as withParent(withSibling(isVisible())).  Instead of prepositional
+    // phrases like "withFoo", matcher names should be verb phrases like "hasFoo" or
+    // connecting verb phrases ending in "That", yielding more readable expressions
+    // such as whoseParent(hasSiblingThat(isVisible())).
+
+    public static Matcher<View> isAnyOf(final Class<? extends View>... classes) {
+        Preconditions.checkArgument(classes.length >= 1);
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public boolean matchesSafely(View obj) {
+                for (Class cls : classes) {
+                    if (cls.isInstance(obj)) return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                String[] names = new String[classes.length];
+                for (int i = 0; i < classes.length; i++) {
+                    names[i] = classes[i].getSimpleName();
+                }
+                String list = Joiner.on(", ").join(names);
+                if (names.length == 2) {
+                    list = list.replace(", ", " or ");
+                } else if (names.length > 2) {
+                    list = list.replaceAll(", ([^,*])$", ", or $1");
+                }
+                description.appendText(
+                    (names[0].matches("^[AEIOU]") ? "is an " : "is a ") + list);
+            }
+        };
+    }
+
+    @SafeVarargs
+    public static Matcher<View> whoseParent(Matcher<View>... matchers) {
+        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return new MatcherWithDescription<>(ViewMatchers.withParent(matcher),
+            "whose parent {1}", matcher);
+    }
+
+    @SafeVarargs
+    public static Matcher<View> hasChildThat(Matcher<View>... matchers) {
+        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return new MatcherWithDescription<>(ViewMatchers.withChild(matcher),
+            "has a child that {1}", matcher);
+    }
+
+    @SafeVarargs
+    public static Matcher<View> hasAncestorThat(Matcher<View>... matchers) {
+        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return new MatcherWithDescription<>(ViewMatchers.isDescendantOfA(matcher),
+            "has an ancestor that {1}", matcher);
+    }
+
+    @SafeVarargs
+    public static Matcher<View> hasDescendantThat(Matcher<View>... matchers) {
+        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return new MatcherWithDescription<>(ViewMatchers.hasDescendant(matcher),
+            "has a descendant that {1}", matcher);
+    }
+
+    @SafeVarargs
+    public static Matcher<View> hasSiblingThat(Matcher<View>... matchers) {
+        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return new MatcherWithDescription<>(ViewMatchers.hasSibling(matcher),
+            "has a sibling that {1}", matcher);
+    }
+
+    public static Matcher<View> isChecked() {
+        return new MatcherWithDescription<>(ViewMatchers.isChecked(), "is checked");
+    }
+
+    public static Matcher<View> isNotChecked() {
+        return new MatcherWithDescription<>(ViewMatchers.isNotChecked(), "is unchecked");
+    }
+
+    @SafeVarargs
+    public static Matcher<View> hasText(Matcher<String>... matchers) {
+        Matcher<String> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
+        return new MatcherWithDescription<>(ViewMatchers.withText(matcher),
+            "has text {1}", matcher);
+    }
+
+    public static Matcher<View> hasTextContaining(String text) {
+        return new MatcherWithDescription<>(ViewMatchers.withText(text),
+            "has text containing \"" + text + "\"");
+    }
+
+    public static Matcher<View> hasTextMatchingRegex(String regex) {
+        return new MatcherWithDescription<>(
+            ViewMatchers.withText(StringMatchers.matchesRegex(regex)),
+            "has text matching regex /" + regex + "/");
+    }
+
+    public static Matcher<View> isAtLeastNPercentVisible(int percentage) {
+        return new MatcherWithDescription<>(ViewMatchers.isDisplayingAtLeast(percentage),
+            "is at least " + percentage + "% visible");
+    }
+
+    /** Matcher that matches any view in the given row, assuming all rows have the specified height. */
+    public static TypeSafeMatcher<View> isInRow(final int rowNumber, final int rowHeight) {
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public boolean matchesSafely(View view) {
+                return view.getY() >= getMinY() && view.getY() < getMaxY();
+            }
+
+            private int getMaxY() {
+                return (rowNumber + 1)*rowHeight;
+            }
+
+            private int getMinY() {
+                return rowNumber*rowHeight;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has " + getMinY() + " <= y < " + getMaxY());
+            }
+        };
+    }
+
+    /** Matcher that matches any view in the given column, assuming all columns have the specified with. */
+    public static TypeSafeMatcher<View> isInColumn(final int colNumber, final int colWidth) {
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public boolean matchesSafely(View view) {
+                return view.getX() >= getMinX() && view.getX() < getMaxX();
+            }
+
+            private int getMaxX() {
+                return (colNumber + 1)*colWidth;
+            }
+
+            private int getMinX() {
+                return colNumber*colWidth;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has " + getMinX() + " <= x < " + getMaxX());
+            }
+        };
+    }
+
+    /** Matcher that matches any view with the given background drawable. */
+    public static TypeSafeMatcher<View> hasBackground(final Drawable background) {
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public boolean matchesSafely(View view) {
+                return background != null && view.getBackground() != null &&
+                    background.getConstantState().equals(
+                        view.getBackground().getConstantState());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has background " + background.toString());
+            }
+        };
+    }
+
+    /** Matcher that matches a view with the background drawable specified by ID. */
+    public static TypeSafeMatcher<View> hasBackground(final int resourceId) {
+        return new TypeSafeMatcher<View>() {
+            @Override
+            public boolean matchesSafely(View view) {
+                Drawable background = view.getResources().getDrawable(resourceId);
+                return background != null && view.getBackground() != null &&
+                    background.getConstantState().equals(
+                        view.getBackground().getConstantState());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has drawable resource " + resourceId + " as its background");
+            }
+        };
     }
 
     protected static void expectVisibleSoon(ViewInteraction vi) {
@@ -99,168 +340,8 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
         }
     }
 
-    public static void expectVisible(DataInteraction di) {
-        di.check(matches(isVisible()));
-    }
-
-    public static void click(DataInteraction di) {
-        di.perform(ViewActions.click());
-    }
-    
-    public static void click(ViewInteraction vi) {
-        vi.perform(ViewActions.click());
-    }
-    
-    public static void type(Object obj, ViewInteraction vi) {
-        vi.perform(ViewActions.typeText(obj.toString()));
-    }
-
-    public static void scrollTo(ViewInteraction vi) {
-        vi.perform(ViewActions.scrollTo());
-    }
-
-    public static void scrollToAndClick(ViewInteraction vi) {
-        scrollTo(vi);
-        click(vi);
-    }
-
-    public static void scrollToAndType(Object obj, ViewInteraction vi) {
-        scrollTo(vi);
-        type(obj, vi);
-    }
-
-    public static void scrollToAndExpectVisible(ViewInteraction vi) {
-        scrollTo(vi);
+    public static void expectVisible(ViewInteraction vi) {
         vi.check(matches(isVisible()));
-    }
-
-    // Matchers with better descriptions than those in espresso.matcher.ViewMatchers.
-
-    public static Matcher<View> isA(final Class<? extends View> cls) {
-        String name = cls.getSimpleName();
-        return new MatcherWithDescription<>(
-                ViewMatchers.isAssignableFrom(cls),
-                (name.matches("^[AEIOU]") ? "is an " : "is a ") + name);
-    }
-
-    public static Matcher<View> isAnyOf(final Class<? extends View>... classes) {
-        Preconditions.checkArgument(classes.length >= 1);
-        return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View obj) {
-                for (Class cls : classes) {
-                    if (cls.isInstance(obj)) return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                String[] names = new String[classes.length];
-                for (int i = 0; i < classes.length; i++) {
-                    names[i] = classes[i].getSimpleName();
-                }
-                String list = Joiner.on(", ").join(names);
-                if (names.length == 2) {
-                    list = list.replace(", ", " or ");
-                } else if (names.length > 2) {
-                    list = list.replaceAll(", ([^,*])$", ", or $1");
-                }
-                description.appendText(
-                        (names[0].matches("^[AEIOU]") ? "is an " : "is a ") + list);
-            }
-        };
-    }
-
-    // Names of Espresso matchers form expressions that don't make any grammatical sense,
-    // such as withParent(withSibling(isVisible())).  Instead of prepositional
-    // phrases like "withFoo", matcher names should be verb phrases like "hasFoo" or
-    // connecting verb phrases ending in "That", yielding more readable expressions
-    // such as whoseParent(hasSiblingThat(isVisible())).
-
-    public static Matcher<View> hasId(int id) {
-        return new MatcherWithDescription<>(ViewMatchers.withId(id), "has ID " + id);
-    }
-
-    @SafeVarargs
-    public static Matcher<View> whoseParent(Matcher<View>... matchers) {
-        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
-        return new MatcherWithDescription<>(ViewMatchers.withParent(matcher),
-                "whose parent {1}", matcher);
-    }
-
-    @SafeVarargs
-    public static Matcher<View> hasChildThat(Matcher<View>... matchers) {
-        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
-        return new MatcherWithDescription<>(ViewMatchers.withChild(matcher),
-                "has a child that {1}", matcher);
-    }
-
-    @SafeVarargs
-    public static Matcher<View> hasAncestorThat(Matcher<View>... matchers) {
-        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
-        return new MatcherWithDescription<>(ViewMatchers.isDescendantOfA(matcher),
-                "has an ancestor that {1}", matcher);
-    }
-
-    @SafeVarargs
-    public static Matcher<View> hasDescendantThat(Matcher<View>... matchers) {
-        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
-        return new MatcherWithDescription<>(ViewMatchers.hasDescendant(matcher),
-                "has a descendant that {1}", matcher);
-    }
-
-    @SafeVarargs
-    public static Matcher<View> hasSiblingThat(Matcher<View>... matchers) {
-        Matcher<View> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
-        return new MatcherWithDescription<>(ViewMatchers.hasSibling(matcher),
-                "has a sibling that {1}", matcher);
-    }
-
-    public static Matcher<View> isChecked() {
-        return new MatcherWithDescription<>(ViewMatchers.isChecked(), "is checked");
-    }
-
-    public static Matcher<View> isNotChecked() {
-        return new MatcherWithDescription<>(ViewMatchers.isNotChecked(), "is unchecked");
-    }
-
-    @SafeVarargs
-    public static Matcher<View> hasText(Matcher<String>... matchers) {
-        Matcher<String> matcher = matchers.length > 1 ? allOf(matchers) : matchers[0];
-        return new MatcherWithDescription<>(ViewMatchers.withText(matcher),
-                "has text {1}", matcher);
-    }
-
-    public static Matcher<View> hasText(String text) {
-        return new MatcherWithDescription<>(ViewMatchers.withText(text),
-                "has the exact text \"" + text + "\"");
-    }
-
-    public static Matcher<View> hasText(int resourceId) {
-        return new MatcherWithDescription<>(ViewMatchers.withText(resourceId),
-                "has string resource " + resourceId + " as its text");
-    }
-
-    public static Matcher<View> hasTextContaining(String text) {
-        return new MatcherWithDescription<>(ViewMatchers.withText(text),
-                "has text containing \"" + text + "\"");
-    }
-
-    public static Matcher<View> hasTextMatchingRegex(String regex) {
-        return new MatcherWithDescription<>(
-                ViewMatchers.withText(StringMatchers.matchesRegex(regex)),
-                "has text matching regex /" + regex + "/");
-    }
-
-    public static Matcher<View> isVisible() {
-        return new MatcherWithDescription<>(ViewMatchers.isDisplayed(),
-                "is visible");
-    }
-
-    public static Matcher<View> isAtLeastNPercentVisible(int percentage) {
-        return new MatcherWithDescription<>(ViewMatchers.isDisplayingAtLeast(percentage),
-                "is at least " + percentage + "% visible");
     }
 
     /** Replaces the description of an existing matcher. */
@@ -288,86 +369,5 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
             }
             description.appendText(String.format(mFormat, (Object[]) args));
         }
-    }
-
-    /** Matcher that matches any view in the given row, assuming all rows have the specified height. */
-    public static TypeSafeMatcher<View> isInRow(final int rowNumber, final int rowHeight) {
-        return new TypeSafeMatcher<View>() {
-            private int getMinY() {
-                return rowNumber * rowHeight;
-            }
-
-            private int getMaxY() {
-                return (rowNumber + 1) * rowHeight;
-            }
-
-            @Override
-            public boolean matchesSafely(View view) {
-                return view.getY() >= getMinY() && view.getY() < getMaxY();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("has " + getMinY() + " <= y < " + getMaxY());
-            }
-        };
-    }
-
-    /** Matcher that matches any view in the given column, assuming all columns have the specified with. */
-    public static TypeSafeMatcher<View> isInColumn(final int colNumber, final int colWidth) {
-        return new TypeSafeMatcher<View>() {
-            private int getMinX() {
-                return colNumber * colWidth;
-            }
-
-            private int getMaxX() {
-                return (colNumber + 1) * colWidth;
-            }
-
-            @Override
-            public boolean matchesSafely(View view) {
-                return view.getX() >= getMinX() && view.getX() < getMaxX();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("has " + getMinX() + " <= x < " + getMaxX());
-            }
-        };
-    }
-
-    /** Matcher that matches any view with the given background drawable. */
-    public static TypeSafeMatcher<View> hasBackground(final Drawable background) {
-        return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
-                return background != null && view.getBackground() != null &&
-                        background.getConstantState().equals(
-                                view.getBackground().getConstantState());
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("has background " + background.toString());
-            }
-        };
-    }
-
-    /** Matcher that matches a view with the background drawable specified by ID. */
-    public static TypeSafeMatcher<View> hasBackground(final int resourceId) {
-        return new TypeSafeMatcher<View>() {
-            @Override
-            public boolean matchesSafely(View view) {
-                Drawable background = view.getResources().getDrawable(resourceId);
-                return background != null && view.getBackground() != null &&
-                        background.getConstantState().equals(
-                                view.getBackground().getConstantState());
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("has drawable resource " + resourceId + " as its background");
-            }
-        };
     }
 }

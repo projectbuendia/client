@@ -37,13 +37,13 @@ public class WrapContentLinearLayoutManager extends LinearLayoutManager {
         final int heightMode = View.MeasureSpec.getMode(heightSpec);
 
         if ((widthMode == View.MeasureSpec.AT_MOST && getOrientation() == VERTICAL)
-                || (heightMode == View.MeasureSpec.AT_MOST && getOrientation() == HORIZONTAL)) {
+            || (heightMode == View.MeasureSpec.AT_MOST && getOrientation() == HORIZONTAL)) {
 
             int unSpecifiedSpec = MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
             int maxSize = 0;
             for (int i = 0; i < state.getItemCount(); ++i) {
                 int currentSize = measureScrapChild(recycler, i,
-                        unSpecifiedSpec, unSpecifiedSpec, getOrientation());
+                    unSpecifiedSpec, unSpecifiedSpec, getOrientation());
                 maxSize = Math.max(maxSize, currentSize);
             }
 
@@ -65,18 +65,18 @@ public class WrapContentLinearLayoutManager extends LinearLayoutManager {
      * non-scrolling dimension of the RecyclerView, given the RecyclerView's {@code orientation}.
      */
     private int measureScrapChild(RecyclerView.Recycler recycler, int position, int widthSpec,
-                                   int heightSpec, int orientation) {
+                                  int heightSpec, int orientation) {
         View view = recycler.getViewForPosition(position);
         if (view != null) {
             RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
             int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
-                    getPaddingLeft() + getPaddingRight(), p.width);
+                getPaddingLeft() + getPaddingRight(), p.width);
             int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
-                    getPaddingTop() + getPaddingBottom(), p.height);
+                getPaddingTop() + getPaddingBottom(), p.height);
             view.measure(childWidthSpec, childHeightSpec);
             int result = (orientation == VERTICAL)
-                    ? view.getMeasuredWidth()
-                    : view.getMeasuredHeight();
+                ? view.getMeasuredWidth()
+                : view.getMeasuredHeight();
             recycler.recycleView(view);
             return result;
         } else {

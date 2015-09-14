@@ -11,11 +11,13 @@
 
 package org.projectbuendia.client.user;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.content.OperationApplicationException;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+
+import com.android.volley.VolleyError;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 import org.projectbuendia.client.events.user.ActiveUserSetEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
@@ -33,44 +35,42 @@ import org.projectbuendia.client.utils.AsyncTaskRunner;
 import org.projectbuendia.client.utils.EventBusInterface;
 import org.projectbuendia.client.utils.Logger;
 
-import com.android.volley.VolleyError;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Manages the available logins and the currently logged-in user.
- *
+ * <p/>
  * <p>All classes that care about the current active user should be able to gracefully handle the
  * following event bus events:
  * <ul>
- *     <li>{@link ActiveUserSetEvent}
- *     <li>{@link ActiveUserUnsetEvent}
+ * <li>{@link ActiveUserSetEvent}
+ * <li>{@link ActiveUserUnsetEvent}
  * </ul>
- *
+ * <p/>
  * <p>All classes that care about all known users should additionally be able to gracefully handle
  * the following event bus events:
  * <ul>
- *     <li>{@link KnownUsersLoadedEvent}
- *     <li>{@link KnownUsersLoadFailedEvent}
- *     <li>{@link KnownUsersSyncedEvent}
- *     <li>{@link KnownUsersSyncFailedEvent}
+ * <li>{@link KnownUsersLoadedEvent}
+ * <li>{@link KnownUsersLoadFailedEvent}
+ * <li>{@link KnownUsersSyncedEvent}
+ * <li>{@link KnownUsersSyncFailedEvent}
  * </ul>
- *
+ * <p/>
  * <p>All classes that care about being able to add and delete users should additionally be able
  * gracefully handle the following event bus events:
  * <ul>
- *     <li>{@link UserAddedEvent}
- *     <li>{@link UserAddFailedEvent}
- *     <li>{@link UserDeletedEvent}
- *     <li>{@link UserDeleteFailedEvent}
+ * <li>{@link UserAddedEvent}
+ * <li>{@link UserAddFailedEvent}
+ * <li>{@link UserDeletedEvent}
+ * <li>{@link UserDeleteFailedEvent}
  * </ul>
- *
+ * <p/>
  * <p>All methods should be called on the main thread.
  */
 public class UserManager {
@@ -87,15 +87,6 @@ public class UserManager {
     private boolean mIsDirty = false;
     @Nullable private AsyncTask mLastTask;
     @Nullable private JsonUser mActiveUser;
-
-    UserManager(
-            UserStore userStore,
-            EventBusInterface eventBus,
-            AsyncTaskRunner asyncTaskRunner) {
-        mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
-        mEventBus = checkNotNull(eventBus);
-        mUserStore = checkNotNull(userStore);
-    }
 
     /**
      * Utility function for automatically canceling user load tasks to simulate network connectivity
@@ -131,10 +122,10 @@ public class UserManager {
 
     /**
      * Loads the set of all users known to the application from local cache.
-     *
+     * <p/>
      * <p>This method will post a {@link KnownUsersLoadedEvent} if the known users were
      * successfully loaded and a {@link KnownUsersLoadFailedEvent} otherwise.
-     *
+     * <p/>
      * <p>This method will only perform a local cache lookup once per application lifetime.
      */
     public void loadKnownUsers() {
@@ -148,10 +139,10 @@ public class UserManager {
 
     /**
      * Syncs the set of all users known to the application with the server.
-     *
+     * <p/>
      * <p>Server synchronization will periodically happen automatically, but this method allows for
      * the sync to be forced.
-     *
+     * <p/>
      * <p>This method will post a {@link KnownUsersSyncedEvent} if the sync succeeded and a
      * {@link KnownUsersSyncFailedEvent} otherwise. If the sync succeeded and the current active
      * user was deleted on the server, this method will post a {@link ActiveUserUnsetEvent}.
@@ -162,9 +153,39 @@ public class UserManager {
 
     /** Synchronous version of {@link #syncKnownUsers()}. */
     public void syncKnownUsersSynchronously()
-            throws InterruptedException, ExecutionException, RemoteException,
-            OperationApplicationException, UserSyncException {
+        throws InterruptedException, ExecutionException, RemoteException,
+        OperationApplicationException, UserSyncException {
         onUsersSynced(mUserStore.syncKnownUsers());
+    }
+
+    /**
+     * Called when users are retrieved from the server, in order to send events and update user
+     * state as necessary.
+     */
+    private void onUsersSynced(Set<JsonUser> syncedUsers) throws UserSyncException {
+        if (syncedUsers == null || syncedUsers.isEmpty()) {
+            throw new UserSyncException("Set of users retrieved from server is null or empty.");
+        }
+
+        ImmutableSet<JsonUser> addedUsers =
+            ImmutableSet.copyOf(Sets.difference(syncedUsers, mKnownUsers));
+        ImmutableSet<JsonUser> deletedUsers =
+            ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedUsers));
+
+        mKnownUsers.clear();
+        mKnownUsers.addAll(syncedUsers);
+        mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
+
+        if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
+            // TODO: Potentially clear mActiveUser here.
+            mEventBus.post(new ActiveUserUnsetEvent(
+                mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
+        }
+
+        // If at least one user was added or deleted, the set of known users has changed.
+        if (!addedUsers.isEmpty() || !deletedUsers.isEmpty()) {
+            setDirty(true);
+        }
     }
 
     /** Returns the current active user or {@code null} if no user is active. */
@@ -175,9 +196,9 @@ public class UserManager {
     /**
      * Sets the current active user or unsets it if {@code activeUser} is {@code null}, returning
      * whether the operation succeeded.
-     *
+     * <p/>
      * <p>This method will fail if the specified user is not known to the application.
-     *
+     * <p/>
      * <p>This method will post an {@link ActiveUserSetEvent} if the active user was successfully
      * set and an {@link ActiveUserUnsetEvent} if the active user was unset successfully; these
      * events will be posted even if the active user did not change.
@@ -187,7 +208,7 @@ public class UserManager {
         if (activeUser == null) {
             mActiveUser = null;
             mEventBus.post(new ActiveUserUnsetEvent(
-                    previousActiveUser, ActiveUserUnsetEvent.REASON_UNSET_INVOKED));
+                previousActiveUser, ActiveUserUnsetEvent.REASON_UNSET_INVOKED));
             return true;
         }
 
@@ -203,7 +224,7 @@ public class UserManager {
 
     /**
      * Adds a user to the set of known users, both locally and on the server.
-     *
+     * <p/>
      * <p>This method will post a {@link UserAddedEvent} if the user was added successfully and a
      * {@link UserAddFailedEvent} otherwise.
      */
@@ -215,7 +236,7 @@ public class UserManager {
 
     /**
      * Deletes a user from the set of known users, both locally and on the server.
-     *
+     * <p/>
      * <p>This method will post a {@link UserDeletedEvent} if the user was deleted successfully and
      * a {@link UserDeleteFailedEvent} otherwise.
      */
@@ -225,39 +246,25 @@ public class UserManager {
         mAsyncTaskRunner.runTask(new DeleteUserTask(user));
     }
 
-    /**
-     * Called when users are retrieved from the server, in order to send events and update user
-     * state as necessary.
-     */
-    private void onUsersSynced(Set<JsonUser> syncedUsers) throws UserSyncException {
-        if (syncedUsers == null || syncedUsers.isEmpty()) {
-            throw new UserSyncException("Set of users retrieved from server is null or empty.");
+    /** Thrown when an error occurs syncing users from server. */
+    public static class UserSyncException extends Throwable {
+        public UserSyncException(String s) {
+            super(s);
         }
+    }
 
-        ImmutableSet<JsonUser> addedUsers =
-                ImmutableSet.copyOf(Sets.difference(syncedUsers, mKnownUsers));
-        ImmutableSet<JsonUser> deletedUsers =
-                ImmutableSet.copyOf(Sets.difference(mKnownUsers, syncedUsers));
-
-        mKnownUsers.clear();
-        mKnownUsers.addAll(syncedUsers);
-        mEventBus.post(new KnownUsersSyncedEvent(addedUsers, deletedUsers));
-
-        if (mActiveUser != null && deletedUsers.contains(mActiveUser)) {
-            // TODO: Potentially clear mActiveUser here.
-            mEventBus.post(new ActiveUserUnsetEvent(
-                    mActiveUser, ActiveUserUnsetEvent.REASON_USER_DELETED));
-        }
-
-        // If at least one user was added or deleted, the set of known users has changed.
-        if (!addedUsers.isEmpty() || !deletedUsers.isEmpty()) {
-            setDirty(true);
-        }
+    UserManager(
+        UserStore userStore,
+        EventBusInterface eventBus,
+        AsyncTaskRunner asyncTaskRunner) {
+        mAsyncTaskRunner = checkNotNull(asyncTaskRunner);
+        mEventBus = checkNotNull(eventBus);
+        mUserStore = checkNotNull(userStore);
     }
 
     /**
      * Loads known users from the database into memory.
-     *
+     * <p/>
      * <p>Forces a network sync if the database has not been downloaded yet.
      */
     private class LoadKnownUsersTask extends AsyncTask<Object, Void, Set<JsonUser>> {
@@ -274,7 +281,7 @@ public class UserManager {
                 // TODO: Figure out type of exception to throw.
                 LOG.e(e, "Load users task failed");
                 mEventBus.post(
-                        new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
+                    new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_UNKNOWN));
                 return null;
             }
         }
@@ -283,7 +290,7 @@ public class UserManager {
         protected void onCancelled() {
             LOG.w("Load users task cancelled");
             mEventBus.post(
-                    new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_CANCELLED));
+                new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_CANCELLED));
         }
 
         @Override
@@ -295,7 +302,7 @@ public class UserManager {
             if (mKnownUsers.isEmpty()) {
                 LOG.e("No users returned from db");
                 mEventBus.post(new KnownUsersLoadFailedEvent(
-                                KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
+                    KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
             } else {
                 mSynced = true;
                 mEventBus.post(new KnownUsersLoadedEvent(ImmutableSet.copyOf(mKnownUsers)));
@@ -321,7 +328,7 @@ public class UserManager {
         protected void onPostExecute(Set<JsonUser> syncedUsers) {
             if (syncedUsers == null) {
                 mEventBus.post(
-                        new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
+                    new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
                 return;
             }
 
@@ -329,12 +336,12 @@ public class UserManager {
                 onUsersSynced(syncedUsers);
             } catch (UserSyncException e) {
                 mEventBus.post(
-                        new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
+                    new KnownUsersSyncFailedEvent(KnownUsersSyncFailedEvent.REASON_UNKNOWN));
             }
         }
     }
 
-    /**Adds a user to the database asynchronously. */
+    /** Adds a user to the database asynchronously. */
     private final class AddUserTask extends AsyncTask<Void, Void, JsonUser> {
 
         private final JsonNewUser mUser;
@@ -371,10 +378,10 @@ public class UserManager {
                 setDirty(true);
             } else if (mAlreadyExists) {
                 mEventBus.post(new UserAddFailedEvent(
-                        mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
+                    mUser, UserAddFailedEvent.REASON_USER_EXISTS_ON_SERVER));
             } else if (mFailedToConnect) {
                 mEventBus.post(new UserAddFailedEvent(
-                        mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
+                    mUser, UserAddFailedEvent.REASON_CONNECTION_ERROR));
             } else {
                 mEventBus.post(new UserAddFailedEvent(mUser, UserAddFailedEvent.REASON_UNKNOWN));
             }
@@ -411,15 +418,8 @@ public class UserManager {
                 setDirty(true);
             } else {
                 mEventBus.post(
-                        new UserDeleteFailedEvent(mUser, UserDeleteFailedEvent.REASON_UNKNOWN));
+                    new UserDeleteFailedEvent(mUser, UserDeleteFailedEvent.REASON_UNKNOWN));
             }
-        }
-    }
-
-    /** Thrown when an error occurs syncing users from server. */
-    public static class UserSyncException extends Throwable {
-        public UserSyncException(String s) {
-            super(s);
         }
     }
 }

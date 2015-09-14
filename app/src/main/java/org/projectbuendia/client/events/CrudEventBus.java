@@ -13,7 +13,7 @@ package org.projectbuendia.client.events;
 
 /**
  * An interface for an event bus that handles CRUD operations on the data model.
- *
+ * <p/>
  * <p>In addition to providing support for subscribing to and posting events, this interface
  * provides a mechanism to clean up after itself if all registered subscribers are unregistered or
  * if an event is posted for which there are no listeners.
@@ -29,7 +29,6 @@ public interface CrudEventBus {
     /**
      * Registers a {@link CleanupSubscriber} that gets invoked when all subscribers have been
      * unregistered.
-     *
      * @param subscriber the subscriber to invoke or {@code null} to disable the callback
      */
     void registerCleanupSubscriber(CleanupSubscriber subscriber);

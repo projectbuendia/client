@@ -16,16 +16,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import org.projectbuendia.client.models.Base;
-import org.projectbuendia.client.models.converters.Converter;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.models.Base;
+import org.projectbuendia.client.models.converters.Converter;
 
 /**
  * An {@link AsyncTask} that fetches a single item from the data store.
- *
+ * <p/>
  * <p>If the operation succeeds, a {@link ItemFetchedEvent} is posted on the given
  * {@link CrudEventBus} with the retrieved item. If the operation fails, a
  * {@link ItemFetchFailedEvent} is posted instead.
@@ -40,13 +40,13 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
     private final CrudEventBus mBus;
 
     FetchItemTask(
-            ContentResolver contentResolver,
-            Uri contentUri,
-            String[] projectionColumns,
-            SimpleSelectionFilter filter,
-            String constraint,
-            Converter<T> converter,
-            CrudEventBus bus) {
+        ContentResolver contentResolver,
+        Uri contentUri,
+        String[] projectionColumns,
+        SimpleSelectionFilter filter,
+        String constraint,
+        Converter<T> converter,
+        CrudEventBus bus) {
         mContentResolver = contentResolver;
         mContentUri = contentUri;
         mProjectionColumns = projectionColumns;
@@ -61,11 +61,11 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                    mContentUri,
-                    mProjectionColumns,
-                    mFilter.getSelectionString(),
-                    mFilter.getSelectionArgs(mConstraint),
-                    null);
+                mContentUri,
+                mProjectionColumns,
+                mFilter.getSelectionString(),
+                mFilter.getSelectionArgs(mConstraint),
+                null);
 
             if (cursor == null || !cursor.moveToFirst()) {
                 return new ItemFetchFailedEvent("no results");

@@ -52,31 +52,31 @@ public class SubtitledButtonView extends LinearLayout {
         setBackgroundResource(R.drawable.border_grey_1dp);
 
         LayoutInflater.from(context).inflate(
-                R.layout.view_subtitled_button, this, true /*attachToRoot*/);
+            R.layout.view_subtitled_button, this, true /*attachToRoot*/);
         ButterKnife.inject(this);
 
         Resources resources = getResources();
         int defaultTextColor = resources.getColor(R.color.view_subtitled_button_text_color);
         int defaultSubtitleTextColor = resources.getColor(
-                R.color.view_subtitled_button_subtitle_text_color);
+            R.color.view_subtitled_button_subtitle_text_color);
         boolean defaultIsSquare = resources.getBoolean(
-                R.bool.view_subtitled_button_is_square);
+            R.bool.view_subtitled_button_is_square);
         TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.SubtitledButtonView, defStyleAttr, 0 /*defStyleRes*/);
+            attrs, R.styleable.SubtitledButtonView, defStyleAttr, 0 /*defStyleRes*/);
         String subtitle;
         String title;
         int subtitleTextColor;
         int textColor;
         try {
             textColor = a.getColor(
-                    R.styleable.SubtitledButtonView_subtitledButtonTextColor, defaultTextColor);
+                R.styleable.SubtitledButtonView_subtitledButtonTextColor, defaultTextColor);
             subtitleTextColor = a.getColor(
-                    R.styleable.SubtitledButtonView_subtitledButtonSubtitleTextColor,
-                    defaultSubtitleTextColor);
+                R.styleable.SubtitledButtonView_subtitledButtonSubtitleTextColor,
+                defaultSubtitleTextColor);
             title = a.getString(R.styleable.SubtitledButtonView_subtitledButtonTitle);
             subtitle = a.getString(R.styleable.SubtitledButtonView_subtitledButtonSubtitle);
             mIsSquare = a.getBoolean(R.styleable.SubtitledButtonView_subtitledButtonIsSquare,
-                    defaultIsSquare);
+                defaultIsSquare);
         } finally {
             a.recycle();
         }

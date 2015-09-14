@@ -13,14 +13,14 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.support.annotation.Nullable;
 
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.filter.matchers.MatchingFilter;
+import org.projectbuendia.client.models.Patient;
 
 import java.util.regex.Pattern;
 
 /**
  * Filters by name.
- *
+ * <p/>
  * <p>Selects patients for whom each of the words in the parameter string prefix-match any of the
  * words in the given name or family name, even if in a different order.
  */

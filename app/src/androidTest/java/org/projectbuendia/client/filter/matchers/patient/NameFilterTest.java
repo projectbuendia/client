@@ -31,6 +31,13 @@ public class NameFilterTest extends InstrumentationTestCase {
         assertTrue(mNameFilter.matches(getPatientWithName("John", "Doe"), "John Doe"));
     }
 
+    private Patient getPatientWithName(String givenName, String familyName) {
+        return Patient.builder()
+            .setGivenName(Utils.nameOrUnknown(givenName))
+            .setFamilyName(Utils.nameOrUnknown(familyName))
+            .build();
+    }
+
     /** Tests that name matching works on just the given name. */
     public void testMatches_exactMatchOnGivenName() {
         assertTrue(mNameFilter.matches(getPatientWithName("John", "Doe"), "John"));
@@ -128,12 +135,5 @@ public class NameFilterTest extends InstrumentationTestCase {
     /** Tests that a dash does not match a patient with a fully-known name. */
     public void testMatches_dashDoesNotMatchKnownName() {
         assertFalse(mNameFilter.matches(getPatientWithName("John", "Doe"), "-"));
-    }
-
-    private Patient getPatientWithName(String givenName, String familyName) {
-        return Patient.builder()
-                .setGivenName(Utils.nameOrUnknown(givenName))
-                .setFamilyName(Utils.nameOrUnknown(familyName))
-                .build();
     }
 }

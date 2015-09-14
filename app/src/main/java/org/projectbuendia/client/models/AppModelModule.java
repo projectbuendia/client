@@ -17,19 +17,19 @@ import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.TaskModule;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 
-import javax.inject.Singleton;
-
 /** A Dagger module that provides bindings for the {@link AppModel}. */
 @Module(
-        includes = {
-                ConverterModule.class,
-                TaskModule.class
-        },
-        complete = false,
-        library = true)
+    includes = {
+        ConverterModule.class,
+        TaskModule.class
+    },
+    complete = false,
+    library = true)
 public class AppModelModule {
 
     @Provides

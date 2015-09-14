@@ -46,21 +46,21 @@ public class PatientAttributeView extends LinearLayout {
         super(context, attrs, defStyleAttr);
 
         LayoutInflater.from(context).inflate(
-                R.layout.view_patient_attribute, this, true /*attachToRoot*/);
+            R.layout.view_patient_attribute, this, true /*attachToRoot*/);
         ButterKnife.inject(this);
 
         Resources resources = getResources();
         int defaultTextColor = resources.getColor(R.color.view_patient_attribute_text_color);
 
         TypedArray a = context.obtainStyledAttributes(
-                attrs, R.styleable.PatientAttributeView, defStyleAttr, 0 /*defStyleRes*/);
+            attrs, R.styleable.PatientAttributeView, defStyleAttr, 0 /*defStyleRes*/);
         String value;
         String name;
         int textColor;
         int iconResource;
         try {
             textColor = a.getColor(
-                    R.styleable.PatientAttributeView_attributeTextColor, defaultTextColor);
+                R.styleable.PatientAttributeView_attributeTextColor, defaultTextColor);
             name = a.getString(R.styleable.PatientAttributeView_attributeName);
             value = a.getString(R.styleable.PatientAttributeView_attributeValue);
             iconResource = a.getInt(R.styleable.PatientAttributeView_attributeIconResource, 0);

@@ -40,33 +40,25 @@ import java.util.List;
  * A {@link Fragment} that shows a spinner or progress bar when fragment content is not ready to
  * be displayed.
  */
-public abstract class ProgressFragment extends Fragment implements  Response.ErrorListener {
+public abstract class ProgressFragment extends Fragment implements Response.ErrorListener {
+
+    protected View mContent;
+    protected RelativeLayout mFrame;
+    protected TextView mErrorTextView;
+    // Fancy progress bar.
+    protected View mProgressBarLayout;
+    protected ProgressBar mProgressBar;
+    protected TextView mProgressBarLabel;
+    // Indeterminate progress bar.
+    protected ProgressBar mIndeterminateProgressBar;
+    protected int mShortAnimationDuration;
+    private State mState = State.LOADING;
+    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<ChangeStateSubscriber>();
 
     public enum State {
         LOADING,
         LOADED,
         ERROR
-    }
-
-    protected View mContent;
-
-    protected RelativeLayout mFrame;
-    protected TextView mErrorTextView;
-
-    // Fancy progress bar.
-    protected View mProgressBarLayout;
-    protected ProgressBar mProgressBar;
-    protected TextView mProgressBarLabel;
-
-    // Indeterminate progress bar.
-    protected ProgressBar mIndeterminateProgressBar;
-
-    protected int mShortAnimationDuration;
-
-    private State mState = State.LOADING;
-    private List<ChangeStateSubscriber> mSubscribers = new ArrayList<ChangeStateSubscriber>();
-
-    public ProgressFragment() {
     }
 
     /** Subscriber for listening for state changes. */
@@ -75,18 +67,39 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         public void onChangeState(State newState);
     }
 
+    public ProgressFragment() {
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
+            android.R.integer.config_shortAnimTime);
     }
 
     @Override
     public void onErrorResponse(VolleyError error) {
         changeErrorState(error.toString());
         Log.e("server", new String(error.networkResponse.data, Charsets.UTF_8));
+    }
+
+    protected void changeErrorState(String message) {
+        mErrorTextView.setText(message);
+        changeState(State.ERROR);
+    }
+
+    /** Changes the state of this fragment, hiding or showing the spinner as necessary. */
+    public void changeState(State state) {
+        mState = state;
+        // On state change, always start with the indeterminate loader.
+        mProgressBarLayout.setVisibility(View.GONE);
+        mIndeterminateProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
+        mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);
+        mErrorTextView.setVisibility(state == State.ERROR ? View.VISIBLE : View.GONE);
+        for (ChangeStateSubscriber subscriber : mSubscribers) {
+            subscriber.onChangeState(mState);
+        }
     }
 
     @Override
@@ -97,34 +110,34 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater,
-            @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
+        LayoutInflater inflater,
+        @Nullable ViewGroup container,
+        @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
         mFrame = new RelativeLayout(getActivity());
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT);
+            RelativeLayout.LayoutParams.MATCH_PARENT,
+            RelativeLayout.LayoutParams.MATCH_PARENT);
         mFrame.setLayoutParams(layoutParams);
 
         RelativeLayout.LayoutParams relativeLayout = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
         relativeLayout.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         mIndeterminateProgressBar = new ProgressBar(getActivity());
         mIndeterminateProgressBar.setLayoutParams(relativeLayout);
 
         mProgressBarLayout =
-                inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
+            inflater.inflate(R.layout.progress_fragment_measured_progress_view, null);
         mProgressBarLayout.setLayoutParams(relativeLayout);
         mProgressBar =
-                (ProgressBar)mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
-        mProgressBarLabel = (TextView)mProgressBarLayout.findViewById(R.id.progress_fragment_label);
+            (ProgressBar) mProgressBarLayout.findViewById(R.id.progress_fragment_progress_bar);
+        mProgressBarLabel = (TextView) mProgressBarLayout.findViewById(R.id.progress_fragment_label);
 
         RelativeLayout.LayoutParams fullLayout = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT);
         fullLayout.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         mErrorTextView = new TextView(getActivity());
         mErrorTextView.setLayoutParams(fullLayout);
@@ -167,27 +180,16 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         mContent = LayoutInflater.from(getActivity()).inflate(layout, null, false);
     }
 
-    protected void changeErrorState(String message) {
-        mErrorTextView.setText(message);
-        changeState(State.ERROR);
-    }
-
-    /** Changes the state of this fragment, hiding or showing the spinner as necessary. */
-    public void changeState(State state) {
-        mState = state;
-        // On state change, always start with the indeterminate loader.
-        mProgressBarLayout.setVisibility(View.GONE);
-        mIndeterminateProgressBar.setVisibility(state == State.LOADING ? View.VISIBLE : View.GONE);
-        mContent.setVisibility(state == State.LOADED ? View.VISIBLE : View.GONE);
-        mErrorTextView.setVisibility(state == State.ERROR ? View.VISIBLE : View.GONE);
-        for (ChangeStateSubscriber subscriber : mSubscribers) {
-            subscriber.onChangeState(mState);
-        }
-    }
-
     protected void incrementProgressBy(int progress) {
         switchToHorizontalProgressBar();
         mProgressBar.incrementProgressBy(progress);
+    }
+
+    protected void switchToHorizontalProgressBar() {
+        if (mState == State.LOADING) {
+            mIndeterminateProgressBar.setVisibility(View.GONE);
+            mProgressBarLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     protected void setProgress(int progress) {
@@ -198,13 +200,6 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
     protected void setProgressLabel(String label) {
         switchToHorizontalProgressBar();
         mProgressBarLabel.setText(label);
-    }
-
-    protected void switchToHorizontalProgressBar() {
-        if (mState == State.LOADING) {
-            mIndeterminateProgressBar.setVisibility(View.GONE);
-            mProgressBarLayout.setVisibility(View.VISIBLE);
-        }
     }
 
     protected void switchToCircularProgressBar() {
@@ -233,14 +228,14 @@ public abstract class ProgressFragment extends Fragment implements  Response.Err
         // participate in layout passes, etc.)
         if (outView != null) {
             outView.animate()
-                    .alpha(0f)
-                    .setDuration(mShortAnimationDuration)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            outView.setVisibility(View.GONE);
-                        }
-                    });
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        outView.setVisibility(View.GONE);
+                    }
+                });
         }
     }
 

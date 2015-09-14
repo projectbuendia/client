@@ -16,8 +16,6 @@ import org.projectbuendia.client.net.json.JsonUser;
 
 /** Matchers for {@link JsonUser} objects. */
 public class UserMatchers {
-    private UserMatchers() {}
-
     /** Matches any user with the specified full name. */
     public static class HasFullName extends ArgumentMatcher<Object> {
         private String mFullName;
@@ -33,7 +31,10 @@ public class UserMatchers {
                 return false;
             }
 
-            return ((JsonUser)user).fullName.equals(mFullName);
+            return ((JsonUser) user).fullName.equals(mFullName);
         }
+    }
+
+    private UserMatchers() {
     }
 }

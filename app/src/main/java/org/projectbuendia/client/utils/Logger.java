@@ -20,23 +20,23 @@ import org.projectbuendia.client.BuildConfig;
 /**
  * A logging facade that provides enhanced functionality and convenience methods over Android's
  * {@link Log}.
- *
+ * <p/>
  * <p>{@link Logger} provides the following benefits:
- *
+ * <p/>
  * <ul>
- *     <li>Automatic tagging with the calling class's class name.
- *     <li>Suppression of verbose, debug, and info messages in release builds.
- *     <li>Support for format strings without a separate call to {@link String#format}.
+ * <li>Automatic tagging with the calling class's class name.
+ * <li>Suppression of verbose, debug, and info messages in release builds.
+ * <li>Support for format strings without a separate call to {@link String#format}.
  * </ul>
- *
+ * <p/>
  * <p>To use this class, create an instance of {@link Logger} by calling:
  * <code>
- *     private static final Logger LOG = Logger.create();
+ * private static final Logger LOG = Logger.create();
  * </code>
- *
+ * <p/>
  * <p>Then, invoke logging methods on the {@code LOG} instance:
  * <code>
- *     LOG.e(exception, "Logger is #%1$d!", 1);
+ * LOG.e(exception, "Logger is #%1$d!", 1);
  * </code>
  */
 public final class Logger {
@@ -48,18 +48,27 @@ public final class Logger {
         return new Logger(getTag());
     }
 
+    private static final String getTag() {
+        String[] parts = new Throwable().getStackTrace()[2].getClassName().split("\\.");
+        return "buendia/" + parts[parts.length - 1];
+    }
+
     /** Creates a {@link Logger} with a manually-specified tag. */
     public static final Logger create(String tag) {
         return new Logger(tag);
     }
 
-    private Logger(String tag) {
-        this.tag = tag;
-    }
-
     public void v(String message, Object... args) {
         if (BuildConfig.DEBUG) {
             Log.v(tag, formatIfNeeded(message, args));
+        }
+    }
+
+    private static String formatIfNeeded(String message, Object... args) {
+        if (args == null || args.length == 0) {
+            return message;
+        } else {
+            return String.format(message, args);
         }
     }
 
@@ -109,16 +118,7 @@ public final class Logger {
         Log.e(tag, formatIfNeeded(message, args), t);
     }
 
-    private static final String getTag() {
-        String[] parts = new Throwable().getStackTrace()[2].getClassName().split("\\.");
-        return "buendia/" + parts[parts.length - 1];
-    }
-
-    private static String formatIfNeeded(String message, Object... args) {
-        if (args == null || args.length == 0) {
-            return message;
-        } else {
-            return String.format(message, args);
-        }
+    private Logger(String tag) {
+        this.tag = tag;
     }
 }

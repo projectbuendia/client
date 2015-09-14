@@ -14,29 +14,27 @@ package org.projectbuendia.client.user;
 import org.projectbuendia.client.utils.AsyncTaskRunner;
 import org.projectbuendia.client.utils.EventBusInterface;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 
-import javax.inject.Singleton;
-
 /** A Dagger module that provides bindings for user-related classes. */
 @Module(
-        complete = false,
-        library = true)
+    complete = false,
+    library = true)
 public class UserModule {
 
     @Provides
-    @Singleton
-    UserStore provideUserStore() {
+    @Singleton UserStore provideUserStore() {
         return new UserStore();
     }
 
     @Provides
-    @Singleton
-    UserManager provideUserManage(
-            UserStore userStore,
-            EventBusInterface eventBus,
-            AsyncTaskRunner asyncTaskRunner) {
+    @Singleton UserManager provideUserManage(
+        UserStore userStore,
+        EventBusInterface eventBus,
+        AsyncTaskRunner asyncTaskRunner) {
         return new UserManager(userStore, eventBus, asyncTaskRunner);
     }
 }

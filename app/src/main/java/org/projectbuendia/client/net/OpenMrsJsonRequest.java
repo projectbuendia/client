@@ -26,21 +26,13 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
     private final String mUsername;
     private final String mPassword;
 
-    private OpenMrsJsonRequest(String username, String password, String url, JSONObject jsonRequest,
-                              Response.Listener<JSONObject> listener,
-                              Response.ErrorListener errorListener) {
-        super(url, jsonRequest, listener, errorListener);
-        this.mUsername = username;
-        this.mPassword = password;
-    }
-
     /**
      * Constructs a GET request to OpenMRS.
      * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
-     * @param urlSuffix the API URL being requested, relative to the API root
-     * @param jsonRequest a {@link JSONObject} containing the request body
-     * @param listener a {@link Response.Listener} that handles successful requests
-     * @param errorListener a {@link Response.ErrorListener} that handles failed requests
+     * @param urlSuffix         the API URL being requested, relative to the API root
+     * @param jsonRequest       a {@link JSONObject} containing the request body
+     * @param listener          a {@link Response.Listener} that handles successful requests
+     * @param errorListener     a {@link Response.ErrorListener} that handles failed requests
      */
     public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
                               String urlSuffix,
@@ -48,18 +40,26 @@ public class OpenMrsJsonRequest extends JsonObjectRequest {
                               Response.Listener<JSONObject> listener,
                               Response.ErrorListener errorListener) {
         this(connectionDetails.getUser(), connectionDetails.getPassword(),
-                connectionDetails.getBuendiaApiUrl() + urlSuffix,
-                jsonRequest, listener, errorListener);
+            connectionDetails.getBuendiaApiUrl() + urlSuffix,
+            jsonRequest, listener, errorListener);
+    }
+
+    private OpenMrsJsonRequest(String username, String password, String url, JSONObject jsonRequest,
+                               Response.Listener<JSONObject> listener,
+                               Response.ErrorListener errorListener) {
+        super(url, jsonRequest, listener, errorListener);
+        this.mUsername = username;
+        this.mPassword = password;
     }
 
     /**
      * Constructs a request to OpenMRS using an arbitrary HTTP method.
      * @param connectionDetails an {@link OpenMrsConnectionDetails} for communicating with OpenMRS
-     * @param method the HTTP method
-     * @param url the absolute URL being requested
-     * @param jsonRequest a {@link JSONObject} containing the request body
-     * @param listener a {@link Response.Listener} that handles successful requests
-     * @param errorListener a {@link Response.ErrorListener} that handles failed requests
+     * @param method            the HTTP method
+     * @param url               the absolute URL being requested
+     * @param jsonRequest       a {@link JSONObject} containing the request body
+     * @param listener          a {@link Response.Listener} that handles successful requests
+     * @param errorListener     a {@link Response.ErrorListener} that handles failed requests
      */
     public OpenMrsJsonRequest(OpenMrsConnectionDetails connectionDetails,
                               int method, String url, JSONObject jsonRequest,

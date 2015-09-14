@@ -11,9 +11,10 @@
 
 package org.projectbuendia.client.ui.login;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import android.test.AndroidTestCase;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -29,10 +30,9 @@ import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.user.UserManager;
 
-import android.test.AndroidTestCase;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /** Tests for {@link LoginController}. */
 public class LoginControllerTest extends AndroidTestCase {
@@ -43,20 +43,6 @@ public class LoginControllerTest extends AndroidTestCase {
     @Mock private LoginController.FragmentUi mMockFragmentUi;
     @Mock private Troubleshooter mTroubleshooter;
     private FakeEventBus mFakeEventBus;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-
-        mFakeEventBus = new FakeEventBus();
-        mController = new LoginController(
-                mMockUserManager,
-                mFakeEventBus,
-                mTroubleshooter,
-                mMockUi,
-                mMockFragmentUi);
-    }
 
     /** Tests that init() attempts to load known users. */
     public void testInit_SetsKnownUserLoadGoing() {
@@ -203,7 +189,7 @@ public class LoginControllerTest extends AndroidTestCase {
         // WHEN server becomes healthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(true);
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
-                ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION)));
+            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION)));
         // THEN users are reloaded
         // Note: already called once in init()
         verify(mMockUserManager, times(2)).loadKnownUsers();
@@ -219,7 +205,7 @@ public class LoginControllerTest extends AndroidTestCase {
         // WHEN server becomes healthy
         when(mTroubleshooter.isServerHealthy()).thenReturn(true);
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
-                ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION)));
+            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION)));
         // THEN users are not reloaded
         verify(mMockUserManager, times(1)).loadKnownUsers();
     }
@@ -234,10 +220,24 @@ public class LoginControllerTest extends AndroidTestCase {
         mController.init();
         // WHEN TroubleshootingActions change but server is still unhealthy
         mFakeEventBus.post(new TroubleshootingActionsChangedEvent(
-                ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION)));
+            ImmutableSet.of(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION)));
         // THEN users are not reloaded
         // Note: this function is called once during init(), so expect it to be called once, but
         //       only once.
         verify(mMockUserManager, times(1)).loadKnownUsers();
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeEventBus = new FakeEventBus();
+        mController = new LoginController(
+            mMockUserManager,
+            mFakeEventBus,
+            mTroubleshooter,
+            mMockUi,
+            mMockFragmentUi);
     }
 }

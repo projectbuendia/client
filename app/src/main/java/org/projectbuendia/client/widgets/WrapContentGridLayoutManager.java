@@ -24,7 +24,7 @@ import android.view.ViewGroup;
 final class WrapContentGridLayoutManager extends GridLayoutManager {
 
     public WrapContentGridLayoutManager(
-            Context context, int spanCount, int orientation, boolean reverseLayout) {
+        Context context, int spanCount, int orientation, boolean reverseLayout) {
         super(context, spanCount, orientation, reverseLayout);
     }
 
@@ -55,9 +55,9 @@ final class WrapContentGridLayoutManager extends GridLayoutManager {
         int totalHeight = getPaddingTop() + getPaddingBottom();
         for (int i = 0; i < getSpanCount(); ++i) {
             int currentHeight = measureScrapChild(recycler, i,
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                    HORIZONTAL);
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                HORIZONTAL);
             totalHeight += currentHeight;
         }
 
@@ -71,13 +71,13 @@ final class WrapContentGridLayoutManager extends GridLayoutManager {
         if (view != null) {
             RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
             int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
-                    getPaddingLeft() + getPaddingRight(), p.width);
+                getPaddingLeft() + getPaddingRight(), p.width);
             int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
-                    getPaddingTop() + getPaddingBottom(), p.height);
+                getPaddingTop() + getPaddingBottom(), p.height);
             view.measure(childWidthSpec, childHeightSpec);
             int result = (queriedDimension == VERTICAL)
-                    ? view.getMeasuredWidth()
-                    : view.getMeasuredHeight();
+                ? view.getMeasuredWidth()
+                : view.getMeasuredHeight();
             recycler.recycleView(view);
             return result;
         } else {

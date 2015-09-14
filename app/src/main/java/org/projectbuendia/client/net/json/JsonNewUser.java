@@ -19,18 +19,11 @@ import java.util.UUID;
  * visible fields for that user during retrieval (for example, the user's password).
  */
 public class JsonNewUser implements Serializable {
-    private static final String DEFAULT_PASSWORD = "Password123";
-
     public String username;
     public String givenName;
     public String familyName;
     public String password;
-
-    /** Creates a user with generated username and a default password. */
-    public JsonNewUser() {
-        this.password = DEFAULT_PASSWORD;
-        this.username = generateUsername();
-    }
+    private static final String DEFAULT_PASSWORD = "Password123";
 
     /**
      * Creates a user with generated username, default password, and the specified given and
@@ -40,6 +33,12 @@ public class JsonNewUser implements Serializable {
         this();
         this.givenName = givenName;
         this.familyName = familyName;
+    }
+
+    /** Creates a user with generated username and a default password. */
+    public JsonNewUser() {
+        this.password = DEFAULT_PASSWORD;
+        this.username = generateUsername();
     }
 
     private String generateUsername() {

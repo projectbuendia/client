@@ -26,11 +26,6 @@ public enum ResZone implements Resolvable<ResZone.Resolved> {
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    ResZone(int backgroundColorId, int foregroundColorId) {
-        this.backgroundColorId = backgroundColorId;
-        this.foregroundColorId = foregroundColorId;
-    }
-
     @Override
     public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResZone.Resolved.class);
@@ -53,5 +48,10 @@ public enum ResZone implements Resolvable<ResZone.Resolved> {
         public int getForegroundColor() {
             return mResources.getColor(mZone.foregroundColorId);
         }
+    }
+
+    ResZone(int backgroundColorId, int foregroundColorId) {
+        this.backgroundColorId = backgroundColorId;
+        this.foregroundColorId = foregroundColorId;
     }
 }

@@ -23,13 +23,13 @@ import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
+import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
-import org.projectbuendia.client.events.data.PatientAddFailedEvent;
-import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.FakeEventBus;
 
@@ -59,14 +59,6 @@ public class NewPatientControllerTest extends AndroidTestCase {
     @Mock private NewPatientController.Ui mMockUi;
     @Mock private AppModel mMockAppModel;
     private FakeEventBus mFakeCrudEventBus;
-
-    @Override
-    protected void setUp() {
-        MockitoAnnotations.initMocks(this);
-        mFakeCrudEventBus = new FakeEventBus();
-        mNewPatientController =
-                new NewPatientController(mMockUi, mFakeCrudEventBus, mMockAppModel);
-    }
 
     /** Tests that initializing the controller fetches a location tree for the location dialog. */
     public void testInit_requestsLocationTree() {
@@ -114,7 +106,7 @@ public class NewPatientControllerTest extends AndroidTestCase {
         mNewPatientController.init();
         // WHEN a patient fails to be added
         mFakeCrudEventBus.post(new PatientAddFailedEvent(
-                PatientAddFailedEvent.REASON_DUPLICATE_ID, null));
+            PatientAddFailedEvent.REASON_DUPLICATE_ID, null));
         // THEN controller reports the error in the UI
         verify(mMockUi).showErrorMessage(anyInt());
     }
@@ -139,8 +131,44 @@ public class NewPatientControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller forwards request to model with correct fields
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
+    }
+
+    private PatientDelta getValidAppPatientDelta() {
+        PatientDelta delta = new PatientDelta();
+        delta.id = Optional.of(VALID_ID);
+        delta.givenName = Optional.of(VALID_GIVEN_NAME);
+        delta.familyName = Optional.of(VALID_FAMILY_NAME);
+        delta.birthdate = Optional.of(
+            DateTime.now().minusYears(Integer.parseInt(VALID_AGE_YEARS)));
+        delta.gender = Optional.of(VALID_SEX);
+        delta.admissionDate = Optional.of(VALID_ADMISSION_DATE);
+        delta.firstSymptomDate = Optional.of(VALID_SYMPTOMS_ONSET_DATE);
+        delta.assignedLocationUuid = Optional.of(VALID_LOCATION_UUID);
+        return delta;
+    }
+
+    private void createPatientFromAppPatientDelta(PatientDelta delta) {
+        String ageYears = "";
+        String ageMonths = "";
+        if (delta.birthdate.isPresent()) {
+            Period agePeriod = new Period(delta.birthdate.get(), DateTime.now());
+            ageYears = "" + agePeriod.getYears();
+            ageMonths = "" + agePeriod.getMonths();
+        }
+
+        mNewPatientController.createPatient(
+            delta.id.orNull(),
+            delta.givenName.orNull(),
+            delta.familyName.orNull(),
+            ageYears,
+            ageMonths,
+            delta.gender.get(),
+            delta.admissionDate.orNull(),
+            delta.firstSymptomDate.orNull(),
+            delta.assignedLocationUuid.orNull()
+        );
     }
 
     /** Tests that clicking 'create patient' clears any existing validation errors. */
@@ -180,8 +208,8 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // THEN controller adds the patient with a default given name
         patientDelta.givenName = Optional.of(App.getInstance().getString(R.string.unknown_name));
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that family name is replaced by a default if not specified. */
@@ -194,10 +222,10 @@ public class NewPatientControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller adds the patient with a default family name
         patientDelta.familyName =
-                Optional.of(App.getInstance().getString(R.string.unknown_name));
+            Optional.of(App.getInstance().getString(R.string.unknown_name));
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that negative ages are not allowed. */
@@ -206,15 +234,15 @@ public class NewPatientControllerTest extends AndroidTestCase {
         mNewPatientController.init();
         // WHEN all fields are populated, age is negative (birthdate in future)
         mNewPatientController.createPatient(
-                VALID_ID,
-                VALID_GIVEN_NAME,
-                VALID_FAMILY_NAME,
-                "-1",
-                "",
-                VALID_SEX,
-                VALID_ADMISSION_DATE,
-                VALID_SYMPTOMS_ONSET_DATE,
-                VALID_LOCATION_UUID);
+            VALID_ID,
+            VALID_GIVEN_NAME,
+            VALID_FAMILY_NAME,
+            "-1",
+            "",
+            VALID_SEX,
+            VALID_ADMISSION_DATE,
+            VALID_SYMPTOMS_ONSET_DATE,
+            VALID_LOCATION_UUID);
         // THEN controller fails to add the patient
         verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
     }
@@ -225,15 +253,15 @@ public class NewPatientControllerTest extends AndroidTestCase {
         mNewPatientController.init();
         // WHEN all fields but years/months choice are populated
         mNewPatientController.createPatient(
-                VALID_ID,
-                VALID_GIVEN_NAME,
-                VALID_FAMILY_NAME,
-                "",
-                "",
-                VALID_SEX,
-                VALID_ADMISSION_DATE,
-                VALID_SYMPTOMS_ONSET_DATE,
-                VALID_LOCATION_UUID);
+            VALID_ID,
+            VALID_GIVEN_NAME,
+            VALID_FAMILY_NAME,
+            "",
+            "",
+            VALID_SEX,
+            VALID_ADMISSION_DATE,
+            VALID_SYMPTOMS_ONSET_DATE,
+            VALID_LOCATION_UUID);
         // THEN controller fails to add the patient
         verify(mMockUi).showValidationError(anyInt(), anyInt(), (String[]) anyVararg());
     }
@@ -284,8 +312,8 @@ public class NewPatientControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that symptoms onset date can be left blank. */
@@ -298,8 +326,8 @@ public class NewPatientControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation with no symptoms onset date
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that symptoms onset date cannot be in the future. */
@@ -324,8 +352,8 @@ public class NewPatientControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that location can be left blank. */
@@ -339,8 +367,8 @@ public class NewPatientControllerTest extends AndroidTestCase {
         // THEN controller requests patient creation, defaulting to Triage
         patientDelta.assignedLocationUuid = Optional.of(Zones.TRIAGE_ZONE_UUID);
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
     /** Tests that unicode characters can be used in the patient's name. */
@@ -353,43 +381,15 @@ public class NewPatientControllerTest extends AndroidTestCase {
         createPatientFromAppPatientDelta(patientDelta);
         // THEN controller requests patient creation
         verify(mMockAppModel).addPatient(
-                any(FakeEventBus.class),
-                argThat(matchesPatientDelta(patientDelta)));
+            any(FakeEventBus.class),
+            argThat(matchesPatientDelta(patientDelta)));
     }
 
-    private void createPatientFromAppPatientDelta(PatientDelta delta) {
-        String ageYears = "";
-        String ageMonths = "";
-        if (delta.birthdate.isPresent()) {
-            Period agePeriod = new Period(delta.birthdate.get(), DateTime.now());
-            ageYears = "" + agePeriod.getYears();
-            ageMonths = "" + agePeriod.getMonths();
-        }
-
-        mNewPatientController.createPatient(
-                delta.id.orNull(),
-                delta.givenName.orNull(),
-                delta.familyName.orNull(),
-                ageYears,
-                ageMonths,
-                delta.gender.get(),
-                delta.admissionDate.orNull(),
-                delta.firstSymptomDate.orNull(),
-                delta.assignedLocationUuid.orNull()
-        );
-    }
-
-    private PatientDelta getValidAppPatientDelta() {
-        PatientDelta delta = new PatientDelta();
-        delta.id = Optional.of(VALID_ID);
-        delta.givenName = Optional.of(VALID_GIVEN_NAME);
-        delta.familyName = Optional.of(VALID_FAMILY_NAME);
-        delta.birthdate = Optional.of(
-                DateTime.now().minusYears(Integer.parseInt(VALID_AGE_YEARS)));
-        delta.gender = Optional.of(VALID_SEX);
-        delta.admissionDate = Optional.of(VALID_ADMISSION_DATE);
-        delta.firstSymptomDate = Optional.of(VALID_SYMPTOMS_ONSET_DATE);
-        delta.assignedLocationUuid = Optional.of(VALID_LOCATION_UUID);
-        return delta;
+    @Override
+    protected void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mFakeCrudEventBus = new FakeEventBus();
+        mNewPatientController =
+            new NewPatientController(mMockUi, mFakeCrudEventBus, mMockAppModel);
     }
 }

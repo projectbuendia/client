@@ -37,17 +37,17 @@ public class Serializers {
 
     private static class DateTimeSerializer implements JsonSerializer<DateTime> {
         public JsonElement serialize(
-                DateTime src,
-                Type typeOfSrc,
-                JsonSerializationContext context) {
+            DateTime src,
+            Type typeOfSrc,
+            JsonSerializationContext context) {
             return new JsonPrimitive(src.toString());
         }
     }
 
     private static class DateTimeDeserializer implements JsonDeserializer<DateTime> {
         public DateTime deserialize(
-                JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
+            JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
             return new DateTime(json.getAsJsonPrimitive().getAsString());
         }
     }

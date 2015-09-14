@@ -36,13 +36,13 @@ import org.odk.collect.android.model.Preset;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.CrudEventBus;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
@@ -80,6 +80,32 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     // 39.95 is chosen as the threshold as it would be displayed as 40.0
     // (and values slightly below 40.0 may be the result of rounding errors).
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
+    private static final String KEY_CONTROLLER_STATE = "controllerState";
+    private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
+    private PatientChartController mController;
+    // TODO: Refactor.
+    private boolean mIsFetchingXform = false;
+    private ProgressDialog mFormLoadingDialog;
+    private ProgressDialog mFormSubmissionDialog;
+    @Inject AppModel mAppModel;
+    @Inject EventBus mEventBus;
+    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject SyncManager mSyncManager;
+    @Inject LocalizedChartHelper mLocalizedChartHelper;
+    @Inject AppSettings mSettings;
+    @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
+    @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
+    @InjectView(R.id.attribute_admission_days) PatientAttributeView mPatientAdmissionDaysView;
+    @InjectView(R.id.attribute_symptoms_onset_days)
+    PatientAttributeView mPatientSymptomOnsetDaysView;
+    @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
+    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
+    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
+    @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
+    @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
+    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
+    @InjectView(R.id.chart_webview) WebView mGridWebView;
+    GridRenderer mGridRenderer;
 
     public static void start(Context caller, String uuid) {
         Intent intent = new Intent(caller, PatientChartActivity.class);
@@ -87,41 +113,74 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         caller.startActivity(intent);
     }
 
-    private static final String KEY_CONTROLLER_STATE = "controllerState";
-    private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
+    @Override
+    public void onExtendOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chart, menu);
 
-    private PatientChartController mController;
+        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
 
-    // TODO: Refactor.
-    private boolean mIsFetchingXform = false;
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    Utils.logUserAction("go_to_patient_pressed");
+                    GoToPatientDialogFragment.newInstance()
+                        .show(getSupportFragmentManager(), null);
+                    return true;
+                }
+            });
 
-    private ProgressDialog mFormLoadingDialog;
-    private ProgressDialog mFormSubmissionDialog;
+        MenuItem updateChart = menu.findItem(R.id.action_update_chart);
+        updateChart.setIcon(
+            new IconDrawable(this, Iconify.IconValue.fa_pencil_square_o)
+                .color(0xCCFFFFFF)
+                .sizeDp(36));
+        updateChart.setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
 
-    @Inject AppModel mAppModel;
-    @Inject EventBus mEventBus;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-    @Inject SyncManager mSyncManager;
-    @Inject LocalizedChartHelper mLocalizedChartHelper;
-    @Inject AppSettings mSettings;
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    mController.onAddObservationPressed();
+                    return true;
+                }
+            });
 
-    @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
+        boolean clinicalObservationFormEnabled = false;
+        boolean ebolaLabTestFormEnabled = false;
+        for (final Form form : mLocalizedChartHelper.getForms()) {
+            MenuItem item = menu.add(form.name);
+            item.setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        mController.onOpenFormPressed(form.uuid);
+                        return true;
+                    }
+                }
+            );
+            if (form.uuid.equals(PatientChartController.OBSERVATION_FORM_UUID)) {
+                clinicalObservationFormEnabled = true;
+            }
+            if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
+                ebolaLabTestFormEnabled = true;
+            }
+        }
+        updateChart.setVisible(clinicalObservationFormEnabled);
+        Utils.showIf(mPcr, ebolaLabTestFormEnabled);
+    }
 
-    @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
-    @InjectView(R.id.attribute_admission_days) PatientAttributeView mPatientAdmissionDaysView;
-    @InjectView(R.id.attribute_symptoms_onset_days)
-    PatientAttributeView mPatientSymptomOnsetDaysView;
-    @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
-
-    @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
-    @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
-
-    @InjectView(R.id.patient_chart_fullname) TextView mPatientFullNameView;
-    @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
-    @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
-
-    @InjectView(R.id.chart_webview) WebView mGridWebView;
-    GridRenderer mGridRenderer;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // Go back rather than reloading the activity, so that the patient list retains its
+            // filter state.
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreateImpl(Bundle savedInstanceState) {
@@ -156,28 +215,29 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             @Override
             public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
                 OdkActivityLauncher.sendOdkResultToServer(
-                        PatientChartActivity.this, mSettings,
-                        patientUuid, mSettings.getXformUpdateClientCache(), resultCode, data);
+                    PatientChartActivity.this, mSettings,
+                    patientUuid, mSettings.getXformUpdateClientCache(), resultCode, data);
             }
         };
         final MinimalHandler minimalHandler = new MinimalHandler() {
             private final Handler mHandler = new Handler();
+
             @Override
             public void post(Runnable runnable) {
                 mHandler.post(runnable);
             }
         };
         mController = new PatientChartController(
-                mAppModel,
-                new EventBusWrapper(mEventBus),
-                mCrudEventBusProvider.get(),
-                new Ui(),
-                getIntent().getStringExtra("uuid"),
-                odkResultSender,
-                mLocalizedChartHelper,
-                controllerState,
-                mSyncManager,
-                minimalHandler);
+            mAppModel,
+            new EventBusWrapper(mEventBus),
+            mCrudEventBusProvider.get(),
+            new Ui(),
+            getIntent().getStringExtra("uuid"),
+            odkResultSender,
+            mLocalizedChartHelper,
+            controllerState,
+            mSyncManager,
+            minimalHandler);
 
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -207,81 +267,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     protected void onStopImpl() {
         mController.suspend();
         super.onStopImpl();
-    }
-
-    @Override
-    public void onExtendOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chart, menu);
-
-        menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Utils.logUserAction("go_to_patient_pressed");
-                        GoToPatientDialogFragment.newInstance()
-                                .show(getSupportFragmentManager(), null);
-                        return true;
-                    }
-                });
-
-        MenuItem updateChart = menu.findItem(R.id.action_update_chart);
-        updateChart.setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_pencil_square_o)
-                        .color(0xCCFFFFFF)
-                        .sizeDp(36));
-        updateChart.setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        mController.onAddObservationPressed();
-                        return true;
-                    }
-                });
-
-        boolean clinicalObservationFormEnabled = false;
-        boolean ebolaLabTestFormEnabled = false;
-        for (final Form form : mLocalizedChartHelper.getForms()) {
-            MenuItem item = menu.add(form.name);
-            item.setOnMenuItemClickListener(
-                    new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem menuItem) {
-                            mController.onOpenFormPressed(form.uuid);
-                            return true;
-                        }
-                    }
-            );
-            if (form.uuid.equals(PatientChartController.OBSERVATION_FORM_UUID)) {
-                clinicalObservationFormEnabled = true;
-            }
-            if (form.uuid.equals(PatientChartController.EBOLA_LAB_TEST_FORM_UUID)) {
-                ebolaLabTestFormEnabled = true;
-            }
-        }
-        updateChart.setVisible(clinicalObservationFormEnabled);
-        Utils.showIf(mPcr, ebolaLabTestFormEnabled);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mIsFetchingXform = false;
-        mController.onXFormResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // Go back rather than reloading the activity, so that the patient list retains its
-            // filter state.
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     /*
@@ -318,9 +303,21 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     */
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mIsFetchingXform = false;
+        mController.onXFormResult(requestCode, resultCode, data);
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBundle(KEY_CONTROLLER_STATE, mController.getState());
+    }
+
+    private String getFormattedPcrString(double pcrValue) {
+        return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
+            getResources().getString(R.string.pcr_negative) :
+            String.format("%1$.1f", pcrValue);
     }
 
     private final class Ui implements PatientChartController.Ui {
@@ -346,20 +343,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
             mPatientAdmissionDaysView.setValue(
-                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
             mPatientSymptomOnsetDaysView.setValue(
-                    day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+                day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
             // PCR
             LocalizedObs pcrLObservation = observations.get(Concepts.PCR_L_UUID);
             LocalizedObs pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
             mPcr.setIconDrawable(
-                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
-                            .color(0x00000000)
-                            .sizeDp(36));
+                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
+                    .color(0x00000000)
+                    .sizeDp(36));
             if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
-                    && (pcrNpObservation == null || pcrNpObservation == null)) {
+                && (pcrNpObservation == null || pcrNpObservation == null)) {
                 mPcr.setValue("–");
             } else {
                 String pcrLString = "–";
@@ -371,8 +368,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                         pcrLString = getFormattedPcrString(pcrL);
                     } catch (NumberFormatException e) {
                         LOG.w(
-                                "Retrieved a malformed L-gene PCR value: '%1$s'.",
-                                pcrLObservation.localizedValue);
+                            "Retrieved a malformed L-gene PCR value: '%1$s'.",
+                            pcrLObservation.localizedValue);
                         pcrLString = pcrLObservation.localizedValue;
                     }
                 }
@@ -384,8 +381,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                         pcrNpString = getFormattedPcrString(pcrNp);
                     } catch (NumberFormatException e) {
                         LOG.w(
-                                "Retrieved a malformed Np-gene PCR value: '%1$s'.",
-                                pcrNpObservation.localizedValue);
+                            "Retrieved a malformed Np-gene PCR value: '%1$s'.",
+                            pcrNpObservation.localizedValue);
                         pcrNpString = pcrNpObservation.localizedValue;
                     }
                 }
@@ -396,7 +393,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                     LocalDate obsDay = pcrObsTime.toLocalDate();
                     String dateText = new RelativeDateTimeFormatter().format(today, obsDay);
                     mPcr.setName(getResources().getString(
-                            R.string.latest_pcr_label_with_date, dateText));
+                        R.string.latest_pcr_label_with_date, dateText));
                 }
             }
 
@@ -445,17 +442,17 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public void updatePatientHistoryUi(
-                List<Pair<String, String>> tileConceptUuidsAndNames,
-                Map<String, LocalizedObs> latestObservations,
-                List<Pair<String, String>> gridConceptUuidsAndNames,
-                List<LocalizedObs> observations,
-                List<Order> orders,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate) {
+            List<Pair<String, String>> tileConceptUuidsAndNames,
+            Map<String, LocalizedObs> latestObservations,
+            List<Pair<String, String>> gridConceptUuidsAndNames,
+            List<LocalizedObs> observations,
+            List<Order> orders,
+            LocalDate admissionDate,
+            LocalDate firstSymptomsDate) {
             mGridRenderer.render(
-                    tileConceptUuidsAndNames, latestObservations,
-                    gridConceptUuidsAndNames, observations, orders,
-                    admissionDate, firstSymptomsDate, mController);
+                tileConceptUuidsAndNames, latestObservations,
+                gridConceptUuidsAndNames, observations, orders,
+                admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }
 
@@ -465,16 +462,16 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             mPatientLocationView.setValue(locationText);
             mPatientLocationView.setIconDrawable(
-                    new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
-                            .color(0x00000000)
-                            .sizeDp(36));
+                new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_map_marker)
+                    .color(0x00000000)
+                    .sizeDp(36));
         }
 
         @Override
         public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
             mPatientFullNameView.setText(
-                    patient.id + ": " + patient.givenName + " " + patient.familyName);
+                patient.id + ": " + patient.givenName + " " + patient.familyName);
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -483,7 +480,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 labels.add("F");
             }
             labels.add(patient.birthdate == null
-                    ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
+                ? "age unknown" : Utils.birthdateToAge(patient.birthdate));
             mPatientGenderAgeView.setText(Joiner.on(", ").join(labels));
         }
 
@@ -499,15 +496,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override
         public synchronized void fetchAndShowXform(
-                int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
-                Preset preset) {
+            int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
+            Preset preset) {
             if (mIsFetchingXform) {
                 return;
             }
 
             mIsFetchingXform = true;
             OdkActivityLauncher.fetchAndShowXform(
-                    PatientChartActivity.this, formUuid, requestCode, patient, preset);
+                PatientChartActivity.this, formUuid, requestCode, patient, preset);
         }
 
         @Override
@@ -528,20 +525,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override
         public void showNewOrderDialog(String patientUuid) {
             OrderDialogFragment.newInstance(patientUuid, null)
-                    .show(getSupportFragmentManager(), null);
+                .show(getSupportFragmentManager(), null);
         }
 
         @Override
         public void showOrderExecutionDialog(
-                Order order, Interval interval, List<DateTime> executionTimes) {
+            Order order, Interval interval, List<DateTime> executionTimes) {
             OrderExecutionDialogFragment.newInstance(order, interval, executionTimes)
-                    .show(getSupportFragmentManager(), null);
+                .show(getSupportFragmentManager(), null);
         }
-    }
-
-    private String getFormattedPcrString(double pcrValue) {
-        return pcrValue >= PCR_NEGATIVE_THRESHOLD ?
-            getResources().getString(R.string.pcr_negative) :
-            String.format("%1$.1f", pcrValue);
     }
 }

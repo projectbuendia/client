@@ -26,14 +26,14 @@ public class PatientConverter implements Converter<Patient> {
     @Override
     public Patient fromCursor(Cursor cursor) {
         return Patient.builder()
-                .setId(Utils.getString(cursor, Patients._ID))
-                .setUuid(Utils.getString(cursor, Patients.UUID))
-                .setGivenName(Utils.getString(cursor, Patients.GIVEN_NAME))
-                .setFamilyName(Utils.getString(cursor, Patients.FAMILY_NAME))
-                .setBirthdate(Utils.getLocalDate(cursor, Patients.BIRTHDATE))
-                .setGender(getGenderFromString(Utils.getString(cursor, Patients.GENDER)))
-                .setLocationUuid(Utils.getString(cursor, Patients.LOCATION_UUID))
-                .build();
+            .setId(Utils.getString(cursor, Patients._ID))
+            .setUuid(Utils.getString(cursor, Patients.UUID))
+            .setGivenName(Utils.getString(cursor, Patients.GIVEN_NAME))
+            .setFamilyName(Utils.getString(cursor, Patients.FAMILY_NAME))
+            .setBirthdate(Utils.getLocalDate(cursor, Patients.BIRTHDATE))
+            .setGender(getGenderFromString(Utils.getString(cursor, Patients.GENDER)))
+            .setLocationUuid(Utils.getString(cursor, Patients.LOCATION_UUID))
+            .build();
     }
 
     private static int getGenderFromString(String genderString) {

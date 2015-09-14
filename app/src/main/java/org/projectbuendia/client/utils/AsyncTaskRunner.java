@@ -22,8 +22,8 @@ public interface AsyncTaskRunner {
         @Override
         @SafeVarargs
         public final <ParamsT, ProgressT, ResultT> void runTask(
-                final AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
-                final ParamsT... params) {
+            final AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
+            final ParamsT... params) {
             // Force the AsyncTask to start from the main thread (since using any other thread will
             // result in an exception, anyway).
             Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -38,6 +38,6 @@ public interface AsyncTaskRunner {
 
     @SuppressWarnings("unchecked")
     public <ParamsT, ProgressT, ResultT> void runTask(
-            AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
-            ParamsT... params);
+        AsyncTask<ParamsT, ProgressT, ResultT> asyncTask,
+        ParamsT... params);
 }

@@ -18,15 +18,15 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.SyncAccountService;
@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link AsyncTask} that adds a patient to a server.
- *
+ * <p/>
  * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the given
  * {@link CrudEventBus} with the added patient. If the operation fails, a
  * {@link PatientAddFailedEvent} is posted instead.
@@ -57,12 +57,12 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
     /** Creates a new {@link AddPatientTask}. */
     public AddPatientTask(
-            TaskFactory taskFactory,
-            ConverterPack converters,
-            Server server,
-            ContentResolver contentResolver,
-            PatientDelta patientDelta,
-            CrudEventBus bus) {
+        TaskFactory taskFactory,
+        ConverterPack converters,
+        Server server,
+        ContentResolver contentResolver,
+        PatientDelta patientDelta,
+        CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mConverterPack = converters;
         mServer = server;
@@ -100,11 +100,11 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
         if (json.uuid == null) {
             LOG.e(
-                    "Although the server reported a patient successfully added, it did not return "
-                            + "a UUID for that patient. This indicates a server error.");
+                "Although the server reported a patient successfully added, it did not return "
+                    + "a UUID for that patient. This indicates a server error.");
 
             return new PatientAddFailedEvent(
-                    PatientAddFailedEvent.REASON_SERVER, null /*exception*/);
+                PatientAddFailedEvent.REASON_SERVER, null /*exception*/);
         }
 
         Patient patient = Patient.fromJson(json);
@@ -116,12 +116,17 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new PatientAddFailedEvent(
-                    PatientAddFailedEvent.REASON_CLIENT, null /*exception*/);
+                PatientAddFailedEvent.REASON_CLIENT, null /*exception*/);
         }
 
         mUuid = json.uuid;
 
         return null;
+    }
+
+    private boolean isValidationErrorMessageForField(String message, String fieldName) {
+        return message.contains("'Patient#null' failed to validate with reason: "
+            + fieldName);
     }
 
     @Override
@@ -135,29 +140,24 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
         // If the UUID was not set, a programming error occurred. Log and post an error event.
         if (mUuid == null) {
             LOG.e(
-                    "Although a patient add ostensibly succeeded, no UUID was set for the newly-"
-                            + "added patient. This indicates a programming error.");
+                "Although a patient add ostensibly succeeded, no UUID was set for the newly-"
+                    + "added patient. This indicates a programming error.");
 
             mBus.post(new PatientAddFailedEvent(
-                    PatientAddFailedEvent.REASON_UNKNOWN, null /*exception*/));
+                PatientAddFailedEvent.REASON_UNKNOWN, null /*exception*/));
             return;
         }
 
         // Otherwise, start a fetch task to fetch the patient from the database.
         mBus.register(new CreationEventSubscriber());
         FetchItemTask<Patient> task = mTaskFactory.newFetchItemTask(
-                Contracts.Patients.CONTENT_URI,
-                null,
-                new UuidFilter(),
-                mUuid,
-                mConverterPack.patient,
-                mBus);
+            Contracts.Patients.CONTENT_URI,
+            null,
+            new UuidFilter(),
+            mUuid,
+            mConverterPack.patient,
+            mBus);
         task.execute();
-    }
-
-    private boolean isValidationErrorMessageForField(String message, String fieldName) {
-        return message.contains("'Patient#null' failed to validate with reason: "
-                + fieldName);
     }
 
     // After updating a patient, we fetch the patient from the database. The result of the fetch
@@ -172,7 +172,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
 
         public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new PatientAddFailedEvent(
-                    PatientAddFailedEvent.REASON_CLIENT, new Exception(event.error)));
+                PatientAddFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);
         }
     }

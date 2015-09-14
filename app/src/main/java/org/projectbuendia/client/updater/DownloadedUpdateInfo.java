@@ -25,18 +25,11 @@ import org.projectbuendia.client.utils.Logger;
  */
 public class DownloadedUpdateInfo {
 
-    private static final Logger LOG = Logger.create();
-
     public final boolean isValid;
     public final LexicographicVersion currentVersion;
     public final LexicographicVersion downloadedVersion;
     public final String path;
-
-    /** Creates an instance of {@link DownloadedUpdateInfo} for an invalid update. */
-    public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
-        return new DownloadedUpdateInfo(
-                false /*isValid*/, currentVersion, UpdateManager.MINIMAL_VERSION, null /*path*/);
-    }
+    private static final Logger LOG = Logger.create();
 
     /** Creates an instance of {@link DownloadedUpdateInfo} from a path to an APK on disk. */
     public static DownloadedUpdateInfo fromUri(LexicographicVersion currentVersion, String uri) {
@@ -57,11 +50,11 @@ public class DownloadedUpdateInfo {
 
         if (!packageInfo.packageName.equals(BuildConfig.APPLICATION_ID)) {
             LOG.w(
-                    "'%1$s' does not have the correct package name. Expected: '%2$s'; actual: "
-                            + "'%3$s'.",
-                    uri,
-                    BuildConfig.APPLICATION_ID,
-                    packageInfo.packageName);
+                "'%1$s' does not have the correct package name. Expected: '%2$s'; actual: "
+                    + "'%3$s'.",
+                uri,
+                BuildConfig.APPLICATION_ID,
+                packageInfo.packageName);
             return getInvalid(currentVersion);
         }
 
@@ -76,26 +69,32 @@ public class DownloadedUpdateInfo {
         return new DownloadedUpdateInfo(true /*isValid*/, currentVersion, downloadedVersion, uri);
     }
 
-    private DownloadedUpdateInfo(
-            boolean isValid,
-            LexicographicVersion currentVersion,
-            LexicographicVersion downloadedVersion,
-            String uri) {
-        this.isValid = isValid;
-        this.currentVersion = currentVersion;
-        this.downloadedVersion = downloadedVersion;
-        this.path = uri;
+    /** Creates an instance of {@link DownloadedUpdateInfo} for an invalid update. */
+    public static DownloadedUpdateInfo getInvalid(LexicographicVersion currentVersion) {
+        return new DownloadedUpdateInfo(
+            false /*isValid*/, currentVersion, UpdateManager.MINIMAL_VERSION, null /*path*/);
     }
 
     /** Converts the info as a string for display. */
     public String toString() {
         return "DownloadedUpdateInfo(isValid=" + isValid + ", "
-                + "currentVersion=" + currentVersion + ", "
-                + "availableVersion=" + downloadedVersion + ", "
-                + "path=" + path + ")";
+            + "currentVersion=" + currentVersion + ", "
+            + "availableVersion=" + downloadedVersion + ", "
+            + "path=" + path + ")";
     }
 
     public boolean shouldInstall() {
         return isValid && downloadedVersion.greaterThan(currentVersion);
+    }
+
+    private DownloadedUpdateInfo(
+        boolean isValid,
+        LexicographicVersion currentVersion,
+        LexicographicVersion downloadedVersion,
+        String uri) {
+        this.isValid = isValid;
+        this.currentVersion = currentVersion;
+        this.downloadedVersion = downloadedVersion;
+        this.path = uri;
     }
 }

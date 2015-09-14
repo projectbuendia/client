@@ -23,16 +23,6 @@ public class Contracts {
     public static final String CONTENT_AUTHORITY = BuildConfig.CONTENT_AUTHORITY;
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
-    
-    public static Uri buildContentUri(String path) {
-        return BASE_CONTENT_URI.buildUpon().appendPath(path).build();
-    }
-    public static String buildGroupType(String name) {
-        return ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
-    }
-    public static String buildItemType(String name) {
-        return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
-    }
 
     public enum Table {
         CHARTS("charts"),
@@ -48,12 +38,15 @@ public class Contracts {
         USERS("users");
 
         public String name;
-        Table(String name) { this.name = name; }
-        public String toString() { return name; }
-    }
 
-    // Each interface below corresponds to one SQLite table.  The column names
-    // defined in the constants should match the schemas defined in Database.java.
+        public String toString() {
+            return name;
+        }
+
+        Table(String name) {
+            this.name = name;
+        }
+    }
 
     public interface Charts extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("charts");
@@ -84,6 +77,9 @@ public class Contracts {
         String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
         String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
     }
+
+    // Each interface below corresponds to one SQLite table.  The column names
+    // defined in the constants should match the schemas defined in Database.java.
 
     public interface Forms extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("forms");
@@ -122,7 +118,7 @@ public class Contracts {
          * The start time of the last full sync operation, according to the
          * local (client's) clock.  Since sync operations are transactional,
          * this should only be set if this sync was completed successfully.
-         *
+         * <p/>
          * <p>Updated at the very beginning of full sync operations.
          */
         String FULL_SYNC_START_TIME = "full_sync_start_time";
@@ -131,7 +127,7 @@ public class Contracts {
          * The end time of the last full sync operation, according to the
          * local (client's) clock.  In rare cases, this may correspond to a
          * sync that completed but downloaded incomplete data.
-         *
+         * <p/>
          * <p>Updated at the very end of full sync operations.
          */
         String FULL_SYNC_END_TIME = "full_sync_end_time";
@@ -140,7 +136,7 @@ public class Contracts {
          * The "snapshot time" of the last observation sync operation, according
          * to the server's clock.  This is used to request an incremental update
          * of observations from the server.
-         *
+         * <p/>
          * <p>Updated after observation sync to the snapshot time reported by the server.
          */
         String OBS_SYNC_TIME = "obs_sync_time";
@@ -198,10 +194,6 @@ public class Contracts {
         String FULL_NAME = "full_name";
     }
 
-    // Each interface below describes a derived view implemented by a custom
-    // ProviderDelegate.  The column name constants should match the columns
-    // returned by the query() method of the corresponding ProviderDelegate.
-
     public interface LocalizedLocations extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("localized-locations");
         String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
@@ -212,16 +204,6 @@ public class Contracts {
         String NAME = "name";
         /** Patient count for a location, not including child locations. */
         String PATIENT_COUNT = "patient_count";
-    }
-
-    interface LocalizedChartColumns {
-        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
-        String GROUP_NAME = "group_name";
-        String CONCEPT_UUID = "concept_uuid";
-        String CONCEPT_NAME = "concept_name";
-        String CONCEPT_TYPE = "concept_type";
-        String VALUE = "value";
-        String LOCALIZED_VALUE = "localized_value";
     }
 
     // TODO: rename to LocalizedObservations
@@ -238,6 +220,10 @@ public class Contracts {
         String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
     }
 
+    // Each interface below describes a derived view implemented by a custom
+    // ProviderDelegate.  The column name constants should match the columns
+    // returned by the query() method of the corresponding ProviderDelegate.
+
     public interface PatientCounts extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("patient-counts");
         String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
@@ -248,11 +234,23 @@ public class Contracts {
         // TODO: just use a column named "count", not a mysterious "_count"
     }
 
+    public static Uri buildContentUri(String path) {
+        return BASE_CONTENT_URI.buildUpon().appendPath(path).build();
+    }
+
+    public static String buildGroupType(String name) {
+        return ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
+    }
+
+    public static String buildItemType(String name) {
+        return ContentResolver.CURSOR_ITEM_BASE_TYPE + TYPE_PACKAGE_PREFIX + name;
+    }
+
     /** Returns the content URI for the localized locations for a given locale. */
     public static Uri getLocalizedLocationsUri(String locale) {
         return LocalizedLocations.CONTENT_URI.buildUpon()
-                .appendPath(locale)
-                .build();
+            .appendPath(locale)
+            .build();
     }
 
     /**
@@ -260,12 +258,12 @@ public class Contracts {
      * locale.
      */
     public static Uri getLocalizedChartUri(
-            String chartUuid, String patientUuid, String locale) {
+        String chartUuid, String patientUuid, String locale) {
         return LocalizedCharts.CONTENT_URI.buildUpon()
-                .appendPath(chartUuid)
-                .appendPath(locale)
-                .appendPath(patientUuid)
-                .build();
+            .appendPath(chartUuid)
+            .appendPath(locale)
+            .appendPath(patientUuid)
+            .build();
     }
 
     /**
@@ -274,8 +272,18 @@ public class Contracts {
      */
     public static Uri getMostRecentChartUri(String patientUuid, String locale) {
         return MostRecentLocalizedCharts.CONTENT_URI.buildUpon()
-                .appendPath(patientUuid)
-                .appendPath(locale)
-                .build();
+            .appendPath(patientUuid)
+            .appendPath(locale)
+            .build();
+    }
+
+    interface LocalizedChartColumns {
+        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
+        String GROUP_NAME = "group_name";
+        String CONCEPT_UUID = "concept_uuid";
+        String CONCEPT_NAME = "concept_name";
+        String CONCEPT_TYPE = "concept_type";
+        String VALUE = "value";
+        String LOCALIZED_VALUE = "localized_value";
     }
 }

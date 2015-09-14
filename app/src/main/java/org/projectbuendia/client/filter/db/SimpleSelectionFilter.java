@@ -32,16 +32,16 @@ public abstract class SimpleSelectionFilter<T extends Base> {
      */
     public abstract String[] getSelectionArgs(CharSequence constraint);
 
+    @Override
+    public String toString() {
+        return getDescription();
+    }
+
     /**
      * Returns a localized, human-readable description for this filter for logging and display
      * purposes.
      */
     public String getDescription() {
         return getClass().getName();
-    }
-
-    @Override
-    public String toString() {
-        return getDescription();
     }
 }

@@ -13,11 +13,11 @@ package org.projectbuendia.client.filter.db.patient;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.filter.db.AllFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,12 +26,12 @@ import java.util.List;
 /** All available patient filters available to the user, categorized by filter type. */
 public final class PatientDbFilters {
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
-            new ConceptFilter(
-                App.getInstance().getString(R.string.pregnant),
-                Concepts.PREGNANCY_UUID,
-                Concepts.YES_UUID),
-            new AgeFilter(5),
-            new AgeFilter(2)
+        new ConceptFilter(
+            App.getInstance().getString(R.string.pregnant),
+            Concepts.PREGNANCY_UUID,
+            Concepts.YES_UUID),
+        new AgeFilter(5),
+        new AgeFilter(2)
     };
 
     private static final SimpleSelectionFilter DEFAULT_FILTER = new AllFilter();
@@ -40,12 +40,25 @@ public final class PatientDbFilters {
         return DEFAULT_FILTER;
     }
 
+    /** Returns an array of all {@link SimpleSelectionFilter}s that should be displayed to the user. */
+    public static SimpleSelectionFilter[] getFiltersForDisplay(LocationTree locationTree) {
+        List<SimpleSelectionFilter> allFilters = new ArrayList<>();
+        allFilters.add(new PresentFilter());
+        Collections.addAll(allFilters, getZoneFilters(locationTree));
+        allFilters.add(null); // Section break
+        Collections.addAll(allFilters, getOtherFilters());
+
+        SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[allFilters.size()];
+        allFilters.toArray(filterArray);
+        return filterArray;
+    }
+
     /** Returns an array of {@link SimpleSelectionFilter}s, each representing a zone. */
     public static SimpleSelectionFilter[] getZoneFilters(LocationTree locationTree) {
         List<SimpleSelectionFilter> filters = new ArrayList<>();
 
         for (Location zone :
-                locationTree.getDescendantsAtDepth(LocationTree.ABSOLUTE_DEPTH_ZONE)) {
+            locationTree.getDescendantsAtDepth(LocationTree.ABSOLUTE_DEPTH_ZONE)) {
             filters.add(new LocationUuidFilter(locationTree, zone));
         }
         SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[filters.size()];
@@ -59,20 +72,5 @@ public final class PatientDbFilters {
      */
     public static SimpleSelectionFilter[] getOtherFilters() {
         return OTHER_FILTERS;
-    }
-
-    /**
-     * Returns an array of all {@link SimpleSelectionFilter}s that should be displayed to the user.
-     */
-    public static SimpleSelectionFilter[] getFiltersForDisplay(LocationTree locationTree) {
-        List<SimpleSelectionFilter> allFilters = new ArrayList<>();
-        allFilters.add(new PresentFilter());
-        Collections.addAll(allFilters, getZoneFilters(locationTree));
-        allFilters.add(null); // Section break
-        Collections.addAll(allFilters, getOtherFilters());
-
-        SimpleSelectionFilter[] filterArray = new SimpleSelectionFilter[allFilters.size()];
-        allFilters.toArray(filterArray);
-        return filterArray;
     }
 }

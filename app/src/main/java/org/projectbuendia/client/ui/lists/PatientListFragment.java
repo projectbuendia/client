@@ -38,20 +38,18 @@ import de.greenrobot.event.EventBus;
 
 /** A fragment showing a filterable list of patients. */
 public class PatientListFragment extends ProgressFragment implements
-        ExpandableListView.OnChildClickListener {
-
-    private PatientSearchController mController;
-    private PatientListController mListController;
-    private PatientListTypedCursorAdapter mPatientAdapter;
-    private FragmentUi mFragmentUi;
-    private ListUi mListUi;
+    ExpandableListView.OnChildClickListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on tablets.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-
+    private PatientSearchController mController;
+    private PatientListController mListController;
+    private PatientListTypedCursorAdapter mPatientAdapter;
+    private FragmentUi mFragmentUi;
+    private ListUi mListUi;
     @Inject SyncManager mSyncManager;
 
     /** The current activated item position. Only used on tablets. */
@@ -75,7 +73,7 @@ public class PatientListFragment extends ProgressFragment implements
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         mListController = new PatientListController(
-                mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
+            mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
         setContentView(R.layout.fragment_patient_list);
     }
 
@@ -107,7 +105,7 @@ public class PatientListFragment extends ProgressFragment implements
         // The list view adapter will be set once locations are available.
 
         mSwipeToRefresh =
-                (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
+            (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -118,9 +116,19 @@ public class PatientListFragment extends ProgressFragment implements
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
-                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+            && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
+    }
+
+    private void setActivatedPosition(int position) {
+        if (position == ListView.INVALID_POSITION) {
+            mListView.setItemChecked(mActivatedPosition, false);
+        } else {
+            mListView.setItemChecked(position, true);
+        }
+
+        mActivatedPosition = position;
     }
 
     public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
@@ -153,25 +161,15 @@ public class PatientListFragment extends ProgressFragment implements
 
     @Override
     public boolean onChildClick(
-            ExpandableListView parent,
-            View v,
-            int groupPosition,
-            int childPosition,
-            long id) {
-        Patient patient = (Patient)mPatientAdapter.getChild(groupPosition, childPosition);
+        ExpandableListView parent,
+        View v,
+        int groupPosition,
+        int childPosition,
+        long id) {
+        Patient patient = (Patient) mPatientAdapter.getChild(groupPosition, childPosition);
         Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
         mController.onPatientSelected(patient);
         return true;
-    }
-
-    private void setActivatedPosition(int position) {
-        if (position == ListView.INVALID_POSITION) {
-            mListView.setItemChecked(mActivatedPosition, false);
-        } else {
-            mListView.setItemChecked(position, true);
-        }
-
-        mActivatedPosition = position;
     }
 
     @Override

@@ -31,24 +31,18 @@ public class FakeAppLocationTreeFactory {
     /**
      * Builds an {@link LocationTree} with a facility, the Triage and Discharged zones, and
      * a Suspect zone containing two tents.
-     *
      * @return the constructed {@link LocationTree}
      */
     public static LocationTree build() {
         FakeTypedCursor<Location> locationCursor =
-                new FakeTypedCursor<>(
-                        getSiteLocation(),
-                        getTriageZoneLocation(),
-                        getDischargedZoneLocation(),
-                        getSuspectZoneLocation(),
-                        getSuspect1TentLocation(),
-                        getSuspect2TentLocation()
-                );
-        return LocationTree.forTypedCursor(locationCursor);
-    }
-
-    public static LocationTree emptyTree() {
-        FakeTypedCursor<Location> locationCursor = new FakeTypedCursor<>();
+            new FakeTypedCursor<>(
+                getSiteLocation(),
+                getTriageZoneLocation(),
+                getDischargedZoneLocation(),
+                getSuspectZoneLocation(),
+                getSuspect1TentLocation(),
+                getSuspect2TentLocation()
+            );
         return LocationTree.forTypedCursor(locationCursor);
     }
 
@@ -74,5 +68,10 @@ public class FakeAppLocationTreeFactory {
 
     private static Location getSuspect2TentLocation() {
         return new Location(SUSPECT_2_UUID, Zones.SUSPECT_ZONE_UUID, SUSPECT_2_TENT_NAME, 0);
+    }
+
+    public static LocationTree emptyTree() {
+        FakeTypedCursor<Location> locationCursor = new FakeTypedCursor<>();
+        return LocationTree.forTypedCursor(locationCursor);
     }
 }

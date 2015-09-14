@@ -34,32 +34,32 @@ public class Concepts {
 
     public static final String GENERAL_CONDITION_WELL_UUID = "1855AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_UNWELL_UUID =
-            "137793AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        "137793AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_CRITICAL_UUID =
-            "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
+        "2827e7ac-10c1-4d3f-9fa4-0239771d8548";
     public static final String GENERAL_CONDITION_PALLIATIVE_UUID =
-            "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
+        "7cea1f8f-88cb-4f9c-a9d6-dc28d6eaa520";
     public static final String GENERAL_CONDITION_CONVALESCENT_UUID =
-            "119844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        "119844AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_DISCHARGED_NON_CASE =
-            "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
+        "e4a20c4a-6f13-11e4-b315-040ccecfdba4";
     public static final String GENERAL_CONDITION_CURED =
-            "159791AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        "159791AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String GENERAL_CONDITION_SUSPECTED_DEAD =
-            "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
+        "91dc5fcc-fa9e-4ccd-8cd0-0d203923493f";
     public static final String GENERAL_CONDITION_CONFIRMED_DEAD =
-            "160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        "160432AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
     public static final String[] GENERAL_CONDITION_UUIDS = new String[] {
-            GENERAL_CONDITION_WELL_UUID,
-            GENERAL_CONDITION_UNWELL_UUID,
-            GENERAL_CONDITION_CRITICAL_UUID,
-            GENERAL_CONDITION_PALLIATIVE_UUID,
-            GENERAL_CONDITION_CONVALESCENT_UUID,
-            GENERAL_CONDITION_SUSPECTED_DEAD,
-            GENERAL_CONDITION_CONFIRMED_DEAD,
-            GENERAL_CONDITION_CURED,
-            GENERAL_CONDITION_DISCHARGED_NON_CASE
+        GENERAL_CONDITION_WELL_UUID,
+        GENERAL_CONDITION_UNWELL_UUID,
+        GENERAL_CONDITION_CRITICAL_UUID,
+        GENERAL_CONDITION_PALLIATIVE_UUID,
+        GENERAL_CONDITION_CONVALESCENT_UUID,
+        GENERAL_CONDITION_SUSPECTED_DEAD,
+        GENERAL_CONDITION_CONFIRMED_DEAD,
+        GENERAL_CONDITION_CURED,
+        GENERAL_CONDITION_DISCHARGED_NON_CASE
     };
 
     /** UUID for the (question) concept for the temperature. */
@@ -153,5 +153,6 @@ public class Concepts {
         }
     }
 
-    private Concepts() {}
+    private Concepts() {
+    }
 }

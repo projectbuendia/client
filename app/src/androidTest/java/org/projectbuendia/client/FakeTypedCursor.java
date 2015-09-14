@@ -27,7 +27,6 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
 
     /**
      * Creates a {@link FakeTypedCursor} that contains the specified objects.
-     *
      * @param objects the contents of the cursor
      */
     public FakeTypedCursor(T... objects) {
@@ -52,11 +51,13 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
 
     /** No-op. */
     @Override
-    public void registerContentObserver(ContentObserver observer) {}
+    public void registerContentObserver(ContentObserver observer) {
+    }
 
     /** No-op. */
     @Override
-    public void unregisterContentObserver(ContentObserver observer) {}
+    public void unregisterContentObserver(ContentObserver observer) {
+    }
 
     @Override
     public void close() {

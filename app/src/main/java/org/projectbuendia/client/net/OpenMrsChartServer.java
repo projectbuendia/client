@@ -17,24 +17,24 @@ import com.android.volley.Response;
 import org.joda.time.Instant;
 import org.projectbuendia.client.net.json.JsonChart;
 import org.projectbuendia.client.net.json.JsonConceptResponse;
-import org.projectbuendia.client.net.json.Serializers;
 import org.projectbuendia.client.net.json.JsonPatientRecord;
 import org.projectbuendia.client.net.json.JsonPatientRecordResponse;
+import org.projectbuendia.client.net.json.Serializers;
 
 import java.util.HashMap;
 
 /**
  * A connection to an OpenMRS backend to get chart information (observations on encounters
  * with patients).
- *
+ * <p/>
  * <p>There are essentially three endpoints:
  * <ul>
- *     <li><code>/patientencounters</code> gives encoded details of the observations of concept
- *     values that happen at an encounter
- *     <li><code>/concepts</code> gives localised string and type information for the concepts
- *     observed
- *     <li><code>/charts</code> gives display information about how to display those encounters,
- *     so you can have consistent ordering of observations and grouping into sections.
+ * <li><code>/patientencounters</code> gives encoded details of the observations of concept
+ * values that happen at an encounter
+ * <li><code>/concepts</code> gives localised string and type information for the concepts
+ * observed
+ * <li><code>/charts</code> gives display information about how to display those encounters,
+ * so you can have consistent ordering of observations and grouping into sections.
  * </ul>
  */
 public class OpenMrsChartServer {
@@ -47,18 +47,18 @@ public class OpenMrsChartServer {
 
     /**
      * Retrieves charts from the server for a given patient.
-     * @param patientUuid the UUID of the patient
+     * @param patientUuid     the UUID of the patient
      * @param successListener a {@link Response.Listener} that handles successful chart retrieval
-     * @param errorListener a {@link Response.ErrorListener} that handles failed chart retrieval
+     * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
      */
     public void getChart(String patientUuid,
                          Response.Listener<JsonPatientRecord> successListener,
                          Response.ErrorListener errorListener) {
         GsonRequest<JsonPatientRecord> request = new GsonRequest<>(
-                mConnectionDetails.getBuendiaApiUrl() + "/patientencounters/" + patientUuid,
-                JsonPatientRecord.class, false,
-                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-                successListener, errorListener);
+            mConnectionDetails.getBuendiaApiUrl() + "/patientencounters/" + patientUuid,
+            JsonPatientRecord.class, false,
+            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+            successListener, errorListener);
         Serializers.registerTo(request.getGson());
         mConnectionDetails.getVolley().addToRequestQueue(request);
     }
@@ -66,58 +66,57 @@ public class OpenMrsChartServer {
     /**
      * Retrieves all charts from the server for all patients.
      * @param successListener a {@link Response.Listener} that handles successful chart retrieval
-     * @param errorListener a {@link Response.ErrorListener} that handles failed chart retrieval
+     * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
      */
     public void getAllCharts(Response.Listener<JsonPatientRecordResponse> successListener,
                              Response.ErrorListener errorListener) {
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
-                successListener, errorListener);
+            successListener, errorListener);
+    }
+
+    private void doEncountersRequest(
+        String url,
+        Response.Listener<JsonPatientRecordResponse> successListener,
+        Response.ErrorListener errorListener) {
+        GsonRequest<JsonPatientRecordResponse> request = new GsonRequest<>(
+            url,
+            JsonPatientRecordResponse.class, false,
+            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+            successListener, errorListener);
+        Serializers.registerTo(request.getGson());
+        request.setRetryPolicy(
+            new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
+        mConnectionDetails.getVolley().addToRequestQueue(request);
     }
 
     /**
      * Get all observations that happened in an encounter after or on lastTime. Allows a client to
      * do incremental cache updating.
-     *
-     * @param lastTime a joda instant representing the start time for new observations (inclusive)
+     * @param lastTime        a joda instant representing the start time for new observations (inclusive)
      * @param successListener a listener to get the results on the event of success
-     * @param errorListener a (Volley) listener to get any errors
+     * @param errorListener   a (Volley) listener to get any errors
      */
     public void getIncrementalCharts(
-            Instant lastTime,
-            Response.Listener<JsonPatientRecordResponse> successListener,
-            Response.ErrorListener errorListener) {
+        Instant lastTime,
+        Response.Listener<JsonPatientRecordResponse> successListener,
+        Response.ErrorListener errorListener) {
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
-                        + "/patientencounters?sm=" + lastTime.getMillis(),
-                successListener, errorListener);
-    }
-
-    private void doEncountersRequest(
-            String url,
-            Response.Listener<JsonPatientRecordResponse> successListener,
-            Response.ErrorListener errorListener) {
-        GsonRequest<JsonPatientRecordResponse> request = new GsonRequest<>(
-                url,
-                JsonPatientRecordResponse.class, false,
-                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-                successListener, errorListener);
-        Serializers.registerTo(request.getGson());
-        request.setRetryPolicy(
-                new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_VERY_LONG, 1, 1f));
-        mConnectionDetails.getVolley().addToRequestQueue(request);
+                + "/patientencounters?sm=" + lastTime.getMillis(),
+            successListener, errorListener);
     }
 
     /**
      * Retrieves all concepts from the server that are present in at least one chart.
      * @param successListener a {@link Response.Listener} that handles successful concept retrieval
-     * @param errorListener a {@link Response.ErrorListener} that handles failed concept retrieval
+     * @param errorListener   a {@link Response.ErrorListener} that handles failed concept retrieval
      */
     public void getConcepts(Response.Listener<JsonConceptResponse> successListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<JsonConceptResponse> request = new GsonRequest<JsonConceptResponse>(
-                mConnectionDetails.getBuendiaApiUrl() + "/concept",
-                JsonConceptResponse.class, false,
-                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-                successListener, errorListener) {
+            mConnectionDetails.getBuendiaApiUrl() + "/concept",
+            JsonConceptResponse.class, false,
+            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+            successListener, errorListener) {
         };
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);
@@ -125,18 +124,18 @@ public class OpenMrsChartServer {
 
     /**
      * Retrieves the structure of a given chart (groupings, orderings) from the server.
-     * @param uuid the UUID of the chart
+     * @param uuid            the UUID of the chart
      * @param successListener a {@link Response.Listener} that handles successful structure retrieval
-     * @param errorListener a {@link Response.ErrorListener} that handles failed structure retrieval
+     * @param errorListener   a {@link Response.ErrorListener} that handles failed structure retrieval
      */
     public void getChartStructure(
-            String uuid, Response.Listener<JsonChart> successListener,
-            Response.ErrorListener errorListener) {
+        String uuid, Response.Listener<JsonChart> successListener,
+        Response.ErrorListener errorListener) {
         GsonRequest<JsonChart> request = new GsonRequest<JsonChart>(
-                mConnectionDetails.getBuendiaApiUrl() + "/chart/" + uuid + "?v=full",
-                JsonChart.class, false,
-                mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
-                successListener, errorListener) {
+            mConnectionDetails.getBuendiaApiUrl() + "/chart/" + uuid + "?v=full",
+            JsonChart.class, false,
+            mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
+            successListener, errorListener) {
         };
         request.setRetryPolicy(new DefaultRetryPolicy(Common.REQUEST_TIMEOUT_MS_LONG, 1, 1f));
         mConnectionDetails.getVolley().addToRequestQueue(request);

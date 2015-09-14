@@ -59,7 +59,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * <p>Instead of overriding this method, override {@link #onCreateImpl}.
      */
     @Override
@@ -113,7 +113,34 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         return true;
     }
 
-    public void onExtendOptionsMenu(Menu menu) {}
+    public void onExtendOptionsMenu(Menu menu) {
+    }
+
+    private void updateActiveUser() {
+        JsonUser user = App.getUserManager().getActiveUser();
+
+        if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
+            LOG.w("The user has switched. I don't know how to deal with that right now");
+            // TODO: Handle.
+        }
+        mLastActiveUser = user;
+
+        TextView initials = (TextView) mMenu
+            .getItem(mMenu.size() - 1)
+            .getActionView()
+            .findViewById(R.id.user_initials);
+
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
+        initials.setText(user.getInitials());
+    }
+
+    public void onEvent(ActiveUserUnsetEvent event) {
+        // TODO: Implement this in one way or another!
+    }
+
+    public void onEvent(PatientChartRequestedEvent event) {
+        PatientChartActivity.start(this, event.uuid);
+    }
 
     @Override
     protected final void onStart() {
@@ -185,30 +212,19 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onStop();
     }
 
-    private void updateActiveUser() {
-        JsonUser user = App.getUserManager().getActiveUser();
+    protected LoadingState getLoadingState() {
+        return mLoadingState;
+    }
 
-        if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            LOG.w("The user has switched. I don't know how to deal with that right now");
-            // TODO: Handle.
+    /**
+     * Changes the state of this activity, changing the set of available buttons if necessary.
+     * @param loadingState the new activity state
+     */
+    protected void setLoadingState(LoadingState loadingState) {
+        if (mLoadingState != loadingState) {
+            mLoadingState = loadingState;
+            invalidateOptionsMenu();
         }
-        mLastActiveUser = user;
-
-        TextView initials = (TextView) mMenu
-                .getItem(mMenu.size() - 1)
-                .getActionView()
-                .findViewById(R.id.user_initials);
-
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
-        initials.setText(user.getInitials());
-    }
-
-    public void onEvent(ActiveUserUnsetEvent event) {
-        // TODO: Implement this in one way or another!
-    }
-
-    public void onEvent(PatientChartRequestedEvent event) {
-        PatientChartActivity.start(this, event.uuid);
     }
 
     class MenuPopupWindow extends PopupWindow {
@@ -224,14 +240,14 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             super();
 
             mLayout = (LinearLayout) getLayoutInflater()
-                    .inflate(R.layout.popup_window_user, null);
+                .inflate(R.layout.popup_window_user, null);
             setContentView(mLayout);
 
             ButterKnife.inject(this, mLayout);
 
             setWindowLayoutMode(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
             setFocusable(true);
             setOutsideTouchable(true);
             setBackgroundDrawable(new BitmapDrawable());
@@ -265,21 +281,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
-    }
-
-    /**
-     * Changes the state of this activity, changing the set of available buttons if necessary.
-     * @param loadingState the new activity state
-     */
-    protected void setLoadingState(LoadingState loadingState) {
-        if (mLoadingState != loadingState) {
-            mLoadingState = loadingState;
-            invalidateOptionsMenu();
-        }
-    }
-
-    protected LoadingState getLoadingState() {
-        return mLoadingState;
     }
 }
 

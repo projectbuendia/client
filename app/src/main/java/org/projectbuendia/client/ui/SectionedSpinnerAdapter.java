@@ -27,24 +27,20 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
     private final int mSectionBorderResource;
     private final LayoutInflater mInflater;
 
-    private enum ViewType {
-        SECTION_BORDER, LIST_ITEM
-    }
-
     /**
      * Instantiates a {@link SectionedSpinnerAdapter} with the given resources and contents.
-     * @param context the Application or Activity context
-     * @param collapsedResource the {@link android.graphics.drawable.Drawable} used to display the
-     *                          selected adapter item when the list is collapsed
-     * @param dropDownResource the {@link android.graphics.drawable.Drawable} used to display an
-     *                         adapter item when the list is expanded
+     * @param context               the Application or Activity context
+     * @param collapsedResource     the {@link android.graphics.drawable.Drawable} used to display the
+     *                              selected adapter item when the list is collapsed
+     * @param dropDownResource      the {@link android.graphics.drawable.Drawable} used to display an
+     *                              adapter item when the list is expanded
      * @param sectionBorderResource the {@link android.graphics.drawable.Drawable} used to display
      *                              section dividers (null items)
-     * @param items the contents of the list
+     * @param items                 the contents of the list
      */
     public SectionedSpinnerAdapter(
-            Context context, int collapsedResource, int dropDownResource,
-            int sectionBorderResource, T[] items) {
+        Context context, int collapsedResource, int dropDownResource,
+        int sectionBorderResource, T[] items) {
         super(context, collapsedResource, items);
         mItems = items;
         mSectionBorderResource = sectionBorderResource;
@@ -70,6 +66,29 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
         // ordinarily support multiple view types and ignore getViewTypeCount().
         view.setTag(ViewType.LIST_ITEM);
         return view;
+    }
+
+    private boolean isSectionBorder(int position) {
+        return position < mItems.length && mItems[position] == null;
+    }
+
+    private View getSectionBorder(View convertView, ViewGroup parent) {
+        if (convertView == null || convertView.getTag() != ViewType.SECTION_BORDER) {
+            convertView = mInflater.inflate(mSectionBorderResource, parent, false);
+        }
+        convertView.setClickable(true);
+
+        // Manually manage the different types of views, since Spinners don't
+        // ordinarily support multiple view types and ignore getViewTypeCount().
+        convertView.setTag(ViewType.SECTION_BORDER);
+
+        return convertView;
+    }
+
+    private void resetClickable(View convertView) {
+        if (convertView != null) {
+            convertView.setClickable(false);
+        }
     }
 
     @Override
@@ -102,30 +121,11 @@ public class SectionedSpinnerAdapter<T> extends ArrayAdapter<T> {
      */
     public int getItemViewType(int position) {
         return isSectionBorder(position)
-                ? ViewType.SECTION_BORDER.ordinal()
-                : ViewType.LIST_ITEM.ordinal();
+            ? ViewType.SECTION_BORDER.ordinal()
+            : ViewType.LIST_ITEM.ordinal();
     }
 
-    private boolean isSectionBorder(int position) {
-        return position < mItems.length && mItems[position] == null;
-    }
-
-    private View getSectionBorder(View convertView, ViewGroup parent) {
-        if (convertView == null || convertView.getTag() != ViewType.SECTION_BORDER) {
-            convertView = mInflater.inflate(mSectionBorderResource, parent, false);
-        }
-        convertView.setClickable(true);
-
-        // Manually manage the different types of views, since Spinners don't
-        // ordinarily support multiple view types and ignore getViewTypeCount().
-        convertView.setTag(ViewType.SECTION_BORDER);
-
-        return convertView;
-    }
-
-    private void resetClickable(View convertView) {
-        if (convertView != null) {
-            convertView.setClickable(false);
-        }
+    private enum ViewType {
+        SECTION_BORDER, LIST_ITEM
     }
 }

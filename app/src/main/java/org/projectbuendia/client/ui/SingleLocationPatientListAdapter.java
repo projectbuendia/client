@@ -25,19 +25,19 @@ import org.projectbuendia.client.models.LocationTree;
  */
 public class SingleLocationPatientListAdapter extends PatientListTypedCursorAdapter {
     public SingleLocationPatientListAdapter(
-            Context context, LocationTree locationTree) {
+        Context context, LocationTree locationTree) {
         super(context, locationTree);
+    }
+
+    @Override
+    public View getGroupView(
+        int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+        return newGroupView();
     }
 
     @Override
     protected View newGroupView() {
         return LayoutInflater.from(mContext).inflate(
-                R.layout.patient_list_empty_group_header, null);
-    }
-
-    @Override
-    public View getGroupView(
-            int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        return newGroupView();
+            R.layout.patient_list_empty_group_header, null);
     }
 }

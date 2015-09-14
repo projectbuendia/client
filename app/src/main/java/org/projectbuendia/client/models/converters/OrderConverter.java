@@ -25,11 +25,11 @@ public class OrderConverter implements Converter<Order> {
     @Override
     public Order fromCursor(Cursor cursor) {
         return new Order(
-                cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
-                cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),
-                cursor.getString(cursor.getColumnIndex(Contracts.Orders.INSTRUCTIONS)),
-                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_TIME)),
-                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_TIME))
+            cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
+            cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),
+            cursor.getString(cursor.getColumnIndex(Contracts.Orders.INSTRUCTIONS)),
+            cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_TIME)),
+            cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_TIME))
         );
     }
 }

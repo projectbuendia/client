@@ -25,32 +25,32 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
 
     /**
      * Query that fetches localized location information for a given locale.
-     *
+     * <p/>
      * <p>Parameters:
      * <ul>
-     *     <li>string, the locale in which the location information should be returned</li>
+     * <li>string, the locale in which the location information should be returned</li>
      * </ul>
-     *
+     * <p/>
      * <p>Result Columns:
      * <ul>
-     *     <li>string location_uuid, the UUID of a location</li>
-     *     <li>string parent_uuid, the UUID of the location's parent</li>
-     *     <li>string name, the localized name of the location</li>
+     * <li>string location_uuid, the UUID of a location</li>
+     * <li>string parent_uuid, the UUID of the location's parent</li>
+     * <li>string name, the localized name of the location</li>
      * </ul>
      */
     private static final String QUERY = ""
-            + " SELECT"
-            + "     locations.location_uuid AS location_uuid,"
-            + "     locations.parent_uuid AS parent_uuid,"
-            + "     location_names.name AS name,"
-            + "     COUNT(patients.location_uuid) AS patient_count"
-            + " FROM locations"
-            + "     INNER JOIN location_names"
-            + "     ON locations.location_uuid = location_names.location_uuid"
-            + "     LEFT JOIN patients"
-            + "     ON locations.location_uuid = patients.location_uuid"
-            + " WHERE location_names.locale = ?"
-            + " GROUP BY locations.location_uuid";
+        + " SELECT"
+        + "     locations.location_uuid AS location_uuid,"
+        + "     locations.parent_uuid AS parent_uuid,"
+        + "     location_names.name AS name,"
+        + "     COUNT(patients.location_uuid) AS patient_count"
+        + " FROM locations"
+        + "     INNER JOIN location_names"
+        + "     ON locations.location_uuid = location_names.location_uuid"
+        + "     LEFT JOIN patients"
+        + "     ON locations.location_uuid = patients.location_uuid"
+        + " WHERE location_names.locale = ?"
+        + " GROUP BY locations.location_uuid";
 
     @Override
     public String getType() {
@@ -59,8 +59,8 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
 
     @Override
     public Cursor query(
-            Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
+        String selection, String[] selectionArgs, String sortOrder) {
         // URI expected to be of form ../localized-locations/{locale}.
         List<String> pathSegments = uri.getPathSegments();
         if (pathSegments.size() != 2) {
@@ -68,35 +68,35 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
         }
 
         String locale = pathSegments.get(1);
-        return dbHelper.getReadableDatabase().rawQuery(QUERY, new String[] { locale });
+        return dbHelper.getReadableDatabase().rawQuery(QUERY, new String[] {locale});
     }
 
     @Override
     public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int bulkInsert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues[] values) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues[] values) {
         throw new UnsupportedOperationException(
-                "Bulk insert is not supported for URI '" + uri + "'.");
+            "Bulk insert is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int delete(
-            Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
-            String[] selectionArgs) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
+        String[] selectionArgs) {
         throw new UnsupportedOperationException("Delete is not supported for URI '" + uri + "'.");
     }
 
     @Override
     public int update(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values, String selection, String[] selectionArgs) {
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("Update is not supported for URI '" + uri + "'.");
     }
 }

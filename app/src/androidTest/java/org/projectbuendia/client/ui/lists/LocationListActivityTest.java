@@ -15,9 +15,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static android.support.test.espresso.Espresso.pressBack;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /** Tests for {@link LocationListActivity}. */
 public class LocationListActivityTest extends FunctionalTestCase {

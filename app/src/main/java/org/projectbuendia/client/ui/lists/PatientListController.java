@@ -25,28 +25,12 @@ import javax.inject.Inject;
 public class PatientListController {
 
     private static final Logger LOG = Logger.create();
-
-    private final class SyncSubscriber {
-        public synchronized void onEventMainThread(SyncSucceededEvent event) {
-            onSyncFinished(true);
-        }
-
-        public synchronized void onEventMainThread(SyncFailedEvent event) {
-            onSyncFinished(false);
-        }
-    }
-
     private final SyncSubscriber mSyncSubscriber = new SyncSubscriber();
-
     private final Ui mUi;
-
     private final SyncManager mSyncManager;
-
     @Inject HealthMonitor mHealthMonitor;
-
     /** True if a full sync initiated by this activity is in progress. */
     private boolean mInitiatedFullSync;
-
     private EventBusRegistrationInterface mEventBus;
 
     public interface Ui {
@@ -62,13 +46,12 @@ public class PatientListController {
 
     /**
      * Initializes this with the given UI, sync manager, and event bus.
-     *
-     * @param ui {@link Ui} that will respond to list refresh events
+     * @param ui          {@link Ui} that will respond to list refresh events
      * @param syncManager a {@link SyncManager} for performing sync operations
-     * @param eventBus the {@link EventBusRegistrationInterface} that will listen for sync events
+     * @param eventBus    the {@link EventBusRegistrationInterface} that will listen for sync events
      */
     public PatientListController(
-            Ui ui, SyncManager syncManager, EventBusRegistrationInterface eventBus) {
+        Ui ui, SyncManager syncManager, EventBusRegistrationInterface eventBus) {
         mUi = ui;
         mSyncManager = syncManager;
         mEventBus = eventBus;
@@ -104,5 +87,15 @@ public class PatientListController {
             mUi.showRefreshError();
         }
         mInitiatedFullSync = false;
+    }
+
+    private final class SyncSubscriber {
+        public synchronized void onEventMainThread(SyncSucceededEvent event) {
+            onSyncFinished(true);
+        }
+
+        public synchronized void onEventMainThread(SyncFailedEvent event) {
+            onSyncFinished(false);
+        }
     }
 }

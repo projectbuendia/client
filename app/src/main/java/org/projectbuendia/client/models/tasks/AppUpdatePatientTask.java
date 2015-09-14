@@ -17,16 +17,16 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.ItemUpdatedEvent;
+import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.sync.providers.Contracts;
@@ -35,7 +35,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link AsyncTask} that updates a patient on a server.
- *
+ * <p/>
  * <p>If the operation succeeds, a {@link ItemUpdatedEvent} is posted on the given
  * {@link CrudEventBus} with both the old and updated patient data. If the operation fails, a
  * {@link PatientUpdateFailedEvent} is posted instead.
@@ -53,13 +53,13 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
     private final CrudEventBus mBus;
 
     AppUpdatePatientTask(
-            TaskFactory taskFactory,
-            ConverterPack converters,
-            Server server,
-            ContentResolver contentResolver,
-            Patient originalPatient,
-            PatientDelta patientDelta,
-            CrudEventBus bus) {
+        TaskFactory taskFactory,
+        ConverterPack converters,
+        Server server,
+        ContentResolver contentResolver,
+        Patient originalPatient,
+        PatientDelta patientDelta,
+        CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mConverterPack = converters;
         mServer = server;
@@ -82,24 +82,24 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
         } catch (ExecutionException e) {
             // TODO: Parse the VolleyError to see exactly what kind of error was raised.
             return new PatientUpdateFailedEvent(
-                    PatientUpdateFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
+                PatientUpdateFailedEvent.REASON_NETWORK, (VolleyError) e.getCause());
         }
 
         int count = mContentResolver.update(
-                Contracts.Patients.CONTENT_URI,
-                mPatientDelta.toContentValues(),
-                FILTER.getSelectionString(),
-                FILTER.getSelectionArgs(mUuid));
+            Contracts.Patients.CONTENT_URI,
+            mPatientDelta.toContentValues(),
+            FILTER.getSelectionString(),
+            FILTER.getSelectionArgs(mUuid));
 
         switch (count) {
             case 0:
                 return new PatientUpdateFailedEvent(
-                        PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT, null /*exception*/);
+                    PatientUpdateFailedEvent.REASON_NO_SUCH_PATIENT, null /*exception*/);
             case 1:
                 return null;
             default:
                 return new PatientUpdateFailedEvent(
-                        PatientUpdateFailedEvent.REASON_SERVER, null /*exception*/);
+                    PatientUpdateFailedEvent.REASON_SERVER, null /*exception*/);
         }
     }
 
@@ -135,7 +135,7 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
 
         public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new PatientUpdateFailedEvent(
-                    PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
+                PatientUpdateFailedEvent.REASON_CLIENT, new Exception(event.error)));
             mBus.unregister(this);
         }
     }

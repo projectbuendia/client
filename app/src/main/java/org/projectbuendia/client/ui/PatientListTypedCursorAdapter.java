@@ -22,17 +22,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationComparator;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
-import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
-import org.projectbuendia.client.utils.Utils;
 import org.projectbuendia.client.utils.PatientCountDisplay;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +61,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
-     *
      * @param context an activity context
      */
     public PatientListTypedCursorAdapter(Context context, LocationTree locationTree) {
@@ -83,26 +82,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public int getChildrenCount(int groupPosition) {
-        Object patientsForLocation = getGroup(groupPosition);
-        if (mPatientsByLocation == null || patientsForLocation == null) {
-            return 0;
-        }
-
-        return mPatientsByLocation.get(patientsForLocation).size();
-    }
-
-    @Override
-    public Object getGroup(int groupPosition) {
-        return mLocations[groupPosition];
-    }
-
-    @Override
-    public Object getChild(int groupPosition, int childPosition) {
-        return mPatientsByLocation.get(getGroup(groupPosition)).get(childPosition);
-    }
-
-    @Override
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
@@ -119,8 +98,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(
-            int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        Location location = (Location)getGroup(groupPosition);
+        int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+        Location location = (Location) getGroup(groupPosition);
 
         int patientCount = getChildrenCount(groupPosition);
         String tentName = location.toString();
@@ -138,14 +117,29 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    @Override
+    public Object getGroup(int groupPosition) {
+        return mLocations[groupPosition];
+    }
+
+    @Override
+    public int getChildrenCount(int groupPosition) {
+        Object patientsForLocation = getGroup(groupPosition);
+        if (mPatientsByLocation == null || patientsForLocation == null) {
+            return 0;
+        }
+
+        return mPatientsByLocation.get(patientsForLocation).size();
+    }
+
     protected View newGroupView() {
         return LayoutInflater.from(mContext).inflate(R.layout.listview_tent_header, null);
     }
 
     @Override
     public View getChildView(
-            int groupPosition, int childPosition, boolean isLastChild, View convertView,
-            ViewGroup parent) {
+        int groupPosition, int childPosition, boolean isLastChild, View convertView,
+        ViewGroup parent) {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
         // Show pregnancy status and condition if present.
@@ -166,7 +160,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         ResStatus.Resolved status =
-                Concepts.getResStatus(condition).resolve(mContext.getResources());
+            Concepts.getResStatus(condition).resolve(mContext.getResources());
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(patient.givenName + " " + patient.familyName);
@@ -175,16 +169,16 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
 
         holder.mPatientAge.setText(
-                patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));
+            patient.birthdate == null ? "" : Utils.birthdateToAge(patient.birthdate));
 
         holder.mPatientGender.setVisibility(
-                patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
+            patient.gender == Patient.GENDER_UNKNOWN ? View.GONE : View.VISIBLE);
 
         if (patient.gender != Patient.GENDER_UNKNOWN) {
             holder.mPatientGender.setImageDrawable(mContext.getResources().getDrawable(
-                    patient.gender == Patient.GENDER_MALE ? R.drawable.ic_gender_male
-                            : pregnant ? R.drawable.ic_gender_female_pregnant
-                            : R.drawable.ic_gender_female
+                patient.gender == Patient.GENDER_MALE ? R.drawable.ic_gender_male
+                    : pregnant ? R.drawable.ic_gender_female_pregnant
+                    : R.drawable.ic_gender_female
             ));
         }
 
@@ -192,13 +186,13 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         if (isLastChild) {
             convertView.setBackgroundResource(R.drawable.bottom_border_1dp);
             convertView.setPadding(
-                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
-                    convertView.getPaddingRight(), 40);
+                convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                convertView.getPaddingRight(), 40);
         } else {
             convertView.setBackgroundResource(0);
             convertView.setPadding(
-                    convertView.getPaddingLeft(), convertView.getPaddingTop(),
-                    convertView.getPaddingRight(), 20);
+                convertView.getPaddingLeft(), convertView.getPaddingTop(),
+                convertView.getPaddingRight(), 20);
         }
 
         ExpandableListView expandableListView = (ExpandableListView) parent;
@@ -207,9 +201,14 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
+    @Override
+    public Object getChild(int groupPosition, int childPosition) {
+        return mPatientsByLocation.get(getGroup(groupPosition)).get(childPosition);
+    }
+
     private View newChildView() {
         View view = LayoutInflater.from(mContext).inflate(
-                R.layout.listview_cell_search_results, null, false);
+            R.layout.listview_cell_search_results, null, false);
         ViewHolder holder = new ViewHolder(view);
         view.setTag(holder);
         return view;
@@ -254,6 +253,17 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         notifyDataSetChanged();
     }
 
+    // Add a single patient to relevant data structures.
+    private void addPatient(Patient patient) {
+        Location location = mLocationTree.findByUuid(patient.locationUuid);
+        if (location != null) {  // shouldn't be null, but better to be safe
+            if (!mPatientsByLocation.containsKey(location)) {
+                mPatientsByLocation.put(location, new ArrayList<Patient>());
+            }
+            mPatientsByLocation.get(location).add(patient);
+        }
+    }
+
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... params) {
@@ -264,17 +274,6 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         @Override
         protected void onPostExecute(Void result) {
             notifyDataSetChanged();
-        }
-    }
-
-    // Add a single patient to relevant data structures.
-    private void addPatient(Patient patient) {
-        Location location = mLocationTree.findByUuid(patient.locationUuid);
-        if (location != null) {  // shouldn't be null, but better to be safe
-            if (!mPatientsByLocation.containsKey(location)) {
-                mPatientsByLocation.put(location, new ArrayList<Patient>());
-            }
-            mPatientsByLocation.get(location).add(patient);
         }
     }
 

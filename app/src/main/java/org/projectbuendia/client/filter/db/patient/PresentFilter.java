@@ -13,8 +13,8 @@ package org.projectbuendia.client.filter.db.patient;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.providers.Contracts;
 
@@ -26,7 +26,7 @@ import org.projectbuendia.client.sync.providers.Contracts;
  */
 public class PresentFilter extends SimpleSelectionFilter<Patient> {
     private static final String SELECTION_STRING = Contracts.Patients.LOCATION_UUID + "!=?";
-    private static final String[] SELECTION_ARGS = new String[] { Zones.DISCHARGED_ZONE_UUID };
+    private static final String[] SELECTION_ARGS = new String[] {Zones.DISCHARGED_ZONE_UUID};
 
     @Override
     public String getSelectionString() {

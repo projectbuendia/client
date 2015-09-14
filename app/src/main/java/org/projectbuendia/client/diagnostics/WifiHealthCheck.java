@@ -32,25 +32,24 @@ public class WifiHealthCheck extends HealthCheck {
     private final WifiChangeBroadcastReceiver mWifiStateChangedReceiver;
     private final AppSettings mSettings;
 
+    @Override
+    public boolean isApiUnavailable() {
+        // We will get an event that lets us update the set of active issues whenever
+        // the wifi state changes, so we can be confident that the API is definitely
+        // unavailable whenever either of the wifi-related issues is active.
+        return mSettings.getRequireWifi() && (
+            mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
+                mActiveIssues.contains(HealthIssue.WIFI_DISABLED));
+    }
+
     protected WifiHealthCheck(Application application, AppSettings settings) {
         super(application);
 
         mWifiManager = (WifiManager) application.getSystemService(Context.WIFI_SERVICE);
         mConnectivityManager =
-                (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+            (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
         mWifiStateChangedReceiver = new WifiChangeBroadcastReceiver();
         mSettings = settings;
-    }
-
-    @Override
-    protected void startImpl() {
-        mApplication.registerReceiver(mWifiStateChangedReceiver, sWifiStateChangedIntentFilter);
-        checkWifiState();
-    }
-
-    @Override
-    protected void stopImpl() {
-        mApplication.unregisterReceiver(mWifiStateChangedReceiver);
     }
 
     private static IntentFilter getIntentFilter() {
@@ -58,6 +57,12 @@ public class WifiHealthCheck extends HealthCheck {
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         return intentFilter;
+    }
+
+    @Override
+    protected void startImpl() {
+        mApplication.registerReceiver(mWifiStateChangedReceiver, sWifiStateChangedIntentFilter);
+        checkWifiState();
     }
 
     private void checkWifiState() {
@@ -68,7 +73,7 @@ public class WifiHealthCheck extends HealthCheck {
         }
         int wifiState = mWifiManager.getWifiState();
         if (wifiState != WifiManager.WIFI_STATE_ENABLING
-                && wifiState != WifiManager.WIFI_STATE_ENABLED) {
+            && wifiState != WifiManager.WIFI_STATE_ENABLED) {
             reportIssue(HealthIssue.WIFI_DISABLED);
         } else {
             resolveIssue(HealthIssue.WIFI_DISABLED);
@@ -81,20 +86,15 @@ public class WifiHealthCheck extends HealthCheck {
         }
     }
 
+    @Override
+    protected void stopImpl() {
+        mApplication.unregisterReceiver(mWifiStateChangedReceiver);
+    }
+
     private class WifiChangeBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             checkWifiState();
         }
-    }
-
-    @Override
-    public boolean isApiUnavailable() {
-        // We will get an event that lets us update the set of active issues whenever
-        // the wifi state changes, so we can be confident that the API is definitely
-        // unavailable whenever either of the wifi-related issues is active.
-        return mSettings.getRequireWifi() && (
-                mActiveIssues.contains(HealthIssue.WIFI_NOT_CONNECTED) ||
-                mActiveIssues.contains(HealthIssue.WIFI_DISABLED));
     }
 }

@@ -16,9 +16,8 @@ import android.net.Uri;
 
 /**
  * A {@link Cursor}-like data structure that exposes a type-safe interface.
- *
+ * <p/>
  * <p>Implementations are most likely NOT thread-safe.
- *
  * @param <T> the type of the array elements
  */
 public interface TypedCursor<T> extends Iterable<T>, Observable {

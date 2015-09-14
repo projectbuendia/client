@@ -26,9 +26,9 @@ import java.util.List;
  * an optional name used for string representations.
  */
 public final class SimpleSelectionFilterGroup<T extends Base>
-        extends SimpleSelectionFilter<T> {
+    extends SimpleSelectionFilter<T> {
     private static final String DEFAULT_FILTER_NAME =
-            App.getInstance().getString(R.string.filter_group_default_name);
+        App.getInstance().getString(R.string.filter_group_default_name);
 
     private final FilterType mFilterType;
     private final ImmutableList<SimpleSelectionFilter> mFilters;

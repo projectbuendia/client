@@ -21,16 +21,15 @@ import dagger.Provides;
  * Other {@link Converter} objects may require manual instantiation.
  */
 @Module(
-        complete = false,
-        library = true)
+    complete = false,
+    library = true)
 public class ConverterModule {
 
     @Provides
-    @Singleton
-    ConverterPack provideAppTypeConverters() {
+    @Singleton ConverterPack provideAppTypeConverters() {
         return new ConverterPack(
-                new PatientConverter(),
-                new LocationConverter(),
-                new OrderConverter());
+            new PatientConverter(),
+            new LocationConverter(),
+            new OrderConverter());
     }
 }

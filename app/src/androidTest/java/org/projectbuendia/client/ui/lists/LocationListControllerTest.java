@@ -11,18 +11,12 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import android.test.AndroidTestCase;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeSyncManager;
-import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncCanceledEvent;
@@ -30,7 +24,13 @@ import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.FakeEventBus;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /** Tests for {@link LocationListController}. */
 public final class LocationListControllerTest extends AndroidTestCase {
@@ -42,22 +42,6 @@ public final class LocationListControllerTest extends AndroidTestCase {
     @Mock private LocationListController.Ui mMockUi;
     @Mock private LocationListController.LocationFragmentUi mMockFragmentUi;
     @Mock private PatientSearchController mMockSearchController;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-
-        mFakeEventBus = new FakeEventBus();
-        mFakeSyncManager = new FakeSyncManager();
-        mController = new LocationListController(
-                mMockAppModel,
-                mFakeEventBus,
-                mMockUi,
-                mFakeEventBus,
-                mFakeSyncManager,
-                mMockSearchController);
-    }
 
     /** Tests that locations are loaded during initialization, when available. */
     public void testInit_RequestsLoadLocationsWhenDataModelAvailable() {
@@ -143,9 +127,7 @@ public final class LocationListControllerTest extends AndroidTestCase {
         verify(mMockFragmentUi).setBusyLoading(false);
     }
 
-    /**
-     * Tests that a sync failure causes the error dialog to appear when no locations are present.
-     */
+    /** Tests that a sync failure causes the error dialog to appear when no locations are present. */
     public void testSyncFailureShowsErrorDialog_noLocations() {
         // GIVEN an initialized controller with a fragment attached
         mController.init();
@@ -341,5 +323,21 @@ public final class LocationListControllerTest extends AndroidTestCase {
         mFakeEventBus.post(new SyncStartedEvent());
         // THEN the activity does not notify the UI
         verify(mMockFragmentUi, times(0)).resetSyncProgress();
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeEventBus = new FakeEventBus();
+        mFakeSyncManager = new FakeSyncManager();
+        mController = new LocationListController(
+            mMockAppModel,
+            mFakeEventBus,
+            mMockUi,
+            mFakeEventBus,
+            mFakeSyncManager,
+            mMockSearchController);
     }
 }

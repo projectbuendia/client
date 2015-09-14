@@ -17,21 +17,11 @@ import org.projectbuendia.client.R;
 
 /** Provides helper methods for displaying patient counts with support for internationalization. */
 public class PatientCountDisplay {
-    public static String getPatientCountSubtitle(Context context, int patientCount) {
-        return getPatientCountSubtitle(context, patientCount, false);
-    }
-
-    public static String getPatientCountSubtitle(
-            Context context, int patientCount, boolean usePresent) {
-        int resource = resourceForPatientCount(patientCount, usePresent);
-        return context.getResources().getString(resource, patientCount);
-    }
-
     /**
      * Constructs a String from a prefix String and patient count.
-     * @param context the Application or Activity context
+     * @param context      the Application or Activity context
      * @param patientCount the number of patients
-     * @param prefix a String preceding the patient count (for example, the name of a location)
+     * @param prefix       a String preceding the patient count (for example, the name of a location)
      * @return a String containing the prefix string and patient count in a displayable format
      */
     public static String getPatientCountTitle(Context context, int patientCount, String prefix) {
@@ -41,7 +31,17 @@ public class PatientCountDisplay {
         }
 
         return context.getResources().getString(
-                R.string.string_with_paren, prefix, getPatientCountSubtitle(context, patientCount));
+            R.string.string_with_paren, prefix, getPatientCountSubtitle(context, patientCount));
+    }
+
+    public static String getPatientCountSubtitle(Context context, int patientCount) {
+        return getPatientCountSubtitle(context, patientCount, false);
+    }
+
+    public static String getPatientCountSubtitle(
+        Context context, int patientCount, boolean usePresent) {
+        int resource = resourceForPatientCount(patientCount, usePresent);
+        return context.getResources().getString(resource, patientCount);
     }
 
     // TODO/refactor: Switch to built in support for plurals in Android.

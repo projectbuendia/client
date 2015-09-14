@@ -11,13 +11,13 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.LocationTree;
 
 /**
  * An event bus event indicating that an {@link LocationTree} has been fetched from the data
  * store.
- *
+ * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
 public class AppLocationTreeFetchedEvent {

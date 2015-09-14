@@ -46,8 +46,7 @@ public class GridRenderer {
     private Chronology chronology = ISOChronology.getInstance(DateTimeZone.getDefault());
 
     public interface GridJsInterface {
-        @android.webkit.JavascriptInterface
-        void onNewOrderPressed();
+        @android.webkit.JavascriptInterface void onNewOrderPressed();
 
         @android.webkit.JavascriptInterface
         void onOrderCellPressed(String orderUuid, long startMillis);
@@ -74,22 +73,22 @@ public class GridRenderer {
         // the fonts don't change size when the user font size preference changes.
         // So, we apply the scaling factor explicitly, defining 1 em to be 10 sp.
         DisplayMetrics metrics = mResources.getDisplayMetrics();
-        float defaultFontSize = 10 * metrics.scaledDensity / metrics.density;
+        float defaultFontSize = 10*metrics.scaledDensity/metrics.density;
         mView.getSettings().setDefaultFontSize((int) defaultFontSize);
 
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
         String html = new GridHtmlGenerator(
-                tileConceptUuidsAndNames, latestObservations,
-                gridConceptUuidsAndNames, observations, orders,
-                admissionDate, firstSymptomsDate).getHtml();
+            tileConceptUuidsAndNames, latestObservations,
+            gridConceptUuidsAndNames, observations, orders,
+            admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
         // mView.loadData(html, "text/html; charset=utf-8", null);
         // mView.loadData(html, "text/html; charset=utf-8", null);
         mView.loadDataWithBaseURL("file:///android_asset/", html,
-                "text/html; charset=utf-8", "utf-8", null);
+            "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
 
         mLastRenderedObs = observations;
@@ -121,12 +120,21 @@ public class GridRenderer {
             mOrders = orders;
             for (Pair<String, String> uuidAndName : tileConceptUuidsAndNames) {
                 mTiles.add(new Tile(uuidAndName.first, uuidAndName.second,
-                        new Value(latestObservations.get(uuidAndName.first), chronology)));
+                    new Value(latestObservations.get(uuidAndName.first), chronology)));
             }
             for (Pair<String, String> uuidAndName : gridConceptUuidsAndNames) {
                 addRow(uuidAndName.first, uuidAndName.second);
             }
             addObservations(observations);
+        }
+
+        void addRow(String conceptUuid, String conceptName) {
+            Row row = mRowsByUuid.get(conceptUuid);
+            if (row == null) {
+                row = new Row(conceptUuid, conceptName);
+                mRows.add(row);
+                mRowsByUuid.put(conceptUuid, row);
+            }
         }
 
         void addObservations(List<LocalizedObs> observations) {
@@ -143,7 +151,7 @@ public class GridRenderer {
                 if (obs.conceptUuid.equals(AppModel.ORDER_EXECUTED_CONCEPT_UUID)) {
                     Integer count = column.orderExecutionCounts.get(obs.value);
                     column.orderExecutionCounts.put(
-                            obs.value, count == null ? 1 : count + 1);
+                        obs.value, count == null ? 1 : count + 1);
                 } else {
                     addRow(obs.conceptUuid, obs.conceptName);
                 }
@@ -156,22 +164,6 @@ public class GridRenderer {
             }
         }
 
-        void addValue(Column column, String conceptUuid, Value value) {
-            if (!column.values.containsKey(conceptUuid)) {
-                column.values.put(conceptUuid, new TreeSet<>(Value.BY_OBS_TIME));
-            }
-            column.values.get(conceptUuid).add(value);
-        }
-
-        void addRow(String conceptUuid, String conceptName) {
-            Row row = mRowsByUuid.get(conceptUuid);
-            if (row == null) {
-                row = new Row(conceptUuid, conceptName);
-                mRows.add(row);
-                mRowsByUuid.put(conceptUuid, row);
-            }
-        }
-
         Column getColumnContainingTime(DateTime dt) {
             LocalDate date = dt.toLocalDate();
             DateTime start = date.toDateTimeAtStartOfDay();
@@ -179,12 +171,19 @@ public class GridRenderer {
             if (!mColumnsByStartMillis.containsKey(startMillis)) {
                 int admitDay = Utils.dayNumberSince(mAdmissionDate, date);
                 String admitDayLabel = (admitDay >= 1) ?
-                        mResources.getString(R.string.day_n, admitDay) : "–";
+                    mResources.getString(R.string.day_n, admitDay) : "–";
                 String dateLabel = date.toString("d MMM");
                 mColumnsByStartMillis.put(startMillis, new Column(
-                        start, start.plusDays(1), admitDayLabel + "<br>" + dateLabel));
+                    start, start.plusDays(1), admitDayLabel + "<br>" + dateLabel));
             }
             return mColumnsByStartMillis.get(startMillis);
+        }
+
+        void addValue(Column column, String conceptUuid, Value value) {
+            if (!column.values.containsKey(conceptUuid)) {
+                column.values.put(conceptUuid, new TreeSet<>(Value.BY_OBS_TIME));
+            }
+            column.values.get(conceptUuid).add(value);
         }
 
         // TODO: grouped coded concepts (for select-multiple, e.g. types of bleeding, types of pain)

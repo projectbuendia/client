@@ -33,7 +33,7 @@ public class LocalDateSerializer implements JsonSerializer<LocalDate>, JsonDeser
 
     @Override
     public LocalDate deserialize(JsonElement json, Type type, JsonDeserializationContext context)
-            throws JsonParseException {
+        throws JsonParseException {
         String text = json.getAsString();
         try {
             return LocalDate.parse(text);

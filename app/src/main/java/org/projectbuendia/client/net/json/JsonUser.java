@@ -18,8 +18,7 @@ import java.util.Comparator;
 
 /** JSON reprsentation of a user (an OpenMRS Provider). */
 public class JsonUser implements Serializable, Comparable<JsonUser> {
-    private static final String GUEST_ACCOUNT_NAME = "Guest User";
-
+    public String id;
     public static final Comparator<JsonUser> COMPARATOR_BY_ID = new Comparator<JsonUser>() {
 
         @Override
@@ -27,7 +26,8 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
             return a.id.compareTo(b.id);
         }
     };
-
+    public String fullName;
+    private static final String GUEST_ACCOUNT_NAME = "Guest User";
     public static final Comparator<JsonUser> COMPARATOR_BY_NAME = new Comparator<JsonUser>() {
 
         @Override
@@ -41,9 +41,6 @@ public class JsonUser implements Serializable, Comparable<JsonUser> {
             return a.fullName.compareTo(b.fullName);
         }
     };
-
-    public String id;
-    public String fullName;
 
     /** Default constructor for serialization. */
     public JsonUser() {

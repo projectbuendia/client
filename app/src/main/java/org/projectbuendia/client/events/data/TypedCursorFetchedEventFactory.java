@@ -13,21 +13,20 @@ package org.projectbuendia.client.events.data;
 
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.User;
 import org.projectbuendia.client.models.TypedCursor;
+import org.projectbuendia.client.models.User;
 
 /** A factory that creates instances of subclasses of {@link TypedCursorFetchedEvent}. */
 public class TypedCursorFetchedEventFactory {
 
     /**
      * Creates a {@link TypedCursorFetchedEvent} for the specified data type and cursor.
-     *
      * @throws IllegalArgumentException if {@code clazz} is unknown
      */
     @SuppressWarnings("unchecked") // Types checked by code.
     public static <T> TypedCursorFetchedEvent<?> createEvent(
-            Class<T> clazz,
-            TypedCursor<T> cursor) {
+        Class<T> clazz,
+        TypedCursor<T> cursor) {
         if (clazz.equals(Patient.class)) {
             return new AppPatientsFetchedEvent((TypedCursor<Patient>) cursor);
         } else if (clazz.equals(User.class)) {
@@ -36,9 +35,10 @@ public class TypedCursorFetchedEventFactory {
             return new AppLocationsFetchedEvent((TypedCursor<Location>) cursor);
         } else {
             throw new IllegalArgumentException(
-                    "Unable to create an event for unknown type " + clazz.getName());
+                "Unable to create an event for unknown type " + clazz.getName());
         }
     }
 
-    private TypedCursorFetchedEventFactory() {}
+    private TypedCursorFetchedEventFactory() {
+    }
 }

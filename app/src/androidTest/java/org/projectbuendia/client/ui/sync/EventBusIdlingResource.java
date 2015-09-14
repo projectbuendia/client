@@ -12,6 +12,7 @@
 package org.projectbuendia.client.ui.sync;
 
 import android.support.test.espresso.IdlingResource;
+
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
 
@@ -36,7 +37,7 @@ public class EventBusIdlingResource<T> implements IdlingResource {
      * Listens for events on the given EventBusRegistrationInterface. Resources with the same name
      * as existing resources may be ignored, so be sure to use different names when registering
      * multiple resources.
-     * @param name a unique name for idempotency
+     * @param name     a unique name for idempotency
      * @param eventBus {@link EventBusRegistrationInterface} to register for user events
      */
     public EventBusIdlingResource(String name, EventBusRegistrationInterface eventBus) {
@@ -51,16 +52,16 @@ public class EventBusIdlingResource<T> implements IdlingResource {
     }
 
     @Override
-    public boolean isIdleNow() {
-        return mEventFired;
-    }
-
-    @Override
     public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
         mResourceCallback = resourceCallback;
         if (isIdleNow()) {
             mResourceCallback.onTransitionToIdle();
         }
+    }
+
+    @Override
+    public boolean isIdleNow() {
+        return mEventFired;
     }
 
     private class EventSubscriber {

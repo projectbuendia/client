@@ -34,7 +34,7 @@ public class InstantAutoCompleteTextView extends AutoCompleteTextView {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public InstantAutoCompleteTextView(
-            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 

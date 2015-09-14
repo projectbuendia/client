@@ -15,6 +15,10 @@ import android.support.annotation.Nullable;
 
 /** An event bus event indicating that submitting an Xform failed. */
 public class SubmitXformFailedEvent {
+    public final Reason reason;
+    @Nullable
+    public final Exception exception;
+
     public enum Reason {
         UNKNOWN,
         SERVER_AUTH,
@@ -23,10 +27,6 @@ public class SubmitXformFailedEvent {
         SERVER_ERROR,
         CLIENT_ERROR
     }
-
-    public final Reason reason;
-    @Nullable
-    public final Exception exception;
 
     public SubmitXformFailedEvent(Reason reason, @Nullable Exception exception) {
         this.reason = reason;

@@ -17,17 +17,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
 import org.projectbuendia.client.FakeTypedCursor;
-import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
-import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
-import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
+import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.filter.db.patient.PatientDbFilters;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -41,6 +41,7 @@ import static org.mockito.Mockito.verify;
 
 /** Tests for {@link PatientSearchController}. */
 public class PatientSearchControllerTest extends AndroidTestCase {
+    private static final String LOCALE = "en";
     private PatientSearchController mController;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
@@ -49,22 +50,6 @@ public class PatientSearchControllerTest extends AndroidTestCase {
     @Mock private PatientSearchController.Ui mMockUi;
     @Mock private PatientSearchController.FragmentUi mFragmentMockUi;
 
-    private static final String LOCALE = "en";
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-
-        mFakeCrudEventBus = new FakeEventBus();
-        mFakeGlobalEventBus = new FakeEventBus();
-        mController = new PatientSearchController(
-                mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel,
-                mSyncManager, LOCALE);
-        mController.attachFragmentUi(mFragmentMockUi);
-        mController.init();
-    }
-
     /** Tests that results are reloaded when a sync event occurs. */
     public void testSyncSubscriber_reloadsResults() {
         // GIVEN initialized PatientSearchController
@@ -72,7 +57,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mFakeGlobalEventBus.post(new SyncSucceededEvent());
         // THEN results should be reloaded
         verify(mMockAppModel).fetchPatients(
-                any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
+            any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
     }
 
     /** Tests that results are reloaded when a sync event occurs. */
@@ -90,10 +75,15 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.loadSearchResults();
         // WHEN patients are retrieved
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to fragment UI's
         verify(mFragmentMockUi).setPatients(any(TypedCursor.class));
+    }
+
+    private TypedCursor<Patient> getFakeAppPatientCursor() {
+        Patient patient = Patient.builder().build();
+        return new FakeTypedCursor<Patient>(new Patient[] {patient});
     }
 
     /** Tests that patients are passed to the activity UI after retrieval. */
@@ -102,7 +92,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.loadSearchResults();
         // WHEN patients are retrieved
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to activity UI
         verify(mMockUi).setPatients(any(TypedCursor.class));
@@ -113,12 +103,12 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // WHEN new results are retrieved
         mController.loadSearchResults();
         TypedCursorFetchedEvent reloadEvent = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(reloadEvent);
         // THEN old patients cursor is closed
         assertTrue(((FakeTypedCursor<Patient>) event.cursor).isClosed());
@@ -129,7 +119,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // WHEN controller is suspended
         mController.suspend();
@@ -150,7 +140,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // GIVEN initialized PatientSearchController with existing results
         mController.loadSearchResults();
         TypedCursorFetchedEvent event = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // WHEN a suspend()/init() cycle occurs
         mController.suspend();
@@ -158,7 +148,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         // THEN search results can be loaded successfully
         mController.loadSearchResults();
         TypedCursorFetchedEvent reloadEvent = TypedCursorFetchedEventFactory.createEvent(
-                Patient.class, getFakeAppPatientCursor());
+            Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(reloadEvent);
         verify(mFragmentMockUi, times(2)).setPatients(any(TypedCursor.class));
     }
@@ -175,7 +165,7 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.loadSearchResults();
         // THEN nothing is returned
         verify(mMockAppModel, times(0)).fetchPatients(
-                any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
+            any(CrudEventBus.class), any(SimpleSelectionFilter.class), anyString());
     }
 
     /**
@@ -192,10 +182,10 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.loadSearchResults();
         // THEN patients are fetched from Triage
         verify(mMockAppModel).fetchPatients(
-                any(CrudEventBus.class),
-                argThat(new SimpleSelectionFilterMatchers.IsFilterGroupWithLocationFilter(
-                        Zones.TRIAGE_ZONE_UUID)),
-                anyString());
+            any(CrudEventBus.class),
+            argThat(new SimpleSelectionFilterMatchers.IsFilterGroupWithLocationFilter(
+                Zones.TRIAGE_ZONE_UUID)),
+            anyString());
     }
 
     /** Tests that the spinner is shown when loadSearchResults() is called. */
@@ -222,8 +212,8 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.loadSearchResults();
         // WHEN patients are retrieved
         TypedCursorFetchedEvent event =
-                TypedCursorFetchedEventFactory.createEvent(
-                        Patient.class, getFakeAppPatientCursor());
+            TypedCursorFetchedEventFactory.createEvent(
+                Patient.class, getFakeAppPatientCursor());
         mFakeCrudEventBus.post(event);
         // THEN patients are passed to fragment UI's
         verify(mFragmentMockUi).showSpinner(false);
@@ -236,11 +226,20 @@ public class PatientSearchControllerTest extends AndroidTestCase {
         mController.onQuerySubmitted("foo");
         // THEN results are requested with that search term
         verify(mMockAppModel).fetchPatients(
-                mFakeCrudEventBus, PatientDbFilters.getDefaultFilter(), "foo");
+            mFakeCrudEventBus, PatientDbFilters.getDefaultFilter(), "foo");
     }
 
-    private TypedCursor<Patient> getFakeAppPatientCursor() {
-        Patient patient = Patient.builder().build();
-        return new FakeTypedCursor<Patient>(new Patient[] { patient });
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeCrudEventBus = new FakeEventBus();
+        mFakeGlobalEventBus = new FakeEventBus();
+        mController = new PatientSearchController(
+            mMockUi, mFakeCrudEventBus, mFakeGlobalEventBus, mMockAppModel,
+            mSyncManager, LOCALE);
+        mController.attachFragmentUi(mFragmentMockUi);
+        mController.init();
     }
 }

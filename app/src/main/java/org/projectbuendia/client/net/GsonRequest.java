@@ -42,31 +42,14 @@ public class GsonRequest<T> extends Request<T> {
     private final Map<String, String> mHeaders;
     private final Response.Listener<T> mListener;
     private final boolean mIsArray;
-    private Map<String,String> mBody = null;
-
-    /**
-     * Creates an instance of {@link GsonRequest} that expects an array of Gson objects as a
-     * response.
-     */
-    public static <T> GsonRequest<List<T>> withArrayResponse(
-            String url,
-            Class<T> clazz,
-            Map<String, String> headers,
-            Response.Listener<List<T>> listener,
-            Response.ErrorListener errorListener) {
-        // TODO: This current class does not handle arrays well because it doesn't properly
-        // use Java generics. Until we can fix it, we'll just cast a lot to make Java happy.
-        return (GsonRequest<List<T>>) new GsonRequest<>(
-                url, clazz, true, headers, (Response.Listener<T>) listener, errorListener);
-    }
+    private Map<String, String> mBody = null;
 
     /**
      * Makes a GET request and returns a parsed object from JSON.
-     *
-     * @param url URL of the request to make
-     * @param clazz Relevant class object, for Gson's reflection
-     * @param headers Map of request headers
-     * @param listener a {@link Response.Listener} that handles successful requests
+     * @param url           URL of the request to make
+     * @param clazz         Relevant class object, for Gson's reflection
+     * @param headers       Map of request headers
+     * @param listener      a {@link Response.Listener} that handles successful requests
      * @param errorListener a {@link Response.ErrorListener} that handles failed requests
      */
     public GsonRequest(String url, Class<T> clazz, boolean array, Map<String, String> headers,
@@ -76,14 +59,13 @@ public class GsonRequest<T> extends Request<T> {
 
     /**
      * Makes a request using an arbitrary HTTP method and returns a parsed object from JSON.
-     *
-     * @param method the request method
-     * @param body the request body
-     * @param url URL of the request to make
-     * @param clazz Relevant class object, for Gson's reflection
-     * @param isArray true if the response is expected to contain an array of items
-     * @param headers Map of request headers
-     * @param listener a {@link Response.Listener} that handles successful requests
+     * @param method        the request method
+     * @param body          the request body
+     * @param url           URL of the request to make
+     * @param clazz         Relevant class object, for Gson's reflection
+     * @param isArray       true if the response is expected to contain an array of items
+     * @param headers       Map of request headers
+     * @param listener      a {@link Response.Listener} that handles successful requests
      * @param errorListener a {@link Response.ErrorListener} that handles failed requests
      */
     public GsonRequest(int method,
@@ -98,9 +80,29 @@ public class GsonRequest<T> extends Request<T> {
         this.mIsArray = isArray;
     }
 
+    /**
+     * Creates an instance of {@link GsonRequest} that expects an array of Gson objects as a
+     * response.
+     */
+    public static <T> GsonRequest<List<T>> withArrayResponse(
+        String url,
+        Class<T> clazz,
+        Map<String, String> headers,
+        Response.Listener<List<T>> listener,
+        Response.ErrorListener errorListener) {
+        // TODO: This current class does not handle arrays well because it doesn't properly
+        // use Java generics. Until we can fix it, we'll just cast a lot to make Java happy.
+        return (GsonRequest<List<T>>) new GsonRequest<>(
+            url, clazz, true, headers, (Response.Listener<T>) listener, errorListener);
+    }
+
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         return mHeaders != null ? mHeaders : super.getHeaders();
+    }
+
+    public GsonBuilder getGson() {
+        return mGson;
     }
 
     @Override
@@ -109,7 +111,7 @@ public class GsonRequest<T> extends Request<T> {
     }
 
     @Override
-    protected Map<String,String> getParams() {
+    protected Map<String, String> getParams() {
         return mBody;
     }
 
@@ -117,8 +119,8 @@ public class GsonRequest<T> extends Request<T> {
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
         try {
             String json = new String(
-                    response.data,
-                    HTTP.UTF_8);  // TODO: HttpHeaderParser.parseCharset(response.mHeaders).
+                response.data,
+                HTTP.UTF_8);  // TODO: HttpHeaderParser.parseCharset(response.mHeaders).
             Gson gsonParser = mGson.create();
             Log.d("SyncAdapter", "parsing response");
             if (mIsArray) {
@@ -129,12 +131,12 @@ public class GsonRequest<T> extends Request<T> {
                     elements.add(gsonParser.fromJson(array.get(i).toString(), mClazz));
                 }
                 return (Response<T>) Response.success(
-                        elements,
-                        HttpHeaderParser.parseCacheHeaders(response));
+                    elements,
+                    HttpHeaderParser.parseCacheHeaders(response));
             } else {
                 return Response.success(
-                        gsonParser.fromJson(json, mClazz),
-                        HttpHeaderParser.parseCacheHeaders(response));
+                    gsonParser.fromJson(json, mClazz),
+                    HttpHeaderParser.parseCacheHeaders(response));
             }
         } catch (UnsupportedEncodingException e) {
             return Response.error(new ParseError(e));
@@ -143,9 +145,5 @@ public class GsonRequest<T> extends Request<T> {
         } catch (Exception e) {
             return Response.error(new ParseError(e));
         }
-    }
-
-    public GsonBuilder getGson() {
-        return mGson;
     }
 }

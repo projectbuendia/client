@@ -24,15 +24,6 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
     private DateTime mNow;
     private LocalDate mToday;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mFormatter = new RelativeDateTimeFormatter();
-        mNow = DateTime.parse("2000-01-01T12:00Z");
-        mToday = LocalDate.parse("2000-01-01");
-    }
-
     public void testFormat_rightNow() throws Exception {
         assertEquals("right now", mFormatter.format(mNow, mNow));
     }
@@ -55,5 +46,14 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
 
     public void testFormatLocalDate_today() {
         assertEquals("today", mFormatter.format(mToday, mToday));
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        mFormatter = new RelativeDateTimeFormatter();
+        mNow = DateTime.parse("2000-01-01T12:00Z");
+        mToday = LocalDate.parse("2000-01-01");
     }
 }

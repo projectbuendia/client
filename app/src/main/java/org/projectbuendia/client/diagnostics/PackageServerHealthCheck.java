@@ -43,36 +43,18 @@ public class PackageServerHealthCheck extends HealthCheck {
     private HandlerThread mHandlerThread;
     private Handler mHandler;
     private AppSettings mSettings;
-
-    PackageServerHealthCheck(Application application, AppSettings settings) {
-        super(application);
-        mSettings = settings;
-    }
-
-    @Override
-    protected void startImpl() {
-        synchronized (mLock) {
-            if (mHandlerThread == null) {
-                mHandlerThread = new HandlerThread("Buendia Package Server Health Check");
-                mHandlerThread.start();
-                mHandler = new Handler(mHandlerThread.getLooper());
-                mHandler.post(mHealthCheckRunnable);
-            }
-        }
-    }
-
-    @Override
-    protected void stopImpl() {
-        synchronized (mLock) {
-            if (mHandlerThread != null) {
-                mHandlerThread.quit();
-                mHandlerThread = null;
-                mHandler = null;
-            }
-        }
-    }
-
     private final Runnable mHealthCheckRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            performCheck();
+
+            synchronized (mLock) {
+                if (mHandler != null) {
+                    mHandler.postDelayed(this, CHECK_PERIOD_MS);
+                }
+            }
+        }
 
         private void performCheck() {
             Uri uri = Uri.parse(mSettings.getPackageServerUrl(HEALTH_CHECK_ENDPOINT));
@@ -109,16 +91,33 @@ public class PackageServerHealthCheck extends HealthCheck {
                 LOG.w(e, "Package server check failed: %s", uri);
             }
         }
+    };
 
-        @Override
-        public void run() {
-            performCheck();
+    PackageServerHealthCheck(Application application, AppSettings settings) {
+        super(application);
+        mSettings = settings;
+    }
 
-            synchronized (mLock) {
-                if (mHandler != null) {
-                    mHandler.postDelayed(this, CHECK_PERIOD_MS);
-                }
+    @Override
+    protected void startImpl() {
+        synchronized (mLock) {
+            if (mHandlerThread == null) {
+                mHandlerThread = new HandlerThread("Buendia Package Server Health Check");
+                mHandlerThread.start();
+                mHandler = new Handler(mHandlerThread.getLooper());
+                mHandler.post(mHealthCheckRunnable);
             }
         }
-    };
+    }
+
+    @Override
+    protected void stopImpl() {
+        synchronized (mLock) {
+            if (mHandlerThread != null) {
+                mHandlerThread.quit();
+                mHandlerThread = null;
+                mHandler = null;
+            }
+        }
+    }
 }

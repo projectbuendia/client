@@ -30,7 +30,7 @@ public class FilteredCursorWrapperTest extends InstrumentationTestCase {
     };
 
     private static final String[] SAMPLE_DATA = new String[] {
-            "apple", "orange", "pear", "grapefruit"
+        "apple", "orange", "pear", "grapefruit"
     };
 
     private static final TypedCursor<String> SAMPLE_CURSOR = new FakeTypedCursor<>(SAMPLE_DATA);
@@ -40,6 +40,10 @@ public class FilteredCursorWrapperTest extends InstrumentationTestCase {
         assertEquals(2, getWrapperForConstraint("pe").getCount());
         assertEquals(1, getWrapperForConstraint("pea").getCount());
         assertEquals(0, getWrapperForConstraint("peak").getCount());
+    }
+
+    private FilteredCursorWrapper<String> getWrapperForConstraint(String constraint) {
+        return new FilteredCursorWrapper<>(SAMPLE_CURSOR, SUBSTRING_FILTER, constraint);
     }
 
     /** Tests that get() returns any and all matched entries. */
@@ -56,9 +60,5 @@ public class FilteredCursorWrapperTest extends InstrumentationTestCase {
         assertEquals(2, iteratorValues.length);
         assertEquals("pear", iteratorValues[0]);
         assertEquals("grapefruit", iteratorValues[1]);
-    }
-
-    private FilteredCursorWrapper<String> getWrapperForConstraint(String constraint) {
-        return new FilteredCursorWrapper<>(SAMPLE_CURSOR, SUBSTRING_FILTER, constraint);
     }
 }

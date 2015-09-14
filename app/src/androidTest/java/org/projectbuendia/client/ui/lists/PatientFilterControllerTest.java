@@ -16,9 +16,9 @@ import android.test.AndroidTestCase;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAppLocationTreeFactory;
-import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.ui.matchers.SimpleSelectionFilterMatchers;
 
@@ -27,22 +27,11 @@ import static org.mockito.Mockito.verify;
 
 /** Tests for {@link PatientFilterController}. */
 public class PatientFilterControllerTest extends AndroidTestCase {
+    private static final String LOCALE = "en";
     private PatientFilterController mController;
     private FakeEventBus mFakeCrudEventBus;
     @Mock private AppModel mMockAppModel;
     @Mock private PatientFilterController.Ui mMockUi;
-
-    private static final String LOCALE = "en";
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-
-        mFakeCrudEventBus = new FakeEventBus();
-        mController = new PatientFilterController(
-                mMockUi, mFakeCrudEventBus, mMockAppModel, LOCALE);
-    }
 
     /** Tests that requesting an action bar initialization fetches a location tree. */
     public void testSetupActionBarAsync_fetchesLocationTree() {
@@ -63,6 +52,16 @@ public class PatientFilterControllerTest extends AndroidTestCase {
         mFakeCrudEventBus.post(event);
         // THEN location filters passed to the Ui
         verify(mMockUi).populateActionBar(
-                argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));
+            argThat(new SimpleSelectionFilterMatchers.ContainsFilterWithName("Triage")));
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeCrudEventBus = new FakeEventBus();
+        mController = new PatientFilterController(
+            mMockUi, mFakeCrudEventBus, mMockAppModel, LOCALE);
     }
 }

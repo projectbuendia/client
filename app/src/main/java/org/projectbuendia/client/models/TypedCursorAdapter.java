@@ -32,14 +32,9 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
         return mTypedCursor == null ? 0 : mTypedCursor.getCount();
     }
 
-    @Override
-    public T getItem(int position) {
-        return mTypedCursor == null ? null : mTypedCursor.get(position);
-    }
-
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * <p>The ID of an item will be the value of its {@link Base#id} field if its ID is a
      * byte, short, int, or long; otherwise, it will be the hash of that value.
      */
@@ -58,9 +53,9 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
         }
 
         if (id instanceof Long
-                || id instanceof Integer
-                || id instanceof Short
-                || id instanceof Byte) {
+            || id instanceof Integer
+            || id instanceof Short
+            || id instanceof Byte) {
             return ((Number) id).longValue();
         } else {
             return id.hashCode();
@@ -76,16 +71,27 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (mTypedCursor == null) {
             throw new IllegalStateException(
-                    "Cannot get a view when no backing lazy array has been set.");
+                "Cannot get a view when no backing lazy array has been set.");
         }
 
         View view =
-                convertView == null
+            convertView == null
                 ? newView(mContext, mTypedCursor.get(position), parent)
                 : convertView;
         bindView(mContext, view, getItem(position));
 
         return view;
+    }
+
+    protected abstract View newView(Context context, T item, ViewGroup parent);
+
+    protected abstract void bindView(Context context, View view, T item);
+
+    // TODO: Provide a mechanism to filter, similar to Cursor.
+
+    @Override
+    public T getItem(int position) {
+        return mTypedCursor == null ? null : mTypedCursor.get(position);
     }
 
     /**
@@ -108,10 +114,4 @@ public abstract class TypedCursorAdapter<T extends Base> extends BaseAdapter {
             notifyDataSetChanged();
         }
     }
-
-    // TODO: Provide a mechanism to filter, similar to Cursor.
-
-    protected abstract View newView(Context context, T item, ViewGroup parent);
-
-    protected abstract void bindView(Context context, View view, T item);
 }

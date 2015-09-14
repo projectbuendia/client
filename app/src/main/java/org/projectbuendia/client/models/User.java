@@ -19,12 +19,6 @@ public final class User extends Base<Integer> {
     public final String uuid;
     public final String fullName;
 
-    private User(Builder builder) {
-        this.id = builder.mId;
-        this.uuid = builder.mUuid;
-        this.fullName = builder.mFullName;
-    }
-
     public static Builder builder() {
         return new Builder();
     }
@@ -34,8 +28,6 @@ public final class User extends Base<Integer> {
         private int mId = 0;
         private String mUuid = "";
         private String mFullName = "";
-
-        private Builder() {}
 
         public Builder setId(int id) {
             this.mId = id;
@@ -55,5 +47,14 @@ public final class User extends Base<Integer> {
         public User build() {
             return new User(this);
         }
+
+        private Builder() {
+        }
+    }
+
+    private User(Builder builder) {
+        this.id = builder.mId;
+        this.uuid = builder.mUuid;
+        this.fullName = builder.mFullName;
     }
 }

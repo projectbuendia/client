@@ -11,9 +11,7 @@
 
 package org.projectbuendia.client.ui.login;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import com.google.common.collect.Ordering;
 
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.diagnostics.Troubleshooter;
@@ -29,12 +27,22 @@ import org.projectbuendia.client.utils.EventBusRegistrationInterface;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
-import com.google.common.collect.Ordering;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /** Controller for {@link LoginActivity}. */
 public final class LoginController {
 
     private static final Logger LOG = Logger.create();
+    private final EventBusRegistrationInterface mEventBus;
+    private final Ui mUi;
+    private final FragmentUi mFragmentUi;
+    private final DialogActivityUi mDialogUi = new DialogActivityUi();
+    private final UserManager mUserManager;
+    private final List<JsonUser> mUsersSortedByName = new ArrayList<>();
+    private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
+    private final Troubleshooter mTroubleshooter;
 
     public interface Ui {
 
@@ -56,32 +64,23 @@ public final class LoginController {
         void showUsers(List<JsonUser> users);
     }
 
-    private final EventBusRegistrationInterface mEventBus;
-    private final Ui mUi;
-    private final FragmentUi mFragmentUi;
-    private final DialogActivityUi mDialogUi = new DialogActivityUi();
-    private final UserManager mUserManager;
-    private final List<JsonUser> mUsersSortedByName = new ArrayList<>();
-    private final BusEventSubscriber mSubscriber = new BusEventSubscriber();
-    private final Troubleshooter mTroubleshooter;
-
     /**
      * Instantiates a {@link LoginController}.
-     * @param userManager a {@link UserManager} from which users will be fetched
-     * @param eventBus an {@link EventBusRegistrationInterface} for listening to user fetch and
-     *                 modification events
+     * @param userManager    a {@link UserManager} from which users will be fetched
+     * @param eventBus       an {@link EventBusRegistrationInterface} for listening to user fetch and
+     *                       modification events
      * @param troubleshooter a {@link Troubleshooter} for monitoring server health; if the server
      *                       becomes available and the controller has no data available, the
      *                       controller will automatically retry fetching users
-     * @param ui a {@link Ui} for handling activity changes
-     * @param fragmentUi a {@link FragmentUi} for displaying users
+     * @param ui             a {@link Ui} for handling activity changes
+     * @param fragmentUi     a {@link FragmentUi} for displaying users
      */
     public LoginController(
-            UserManager userManager,
-            EventBusRegistrationInterface eventBus,
-            Troubleshooter troubleshooter,
-            Ui ui,
-            FragmentUi fragmentUi) {
+        UserManager userManager,
+        EventBusRegistrationInterface eventBus,
+        Troubleshooter troubleshooter,
+        Ui ui,
+        FragmentUi fragmentUi) {
         mUserManager = userManager;
         mEventBus = eventBus;
         mTroubleshooter = troubleshooter;
@@ -128,47 +127,6 @@ public final class LoginController {
         mUi.showTentSelectionScreen();
     }
 
-    @SuppressWarnings("unused") // Called by reflection from event bus.
-    private final class BusEventSubscriber {
-        /** Restart user fetch if we have no users and the Buendia API just became available. */
-        public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
-            if (mUsersSortedByName.isEmpty() && mTroubleshooter.isServerHealthy()) {
-                LOG.d("Buendia API is available and users are not, retrying sync.");
-                onSyncRetry();
-            }
-        }
-
-        /** Updates the UI when the list of users is loaded. */
-        public void onEventMainThread(KnownUsersLoadedEvent event) {
-            LOG.d("Loaded list of " + event.knownUsers.size() + " users");
-            mUsersSortedByName.clear();
-            mUsersSortedByName
-                    .addAll(Ordering.from(JsonUser.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
-            mFragmentUi.showUsers(mUsersSortedByName);
-            mFragmentUi.showSpinner(false);
-            mUi.showSyncFailedDialog(false);
-        }
-
-        public void onEventMainThread(KnownUsersLoadFailedEvent event) {
-            LOG.e("Failed to load list of users");
-            mUi.showSyncFailedDialog(true);
-        }
-
-        public void onEventMainThread(UserAddedEvent event) {
-            mUi.showSyncFailedDialog(false);  // Just in case.
-            LOG.d("User added");
-            insertIntoSortedList(mUsersSortedByName, JsonUser.COMPARATOR_BY_NAME, event.addedUser);
-            mFragmentUi.showUsers(mUsersSortedByName);
-            mFragmentUi.showSpinner(false);
-        }
-
-        public void onEventMainThread(UserAddFailedEvent event) {
-            LOG.d("Failed to add user");
-            mUi.showErrorToast(errorToStringId(event));
-            mFragmentUi.showSpinner(false);
-        }
-    }
-
     public NewUserDialogFragment.ActivityUi getDialogUi() {
         return mDialogUi;
     }
@@ -204,7 +162,7 @@ public final class LoginController {
      * order.
      */
     private static <T> void insertIntoSortedList(
-            List<T> list, Comparator<T> comparator, T newItem) {
+        List<T> list, Comparator<T> comparator, T newItem) {
         int index;
         for (index = 0; index < list.size(); index++) {
             if (comparator.compare(list.get(index), newItem) > 0) {
@@ -212,5 +170,46 @@ public final class LoginController {
             }
         }
         list.add(index, newItem);
+    }
+
+    @SuppressWarnings("unused") // Called by reflection from event bus.
+    private final class BusEventSubscriber {
+        /** Restart user fetch if we have no users and the Buendia API just became available. */
+        public void onEventMainThread(TroubleshootingActionsChangedEvent event) {
+            if (mUsersSortedByName.isEmpty() && mTroubleshooter.isServerHealthy()) {
+                LOG.d("Buendia API is available and users are not, retrying sync.");
+                onSyncRetry();
+            }
+        }
+
+        /** Updates the UI when the list of users is loaded. */
+        public void onEventMainThread(KnownUsersLoadedEvent event) {
+            LOG.d("Loaded list of " + event.knownUsers.size() + " users");
+            mUsersSortedByName.clear();
+            mUsersSortedByName
+                .addAll(Ordering.from(JsonUser.COMPARATOR_BY_NAME).sortedCopy(event.knownUsers));
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
+            mUi.showSyncFailedDialog(false);
+        }
+
+        public void onEventMainThread(KnownUsersLoadFailedEvent event) {
+            LOG.e("Failed to load list of users");
+            mUi.showSyncFailedDialog(true);
+        }
+
+        public void onEventMainThread(UserAddedEvent event) {
+            mUi.showSyncFailedDialog(false);  // Just in case.
+            LOG.d("User added");
+            insertIntoSortedList(mUsersSortedByName, JsonUser.COMPARATOR_BY_NAME, event.addedUser);
+            mFragmentUi.showUsers(mUsersSortedByName);
+            mFragmentUi.showSpinner(false);
+        }
+
+        public void onEventMainThread(UserAddFailedEvent event) {
+            LOG.d("Failed to add user");
+            mUi.showErrorToast(errorToStringId(event));
+            mFragmentUi.showSpinner(false);
+        }
     }
 }

@@ -12,14 +12,11 @@
 package org.projectbuendia.client.ui.lists;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.StringStartsWith.startsWith;
 
 /** Tests for {@link FilteredPatientListActivity}. */
 public class FilteredPatientListActivityTest extends FunctionalTestCase {
@@ -27,13 +24,6 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
     public void setUp() throws Exception {
         super.setUp();
         click(viewWithText("Guest User"));
-    }
-
-    /** Opens the patient list. */
-    public void openPatientList() {
-        waitForProgressFragment(); // Wait for tents.
-        click(viewWithText("ALL PRESENT PATIENTS"));
-        waitForProgressFragment(); // Wait for patients.
     }
 
     /** Looks for the filter menu. */
@@ -46,6 +36,13 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         screenshot("In Filter Menu");
     }
 
+    /** Opens the patient list. */
+    public void openPatientList() {
+        waitForProgressFragment(); // Wait for tents.
+        click(viewWithText("ALL PRESENT PATIENTS"));
+        waitForProgressFragment(); // Wait for patients.
+    }
+
     /** Looks for two zone headings and at least one patient. */
     public void testZoneAndPatientDisplayed() {
         openPatientList();
@@ -55,8 +52,8 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
 
         // Click the first patient
         click(dataThat(is(Patient.class))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0));
+            .inAdapterView(withId(R.id.fragment_patient_list))
+            .atPosition(0));
         screenshot("After Patient Clicked");
     }
 }

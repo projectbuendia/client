@@ -54,27 +54,26 @@ public class LoginFragment extends ProgressFragment {
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         ButterKnife.inject(this, v);
         mUserGrid.setAdapter(mUserListAdapter);
         return v;
     }
 
-    @OnItemClick(R.id.users)
-    void onUsersItemClick(int position) {
+    /** Returns the {@link FragmentUi} for interfacing with the {@link LoginController}. */
+    public FragmentUi getFragmentUi() {
+        return mFragmentUi;
+    }
+
+    @OnItemClick(R.id.users) void onUsersItemClick(int position) {
         LoginController controller =
-                ((LoginActivity)getActivity()).getUserLoginController();
+            ((LoginActivity) getActivity()).getUserLoginController();
         if (controller != null) {
             controller.onUserSelected(mUserListAdapter.getItem(position));
         } else {
             LOG.e("No LoginController available. This should never happen.");
         }
-    }
-
-    /** Returns the {@link FragmentUi} for interfacing with the {@link LoginController}. */
-    public FragmentUi getFragmentUi() {
-        return mFragmentUi;
     }
 
     private class FragmentUi implements LoginController.FragmentUi {

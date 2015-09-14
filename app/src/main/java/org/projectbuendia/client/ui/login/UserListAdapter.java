@@ -11,16 +11,17 @@
 
 package org.projectbuendia.client.ui.login;
 
-import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.json.JsonUser;
-import org.projectbuendia.client.utils.Colorizer;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.utils.Colorizer;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -41,7 +42,7 @@ final class UserListAdapter extends ArrayAdapter<JsonUser> {
             holder = (ItemViewHolder) view.getTag();
         } else {
             view = LayoutInflater.from(getContext())
-                    .inflate(R.layout.grid_item_user, parent, false);
+                .inflate(R.layout.grid_item_user, parent, false);
             holder = new ItemViewHolder(view);
             view.setTag(holder);
         }

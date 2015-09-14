@@ -14,11 +14,6 @@ package org.projectbuendia.client.ui.sync;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-
 /** Test cases for handling user sync failure on the user login screen. */
 public class UserLoginFailingSyncTest extends SyncTestCase {
     @Override

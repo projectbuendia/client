@@ -33,7 +33,7 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
      * search term.
      */
     public FilteredCursorWrapper(
-            TypedCursor<T> cursor, MatchingFilter<T> filter, CharSequence constraint) {
+        TypedCursor<T> cursor, MatchingFilter<T> filter, CharSequence constraint) {
         mCursor = cursor;
         mIndices = new ArrayList<Integer>();
 
@@ -44,16 +44,6 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
                 mIndices.add(i);
             }
         }
-    }
-
-    @Override
-    public int getCount() {
-        return mIndices.size();
-    }
-
-    @Override
-    public T get(int position) {
-        return mCursor.get(mIndices.get(position));
     }
 
     @Override
@@ -97,5 +87,15 @@ public class FilteredCursorWrapper<T> implements TypedCursor<T> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    @Override
+    public int getCount() {
+        return mIndices.size();
+    }
+
+    @Override
+    public T get(int position) {
+        return mCursor.get(mIndices.get(position));
     }
 }

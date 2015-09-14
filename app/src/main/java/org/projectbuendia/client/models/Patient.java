@@ -35,32 +35,22 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
     public final LocalDate birthdate;
     public final String locationUuid;
 
-    private Patient(Builder builder) {
-        this.id = builder.mId;
-        this.uuid = builder.mUuid;
-        this.givenName = builder.mGivenName;
-        this.familyName = builder.mFamilyName;
-        this.gender = builder.mGender;
-        this.birthdate = builder.mBirthdate;
-        this.locationUuid = builder.mLocationUuid;
+    /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
+    public static Patient fromJson(JsonPatient patient) {
+        return builder()
+            .setId(patient.id)
+            .setUuid(patient.uuid)
+            .setGivenName(patient.given_name)
+            .setFamilyName(patient.family_name)
+            .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
+            .setBirthdate(patient.birthdate)
+            .setLocationUuid(
+                patient.assigned_location == null ? null : patient.assigned_location.uuid)
+            .build();
     }
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    /** Creates an instance of {@link Patient} from a network {@link JsonPatient} object. */
-    public static Patient fromJson(JsonPatient patient) {
-        return builder()
-                .setId(patient.id)
-                .setUuid(patient.uuid)
-                .setGivenName(patient.given_name)
-                .setFamilyName(patient.family_name)
-                .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
-                .setBirthdate(patient.birthdate)
-                .setLocationUuid(
-                        patient.assigned_location == null ? null : patient.assigned_location.uuid)
-                .build();
     }
 
     /**
@@ -100,8 +90,6 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         private LocalDate mBirthdate;
         private String mLocationUuid;
 
-        private Builder() {}
-
         public Builder setId(String id) {
             this.mId = id;
             return this;
@@ -140,5 +128,18 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         public Patient build() {
             return new Patient(this);
         }
+
+        private Builder() {
+        }
+    }
+
+    private Patient(Builder builder) {
+        this.id = builder.mId;
+        this.uuid = builder.mUuid;
+        this.givenName = builder.mGivenName;
+        this.familyName = builder.mFamilyName;
+        this.gender = builder.mGender;
+        this.birthdate = builder.mBirthdate;
+        this.locationUuid = builder.mLocationUuid;
     }
 }

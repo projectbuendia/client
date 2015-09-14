@@ -17,20 +17,32 @@ import java.util.Map;
 
 public class PebbleExtension extends AbstractExtension {
 
-    static Map<String, Filter> filters = ImmutableMap.<String, Filter>of(
-            "min", new MinFilter(),
-            "max", new MaxFilter(),
-            "avg", new AvgFilter(),
-            "js", new JsFilter(),
-            "dateformat", new DateFormatFilter());
-    static Map<String, Function> functions = ImmutableMap.<String, Function>of(
-            "get_values", new GetValuesFunction(),
-            "get_order_execution_count", new GetOrderExecutionCountFunction(),
-            "intervals_overlap", new IntervalsOverlapFunction());
+    static Map<String, Filter> filters = ImmutableMap.<String, Filter> of(
+        "min", new MinFilter(),
+        "max", new MaxFilter(),
+        "avg", new AvgFilter(),
+        "js", new JsFilter(),
+        "dateformat", new DateFormatFilter());
+    static Map<String, Function> functions = ImmutableMap.<String, Function> of(
+        "get_values", new GetValuesFunction(),
+        "get_order_execution_count", new GetOrderExecutionCountFunction(),
+        "intervals_overlap", new IntervalsOverlapFunction());
+
+    @Override
+    public Map<String, Filter> getFilters() {
+        return filters;
+    }
+
+    @Override
+    public Map<String, Function> getFunctions() {
+        return functions;
+    }
 
     abstract static class NullaryFilter implements Filter {
         @Override
-        public List<String> getArgumentNames() { return null; }
+        public List<String> getArgumentNames() {
+            return null;
+        }
     }
 
     static class MinFilter extends NullaryFilter {
@@ -62,7 +74,7 @@ public class PebbleExtension extends AbstractExtension {
                     count += 1;
                 }
             }
-            return count == 0 ? null : sum / count;
+            return count == 0 ? null : sum/count;
         }
     }
 
@@ -125,6 +137,7 @@ public class PebbleExtension extends AbstractExtension {
             return count == null ? 0 : count;
         }
     }
+
     static class IntervalsOverlapFunction implements Function {
         @Override
         public List<String> getArgumentNames() {
@@ -137,15 +150,5 @@ public class PebbleExtension extends AbstractExtension {
             Interval b = (Interval) args.get("b");
             return a.overlaps(b);
         }
-    }
-
-    @Override
-    public Map<String, Filter> getFilters() {
-        return filters;
-    }
-
-    @Override
-    public Map<String, Function> getFunctions() {
-        return functions;
     }
 }

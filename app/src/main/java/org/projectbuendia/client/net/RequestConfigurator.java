@@ -17,7 +17,7 @@ import com.android.volley.RetryPolicy;
 
 /**
  * Configures Volley requests before they are sent to the server.
- *
+ * <p/>
  * <p>The default implementation of this class sets the retry policy to a configurable timeout and
  * no retries.
  */
@@ -25,17 +25,17 @@ class RequestConfigurator {
 
     private final RetryPolicy mRetryPolicy;
 
+    public <T extends Request> T configure(T request) {
+        request.setRetryPolicy(mRetryPolicy);
+        return request;
+    }
+
     RequestConfigurator(int timeoutMs) {
         mRetryPolicy =
-                new DefaultRetryPolicy(timeoutMs, 0 /*maxNumRetries*/, 0 /*backoffMultiplier*/);
+            new DefaultRetryPolicy(timeoutMs, 0 /*maxNumRetries*/, 0 /*backoffMultiplier*/);
     }
 
     RequestConfigurator(int timeoutMs, int maxNumRetries, int backoffMultiplier) {
         mRetryPolicy = new DefaultRetryPolicy(timeoutMs, maxNumRetries, backoffMultiplier);
-    }
-
-    public <T extends Request> T configure(T request) {
-        request.setRetryPolicy(mRetryPolicy);
-        return request;
     }
 }

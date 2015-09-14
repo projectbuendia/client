@@ -25,7 +25,7 @@ import java.util.List;
  * An {@link Converter} that converts {@link Encounter}s. Expects the {@link Cursor} to
  * contain only a single encounter, represented by multiple observations, with one observation per
  * row.
- *
+ * <p/>
  * <p>Unlike other {@link Converter}s, {@link EncounterConverter} must be instantiated
  * once per patient, since {@link Encounter} contains the patient's UUID as one of its fields,
  * which is not present in the database representation of an encounter.
@@ -40,9 +40,9 @@ public class EncounterConverter implements Converter<Encounter> {
     @Override
     public Encounter fromCursor(Cursor cursor) {
         final String encounterUuid = cursor.getString(
-                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
+            cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
         final long timestamp = cursor.getLong(
-                cursor.getColumnIndex(Observations.ENCOUNTER_TIME));
+            cursor.getColumnIndex(Observations.ENCOUNTER_TIME));
         List<Observation> observations = new ArrayList<>();
         cursor.move(-1);
         while (cursor.moveToNext()) {

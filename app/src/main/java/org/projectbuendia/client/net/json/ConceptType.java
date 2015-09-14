@@ -15,9 +15,9 @@ import com.google.gson.annotations.SerializedName;
 
 /** OpenMRS concept types (used for JSON representation and elsewhere) */
 public enum ConceptType {
-    @SerializedName("numeric") NUMERIC,
-    @SerializedName("coded") CODED,
-    @SerializedName("text") TEXT,
-    @SerializedName("date") DATE,
-    @SerializedName("none") NONE
+    @SerializedName("numeric")NUMERIC,
+    @SerializedName("coded")CODED,
+    @SerializedName("text")TEXT,
+    @SerializedName("date")DATE,
+    @SerializedName("none")NONE
 }

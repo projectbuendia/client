@@ -24,19 +24,17 @@ import de.greenrobot.event.EventBusBuilder;
 
 /** A Dagger module that provides bindings for events. */
 @Module(
-        complete = false,
-        library = true)
+    complete = false,
+    library = true)
 public class EventsModule {
 
     @Provides
-    @Singleton
-    EventBus provideEventBus() {
+    @Singleton EventBus provideEventBus() {
         return EventBus.getDefault();
     }
 
     @Provides
-    @Singleton
-    EventBusInterface provideEventBusInterface(EventBus eventBus) {
+    @Singleton EventBusInterface provideEventBusInterface(EventBus eventBus) {
         return new EventBusWrapper(eventBus);
     }
 
@@ -47,9 +45,8 @@ public class EventsModule {
         return EventBus.builder();
     }
 
-    @Provides
-    CrudEventBus provideCrudEventBus(
-            @Qualifiers.CrudEventBusBuilder EventBusBuilder crudEventBusBuilder) {
+    @Provides CrudEventBus provideCrudEventBus(
+        @Qualifiers.CrudEventBusBuilder EventBusBuilder crudEventBusBuilder) {
         return new DefaultCrudEventBus(crudEventBusBuilder.build());
     }
 }

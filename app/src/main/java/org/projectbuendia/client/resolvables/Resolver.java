@@ -28,13 +28,13 @@ class Resolver {
 
     @SuppressWarnings("unchecked") // Checked at runtime.
     public static synchronized <T> T resolve(
-            Resolvable resolvable, Resources resources, Class<T> clazz) {
+        Resolvable resolvable, Resources resources, Class<T> clazz) {
         if (sResources == null) {
             sResources = resources;
         } else if (sResources != resources) {
             LOG.w(
-                    "Setting Resources instance to a different value than the one already set. "
-                            + "All cached Resolvables are being discarded.");
+                "Setting Resources instance to a different value than the one already set. "
+                    + "All cached Resolvables are being discarded.");
             sResources = resources;
             sResolvablesToResolveds.clear();
         }
@@ -45,7 +45,7 @@ class Resolver {
                 resolved = new ResStatus.Resolved((ResStatus) resolvable, resources);
             } else if (ResTemperatureRange.Resolved.class.equals(clazz)) {
                 resolved = new ResTemperatureRange.Resolved(
-                        (ResTemperatureRange) resolvable, resources);
+                    (ResTemperatureRange) resolvable, resources);
             } else if (ResVital.Resolved.class.equals(clazz)) {
                 resolved = new ResVital.Resolved((ResVital) resolvable, resources);
             } else if (ResZone.Resolved.class.equals(clazz)) {
@@ -60,5 +60,6 @@ class Resolver {
         return (T) resolved;
     }
 
-    private Resolver() {}
+    private Resolver() {
+    }
 }

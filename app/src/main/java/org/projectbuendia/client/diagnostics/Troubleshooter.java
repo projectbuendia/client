@@ -66,61 +66,7 @@ public class Troubleshooter {
      */
     public boolean isServerHealthy() {
         return getNetworkConnectivityTroubleshootingActions().isEmpty()
-                && getConfigurationTroubleshootingActions().isEmpty();
-    }
-
-    /** Called when a new health issue is discovered. */
-    public <T extends HealthIssue> void onDiscovered(T healthIssue) {
-        synchronized (mIssuesLock) {
-            mActiveIssues.add(healthIssue);
-        }
-
-        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
-        // prevent multiple troubleshooting events from firing for issues resulting from the same
-        // root cause.
-        postTroubleshootingEvents();
-    }
-
-    /** Called when a health issue is resolved. */
-    public void onResolved(HealthIssue healthIssue) {
-        synchronized (mIssuesLock) {
-            if (!mActiveIssues.remove(healthIssue)) {
-                LOG.w(
-                        "Attempted to remove health issue '%1$s' that the troubleshooter was not "
-                                + "previously aware of.",
-                        healthIssue.toString());
-            }
-        }
-
-        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
-        // prevent multiple troubleshooting events from firing for issues resulting from the same
-        // root cause.
-        postTroubleshootingEvents();
-    }
-
-    private void postTroubleshootingEvents() {
-        synchronized (mTroubleshootingLock) {
-            ImmutableSet.Builder<TroubleshootingAction> actionsBuilder = ImmutableSet.builder();
-
-            actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
-            actionsBuilder.addAll(getConfigurationTroubleshootingActions());
-            actionsBuilder.addAll(getPackageServerTroubleshootingActions());
-
-            ImmutableSet<TroubleshootingAction> actions = actionsBuilder.build();
-
-            if (mLastTroubleshootingActionsChangedEvent != null) {
-                // If nothing's changed since the last time we checked, don't post a new event.
-                if (mLastTroubleshootingActionsChangedEvent.actions.equals(actions)) {
-                    return;
-                }
-
-                mEventBus.removeStickyEvent(mLastTroubleshootingActionsChangedEvent);
-            }
-
-            mLastTroubleshootingActionsChangedEvent =
-                    new TroubleshootingActionsChangedEvent(actions);
-            mEventBus.postSticky(mLastTroubleshootingActionsChangedEvent);
-        }
+            && getConfigurationTroubleshootingActions().isEmpty();
     }
 
     private Set<TroubleshootingAction> getNetworkConnectivityTroubleshootingActions() {
@@ -153,6 +99,43 @@ public class Troubleshooter {
         return actions;
     }
 
+    /** Called when a new health issue is discovered. */
+    public <T extends HealthIssue> void onDiscovered(T healthIssue) {
+        synchronized (mIssuesLock) {
+            mActiveIssues.add(healthIssue);
+        }
+
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
+        // prevent multiple troubleshooting events from firing for issues resulting from the same
+        // root cause.
+        postTroubleshootingEvents();
+    }
+
+    private void postTroubleshootingEvents() {
+        synchronized (mTroubleshootingLock) {
+            ImmutableSet.Builder<TroubleshootingAction> actionsBuilder = ImmutableSet.builder();
+
+            actionsBuilder.addAll(getNetworkConnectivityTroubleshootingActions());
+            actionsBuilder.addAll(getConfigurationTroubleshootingActions());
+            actionsBuilder.addAll(getPackageServerTroubleshootingActions());
+
+            ImmutableSet<TroubleshootingAction> actions = actionsBuilder.build();
+
+            if (mLastTroubleshootingActionsChangedEvent != null) {
+                // If nothing's changed since the last time we checked, don't post a new event.
+                if (mLastTroubleshootingActionsChangedEvent.actions.equals(actions)) {
+                    return;
+                }
+
+                mEventBus.removeStickyEvent(mLastTroubleshootingActionsChangedEvent);
+            }
+
+            mLastTroubleshootingActionsChangedEvent =
+                new TroubleshootingActionsChangedEvent(actions);
+            mEventBus.postSticky(mLastTroubleshootingActionsChangedEvent);
+        }
+    }
+
     private Set<TroubleshootingAction> getPackageServerTroubleshootingActions() {
         Set<TroubleshootingAction> actions = new HashSet<>();
         if (mActiveIssues.contains(HealthIssue.PACKAGE_SERVER_HOST_UNREACHABLE)) {
@@ -161,5 +144,22 @@ public class Troubleshooter {
             actions.add(TroubleshootingAction.CHECK_PACKAGE_SERVER_CONFIGURATION);
         }
         return actions;
+    }
+
+    /** Called when a health issue is resolved. */
+    public void onResolved(HealthIssue healthIssue) {
+        synchronized (mIssuesLock) {
+            if (!mActiveIssues.remove(healthIssue)) {
+                LOG.w(
+                    "Attempted to remove health issue '%1$s' that the troubleshooter was not "
+                        + "previously aware of.",
+                    healthIssue.toString());
+            }
+        }
+
+        // TODO: Consider scheduling this for ~100 milliseconds in the future so as to
+        // prevent multiple troubleshooting events from firing for issues resulting from the same
+        // root cause.
+        postTroubleshootingEvents();
     }
 }

@@ -17,11 +17,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.models.converters.Converter;
-import org.projectbuendia.client.models.converters.ConverterPack;
-import org.projectbuendia.client.models.tasks.AddPatientTask;
-import org.projectbuendia.client.models.tasks.TaskFactory;
-import org.projectbuendia.client.models.tasks.AppUpdatePatientTask;
 import org.projectbuendia.client.events.CleanupSubscriber;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
@@ -32,6 +27,11 @@ import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.models.converters.Converter;
+import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.tasks.AddPatientTask;
+import org.projectbuendia.client.models.tasks.AppUpdatePatientTask;
+import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
@@ -41,28 +41,19 @@ import de.greenrobot.event.NoSubscriberEvent;
 
 /**
  * A model that manages all data access within the application.
- *
+ * <p/>
  * <p>This model's {@code fetch} methods often provide {@link TypedCursor}s as results, which MUST
  * be closed when the consumer is done with them.
- *
+ * <p/>
  * <p>Updates done through this model are written through to a backing {@link Server}; callers do
  * not need to worry about the implementation details of this.
  */
 public class AppModel {
-    private static final Logger LOG = Logger.create();
     public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia-concept-order_executed";
-
+    private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;
     private final ConverterPack mConverterPack;
     private final TaskFactory mTaskFactory;
-
-    AppModel(ContentResolver contentResolver,
-            ConverterPack converters,
-            TaskFactory taskFactory) {
-        mContentResolver = contentResolver;
-        mConverterPack = converters;
-        mTaskFactory = taskFactory;
-    }
 
     /**
      * Returns true iff the model has previously been fully downloaded from the server--that is, if
@@ -82,14 +73,14 @@ public class AppModel {
         // last operations of a complete sync. If both of these fields are present, and the last
         // end time is greater than the last start time, then a full sync must have completed.
         try (Cursor c = mContentResolver.query(
-                Contracts.Misc.CONTENT_URI, null, null, null, null)) {
+            Contracts.Misc.CONTENT_URI, null, null, null, null)) {
             LOG.d("Sync timing result count: %d", c.getCount());
             if (c.moveToNext()) {
                 DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_TIME);
                 DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_TIME);
                 DateTime obsSyncEnd = Utils.getDateTime(c, Contracts.Misc.OBS_SYNC_TIME);
                 LOG.i("full_sync_start_time = %s, full_sync_end_time = %s, obs_sync_time = %s",
-                        fullSyncStart, fullSyncEnd, obsSyncEnd);
+                    fullSyncStart, fullSyncEnd, obsSyncEnd);
                 if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
                     return fullSyncEnd;
                 }
@@ -162,9 +153,9 @@ public class AppModel {
      * {@link Patient} on the specified event bus when complete.
      */
     public void updatePatient(
-            CrudEventBus bus, Patient originalPatient, PatientDelta patientDelta) {
+        CrudEventBus bus, Patient originalPatient, PatientDelta patientDelta) {
         AppUpdatePatientTask task =
-                mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
+            mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
         task.execute();
     }
 
@@ -182,7 +173,7 @@ public class AppModel {
      */
     public void addOrderExecutedEncounter(CrudEventBus bus, Patient patient, String orderUuid) {
         addEncounter(bus, patient, new Encounter(
-                patient.uuid, null, DateTime.now(), null, new String[] { orderUuid }
+            patient.uuid, null, DateTime.now(), null, new String[] {orderUuid}
         ));
     }
 
@@ -192,6 +183,14 @@ public class AppModel {
      */
     public void addEncounter(CrudEventBus bus, Patient patient, Encounter encounter) {
         mTaskFactory.newAddEncounterAsyncTask(patient, encounter, bus).execute();
+    }
+
+    AppModel(ContentResolver contentResolver,
+             ConverterPack converters,
+             TaskFactory taskFactory) {
+        mContentResolver = contentResolver;
+        mConverterPack = converters;
+        mTaskFactory = taskFactory;
     }
 
     /** A subscriber that handles error events posted to {@link CrudEventBus}es. */
@@ -231,10 +230,10 @@ public class AppModel {
         private final CrudEventBus mBus;
 
         public FetchLocationTreeAsyncTask(
-                ContentResolver contentResolver,
-                String locale,
-                Converter<Location> converter,
-                CrudEventBus bus) {
+            ContentResolver contentResolver,
+            String locale,
+            Converter<Location> converter,
+            CrudEventBus bus) {
             mContentResolver = contentResolver;
             mLocale = locale;
             mConverter = converter;
@@ -247,14 +246,14 @@ public class AppModel {
             try {
                 // TODO: Ensure this cursor is closed.
                 cursor = mContentResolver.query(
-                        Contracts.getLocalizedLocationsUri(mLocale),
-                        null,
-                        null,
-                        null,
-                        null);
+                    Contracts.getLocalizedLocationsUri(mLocale),
+                    null,
+                    null,
+                    null,
+                    null);
 
                 return LocationTree
-                        .forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
+                    .forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
             } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();
@@ -271,7 +270,7 @@ public class AppModel {
     }
 
     private static class FetchTypedCursorAsyncTask<T extends Base>
-            extends AsyncTask<Void, Void, TypedCursor<T>> {
+        extends AsyncTask<Void, Void, TypedCursor<T>> {
 
         private final Uri mContentUri;
         private final String[] mProjection;
@@ -283,14 +282,14 @@ public class AppModel {
         private final CrudEventBus mBus;
 
         public FetchTypedCursorAsyncTask(
-                Uri contentUri,
-                String[] projection,
-                Class<T> clazz,
-                ContentResolver contentResolver,
-                SimpleSelectionFilter<T> filter,
-                String constraint,
-                Converter<T> converter,
-                CrudEventBus bus) {
+            Uri contentUri,
+            String[] projection,
+            Class<T> clazz,
+            ContentResolver contentResolver,
+            SimpleSelectionFilter<T> filter,
+            String constraint,
+            Converter<T> converter,
+            CrudEventBus bus) {
             mContentUri = contentUri;
             mProjection = projection;
             mClazz = clazz;
@@ -306,11 +305,11 @@ public class AppModel {
             Cursor cursor = null;
             try {
                 cursor = mContentResolver.query(
-                        mContentUri,
-                        mProjection,
-                        mFilter.getSelectionString(),
-                        mFilter.getSelectionArgs(mConstraint),
-                        null);
+                    mContentUri,
+                    mProjection,
+                    mFilter.getSelectionString(),
+                    mFilter.getSelectionArgs(mConstraint),
+                    null);
 
                 return new TypedConvertedCursor<>(mConverter, cursor);
             } catch (Exception e) {

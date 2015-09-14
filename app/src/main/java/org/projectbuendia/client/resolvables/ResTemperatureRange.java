@@ -25,11 +25,6 @@ public enum ResTemperatureRange implements Resolvable<ResTemperatureRange.Resolv
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    ResTemperatureRange(int backgroundColorId, int foregroundColorId) {
-        this.backgroundColorId = backgroundColorId;
-        this.foregroundColorId = foregroundColorId;
-    }
-
     @Override
     public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResTemperatureRange.Resolved.class);
@@ -52,6 +47,11 @@ public enum ResTemperatureRange implements Resolvable<ResTemperatureRange.Resolv
         public int getForegroundColor() {
             return mResources.getColor(mTemperatureRange.foregroundColorId);
         }
+    }
+
+    ResTemperatureRange(int backgroundColorId, int foregroundColorId) {
+        this.backgroundColorId = backgroundColorId;
+        this.foregroundColorId = foregroundColorId;
     }
 }
 

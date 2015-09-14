@@ -43,9 +43,16 @@ import de.greenrobot.event.EventBus;
 
 /** A {@link DialogFragment} for recording that an order was executed. */
 public class OrderExecutionDialogFragment extends DialogFragment {
+    @InjectView(R.id.order_instructions) TextView mOrderInstructions;
+    @InjectView(R.id.order_start_time) TextView mOrderStartTime;
+    @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
+    @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
+    @InjectView(R.id.order_execution_mark_toggle) ToggleButton mMarkToggle;
+    private LayoutInflater mInflater;
+
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderExecutionDialogFragment newInstance(
-            Order order, Interval interval, List<DateTime> executionTimes) {
+        Order order, Interval interval, List<DateTime> executionTimes) {
         Bundle args = new Bundle();
         args.putString("orderUuid", order.uuid);
         args.putString("instructions", order.instructions);
@@ -69,81 +76,10 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         return f;
     }
 
-    @InjectView(R.id.order_instructions) TextView mOrderInstructions;
-    @InjectView(R.id.order_start_time) TextView mOrderStartTime;
-    @InjectView(R.id.order_execution_count) TextView mOrderExecutionCount;
-    @InjectView(R.id.order_execution_list) TextView mOrderExecutionList;
-    @InjectView(R.id.order_execution_mark_toggle) ToggleButton mMarkToggle;
-
-    private LayoutInflater mInflater;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
-    }
-
-    public void onSubmit() {
-        if (mMarkToggle.isChecked()) {
-            Bundle args = getArguments();
-            String orderUuid = args.getString("orderUuid");
-            String instructions = args.getString("instructions");
-            Interval interval = new Interval(
-                    args.getLong("intervalStartMillis"),
-                    args.getLong("intervalStopMillis"));
-            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
-            Utils.logUserAction("order_execution_submitted",
-                    "orderUuid", orderUuid,
-                    "instructions", instructions,
-                    "interval", "" + interval,
-                    "encounterTime", "" + encounterTime);
-
-            // Post an event that triggers the PatientChartController to record the order execution.
-            EventBus.getDefault().post(new OrderExecutionSaveRequestedEvent(
-                    orderUuid, interval, encounterTime));
-        }
-    }
-
-    void updateUi(boolean orderExecutedNow) {
-        Bundle args = getArguments();
-        LocalDate date = new DateTime(args.getLong("intervalStartMillis")).toLocalDate();
-        List<DateTime> executionTimes = new ArrayList<>();
-        for (long millis : args.getLongArray("executionTimes")) {
-            executionTimes.add(new DateTime(millis));
-        }
-
-        // Show what was ordered and when the order started.
-        mOrderInstructions.setText(args.getString("instructions"));
-        DateTime start = new DateTime(args.getLong("orderStartMillis"));
-        mOrderStartTime.setText(getResources().getString(
-                R.string.order_started_on_date_at_time,
-                Utils.toShortString(start.toLocalDate()), Utils.toTimeOfDayString(start)));
-
-        // Describe how many times the order was executed during the selected interval.
-        int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
-        boolean plural = count != 1;
-        mOrderExecutionCount.setText(Html.fromHtml(getResources().getString(
-                date.equals(LocalDate.now()) ?
-                        (plural ? R.string.order_execution_today_plural_html
-                                : R.string.order_execution_today_singular_html) :
-                        (plural ? R.string.order_execution_historical_plural_html
-                                : R.string.order_execution_historical_singular_html),
-                count, Utils.toShortString(date))));
-
-        // Show the list of times that the order was executed during the selected interval.
-        boolean editable = args.getBoolean("editable");
-        Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
-        List<String> htmlItems = new ArrayList<>();
-        for (DateTime executionTime : executionTimes) {
-            htmlItems.add(Utils.toTimeOfDayString(executionTime));
-        }
-        if (editable) {
-            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
-            htmlItems.add(orderExecutedNow ?
-                    "<b>" + Utils.toTimeOfDayString(encounterTime) + "</b>" :
-                    "<b>&nbsp;</b>");  // keep total height stable
-        }
-        mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
     }
 
     @Override
@@ -160,15 +96,15 @@ public class OrderExecutionDialogFragment extends DialogFragment {
         });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(getResources().getString(R.string.order_execution_title))
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        onSubmit();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .setView(fragment);
+            .setTitle(getResources().getString(R.string.order_execution_title))
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    onSubmit();
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .setView(fragment);
 
         if (!getArguments().getBoolean("editable")) {
             // Historical counts can be viewed but not changed.
@@ -176,5 +112,68 @@ public class OrderExecutionDialogFragment extends DialogFragment {
             mMarkToggle.setVisibility(View.GONE);
         }
         return builder.create();
+    }
+
+    void updateUi(boolean orderExecutedNow) {
+        Bundle args = getArguments();
+        LocalDate date = new DateTime(args.getLong("intervalStartMillis")).toLocalDate();
+        List<DateTime> executionTimes = new ArrayList<>();
+        for (long millis : args.getLongArray("executionTimes")) {
+            executionTimes.add(new DateTime(millis));
+        }
+
+        // Show what was ordered and when the order started.
+        mOrderInstructions.setText(args.getString("instructions"));
+        DateTime start = new DateTime(args.getLong("orderStartMillis"));
+        mOrderStartTime.setText(getResources().getString(
+            R.string.order_started_on_date_at_time,
+            Utils.toShortString(start.toLocalDate()), Utils.toTimeOfDayString(start)));
+
+        // Describe how many times the order was executed during the selected interval.
+        int count = executionTimes.size() + (orderExecutedNow ? 1 : 0);
+        boolean plural = count != 1;
+        mOrderExecutionCount.setText(Html.fromHtml(getResources().getString(
+            date.equals(LocalDate.now()) ?
+                (plural ? R.string.order_execution_today_plural_html
+                    : R.string.order_execution_today_singular_html) :
+                (plural ? R.string.order_execution_historical_plural_html
+                    : R.string.order_execution_historical_singular_html),
+            count, Utils.toShortString(date))));
+
+        // Show the list of times that the order was executed during the selected interval.
+        boolean editable = args.getBoolean("editable");
+        Utils.showIf(mOrderExecutionList, executionTimes.size() > 0 || editable);
+        List<String> htmlItems = new ArrayList<>();
+        for (DateTime executionTime : executionTimes) {
+            htmlItems.add(Utils.toTimeOfDayString(executionTime));
+        }
+        if (editable) {
+            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
+            htmlItems.add(orderExecutedNow ?
+                "<b>" + Utils.toTimeOfDayString(encounterTime) + "</b>" :
+                "<b>&nbsp;</b>");  // keep total height stable
+        }
+        mOrderExecutionList.setText(Html.fromHtml(Joiner.on("<br>").join(htmlItems)));
+    }
+
+    public void onSubmit() {
+        if (mMarkToggle.isChecked()) {
+            Bundle args = getArguments();
+            String orderUuid = args.getString("orderUuid");
+            String instructions = args.getString("instructions");
+            Interval interval = new Interval(
+                args.getLong("intervalStartMillis"),
+                args.getLong("intervalStopMillis"));
+            DateTime encounterTime = new DateTime(args.getLong("encounterTimeMillis"));
+            Utils.logUserAction("order_execution_submitted",
+                "orderUuid", orderUuid,
+                "instructions", instructions,
+                "interval", "" + interval,
+                "encounterTime", "" + encounterTime);
+
+            // Post an event that triggers the PatientChartController to record the order execution.
+            EventBus.getDefault().post(new OrderExecutionSaveRequestedEvent(
+                orderUuid, interval, encounterTime));
+        }
     }
 }

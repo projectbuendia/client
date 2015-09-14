@@ -24,11 +24,6 @@ public enum ResVital implements Resolvable<ResVital.Resolved> {
     public final int backgroundColorId;
     public final int foregroundColorId;
 
-    ResVital(int backgroundColorId, int foregroundColorId) {
-        this.backgroundColorId = backgroundColorId;
-        this.foregroundColorId = foregroundColorId;
-    }
-
     @Override
     public Resolved resolve(Resources resources) {
         return Resolver.resolve(this, resources, ResVital.Resolved.class);
@@ -51,5 +46,10 @@ public enum ResVital implements Resolvable<ResVital.Resolved> {
         public int getForegroundColor() {
             return mResources.getColor(mVital.foregroundColorId);
         }
+    }
+
+    ResVital(int backgroundColorId, int foregroundColorId) {
+        this.backgroundColorId = backgroundColorId;
+        this.foregroundColorId = foregroundColorId;
     }
 }

@@ -51,32 +51,32 @@ public class LoginActivity extends BaseActivity {
 
         setContentView(R.layout.activity_user_login);
         LoginFragment fragment = (LoginFragment)
-                getSupportFragmentManager().findFragmentById(R.id.fragment_user_login);
+            getSupportFragmentManager().findFragmentById(R.id.fragment_user_login);
         mController = new LoginController(
-                App.getUserManager(),
-                new EventBusWrapper(EventBus.getDefault()),
-                mTroubleshooter,
-                new Ui(),
-                fragment.getFragmentUi());
+            App.getUserManager(),
+            new EventBusWrapper(EventBus.getDefault()),
+            mTroubleshooter,
+            new Ui(),
+            fragment.getFragmentUi());
 
         // TODO/refactor: Consider refactoring out some common code between here and tent selection.
         mSyncFailedDialog = new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle(getString(R.string.sync_failed_dialog_title))
-                .setMessage(R.string.user_sync_failed_dialog_message)
-                .setNegativeButton(R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                        SettingsActivity.start(LoginActivity.this);
-                    }
-                })
-                .setPositiveButton(R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                        mController.onSyncRetry();
-                    }
-                })
-                .create();
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle(getString(R.string.sync_failed_dialog_title))
+            .setMessage(R.string.user_sync_failed_dialog_message)
+            .setNegativeButton(R.string.sync_failed_settings, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SettingsActivity.start(LoginActivity.this);
+                }
+            })
+            .setPositiveButton(R.string.sync_failed_retry, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mController.onSyncRetry();
+                }
+            })
+            .create();
     }
 
     /**
@@ -92,25 +92,25 @@ public class LoginActivity extends BaseActivity {
         getMenuInflater().inflate(R.menu.login, menu);
 
         menu.findItem(R.id.action_add_user).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
+            new MenuItem.OnMenuItemClickListener() {
 
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        mController.onAddUserPressed();
-                        return true;
-                    }
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    mController.onAddUserPressed();
+                    return true;
                 }
+            }
         );
 
         menu.findItem(R.id.settings).setOnMenuItemClickListener(
-                new MenuItem.OnMenuItemClickListener() {
+            new MenuItem.OnMenuItemClickListener() {
 
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        mController.onSettingsPressed();
-                        return true;
-                    }
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    mController.onSettingsPressed();
+                    return true;
                 }
+            }
         );
 
         return true;
@@ -132,7 +132,7 @@ public class LoginActivity extends BaseActivity {
         @Override
         public void showAddNewUserDialog() {
             NewUserDialogFragment.newInstance(mController.getDialogUi())
-                    .show(getSupportFragmentManager(), null);
+                .show(getSupportFragmentManager(), null);
         }
 
         @Override

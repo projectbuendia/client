@@ -42,7 +42,7 @@ public interface DataGridAdapter {
      * @param viewType an identifier for the type of cell (e.g. cell vs. row header vs. column
      *                 header) which may be used to visualize different sections of the grid
      *                 differently
-     * @param rowType 0 or 1, usually the row index modulo 2 -- used to alternate between colors
+     * @param rowType  0 or 1, usually the row index modulo 2 -- used to alternate between colors
      */
     void setCellBackgroundForViewType(View view, CellType viewType, int rowType);
 
@@ -61,11 +61,12 @@ public interface DataGridAdapter {
     /**
      * Fills {@code view} with the correct contents for the cell at given row and column. Can be
      * reused in RecyclerView without inflating new views.
-     *
+     * <p/>
      * <p>Either {@code viewStub} or {@code textView} must be non-null. If {@code textView} is null
      * and we need the textView to represent the cell, it will be inflated from {@code viewStub} and
      * returned by the method.
      */
-    @Nullable TextView fillCell(int row, int column, View view, @Nullable ViewStub viewStub,
+    @Nullable
+    TextView fillCell(int row, int column, View view, @Nullable ViewStub viewStub,
                       @Nullable TextView textView);
 }

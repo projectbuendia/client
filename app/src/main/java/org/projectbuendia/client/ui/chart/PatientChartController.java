@@ -104,6 +104,20 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     // This value is incremented whenever the controller is activated or suspended.
     // A "phase" is a period of time between such transition points.
     private int mCurrentPhaseId = 0;
+    private final EventBusRegistrationInterface mDefaultEventBus;
+    private final CrudEventBus mCrudEventBus;
+    private final OdkResultSender mOdkResultSender;
+    private final Ui mUi;
+    private final LocalizedChartHelper mChartHelper;
+    private final AppModel mAppModel;
+    private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
+    private final SyncManager mSyncManager;
+    private final MinimalHandler mMainThreadHandler;
+    private AssignLocationDialog mAssignLocationDialog;
+    private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
+    // Every form request made by this controller is kept in this list until
+    // the form is closed.
+    List<FormRequest> mFormRequests = new ArrayList<>();
 
     public interface Ui {
         /** Sets the activity title. */
@@ -111,9 +125,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Updates the UI showing current observation values for this patient. */
         void updatePatientVitalsUi(
-                Map<String, LocalizedObs> observations,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate);
+            Map<String, LocalizedObs> observations,
+            LocalDate admissionDate,
+            LocalDate firstSymptomsDate);
 
         /** Updates the general condition UI with the patient's current condition. */
         void updatePatientConditionUi(String generalConditionUuid);
@@ -123,13 +137,13 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updatePatientHistoryUi(
-                List<Pair<String, String>> tileConceptUuidsAndNames,
-                Map<String, LocalizedObs> latestObservations,
-                List<Pair<String, String>> gridConceptUuidsAndNames,
-                List<LocalizedObs> observations,
-                List<org.projectbuendia.client.sync.Order> orders,
-                LocalDate admissionDate,
-                LocalDate firstSymptomsDate);
+            List<Pair<String, String>> tileConceptUuidsAndNames,
+            Map<String, LocalizedObs> latestObservations,
+            List<Pair<String, String>> gridConceptUuidsAndNames,
+            List<LocalizedObs> observations,
+            List<org.projectbuendia.client.sync.Order> orders,
+            LocalDate admissionDate,
+            LocalDate firstSymptomsDate);
 
         /** Updates the indicator of this patient's latest encounter time. */
         void updateLastObsTimeUi(DateTime lastObsTime);
@@ -145,8 +159,8 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         /** Starts a new form activity to collect observations from the user. */
         void fetchAndShowXform(
-                int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
-                Preset preset);
+            int requestCode, String formUuid, org.odk.collect.android.model.Patient patient,
+            Preset preset);
 
         void reEnableFetch();
         void showFormLoadingDialog(boolean show);
@@ -155,25 +169,12 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval interval, List<DateTime> executionTimes);
     }
 
-    private final EventBusRegistrationInterface mDefaultEventBus;
-    private final CrudEventBus mCrudEventBus;
-    private final OdkResultSender mOdkResultSender;
-    private final Ui mUi;
-    private final LocalizedChartHelper mChartHelper;
-    private final AppModel mAppModel;
-    private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
-    private final SyncManager mSyncManager;
-    private final MinimalHandler mMainThreadHandler;
-
-    private AssignLocationDialog mAssignLocationDialog;
-    private AssignGeneralConditionDialog mAssignGeneralConditionDialog;
-
     /** Sends ODK form data. */
     public interface OdkResultSender {
         void sendOdkResultToServer(
-                @Nullable String patientUuid,
-                int resultCode,
-                Intent data);
+            @Nullable String patientUuid,
+            int resultCode,
+            Intent data);
     }
 
     public interface MinimalHandler {
@@ -181,16 +182,16 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     }
 
     public PatientChartController(
-            AppModel appModel,
-            EventBusRegistrationInterface defaultEventBus,
-            CrudEventBus crudEventBus,
-            Ui ui,
-            String patientUuid,
-            OdkResultSender odkResultSender,
-            LocalizedChartHelper chartHelper,
-            @Nullable Bundle savedState,
-            SyncManager syncManager,
-            MinimalHandler mainThreadHandler) {
+        AppModel appModel,
+        EventBusRegistrationInterface defaultEventBus,
+        CrudEventBus crudEventBus,
+        Ui ui,
+        String patientUuid,
+        OdkResultSender odkResultSender,
+        LocalizedChartHelper chartHelper,
+        @Nullable Bundle savedState,
+        SyncManager syncManager,
+        MinimalHandler mainThreadHandler) {
         mAppModel = appModel;
         mDefaultEventBus = defaultEventBus;
         mCrudEventBus = crudEventBus;
@@ -205,43 +206,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         }
         mSyncManager = syncManager;
         mMainThreadHandler = mainThreadHandler;
-    }
-
-    /** Represents an instance of a form being opened by the user. */
-    class FormRequest {
-        public final String formUuid;
-        public final String patientUuid;
-        public final int requestIndex;
-
-        public FormRequest(String formUuid, String patientUuid, int index) {
-            this.formUuid = formUuid;
-            this.patientUuid = patientUuid;
-            this.requestIndex = index;
-        }
-    }
-
-    // Every form request made by this controller is kept in this list until
-    // the form is closed.
-    List<FormRequest> mFormRequests = new ArrayList<>();
-
-    FormRequest newFormRequest(String formUuid, String patientUuid) {
-        // Find an empty slot in the array of all existing form requests.
-        int requestIndex = 0;
-        while (requestIndex < mFormRequests.size() && mFormRequests.get(requestIndex) != null) {
-            requestIndex++;
-        }
-        if (requestIndex >= mFormRequests.size()) {
-            mFormRequests.add(null);
-        }
-        FormRequest request = new FormRequest(formUuid, patientUuid, requestIndex);
-        mFormRequests.set(requestIndex, request);
-        return request;
-    }
-
-    FormRequest popFormRequest(int requestIndex) {
-        FormRequest request = mFormRequests.get(requestIndex);
-        mFormRequests.set(requestIndex, null);
-        return request;
     }
 
     /**
@@ -269,17 +233,6 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         startObservationSync();
     }
 
-    /** Releases any resources used by the controller. */
-    public void suspend() {
-        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
-
-        mCrudEventBus.unregister(mEventBusSubscriber);
-        mDefaultEventBus.unregister(mEventBusSubscriber);
-        if (mLocationTree != null) {
-            mLocationTree.close();
-        }
-    }
-
     /** Starts syncing observations more frequently while the user is viewing the chart. */
     private void startObservationSync() {
         final Handler handler = new Handler(Looper.getMainLooper());
@@ -303,6 +256,17 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         handler.postDelayed(runnable, OBSERVATION_SYNC_PERIOD_MILLIS);
     }
 
+    /** Releases any resources used by the controller. */
+    public void suspend() {
+        mCurrentPhaseId++;  // phase ID changes on every init() or suspend()
+
+        mCrudEventBus.unregister(mEventBusSubscriber);
+        mDefaultEventBus.unregister(mEventBusSubscriber);
+        if (mLocationTree != null) {
+            mLocationTree.close();
+        }
+    }
+
     public void onXFormResult(int requestCode, int resultCode, Intent data) {
         FormRequest request = popFormRequest(requestCode);
         if (request == null) {
@@ -312,12 +276,18 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         boolean shouldShowSubmissionDialog = (resultCode != Activity.RESULT_CANCELED);
         String action = (resultCode == Activity.RESULT_CANCELED)
-                ? "form_discard_pressed" : "form_save_pressed";
+            ? "form_discard_pressed" : "form_save_pressed";
         Utils.logUserAction(action,
-                "form", request.formUuid,
-                "patient_uuid", request.patientUuid);
+            "form", request.formUuid,
+            "patient_uuid", request.patientUuid);
         mOdkResultSender.sendOdkResultToServer(request.patientUuid, resultCode, data);
         mUi.showFormSubmissionDialog(shouldShowSubmissionDialog);
+    }
+
+    FormRequest popFormRequest(int requestIndex) {
+        FormRequest request = mFormRequests.get(requestIndex);
+        mFormRequests.set(requestIndex, null);
+        return request;
     }
 
     /** Call when the user has indicated they want to add observation data. */
@@ -341,22 +311,22 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
 
         JsonUser user = App.getUserManager().getActiveUser();
         Utils.logUserAction("form_opener_pressed",
-                "form", "round",
-                "group", targetGroup);
+            "form", "round",
+            "group", targetGroup);
         if (user != null) {
             preset.clinicianName = user.fullName;
         }
 
         Map<String, LocalizedObs> observations =
-                mChartHelper.getMostRecentObservations(mPatientUuid);
+            mChartHelper.getMostRecentObservations(mPatientUuid);
 
         if (observations.containsKey(Concepts.PREGNANCY_UUID)
-                && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
+            && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
             preset.pregnant = Preset.YES;
         }
 
         if (observations.containsKey(Concepts.IV_UUID)
-                && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
+            && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
             preset.ivFitted = Preset.YES;
         }
 
@@ -367,6 +337,25 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mUi.fetchAndShowXform(
             request.requestIndex, request.formUuid,
             mPatient.toOdkPatient(), preset);
+    }
+
+    private boolean dialogShowing() {
+        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
+            || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
+    }
+
+    FormRequest newFormRequest(String formUuid, String patientUuid) {
+        // Find an empty slot in the array of all existing form requests.
+        int requestIndex = 0;
+        while (requestIndex < mFormRequests.size() && mFormRequests.get(requestIndex) != null) {
+            requestIndex++;
+        }
+        if (requestIndex >= mFormRequests.size()) {
+            mFormRequests.add(null);
+        }
+        FormRequest request = new FormRequest(formUuid, patientUuid, requestIndex);
+        mFormRequests.set(requestIndex, request);
+        return request;
     }
 
     public void onAddTestResultsPressed() {
@@ -416,65 +405,27 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         List<DateTime> executionTimes = new ArrayList<>();
         for (LocalizedObs obs : mObservations) {
             if (AppModel.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
-                    order.uuid.equals(obs.value)) {
+                order.uuid.equals(obs.value)) {
                 executionTimes.add(obs.encounterTime);
             }
         }
         mUi.showOrderExecutionDialog(order, interval, executionTimes);
     }
 
-    /** Retrieves the value of a date observation as a LocalDate. */
-    private LocalDate getObservedDate(
-            Map<String, LocalizedObs> observations, String conceptUuid) {
-        LocalizedObs obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.toLocalDate(obs.localizedValue);
-    }
-
-    /** Gets the latest observation values and displays them on the UI. */
-    private synchronized void updatePatientObsUi() {
-        // Get the observations and orders
-        // TODO: Background thread this, or make this call async-like.
-        mObservations = mChartHelper.getObservations(mPatientUuid);
-        Map<String, LocalizedObs> conceptsToLatestObservations =
-                new HashMap<>(mChartHelper.getMostRecentObservations(mPatientUuid));
-        for (LocalizedObs obs : mObservations) {
-            mLastObsTime = Utils.max(mLastObsTime, obs.encounterTime);
-        }
-        List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
-        mOrdersByUuid = new HashMap<>();
-        for (org.projectbuendia.client.sync.Order order : orders) {
-            mOrdersByUuid.put(order.uuid, order);
-        }
-        LOG.d("Showing " + mObservations.size() + " observations and "
-                + orders.size() + " orders");
-
-        LocalDate admissionDate = getObservedDate(
-                conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
-        LocalDate firstSymptomsDate = getObservedDate(
-                conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
-        mUi.updateLastObsTimeUi(mLastObsTime);
-        mUi.updatePatientVitalsUi(
-                conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.updatePatientHistoryUi(
-                mChartHelper.getTileConcepts(), conceptsToLatestObservations,
-                mChartHelper.getGridRowConcepts(), mObservations, orders,
-                admissionDate, firstSymptomsDate);
-    }
-
     public void showAssignGeneralConditionDialog(
-            Context context, final String generalConditionUuid) {
+        Context context, final String generalConditionUuid) {
         AssignGeneralConditionDialog.ConditionSelectedCallback callback =
-                new AssignGeneralConditionDialog.ConditionSelectedCallback() {
+            new AssignGeneralConditionDialog.ConditionSelectedCallback() {
 
-                    @Override
-                    public boolean onNewConditionSelected(String newConditionUuid) {
-                        setCondition(newConditionUuid);
-                        Utils.logUserAction("condition_assigned");
-                        return false;
-                    }
-                };
+                @Override
+                public boolean onNewConditionSelected(String newConditionUuid) {
+                    setCondition(newConditionUuid);
+                    Utils.logUserAction("condition_assigned");
+                    return false;
+                }
+            };
         mAssignGeneralConditionDialog = new AssignGeneralConditionDialog(
-                context, generalConditionUuid, callback);
+            context, generalConditionUuid, callback);
 
         mAssignGeneralConditionDialog.show();
     }
@@ -482,15 +433,15 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     public void setCondition(String newConditionUuid) {
         LOG.v("Assigning general condition: %s", newConditionUuid);
         Encounter encounter = new Encounter(
-                mPatientUuid,
-                null, // encounter UUID, which the server will generate
-                DateTime.now(),
-                new Observation[] {
-                        new Observation(
-                                Concepts.GENERAL_CONDITION_UUID,
-                                newConditionUuid,
-                                Observation.Type.NON_DATE)
-                }, null);
+            mPatientUuid,
+            null, // encounter UUID, which the server will generate
+            DateTime.now(),
+            new Observation[] {
+                new Observation(
+                    Concepts.GENERAL_CONDITION_UUID,
+                    newConditionUuid,
+                    Observation.Type.NON_DATE)
+            }, null);
         mAppModel.addEncounter(mCrudEventBus, mPatient, encounter);
     }
 
@@ -498,16 +449,16 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         if (mAssignLocationDialog != null) return;
 
         AssignLocationDialog.LocationSelectedCallback callback =
-                new AssignLocationDialog.LocationSelectedCallback() {
-                    @Override
-                    public boolean onLocationSelected(String locationUuid) {
-                        PatientDelta delta = new PatientDelta();
-                        delta.assignedLocationUuid = Optional.of(locationUuid);
-                        mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
-                        Utils.logUserAction("location_assigned");
-                        return false;
-                    }
-                };
+            new AssignLocationDialog.LocationSelectedCallback() {
+                @Override
+                public boolean onLocationSelected(String locationUuid) {
+                    PatientDelta delta = new PatientDelta();
+                    delta.assignedLocationUuid = Optional.of(locationUuid);
+                    mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
+                    Utils.logUserAction("location_assigned");
+                    return false;
+                }
+            };
 
         Runnable onDismiss = new Runnable() {
             @Override
@@ -517,14 +468,71 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         };
 
         mAssignLocationDialog = new AssignLocationDialog(
-                context,
-                mAppModel,
-                LocaleSelector.getCurrentLocale().getLanguage(),
-                onDismiss,
-                mCrudEventBus,
-                Optional.of(mPatient.locationUuid),
-                callback);
+            context,
+            mAppModel,
+            LocaleSelector.getCurrentLocale().getLanguage(),
+            onDismiss,
+            mCrudEventBus,
+            Optional.of(mPatient.locationUuid),
+            callback);
         mAssignLocationDialog.show();
+    }
+
+    /** Gets the latest observation values and displays them on the UI. */
+    private synchronized void updatePatientObsUi() {
+        // Get the observations and orders
+        // TODO: Background thread this, or make this call async-like.
+        mObservations = mChartHelper.getObservations(mPatientUuid);
+        Map<String, LocalizedObs> conceptsToLatestObservations =
+            new HashMap<>(mChartHelper.getMostRecentObservations(mPatientUuid));
+        for (LocalizedObs obs : mObservations) {
+            mLastObsTime = Utils.max(mLastObsTime, obs.encounterTime);
+        }
+        List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
+        mOrdersByUuid = new HashMap<>();
+        for (org.projectbuendia.client.sync.Order order : orders) {
+            mOrdersByUuid.put(order.uuid, order);
+        }
+        LOG.d("Showing " + mObservations.size() + " observations and "
+            + orders.size() + " orders");
+
+        LocalDate admissionDate = getObservedDate(
+            conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
+        LocalDate firstSymptomsDate = getObservedDate(
+            conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
+        mUi.updateLastObsTimeUi(mLastObsTime);
+        mUi.updatePatientVitalsUi(
+            conceptsToLatestObservations, admissionDate, firstSymptomsDate);
+        mUi.updatePatientHistoryUi(
+            mChartHelper.getTileConcepts(), conceptsToLatestObservations,
+            mChartHelper.getGridRowConcepts(), mObservations, orders,
+            admissionDate, firstSymptomsDate);
+    }
+
+    /** Retrieves the value of a date observation as a LocalDate. */
+    private LocalDate getObservedDate(
+        Map<String, LocalizedObs> observations, String conceptUuid) {
+        LocalizedObs obs = observations.get(conceptUuid);
+        return obs == null ? null : Utils.toLocalDate(obs.localizedValue);
+    }
+
+    private synchronized void updatePatientLocationUi() {
+        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
+            mUi.updatePatientLocationUi(mLocationTree, mPatient);
+        }
+    }
+
+    /** Represents an instance of a form being opened by the user. */
+    class FormRequest {
+        public final String formUuid;
+        public final String patientUuid;
+        public final int requestIndex;
+
+        public FormRequest(String formUuid, String patientUuid, int index) {
+            this.formUuid = formUuid;
+            this.patientUuid = patientUuid;
+            this.requestIndex = index;
+        }
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
@@ -564,7 +572,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                     messageResource = R.string.encounter_add_failed_invalid_encounter;
                     // Validation reason typically starts after the message below.
                     exceptionMessage = exceptionMessage.replaceFirst(
-                            ".*failed to validate with reason: .*: ", "");
+                        ".*failed to validate with reason: .*: ", "");
                     break;
                 case INTERRUPTED:
                     messageResource = R.string.encounter_add_failed_interrupted;
@@ -702,7 +710,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
             }
 
             mAppModel.addOrder(mCrudEventBus, new Order(
-                    null, event.patientUuid, event.instructions, start, stop));
+                null, event.patientUuid, event.instructions, start, stop));
         }
 
         public void onEventMainThread(OrderExecutionSaveRequestedEvent event) {
@@ -711,16 +719,5 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
                 mAppModel.addOrderExecutedEncounter(mCrudEventBus, mPatient, order.uuid);
             }
         }
-    }
-
-    private synchronized void updatePatientLocationUi() {
-        if (mLocationTree != null && mPatient != null && mPatient.locationUuid != null) {
-            mUi.updatePatientLocationUi(mLocationTree, mPatient);
-        }
-    }
-
-    private boolean dialogShowing() {
-        return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
-                || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
     }
 }

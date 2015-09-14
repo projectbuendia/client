@@ -18,15 +18,15 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.LocationTree;
-import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
-import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
+import org.projectbuendia.client.events.data.PatientAddFailedEvent;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
@@ -40,6 +40,11 @@ final class NewPatientController {
     static final int SEX_UNKNOWN = 0;
     static final int SEX_MALE = 1;
     static final int SEX_FEMALE = 2;
+    private final Ui mUi;
+    private final CrudEventBus mCrudEventBus;
+    private final AppModel mModel;
+    private final EventSubscriber mEventBusSubscriber;
+    private LocationTree mLocationTree;
 
     public interface Ui {
 
@@ -68,18 +73,12 @@ final class NewPatientController {
         /** Invoked when the server RPC to create a patient fails. */
         void showErrorMessage(String errorString);
 
-        /** Invoked when the server RPC to create a patient succeeds.
-         * @param patientUuid*/
+        /**
+         * Invoked when the server RPC to create a patient succeeds.
+         * @param patientUuid
+         */
         void finishAndGoToPatientChart(String patientUuid);
     }
-
-    private final Ui mUi;
-    private final CrudEventBus mCrudEventBus;
-    private final AppModel mModel;
-
-    private final EventSubscriber mEventBusSubscriber;
-
-    private LocationTree mLocationTree;
 
     public NewPatientController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
         mUi = ui;
@@ -106,8 +105,8 @@ final class NewPatientController {
     }
 
     public boolean createPatient(
-            String id, String givenName, String familyName, String ageYears, String ageMonths,
-            int sex, LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
+        String id, String givenName, String familyName, String ageYears, String ageMonths,
+        int sex, LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
@@ -134,7 +133,7 @@ final class NewPatientController {
         }
         if (admissionDate == null) {
             mUi.showValidationError(
-                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
+                Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
@@ -143,12 +142,12 @@ final class NewPatientController {
         }
         if (admissionDate != null && admissionDate.isAfter(LocalDate.now())) {
             mUi.showValidationError(
-                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_future_admission_date);
+                Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_future_admission_date);
             hasValidationErrors = true;
         }
         if (symptomsOnsetDate != null && symptomsOnsetDate.isAfter(LocalDate.now())) {
             mUi.showValidationError(
-                    Ui.FIELD_SYMPTOMS_ONSET_DATE, R.string.patient_validation_future_onset_date);
+                Ui.FIELD_SYMPTOMS_ONSET_DATE, R.string.patient_validation_future_onset_date);
             hasValidationErrors = true;
         }
 
@@ -162,10 +161,10 @@ final class NewPatientController {
         delta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
         delta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
         delta.birthdate = Optional.of(
-                DateTime.now().minusYears(years).minusMonths(months));
+            DateTime.now().minusYears(years).minusMonths(months));
         delta.gender = Optional.of(sex);
         delta.assignedLocationUuid = Optional.of(
-                Utils.valueOrDefault(locationUuid, Zones.DEFAULT_LOCATION_UUID));
+            Utils.valueOrDefault(locationUuid, Zones.DEFAULT_LOCATION_UUID));
         delta.admissionDate = Optional.of(admissionDate);
         delta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
@@ -197,12 +196,12 @@ final class NewPatientController {
                 case PatientAddFailedEvent.REASON_NETWORK:
                     // For network errors, include the VolleyError message, if available.
                     if (event.exception != null
-                            && event.exception.getCause() != null
-                            && event.exception.getCause() instanceof VolleyError
-                            && event.exception.getCause().getMessage() != null) {
+                        && event.exception.getCause() != null
+                        && event.exception.getCause() instanceof VolleyError
+                        && event.exception.getCause().getMessage() != null) {
                         mUi.showErrorMessage(App.getInstance().getString(
-                                R.string.patient_creation_network_error_with_reason,
-                                event.exception.getCause().getMessage()));
+                            R.string.patient_creation_network_error_with_reason,
+                            event.exception.getCause().getMessage()));
                     } else {
                         mUi.showErrorMessage(R.string.patient_creation_network_error);
                     }

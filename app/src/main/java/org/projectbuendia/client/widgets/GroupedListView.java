@@ -20,12 +20,12 @@ import android.widget.ExpandableListView;
 
 /**
  * GroupedListView is a list view split up by category, where each category has a heading.
- *
+ * <p/>
  * <p>It acts like an expandable list view that:
  * <ul>
- *   <li>Always shows groups as expanded
- *   <li>Has no expand/collapse chevron
- *   <li>Disables group collapse
+ * <li>Always shows groups as expanded
+ * <li>Has no expand/collapse chevron
+ * <li>Disables group collapse
  * </ul>
  */
 public class GroupedListView extends ExpandableListView {

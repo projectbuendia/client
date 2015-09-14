@@ -21,8 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.resolvables.ResStatus;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -33,29 +33,29 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
     private String[] mConditions;
     @Nullable private String mSelectedConditionUuid;
 
-    public void setSelectedConditionUuid(@Nullable String selectedConditionUuid) {
-        mSelectedConditionUuid = selectedConditionUuid;
-        notifyDataSetChanged();
-    }
-
     /**
      * Creates a new adapter that displays conditions corresponding to the given UUID's.
-     * @param context an activity context
-     * @param conditions UUID's of the general conditions to display
+     * @param context               an activity context
+     * @param conditions            UUID's of the general conditions to display
      * @param selectedConditionUuid UUID of the current general condition, or null if the patient
      *                              has no prior known condition
      */
     public GeneralConditionAdapter(
-            Context context, String[] conditions, @Nullable String selectedConditionUuid)  {
+        Context context, String[] conditions, @Nullable String selectedConditionUuid) {
         super(context, VIEW_RESOURCE, conditions);
         mConditions = conditions;
         mSelectedConditionUuid = selectedConditionUuid;
     }
 
+    public void setSelectedConditionUuid(@Nullable String selectedConditionUuid) {
+        mSelectedConditionUuid = selectedConditionUuid;
+        notifyDataSetChanged();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) getContext()
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view;
         ViewHolder holder;
         if (convertView != null) {
@@ -69,7 +69,7 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
 
         String conditionUuid = getItem(position);
         ResStatus.Resolved condition =
-                Concepts.getResStatus(conditionUuid).resolve(getContext().getResources());
+            Concepts.getResStatus(conditionUuid).resolve(getContext().getResources());
 
         holder.mConditionNumber.setText(condition.getShortDescription());
         holder.mConditionNumber.setTextColor(condition.getForegroundColor());

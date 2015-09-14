@@ -18,16 +18,16 @@ import android.os.AsyncTask;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 
-import org.projectbuendia.client.models.Encounter;
-import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.converters.EncounterConverter;
-import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
+import org.projectbuendia.client.models.Encounter;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.converters.EncounterConverter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.json.JsonEncounter;
 import org.projectbuendia.client.sync.providers.Contracts.Observations;
@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link AsyncTask} that adds a patient encounter to the server.
- *
+ * <p/>
  * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the given
  * {@link CrudEventBus} with the added encounter. If the operation fails, a
  * {@link EncounterAddFailedEvent} is posted instead.
@@ -47,11 +47,11 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     private static final Logger LOG = Logger.create();
 
     private static final String[] ENCOUNTER_PROJECTION = new String[] {
-            Observations.CONCEPT_UUID,
-            Observations.ENCOUNTER_TIME,
-            Observations.ENCOUNTER_UUID,
-            Observations.PATIENT_UUID,
-            Observations.VALUE
+        Observations.CONCEPT_UUID,
+        Observations.ENCOUNTER_TIME,
+        Observations.ENCOUNTER_UUID,
+        Observations.PATIENT_UUID,
+        Observations.VALUE
     };
 
     private final TaskFactory mTaskFactory;
@@ -97,7 +97,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             LOG.e(e, "Server error while adding encounter");
 
             EncounterAddFailedEvent.Reason reason =
-                    EncounterAddFailedEvent.Reason.UNKNOWN_SERVER_ERROR;
+                EncounterAddFailedEvent.Reason.UNKNOWN_SERVER_ERROR;
             if (e.getCause() != null) {
                 String errorMessage = e.getCause().getMessage();
                 if (errorMessage.contains("failed to validate")) {
@@ -106,18 +106,18 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
                     reason = EncounterAddFailedEvent.Reason.FAILED_TO_AUTHENTICATE;
                 }
             }
-            LOG.e("Error response: %s", ((VolleyError)e.getCause()).networkResponse);
+            LOG.e("Error response: %s", ((VolleyError) e.getCause()).networkResponse);
 
             return new EncounterAddFailedEvent(reason, (VolleyError) e.getCause());
         }
 
         if (jsonEncounter.uuid == null) {
             LOG.e(
-                    "Although the server reported an encounter successfully added, it did not "
-                            + "return a UUID for that encounter. This indicates a server error.");
+                "Although the server reported an encounter successfully added, it did not "
+                    + "return a UUID for that encounter. This indicates a server error.");
 
             return new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
+                EncounterAddFailedEvent.Reason.FAILED_TO_SAVE_ON_SERVER, null /*exception*/);
         }
 
         Encounter encounter = Encounter.fromJson(mPatient.uuid, jsonEncounter);
@@ -127,10 +127,10 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
             if (inserted != values.length) {
                 LOG.w("Inserted %d observations for encounter. Expected: %d",
-                        inserted, encounter.observations.length);
+                    inserted, encounter.observations.length);
                 return new EncounterAddFailedEvent(
-                        EncounterAddFailedEvent.Reason.INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
-                        null /*exception*/);
+                    EncounterAddFailedEvent.Reason.INVALID_NUMBER_OF_OBSERVATIONS_SAVED,
+                    null /*exception*/);
             }
         } else {
             LOG.w("Encounter was sent to the server but contained no observations.");
@@ -151,11 +151,11 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         // If the UUID was not set, a programming error occurred. Log and post an error event.
         if (mUuid == null) {
             LOG.e(
-                    "Although an encounter add ostensibly succeeded, no UUID was set for the newly-"
-                            + "added encounter. This indicates a programming error.");
+                "Although an encounter add ostensibly succeeded, no UUID was set for the newly-"
+                    + "added encounter. This indicates a programming error.");
 
             mBus.post(new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
+                EncounterAddFailedEvent.Reason.UNKNOWN, null /*exception*/));
             return;
         }
 
@@ -183,8 +183,8 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
         public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new EncounterAddFailedEvent(
-                    EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
-                    new Exception(event.error)));
+                EncounterAddFailedEvent.Reason.FAILED_TO_FETCH_SAVED_OBSERVATION,
+                new Exception(event.error)));
             mBus.unregister(this);
         }
     }

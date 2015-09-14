@@ -12,19 +12,19 @@
 package org.projectbuendia.client.ui.sync;
 
 import android.support.test.espresso.Espresso;
+
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.net.json.JsonPatient;
 
 import java.util.UUID;
 
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
 /** Tests the loading of the encounter xform from the patient chart activity. */
@@ -44,9 +44,9 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         loadChart();
         screenshot("Patient Chart");
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-                new EventBusIdlingResource<FetchXformSucceededEvent>(
-                        UUID.randomUUID().toString(),
-                        mEventBus);
+            new EventBusIdlingResource<FetchXformSucceededEvent>(
+                UUID.randomUUID().toString(),
+                mEventBus);
         click(viewWithId(R.id.action_update_chart));
         Espresso.registerIdlingResources(xformIdlingResource);
         // This check is known to be particularly flaky.
@@ -64,8 +64,8 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         expectVisibleSoon(viewThat(hasTextContaining("Triage (")));
         // Click first patient.
         click(dataThat(is(Patient.class))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0));
+            .inAdapterView(withId(R.id.fragment_patient_list))
+            .atPosition(0));
     }
 
     private PatientDelta getBasicDemoPatient() {

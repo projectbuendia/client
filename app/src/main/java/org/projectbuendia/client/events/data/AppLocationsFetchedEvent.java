@@ -11,13 +11,13 @@
 
 package org.projectbuendia.client.events.data;
 
+import org.projectbuendia.client.events.DefaultCrudEventBus;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.TypedCursor;
-import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
  * An event bus event indicating that {@link Location}s have been fetched from the data store.
- *
+ * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
 public class AppLocationsFetchedEvent extends TypedCursorFetchedEvent<Location> {

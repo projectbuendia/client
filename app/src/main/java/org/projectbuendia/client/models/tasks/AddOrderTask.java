@@ -17,14 +17,14 @@ import android.os.AsyncTask;
 
 import com.android.volley.toolbox.RequestFuture;
 
-import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.events.data.OrderAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.events.data.OrderAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
+import org.projectbuendia.client.models.Order;
+import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.net.json.JsonOrder;
 import org.projectbuendia.client.sync.providers.Contracts;
@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link AsyncTask} that adds an order, both on the server and in the local store.
- *
+ * <p/>
  * <p>If the operation succeeds, a {@link ItemCreatedEvent} is posted on the
  * given {@link CrudEventBus} with the added order. If the operation fails, an
  * {@link OrderAddFailedEvent} is posted instead.
@@ -54,12 +54,12 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
     /** Creates a new {@link AddOrderTask}. */
     public AddOrderTask(
-            TaskFactory taskFactory,
-            ConverterPack converters,
-            Server server,
-            ContentResolver contentResolver,
-            Order order,
-            CrudEventBus bus) {
+        TaskFactory taskFactory,
+        ConverterPack converters,
+        Server server,
+        ContentResolver contentResolver,
+        Order order,
+        CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mConverterPack = converters;
         mServer = server;
@@ -88,7 +88,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
         if (uri == null || uri.equals(Uri.EMPTY)) {
             return new OrderAddFailedEvent(
-                    OrderAddFailedEvent.Reason.CLIENT_ERROR, null);
+                OrderAddFailedEvent.Reason.CLIENT_ERROR, null);
         }
 
         mUuid = json.uuid;
@@ -127,7 +127,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
 
         public void onEventMainThread(ItemFetchFailedEvent event) {
             mBus.post(new OrderAddFailedEvent(
-                    OrderAddFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
+                OrderAddFailedEvent.Reason.CLIENT_ERROR, new Exception(event.error)));
             mBus.unregister(this);
         }
     }

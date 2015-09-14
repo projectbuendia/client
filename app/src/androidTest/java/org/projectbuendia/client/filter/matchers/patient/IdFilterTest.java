@@ -30,6 +30,10 @@ public class IdFilterTest extends InstrumentationTestCase {
         assertTrue(mIdFilter.matches(getPatientWithId("123"), "123"));
     }
 
+    private Patient getPatientWithId(String id) {
+        return Patient.builder().setId(id).build();
+    }
+
     /** Tests that id matching allows for a prefix match. */
     public void testMatches_matchesPrefix() {
         assertTrue(mIdFilter.matches(getPatientWithId("123"), "12"));
@@ -58,9 +62,5 @@ public class IdFilterTest extends InstrumentationTestCase {
     /** Tests that id matching is case-insensitive. */
     public void testMatches_ignoresCase() {
         assertTrue(mIdFilter.matches(getPatientWithId("abc"), "ABC"));
-    }
-
-    private Patient getPatientWithId(String id) {
-        return Patient.builder().setId(id).build();
     }
 }

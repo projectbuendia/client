@@ -14,7 +14,6 @@ package org.projectbuendia.client.ui.sync;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
-
 import android.support.test.espresso.Espresso;
 
 import net.sqlcipher.database.SQLiteException;
@@ -32,7 +31,7 @@ import java.util.UUID;
  * A {@link FunctionalTestCase} that clears the application database as part of set up, allowing for
  * sync behavior to be tested more easily. This class does NOT currently clear ODK forms, which are
  * stored separately as flat files.
- *
+ * <p/>
  * <p>WARNING: Syncing may require the transfer of large quantities of data, so {@link SyncTestCase}
  * tests will almost always be very large tests.
  */
@@ -62,13 +61,6 @@ public class SyncTestCase extends FunctionalTestCase {
         super.setUp();
     }
 
-    /** Cleans up post-test wifi state. Won't work during tearDown(). */
-    public void cleanupWifi() {
-        setWifiEnabled(true);
-        // Wait until wifi connection has been re-established.
-        Espresso.registerIdlingResources(new WifiStateIdlingResource());
-    }
-
     /** Clears all contents of the database (note: this does not include ODK forms or instances). */
     public void clearDatabase() throws SQLException {
         Database db = new Database(App.getInstance().getApplicationContext());
@@ -81,18 +73,25 @@ public class SyncTestCase extends FunctionalTestCase {
         PreferenceManager.getDefaultSharedPreferences(App.getInstance()).edit().clear().commit();
     }
 
+    /** Cleans up post-test wifi state. Won't work during tearDown(). */
+    public void cleanupWifi() {
+        setWifiEnabled(true);
+        // Wait until wifi connection has been re-established.
+        Espresso.registerIdlingResources(new WifiStateIdlingResource());
+    }
+
     /** Turns wifi on or off. */
     protected void setWifiEnabled(boolean enabled) {
         LOG.i("Setting wifi state: %b", enabled);
         WifiManager wifiManager =
-                (WifiManager)App.getInstance().getSystemService(Context.WIFI_SERVICE);
+            (WifiManager) App.getInstance().getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(enabled);
     }
 
     /** Delays all ViewActions until sync has failed once. */
     protected void waitForSyncFailure() {
         EventBusIdlingResource<SyncFailedEvent> syncFailedEventIdlingResource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncFailedEventIdlingResource);
     }
 }

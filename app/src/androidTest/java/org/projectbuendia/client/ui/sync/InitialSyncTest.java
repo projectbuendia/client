@@ -18,10 +18,6 @@ import org.projectbuendia.client.events.sync.SyncCanceledEvent;
 
 import java.util.UUID;
 
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-
 /** Test case for behavior during and immediately after an initial sync. */
 public class InitialSyncTest extends SyncTestCase {
 
@@ -58,7 +54,7 @@ public class InitialSyncTest extends SyncTestCase {
     public void testSyncCancelButton() {
         // Cancel the sync.
         EventBusIdlingResource<SyncCanceledEvent> syncCanceledResource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         // There may be a slight delay before the cancel button appears.
         expectVisibleSoon(viewWithId(R.id.action_cancel));
         click(viewWithId(R.id.action_cancel));

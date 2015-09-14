@@ -29,12 +29,12 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -49,18 +49,17 @@ import de.greenrobot.event.EventBus;
 
 /** A dialog for jumping to a patient by ID. */
 public class GoToPatientDialogFragment extends DialogFragment {
-    public static GoToPatientDialogFragment newInstance() {
-        return new GoToPatientDialogFragment();
-    }
-
     @Inject AppModel mAppModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @InjectView(R.id.go_to_patient_id) EditText mPatientId;
     @InjectView(R.id.go_to_patient_result) TextView mPatientSearchResult;
-
     private LayoutInflater mInflater;
     String mPatientUuid;
     CrudEventBus mBus;
+
+    public static GoToPatientDialogFragment newInstance() {
+        return new GoToPatientDialogFragment();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,16 +69,6 @@ public class GoToPatientDialogFragment extends DialogFragment {
         mBus = mCrudEventBusProvider.get();
         mBus.register(this);
 
-    }
-
-    public void onSubmit() {
-        Utils.logUserAction("go_to_patient_submitted",
-                "patient_id", mPatientId.getText().toString(),
-                "patient_uuid", mPatientUuid);
-        if (mPatientUuid != null) {
-            EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
-            getDialog().dismiss();
-        }
     }
 
     @Override
@@ -94,58 +83,25 @@ public class GoToPatientDialogFragment extends DialogFragment {
             }
         });
         return new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.go_to_patient_title)
-                .setPositiveButton(R.string.go_to_patient_go, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        onSubmit();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .setView(fragment)
-                .create();
+            .setTitle(R.string.go_to_patient_title)
+            .setPositiveButton(R.string.go_to_patient_go, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    onSubmit();
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .setView(fragment)
+            .create();
     }
 
-    class IdWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {}
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {}
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            String id = mPatientId.getText().toString().trim();
-            if (id.isEmpty()) {
-                mPatientUuid = null;
-                mPatientSearchResult.setText("");
-            } else {
-                try (Cursor cursor = getActivity().getContentResolver().query(
-                        Patients.CONTENT_URI, null, "_id = ?", new String[] {id}, null)) {
-                    if (cursor.moveToNext()) {
-                        String uuid = Utils.getString(cursor, Patients.UUID, null);
-                        String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
-                        String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
-                        LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
-                        String gender = Utils.getString(cursor, Patients.GENDER, "");
-                        mPatientUuid = uuid;
-                        mPatientSearchResult.setText(givenName + " " + familyName +
-                                " (" + gender + ", " + Utils.birthdateToAge(birthdate) + ")");
-                    } else {
-                        String message = getResources().getString(R.string.go_to_patient_no_data);
-                        DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
-                        if (lastSyncTime != null) {
-                            message = getResources().getString(
-                                    R.string.go_to_patient_not_found_as_of_time,
-                                    new RelativeDateTimeFormatter().format(lastSyncTime));
-                        }
-                        mPatientUuid = null;
-                        mPatientSearchResult.setText(message);
-
-                        // Immediately check for this patient on the server.
-                        mAppModel.downloadSinglePatient(mBus, id);
-                    }
-                }
-            }
-            ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
-                    .setEnabled(mPatientUuid != null);
+    public void onSubmit() {
+        Utils.logUserAction("go_to_patient_submitted",
+            "patient_id", mPatientId.getText().toString(),
+            "patient_uuid", mPatientUuid);
+        if (mPatientUuid != null) {
+            EventBus.getDefault().post(new PatientChartRequestedEvent(mPatientUuid));
+            getDialog().dismiss();
         }
     }
 
@@ -155,7 +111,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
         if (id.equals(patient.id)) {  // server returned the patient we were looking for
             mPatientUuid = patient.uuid;
             mPatientSearchResult.setText(patient.givenName + " " + patient.familyName +
-                    " (" + patient.gender + ", " + Utils.birthdateToAge(patient.birthdate) + ")");
+                " (" + patient.gender + ", " + Utils.birthdateToAge(patient.birthdate) + ")");
 
             // Perform incremental observation sync to get the patient's admission date
             // and any other recent observations.
@@ -168,6 +124,54 @@ public class GoToPatientDialogFragment extends DialogFragment {
         if (id.equals(event.id)) {  // server returned empty results for the ID we sought
             mPatientUuid = null;
             mPatientSearchResult.setText(getResources().getString(R.string.go_to_patient_not_found));
+        }
+    }
+
+    class IdWatcher implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence c, int x, int y, int z) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence c, int x, int y, int z) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            String id = mPatientId.getText().toString().trim();
+            if (id.isEmpty()) {
+                mPatientUuid = null;
+                mPatientSearchResult.setText("");
+            } else {
+                try (Cursor cursor = getActivity().getContentResolver().query(
+                    Patients.CONTENT_URI, null, "_id = ?", new String[] {id}, null)) {
+                    if (cursor.moveToNext()) {
+                        String uuid = Utils.getString(cursor, Patients.UUID, null);
+                        String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");
+                        String familyName = Utils.getString(cursor, Patients.FAMILY_NAME, "");
+                        LocalDate birthdate = Utils.getLocalDate(cursor, Patients.BIRTHDATE);
+                        String gender = Utils.getString(cursor, Patients.GENDER, "");
+                        mPatientUuid = uuid;
+                        mPatientSearchResult.setText(givenName + " " + familyName +
+                            " (" + gender + ", " + Utils.birthdateToAge(birthdate) + ")");
+                    } else {
+                        String message = getResources().getString(R.string.go_to_patient_no_data);
+                        DateTime lastSyncTime = mAppModel.getLastFullSyncTime();
+                        if (lastSyncTime != null) {
+                            message = getResources().getString(
+                                R.string.go_to_patient_not_found_as_of_time,
+                                new RelativeDateTimeFormatter().format(lastSyncTime));
+                        }
+                        mPatientUuid = null;
+                        mPatientSearchResult.setText(message);
+
+                        // Immediately check for this patient on the server.
+                        mAppModel.downloadSinglePatient(mBus, id);
+                    }
+                }
+            }
+            ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE)
+                .setEnabled(mPatientUuid != null);
         }
     }
 }
