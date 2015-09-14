@@ -18,19 +18,30 @@ import java.util.Random;
 
 /** A class that generates aesthetically pleasing colors based on a color wheel. */
 public class Colorizer {
-
     /** A {@link Colorizer} that has 12 colors. */
-    public static final Colorizer C_12 = new Colorizer(0);
+    public static final Colorizer C_12;
     /** A {@link Colorizer} that has 24 colors. */
-    public static final Colorizer C_24 = new Colorizer(1);
+    public static final Colorizer C_24;
     /** A {@link Colorizer} that has 48 colors. */
-    public static final Colorizer C_48 = new Colorizer(2);
+    public static final Colorizer C_48;
     /** A {@link Colorizer} that has 96 colors. */
-    public static final Colorizer C_96 = new Colorizer(3);
-    private static final int[] sDefaultPalette = new int[] {
-        0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00,
-        0xFFFF7000, 0xFF7FFF00, 0xFF00FF7F, 0xFF007FFF, 0xFF7F00FF, 0xFFFF007F};
-    private static final int[][] sDefaultPaletteBytes = getPaletteBytes(sDefaultPalette);
+    public static final Colorizer C_96;
+    private static int[] sDefaultPalette;
+    private static int[][] sDefaultPaletteBytes;
+    
+    static {
+        // The above fields are initialized here because initialization must occur in a
+        // specific order; the palettes must be set before any constructors are safe to call.
+        sDefaultPalette = new int[] {
+            0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFF00FFFF, 0xFFFF00FF, 0xFFFFFF00,
+            0xFFFF7000, 0xFF7FFF00, 0xFF00FF7F, 0xFF007FFF, 0xFF7F00FF, 0xFFFF007F};
+        sDefaultPaletteBytes = getPaletteBytes(sDefaultPalette);
+        C_12 = new Colorizer(0);
+        C_24 = new Colorizer(1);
+        C_48 = new Colorizer(2);
+        C_96 = new Colorizer(3);
+    }
+    
     private final LruCache<Integer, Integer> mCache = new LruCache<>(128);
     private final int[][] mPaletteBytes;
     private final int mInterpolations;
