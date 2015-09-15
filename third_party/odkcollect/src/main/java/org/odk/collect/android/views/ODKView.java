@@ -47,7 +47,7 @@ import org.odk.collect.android.exception.ExternalParamsException;
 import org.odk.collect.android.exception.JavaRosaException;
 import org.odk.collect.android.external.ExternalAppsUtils;
 import org.odk.collect.android.logic.FormController;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.widgets.IBinaryWidget;
 import org.odk.collect.android.widgets.QuestionWidget;
 import org.odk.collect.android.widgets.WidgetFactory;
@@ -89,7 +89,7 @@ public class ODKView extends LinearLayout {
     }
 
     public ODKView(Context context, final FormEntryPrompt[] questionPrompts,
-                   FormEntryCaption[] groups, boolean advancingPage, PrepopulatableFields fields) {
+                   FormEntryCaption[] groups, boolean advancingPage, Preset fields) {
         super(context);
 
         mWidgets = new ArrayList<QuestionWidget>();

@@ -31,25 +31,24 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
         super(name, table, idColumn);
     }
 
-    @Override
-    public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values) {
+    @Override public Uri insert(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values) {
         values.put(mIdColumn, uri.getLastPathSegment());
         // Perform an upsert operation, not replacing any values of fields not being explicitly
         // updated.
         dbHelper.getWritableDatabase().updateWithOnConflict(
-                mTable.name,
-                values,
-                mIdColumn + "=?",
-                new String[] {uri.getLastPathSegment()},
-                SQLiteDatabase.CONFLICT_IGNORE
+            mTable.name,
+            values,
+            mIdColumn + "=?",
+            new String[] {uri.getLastPathSegment()},
+            SQLiteDatabase.CONFLICT_IGNORE
         );
         dbHelper.getWritableDatabase().insertWithOnConflict(
-                mTable.name,
-                null,
-                values,
-                SQLiteDatabase.CONFLICT_IGNORE
+            mTable.name,
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_IGNORE
         );
         contentResolver.notifyChange(uri, null, false);
         return getPrefixUriBuilder(uri).appendPath(uri.getLastPathSegment()).build();
@@ -57,7 +56,7 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
 
     private static Uri.Builder getPrefixUriBuilder(Uri uri) {
         Uri.Builder prefixBuilder = uri.buildUpon()
-                .path("");
+            .path("");
         List<String> pathSegments = uri.getPathSegments();
         for (int i = 0; i < pathSegments.size() - 1; i++) {
             prefixBuilder.appendPath(pathSegments.get(i));

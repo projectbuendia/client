@@ -37,7 +37,8 @@
                 android:layout_span="2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords|textPersonName"
+                android:inputType="textCapSentences|textNoSuggestions"
+                android:maxLength="40"
                 android:ems="15" />
         </TableRow>
 
@@ -56,7 +57,8 @@
                 android:layout_span="2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords|textPersonName"
+                android:inputType="textNoSuggestions"
+                android:maxLength="40"
                 android:ems="15" />
         </TableRow>
 
@@ -125,7 +127,7 @@
                 android:layout_span="2"
                 android:layout_width="400dip"
                 android:layout_gravity="top|start"
-                android:text="@string/order_duration_indefinitely"
+                android:text="@string/order_duration_unspecified"
                 android:layout_marginStart="12sp" />
         </TableRow>
     </TableLayout>

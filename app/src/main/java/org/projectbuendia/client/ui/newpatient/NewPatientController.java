@@ -18,16 +18,16 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.AppPatientDelta;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
-import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.events.data.PatientAddFailedEvent;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.PatientDelta;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
@@ -37,13 +37,14 @@ final class NewPatientController {
 
     private static final Logger LOG = Logger.create();
 
-    static final int AGE_UNKNOWN = 0;
-    static final int AGE_YEARS = 1;
-    static final int AGE_MONTHS = 2;
-
     static final int SEX_UNKNOWN = 0;
     static final int SEX_MALE = 1;
     static final int SEX_FEMALE = 2;
+    private final Ui mUi;
+    private final CrudEventBus mCrudEventBus;
+    private final AppModel mModel;
+    private final EventSubscriber mEventBusSubscriber;
+    private LocationTree mLocationTree;
 
     public interface Ui {
 
@@ -51,14 +52,14 @@ final class NewPatientController {
         static final int FIELD_ID = 1;
         static final int FIELD_GIVEN_NAME = 2;
         static final int FIELD_FAMILY_NAME = 3;
-        static final int FIELD_AGE = 4;
-        static final int FIELD_AGE_UNITS = 5;
+        static final int FIELD_AGE_YEARS = 4;
+        static final int FIELD_AGE_MONTHS = 5;
         static final int FIELD_SEX = 6;
         static final int FIELD_LOCATION = 7;
         static final int FIELD_ADMISSION_DATE = 8;
         static final int FIELD_SYMPTOMS_ONSET_DATE = 9;
 
-        void setLocationTree(AppLocationTree locationTree);
+        void setLocationTree(LocationTree locationTree);
 
         /** Adds a validation error message for a specific field. */
         void showValidationError(int field, int messageResource, String... messageArgs);
@@ -72,17 +73,12 @@ final class NewPatientController {
         /** Invoked when the server RPC to create a patient fails. */
         void showErrorMessage(String errorString);
 
-        /** Invoked when the server RPC to create a patient succeeds. */
-        void quitActivity();
+        /**
+         * Invoked when the server RPC to create a patient succeeds.
+         * @param patientUuid
+         */
+        void finishAndGoToPatientChart(String patientUuid);
     }
-
-    private final Ui mUi;
-    private final CrudEventBus mCrudEventBus;
-    private final AppModel mModel;
-
-    private final EventSubscriber mEventBusSubscriber;
-
-    private AppLocationTree mLocationTree;
 
     public NewPatientController(Ui ui, CrudEventBus crudEventBus, AppModel model) {
         mUi = ui;
@@ -109,39 +105,35 @@ final class NewPatientController {
     }
 
     public boolean createPatient(
-            String id, String givenName, String familyName, String age, int ageUnits, int sex,
-            LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
+        String id, String givenName, String familyName, String ageYears, String ageMonths,
+        int sex, LocalDate admissionDate, LocalDate symptomsOnsetDate, String locationUuid) {
         // Validate the input.
         mUi.clearValidationErrors();
         boolean hasValidationErrors = false;
-        if (id == null || id.equals("")) {
+        id = id.trim();
+        givenName = givenName.trim();
+        familyName = familyName.trim();
+        ageYears = ageYears.trim();
+        ageMonths = ageMonths.trim();
+        if (id.isEmpty()) {
             mUi.showValidationError(Ui.FIELD_ID, R.string.patient_validation_missing_id);
             hasValidationErrors = true;
         }
-        if (age == null || age.equals("")) {
-            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_missing_age);
+        if (ageYears.isEmpty() && ageMonths.isEmpty()) {
+            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_validation_missing_age);
+            hasValidationErrors = true;
+        }
+        int years = 0, months = 0;
+        try {
+            years = ageYears.isEmpty() ? 0 : Integer.parseInt(ageYears);
+            months = ageMonths.isEmpty() ? 0 : Integer.parseInt(ageMonths);
+        } catch (Throwable e) {  // shouldn't happen (text field only allows digits)
+            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_validation_missing_age);
             hasValidationErrors = true;
         }
         if (admissionDate == null) {
             mUi.showValidationError(
-                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
-            hasValidationErrors = true;
-        }
-        int ageInt = 0;
-        try {
-            ageInt = Integer.parseInt(age);
-        } catch (NumberFormatException e) {
-            mUi.showValidationError(
-                    Ui.FIELD_AGE, R.string.patient_validation_whole_number_age_required);
-            hasValidationErrors = true;
-        }
-        if (ageInt < 0) {
-            mUi.showValidationError(Ui.FIELD_AGE, R.string.patient_validation_negative_age);
-            hasValidationErrors = true;
-        }
-        if (ageUnits != AGE_YEARS && ageUnits != AGE_MONTHS) {
-            mUi.showValidationError(
-                    Ui.FIELD_AGE_UNITS, R.string.patient_validation_select_years_or_months);
+                Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_missing_admission_date);
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
@@ -150,12 +142,12 @@ final class NewPatientController {
         }
         if (admissionDate != null && admissionDate.isAfter(LocalDate.now())) {
             mUi.showValidationError(
-                    Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_future_admission_date);
+                Ui.FIELD_ADMISSION_DATE, R.string.patient_validation_future_admission_date);
             hasValidationErrors = true;
         }
         if (symptomsOnsetDate != null && symptomsOnsetDate.isAfter(LocalDate.now())) {
             mUi.showValidationError(
-                    Ui.FIELD_SYMPTOMS_ONSET_DATE, R.string.patient_validation_future_onset_date);
+                Ui.FIELD_SYMPTOMS_ONSET_DATE, R.string.patient_validation_future_onset_date);
             hasValidationErrors = true;
         }
 
@@ -164,32 +156,20 @@ final class NewPatientController {
             return false;
         }
 
-        AppPatientDelta patientDelta = new AppPatientDelta();
-        patientDelta.id = Optional.of(id);
-        patientDelta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
-        patientDelta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
-        patientDelta.birthdate = Optional.of(getBirthdateFromAge(ageInt, ageUnits));
-        patientDelta.gender = Optional.of(sex);
-        patientDelta.assignedLocationUuid =
-                Optional.of(Utils.valueOrDefault(locationUuid, Zone.DEFAULT_LOCATION_UUID));
-        patientDelta.admissionDate = Optional.of(admissionDate);
-        patientDelta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
+        PatientDelta delta = new PatientDelta();
+        delta.id = Optional.of(id);
+        delta.givenName = Optional.of(Utils.nameOrUnknown(givenName));
+        delta.familyName = Optional.of(Utils.nameOrUnknown(familyName));
+        delta.birthdate = Optional.of(
+            DateTime.now().minusYears(years).minusMonths(months));
+        delta.gender = Optional.of(sex);
+        delta.assignedLocationUuid = Optional.of(
+            Utils.valueOrDefault(locationUuid, Zones.DEFAULT_LOCATION_UUID));
+        delta.admissionDate = Optional.of(admissionDate);
+        delta.firstSymptomDate = Optional.fromNullable(symptomsOnsetDate);
 
-        mModel.addPatient(mCrudEventBus, patientDelta);
-
+        mModel.addPatient(mCrudEventBus, delta);
         return true;
-    }
-
-    private DateTime getBirthdateFromAge(int ageInt, int ageUnits) {
-        DateTime now = DateTime.now();
-        switch (ageUnits) {
-            case AGE_YEARS:
-                return now.minusYears(ageInt);
-            case AGE_MONTHS:
-                return now.minusMonths(ageInt);
-            default:
-                return null;
-        }
     }
 
     @SuppressWarnings("unused") // Called by reflection from EventBus.
@@ -203,9 +183,9 @@ final class NewPatientController {
             mLocationTree = event.tree;
         }
 
-        public void onEventMainThread(ItemCreatedEvent<AppPatient> event) {
+        public void onEventMainThread(ItemCreatedEvent<Patient> event) {
             Utils.logEvent("add_patient_succeeded");
-            mUi.quitActivity();
+            mUi.finishAndGoToPatientChart(event.item.uuid);
         }
 
         public void onEventMainThread(PatientAddFailedEvent event) {
@@ -216,12 +196,12 @@ final class NewPatientController {
                 case PatientAddFailedEvent.REASON_NETWORK:
                     // For network errors, include the VolleyError message, if available.
                     if (event.exception != null
-                            && event.exception.getCause() != null
-                            && event.exception.getCause() instanceof VolleyError
-                            && event.exception.getCause().getMessage() != null) {
+                        && event.exception.getCause() != null
+                        && event.exception.getCause() instanceof VolleyError
+                        && event.exception.getCause().getMessage() != null) {
                         mUi.showErrorMessage(App.getInstance().getString(
-                                R.string.patient_creation_network_error_with_reason,
-                                event.exception.getCause().getMessage()));
+                            R.string.patient_creation_network_error_with_reason,
+                            event.exception.getCause().getMessage()));
                     } else {
                         mUi.showErrorMessage(R.string.patient_creation_network_error);
                     }

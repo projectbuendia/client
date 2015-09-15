@@ -71,7 +71,7 @@
         android:layout_marginTop="0dp"
         android:orientation="horizontal">
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_admission_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
             app:attributeName="Since admission"
             app:attributeValue="–"/>
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_symptoms_onset_days"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
             app:attributeName="Since symptom onset"
             app:attributeValue="–"/>
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
             app:attributeName="Location"
             app:attributeValue="–"/>
 
-        <org.projectbuendia.client.widget.PatientAttributeView
+        <org.projectbuendia.client.widgets.PatientAttributeView
             android:id="@+id/attribute_pcr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -134,113 +134,9 @@
         </RelativeLayout>
     </FrameLayout>
 
-    <TableLayout
-        android:id="@+id/patient_chart_vitals"
-        android:layout_below="@+id/patient_chart_last_update_section"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:stretchColumns="*">
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="160dp">
-<!--
-            <include
-                layout="@layout/view_vital_general_condition"
-                android:id="@+id/patient_chart_general_condition_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
--->
-            <include
-                layout="@layout/view_vital_weight"
-                android:id="@+id/patient_chart_weight_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-
-            <include
-                layout="@layout/view_vital_responsiveness"
-                android:id="@+id/patient_chart_responsiveness_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-
-            <include
-                layout="@layout/view_vital_mobility"
-                android:id="@+id/patient_chart_mobility_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-
-            <include
-                layout="@layout/view_vital_pain"
-                android:id="@+id/patient_chart_pain_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-            <!--
-            <include
-                layout="@layout/view_vital_pcr"
-                android:id="@+id/patient_chart_pcr_parent"
-                android:layout_width="0dp"
-                android:layout_height="144dp"
-                android:layout_margin="4dp" />
-            -->
-        </TableRow>
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <org.projectbuendia.client.widget.VitalView
-                android:id="@+id/vital_pulse"
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_margin="4dp"
-                android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_unknown"
-                app:vitalName="Pulse"
-                app:vitalValue="–"/>
-
-            <org.projectbuendia.client.widget.VitalView
-                android:id="@+id/vital_respiration"
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_margin="4dp"
-                android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_unknown"
-                app:vitalName="Respiration"
-                app:vitalValue="–"/>
-
-            <org.projectbuendia.client.widget.VitalView
-                android:id="@+id/vital_diet"
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_margin="4dp"
-                android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_unknown"
-                app:vitalName="Tolerating Diet"
-                app:vitalValue="–"/>
-
-            <org.projectbuendia.client.widget.VitalView
-                android:id="@+id/vital_food_drink"
-                android:layout_width="0dp"
-                android:layout_height="104dp"
-                android:layout_margin="4dp"
-                android:background="@color/vital_unknown"
-                app:textColor="@color/vital_fg_unknown"
-                app:vitalName="Hydration"
-                app:vitalValue="–"/>
-
-        </TableRow>
-
-    </TableLayout>
-
     <WebView
         android:id="@+id/chart_webview"
-        android:layout_below="@+id/patient_chart_vitals"
+        android:layout_below="@+id/patient_chart_last_update_section"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"/>
 

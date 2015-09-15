@@ -15,6 +15,9 @@ import android.support.annotation.Nullable;
 
 /** An event bus event indicating that fetching an Xform failed. */
 public class FetchXformFailedEvent {
+    public final Reason reason;
+    @Nullable public final Exception exception;
+
     public enum Reason {
         UNKNOWN,
         NO_FORMS_FOUND,
@@ -23,9 +26,6 @@ public class FetchXformFailedEvent {
         SERVER_FAILED_TO_FETCH,
         SERVER_UNKNOWN
     }
-
-    public final Reason reason;
-    @Nullable public final Exception exception;
 
     public FetchXformFailedEvent(Reason reason, @Nullable Exception exception) {
         this.reason = reason;

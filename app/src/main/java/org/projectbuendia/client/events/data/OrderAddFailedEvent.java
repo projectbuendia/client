@@ -15,19 +15,19 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
 
 /**
  * An event bus event indicating that adding an order failed.
- *
+ * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
 public class OrderAddFailedEvent {
+    public final Reason reason;
+    public final Exception exception;
+
     public enum Reason {
         UNKNOWN,
         UNKNOWN_SERVER_ERROR,
         CLIENT_ERROR,
         INTERRUPTED
     }
-
-    public final Reason reason;
-    public final Exception exception;
 
     public OrderAddFailedEvent(Reason reason, Exception exception) {
         this.reason = reason;

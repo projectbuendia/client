@@ -11,21 +11,22 @@
 
 package org.projectbuendia.client.ui.login;
 
-import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.model.User;
-import org.projectbuendia.client.utils.Colorizer;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.utils.Colorizer;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /** {@link ArrayAdapter} for a grid of users. */
-final class UserListAdapter extends ArrayAdapter<User> {
+final class UserListAdapter extends ArrayAdapter<JsonUser> {
 
     private final Colorizer mColorizer;
 
@@ -34,19 +35,18 @@ final class UserListAdapter extends ArrayAdapter<User> {
         mColorizer = colorizer;
     }
 
-    @Override
-    public View getView(int position, View view, ViewGroup parent) {
+    @Override public View getView(int position, View view, ViewGroup parent) {
         ItemViewHolder holder;
         if (view != null) {
             holder = (ItemViewHolder) view.getTag();
         } else {
             view = LayoutInflater.from(getContext())
-                    .inflate(R.layout.grid_item_user, parent, false);
+                .inflate(R.layout.grid_item_user, parent, false);
             holder = new ItemViewHolder(view);
             view.setTag(holder);
         }
 
-        User user = getItem(position);
+        JsonUser user = getItem(position);
         holder.initials.setBackgroundColor(mColorizer.getColorArgb(user.id));
         holder.initials.setText(user.getInitials());
         holder.fullName.setText(user.fullName);

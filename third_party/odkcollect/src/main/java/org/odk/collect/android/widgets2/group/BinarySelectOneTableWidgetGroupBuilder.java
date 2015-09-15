@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import org.javarosa.core.model.Constants;
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.R;
-import org.odk.collect.android.model.PrepopulatableFields;
+import org.odk.collect.android.model.Preset;
 import org.odk.collect.android.widgets2.common.Appearance;
 import org.odk.collect.android.widgets2.selectone.BinarySelectOneWidget;
 
@@ -38,7 +38,7 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
             Appearance appearance,
             boolean forceReadOnly,
             int id,
-            PrepopulatableFields fields) {
+            Preset preset) {
         if (prompt.getControlType() != Constants.CONTROL_SELECT_ONE) {
             Log.w(
                     TAG,
@@ -62,10 +62,10 @@ public class BinarySelectOneTableWidgetGroupBuilder implements
         // TODO: Remove this workaround.
         String questionText = prompt.getQuestionText().toLowerCase();
         if (questionText.equals("pregnant")) {
-            widget.forceSetAnswer(fields.pregnant);
+            widget.forceSetAnswer(preset.pregnant);
         }
         if (questionText.equals("iv access present")) {
-            widget.forceSetAnswer(fields.ivFitted);
+            widget.forceSetAnswer(preset.ivFitted);
         }
 
         widget.setId(id);

@@ -27,7 +27,7 @@ import android.view.MenuItem;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppModel;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.ui.login.LoginActivity;
 
 import java.util.List;
@@ -40,7 +40,7 @@ import javax.inject.Inject;
  * handset devices, settings are presented as a single list. On tablets,
  * settings are split by category, with category headers shown to the left of
  * the list of settings.
- *
+ * <p/>
  * <p>See <a href="http://developer.android.com/design/patterns/settings.html">
  * Android Design: Settings</a> for design guidelines and the <a
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
@@ -52,35 +52,68 @@ public class SettingsActivity extends PreferenceActivity {
      * arranged in a single list without a left navigation panel.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    static final String[] prefKeys = {
+        "server",
+        "openmrs_user",
+        "openmrs_password",
+        "openmrs_root_url",
+        "package_server_root_url",
+        "apk_update_interval_secs",
+        "keep_form_instances_locally",
+        "xform_update_client_cache",
+        "incremental_observation_update",
+        "require_wifi"
+    };
+    static boolean updatingPrefValues = false;
+    /** A listener that performs updates when any preference's value changes. */
+    static final Preference.OnPreferenceChangeListener sPrefListener =
+        new Preference.OnPreferenceChangeListener() {
+            @Override public boolean onPreferenceChange(Preference pref, Object value) {
+                updatePrefSummary(pref, value);
+                if (updatingPrefValues)
+                    return true; // prevent endless recursion
+
+                SharedPreferences prefs =
+                    PreferenceManager.getDefaultSharedPreferences(pref.getContext());
+                String server = prefs.getString("server", "");
+                String str = "" + value;
+                try {
+                    updatingPrefValues = true;
+                    switch (pref.getKey()) {
+                        case "server":
+                            if (!str.equals("")) {
+                                prefs.edit()
+                                    .putString("openmrs_root_url",
+                                        "http://" + str + ":9000/openmrs")
+                                    .putString("package_server_root_url",
+                                        "http://" + str + ":9001")
+                                    .apply();
+                            }
+                            break;
+                        case "openmrs_root_url":
+                            if (!str.equals("http://" + server + ":9000/openmrs")) {
+                                prefs.edit().putString("server", "").apply();
+                            }
+                            break;
+                        case "package_server_root_url":
+                            if (!str.equals("http://" + server + ":9001")) {
+                                prefs.edit().putString("server", "").apply();
+                            }
+                            break;
+                    }
+                } finally {
+                    updatingPrefValues = false;
+                }
+                return true;
+            }
+        };
     @Inject AppModel mAppModel;
 
     public static void start(Context caller) {
         caller.startActivity(new Intent(caller, SettingsActivity.class));
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        App.getInstance().inject(this);
-        setupActionBar();
-    }
-
-    @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return true;
-    }
-
-    /** Set up the {@link android.app.ActionBar}, if the API is available. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
@@ -98,143 +131,44 @@ public class SettingsActivity extends PreferenceActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        setupSimplePreferencesScreen();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (!mAppModel.isFullModelAvailable()) {
-            // The database was cleared; go back to the login activity.
-            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-        }
-    }
-
-    /**
-     * Shows the simplified settings UI if the device configuration dictates
-     * that a simplified, single-pane UI should be shown.
-     */
-    private void setupSimplePreferencesScreen() {
-        if (!isSimplePreferences(this)) {
-            return;
-        }
-
-        // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
-        addPreferencesFromResource(R.xml.pref_general);
-        addPreferencesFromResource(R.xml.pref_advanced);
-        addPreferencesFromResource(R.xml.pref_developer);
-        initPrefs(this);
-    }
-
-    @Override
-    public boolean onIsMultiPane() {
+    @Override public boolean onIsMultiPane() {
         return isXLargeTablet(this) && !isSimplePreferences(this);
     }
 
-    /** Checks if the screen is extra-large (e.g. a 10" tablet is extra-large). */
-    private static boolean isXLargeTablet(Context context) {
-        return (context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-    }
-
-    /**
-     * Determines whether the simplified settings UI should be shown. This is
-     * true if this is forced via {@link #ALWAYS_SIMPLE_PREFS}, or the device
-     * doesn't have newer APIs like {@link PreferenceFragment}, or the device
-     * doesn't have an extra-large screen. In these cases, a single-pane
-     * "simplified" settings UI should be shown.
-     */
-    private static boolean isSimplePreferences(Context context) {
-        return ALWAYS_SIMPLE_PREFS
-                || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
-                || !isXLargeTablet(context);
-    }
-
-    @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @Override @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
         if (!isSimplePreferences(this)) {
             loadHeadersFromResource(R.xml.pref_headers, target);
         }
     }
 
-    static final String[] prefKeys = {
-            "server",
-            "openmrs_user",
-            "openmrs_password",
-            "openmrs_root_url",
-            "package_server_root_url",
-            "apk_update_interval_secs",
-            "keep_form_instances_locally",
-            "xform_update_client_cache",
-            "incremental_observation_update",
-            "require_wifi"
-    };
-
-    static boolean updatingPrefValues = false;
-
-    static void updatePrefSummary(Preference pref, Object value) {
-        String str = value.toString();
-        switch (pref.getKey()) {
-            case "server":
-            case "openmrs_user":
-            case "openmrs_root_url":
-            case "package_server_root_url":
-            case "apk_update_interval_secs":
-                pref.setSummary(str);
+    /** When the UI has two panes, this fragment shows just the general settings. */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class GeneralPreferenceFragment extends PreferenceFragment {
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_general);
+            initPrefs(this);
         }
     }
 
-    /** A listener that performs updates when any preference's value changes. */
-    static final Preference.OnPreferenceChangeListener sPrefListener =
-            new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference pref, Object value) {
-                    updatePrefSummary(pref, value);
-                    if (updatingPrefValues) return true; // prevent endless recursion
+    /** When the UI has two panes, this fragment shows just the advanced settings. */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class AdvancedPreferenceFragment extends PreferenceFragment {
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_advanced);
+            initPrefs(this);
+        }
+    }
 
-                    SharedPreferences prefs =
-                            PreferenceManager.getDefaultSharedPreferences(pref.getContext());
-                    String server = prefs.getString("server", "");
-                    String str = "" + value;
-                    try {
-                        updatingPrefValues = true;
-                        switch (pref.getKey()) {
-                            case "server":
-                                if (!str.equals("")) {
-                                    prefs.edit().putString("openmrs_root_url",
-                                            "http://" + value + ":9000/openmrs")
-                                            .putString("package_server_root_url",
-                                                    "http://" + value + ":9001/")
-                                            .apply();
-                                }
-                                break;
-                            case "openmrs_root_url":
-                                if (!str.equals("http://" + server + ":9000/openmrs")) {
-                                    prefs.edit().putString("server", "").apply();
-                                }
-                                break;
-                            case "package_server_root_url":
-                                if (!str.equals("http://" + server + ":9001/")) {
-                                    prefs.edit().putString("server", "").apply();
-                                }
-                                break;
-                        }
-                    } finally {
-                        updatingPrefValues = false;
-                    }
-                    return true;
-                }
-            };
-
-    /** Sets up all the preferences in an activity. */
-    private static void initPrefs(PreferenceActivity activity) {
-        for (String key : prefKeys) {
-            initPref(activity.findPreference(key));
+    /** When the UI has two panes, this fragment shows just the developer settings. */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class DeveloperPreferenceFragment extends PreferenceFragment {
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_developer);
+            initPrefs(this);
         }
     }
 
@@ -254,35 +188,88 @@ public class SettingsActivity extends PreferenceActivity {
         }
     }
 
-    /** When the UI has two panes, this fragment shows just the general settings. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
-            initPrefs(this);
+    static void updatePrefSummary(Preference pref, Object value) {
+        String str = value.toString();
+        switch (pref.getKey()) {
+            case "server":
+            case "openmrs_user":
+            case "openmrs_root_url":
+            case "package_server_root_url":
+            case "apk_update_interval_secs":
+                pref.setSummary(str);
         }
     }
 
-    /** When the UI has two panes, this fragment shows just the advanced settings. */
+    @Override protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        App.getInstance().inject(this);
+        setupActionBar();
+    }
+
+    /** Set up the {@link android.app.ActionBar}, if the API is available. */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class AdvancedPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_advanced);
-            initPrefs(this);
+    private void setupActionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Show the Up button in the action bar.
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
-    /** When the UI has two panes, this fragment shows just the developer settings. */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class DeveloperPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_developer);
-            initPrefs(this);
+
+    @Override protected boolean isValidFragment(String fragmentName) {
+        return true;
+    }
+
+    @Override protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        setupSimplePreferencesScreen();
+    }
+
+    /**
+     * Shows the simplified settings UI if the device configuration dictates
+     * that a simplified, single-pane UI should be shown.
+     */
+    private void setupSimplePreferencesScreen() {
+        if (!isSimplePreferences(this)) return;
+
+        // The simplified UI uses the old PreferenceActivity API instead of PreferenceFragment.
+        addPreferencesFromResource(R.xml.pref_general);
+        addPreferencesFromResource(R.xml.pref_advanced);
+        addPreferencesFromResource(R.xml.pref_developer);
+        initPrefs(this);
+    }
+
+    /**
+     * Determines whether the simplified settings UI should be shown. This is
+     * true if this is forced via {@link #ALWAYS_SIMPLE_PREFS}, or the device
+     * doesn't have newer APIs like {@link PreferenceFragment}, or the device
+     * doesn't have an extra-large screen. In these cases, a single-pane
+     * "simplified" settings UI should be shown.
+     */
+    private static boolean isSimplePreferences(Context context) {
+        return ALWAYS_SIMPLE_PREFS
+            || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
+            || !isXLargeTablet(context);
+    }
+
+    /** Sets up all the preferences in an activity. */
+    private static void initPrefs(PreferenceActivity activity) {
+        for (String key : prefKeys) {
+            initPref(activity.findPreference(key));
+        }
+    }
+
+    /** Checks if the screen is extra-large (e.g. a 10" tablet is extra-large). */
+    private static boolean isXLargeTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+            & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+        if (!mAppModel.isFullModelAvailable()) {
+            // The database was cleared; go back to the login activity.
+            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         }
     }
 }

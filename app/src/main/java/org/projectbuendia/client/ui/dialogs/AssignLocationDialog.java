@@ -22,13 +22,13 @@ import android.widget.GridView;
 import com.google.common.base.Optional;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Zones;
 import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.lists.LocationListAdapter;
 import org.projectbuendia.client.utils.Logger;
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A dialog that allows users to assign or change a patient's location. */
 public final class AssignLocationDialog
-        implements DialogInterface.OnDismissListener, AdapterView.OnItemClickListener {
+    implements DialogInterface.OnDismissListener, AdapterView.OnItemClickListener {
 
     private static final Logger LOG = Logger.create();
 
@@ -59,7 +59,7 @@ public final class AssignLocationDialog
     private final Optional<String> mCurrentLocationUuid;
     private final LocationSelectedCallback mLocationSelectedCallback;
     private ProgressDialog mProgressDialog;
-    private AppLocationTree mLocationTree;
+    private LocationTree mLocationTree;
     private boolean mRegistered;
 
     // TODO: Consider making this an event bus event rather than a callback so that we don't
@@ -67,33 +67,32 @@ public final class AssignLocationDialog
     public interface LocationSelectedCallback {
         /**
          * Called when then user selects a location that is not the currently selected one.
-         *
          * @return whether to immediately dismiss the dialog. If {@code false}, the dialog will
-         *         disable further button presses and display a progress spinner until
-         *         {@link AssignLocationDialog#dismiss} is called.
+         * disable further button presses and display a progress spinner until
+         * {@link AssignLocationDialog#dismiss} is called.
          */
         boolean onLocationSelected(String locationUuid);
     }
 
     /**
      * Instantiates an {@link AssignLocationDialog}.
-     * @param context the Activity or Application context
-     * @param appModel the {@link AppModel} from which locations will be fetched
-     * @param locale the current locale
-     * @param onDismiss a {@link Runnable} run when the dialog is dismissed
-     * @param eventBus a {@link CrudEventBus} where location modification events will be posted
-     * @param currentLocationUuid an optional UUID for the user's current location, which will be
-     *                            highlighted if specified
+     * @param context                  the Activity or Application context
+     * @param appModel                 the {@link AppModel} from which locations will be fetched
+     * @param locale                   the current locale
+     * @param onDismiss                a {@link Runnable} run when the dialog is dismissed
+     * @param eventBus                 a {@link CrudEventBus} where location modification events will be posted
+     * @param currentLocationUuid      an optional UUID for the user's current location, which will be
+     *                                 highlighted if specified
      * @param locationSelectedCallback a {@link Runnable} run when a location is selected
      */
     public AssignLocationDialog(
-            Context context,
-            AppModel appModel,
-            String locale,
-            Runnable onDismiss,
-            CrudEventBus eventBus,
-            Optional<String> currentLocationUuid,
-            LocationSelectedCallback locationSelectedCallback) {
+        Context context,
+        AppModel appModel,
+        String locale,
+        Runnable onDismiss,
+        CrudEventBus eventBus,
+        Optional<String> currentLocationUuid,
+        LocationSelectedCallback locationSelectedCallback) {
         mContext = checkNotNull(context);
         mAppModel = checkNotNull(appModel);
         mLocale = checkNotNull(locale);
@@ -119,11 +118,17 @@ public final class AssignLocationDialog
         startListeningForLocations();
 
         mDialog = new AlertDialog.Builder(mContext)
-                .setTitle(R.string.action_assign_location)
-                .setView(contents)
-                .setOnDismissListener(this)
-                .create();
+            .setTitle(R.string.action_assign_location)
+            .setView(contents)
+            .setOnDismissListener(this)
+            .create();
         mDialog.show();
+    }
+
+    private void startListeningForLocations() {
+        mRegistered = true;
+        mEventBus.register(mEventBusSubscriber);
+        mAppModel.fetchLocationTree(mEventBus, mLocale);
     }
 
     /**
@@ -155,40 +160,21 @@ public final class AssignLocationDialog
         mProgressDialog.dismiss();
     }
 
-    private void startListeningForLocations() {
-        mRegistered = true;
-        mEventBus.register(mEventBusSubscriber);
-        mAppModel.fetchLocationTree(mEventBus, mLocale);
-    }
-
-    private void setTents(AppLocationTree locationTree) {
-        if (mGridView != null) {
-            List<AppLocation> locations = new ArrayList<>(
-                    locationTree.getDescendantsAtDepth(AppLocationTree.ABSOLUTE_DEPTH_TENT));
-            AppLocation triageZone = locationTree.findByUuid(Zone.TRIAGE_ZONE_UUID);
-            locations.add(0, triageZone);
-            AppLocation dischargedZone = locationTree.findByUuid(Zone.DISCHARGED_ZONE_UUID);
-            locations.add(dischargedZone);
-            mAdapter = new LocationListAdapter(
-                    mContext, locations, locationTree, mCurrentLocationUuid);
-            mGridView.setAdapter(mAdapter);
-            mGridView.setOnItemClickListener(this);
-            mGridView.setSelection(1);
-        }
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
         String locationUuid = mAdapter.getItem(position).uuid;
         mAdapter.setSelectedLocationUuid(Optional.fromNullable(locationUuid));
         mProgressDialog = ProgressDialog.show(mContext,
-                mContext.getResources().getString(R.string.title_updating_patient),
-                mContext.getResources().getString(R.string.please_wait), true);
+            mContext.getResources().getString(R.string.title_updating_patient),
+            mContext.getResources().getString(R.string.please_wait), true);
         if (isCurrentTent(locationUuid)
-                || mLocationSelectedCallback.onLocationSelected(locationUuid)) {
+            || mLocationSelectedCallback.onLocationSelected(locationUuid)) {
             dismiss();
         }
+    }
+
+    private boolean isCurrentTent(String newTentUuid) {
+        return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());
     }
 
     /** Dismisses the dialog and releases all dialog resources. */
@@ -202,23 +188,34 @@ public final class AssignLocationDialog
 
     // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
-    private boolean isCurrentTent(String newTentUuid) {
-        return mCurrentLocationUuid.equals(mAdapter.getSelectedLocationUuid());
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
+    @Override public void onDismiss(DialogInterface dialog) {
         if (mRegistered) {
             mEventBus.unregister(mEventBusSubscriber);
         }
         mOnDismiss.run();
     }
 
+    private void setTents(LocationTree locationTree) {
+        if (mGridView != null) {
+            List<Location> locations = new ArrayList<>(
+                locationTree.getDescendantsAtDepth(LocationTree.ABSOLUTE_DEPTH_TENT));
+            Location triageZone = locationTree.findByUuid(Zones.TRIAGE_ZONE_UUID);
+            locations.add(0, triageZone);
+            Location dischargedZone = locationTree.findByUuid(Zones.DISCHARGED_ZONE_UUID);
+            locations.add(dischargedZone);
+            mAdapter = new LocationListAdapter(
+                mContext, locations, locationTree, mCurrentLocationUuid);
+            mGridView.setAdapter(mAdapter);
+            mGridView.setOnItemClickListener(this);
+            mGridView.setSelection(1);
+        }
+    }
+
     private final class EventBusSubscriber {
 
         public void onEventMainThread(AppLocationTreeFetchedEvent event) {
             if (event.tree.getRoot() == null) {
-                LOG.d("AppLocationTree has a null root, suggesting something went wrong.");
+                LOG.d("LocationTree has a null root, suggesting something went wrong.");
                 return;
             }
 

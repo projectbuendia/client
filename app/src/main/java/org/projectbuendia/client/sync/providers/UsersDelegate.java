@@ -26,39 +26,26 @@ class UsersDelegate implements ProviderDelegate<Database> {
     public static final String NAME = "users";
 
     public static final String TYPE =
-            ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + NAME;
+        ContentResolver.CURSOR_DIR_BASE_TYPE + TYPE_PACKAGE_PREFIX + NAME;
 
-    @Override
-    public String getType() {
+    @Override public String getType() {
         return TYPE;
     }
 
-    @Override
-    public Cursor query(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    @Override public Cursor query(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = new QueryBuilder(Table.USERS)
-                .where(selection, selectionArgs)
-                .orderBy(sortOrder)
-                .select(dbHelper.getReadableDatabase(), projection);
+            .where(selection, selectionArgs)
+            .orderBy(sortOrder)
+            .select(dbHelper.getReadableDatabase(), projection);
         cursor.setNotificationUri(contentResolver, uri);
         return cursor;
     }
 
-    @Override
-    public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values) {
-        long id = dbHelper.getWritableDatabase()
-                .replaceOrThrow(Table.USERS.name, null, values);
-        contentResolver.notifyChange(uri, null, false);
-        return uri.buildUpon().appendPath(Long.toString(id)).build();
-    }
-
-    @Override
-    public int bulkInsert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues[] values) {
+    @Override public int bulkInsert(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues[] values) {
         // TODO: optimise this.
         for (ContentValues value : values) {
             insert(dbHelper, contentResolver, uri, value);
@@ -66,24 +53,31 @@ class UsersDelegate implements ProviderDelegate<Database> {
         return values.length;
     }
 
-    @Override
-    public int delete(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            String selection, String[] selectionArgs) {
+    @Override public Uri insert(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values) {
+        long id = dbHelper.getWritableDatabase()
+            .replaceOrThrow(Table.USERS.name, null, values);
+        contentResolver.notifyChange(uri, null, false);
+        return uri.buildUpon().appendPath(Long.toString(id)).build();
+    }
+
+    @Override public int delete(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        String selection, String[] selectionArgs) {
         int count = new QueryBuilder(Table.USERS)
-                .where(selection, selectionArgs)
-                .delete(dbHelper.getWritableDatabase());
+            .where(selection, selectionArgs)
+            .delete(dbHelper.getWritableDatabase());
         contentResolver.notifyChange(uri, null, false);
         return count;
     }
 
-    @Override
-    public int update(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values, String selection, String[] selectionArgs) {
+    @Override public int update(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values, String selection, String[] selectionArgs) {
         int count = new QueryBuilder(Table.USERS)
-                .where(selection, selectionArgs)
-                .update(dbHelper.getWritableDatabase(), values);
+            .where(selection, selectionArgs)
+            .update(dbHelper.getWritableDatabase(), values);
         contentResolver.notifyChange(uri, null, false);
         return count;
     }

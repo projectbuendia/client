@@ -33,15 +33,15 @@ public class OdkDatabase {
         Cursor cursor = null;
         try {
             cursor = OdkXformSyncTask.getCursorForFormFile(
-                    path, new String[]{
-                            BaseColumns._ID
-                    });
+                path, new String[] {
+                    BaseColumns._ID
+                });
             // There should only ever be one form per UUID. But if something goes wrong, we want the
             // app to keep working. Assume the latest one is correct.
             if (cursor.getCount() > 1) {
                 Log.e(TAG, "More than one form in database with the same id. This indicates an "
-                        + "error occurred on insert (probably a race condition) and should be "
-                        + "fixed. However, the app should still function correctly");
+                    + "error occurred on insert (probably a race condition) and should be "
+                    + "fixed. However, the app should still function correctly");
             }
             Preconditions.checkArgument(cursor.getColumnCount() == 1);
             // getCursorForFormFile returns the most recent element first, so we can just use the

@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.android.volley.NoConnectionError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
@@ -31,7 +32,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.UpdateAvailableEvent;
 import org.projectbuendia.client.events.UpdateNotAvailableEvent;
 import org.projectbuendia.client.events.UpdateReadyToInstallEvent;
-import org.projectbuendia.client.model.UpdateInfo;
+import org.projectbuendia.client.net.json.JsonUpdateInfo;
 import org.projectbuendia.client.utils.LexicographicVersion;
 import org.projectbuendia.client.utils.Logger;
 
@@ -41,36 +42,33 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 /**
- * An object that manages auto-updating of the application from a configurable update server.
- *
+ * An object that manages auto-updating of the application from a configurable package server.
+ * <p/>
  * <p>This class requires that all methods be called from the main thread.
  */
 public class UpdateManager {
 
-    private static final Logger LOG = Logger.create();
-
-    /**
-     * The update manager's module name for updates to this app.  A name of "foo"
-     * means the updates are saved as "foo-1.2.apk", "foo-1.3.apk" on disk.
-     */
-    private static final String MODULE_NAME = "buendia-client";
-
     /**
      * The minimal version number.
-     *
+     * <p/>
      * <p>This value is smaller than any other version. If the current application has this version,
      * any non-minimal update will be installed over it. If an update has this version, it will
      * never be installed over any the current application.
      */
     public static final LexicographicVersion MINIMAL_VERSION = LexicographicVersion.parse("0");
-
+    private static final Logger LOG = Logger.create();
+    /**
+     * The update manager's module name for updates to this app.  A name of "foo"
+     * means the updates are saved as "foo-1.2.apk", "foo-1.3.apk" on disk.
+     */
+    private static final String MODULE_NAME = "buendia-client";
     private static final IntentFilter sDownloadCompleteIntentFilter =
-            new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
 
     private final Object mLock = new Object();
 
     private final Application mApplication;
-    private final UpdateServer mServer;
+    private final PackageServer mServer;
 
     private final PackageManager mPackageManager;
     private final LexicographicVersion mCurrentVersion;
@@ -88,18 +86,6 @@ public class UpdateManager {
 
     // ID of the currently running download, or -1 if no download is underway.
     private long mDownloadId = -1;
-
-    UpdateManager(Application application, UpdateServer updateServer, AppSettings settings) {
-        mApplication = application;
-        mServer = updateServer;
-        mSettings = settings;
-        mPackageManager = application.getPackageManager();
-        mDownloadManager =
-                (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
-        mCurrentVersion = getCurrentVersion();
-        mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
-        mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
-    }
 
     /**
      * Ensures that a check for available updates has been initiated within the
@@ -128,6 +114,11 @@ public class UpdateManager {
         mLastCheckForUpdateTime = now;
     }
 
+    /** Returns true if a download is in progress. */
+    public boolean isDownloadInProgress() {
+        return mDownloadId >= 0;
+    }
+
     /**
      * Posts events notifying of whether a file is available to be downloaded, or a
      * file is downloaded and ready to install.  See {@link UpdateReadyToInstallEvent},
@@ -136,8 +127,8 @@ public class UpdateManager {
     protected void postEvents() {
         EventBus bus = EventBus.getDefault();
         if (mLastDownloadedUpdateInfo.shouldInstall()
-                && mLastDownloadedUpdateInfo.downloadedVersion.greaterThanOrEqualTo(
-                        mLastAvailableUpdateInfo.availableVersion)) {
+            && mLastDownloadedUpdateInfo.downloadedVersion.greaterThanOrEqualTo(
+            mLastAvailableUpdateInfo.availableVersion)) {
             bus.postSticky(new UpdateReadyToInstallEvent(mLastDownloadedUpdateInfo));
         } else if (mLastAvailableUpdateInfo.shouldUpdate()) {
             bus.removeStickyEvent(UpdateReadyToInstallEvent.class);
@@ -152,7 +143,6 @@ public class UpdateManager {
     /**
      * Starts downloading an available update in the background, registering a
      * DownloadUpdateReceiver to be invoked when the download is complete.
-     *
      * @return whether a new download was started; {@code false} if the download failed to start.
      */
     public boolean startDownload(AvailableUpdateInfo availableUpdateInfo) {
@@ -160,7 +150,7 @@ public class UpdateManager {
             cancelDownload();
 
             mApplication.registerReceiver(
-                    new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
+                new DownloadUpdateReceiver(), sDownloadCompleteIntentFilter);
 
             try {
                 String dir = getDownloadDirectory();
@@ -169,36 +159,22 @@ public class UpdateManager {
                     return false;
                 }
                 String filename = MODULE_NAME + "-"
-                        + availableUpdateInfo.availableVersion + ".apk";
+                    + availableUpdateInfo.availableVersion + ".apk";
                 DownloadManager.Request request =
-                        new DownloadManager.Request(availableUpdateInfo.updateUri)
-                                .setDestinationInExternalPublicDir(dir, filename)
-                                .setNotificationVisibility(
-                                        DownloadManager.Request.VISIBILITY_VISIBLE);
+                    new DownloadManager.Request(availableUpdateInfo.updateUri)
+                        .setDestinationInExternalPublicDir(dir, filename)
+                        .setNotificationVisibility(
+                            DownloadManager.Request.VISIBILITY_VISIBLE);
                 mDownloadId = mDownloadManager.enqueue(request);
                 LOG.i("Starting download: " + availableUpdateInfo.updateUri
-                        + " -> " + filename + " in " + dir);
+                    + " -> " + filename + " in " + dir);
                 return true;
             } catch (Exception e) {
                 LOG.e(e, "Failed to download application update from "
-                        + availableUpdateInfo.updateUri);
+                    + availableUpdateInfo.updateUri);
                 return false;
             }
         }
-    }
-
-    /** Installs the last downloaded update. */
-    public void installUpdate(DownloadedUpdateInfo updateInfo) {
-        Uri apkUri = Uri.parse(updateInfo.path);
-        Intent installIntent = new Intent(Intent.ACTION_VIEW)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .setDataAndType(apkUri, "application/vnd.android.package-archive");
-        mApplication.startActivity(installIntent);
-    }
-
-    /** Returns true if a download is in progress. */
-    public boolean isDownloadInProgress() {
-        return mDownloadId >= 0;
     }
 
     /** Stops any currently running download. */
@@ -217,7 +193,7 @@ public class UpdateManager {
      */
     private String getDownloadDirectory() {
         String externalStorageDirectory =
-                Environment.getExternalStorageDirectory().getAbsolutePath();
+            Environment.getExternalStorageDirectory().getAbsolutePath();
         File externalFilesDir = mApplication.getExternalFilesDir(null);
         if (externalFilesDir == null) {
             return null;
@@ -229,17 +205,38 @@ public class UpdateManager {
         return downloadDirectory;
     }
 
+    /** Installs the last downloaded update. */
+    public void installUpdate(DownloadedUpdateInfo updateInfo) {
+        Uri apkUri = Uri.parse(updateInfo.path);
+        Intent installIntent = new Intent(Intent.ACTION_VIEW)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .setDataAndType(apkUri, "application/vnd.android.package-archive");
+        mApplication.startActivity(installIntent);
+    }
+
+    UpdateManager(Application application, PackageServer packageServer, AppSettings settings) {
+        mApplication = application;
+        mServer = packageServer;
+        mSettings = settings;
+        mPackageManager = application.getPackageManager();
+        mDownloadManager =
+            (DownloadManager) application.getSystemService(Context.DOWNLOAD_SERVICE);
+        mCurrentVersion = getCurrentVersion();
+        mLastAvailableUpdateInfo = AvailableUpdateInfo.getInvalid(mCurrentVersion);
+        mLastDownloadedUpdateInfo = DownloadedUpdateInfo.getInvalid(mCurrentVersion);
+    }
+
     /** Returns the version of the application. */
     private LexicographicVersion getCurrentVersion() {
         PackageInfo packageInfo;
         try {
             packageInfo =
-                    mPackageManager.getPackageInfo(mApplication.getPackageName(), 0 /*flags*/);
+                mPackageManager.getPackageInfo(mApplication.getPackageName(), 0 /*flags*/);
         } catch (PackageManager.NameNotFoundException e) {
             LOG.e(
-                    e,
-                    "No package found with the name " + mApplication.getPackageName() + ". "
-                            + "This should never happen.");
+                e,
+                "No package found with the name " + mApplication.getPackageName() + ". "
+                    + "This should never happen.");
             return MINIMAL_VERSION;
         }
 
@@ -258,14 +255,14 @@ public class UpdateManager {
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
         File downloadDirectoryFile =
-                new File(Environment.getExternalStorageDirectory(), dir);
+            new File(Environment.getExternalStorageDirectory(), dir);
         if (!downloadDirectoryFile.exists()) {
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
         if (!downloadDirectoryFile.isDirectory()) {
             LOG.e(
-                    "The path in which updates are downloaded is not a directory: '%1$s'",
-                    downloadDirectoryFile.toString());
+                "The path in which updates are downloaded is not a directory: '%1$s'",
+                downloadDirectoryFile.toString());
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         }
 
@@ -273,8 +270,8 @@ public class UpdateManager {
         File latestApk = null;
         for (File file : files) {
             if (file.isFile()
-                    && file.getName().endsWith(".apk")
-                    && (latestApk == null || file.lastModified() > latestApk.lastModified())) {
+                && file.getName().endsWith(".apk")
+                && (latestApk == null || file.lastModified() > latestApk.lastModified())) {
                 latestApk = file;
             }
         }
@@ -283,38 +280,34 @@ public class UpdateManager {
             return DownloadedUpdateInfo.getInvalid(mCurrentVersion);
         } else {
             return DownloadedUpdateInfo
-                    .fromUri(mCurrentVersion, "file://" + latestApk.getAbsolutePath());
+                .fromUri(mCurrentVersion, "file://" + latestApk.getAbsolutePath());
         }
     }
 
     /** A listener that receives the index of available .apk files from the package server. */
     private class PackageIndexReceivedListener
-            implements Response.Listener<List<UpdateInfo>>, Response.ErrorListener {
+        implements Response.Listener<List<JsonUpdateInfo>>, Response.ErrorListener {
 
-        @Override
-        public void onResponse(List<UpdateInfo> response) {
+        @Override public void onResponse(List<JsonUpdateInfo> response) {
             synchronized (mLock) {
                 mLastAvailableUpdateInfo =
-                        AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
+                    AvailableUpdateInfo.fromResponse(mCurrentVersion, response);
                 mLastDownloadedUpdateInfo = getLastDownloadedUpdateInfo();
                 LOG.i("received package index; lastAvailableUpdate: " + mLastAvailableUpdateInfo);
                 postEvents();
             }
         }
 
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            String failure;
-            if (error == null || error.networkResponse == null) {
-                failure = "a network error";
-            } else {
-                failure = String.valueOf(error.networkResponse.statusCode);
+        @Override public void onErrorResponse(VolleyError error) {
+            String message = "Server failed; will retry shortly";
+            if (error != null && error.networkResponse != null) {
+                message = "Server failed (" + error.networkResponse.statusCode + "); will retry shortly";
             }
-
-            LOG.w(
-                    error,
-                    "Server failed with " + failure + " while fetching package index.  Retry will "
-                            + "occur shortly.");
+            if (error instanceof NoConnectionError) {
+                LOG.w(message + " - " + error);
+            } else {
+                LOG.w(error, message);
+            }
             // assume no update is available
             EventBus.getDefault().post(new UpdateNotAvailableEvent());
         }
@@ -326,26 +319,25 @@ public class UpdateManager {
      */
     private class DownloadUpdateReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
+        @Override public void onReceive(Context context, Intent intent) {
             synchronized (mDownloadLock) {
                 if (!isDownloadInProgress()) {
                     LOG.e(
-                            "Received an ACTION_DOWNLOAD_COMPLETED intent when no download was in "
-                                    + "progress. This indicates that this receiver was registered "
-                                    + "incorrectly. Unregistering receiver.");
+                        "Received an ACTION_DOWNLOAD_COMPLETED intent when no download was in "
+                            + "progress. This indicates that this receiver was registered "
+                            + "incorrectly. Unregistering receiver.");
                     mApplication.unregisterReceiver(this);
                     return;
                 }
 
                 long receivedDownloadId =
-                        intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                    intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (mDownloadId != receivedDownloadId) {
                     LOG.d(
-                            "Received an ACTION_DOWNLOAD_COMPLETED intent with download ID "
-                                    + receivedDownloadId + " when the expected download ID is "
-                                    + mDownloadId + ". Download was probably initiated by another "
-                                    + " application.");
+                        "Received an ACTION_DOWNLOAD_COMPLETED intent with download ID "
+                            + receivedDownloadId + " when the expected download ID is "
+                            + mDownloadId + ". Download was probably initiated by another "
+                            + " application.");
                     return;
                 }
 
@@ -358,16 +350,16 @@ public class UpdateManager {
                 final String uriString;
                 try {
                     cursor = mDownloadManager.query(
-                            new DownloadManager.Query().setFilterById(receivedDownloadId));
+                        new DownloadManager.Query().setFilterById(receivedDownloadId));
                     if (!cursor.moveToFirst()) {
                         LOG.w(
-                                "Received download ID " + receivedDownloadId + " does not exist.");
+                            "Received download ID " + receivedDownloadId + " does not exist.");
                         // TODO: Consider firing an event.
                         return;
                     }
 
                     int status = cursor.getInt(
-                            cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                        cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
                     if (status != DownloadManager.STATUS_SUCCESSFUL) {
                         LOG.w("Update download failed with status " + status + ".");
                         // TODO: Consider firing an event.
@@ -375,7 +367,7 @@ public class UpdateManager {
                     }
 
                     uriString = cursor.getString(
-                            cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                        cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
                     if (uriString == null) {
                         LOG.w("No path for a downloaded file exists.");
                         // TODO: Consider firing an event.
@@ -396,14 +388,14 @@ public class UpdateManager {
                 }
 
                 mLastDownloadedUpdateInfo =
-                        DownloadedUpdateInfo.fromUri(mCurrentVersion, uriString);
+                    DownloadedUpdateInfo.fromUri(mCurrentVersion, uriString);
                 LOG.i("downloaded update: " + mLastDownloadedUpdateInfo);
 
                 if (!mLastDownloadedUpdateInfo.isValid) {
                     LOG.w(
-                            "The last update downloaded from the server is invalid. Update checks "
-                                    + "will not occur for the next %1$d seconds.",
-                            mSettings.getApkUpdateInterval());
+                        "The last update downloaded from the server is invalid. Update checks "
+                            + "will not occur for the next %1$d seconds.",
+                        mSettings.getApkUpdateInterval());
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.
@@ -413,15 +405,15 @@ public class UpdateManager {
                 }
 
                 if (!mLastAvailableUpdateInfo.availableVersion
-                        .greaterThanOrEqualTo(mLastDownloadedUpdateInfo.downloadedVersion)) {
+                    .greaterThanOrEqualTo(mLastDownloadedUpdateInfo.downloadedVersion)) {
                     LOG.w(
-                            "The last update downloaded from the server was reported to have "
-                                    + "version '%1$s' but actually has version '%2$s'. This "
-                                    + "indicates a server configuration problem. Update checks "
-                                    + "will not occur for the next %3$d seconds.",
-                            mLastAvailableUpdateInfo.availableVersion.toString(),
-                            mLastDownloadedUpdateInfo.downloadedVersion.toString(),
-                            mSettings.getApkUpdateInterval());
+                        "The last update downloaded from the server was reported to have "
+                            + "version '%1$s' but actually has version '%2$s'. This "
+                            + "indicates a server configuration problem. Update checks "
+                            + "will not occur for the next %3$d seconds.",
+                        mLastAvailableUpdateInfo.availableVersion.toString(),
+                        mLastDownloadedUpdateInfo.downloadedVersion.toString(),
+                        mSettings.getApkUpdateInterval());
 
                     // Set the last available update info to an invalid value so as to prevent
                     // further download attempts.

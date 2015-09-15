@@ -11,20 +11,18 @@
 
 package org.projectbuendia.client.filter.db.encounter;
 
-import org.projectbuendia.client.data.app.AppEncounter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 /** Matches only the encounter with the given UUID. */
-public final class EncounterUuidFilter extends SimpleSelectionFilter<AppEncounter> {
+public final class EncounterUuidFilter extends SimpleSelectionFilter<Encounter> {
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return Contracts.Observations.ENCOUNTER_UUID + " = ?";
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
-        return new String[] { constraint.toString() };
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
+        return new String[] {constraint.toString()};
     }
 }

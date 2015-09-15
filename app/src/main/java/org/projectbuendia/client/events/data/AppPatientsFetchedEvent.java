@@ -11,18 +11,18 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 
 /**
- * An event bus event indicating that {@link AppPatient}s have been fetched from the data store.
- *
+ * An event bus event indicating that {@link Patient}s have been fetched from the data store.
+ * <p/>
  * <p>This event should only be posted on a {@link DefaultCrudEventBus}.
  */
-public class AppPatientsFetchedEvent extends TypedCursorFetchedEvent<AppPatient> {
+public class AppPatientsFetchedEvent extends TypedCursorFetchedEvent<Patient> {
 
-    AppPatientsFetchedEvent(TypedCursor<AppPatient> cursor) {
+    AppPatientsFetchedEvent(TypedCursor<Patient> cursor) {
         super(cursor);
     }
 }

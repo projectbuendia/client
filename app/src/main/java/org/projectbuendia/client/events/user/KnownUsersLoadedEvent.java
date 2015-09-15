@@ -13,19 +13,18 @@ package org.projectbuendia.client.events.user;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 
 /** An event bus event indicating that the set of known users has been loaded from local cache. */
 public final class KnownUsersLoadedEvent {
 
-    public final ImmutableSet<User> knownUsers;
+    public final ImmutableSet<JsonUser> knownUsers;
 
-    public KnownUsersLoadedEvent(ImmutableSet<User> knownUsers) {
+    public KnownUsersLoadedEvent(ImmutableSet<JsonUser> knownUsers) {
         this.knownUsers = knownUsers;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         if (!(obj instanceof KnownUsersLoadedEvent)) {
             return false;
         }
@@ -34,8 +33,7 @@ public final class KnownUsersLoadedEvent {
         return knownUsers.equals(other.knownUsers);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return knownUsers.hashCode();
     }
 }

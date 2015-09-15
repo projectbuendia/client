@@ -20,7 +20,8 @@ import org.joda.time.Period;
  * such as "4 days ago" or "yesterday".
  */
 public class RelativeDateTimeFormatter {
-    public RelativeDateTimeFormatter() { }
+    public RelativeDateTimeFormatter() {
+    }
 
     public String format(LocalDate date) {
         return format(date, LocalDate.now());
@@ -34,7 +35,7 @@ public class RelativeDateTimeFormatter {
         Period period = new Period(date, anchor);
         int daysAgo = period.toStandardDays().getDays();
         return daysAgo > 1 ? daysAgo + " days ago" :
-                daysAgo == 1 ? "yesterday" : "today";
+            daysAgo == 1 ? "yesterday" : "today";
     }
 
     public String format(DateTime dateTime) {
@@ -46,14 +47,14 @@ public class RelativeDateTimeFormatter {
         if (dateTime.isAfter(anchor)) {
             return "in the future";
         }
-        Period period = new Period(anchor, dateTime);
+        Period period = new Period(dateTime, anchor);
         int daysAgo = period.toStandardDays().getDays();
         int hoursAgo = period.toStandardHours().getHours();
         int minutesAgo = period.toStandardMinutes().getMinutes();
 
         return daysAgo > 1 ? daysAgo + " days ago" :
-                hoursAgo > 1 ? hoursAgo + " hours ago" :
-                        minutesAgo > 1 ? minutesAgo + " min ago" :
-                                "right now";
+            hoursAgo > 1 ? hoursAgo + " hours ago" :
+                minutesAgo > 1 ? minutesAgo + " min ago" :
+                    "right now";
     }
 }

@@ -20,57 +20,49 @@ import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.QueryBuilder;
 import org.projectbuendia.client.sync.providers.Contracts.Table;
 
-/**
- * A {@link ProviderDelegate} that provides query access to the count of patients in each location.
- */
+/** A {@link ProviderDelegate} that provides query access to the count of patients in each location. */
 public class PatientCountsDelegate implements ProviderDelegate<Database> {
 
-    @Override
-    public String getType() {
+    @Override public String getType() {
         return Contracts.PatientCounts.GROUP_CONTENT_TYPE;
     }
 
-    @Override
-    public Cursor query(
-            Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder) {
+    @Override public Cursor query(
+        Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
+        String selection, String[] selectionArgs, String sortOrder) {
         return new QueryBuilder(Table.PATIENTS)
-                .where(selection, selectionArgs)
-                .where(Contracts.Patients.LOCATION_UUID + " is not null")
-                .groupBy(Contracts.Patients.LOCATION_UUID)
-                .orderBy(sortOrder)
-                .select(dbHelper.getReadableDatabase(),
-                        Contracts.Patients._ID,
-                        Contracts.Patients.LOCATION_UUID,
-                        "count(*) as " + Contracts.Patients._COUNT);
+            .where(selection, selectionArgs)
+            .where(Contracts.Patients.LOCATION_UUID + " is not null")
+            .groupBy(Contracts.Patients.LOCATION_UUID)
+            .orderBy(sortOrder)
+            .select(dbHelper.getReadableDatabase(),
+                Contracts.Patients._ID,
+                Contracts.Patients.LOCATION_UUID,
+                "count(*) as " + Contracts.Patients._COUNT);
     }
 
-    @Override
-    public Uri insert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values) {
+    @Override public Uri insert(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values) {
         throw new UnsupportedOperationException("Insert is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int bulkInsert(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues[] values) {
+    @Override public int bulkInsert(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues[] values) {
         throw new UnsupportedOperationException(
-                "Bulk insert is not supported for URI '" + uri + "'.");
+            "Bulk insert is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int delete(
-            Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
-            String[] selectionArgs) {
+    @Override public int delete(
+        Database dbHelper, ContentResolver contentResolver, Uri uri, String selection,
+        String[] selectionArgs) {
         throw new UnsupportedOperationException("Delete is not supported for URI '" + uri + "'.");
     }
 
-    @Override
-    public int update(
-            Database dbHelper, ContentResolver contentResolver, Uri uri,
-            ContentValues values, String selection, String[] selectionArgs) {
+    @Override public int update(
+        Database dbHelper, ContentResolver contentResolver, Uri uri,
+        ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("Update is not supported for URI '" + uri + "'.");
     }
 }

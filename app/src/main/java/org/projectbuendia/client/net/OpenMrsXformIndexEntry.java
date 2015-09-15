@@ -34,8 +34,8 @@ public class OpenMrsXformIndexEntry {
 
     /**
      * Constructs an Xform index entry.
-     * @param uuid UUID of the xform
-     * @param name name of the xform
+     * @param uuid        UUID of the xform
+     * @param name        name of the xform
      * @param dateChanged milliseconds since epoch when the form was last changed on the server
      */
     public OpenMrsXformIndexEntry(String uuid, String name, long dateChanged) {

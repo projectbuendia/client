@@ -22,27 +22,11 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 /** Tests for {@link NewPatientActivity}. */
 public class NewPatientActivityTest extends FunctionalTestCase {
 
-    /** Populates all the fields on the New Patient screen, except location. */
-    private void populateNewPatientFieldsExceptLocation(String id) {
-        screenshot("Before Patient Populated");
-        String given = "Given" + id;
-        String family = "Family" + id;
-        type(id, viewWithId(R.id.patient_creation_text_patient_id));
-        type(given, viewWithId(R.id.patient_creation_text_patient_given_name));
-        type(family, viewWithId(R.id.patient_creation_text_patient_family_name));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_text_age));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_units_years));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_units_months));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
-        screenshot("After Patient Populated");
-    }
-
     /** Tests adding a new patient with a location. */
     public void testNewPatientWithLocation() {
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
-        String id = Long.toString(new Date().getTime() % 100000);
+        String id = Long.toString(new Date().getTime()%100000);
         populateNewPatientFieldsExceptLocation(id);
         scrollToAndClick(viewWithId(R.id.patient_creation_button_change_location));
         screenshot("After Location Dialog Shown");
@@ -60,11 +44,26 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         screenshot("After Patient Clicked");
     }
 
+    /** Populates all the fields on the New Patient screen, except location. */
+    private void populateNewPatientFieldsExceptLocation(String id) {
+        screenshot("Before Patient Populated");
+        String given = "Given" + id;
+        String family = "Family" + id;
+        type(id, viewWithId(R.id.patient_creation_text_patient_id));
+        type(given, viewWithId(R.id.patient_creation_text_patient_given_name));
+        type(family, viewWithId(R.id.patient_creation_text_patient_family_name));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_age_years));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_age_months));
+        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
+        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
+        screenshot("After Patient Populated");
+    }
+
     /** Tests adding a new patient with no location. */
     public void testNewPatientWithoutLocation() {
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
-        String id = Long.toString(new Date().getTime() % 100000);
+        String id = Long.toString(new Date().getTime()%100000);
         populateNewPatientFieldsExceptLocation(id);
         screenshot("After Patient Populated");
         click(viewWithText("Create"));
@@ -81,13 +80,13 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         // The admission date should be visible right after adding a patient.
         // Flaky because of potential periodic syncs.
         expectVisibleWithin(90000, viewThat(
-                hasAncestorThat(withId(R.id.attribute_admission_days)),
-                hasText("Day 1")));
+            hasAncestorThat(withId(R.id.attribute_admission_days)),
+            hasText("Day 1")));
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
-                hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
-                hasText("–")));
+            hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
+            hasText("–")));
     }
 
     /** Tests that a confirmation prompt appears upon cancelling the form. */

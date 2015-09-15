@@ -15,28 +15,28 @@ import android.app.Application;
 import android.content.ContentResolver;
 import android.preference.PreferenceManager;
 
-import org.projectbuendia.client.data.app.AppModelModule;
 import org.projectbuendia.client.diagnostics.DiagnosticsModule;
 import org.projectbuendia.client.events.EventsModule;
+import org.projectbuendia.client.models.AppModelModule;
 import org.projectbuendia.client.net.NetModule;
-import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseActivity;
 import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
-import org.projectbuendia.client.ui.lists.LocationListActivity;
-import org.projectbuendia.client.ui.newpatient.NewPatientActivity;
+import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
+import org.projectbuendia.client.ui.lists.LocationListActivity;
 import org.projectbuendia.client.ui.lists.PatientListController;
 import org.projectbuendia.client.ui.lists.PatientListFragment;
-import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.SingleLocationActivity;
 import org.projectbuendia.client.ui.lists.SingleLocationFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.login.LoginFragment;
+import org.projectbuendia.client.ui.newpatient.NewPatientActivity;
 import org.projectbuendia.client.updater.UpdateModule;
 import org.projectbuendia.client.user.UserModule;
 import org.projectbuendia.client.utils.UtilsModule;
@@ -48,39 +48,39 @@ import dagger.Provides;
 
 /** A Dagger module that provides the top-level bindings for the app. */
 @Module(
-        includes = {
-                AppModelModule.class,
-                DiagnosticsModule.class,
-                EventsModule.class,
-                NetModule.class,
-                UpdateModule.class,
-                UserModule.class,
-                UtilsModule.class
-        },
-        injects = {
-                App.class,
+    includes = {
+        AppModelModule.class,
+        DiagnosticsModule.class,
+        EventsModule.class,
+        NetModule.class,
+        UpdateModule.class,
+        UserModule.class,
+        UtilsModule.class
+    },
+    injects = {
+        App.class,
 
-                // TODO: Move these into activity-specific modules.
-                // Activities
-                NewPatientActivity.class,
-                BaseActivity.class,
-                PatientChartActivity.class,
-                FilteredPatientListActivity.class,
-                PatientListController.class,
-                GoToPatientDialogFragment.class,
-                BaseSearchablePatientListActivity.class,
-                SingleLocationActivity.class,
-                LocationListActivity.class,
-                PatientListFragment.class,
-                SingleLocationFragment.class,
-                UpdateNotificationController.class,
-                LoginActivity.class,
-                LoginFragment.class,
-                SettingsActivity.class
-        },
-        staticInjections = {
-                SyncAccountService.class
-        })
+        // TODO: Move these into activity-specific modules.
+        // Activities
+        NewPatientActivity.class,
+        BaseActivity.class,
+        PatientChartActivity.class,
+        FilteredPatientListActivity.class,
+        PatientListController.class,
+        GoToPatientDialogFragment.class,
+        BaseSearchablePatientListActivity.class,
+        SingleLocationActivity.class,
+        LocationListActivity.class,
+        PatientListFragment.class,
+        SingleLocationFragment.class,
+        UpdateNotificationController.class,
+        LoginActivity.class,
+        LoginFragment.class,
+        SettingsActivity.class
+    },
+    staticInjections = {
+        SyncAccountService.class
+    })
 public final class AppModule {
 
     private final App mApp;
@@ -90,27 +90,23 @@ public final class AppModule {
     }
 
     @Provides
-    @Singleton
-    Application provideApplication() {
+    @Singleton Application provideApplication() {
         return mApp;
     }
 
     @Provides
-    @Singleton
-    AppSettings provideAppSettings(Application app) {
+    @Singleton AppSettings provideAppSettings(Application app) {
         return new AppSettings(
-                PreferenceManager.getDefaultSharedPreferences(app), app.getResources());
+            PreferenceManager.getDefaultSharedPreferences(app), app.getResources());
     }
 
     @Provides
-    @Singleton
-    ContentResolver provideContentResolver(Application app) {
+    @Singleton ContentResolver provideContentResolver(Application app) {
         return app.getContentResolver();
     }
 
     @Provides
-    @Singleton
-    SyncManager provideSyncManager(AppSettings settings) {
+    @Singleton SyncManager provideSyncManager(AppSettings settings) {
         return new SyncManager(settings);
     }
 

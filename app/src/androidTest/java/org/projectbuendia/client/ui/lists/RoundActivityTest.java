@@ -12,13 +12,10 @@
 package org.projectbuendia.client.ui.lists;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
-import static android.support.test.espresso.Espresso.onData;
-import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.is;
 
 /** Test case for {@link SingleLocationActivity}. */
@@ -45,9 +42,9 @@ public class RoundActivityTest extends FunctionalTestCase {
     public void testAtLeastOnePatientDisplayed() {
         screenshot("Test Start");
         // Click the first patient
-        click(dataThat(is(AppPatient.class))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0));
+        click(dataThat(is(Patient.class))
+            .inAdapterView(withId(R.id.fragment_patient_list))
+            .atPosition(0));
         screenshot("After Patient Clicked");
     }
 }

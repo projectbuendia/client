@@ -24,7 +24,7 @@ public class OrderExecutionSaveRequestedEvent {
     public final DateTime encounterTime;
 
     public OrderExecutionSaveRequestedEvent(
-            String orderUuid, Interval interval, DateTime encounterTime) {
+        String orderUuid, Interval interval, DateTime encounterTime) {
         this.orderUuid = orderUuid;
         this.interval = interval;
         this.encounterTime = encounterTime;

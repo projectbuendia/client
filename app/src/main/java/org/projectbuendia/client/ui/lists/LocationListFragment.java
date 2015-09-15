@@ -11,15 +11,6 @@
 
 package org.projectbuendia.client.ui.lists;
 
-import java.util.List;
-
-import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.ui.ProgressFragment;
-import org.projectbuendia.client.utils.PatientCountDisplay;
-import org.projectbuendia.client.widget.SubtitledButtonView;
-
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -28,6 +19,14 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 
 import com.google.common.base.Optional;
+
+import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.ui.ProgressFragment;
+import org.projectbuendia.client.widgets.SubtitledButtonView;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -49,6 +48,35 @@ public final class LocationListFragment extends ProgressFragment {
         // Required empty public constructor
     }
 
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_location_selection);
+    }
+
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        ButterKnife.inject(this, view);
+        return view;
+    }
+
+    @Override public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        mController = ((LocationListActivity) getActivity()).getController();
+        mController.attachFragmentUi(mUi);
+    }
+
+    @Override public void onDestroyView() {
+        mController.detachFragmentUi(mUi);
+        super.onDestroyView();
+    }
+
+    public void setPatientCount(SubtitledButtonView button, int count) {
+        button.setSubtitle("" + count);
+        button.setTextColor(0xff000000);
+        button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
+    }
+
     @OnItemClick(R.id.location_selection_locations)
     void onLocationGridClicked(int position) {
         mController.onLocationSelected(mAdapter.getItem(position));
@@ -64,87 +92,45 @@ public final class LocationListFragment extends ProgressFragment {
         mController.onDischargedPressed();
     }
 
-    @OnClick(R.id.location_selection_triage)
-    void onTriageClicked(View v) {
+    @OnClick(R.id.location_selection_triage) void onTriageClicked(View v) {
         mController.onTriagePressed();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_location_selection);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        ButterKnife.inject(this, view);
-        return view;
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        mController = ((LocationListActivity) getActivity()).getController();
-        mController.attachFragmentUi(mUi);
-    }
-
-    @Override
-    public void onDestroyView() {
-        mController.detachFragmentUi(mUi);
-        super.onDestroyView();
-    }
-
-    public void setPatientCount(SubtitledButtonView button, int count) {
-        button.setSubtitle("" + count);
-        button.setTextColor(0xff000000);
-        button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
-    }
-
     private final class Ui implements LocationListController.LocationFragmentUi {
-        @Override
-        public void setDischargedPatientCount(int patientCount) {
+        @Override public void setDischargedPatientCount(int patientCount) {
             setPatientCount(mDischargedButton, patientCount);
         }
 
-        @Override
-        public void setTriagePatientCount(int patientCount) {
+        @Override public void setTriagePatientCount(int patientCount) {
             setPatientCount(mTriageButton, patientCount);
         }
 
-        @Override
-        public void setPresentPatientCount(int patientCount) {
+        @Override public void setPresentPatientCount(int patientCount) {
             setPatientCount(mAllPatientsButton, patientCount);
         }
 
-        @Override
-        public void setLocations(AppLocationTree locationTree, List<AppLocation> locations) {
+        @Override public void setLocations(LocationTree locationTree, List<Location> locations) {
             mAdapter = new LocationListAdapter(
-                    getActivity(), locations, locationTree, Optional.<String>absent());
+                getActivity(), locations, locationTree, Optional.<String> absent());
             mLocationGrid.setAdapter(mAdapter);
         }
 
-        @Override
-        public void setBusyLoading(boolean busy) {
+        @Override public void setBusyLoading(boolean busy) {
             changeState(busy ? State.LOADING : State.LOADED);
         }
 
-        @Override
-        public void showIncrementalSyncProgress(int progress, @Nullable String label) {
+        @Override public void showIncrementalSyncProgress(int progress, @Nullable String label) {
             incrementProgressBy(progress);
             if (label != null) {
                 setProgressLabel(label);
             }
         }
 
-        @Override
-        public void resetSyncProgress() {
+        @Override public void resetSyncProgress() {
             switchToCircularProgressBar();
         }
 
-        @Override
-        public void showSyncCancelRequested() {
+        @Override public void showSyncCancelRequested() {
             setProgressLabel(getString(R.string.cancelling_sync));
         }
     }

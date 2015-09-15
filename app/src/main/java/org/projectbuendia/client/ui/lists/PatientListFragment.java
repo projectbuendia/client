@@ -20,9 +20,9 @@ import android.widget.ListView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
@@ -38,20 +38,18 @@ import de.greenrobot.event.EventBus;
 
 /** A fragment showing a filterable list of patients. */
 public class PatientListFragment extends ProgressFragment implements
-        ExpandableListView.OnChildClickListener {
-
-    private PatientSearchController mController;
-    private PatientListController mListController;
-    private PatientListTypedCursorAdapter mPatientAdapter;
-    private FragmentUi mFragmentUi;
-    private ListUi mListUi;
+    ExpandableListView.OnChildClickListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
      * activated item position. Only used on tablets.
      */
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
-
+    private PatientSearchController mController;
+    private PatientListController mListController;
+    private PatientListTypedCursorAdapter mPatientAdapter;
+    private FragmentUi mFragmentUi;
+    private ListUi mListUi;
     @Inject SyncManager mSyncManager;
 
     /** The current activated item position. Only used on tablets. */
@@ -70,36 +68,31 @@ public class PatientListFragment extends ProgressFragment implements
         mListUi = new ListUi();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
         mListController = new PatientListController(
-                mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
+            mListUi, mSyncManager, new EventBusWrapper(EventBus.getDefault()));
         setContentView(R.layout.fragment_patient_list);
     }
 
-    @Override
-    public void onResume() {
+    @Override public void onResume() {
         super.onResume();
         mListController.init();
     }
 
-    @Override
-    public void onPause() {
+    @Override public void onPause() {
         mListController.suspend();
         super.onPause();
     }
 
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
+    @Override public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         mController = ((BaseSearchablePatientListActivity) getActivity()).getSearchController();
         mController.attachFragmentUi(mFragmentUi);
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    @Override public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         mListView = (ExpandableListView) view.findViewById(R.id.fragment_patient_list);
@@ -107,10 +100,9 @@ public class PatientListFragment extends ProgressFragment implements
         // The list view adapter will be set once locations are available.
 
         mSwipeToRefresh =
-                (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
+            (SwipeRefreshLayout) view.findViewById(R.id.fragment_patient_list_swipe_to_refresh);
         mSwipeToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
+            @Override public void onRefresh() {
                 Utils.logUserAction("refresh_requested");
                 mListController.onRefreshRequested();
             }
@@ -118,50 +110,9 @@ public class PatientListFragment extends ProgressFragment implements
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
-                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+            && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
-    }
-
-    public PatientListTypedCursorAdapter getAdapterInstance(AppLocationTree locationTree) {
-        return new PatientListTypedCursorAdapter(getActivity(), locationTree);
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (Common.OFFLINE_SUPPORT) {
-            // Create account, if needed
-            SyncAccountService.initialize(activity);
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mActivatedPosition != ListView.INVALID_POSITION) {
-            // Serialize and persist the activated item position.
-            outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
-        }
-    }
-
-    @Override
-    public boolean onChildClick(
-            ExpandableListView parent,
-            View v,
-            int groupPosition,
-            int childPosition,
-            long id) {
-        AppPatient patient = (AppPatient)mPatientAdapter.getChild(groupPosition, childPosition);
-        Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
-        mController.onPatientSelected(patient);
-        return true;
     }
 
     private void setActivatedPosition(int position) {
@@ -174,46 +125,76 @@ public class PatientListFragment extends ProgressFragment implements
         mActivatedPosition = position;
     }
 
-    @Override
-    public void onDestroyView() {
+    public PatientListTypedCursorAdapter getAdapterInstance(LocationTree locationTree) {
+        return new PatientListTypedCursorAdapter(getActivity(), locationTree);
+    }
+
+    @Override public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (Common.OFFLINE_SUPPORT) {
+            // Create account, if needed
+            SyncAccountService.initialize(activity);
+        }
+    }
+
+    @Override public void onDetach() {
+        super.onDetach();
+    }
+
+    @Override public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mActivatedPosition != ListView.INVALID_POSITION) {
+            // Serialize and persist the activated item position.
+            outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
+        }
+    }
+
+    @Override public boolean onChildClick(
+        ExpandableListView parent,
+        View v,
+        int groupPosition,
+        int childPosition,
+        long id) {
+        Patient patient = (Patient) mPatientAdapter.getChild(groupPosition, childPosition);
+        Utils.logUserAction("patient_pressed", "patient_uuid", patient.uuid);
+        mController.onPatientSelected(patient);
+        return true;
+    }
+
+    @Override public void onDestroyView() {
         mController.detachFragmentUi(mFragmentUi);
         super.onDestroyView();
     }
 
     private class FragmentUi implements PatientSearchController.FragmentUi {
-        @Override
-        public void setLocationTree(AppLocationTree locationTree) {
+        @Override public void setLocationTree(LocationTree locationTree) {
             mPatientAdapter = getAdapterInstance(locationTree);
             mListView.setAdapter(mPatientAdapter);
         }
 
-        @Override
-        public void setPatients(TypedCursor<AppPatient> patients) {
+        @Override public void setPatients(TypedCursor<Patient> patients) {
             if (mPatientAdapter != null) {
                 mPatientAdapter.setPatients(patients);
             }
         }
 
-        @Override
-        public void showSpinner(boolean show) {
+        @Override public void showSpinner(boolean show) {
             changeState(show ? State.LOADING : State.LOADED);
         }
     }
 
     private class ListUi implements PatientListController.Ui {
 
-        @Override
-        public void stopRefreshAnimation() {
+        @Override public void stopRefreshAnimation() {
             mSwipeToRefresh.setRefreshing(false);
         }
 
-        @Override
-        public void showRefreshError() {
+        @Override public void showRefreshError() {
             BigToast.show(getActivity(), R.string.patient_list_fragment_sync_error);
         }
 
-        @Override
-        public void showApiHealthProblem() {
+        @Override public void showApiHealthProblem() {
             BigToast.show(getActivity(), R.string.api_health_problem);
         }
     }

@@ -15,9 +15,6 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static android.support.test.espresso.Espresso.pressBack;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /** Tests for {@link LocationListActivity}. */
 public class LocationListActivityTest extends FunctionalTestCase {
@@ -76,7 +73,7 @@ public class LocationListActivityTest extends FunctionalTestCase {
         inPatientListClickFirstPatient(); // open patient chart
 
         // Relocate the patient to C1.
-        click(viewWithId(R.id.action_relocate_patient));
+        click(viewWithId(R.id.attribute_location));
         click(viewWithText("C1"));
 
         pressBack(); // back to search fragment

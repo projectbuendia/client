@@ -35,16 +35,15 @@ class ProviderDelegateRegistry<T extends SQLiteOpenHelper> {
 
     /**
      * Registers the specified delegate to handle the specified path.
-     *
      * @throws IllegalStateException if the specified path is already being handled by another
      *                               delegate
      */
     void registerDelegate(String path, ProviderDelegate<T> delegate) {
         int existingCode = mUriMatcher.match(
-                Uri.parse("content://" + Contracts.CONTENT_AUTHORITY + "/" + path));
+            Uri.parse("content://" + Contracts.CONTENT_AUTHORITY + "/" + path));
         if (existingCode != UriMatcher.NO_MATCH) {
             throw new IllegalStateException(
-                    "Path '" + path + "' is already registered to be handled by '"
+                "Path '" + path + "' is already registered to be handled by '"
                     + mDelegates.get(existingCode).toString() + "'.");
         }
         int code = mCodeGenerator.getAndIncrement();
@@ -54,14 +53,13 @@ class ProviderDelegateRegistry<T extends SQLiteOpenHelper> {
 
     /**
      * Returns the {@link ProviderDelegate} for the specified {@link Uri}.
-     *
      * @throws IllegalArgumentException if no matching delegate is registered
      */
     ProviderDelegate<T> getDelegate(Uri uri) {
         int code = mUriMatcher.match(uri);
         if (code == UriMatcher.NO_MATCH) {
             throw new IllegalArgumentException(
-                    "No ProviderDelegate registered for URI '" + uri.toString() + "'.");
+                "No ProviderDelegate registered for URI '" + uri.toString() + "'.");
         }
 
         return mDelegates.get(code);

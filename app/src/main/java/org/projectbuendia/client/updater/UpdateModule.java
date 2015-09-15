@@ -24,23 +24,22 @@ import dagger.Provides;
 
 /** A Dagger module that provides bindings for update-related classes. */
 @Module(
-        injects = {
-                BaseSearchablePatientListActivity.class
-        },
-        complete = false,
-        library = true)
+    injects = {
+        BaseSearchablePatientListActivity.class
+    },
+    complete = false,
+    library = true)
 public class UpdateModule {
 
     @Provides
     @Singleton
-    UpdateServer providePackageServer(Application application, AppSettings settings) {
-        return new UpdateServer(VolleySingleton.getInstance(application), settings);
+    PackageServer providePackageServer(Application application, AppSettings settings) {
+        return new PackageServer(VolleySingleton.getInstance(application), settings);
     }
 
     @Provides
-    @Singleton
-    UpdateManager provideUpdateManager(
-            Application application, UpdateServer server, AppSettings settings) {
+    @Singleton UpdateManager provideUpdateManager(
+        Application application, PackageServer server, AppSettings settings) {
         return new UpdateManager(application, server, settings);
     }
 }

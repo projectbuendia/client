@@ -12,16 +12,14 @@
 package org.projectbuendia.client.ui.matchers;
 
 import org.mockito.ArgumentMatcher;
+import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilterGroup;
 import org.projectbuendia.client.filter.db.patient.LocationUuidFilter;
-import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 
 import java.util.List;
 
 /** Matchers for {@link SimpleSelectionFilter} objects and arrays. */
 public class SimpleSelectionFilterMatchers {
-    private SimpleSelectionFilterMatchers() {}
-
     /** Matches any array of filters containing a filter with the specified name. */
     public static class ContainsFilterWithName extends ArgumentMatcher<SimpleSelectionFilter[]> {
         private String mFilterName;
@@ -32,12 +30,11 @@ public class SimpleSelectionFilterMatchers {
 
         /**
          * Matches any array of filters containing a filter with the specified name.
-         *
          * @param filters an array of {@link SimpleSelectionFilter}'s
          * @return true if the array contains a filter with the specified name
          */
         public boolean matches(Object filters) {
-            SimpleSelectionFilter[] filterArr = (SimpleSelectionFilter[])filters;
+            SimpleSelectionFilter[] filterArr = (SimpleSelectionFilter[]) filters;
             for (int i = 0; i < filterArr.length; i++) {
                 if (filterArr[i].toString().equals(mFilterName)) {
                     return true;
@@ -54,7 +51,7 @@ public class SimpleSelectionFilterMatchers {
      * location UUID.
      */
     public static class IsFilterGroupWithLocationFilter
-            extends ArgumentMatcher<SimpleSelectionFilter> {
+        extends ArgumentMatcher<SimpleSelectionFilter> {
         private String mLocationUuid;
 
         public IsFilterGroupWithLocationFilter(String locationUuid) {
@@ -67,11 +64,11 @@ public class SimpleSelectionFilterMatchers {
          * specified location UUID.
          */
         public boolean matches(Object filter) {
-            if (isMatchingLocationFilter((SimpleSelectionFilter)filter)) {
+            if (isMatchingLocationFilter((SimpleSelectionFilter) filter)) {
                 return true;
             }
 
-            if (isMatchingFilterGroup((SimpleSelectionFilter)filter)) {
+            if (isMatchingFilterGroup((SimpleSelectionFilter) filter)) {
                 return true;
             }
 
@@ -84,7 +81,7 @@ public class SimpleSelectionFilterMatchers {
             }
 
             List<SimpleSelectionFilter> filterList =
-                    ((SimpleSelectionFilterGroup) filter).getFilters();
+                ((SimpleSelectionFilterGroup) filter).getFilters();
             for (SimpleSelectionFilter internalFilter : filterList) {
                 if (matches(internalFilter)) {
                     return true;
@@ -101,5 +98,8 @@ public class SimpleSelectionFilterMatchers {
 
             return ((LocationUuidFilter) filter).getFilterRootUuid().equals(mLocationUuid);
         }
+    }
+
+    private SimpleSelectionFilterMatchers() {
     }
 }

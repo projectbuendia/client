@@ -28,6 +28,11 @@ import de.greenrobot.event.EventBus;
  * and suspend() methods, in addition to other controllers they may have.
  */
 public class UpdateNotificationController {
+    Ui mUi;
+    @Inject UpdateManager mUpdateManager;
+    AvailableUpdateInfo mAvailableUpdateInfo;
+    DownloadedUpdateInfo mDownloadedUpdateInfo;
+
     public interface Ui {
 
         void showUpdateAvailableForDownload(AvailableUpdateInfo updateInfo);
@@ -36,11 +41,6 @@ public class UpdateNotificationController {
 
         void hideSoftwareUpdateNotifications();
     }
-
-    Ui mUi;
-    @Inject UpdateManager mUpdateManager;
-    AvailableUpdateInfo mAvailableUpdateInfo;
-    DownloadedUpdateInfo mDownloadedUpdateInfo;
 
     public UpdateNotificationController(Ui ui) {
         mUi = ui;
@@ -54,10 +54,6 @@ public class UpdateNotificationController {
         updateAvailabilityNotifications();
     }
 
-    public void suspend() {
-        EventBus.getDefault().unregister(this);
-    }
-
     /**
      * Shows or hides software update notifications in the UI according to the
      * currently posted sticky events (posted by the UpdateManager).
@@ -65,9 +61,9 @@ public class UpdateNotificationController {
     protected void updateAvailabilityNotifications() {
         EventBus bus = EventBus.getDefault();
         UpdateReadyToInstallEvent readyEvent =
-                bus.getStickyEvent(UpdateReadyToInstallEvent.class);
+            bus.getStickyEvent(UpdateReadyToInstallEvent.class);
         UpdateAvailableEvent availableEvent =
-                bus.getStickyEvent(UpdateAvailableEvent.class);
+            bus.getStickyEvent(UpdateAvailableEvent.class);
         if (readyEvent != null) {
             mDownloadedUpdateInfo = readyEvent.updateInfo;
             mUi.showUpdateReadyToInstall(mDownloadedUpdateInfo);
@@ -80,6 +76,10 @@ public class UpdateNotificationController {
             mAvailableUpdateInfo = null;
             mUi.hideSoftwareUpdateNotifications();
         }
+    }
+
+    public void suspend() {
+        EventBus.getDefault().unregister(this);
     }
 
     /** Updates the UI in response to updated knowledge of available .apks. */

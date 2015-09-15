@@ -25,7 +25,7 @@
         android:layout_margin="20dp"
         android:gravity="center_vertical"
         android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.Buendia.Medium"
+        android:textAppearance="@style/TextAppearance.Buendia.Small"
         tools:text="Triage"/>
 
     <TextView

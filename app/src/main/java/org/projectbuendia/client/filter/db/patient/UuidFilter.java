@@ -11,20 +11,18 @@
 
 package org.projectbuendia.client.filter.db.patient;
 
-import org.projectbuendia.client.data.app.AppPatient;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.providers.Contracts;
 
 /** Matches only the patient with the given patient UUID. */
-public final class UuidFilter extends SimpleSelectionFilter<AppPatient> {
+public final class UuidFilter extends SimpleSelectionFilter<Patient> {
 
-    @Override
-    public String getSelectionString() {
+    @Override public String getSelectionString() {
         return Contracts.Patients.UUID + "=?";
     }
 
-    @Override
-    public String[] getSelectionArgs(CharSequence constraint) {
-        return new String[] { constraint.toString() };
+    @Override public String[] getSelectionArgs(CharSequence constraint) {
+        return new String[] {constraint.toString()};
     }
 }

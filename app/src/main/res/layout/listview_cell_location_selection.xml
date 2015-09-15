@@ -15,7 +15,7 @@
     android:layout_height="wrap_content"
     android:padding="5dp"
     android:background="@drawable/location_selector">
-    <org.projectbuendia.client.widget.SubtitledButtonView
+    <org.projectbuendia.client.widgets.SubtitledButtonView
         android:id="@+id/location_selection_location"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"/>

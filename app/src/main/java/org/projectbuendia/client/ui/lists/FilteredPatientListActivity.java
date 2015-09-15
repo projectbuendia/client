@@ -40,8 +40,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
         caller.startActivity(new Intent(caller, FilteredPatientListActivity.class));
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
         setContentView(R.layout.activity_patient_list);
 
@@ -59,39 +58,33 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
         App.getInstance().inject(this);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SELECTED_FILTER_KEY, getActionBar().getSelectedNavigationIndex());
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != ODK_ACTIVITY_REQUEST) {
-            return;
-        }
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != ODK_ACTIVITY_REQUEST) return;
         OdkActivityLauncher.sendOdkResultToServer(
-                this, mSettings, /* create a new patient */ null,
-                false, resultCode, data);
+            this, mSettings, /* create a new patient */ null,
+            false, resultCode, data);
     }
 
     private final class FilterUi implements PatientFilterController.Ui {
 
-        @Override
-        public void populateActionBar(final SimpleSelectionFilter[] filters) {
+        @Override public void populateActionBar(final SimpleSelectionFilter[] filters) {
             SectionedSpinnerAdapter<SimpleSelectionFilter> adapter = new SectionedSpinnerAdapter<>(
-                    FilteredPatientListActivity.this,
-                    R.layout.patient_list_spinner_dropdown_item,
-                    R.layout.patient_list_spinner_expanded_dropdown_item,
-                    R.layout.patient_list_spinner_expanded_section_divider,
-                    filters);
+                FilteredPatientListActivity.this,
+                R.layout.patient_list_spinner_dropdown_item,
+                R.layout.patient_list_spinner_expanded_dropdown_item,
+                R.layout.patient_list_spinner_expanded_section_divider,
+                filters);
 
             ActionBar.OnNavigationListener callback = new ActionBar.OnNavigationListener() {
-                @Override
-                public boolean onNavigationItemSelected(int position, long id) {
+                @Override public boolean onNavigationItemSelected(int position, long id) {
                     getSearchController().setFilter(filters[position]);
                     Utils.logUserAction("filter_selected",
-                            "filter", filters[position].toString());
+                        "filter", filters[position].toString());
                     getSearchController().loadSearchResults();
                     return true;
                 }

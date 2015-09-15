@@ -13,14 +13,13 @@ package org.projectbuendia.client.filter.matchers.patient;
 
 import android.test.InstrumentationTestCase;
 
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 
 /** Tests for {@link IdFilter}. */
 public class IdFilterTest extends InstrumentationTestCase {
     private IdFilter mIdFilter;
 
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         super.setUp();
         mIdFilter = new IdFilter();
     }
@@ -28,6 +27,10 @@ public class IdFilterTest extends InstrumentationTestCase {
     /** Tests that id matching works in the base case. */
     public void testMatches_exactMatch() {
         assertTrue(mIdFilter.matches(getPatientWithId("123"), "123"));
+    }
+
+    private Patient getPatientWithId(String id) {
+        return Patient.builder().setId(id).build();
     }
 
     /** Tests that id matching allows for a prefix match. */
@@ -58,9 +61,5 @@ public class IdFilterTest extends InstrumentationTestCase {
     /** Tests that id matching is case-insensitive. */
     public void testMatches_ignoresCase() {
         assertTrue(mIdFilter.matches(getPatientWithId("abc"), "ABC"));
-    }
-
-    private AppPatient getPatientWithId(String id) {
-        return AppPatient.builder().setId(id).build();
     }
 }

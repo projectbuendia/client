@@ -36,9 +36,17 @@ import de.greenrobot.event.EventBus;
 
 /** A {@link DialogFragment} for adding a new user. */
 public class OrderDialogFragment extends DialogFragment {
+    @InjectView(R.id.order_medication) EditText mMedication;
+    @InjectView(R.id.order_dosage) EditText mDosage;
+    @InjectView(R.id.order_frequency) EditText mFrequency;
+    @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
+    @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
+    @InjectView(R.id.order_duration_label) TextView mDurationLabel;
+    private LayoutInflater mInflater;
+
     /** Creates a new instance and registers the given UI, if specified. */
     public static OrderDialogFragment newInstance(
-            String patientUuid, String previousOrderUuid) {
+        String patientUuid, String previousOrderUuid) {
         Bundle args = new Bundle();
         args.putString("patientUuid", patientUuid);
         args.putString("previousOrderUuid", previousOrderUuid);
@@ -47,33 +55,21 @@ public class OrderDialogFragment extends DialogFragment {
         return f;
     }
 
-    @InjectView(R.id.order_medication) EditText mMedication;
-    @InjectView(R.id.order_dosage) EditText mDosage;
-    @InjectView(R.id.order_frequency) EditText mFrequency;
-    @InjectView(R.id.order_give_for_days) EditText mGiveForDays;
-    @InjectView(R.id.order_give_for_days_label) TextView mGiveForDaysLabel;
-    @InjectView(R.id.order_duration_label) TextView mDurationLabel;
-
-    private LayoutInflater mInflater;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInflater = LayoutInflater.from(getActivity());
     }
 
-    @Override
-    public void onResume() {
+    @Override public void onResume() {
         super.onResume();
         // Replace the existing button listener so we can control whether the dialog is dismissed.
         final AlertDialog dialog = (AlertDialog) getDialog();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        onSubmit(dialog);
-                    }
+            new View.OnClickListener() {
+                @Override public void onClick(View view) {
+                    onSubmit(dialog);
                 }
+            }
         );
     }
 
@@ -101,12 +97,12 @@ public class OrderDialogFragment extends DialogFragment {
             valid = false;
         }
         Utils.logUserAction("order_submitted",
-                "valid", "" + valid,
-                "medication", medication,
-                "dosage", dosage,
-                "frequency", frequency,
-                "instructions", instructions,
-                "durationDays", "" + durationDays);
+            "valid", "" + valid,
+            "medication", medication,
+            "dosage", dosage,
+            "frequency", frequency,
+            "instructions", instructions,
+            "durationDays", "" + durationDays);
 
         if (valid) {
             dialog.dismiss();
@@ -114,28 +110,10 @@ public class OrderDialogFragment extends DialogFragment {
             // Post an event that triggers the PatientChartController to save the order.
             // TODO: Support revision of previousOrder in addition to creating new orders.
             EventBus.getDefault().post(new OrderSaveRequestedEvent(
-                    getArguments().getString("previousOrderUuid"),
-                    getArguments().getString("patientUuid"),
-                    instructions, durationDays));
+                getArguments().getString("previousOrderUuid"),
+                getArguments().getString("patientUuid"),
+                instructions, durationDays));
         }
-    }
-
-    @Override
-    public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
-        View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
-        ButterKnife.inject(this, fragment);
-        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
-        mMedication.requestFocus();
-        Dialog dialog = new AlertDialog.Builder(getActivity())
-                .setCancelable(false) // Disable auto-cancel.
-                .setTitle(R.string.title_new_order)
-                .setPositiveButton(R.string.ok, null)
-                .setNegativeButton(R.string.cancel, null)
-                .setView(fragment)
-                .create();
-        // Open the keyboard, ready to type into the medication field.
-        dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        return dialog;
     }
 
     private void setError(EditText field, int resourceId) {
@@ -144,24 +122,43 @@ public class OrderDialogFragment extends DialogFragment {
         field.requestFocus();
     }
 
-    class DurationDaysWatcher implements TextWatcher {
-        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {}
-        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {}
+    @Override public @NonNull Dialog onCreateDialog(Bundle savedInstanceState) {
+        View fragment = mInflater.inflate(R.layout.order_dialog_fragment, null);
+        ButterKnife.inject(this, fragment);
+        mGiveForDays.addTextChangedListener(new DurationDaysWatcher());
+        mMedication.requestFocus();
+        Dialog dialog = new AlertDialog.Builder(getActivity())
+            .setCancelable(false) // Disable auto-cancel.
+            .setTitle(R.string.title_new_order)
+            .setPositiveButton(R.string.ok, null)
+            .setNegativeButton(R.string.cancel, null)
+            .setView(fragment)
+            .create();
+        // Open the keyboard, ready to type into the medication field.
+        dialog.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        return dialog;
+    }
 
-        @Override
-        public void afterTextChanged(Editable editable) {
+    class DurationDaysWatcher implements TextWatcher {
+        @Override public void beforeTextChanged(CharSequence c, int x, int y, int z) {
+        }
+
+        @Override public void onTextChanged(CharSequence c, int x, int y, int z) {
+        }
+
+        @Override public void afterTextChanged(Editable editable) {
             String text = mGiveForDays.getText().toString().trim();
             int days = text.isEmpty() ? 0 : Integer.parseInt(text);
             LocalDate lastDay = LocalDate.now().plusDays(days - 1);
             mGiveForDaysLabel.setText(
-                    days == 0 ? R.string.order_give_for_days :
-                            days == 1 ? R.string.order_give_for_day :
-                                    R.string.order_give_for_days);
+                days == 0 ? R.string.order_give_for_days :
+                    days == 1 ? R.string.order_give_for_day :
+                        R.string.order_give_for_days);
             mDurationLabel.setText(getResources().getString(
-                    days == 0 ? R.string.order_duration_indefinitely :
-                            days == 1 ? R.string.order_duration_today :
-                                    days == 2 ? R.string.order_duration_today_and_tomorrow :
-                                            R.string.order_duration_today_through_date
+                days == 0 ? R.string.order_duration_unspecified :
+                    days == 1 ? R.string.order_duration_stop_after_today :
+                        days == 2 ? R.string.order_duration_stop_after_tomorrow :
+                            R.string.order_duration_stop_after_date
             ).replace("%s", Utils.toShortString(lastDay)));
         }
     }

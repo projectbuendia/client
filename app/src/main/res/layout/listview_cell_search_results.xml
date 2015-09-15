@@ -80,9 +80,9 @@
             android:layout_gravity="center_vertical|end"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="64dp"
+            android:minWidth="96dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            tools:text="23 mo"/>
+            tools:text="5 y 10 mo"/>
 
         </LinearLayout>
 

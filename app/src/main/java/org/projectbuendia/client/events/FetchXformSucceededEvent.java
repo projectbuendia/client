@@ -12,4 +12,5 @@
 package org.projectbuendia.client.events;
 
 /** An event bus event indicating that fetching an Xform succeeded. */
-public class FetchXformSucceededEvent {}
+public class FetchXformSucceededEvent {
+}

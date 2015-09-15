@@ -11,42 +11,29 @@
 
 package org.projectbuendia.client.user;
 
-import static org.mockito.Mockito.when;
-
 import android.test.InstrumentationTestCase;
+
+import com.google.common.collect.ImmutableSet;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAsyncTaskRunner;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 
-import com.google.common.collect.ImmutableSet;
+import static org.mockito.Mockito.when;
 
 /** Tests for {@link UserManager}. */
 public final class UserManagerTest extends InstrumentationTestCase {
 
-    private static final User USER = new User("id", "name");
+    private static final JsonUser USER = new JsonUser("id", "name");
 
     private UserManager mUserManager;
     private FakeEventBus mFakeEventBus;
     private FakeAsyncTaskRunner mFakeAsyncTaskRunner;
     @Mock private UserStore mMockUserStore;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-
-        mFakeEventBus = new FakeEventBus();
-        mFakeAsyncTaskRunner = new FakeAsyncTaskRunner(getInstrumentation());
-        mUserManager = new UserManager(
-                mMockUserStore,
-                mFakeEventBus,
-                mFakeAsyncTaskRunner);
-    }
 
     /** Tests that getActiveUser() returns null if the user is never set. */
     public void testGetActiveUser_ReturnsNullInitially() {
@@ -65,18 +52,30 @@ public final class UserManagerTest extends InstrumentationTestCase {
         mFakeAsyncTaskRunner.runUntilEmpty();
         // THEN the user manager fires off a KnownUsersLoadedEvent
         assertTrue(mFakeEventBus.getEventLog().contains(
-                new KnownUsersLoadedEvent(ImmutableSet.of(USER))));
+            new KnownUsersLoadedEvent(ImmutableSet.of(USER))));
     }
 
     /** Tests that an event is posted when users fail to load. */
     public void testLoadKnownUsers_GeneratesEventOnFailure() throws Exception {
         // GIVEN the user store returns an empty set of users
-        when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.<User>of());
+        when(mMockUserStore.loadKnownUsers()).thenReturn(ImmutableSet.<JsonUser> of());
         // WHEN loadKnownUsers is called and the async task is run
         mUserManager.loadKnownUsers();
         mFakeAsyncTaskRunner.runUntilEmpty();
         // THEN the user manager fires off a KnownUsersLoadFailedEvent
         mFakeEventBus.assertEventLogContains(
-                new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
+            new KnownUsersLoadFailedEvent(KnownUsersLoadFailedEvent.REASON_NO_USERS_RETURNED));
+    }
+
+    @Override protected void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
+        mFakeEventBus = new FakeEventBus();
+        mFakeAsyncTaskRunner = new FakeAsyncTaskRunner(getInstrumentation());
+        mUserManager = new UserManager(
+            mMockUserStore,
+            mFakeEventBus,
+            mFakeAsyncTaskRunner);
     }
 }

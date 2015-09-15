@@ -14,20 +14,21 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
 
-    <!-- the server to use for OpenMRS -->
+    <!-- The hostname to use as both OpenMRS server and package server -->
 
-    <org.projectbuendia.client.widget.EditAndClearDataPreference
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
         android:key="server"
         android:title="@string/pref_title_server"
         android:defaultValue="@string/server_default"
         android:selectAllOnFocus="true"
         android:inputType="text"
+        android:digits="abcdefghijklmnopqrstuvwxyz0123456789."
         android:capitalize="none"
         android:singleLine="true"
         android:maxLines="1" />
 
     <!-- The user to use for OpenMRS requests -->
-    <org.projectbuendia.client.widget.EditAndClearDataPreference
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
         android:key="openmrs_user"
         android:title="@string/pref_title_openmrs_user"
         android:defaultValue="@string/openmrs_user_default"
@@ -38,7 +39,7 @@
         android:maxLines="1" />
 
     <!-- The password to use for OpenMRS requests -->
-    <org.projectbuendia.client.widget.EditAndClearDataPreference
+    <org.projectbuendia.client.widgets.EditAndClearDataPreference
         android:key="openmrs_password"
         android:title="@string/pref_title_openmrs_password"
         android:defaultValue="@string/openmrs_password_default"

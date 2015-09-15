@@ -11,13 +11,13 @@
 
 package org.projectbuendia.client.events.data;
 
-import org.projectbuendia.client.data.app.TypedCursor;
 import org.projectbuendia.client.events.DefaultCrudEventBus;
+import org.projectbuendia.client.models.TypedCursor;
 
 /**
  * An abstract event bus event indicating that a {@link TypedCursor} has been fetched from the data
  * store.
- *
+ * <p/>
  * <p>Subclasses of this event should only be posted on a {@link DefaultCrudEventBus}.
  */
 public abstract class TypedCursorFetchedEvent<T> {

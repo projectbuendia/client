@@ -21,12 +21,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.res.ResZone;
-import org.projectbuendia.client.model.Zone;
-import org.projectbuendia.client.utils.PatientCountDisplay;
-import org.projectbuendia.client.widget.SubtitledButtonView;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.resolvables.ResZone;
+import org.projectbuendia.client.widgets.SubtitledButtonView;
 
 import java.util.List;
 
@@ -34,17 +33,17 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /** {@link ArrayAdapter} for displaying a list of locations. */
-public class LocationListAdapter extends ArrayAdapter<AppLocation> {
+public class LocationListAdapter extends ArrayAdapter<Location> {
 
     private final Context mContext;
-    private final AppLocationTree mLocationTree;
+    private final LocationTree mLocationTree;
     private Optional<String> mSelectedLocationUuid;
 
     public LocationListAdapter(
-            Context context,
-            List<AppLocation> locations,
-            AppLocationTree locationTree,
-            Optional<String> selectedLocation) {
+        Context context,
+        List<Location> locations,
+        LocationTree locationTree,
+        Optional<String> selectedLocation) {
         super(context, R.layout.listview_cell_location_selection, locations);
         mContext = context;
         mLocationTree = locationTree;
@@ -55,10 +54,15 @@ public class LocationListAdapter extends ArrayAdapter<AppLocation> {
         return mSelectedLocationUuid;
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public void setSelectedLocationUuid(Optional<String> locationUuid) {
+        mSelectedLocationUuid = locationUuid;
+
+        notifyDataSetChanged();
+    }
+
+    @Override public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view;
         ViewHolder holder;
         if (convertView != null) {
@@ -71,11 +75,11 @@ public class LocationListAdapter extends ArrayAdapter<AppLocation> {
             view.setTag(holder);
         }
 
-        AppLocation location = getItem(position);
+        Location location = getItem(position);
         // TODO/generalize: Make this more robust. Currently, this line only works if 'location' is
         // a tent; otherwise zone is ResZone.UNKNOWN
-        ResZone.Resolved zone = Zone.getResZone(
-                location.parentUuid).resolve(mContext.getResources());
+        ResZone.Resolved zone = Zones.getResZone(
+            location.parentUuid).resolve(mContext.getResources());
 
         int count = mLocationTree.getTotalPatientCount(location);
         holder.mButton.setTitle(location.toString());
@@ -88,19 +92,13 @@ public class LocationListAdapter extends ArrayAdapter<AppLocation> {
         }
 
         if (mSelectedLocationUuid.isPresent()
-                && mSelectedLocationUuid.get().equals(location.uuid)) {
+            && mSelectedLocationUuid.get().equals(location.uuid)) {
             view.setBackgroundResource(R.color.zone_location_selected_padding);
         } else {
             view.setBackgroundResource(R.drawable.location_selector);
         }
 
         return view;
-    }
-
-    public void setSelectedLocationUuid(Optional<String> locationUuid) {
-        mSelectedLocationUuid = locationUuid;
-
-        notifyDataSetChanged();
     }
 
     static class ViewHolder {

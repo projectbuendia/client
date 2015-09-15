@@ -41,44 +41,20 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /** Utility methods. */
 public class Utils {
-    static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
-    static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
-    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("d MMM 'at' HH:mm");
-    static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
-    static final DateTimeFormatter TIME_OF_DAY_FORMATTER = DateTimeFormat.forPattern("HH:mm");
     public static final DateTime MIN_DATE = new DateTime(0, 1, 1, 0, 0, 0, DateTimeZone.UTC);
     public static final DateTime MAX_DATE = new DateTime(100000, 1, 1, 0, 0, 0, DateTimeZone.UTC);
-
-    private Utils() {
-        // Prevent instantiation.
-    }
-
-    /** Converts objects with integer type to BigInteger. */
-    public static BigInteger toBigInteger(Object obj) {
-        if (obj instanceof Integer) {
-            return BigInteger.valueOf(((Integer) obj).longValue());
-        }
-        if (obj instanceof Long) {
-            return BigInteger.valueOf(((Long) obj).longValue());
-        }
-        if (obj instanceof BigInteger) {
-            return (BigInteger) obj;
-        }
-        return null;
-    }
-
     /**
      * Compares two objects that may be null, Integer, Long, BigInteger, or String.
      * null sorts before everything; all integers sort before all strings; integers
      * sort according to numeric value; strings sort according to string value.
      */
     public static Comparator<Object> nullIntStrComparator = new Comparator<Object>() {
-        @Override
-        public int compare(Object a, Object b) {
+        @Override public int compare(Object a, Object b) {
             BigInteger intA = toBigInteger(a);
             BigInteger intB = toBigInteger(b);
             if (intA != null && intB != null) {
@@ -88,65 +64,46 @@ public class Utils {
                 return ((String) a).compareTo((String) b);
             }
             return (a == null ? 0 : intA != null ? 1 : 2)
-                    - (b == null ? 0 : intB != null ? 1 : 2);
+                - (b == null ? 0 : intB != null ? 1 : 2);
         }
     };
-
     /**
      * Compares two lists, each of whose elements is a null, Integer, Long,
      * BigInteger, or String, lexicographically by element, just like Python.
      */
     public static Comparator<List<Object>> nullIntStrListComparator =
-            new Comparator<List<Object>>() {
-                @Override
-                public int compare(List<Object> a, List<Object> b) {
-                    for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
-                        int result = nullIntStrComparator.compare(a.get(i), b.get(i));
-                        if (result != 0) {
-                            return result;
-                        }
+        new Comparator<List<Object>>() {
+            @Override public int compare(List<Object> a, List<Object> b) {
+                for (int i = 0; i < Math.min(a.size(), b.size()); i++) {
+                    int result = nullIntStrComparator.compare(a.get(i), b.get(i));
+                    if (result != 0) {
+                        return result;
                     }
-                    return a.size() - b.size();
                 }
-            };
-
+                return a.size() - b.size();
+            }
+        };
+    static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
+    static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
+    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("d MMM 'at' HH:mm");
+    static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
+    static final DateTimeFormatter TIME_OF_DAY_FORMATTER = DateTimeFormat.forPattern("HH:mm");
     // Note: Use of \L here assumes a string that is already NFC-normalized.
     private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
-
     /**
      * Compares two strings in a manner that sorts alphabetic parts in alphabetic
      * order and numeric parts in numeric order, while guaranteeing that:
-     *   - compare(s, t) == 0 if and only if s.equals(t).
-     *   - compare(s, s + t) < 0 for any strings s and t.
-     *   - compare(s + x, s + y) == Integer.compare(x, y) for all integers x, y
-     *     and strings s that do not end in a digit.
-     *   - compare(s + t, s + u) == compare(s, t) for all strings s and strings
-     *     t, u that consist entirely of Unicode letters.
+     * - compare(s, t) == 0 if and only if s.equals(t).
+     * - compare(s, s + t) < 0 for any strings s and t.
+     * - compare(s + x, s + y) == Integer.compare(x, y) for all integers x, y
+     * and strings s that do not end in a digit.
+     * - compare(s + t, s + u) == compare(s, t) for all strings s and strings
+     * t, u that consist entirely of Unicode letters.
      * For example, the strings ["b1", "a11a", "a11", "a2", "a2b", "a2a", "a1"]
      * have the sort order ["a1", "a2", "a2a", "a2b", "a11", "a11a", "b1"].
      */
     public static Comparator<String> alphanumericComparator = new Comparator<String>() {
-        /**
-         * Breaks a string into a list of Integers (from sequences of ASCII digits)
-         * and Strings (from sequences of letters).  Other characters are ignored.
-         */
-        private List<Object> getParts(String str) {
-            Matcher matcher = NUMBER_OR_WORD_PATTERN.matcher(str);
-            List<Object> parts = new ArrayList<>();
-            while (matcher.find()) {
-                try {
-                    String part = matcher.group();
-                    String intPart = matcher.group(1);
-                    parts.add(intPart != null ? new BigInteger(intPart) : part);
-                } catch (Exception e) {  // shouldn't happen, but just in case
-                    parts.add(null);
-                }
-            }
-            return parts;
-        }
-
-        @Override
-        public int compare(String a, String b) {
+        @Override public int compare(String a, String b) {
             String aNormalized = Normalizer.normalize(a == null ? "" : a, Normalizer.Form.NFC);
             String bNormalized = Normalizer.normalize(b == null ? "" : b, Normalizer.Form.NFC);
             List<Object> aParts = getParts(aNormalized);
@@ -165,7 +122,40 @@ public class Utils {
             bParts.add(b);
             return nullIntStrListComparator.compare(aParts, bParts);
         }
+
+        /**
+         * Breaks a string into a list of Integers (from sequences of ASCII digits)
+         * and Strings (from sequences of letters).  Other characters are ignored.
+         */
+        private List<Object> getParts(String str) {
+            Matcher matcher = NUMBER_OR_WORD_PATTERN.matcher(str);
+            List<Object> parts = new ArrayList<>();
+            while (matcher.find()) {
+                try {
+                    String part = matcher.group();
+                    String intPart = matcher.group(1);
+                    parts.add(intPart != null ? new BigInteger(intPart) : part);
+                } catch (Exception e) {  // shouldn't happen, but just in case
+                    parts.add(null);
+                }
+            }
+            return parts;
+        }
     };
+
+    /** Converts objects with integer type to BigInteger. */
+    public static BigInteger toBigInteger(Object obj) {
+        if (obj instanceof Integer) {
+            return BigInteger.valueOf(((Integer) obj).longValue());
+        }
+        if (obj instanceof Long) {
+            return BigInteger.valueOf(((Long) obj).longValue());
+        }
+        if (obj instanceof BigInteger) {
+            return (BigInteger) obj;
+        }
+        return null;
+    }
 
     /** URL-encodes a nullable string, catching the useless exception that never happens. */
     public static String urlEncode(@Nullable String s) {
@@ -200,8 +190,8 @@ public class Utils {
      * logs can then be scanned later to produce analytics for the client app.)
      * @param action An identifier for the user action; should describe a user-
      *               initiated operation in the UI (e.g. "foo_button_pressed").
-     * @param pairs An even number of arguments providing key-value pairs of
-     *              arbitrary data to record with the event.
+     * @param pairs  An even number of arguments providing key-value pairs of
+     *               arbitrary data to record with the event.
      */
     public static void logUserAction(String action, String... pairs) {
         Server server = App.getInstance().getServer();
@@ -229,21 +219,14 @@ public class Utils {
         }
     }
 
-    /**
-     * Returns a value if that value is not null, or a specified default value otherwise.
-     * @param value the nullable value
-     * @param defaultValue the default
-     */
-    public static <T extends Object> T valueOrDefault(@Nullable T value, T defaultValue) {
-        return value == null ? defaultValue : value;
+    /** Returns the specified name or a sentinel representing an unknown name, if the name is null. */
+    public static @Nonnull String nameOrUnknown(@Nullable String name) {
+        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
     }
 
-    /**
-     * Returns the specified name or a sentinel representing an unknown name, if the name is null.
-     * @param name the nullable name
-     */
-    public static String nameOrUnknown(@Nullable String name) {
-        return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
+    /** Returns a value if that value is not null, or a specified default value otherwise. */
+    public static @Nonnull <T> T valueOrDefault(@Nullable T value, @Nonnull T defaultValue) {
+        return value == null ? defaultValue : value;
     }
 
     /** Converts a list of Longs to an array of primitive longs. */
@@ -256,21 +239,32 @@ public class Utils {
         return array;
     }
 
+    /** Gets a nullable string value from a cursor. */
+    public static String getString(Cursor c, String columnName) {
+        return getString(c, columnName, null);
+    }
+
     /** Gets a string value from a cursor, returning a default value instead of null. */
     public static String getString(Cursor c, String columnName, String defaultValue) {
         int index = c.getColumnIndex(columnName);
         return c.isNull(index) ? defaultValue : c.getString(index);
     }
 
-    /** Gets a nullable string value from a cursor. */
-    public static String getString(Cursor c, String columnName) {
-        return getString(c, columnName, null);
-    }
-
     /** Gets a LocalDate value from a cursor, possibly returning null. */
     public static LocalDate getLocalDate(Cursor c, String columnName) {
         int index = c.getColumnIndex(columnName);
         return c.isNull(index) ? null : new LocalDate(c.getString(index));
+    }
+
+    /** Gets a nullable long value (in millis) from a cursor as a DateTime. */
+    public static DateTime getDateTime(Cursor c, String columnName) {
+        Long millis = getLong(c, columnName);
+        return millis == null ? null : new DateTime(millis);
+    }
+
+    /** Gets a nullable long value from a cursor. */
+    public static Long getLong(Cursor c, String columnName) {
+        return getLong(c, columnName, null);
     }
 
     /** Gets a long integer value from a cursor, returning a default value instead of null. */
@@ -281,17 +275,6 @@ public class Utils {
         // causing an NPE when defaultValue is null.  The correct superset of (Long) and
         // (long) is obviously (Long); the Java specification (15.25) is incorrect.
         return c.isNull(index) ? defaultValue : (Long) c.getLong(index);
-    }
-
-    /** Gets a nullable long value from a cursor. */
-    public static Long getLong(Cursor c, String columnName) {
-        return getLong(c, columnName, null);
-    }
-
-    /** Gets a nullable long value (in millis) from a cursor as a DateTime. */
-    public static DateTime getDateTime(Cursor c, String columnName) {
-        Long millis = getLong(c, columnName);
-        return millis == null ? null : new DateTime(millis);
     }
 
     /** Converts a nullable LocalDate to a yyyy-mm-dd String. */
@@ -319,12 +302,14 @@ public class Utils {
     }
 
     /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
-    public static @Nullable String toShortString(@Nullable LocalDate localDate) {
+    public static @Nullable
+    String toShortString(@Nullable LocalDate localDate) {
         return localDate == null ? null : SHORT_DATE_FORMATTER.print(localDate);
     }
 
     /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
-    public static @Nullable String toMediumString(@Nullable LocalDate localDate) {
+    public static @Nullable
+    String toMediumString(@Nullable LocalDate localDate) {
         return localDate == null ? null : MEDIUM_DATE_FORMATTER.print(localDate);
     }
 
@@ -334,7 +319,8 @@ public class Utils {
     }
 
     /** Converts a nullable {@link DateTime} to a nullable String with just the time in hours and minutes. */
-    public static @Nullable String toTimeOfDayString(@Nullable DateTime dateTime) {
+    public static @Nullable
+    String toTimeOfDayString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : TIME_OF_DAY_FORMATTER.print(dateTime);
     }
 
@@ -348,13 +334,12 @@ public class Utils {
 
     /** Converts a birthdate to a string describing age in months or years. */
     public static String birthdateToAge(LocalDate birthdate) {
-        // TODO: Localization
+        // TODO/i18n
         Period age = new Period(birthdate, LocalDate.now());
-        if (age.getYears() >= 2) {
-            return "" + age.getYears() + " y";
-        } else {
-            return "" + (age.getYears() * 12 + age.getMonths()) + " mo";
-        }
+        int years = age.getYears(), months = age.getMonths();
+        return years == 0 ? "" + months + " mo" :
+            months == 0 || years >= 5 ? "" + years + " y" :
+                "" + years + " y " + months + " mo";
     }
 
     /**
@@ -371,7 +356,7 @@ public class Utils {
     /** Creates an interval from a min and max, where null means "unbounded". */
     public static Interval toInterval(DateTime start, DateTime stop) {
         return new Interval(start == null ? MIN_DATE : start,
-                stop == null ? MAX_DATE : stop);
+            stop == null ? MAX_DATE : stop);
     }
 
     /** Shows or hides a dialog based on a boolean flag. */
@@ -388,5 +373,9 @@ public class Utils {
     /** Shows or a hides a view based on a boolean flag. */
     public static void showIf(View view, boolean show) {
         view.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private Utils() {
+        // Prevent instantiation.
     }
 }

@@ -52,7 +52,7 @@ public class SyncManager {
     /** Cancels an in-flight, non-periodic sync. */
     public void cancelOnDemandSync() {
         ContentResolver.cancelSync(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
 
         // If sync was pending, it should now be idle and we can consider the sync immediately
         // canceled.
@@ -60,6 +60,18 @@ public class SyncManager {
             LOG.i("Sync was canceled before it began -- immediately firing SyncCanceledEvent.");
             EventBus.getDefault().post(new SyncCanceledEvent());
         }
+    }
+
+    /** Returns {@code true} if a sync is pending. */
+    public boolean isSyncPending() {
+        return ContentResolver.isSyncPending(
+            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
+    }
+
+    /** Returns {@code true} if a sync is active. */
+    public boolean isSyncActive() {
+        return ContentResolver.isSyncActive(
+            SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
     }
 
     /** Starts a full sync as soon as possible. */
@@ -77,26 +89,13 @@ public class SyncManager {
         }
     }
 
-    /** Returns {@code true} if a sync is active. */
-    public boolean isSyncActive() {
-        return ContentResolver.isSyncActive(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
-    }
-
-    /** Returns {@code true} if a sync is pending. */
-    public boolean isSyncPending() {
-        return ContentResolver.isSyncPending(
-                SyncAccountService.getAccount(), Contracts.CONTENT_AUTHORITY);
-    }
-
     /**
      * A {@link BroadcastReceiver} that listens for sync status broadcasts sent by
      * {@link SyncAdapter}.
      */
     public static class SyncStatusBroadcastReceiver extends BroadcastReceiver {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
+        @Override public void onReceive(Context context, Intent intent) {
             int syncStatus = intent.getIntExtra(SYNC_STATUS, -1 /*defaultValue*/);
             switch (syncStatus) {
                 case STARTED:
@@ -126,7 +125,7 @@ public class SyncManager {
                     break;
                 default:
                     LOG.i("Sync status broadcast intent received with unknown status %1$d.",
-                            syncStatus);
+                        syncStatus);
             }
         }
     }

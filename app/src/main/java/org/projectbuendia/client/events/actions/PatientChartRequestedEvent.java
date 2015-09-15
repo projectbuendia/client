@@ -11,9 +11,6 @@
 
 package org.projectbuendia.client.events.actions;
 
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-
 /** Event indicating that the user has requested to open a patient's chart. */
 public class PatientChartRequestedEvent {
     public final String uuid;  // patient's uuid

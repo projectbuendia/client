@@ -19,7 +19,7 @@ import android.widget.GridView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;
@@ -42,8 +42,7 @@ public class LoginFragment extends ProgressFragment {
     @Inject Colorizer mUserColorizer;
     @InjectView(R.id.users) GridView mUserGrid;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
 
@@ -52,24 +51,12 @@ public class LoginFragment extends ProgressFragment {
         mUserListAdapter = new UserListAdapter(getActivity(), mUserColorizer);
     }
 
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    @Override public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, container, savedInstanceState);
         ButterKnife.inject(this, v);
         mUserGrid.setAdapter(mUserListAdapter);
         return v;
-    }
-
-    @OnItemClick(R.id.users)
-    void onUsersItemClick(int position) {
-        LoginController controller =
-                ((LoginActivity)getActivity()).getUserLoginController();
-        if (controller != null) {
-            controller.onUserSelected(mUserListAdapter.getItem(position));
-        } else {
-            LOG.e("No LoginController available. This should never happen.");
-        }
     }
 
     /** Returns the {@link FragmentUi} for interfacing with the {@link LoginController}. */
@@ -77,15 +64,23 @@ public class LoginFragment extends ProgressFragment {
         return mFragmentUi;
     }
 
+    @OnItemClick(R.id.users) void onUsersItemClick(int position) {
+        LoginController controller =
+            ((LoginActivity) getActivity()).getUserLoginController();
+        if (controller != null) {
+            controller.onUserSelected(mUserListAdapter.getItem(position));
+        } else {
+            LOG.e("No LoginController available. This should never happen.");
+        }
+    }
+
     private class FragmentUi implements LoginController.FragmentUi {
 
-        @Override
-        public void showSpinner(boolean show) {
+        @Override public void showSpinner(boolean show) {
             changeState(show ? State.LOADING : State.LOADED);
         }
 
-        @Override
-        public void showUsers(List<User> users) {
+        @Override public void showUsers(List<JsonUser> users) {
             mUserListAdapter.setNotifyOnChange(false);
             mUserListAdapter.clear();
             mUserListAdapter.addAll(users);

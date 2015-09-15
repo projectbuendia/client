@@ -23,7 +23,7 @@ public class ProgressFragmentIdlingResource implements IdlingResource {
      * Constructs a new idling resource that will wait on the given {@link ProgressFragment} to
      * not be in the LOADED state before continuing. Resources with the same name as an
      * existing resource will be ignored.
-     * @param name a unique name for idempotency
+     * @param name             a unique name for idempotency
      * @param progressFragment the {@link ProgressFragment} to monitor
      */
     public ProgressFragmentIdlingResource(String name, ProgressFragment progressFragment) {
@@ -32,25 +32,21 @@ public class ProgressFragmentIdlingResource implements IdlingResource {
         mProgressFragment.registerSubscriber(new ProgressFragmentIdleSubscriber());
     }
 
-    @Override
-    public String getName() {
+    @Override public String getName() {
         return mName;
     }
 
-    @Override
-    public boolean isIdleNow() {
+    @Override public boolean isIdleNow() {
         return mProgressFragment.getState() == ProgressFragment.State.LOADED;
     }
 
-    @Override
-    public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
+    @Override public void registerIdleTransitionCallback(ResourceCallback resourceCallback) {
         mResourceCallback = resourceCallback;
     }
 
     private class ProgressFragmentIdleSubscriber implements ProgressFragment.ChangeStateSubscriber {
 
-        @Override
-        public void onChangeState(ProgressFragment.State newState) {
+        @Override public void onChangeState(ProgressFragment.State newState) {
             if (mResourceCallback != null && isIdleNow()) {
                 mResourceCallback.onTransitionToIdle();
                 mProgressFragment.unregisterSubscriber(this);

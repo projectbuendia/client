@@ -16,11 +16,11 @@ import android.preference.PreferenceManager;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
+import org.odk.collect.android.application.Collect;
 import org.projectbuendia.client.diagnostics.HealthMonitor;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.user.UserManager;
-import org.odk.collect.android.application.Collect;
 
 import javax.inject.Inject;
 
@@ -29,24 +29,34 @@ import dagger.ObjectGraph;
 /** An {@link Application} the represents the Android Client. */
 public class App extends Application {
 
-    private ObjectGraph mObjectGraph;
-
     /** The current instance of the application. */
     private static App sInstance;
-
     private static UserManager sUserManager;
-
     private static Server sServer;
-
     private static OpenMrsConnectionDetails sConnectionDetails;
-
+    private ObjectGraph mObjectGraph;
     @Inject UserManager mUserManager;
     @Inject OpenMrsConnectionDetails mOpenMrsConnectionDetails;
     @Inject Server mServer;
     @Inject HealthMonitor mHealthMonitor;
 
-    @Override
-    public void onCreate() {
+    public static synchronized App getInstance() {
+        return sInstance;
+    }
+
+    public static synchronized UserManager getUserManager() {
+        return sUserManager;
+    }
+
+    public static synchronized Server getServer() {
+        return sServer;
+    }
+
+    public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
+        return sConnectionDetails;
+    }
+
+    @Override public void onCreate() {
         Collect.onCreate(this);
         super.onCreate();
 
@@ -75,22 +85,6 @@ public class App extends Application {
 
     public void inject(Object obj) {
         mObjectGraph.inject(obj);
-    }
-
-    public static synchronized App getInstance() {
-        return sInstance;
-    }
-
-    public static synchronized UserManager getUserManager() {
-        return sUserManager;
-    }
-
-    public static synchronized Server getServer() {
-        return sServer;
-    }
-
-    public static synchronized OpenMrsConnectionDetails getConnectionDetails() {
-        return sConnectionDetails;
     }
 
     public HealthMonitor getHealthMonitor() {

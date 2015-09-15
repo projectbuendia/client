@@ -18,7 +18,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -34,14 +33,15 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppLocationTree;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.res.ResZone;
 import org.projectbuendia.client.events.CrudEventBus;
-import org.projectbuendia.client.model.Zone;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Location;
+import org.projectbuendia.client.models.LocationTree;
+import org.projectbuendia.client.models.Zones;
+import org.projectbuendia.client.resolvables.ResZone;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
 import org.projectbuendia.client.ui.BigToast;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.LocaleSelector;
 import org.projectbuendia.client.utils.Logger;
@@ -58,39 +58,31 @@ import butterknife.OnClick;
 public final class NewPatientActivity extends BaseLoggedInActivity {
 
     private static final Logger LOG = Logger.create();
-
+    // Alert dialog styling.
+    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
+    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
+    private static final int ALERT_DIALOG_PADDING = 32;
     private NewPatientController mController;
     private AlertDialog mAlertDialog;
     private DatePickerDialog mAdmissionDatePickerDialog;
     private DatePickerDialog mSymptomsOnsetDatePickerDialog;
-
     @Inject AppModel mModel;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
-
     @InjectView(R.id.patient_creation_text_patient_id) EditText mId;
     @InjectView(R.id.patient_creation_text_patient_given_name) EditText mGivenName;
     @InjectView(R.id.patient_creation_text_patient_family_name) EditText mFamilyName;
-    @InjectView(R.id.patient_creation_text_age) EditText mAge;
-    @InjectView(R.id.patient_creation_radiogroup_age_units) RadioGroup mAgeUnits;
+    @InjectView(R.id.patient_creation_age_years) EditText mAgeYears;
+    @InjectView(R.id.patient_creation_age_months) EditText mAgeMonths;
     @InjectView(R.id.patient_creation_radiogroup_sex) RadioGroup mSex;
     @InjectView(R.id.patient_creation_admission_date) EditText mAdmissionDate;
     @InjectView(R.id.patient_creation_symptoms_onset_date) EditText mSymptomsOnsetDate;
     @InjectView(R.id.patient_creation_text_change_location) TextView mLocationText;
     @InjectView(R.id.patient_creation_button_create) Button mCreateButton;
     @InjectView(R.id.patient_creation_button_cancel) Button mCancelButton;
-
     private String mLocationUuid;
     private boolean mIsCreatePending = false;
-
-    private AppLocationTree mLocationTree;
-
+    private LocationTree mLocationTree;
     private AssignLocationDialog.LocationSelectedCallback mLocationSelectedCallback;
-
-    // Alert dialog styling.
-    private static final float ALERT_DIALOG_TEXT_SIZE = 32.0f;
-    private static final float ALERT_DIALOG_TITLE_TEXT_SIZE = 34.0f;
-    private static final int ALERT_DIALOG_PADDING = 32;
-
     private DateSetListener mAdmissionDateSetListener;
     private DateSetListener mSymptomsOnsetDateSetListener;
 
@@ -98,8 +90,16 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         caller.startActivity(new Intent(caller, NewPatientActivity.class));
     }
 
-    @Override
-    protected void onCreateImpl(Bundle savedInstanceState) {
+    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            showAlertDialog();
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    @Override protected void onCreateImpl(Bundle savedInstanceState) {
         super.onCreateImpl(savedInstanceState);
 
         App.getInstance().inject(this);
@@ -108,39 +108,38 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
 
         mController = new NewPatientController(new Ui(), crudEventBus, mModel);
         mAlertDialog = new AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setTitle(R.string.title_add_patient_cancel)
-                .setPositiveButton(R.string.yes,
-                        new DialogInterface.OnClickListener() {
+            .setIcon(android.R.drawable.ic_dialog_info)
+            .setTitle(R.string.title_add_patient_cancel)
+            .setPositiveButton(R.string.yes,
+                new DialogInterface.OnClickListener() {
 
-                            @Override
-                            public void onClick(DialogInterface dialog, int i) {
-                                finish();
-                            }
-                        })
-                .setNegativeButton(R.string.no, null)
-                .create();
+                    @Override public void onClick(DialogInterface dialog, int i) {
+                        finish();
+                    }
+                })
+            .setNegativeButton(R.string.no, null)
+            .create();
 
-        setContentView(R.layout.activity_patient_creation);
+        setContentView(R.layout.activity_new_patient);
         ButterKnife.inject(this);
 
         DateTime now = DateTime.now();
         mAdmissionDateSetListener = new DateSetListener(mAdmissionDate, LocalDate.now());
         mAdmissionDatePickerDialog = new DatePickerDialog(
-                this,
-                mAdmissionDateSetListener,
-                now.getYear(),
-                now.getMonthOfYear() - 1,
-                now.getDayOfMonth());
+            this,
+            mAdmissionDateSetListener,
+            now.getYear(),
+            now.getMonthOfYear() - 1,
+            now.getDayOfMonth());
         mAdmissionDatePickerDialog.setTitle(R.string.admission_date_picker_title);
         mAdmissionDatePickerDialog.getDatePicker().setCalendarViewShown(false);
         mSymptomsOnsetDateSetListener = new DateSetListener(mSymptomsOnsetDate, null);
         mSymptomsOnsetDatePickerDialog = new DatePickerDialog(
-                this,
-                mSymptomsOnsetDateSetListener,
-                now.getYear(),
-                now.getMonthOfYear() - 1,
-                now.getDayOfMonth());
+            this,
+            mSymptomsOnsetDateSetListener,
+            now.getYear(),
+            now.getMonthOfYear() - 1,
+            now.getDayOfMonth());
         mSymptomsOnsetDatePickerDialog.setTitle(R.string.symptoms_onset_date_picker_title);
         mSymptomsOnsetDatePickerDialog.getDatePicker().setCalendarViewShown(false);
 
@@ -165,7 +164,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             return;
         }
 
-        AppLocation location = mLocationTree.findByUuid(mLocationUuid);
+        Location location = mLocationTree.findByUuid(mLocationUuid);
 
         if (location == null || location.parentUuid == null) {
             // This can apparently happen, on rare occasions, for an unknown reason. In this
@@ -174,17 +173,17 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             BigToast.show(this, R.string.error_setting_location);
 
             throw new IllegalArgumentException("mLocationTree=" + mLocationTree
-                    + " mLocationTree.getRoot()=" + mLocationTree.getRoot()
-                    + " mLocationUuid=" + mLocationUuid
-                    + " location=" + location
-                    + " location.parentUuid="
-                    + (location == null ? "<invalid>" : location.parentUuid)
+                + " mLocationTree.getRoot()=" + mLocationTree.getRoot()
+                + " mLocationUuid=" + mLocationUuid
+                + " location=" + location
+                + " location.parentUuid="
+                + (location == null ? "<invalid>" : location.parentUuid)
             );
 
             //return;
         }
 
-        ResZone resZone = Zone.getResZone(location.parentUuid);
+        ResZone resZone = Zones.getResZone(location.parentUuid);
 
         if (resZone == null) {
 
@@ -193,11 +192,11 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             BigToast.show(this, R.string.error_setting_location);
 
             throw new IllegalArgumentException("mLocationTree=" + mLocationTree
-                    + " mLocationTree.getRoot()=" + mLocationTree.getRoot()
-                    + " mLocationUuid=" + mLocationUuid
-                    + " location=" + location
-                    + " location.parentUuid=" + location.parentUuid
-                    + " resZone=" + resZone
+                + " mLocationTree.getRoot()=" + mLocationTree.getRoot()
+                + " mLocationUuid=" + mLocationUuid
+                + " location=" + location
+                + " location.parentUuid=" + location.parentUuid
+                + " resZone=" + resZone
             );
 
             // return;
@@ -210,15 +209,54 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         mLocationText.setTextColor(zone.getForegroundColor());
     }
 
-    @Override
-    protected void onStartImpl() {
+    @Override protected void onStartImpl() {
         super.onStartImpl();
         mController.init();
         setUiEnabled(true);  // UI may have been disabled previously.
     }
 
-    @Override
-    protected void onStopImpl() {
+    private void setUiEnabled(boolean enable) {
+        mId.setEnabled(enable);
+        mGivenName.setEnabled(enable);
+        mFamilyName.setEnabled(enable);
+        mAgeYears.setEnabled(enable);
+        mAgeMonths.setEnabled(enable);
+        mSex.setEnabled(enable);
+        mAdmissionDate.setEnabled(enable);
+        mSymptomsOnsetDate.setEnabled(enable);
+        mLocationText.setEnabled(enable);
+        mCreateButton.setEnabled(enable);
+        mCancelButton.setEnabled(enable);
+        mCreateButton.setText(enable ? R.string.patient_creation_create
+            : R.string.patient_creation_create_busy);
+        setFocus(mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
+        showKeyboard(mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
+    }
+
+    /** Gives focus to the first of the given views that has an error. */
+    private void setFocus(TextView... views) {
+        for (TextView v : views) {
+            if (v.getError() != null) {
+                v.requestFocus();
+                return;
+            }
+        }
+    }
+
+    private void showKeyboard(View... forview) {
+        for (View v : forview) {
+            if (v.isFocused()) {
+                getInputMethodManager().showSoftInput(v, 0);
+                return;
+            }
+        }
+    }
+
+    private InputMethodManager getInputMethodManager() {
+        return (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+    }
+
+    @Override protected void onStopImpl() {
         mController.suspend();
         super.onStopImpl();
     }
@@ -234,64 +272,21 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         final View button = findViewById(R.id.patient_creation_button_change_location);
         button.setEnabled(false);
         Runnable reEnableButton = new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 button.setEnabled(true);
             }
         };
         new AssignLocationDialog(
-                this,
-                mModel,
-                LocaleSelector.getCurrentLocale().getLanguage(),
-                reEnableButton,
-                mCrudEventBusProvider.get(),
-                mLocationUuid == null ? Optional.<String>absent() : Optional.of(mLocationUuid),
-                mLocationSelectedCallback).show();
+            this,
+            mModel,
+            LocaleSelector.getCurrentLocale().getLanguage(),
+            reEnableButton,
+            mCrudEventBusProvider.get(),
+            mLocationUuid == null ? Optional.<String> absent() : Optional.of(mLocationUuid),
+            mLocationSelectedCallback).show();
     }
 
-    private void setUiEnabled(boolean enable) {
-        mId.setEnabled(enable);
-        mGivenName.setEnabled(enable);
-        mFamilyName.setEnabled(enable);
-        mAge.setEnabled(enable);
-        mAgeUnits.setEnabled(enable);
-        mSex.setEnabled(enable);
-        mAdmissionDate.setEnabled(enable);
-        mSymptomsOnsetDate.setEnabled(enable);
-        mLocationText.setEnabled(enable);
-        mCreateButton.setEnabled(enable);
-        mCancelButton.setEnabled(enable);
-        mCreateButton.setText(enable ? R.string.patient_creation_create
-                : R.string.patient_creation_create_busy);
-        setFocus(mId, mGivenName, mFamilyName, mAge);
-        showKeyboard(mId, mGivenName, mFamilyName, mAge);
-    }
-
-    /** Gives focus to the first of the given views that has an error. */
-    private void setFocus(TextView... views) {
-        for (TextView v : views) {
-            if (v.getError() != null) {
-                v.requestFocus();
-                return;
-            }
-        }
-    }
-
-    private InputMethodManager getInputMethodManager() {
-        return (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-    }
-
-    private void showKeyboard(View... forview) {
-        for (View v : forview) {
-            if (v.isFocused()) {
-                getInputMethodManager().showSoftInput(v, 0);
-                return;
-            }
-        }
-    }
-
-    @OnClick(R.id.patient_creation_admission_date)
-    void onAdmissionDateClick() {
+    @OnClick(R.id.patient_creation_admission_date) void onAdmissionDateClick() {
         mAdmissionDatePickerDialog.show();
     }
 
@@ -300,59 +295,60 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         mSymptomsOnsetDatePickerDialog.show();
     }
 
-    @OnClick(R.id.patient_creation_button_cancel)
-    void onCancelClick() {
+    @OnClick(R.id.patient_creation_button_cancel) void onCancelClick() {
         showAlertDialog();
     }
 
-    @OnClick(R.id.patient_creation_button_create)
-    void onCreateClick() {
-        if (mIsCreatePending) {
-            return;
+    // TODO: This is very similar to FormEntryActivity; consolidate.
+    private void showAlertDialog() {
+        if (mAlertDialog == null) return;
+
+        mAlertDialog.show();
+
+        // Increase text sizes in dialog, which must be done after the alert is shown when not
+        // specifying a custom alert dialog theme or layout.
+        TextView[] views = {
+            (TextView) mAlertDialog.findViewById(android.R.id.message),
+            mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
+            mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
+            mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+
+        };
+        for (TextView view : views) {
+            if (view != null) {
+                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
+                view.setPadding(
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+            }
         }
+
+        // Title should be bigger than message and button text.
+        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
+        TextView title = (TextView) mAlertDialog.findViewById(alertTitleResource);
+        if (title != null) {
+            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
+            title.setPadding(
+                ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
+                ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
+        }
+    }
+
+    @OnClick(R.id.patient_creation_button_create) void onCreateClick() {
+        if (mIsCreatePending) return;
 
         setUiEnabled(false);
         mIsCreatePending = mController.createPatient(
-                mId.getText().toString(),
-                mGivenName.getText().toString(),
-                mFamilyName.getText().toString(),
-                mAge.getText().toString(),
-                getAgeUnits(),
-                getSex(),
-                getAdmissionDate(),
-                getSymptomsOnsetDate(),
-                mLocationUuid);
+            mId.getText().toString(),
+            mGivenName.getText().toString(),
+            mFamilyName.getText().toString(),
+            mAgeYears.getText().toString(),
+            mAgeMonths.getText().toString(),
+            getSex(),
+            getAdmissionDate(),
+            getSymptomsOnsetDate(),
+            mLocationUuid);
         setUiEnabled(!mIsCreatePending);
-    }
-
-    private LocalDate getSymptomsOnsetDate() {
-        return mSymptomsOnsetDateSetListener.getDate();
-    }
-
-    private LocalDate getAdmissionDate() {
-        return mAdmissionDateSetListener.getDate();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            showAlertDialog();
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-    }
-
-    private int getAgeUnits() {
-        int checkedAgeUnitsId = mAgeUnits.getCheckedRadioButtonId();
-        switch (checkedAgeUnitsId) {
-            case R.id.patient_creation_radiogroup_age_units_years:
-                return NewPatientController.AGE_YEARS;
-            case R.id.patient_creation_radiogroup_age_units_months:
-                return NewPatientController.AGE_MONTHS;
-            default:
-                return NewPatientController.AGE_UNKNOWN;
-        }
     }
 
     private int getSex() {
@@ -367,53 +363,22 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         }
     }
 
-    // TODO: This is very similar to FormEntryActivity; consolidate.
-    private void showAlertDialog() {
-        if (mAlertDialog == null) {
-            return;
-        }
+    private LocalDate getAdmissionDate() {
+        return mAdmissionDateSetListener.getDate();
+    }
 
-        mAlertDialog.show();
-
-        // Increase text sizes in dialog, which must be done after the alert is shown when not
-        // specifying a custom alert dialog theme or layout.
-        TextView[] views = {
-                (TextView) mAlertDialog.findViewById(android.R.id.message),
-                mAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE),
-                mAlertDialog.getButton(DialogInterface.BUTTON_NEUTRAL),
-                mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
-
-        };
-        for (TextView view : views) {
-            if (view != null) {
-                view.setTextSize(ALERT_DIALOG_TEXT_SIZE);
-                view.setPadding(
-                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
-                        ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
-            }
-        }
-
-        // Title should be bigger than message and button text.
-        int alertTitleResource = getResources().getIdentifier("alertTitle", "id", "android");
-        TextView title = (TextView)mAlertDialog.findViewById(alertTitleResource);
-        if (title != null) {
-            title.setTextSize(ALERT_DIALOG_TITLE_TEXT_SIZE);
-            title.setPadding(
-                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING,
-                    ALERT_DIALOG_PADDING, ALERT_DIALOG_PADDING);
-        }
+    private LocalDate getSymptomsOnsetDate() {
+        return mSymptomsOnsetDateSetListener.getDate();
     }
 
     private final class Ui implements NewPatientController.Ui {
 
-        @Override
-        public void setLocationTree(AppLocationTree locationTree) {
+        @Override public void setLocationTree(LocationTree locationTree) {
             mLocationTree = locationTree;
             updateLocationUi();
         }
 
-        @Override
-        public void showValidationError(int field, int messageResource, String... messageArgs) {
+        @Override public void showValidationError(int field, int messageResource, String... messageArgs) {
             String message = getString(messageResource, (Object[]) messageArgs);
             switch (field) {
                 case NewPatientController.Ui.FIELD_ID:
@@ -425,8 +390,8 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
                 case NewPatientController.Ui.FIELD_FAMILY_NAME:
                     mFamilyName.setError(message);
                     break;
-                case NewPatientController.Ui.FIELD_AGE:
-                    mAge.setError(message);
+                case NewPatientController.Ui.FIELD_AGE_YEARS:
+                    mAgeYears.setError(message);
                     break;
                 case NewPatientController.Ui.FIELD_ADMISSION_DATE:
                     // TODO: setError doesn't show a message because this field doesn't focus
@@ -441,9 +406,6 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
                 case NewPatientController.Ui.FIELD_LOCATION:
                     //TODO: Using setError doesn't really work properly. Implement a better UI
                     // fallthrough
-                case NewPatientController.Ui.FIELD_AGE_UNITS:
-                    //TODO: implement errors for age unit
-                    // fallthrough
                 case NewPatientController.Ui.FIELD_SEX:
                     //TODO: implement errors for sex
                     // fallthrough
@@ -456,12 +418,12 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             }
         }
 
-        @Override
-        public void clearValidationErrors() {
+        @Override public void clearValidationErrors() {
             mId.setError(null);
             mGivenName.setError(null);
             mFamilyName.setError(null);
-            mAge.setError(null);
+            mAgeYears.setError(null);
+            mAgeMonths.setError(null);
             mAdmissionDate.setError(null);
             mSymptomsOnsetDate.setError(null);
             // TODO: If the validation error indicators for age units
@@ -469,24 +431,22 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             // for the above fields, they should be cleared as well.
         }
 
-        @Override
-        public void showErrorMessage(int errorResource) {
+        @Override public void showErrorMessage(int errorResource) {
             showErrorMessage(getString(errorResource));
         }
 
-        @Override
-        public void showErrorMessage(String errorString) {
+        @Override public void showErrorMessage(String errorString) {
             mIsCreatePending = false;
             setUiEnabled(true);
             BigToast.show(
-                    NewPatientActivity.this, R.string.patient_creation_error, errorString);
+                NewPatientActivity.this, R.string.patient_creation_error, errorString);
         }
 
-        @Override
-        public void quitActivity() {
+        @Override public void finishAndGoToPatientChart(String patientUuid) {
             mIsCreatePending = false;
             BigToast.show(NewPatientActivity.this, R.string.patient_creation_success);
             finish();
+            PatientChartActivity.start(NewPatientActivity.this, patientUuid);
         }
     }
 
@@ -499,12 +459,11 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
             mLocalDate = defaultDate;
         }
 
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        @Override public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             LocalDate date = new LocalDate()
-                    .withYear(year)
-                    .withMonthOfYear(monthOfYear + 1)
-                    .withDayOfMonth(dayOfMonth);
+                .withYear(year)
+                .withMonthOfYear(monthOfYear + 1)
+                .withDayOfMonth(dayOfMonth);
             mDateField.setText(Utils.toMediumString(date.toDateTimeAtStartOfDay().toLocalDate()));
             mLocalDate = date;
         }

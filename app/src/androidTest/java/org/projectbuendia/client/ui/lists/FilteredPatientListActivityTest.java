@@ -12,14 +12,11 @@
 package org.projectbuendia.client.ui.lists;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.data.app.AppLocation;
-import org.projectbuendia.client.data.app.AppPatient;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.StringStartsWith.startsWith;
 
 /** Tests for {@link FilteredPatientListActivity}. */
 public class FilteredPatientListActivityTest extends FunctionalTestCase {
@@ -29,21 +26,21 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         click(viewWithText("Guest User"));
     }
 
+    /** Looks for the filter menu. */
+    public void testFilterMenu() {
+        openPatientList();
+        screenshot("Test Start");
+        click(viewWithText("All present patients"));
+        expectVisible(viewWithText("Triage"));
+        expectVisible(viewWithText("Pregnant"));
+        screenshot("In Filter Menu");
+    }
+
     /** Opens the patient list. */
     public void openPatientList() {
         waitForProgressFragment(); // Wait for tents.
         click(viewWithText("ALL PRESENT PATIENTS"));
         waitForProgressFragment(); // Wait for patients.
-    }
-
-    /** Looks for the filter menu. */
-    public void testFilterMenu() {
-        openPatientList();
-        screenshot("Test Start");
-        click(viewWithText("All Present Patients"));
-        expectVisible(viewWithText("Triage"));
-        expectVisible(viewWithText("Pregnant"));
-        screenshot("In Filter Menu");
     }
 
     /** Looks for two zone headings and at least one patient. */
@@ -53,13 +50,10 @@ public class FilteredPatientListActivityTest extends FunctionalTestCase {
         // There should be patients in both Triage and S1.
         expectVisibleSoon(viewThat(hasTextMatchingRegex("Triage \\((No|[0-9]+) patients?\\)")));
 
-        expectVisible(dataThat(is(AppLocation.class), hasToString(startsWith("S1")))
-                .inAdapterView(withId(R.id.fragment_patient_list)));
-
         // Click the first patient
-        click(dataThat(is(AppPatient.class))
-                .inAdapterView(withId(R.id.fragment_patient_list))
-                .atPosition(0));
+        click(dataThat(is(Patient.class))
+            .inAdapterView(withId(R.id.fragment_patient_list))
+            .atPosition(0));
         screenshot("After Patient Clicked");
     }
 }

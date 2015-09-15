@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.events.user;
 
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 
 /**
  * An event bus event indicating that a user was successfully deleted, both locally and on the
@@ -19,9 +19,9 @@ import org.projectbuendia.client.net.model.User;
  */
 public class UserDeletedEvent {
 
-    public final User user;
+    public final JsonUser user;
 
-    public UserDeletedEvent(User user) {
+    public UserDeletedEvent(JsonUser user) {
         this.user = user;
     }
 }

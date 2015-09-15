@@ -11,13 +11,12 @@
 
 package org.projectbuendia.client.ui.chart;
 
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingResource;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
-
-import android.support.test.espresso.Espresso;
-import android.support.test.espresso.IdlingResource;
 
 import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
@@ -30,7 +29,7 @@ import org.projectbuendia.client.events.sync.SyncFinishedEvent;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.widget.DataGridView;
+import org.projectbuendia.client.widgets.DataGridView;
 
 import java.util.UUID;
 
@@ -56,7 +55,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Wait for a sync operation to update the chart.
         EventBusIdlingResource<SyncFinishedEvent> syncFinishedIdlingResource =
-                new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
+            new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncFinishedIdlingResource);
 
         // Check for updated vital view.
@@ -64,8 +63,8 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Check for updated chart view.
         expectVisible(viewThat(
-                hasText(R.string.status_short_desc_well),
-                not(hasId(R.id.patient_chart_vital_general_condition_number))));
+            hasText(R.string.status_short_desc_well),
+            not(hasId(R.id.patient_chart_vital_general_condition_number))));
     }
 
     /** Tests that the encounter form can be opened more than once. */
@@ -120,6 +119,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
     // TODO/completeness: Disabled as there seems to be no easy way of
     // scrolling correctly with no adapter view.
+
     /** Tests that encounter time can be set to a date in the past and still displayed correctly. */
     /*public void testCanSubmitObservationsInThePast() {
         inUserLoginGoToDemoPatientChart();
@@ -129,12 +129,28 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         saveForm();
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
+    protected void openEncounterForm() {
+        expectVisibleSoon(viewWithId(R.id.action_update_chart));
+        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
+            new EventBusIdlingResource<FetchXformSucceededEvent>(
+                UUID.randomUUID().toString(),
+                mEventBus);
+        click(viewWithId(R.id.action_update_chart));
+        Espresso.registerIdlingResources(xformIdlingResource);
+
+        // Give the form time to be parsed on the client (this does not result in an event firing).
+        expectVisibleSoon(viewWithText("Encounter"));
+    }
 
     /** Tests that dismissing a form immediately closes it if no changes have been made. */
     public void testDismissButtonReturnsImmediatelyWithNoChanges() {
         inUserLoginGoToDemoPatientChart();
         openEncounterForm();
         discardForm();
+    }
+
+    private void discardForm() {
+        click(viewWithText("Discard"));
     }
 
     /** Tests that dismissing a form results in a dialog if changes have been made. */
@@ -152,6 +168,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         discardForm();
         expectVisible(viewWithText(R.string.title_discard_observations));
         click(viewWithText(R.string.yes));
+    }
+
+    private void answerTextQuestion(String questionText, String answerText) {
+        scrollToAndType(answerText, viewThat(
+            isA(EditText.class),
+            hasSiblingThat(
+                isA(MediaLayout.class),
+                hasDescendantThat(hasTextContaining(questionText)))));
     }
 
     /** Tests that PCR submission does not occur without confirmation being specified. */
@@ -172,6 +196,45 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         // Check that new values displayed.
         expectVisibleSoon(viewThat(hasTextContaining("38.0 / 35.0")));
+    }
+
+    protected void openPcrForm() {
+        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
+            new EventBusIdlingResource<FetchXformSucceededEvent>(
+                UUID.randomUUID().toString(),
+                mEventBus);
+        click(viewWithId(R.id.attribute_pcr));
+        Espresso.registerIdlingResources(xformIdlingResource);
+
+        // Give the form time to be parsed on the client (this does not result in an event firing).
+        expectVisibleSoon(viewWithText("Encounter"));
+    }
+
+    private void answerCodedQuestion(String questionText, String answerText) {
+        // Close the soft keyboard before answering any toggle questions -- on rare occasions,
+        // if Espresso answers one of these questions and is then instructed to type into another
+        // field, the input event will actually be generated as the keyboard is hiding and will be
+        // lost, but Espresso won't detect this case.
+        Espresso.closeSoftKeyboard();
+
+        scrollToAndClick(viewThat(
+            isAnyOf(CheckBox.class, RadioButton.class),
+            hasAncestorThat(
+                isAnyOf(ButtonsSelectOneWidget.class, TableWidgetGroup.class, ODKView.class),
+                hasDescendantThat(hasTextContaining(questionText))),
+            hasTextContaining(answerText)));
+    }
+
+    private void saveForm() {
+        IdlingResource xformWaiter = getXformSubmissionIdlingResource();
+        click(viewWithText("Save"));
+        Espresso.registerIdlingResources(xformWaiter);
+    }
+
+    private IdlingResource getXformSubmissionIdlingResource() {
+        return new EventBusIdlingResource<SubmitXformSucceededEvent>(
+            UUID.randomUUID().toString(),
+            mEventBus);
     }
 
     /** Tests that PCR displays 'NEG' in place of numbers when 40.0 is specified. */
@@ -212,6 +275,22 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         }
     }
 
+    private void checkVitalValueContains(String vitalName, String vitalValue) {
+        // Check for updated vital view.
+        expectVisibleSoon(viewThat(
+            hasTextContaining(vitalValue),
+            hasSiblingThat(hasTextContaining(vitalName))));
+    }
+
+    private void checkObservationValueEquals(int row, String value, String dateKey) {
+        // TODO/completeness: actually check dateKey
+
+        scrollToAndExpectVisible(viewThat(
+            hasText(value),
+            hasAncestorThat(isInRow(row, ROW_HEIGHT)),
+            hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
+    }
+
     /** Ensures that non-overlapping observations for the same encounter are combined. */
     public void testCombinesNonOverlappingObservationsForSameEncounter() {
         inUserLoginGoToDemoPatientChart();
@@ -235,6 +314,14 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationSet(5, "Today"); // Nausea
         checkObservationValueEquals(6, "2", "Today"); // Vomiting
         checkObservationValueEquals(7, "5", "Today"); // Diarrhoea
+    }
+
+    private void checkObservationSet(int row, String dateKey) {
+        // TODO/completeness: actually check dateKey
+        scrollToAndExpectVisible(viewThat(
+            hasAncestorThat(isInRow(row, ROW_HEIGHT)),
+            hasBackground(getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
+            hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
     }
 
     /** Exercises all fields in the encounter form, except for encounter time. */
@@ -297,93 +384,5 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         expectVisible(viewThat(hasTextContaining("IV Fitted")));
 
         // TODO/completeness: exercise the Notes field
-    }
-
-    protected void openEncounterForm() {
-        expectVisibleSoon(viewWithId(R.id.action_update_chart));
-        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-                new EventBusIdlingResource<FetchXformSucceededEvent>(
-                        UUID.randomUUID().toString(),
-                        mEventBus);
-        click(viewWithId(R.id.action_update_chart));
-        Espresso.registerIdlingResources(xformIdlingResource);
-
-        // Give the form time to be parsed on the client (this does not result in an event firing).
-        expectVisibleSoon(viewWithText("Encounter"));
-    }
-
-    protected void openPcrForm() {
-        EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
-                new EventBusIdlingResource<FetchXformSucceededEvent>(
-                        UUID.randomUUID().toString(),
-                        mEventBus);
-        click(viewWithId(R.id.action_add_test_result));
-        Espresso.registerIdlingResources(xformIdlingResource);
-
-        // Give the form time to be parsed on the client (this does not result in an event firing).
-        expectVisibleSoon(viewWithText("Encounter"));
-    }
-
-    private void discardForm() {
-        click(viewWithText("Discard"));
-    }
-
-    private void saveForm() {
-        IdlingResource xformWaiter = getXformSubmissionIdlingResource();
-        click(viewWithText("Save"));
-        Espresso.registerIdlingResources(xformWaiter);
-    }
-
-    private void answerTextQuestion(String questionText, String answerText) {
-        scrollToAndType(answerText, viewThat(
-                isA(EditText.class),
-                hasSiblingThat(
-                        isA(MediaLayout.class),
-                        hasDescendantThat(hasTextContaining(questionText)))));
-    }
-
-    private void answerCodedQuestion(String questionText, String answerText) {
-        // Close the soft keyboard before answering any toggle questions -- on rare occasions,
-        // if Espresso answers one of these questions and is then instructed to type into another
-        // field, the input event will actually be generated as the keyboard is hiding and will be
-        // lost, but Espresso won't detect this case.
-        Espresso.closeSoftKeyboard();
-
-        scrollToAndClick(viewThat(
-                isAnyOf(CheckBox.class, RadioButton.class),
-                hasAncestorThat(
-                        isAnyOf(ButtonsSelectOneWidget.class, TableWidgetGroup.class, ODKView.class),
-                        hasDescendantThat(hasTextContaining(questionText))),
-                hasTextContaining(answerText)));
-    }
-
-    private void checkObservationValueEquals(int row, String value, String dateKey) {
-        // TODO/completeness: actually check dateKey
-
-        scrollToAndExpectVisible(viewThat(
-                hasText(value),
-                hasAncestorThat(isInRow(row, ROW_HEIGHT)),
-                hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
-    }
-
-    private void checkObservationSet(int row, String dateKey) {
-        // TODO/completeness: actually check dateKey
-        scrollToAndExpectVisible(viewThat(
-                hasAncestorThat(isInRow(row, ROW_HEIGHT)),
-                hasBackground(getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
-                hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
-    }
-
-    private void checkVitalValueContains(String vitalName, String vitalValue) {
-        // Check for updated vital view.
-        expectVisibleSoon(viewThat(
-                hasTextContaining(vitalValue),
-                hasSiblingThat(hasTextContaining(vitalName))));
-    }
-
-    private IdlingResource getXformSubmissionIdlingResource() {
-        return new EventBusIdlingResource<SubmitXformSucceededEvent>(
-                UUID.randomUUID().toString(),
-                mEventBus);
     }
 }

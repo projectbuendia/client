@@ -16,7 +16,7 @@ import android.net.Uri;
 
 import com.google.common.collect.Iterators;
 
-import org.projectbuendia.client.data.app.TypedCursor;
+import org.projectbuendia.client.models.TypedCursor;
 
 import java.util.Iterator;
 
@@ -27,44 +27,38 @@ public class FakeTypedCursor<T> implements TypedCursor<T> {
 
     /**
      * Creates a {@link FakeTypedCursor} that contains the specified objects.
-     *
      * @param objects the contents of the cursor
      */
     public FakeTypedCursor(T... objects) {
         mObjects = objects;
     }
 
-    @Override
-    public int getCount() {
+    @Override public int getCount() {
         return mObjects.length;
     }
 
-    @Override
-    public T get(int position) {
+    @Override public T get(int position) {
         return mObjects[position];
     }
 
     /** Returns {@code null}. */
-    @Override
-    public Uri getNotificationUri() {
+    @Override public Uri getNotificationUri() {
         return null;
     }
 
     /** No-op. */
-    @Override
-    public void registerContentObserver(ContentObserver observer) {}
+    @Override public void registerContentObserver(ContentObserver observer) {
+    }
 
     /** No-op. */
-    @Override
-    public void unregisterContentObserver(ContentObserver observer) {}
+    @Override public void unregisterContentObserver(ContentObserver observer) {
+    }
 
-    @Override
-    public void close() {
+    @Override public void close() {
         mIsClosed = true;
     }
 
-    @Override
-    public Iterator<T> iterator() {
+    @Override public Iterator<T> iterator() {
         return Iterators.forArray(mObjects);
     }
 

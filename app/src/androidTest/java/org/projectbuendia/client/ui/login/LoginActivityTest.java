@@ -17,14 +17,6 @@ import org.projectbuendia.client.ui.matchers.UserMatchers;
 
 import java.util.Date;
 
-import static android.support.test.espresso.Espresso.onData;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.typeText;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 
@@ -34,7 +26,7 @@ public class LoginActivityTest extends FunctionalTestCase {
     /** Adds a new user and logs in. */
     public void testAddUser() {
         screenshot("Test Start");
-        final long n = new Date().getTime() % 100000;
+        final long n = new Date().getTime()%100000;
         final String username = "test" + n;
         final String given = "Testgiven" + n;
         final String family = "Testfamily" + n;

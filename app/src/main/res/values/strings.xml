@@ -47,7 +47,7 @@
     <string name="add_user_example_family_name">Smith</string>
     <string name="title_add_new_user">Add new user</string>
     <string name="action_search">Search</string>
-    <string name="action_go_to">#</string>
+    <string name="action_go_to">ID</string>
     <string name="title_location_list">Locations</string>
     <string name="today">Today</string>
     <string name="today_date">Today, %s</string>
@@ -67,8 +67,7 @@
     <string name="one_present_patient">1 present patient</string>
     <string name="n_present_patients">%d present patients</string>
 
-    <string name="title_new_order">New order</string>
-    <string name="order_instructions">Order</string>
+    <string name="title_new_order">New treatment</string>
     <string name="order_medication">Medication</string>
     <string name="order_dosage">Dosage</string>
     <string name="order_frequency">Frequency</string>
@@ -77,10 +76,10 @@
     <string name="order_give_for">Give for</string>
     <string name="order_give_for_days">days</string>
     <string name="order_give_for_day">day</string>
-    <string name="order_duration_today">(today only)</string>
-    <string name="order_duration_today_and_tomorrow">(today and tomorrow)</string>
-    <string name="order_duration_today_through_date">(today through %s)</string>
-    <string name="order_duration_indefinitely">(indefinitely)</string>
+    <string name="order_duration_stop_after_today">(stop after today)</string>
+    <string name="order_duration_stop_after_tomorrow">(stop after tomorrow)</string>
+    <string name="order_duration_stop_after_date">(stop after %s)</string>
+    <string name="order_duration_unspecified">(no specific duration)</string>
     <string name="order_medication_cannot_be_blank">Medication cannot be blank</string>
     <string name="order_give_for_days_cannot_be_zero">Must be empty or greater than 0</string>
 
@@ -120,8 +119,8 @@
     <string name="patient_creation_given_name_label">Given name</string>
     <string name="patient_creation_family_name_label">Family name</string>
     <string name="patient_creation_age_label">Age</string>
-    <string name="patient_creation_age_years">Years</string>
-    <string name="patient_creation_age_months">Months</string>
+    <string name="patient_creation_age_years">years</string>
+    <string name="patient_creation_age_months">months</string>
     <string name="patient_creation_sex_label">Sex</string>
     <string name="patient_creation_location_label">Location</string>
     <string name="patient_creation_location_assign">Assign location</string>
@@ -259,7 +258,7 @@
     <string name="patient_location_error_interrupted">Patient location update was interrupted. Please try again.</string>
     <string name="patient_location_error_network">Error updating patient; please check that you are connected to the server.</string>
     <string name="patient_location_error_no_such_patient">Error updating patient location: this patient does not exist on the server.</string>
-    <string name="troubleshoot_update_server_unreachable">Package server unreachable</string>
+    <string name="troubleshoot_package_server_unreachable">Package server unreachable</string>
     <string name="troubleshoot_update_server_unreachable_details">
         The package server could not be reached. This may be because:
         \n
@@ -268,7 +267,7 @@
         \n
         \nPlease correct the package server setting or consult an administrator for help.
     </string>
-    <string name="troubleshoot_update_server_misconfigured">Package server setting may be incorrect</string>
+    <string name="troubleshoot_package_server_misconfigured">Package server setting may be incorrect</string>
     <string name="troubleshoot_update_server_misconfigured_details">
         Please check that the package server setting is correct or consult an administrator for help.
     </string>
@@ -278,18 +277,15 @@
     <string name="age_filter_description">Under %d years</string>
     <string name="filter_group_default_name">Multiple filters</string>
 
-    <string name="patient_validation_whole_number_age_required">Age should be a whole number.</string>
-    <string name="patient_validation_missing_age">Please enter the age.</string>
-    <string name="patient_validation_missing_family_name">Please enter the family name.</string>
-    <string name="patient_validation_missing_given_name">Please enter the given name.</string>
-    <string name="patient_validation_missing_id">Please enter the patient ID.</string>
-    <string name="patient_validation_missing_admission_date">Please enter the admission date.</string>
-    <string name="patient_validation_negative_age">Age should not be negative.</string>
-    <string name="patient_validation_select_years_or_months">Please select Years or Months.</string>
+    <string name="patient_validation_missing_age">Enter the age (using years, months, or both)</string>
+    <string name="patient_validation_missing_family_name">Enter the family name</string>
+    <string name="patient_validation_missing_given_name">Enter the given name</string>
+    <string name="patient_validation_missing_id">Enter the patient ID</string>
+    <string name="patient_validation_missing_admission_date">Enter the admission date</string>
     <string name="patient_validation_select_gender">Please select Male or Female.</string>
     <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
-    <string name="patient_validation_future_onset_date">Symptoms onset date cannot be in the future.</string>
-    <string name="patient_creation_clear_symptoms_onset_date">Clear</string>
+    <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
+    <string name="patient_creation_clear_symptom_onset_date">Clear</string>
     <!-- Use en dashes for unknown names. These names will be searchable using any form of dash. -->
     <string name="family_name_hint_unknown">–</string>
     <string name="given_name_hint_unknown">–</string>

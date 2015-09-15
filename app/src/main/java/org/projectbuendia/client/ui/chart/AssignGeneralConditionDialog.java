@@ -20,7 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.model.Concepts;
+import org.projectbuendia.client.models.Concepts;
 
 import javax.annotation.Nullable;
 
@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A dialog that allows users to assign or change a patient's general condition. */
 public final class AssignGeneralConditionDialog
-        implements AdapterView.OnItemClickListener {
+    implements AdapterView.OnItemClickListener {
 
     @Nullable private AlertDialog mDialog;
     @Nullable private GridView mGridView;
@@ -44,26 +44,25 @@ public final class AssignGeneralConditionDialog
     public interface ConditionSelectedCallback {
         /**
          * Called when then user selects a general condition that is not the currently selected one.
-         *
          * @return whether to immediately dismiss the dialog. If {@code false}, the dialog will
-         *         disable further button presses and display a progress spinner until
-         *         {@link org.projectbuendia.client.ui.chart.AssignGeneralConditionDialog#dismiss} is called.
+         * disable further button presses and display a progress spinner until
+         * {@link org.projectbuendia.client.ui.chart.AssignGeneralConditionDialog#dismiss} is called.
          */
         boolean onNewConditionSelected(String newConditionUuid);
     }
 
     /**
      * Creates a new dialog.
-     * @param context an activity context
-     * @param currentConditionUuid optional UUID representing the current general condition; may
-     *                             eventually be used for highlighting the selected entry but is
-     *                             currently unused
+     * @param context                   an activity context
+     * @param currentConditionUuid      optional UUID representing the current general condition; may
+     *                                  eventually be used for highlighting the selected entry but is
+     *                                  currently unused
      * @param conditionSelectedCallback callback that responds to a condition selection
      */
     public AssignGeneralConditionDialog(
-            Context context,
-            @Nullable String currentConditionUuid,
-            ConditionSelectedCallback conditionSelectedCallback) {
+        Context context,
+        @Nullable String currentConditionUuid,
+        ConditionSelectedCallback conditionSelectedCallback) {
         mContext = checkNotNull(context);
         mCurrentConditionUuid = currentConditionUuid;
         mConditionSelectedCallback = checkNotNull(conditionSelectedCallback);
@@ -77,7 +76,7 @@ public final class AssignGeneralConditionDialog
 
         if (mGridView != null) {
             mAdapter = new GeneralConditionAdapter(
-                    mContext, Concepts.GENERAL_CONDITION_UUIDS, mCurrentConditionUuid);
+                mContext, Concepts.GENERAL_CONDITION_UUIDS, mCurrentConditionUuid);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
             mGridView.setSelection(1);
@@ -85,32 +84,29 @@ public final class AssignGeneralConditionDialog
 
 
         mDialog = new AlertDialog.Builder(mContext)
-                .setTitle(R.string.action_assign_condition)
-                .setView(frameLayout)
-                .create();
+            .setTitle(R.string.action_assign_condition)
+            .setView(frameLayout)
+            .create();
         mDialog.show();
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (mAdapter == null) {
-            return;
-        }
+    @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (mAdapter == null) return;
 
         String newConditionUuid = mAdapter.getItem(position);
         mAdapter.setSelectedConditionUuid(newConditionUuid);
         mProgressDialog = ProgressDialog.show(mContext,
-                mContext.getResources().getString(R.string.title_updating_patient),
-                mContext.getResources().getString(R.string.please_wait), true);
+            mContext.getResources().getString(R.string.title_updating_patient),
+            mContext.getResources().getString(R.string.please_wait), true);
         if (isCurrentCondition(newConditionUuid)
-                || mConditionSelectedCallback.onNewConditionSelected(newConditionUuid)) {
+            || mConditionSelectedCallback.onNewConditionSelected(newConditionUuid)) {
             dismiss();
         }
     }
 
-    /** Returns true iff the dialog is currently displayed. */
-    public boolean isShowing() {
-        return mDialog != null && mDialog.isShowing();
+    private boolean isCurrentCondition(String newConditionUuid) {
+        return mCurrentConditionUuid != null
+            && mCurrentConditionUuid.equals(newConditionUuid);
     }
 
     /** Dismisses the dialog. */
@@ -124,8 +120,8 @@ public final class AssignGeneralConditionDialog
 
     // TODO: Consider adding the ability to re-enable buttons if a server request fails.
 
-    private boolean isCurrentCondition(String newConditionUuid) {
-        return mCurrentConditionUuid != null
-                && mCurrentConditionUuid.equals(newConditionUuid);
+    /** Returns true iff the dialog is currently displayed. */
+    public boolean isShowing() {
+        return mDialog != null && mDialog.isShowing();
     }
 }

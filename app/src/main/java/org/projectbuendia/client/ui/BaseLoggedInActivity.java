@@ -27,7 +27,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Colorizer;
@@ -47,7 +47,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     @Inject Colorizer mUserColorizer;
 
-    private User mLastActiveUser;
+    private JsonUser mLastActiveUser;
     private Menu mMenu;
     private MenuPopupWindow mPopupWindow;
 
@@ -59,12 +59,11 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
 
     /**
      * {@inheritDoc}
-     *
+     * <p/>
      * <p>Instead of overriding this method, override {@link #onCreateImpl}.
      */
-    @Override
-    public final void onCreate(Bundle savedInstanceState) {
-        User user = App.getUserManager().getActiveUser();
+    @Override public final void onCreate(Bundle savedInstanceState) {
+        JsonUser user = App.getUserManager().getActiveUser();
         if (user == null) {
             super.onCreate(savedInstanceState);
 
@@ -86,8 +85,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public final boolean onCreateOptionsMenu(Menu menu) {
+    @Override public final boolean onCreateOptionsMenu(Menu menu) {
         if (!mIsCreated) {
             return true;
         }
@@ -102,8 +100,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         final View userView = mMenu.getItem(mMenu.size() - 1).getActionView();
         userView.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View view) {
+            @Override public void onClick(View view) {
                 mPopupWindow.showAsDropDown(userView);
             }
         });
@@ -113,10 +110,36 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         return true;
     }
 
-    public void onExtendOptionsMenu(Menu menu) {}
+    public void onExtendOptionsMenu(Menu menu) {
+    }
 
-    @Override
-    protected final void onStart() {
+    private void updateActiveUser() {
+        JsonUser user = App.getUserManager().getActiveUser();
+
+        if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
+            LOG.w("The user has switched. I don't know how to deal with that right now");
+            // TODO: Handle.
+        }
+        mLastActiveUser = user;
+
+        TextView initials = (TextView) mMenu
+            .getItem(mMenu.size() - 1)
+            .getActionView()
+            .findViewById(R.id.user_initials);
+
+        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
+        initials.setText(user.getInitials());
+    }
+
+    public void onEvent(ActiveUserUnsetEvent event) {
+        // TODO: Implement this in one way or another!
+    }
+
+    public void onEvent(PatientChartRequestedEvent event) {
+        PatientChartActivity.start(this, event.uuid);
+    }
+
+    @Override protected final void onStart() {
         if (!mIsCreated) {
             super.onStart();
 
@@ -130,8 +153,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onStart();
     }
 
-    @Override
-    protected final void onResume() {
+    @Override protected final void onResume() {
         if (!mIsCreated) {
             super.onResume();
 
@@ -148,8 +170,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onResume();
     }
 
-    @Override
-    protected final void onPause() {
+    @Override protected final void onPause() {
         if (!mIsCreated) {
             super.onPause();
 
@@ -170,8 +191,7 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onPause();
     }
 
-    @Override
-    protected final void onStop() {
+    @Override protected final void onStop() {
         if (!mIsCreated) {
             super.onStop();
 
@@ -185,30 +205,19 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
         super.onStop();
     }
 
-    private void updateActiveUser() {
-        User user = App.getUserManager().getActiveUser();
+    protected LoadingState getLoadingState() {
+        return mLoadingState;
+    }
 
-        if (mLastActiveUser == null || mLastActiveUser.compareTo(user) != 0) {
-            LOG.w("The user has switched. I don't know how to deal with that right now");
-            // TODO: Handle.
+    /**
+     * Changes the state of this activity, changing the set of available buttons if necessary.
+     * @param loadingState the new activity state
+     */
+    protected void setLoadingState(LoadingState loadingState) {
+        if (mLoadingState != loadingState) {
+            mLoadingState = loadingState;
+            invalidateOptionsMenu();
         }
-        mLastActiveUser = user;
-
-        TextView initials = (TextView) mMenu
-                .getItem(mMenu.size() - 1)
-                .getActionView()
-                .findViewById(R.id.user_initials);
-
-        initials.setBackgroundColor(mUserColorizer.getColorArgb(user.id));
-        initials.setText(user.getInitials());
-    }
-
-    public void onEvent(ActiveUserUnsetEvent event) {
-        // TODO: Implement this in one way or another!
-    }
-
-    public void onEvent(PatientChartRequestedEvent event) {
-        PatientChartActivity.start(this, event.uuid);
     }
 
     class MenuPopupWindow extends PopupWindow {
@@ -224,24 +233,23 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             super();
 
             mLayout = (LinearLayout) getLayoutInflater()
-                    .inflate(R.layout.popup_window_user, null);
+                .inflate(R.layout.popup_window_user, null);
             setContentView(mLayout);
 
             ButterKnife.inject(this, mLayout);
 
             setWindowLayoutMode(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
             setFocusable(true);
             setOutsideTouchable(true);
             setBackgroundDrawable(new BitmapDrawable());
         }
 
-        @Override
-        public void showAsDropDown(View anchor) {
+        @Override public void showAsDropDown(View anchor) {
             super.showAsDropDown(anchor);
 
-            User user = App.getUserManager().getActiveUser();
+            JsonUser user = App.getUserManager().getActiveUser();
             if (user == null) {
                 // TODO: Handle no user.
                 return;
@@ -265,21 +273,6 @@ public abstract class BaseLoggedInActivity extends BaseActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
-    }
-
-    /**
-     * Changes the state of this activity, changing the set of available buttons if necessary.
-     * @param loadingState the new activity state
-     */
-    protected void setLoadingState(LoadingState loadingState) {
-        if (mLoadingState != loadingState) {
-            mLoadingState = loadingState;
-            invalidateOptionsMenu();
-        }
-    }
-
-    protected LoadingState getLoadingState() {
-        return mLoadingState;
     }
 }
 

@@ -14,15 +14,9 @@ package org.projectbuendia.client.ui.sync;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.withText;
-
 /** Test cases for handling user sync failure on the user login screen. */
 public class UserLoginFailingSyncTest extends SyncTestCase {
-    @Override
-    public void setUp() throws Exception {
+    @Override public void setUp() throws Exception {
         setWaitForUserSync(false);
         // TODO/cleanup: Remove all this manual UserManager management once daggered.
         App.getInstance().getUserManager().reset();
@@ -32,8 +26,7 @@ public class UserLoginFailingSyncTest extends SyncTestCase {
         super.setUp();
     }
 
-    @Override
-    public void tearDown() {
+    @Override public void tearDown() {
         App.getInstance().getUserManager().setAutoCancelEnabled(false);
         super.tearDown();
     }

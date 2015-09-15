@@ -23,18 +23,18 @@ import com.android.volley.toolbox.RequestFuture;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.data.app.AppForm;
-import org.projectbuendia.client.data.app.AppModel;
-import org.projectbuendia.client.data.app.AppPatient;
-import org.projectbuendia.client.net.model.ChartGroup;
-import org.projectbuendia.client.net.model.ChartStructure;
-import org.projectbuendia.client.net.model.Encounter;
-import org.projectbuendia.client.net.model.Form;
-import org.projectbuendia.client.net.model.Location;
-import org.projectbuendia.client.net.model.Order;
-import org.projectbuendia.client.net.model.Patient;
-import org.projectbuendia.client.net.model.PatientChart;
-import org.projectbuendia.client.net.model.User;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.models.Patient;
+import org.projectbuendia.client.net.json.JsonChart;
+import org.projectbuendia.client.net.json.JsonChartSection;
+import org.projectbuendia.client.net.json.JsonEncounter;
+import org.projectbuendia.client.net.json.JsonForm;
+import org.projectbuendia.client.net.json.JsonLocation;
+import org.projectbuendia.client.net.json.JsonOrder;
+import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.net.json.JsonPatientRecord;
+import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.Charts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
@@ -60,27 +60,27 @@ import java.util.concurrent.ExecutionException;
 public class DbSyncHelper {
     private static final Logger LOG = Logger.create();
 
-    /** Converts a ChartStructure response into appropriate inserts in the chart table. */
+    /** Converts a JsonChart response into appropriate inserts in the chart table. */
     public static ArrayList<ContentProviderOperation> getChartUpdateOps(
-            ChartStructure response, SyncResult syncResult) {
+        JsonChart response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         if (response.uuid == null) {
             LOG.e("null chart uuid when fetching chart structure");
         }
         int chartRow = 0;
-        for (ChartGroup group : response.groups) {
-            if (group.uuid == null) {
+        for (JsonChartSection section : response.groups) {
+            if (section.uuid == null) {
                 LOG.e("null group uuid for chart " + response.uuid);
                 continue;
             }
-            for (String conceptUuid : group.concepts) {
+            for (String conceptUuid : section.concepts) {
                 ops.add(ContentProviderOperation
-                        .newInsert(Charts.CONTENT_URI)
-                        .withValue(Charts.CHART_UUID, response.uuid)
-                        .withValue(Charts.CHART_ROW, chartRow++)
-                        .withValue(Charts.GROUP_UUID, group.uuid)
-                        .withValue(Charts.CONCEPT_UUID, conceptUuid)
-                        .build());
+                    .newInsert(Charts.CONTENT_URI)
+                    .withValue(Charts.CHART_UUID, response.uuid)
+                    .withValue(Charts.CHART_ROW, chartRow++)
+                    .withValue(Charts.GROUP_UUID, section.uuid)
+                    .withValue(Charts.CONCEPT_UUID, conceptUuid)
+                    .build());
                 syncResult.stats.numInserts++;
             }
         }
@@ -92,11 +92,11 @@ public class DbSyncHelper {
         final ContentResolver resolver = App.getInstance().getContentResolver();
 
         LOG.i("Listing all forms on server");
-        RequestFuture<List<Form>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonForm>> future = RequestFuture.newFuture();
         App.getServer().listForms(future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
-        for (Form form : future.get()) {
-            cvs.put(form.id, AppForm.fromNet(form).toContentValues());
+        for (JsonForm form : future.get()) {
+            cvs.put(form.id, Form.fromJson(form).toContentValues());
         }
 
         Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
@@ -107,7 +107,7 @@ public class DbSyncHelper {
             while (c.moveToNext()) {
                 String localId = Utils.getString(c, Contracts.Forms._ID);
                 Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(localId).build();
-                LOG.i("  - will delete: " + localId);
+                LOG.i("  - will delete form " + localId);
                 ops.add(ContentProviderOperation.newDelete(uri).build());
             }
         } finally {
@@ -115,7 +115,7 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert: " + values.getAsString(Contracts.Forms._ID));
+            LOG.i("  - will insert form " + values.getAsString(Contracts.Forms._ID));
             ops.add(ContentProviderOperation.newInsert(Contracts.Forms.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -127,15 +127,14 @@ public class DbSyncHelper {
      * needed to bring the local database in sync with the server.
      */
     public static List<ContentProviderOperation> getPatientUpdateOps(SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException {
         final ContentResolver resolver = App.getInstance().getContentResolver();
 
-        LOG.i("Downloading all patients from server");
-        RequestFuture<List<Patient>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonPatient>> future = RequestFuture.newFuture();
         App.getServer().listPatients("", "", "", future, future);
         Map<String, ContentValues> cvs = new HashMap<>();
-        for (Patient patient : future.get()) {
-            cvs.put(patient.id, AppPatient.fromNet(patient).toContentValues());
+        for (JsonPatient patient : future.get()) {
+            cvs.put(patient.id, Patient.fromJson(patient).toContentValues());
         }
 
         Cursor c = resolver.query(Patients.CONTENT_URI, null, null, null, null);
@@ -153,12 +152,12 @@ public class DbSyncHelper {
                     ContentValues localCv = new ContentValues();
                     DatabaseUtils.cursorRowToContentValues(c, localCv);
                     if (!cv.equals(localCv)) {  // record has changed on server
-                        LOG.i("  - will update: " + localId);
+                        LOG.i("  - will update patient " + localId);
                         ops.add(ContentProviderOperation.newUpdate(uri).withValues(cv).build());
                         syncResult.stats.numUpdates++;
                     }
                 } else {  // record doesn't exist on server
-                    LOG.i("  - will delete: " + localId);
+                    LOG.i("  - will delete patient " + localId);
                     ops.add(ContentProviderOperation.newDelete(uri).build());
                     syncResult.stats.numDeletes++;
                 }
@@ -168,31 +167,31 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert: " + values.getAsString(Patients._ID));
+            LOG.i("  - will insert patient " + values.getAsString(Patients._ID));
             ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
-        
+
         return ops;
     }
-    
+
     /** Converts a chart data response into appropriate inserts in the chart table. */
     public static List<ContentValues> getObsValuesToInsert(
-            PatientChart response, SyncResult syncResult) {
+        JsonPatientRecord response, SyncResult syncResult) {
         List<ContentValues> cvs = new ArrayList<>();
         final String patientUuid = response.uuid;
-        for (Encounter encounter : response.encounters) {
+        for (JsonEncounter encounter : response.encounters) {
             if (encounter.uuid == null) {
-                LOG.e("Encounter uuid was null for " + patientUuid);
+                LOG.e("Patient %s has an encounter with uuid = null", patientUuid);
                 continue;
             }
             final String encounterUuid = encounter.uuid;
             DateTime timestamp = encounter.timestamp;
             if (timestamp == null) {
-                LOG.e("Encounter timestamp was null for " + encounterUuid);
+                LOG.e("Encounter %s has timestamp = null", encounterUuid);
                 continue;
             }
-            final int encounterTime = (int) (timestamp.getMillis() / 1000); // seconds since epoch
+            final int encounterTime = (int) (timestamp.getMillis()/1000); // seconds since epoch
             ContentValues base = new ContentValues();
             base.put(Observations.PATIENT_UUID, patientUuid);
             base.put(Observations.ENCOUNTER_UUID, encounterUuid);
@@ -226,23 +225,23 @@ public class DbSyncHelper {
      * update the database with the new orders and edits to existing orders.
      */
     public static ArrayList<ContentProviderOperation> getOrderUpdateOps(SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException {
         // Request all orders from the server.
-        RequestFuture<List<Order>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonOrder>> future = RequestFuture.newFuture();
         App.getServer().listOrders(future, future);
-        Map<String, Order> ordersToStore = new HashMap<>();
-        for (Order order : future.get()) {
+        Map<String, JsonOrder> ordersToStore = new HashMap<>();
+        for (JsonOrder order : future.get()) {
             ordersToStore.put(order.uuid, order);
         }
 
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         final ContentResolver resolver = App.getInstance().getContentResolver();
         Cursor c = resolver.query(Orders.CONTENT_URI, new String[] {
-                Orders.UUID,
-                Orders.PATIENT_UUID,
-                Orders.INSTRUCTIONS,
-                Orders.START_TIME,
-                Orders.STOP_TIME
+            Orders.UUID,
+            Orders.PATIENT_UUID,
+            Orders.INSTRUCTIONS,
+            Orders.START_TIME,
+            Orders.STOP_TIME
         }, null, null, null);
         try {
             LOG.i("Examining orders: %d local, %d from server.", c.getCount(), ordersToStore.size());
@@ -250,15 +249,15 @@ public class DbSyncHelper {
             while (c.moveToNext()) {
                 String uuid = c.getString(c.getColumnIndex(Orders.UUID));
                 Uri uri = Orders.CONTENT_URI.buildUpon().appendPath(uuid).build();
-                Order order = ordersToStore.get(uuid);
+                JsonOrder order = ordersToStore.get(uuid);
                 if (order != null) {  // apply update to a local order
                     LOG.v("  - will update order " + uuid);
                     ops.add(ContentProviderOperation.newUpdate(uri)
-                            .withValue(Orders.PATIENT_UUID, order.patient_uuid)
-                            .withValue(Orders.INSTRUCTIONS, order.instructions)
-                            .withValue(Orders.START_TIME, order.start)
-                            .withValue(Orders.STOP_TIME, order.stop)
-                            .build());
+                        .withValue(Orders.PATIENT_UUID, order.patient_uuid)
+                        .withValue(Orders.INSTRUCTIONS, order.instructions)
+                        .withValue(Orders.START_TIME, order.start)
+                        .withValue(Orders.STOP_TIME, order.stop)
+                        .build());
                     ordersToStore.remove(uuid);  // done with this incoming order
                     syncResult.stats.numUpdates++;
                 } else {  // delete the local order (the server doesn't have it)
@@ -272,15 +271,15 @@ public class DbSyncHelper {
         }
 
         // Store all the remaining received orders as new orders.
-        for (Order order : ordersToStore.values()) {
+        for (JsonOrder order : ordersToStore.values()) {
             LOG.v("  - will insert order " + order.uuid);
             ops.add(ContentProviderOperation.newInsert(Orders.CONTENT_URI)
-                    .withValue(Orders.UUID, order.uuid)
-                    .withValue(Orders.PATIENT_UUID, order.patient_uuid)
-                    .withValue(Orders.INSTRUCTIONS, order.instructions)
-                    .withValue(Orders.START_TIME, order.start)
-                    .withValue(Orders.STOP_TIME, order.stop)
-                    .build());
+                .withValue(Orders.UUID, order.uuid)
+                .withValue(Orders.PATIENT_UUID, order.patient_uuid)
+                .withValue(Orders.INSTRUCTIONS, order.instructions)
+                .withValue(Orders.START_TIME, order.start)
+                .withValue(Orders.STOP_TIME, order.stop)
+                .build());
             syncResult.stats.numInserts++;
         }
         return ops;
@@ -288,16 +287,16 @@ public class DbSyncHelper {
 
     /** Given a set of users, replaces the current set of users with users from that set. */
     public static ArrayList<ContentProviderOperation> getUserUpdateOps(
-            Set<User> response, SyncResult syncResult) {
+        Set<JsonUser> response, SyncResult syncResult) {
         ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         // Delete all users before inserting.
         ops.add(ContentProviderOperation.newDelete(Users.CONTENT_URI).build());
         // TODO: Update syncResult delete counts.
-        for (User user : response) {
+        for (JsonUser user : response) {
             ops.add(ContentProviderOperation.newInsert(Users.CONTENT_URI)
-                    .withValue(Users.UUID, user.id)
-                    .withValue(Users.FULL_NAME, user.fullName)
-                    .build());
+                .withValue(Users.UUID, user.id)
+                .withValue(Users.FULL_NAME, user.fullName)
+                .build());
             syncResult.stats.numInserts++;
         }
         return ops;
@@ -308,63 +307,57 @@ public class DbSyncHelper {
      * {@link ContentProviderOperation}s for updating the database.
      */
     public static ArrayList<ContentProviderOperation> getLocationUpdateOps(SyncResult syncResult)
-            throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException {
         final ContentResolver contentResolver = App.getInstance().getContentResolver();
 
         final String[] projection = new String[] {
-                Locations.LOCATION_UUID,
-                Locations.PARENT_UUID
+            Locations.LOCATION_UUID,
+            Locations.PARENT_UUID
         };
         final String[] namesProjection = new String[] {
-                LocationNames._ID,
-                LocationNames.LOCATION_UUID,
-                LocationNames.LOCALE,
-                LocationNames.NAME
+            LocationNames._ID,
+            LocationNames.LOCATION_UUID,
+            LocationNames.LOCALE,
+            LocationNames.NAME
         };
 
         LOG.d("Before network call");
-        RequestFuture<List<Location>> future = RequestFuture.newFuture();
+        RequestFuture<List<JsonLocation>> future = RequestFuture.newFuture();
         App.getServer().listLocations(future, future);
 
         // No need for callbacks as the {@AbstractThreadedSyncAdapter} code is executed in a
         // background thread
-        List<Location> locations = future.get();
+        List<JsonLocation> locations = future.get();
         LOG.d("After network call");
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
 
-
-        HashMap<String, Location> locationsMap = new HashMap<>();
-        for (Location location : locations) {
-            locationsMap.put(location.uuid, location);
+        Map<String, JsonLocation> locationsByUuid = new HashMap<>();
+        for (JsonLocation location : locations) {
+            locationsByUuid.put(location.uuid, location);
         }
 
         // Get list of all items
-        LOG.i("Fetching local entries for merge");
         Uri uri = Locations.CONTENT_URI; // Location tree
         Uri namesUri = LocationNames.CONTENT_URI; // Location names
         Cursor c = contentResolver.query(uri, projection, null, null, null);
         assert c != null;
         Cursor namesCur = contentResolver.query(namesUri, namesProjection, null, null, null);
         assert namesCur != null;
-        LOG.i("Found " + c.getCount() + " local entries. Computing merge solution...");
-        LOG.i("Found " + locations.size() + " external entries. Computing merge solution...");
+        LOG.i("Examining locations: %d local, %d from server", c.getCount(), locations.size());
 
         String id;
         String parentId;
 
         // Build map of location names from the database.
-        HashMap<String, HashMap<String, String>> dbLocationNames =
-                new HashMap<>();
+        Map<String, Map<String, String>> dbLocationNames = new HashMap<>();
         while (namesCur.moveToNext()) {
             String locationId = namesCur.getString(
-                    namesCur.getColumnIndex(LocationNames.LOCATION_UUID));
+                namesCur.getColumnIndex(LocationNames.LOCATION_UUID));
             String locale = namesCur.getString(
-                    namesCur.getColumnIndex(LocationNames.LOCALE));
+                namesCur.getColumnIndex(LocationNames.LOCALE));
             String name = namesCur.getString(
-                    namesCur.getColumnIndex(LocationNames.NAME));
-            if (locationId == null || locale == null || name == null) {
-                continue;
-            }
+                namesCur.getColumnIndex(LocationNames.NAME));
+            if (locationId == null || locale == null || name == null) continue;
 
             if (!dbLocationNames.containsKey(locationId)) {
                 dbLocationNames.put(locationId, new HashMap<String, String>());
@@ -381,79 +374,75 @@ public class DbSyncHelper {
             id = c.getString(c.getColumnIndex(Locations.LOCATION_UUID));
             parentId = c.getString(c.getColumnIndex(Locations.PARENT_UUID));
 
-            Location location = locationsMap.get(id);
+            JsonLocation location = locationsByUuid.get(id);
             if (location != null) {
                 // Entry exists. Remove from entry map to prevent insert later.
-                locationsMap.remove(id);
+                locationsByUuid.remove(id);
 
                 // Grab the names stored in the database for this location.
-                HashMap<String, String> locationNames = dbLocationNames.get(id);
+                Map<String, String> locationNames = dbLocationNames.get(id);
 
                 // Check to see if the entry needs to be updated
                 Uri existingUri = uri.buildUpon().appendPath(String.valueOf(id)).build();
 
                 if (location.parent_uuid != null && !location.parent_uuid.equals(parentId)) {
                     // Update existing record
-                    LOG.i("Scheduling update: " + existingUri);
+                    LOG.i("  - will update location " + id);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
-                            .withValue(Locations.LOCATION_UUID, id)
-                            .withValue(Locations.PARENT_UUID, parentId)
-                            .build());
+                        .withValue(Locations.LOCATION_UUID, id)
+                        .withValue(Locations.PARENT_UUID, parentId)
+                        .build());
                     syncResult.stats.numUpdates++;
-                } else {
-                    LOG.i("No action required for " + existingUri);
                 }
 
                 if (location.names != null
-                        && (locationNames == null || !location.names.equals(locationNames))) {
+                    && (locationNames == null || !location.names.equals(locationNames))) {
                     Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                            String.valueOf(id)).build();
+                        String.valueOf(id)).build();
                     // Update location names by deleting any existing location names and
                     // repopulating.
-                    LOG.i("Scheduling location names update: " + existingNamesUri);
                     batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
                     syncResult.stats.numDeletes++;
                     for (String locale : location.names.keySet()) {
+
                         batch.add(ContentProviderOperation.newInsert(existingNamesUri)
-                                .withValue(LocationNames.LOCATION_UUID, id)
-                                .withValue(LocationNames.LOCALE, locale)
-                                .withValue(LocationNames.NAME, location.names.get(locale))
-                                .build());
+                            .withValue(LocationNames.LOCATION_UUID, id)
+                            .withValue(LocationNames.LOCALE, locale)
+                            .withValue(LocationNames.NAME, location.names.get(locale))
+                            .build());
                         syncResult.stats.numInserts++;
                     }
                 }
             } else {
                 // Entry doesn't exist. Remove it from the database.
+                LOG.i("  - will delete location " + id);
                 Uri deleteUri = uri.buildUpon().appendPath(id).build();
-                LOG.i("Scheduling delete: " + deleteUri);
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
-
                 Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
-                LOG.i("Scheduling delete: " + namesDeleteUri);
                 batch.add(ContentProviderOperation.newDelete(namesDeleteUri).build());
                 syncResult.stats.numDeletes++;
             }
         }
         c.close();
 
-        for (Location location : locationsMap.values()) {
-            LOG.i("Scheduling insert: entry_id=" + location.uuid);
+        for (JsonLocation location : locationsByUuid.values()) {
+            LOG.i("  - will insert location " + location.uuid);
             batch.add(ContentProviderOperation.newInsert(Locations.CONTENT_URI)
-                    .withValue(Locations.LOCATION_UUID, location.uuid)
-                    .withValue(Locations.PARENT_UUID, location.parent_uuid)
-                    .build());
+                .withValue(Locations.LOCATION_UUID, location.uuid)
+                .withValue(Locations.PARENT_UUID, location.parent_uuid)
+                .build());
             syncResult.stats.numInserts++;
 
             if (location.names != null) {
                 for (String locale : location.names.keySet()) {
                     Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                            String.valueOf(location.uuid)).build();
+                        String.valueOf(location.uuid)).build();
                     batch.add(ContentProviderOperation.newInsert(existingNamesUri)
-                            .withValue(LocationNames.LOCATION_UUID, location.uuid)
-                            .withValue(LocationNames.LOCALE, locale)
-                            .withValue(LocationNames.NAME, location.names.get(locale))
-                            .build());
+                        .withValue(LocationNames.LOCATION_UUID, location.uuid)
+                        .withValue(LocationNames.LOCALE, locale)
+                        .withValue(LocationNames.NAME, location.names.get(locale))
+                        .build());
                     syncResult.stats.numInserts++;
                 }
             }
