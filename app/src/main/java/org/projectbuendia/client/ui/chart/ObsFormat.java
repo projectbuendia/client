@@ -86,7 +86,10 @@ public class ObsFormat extends Format {
         }
         // Allow plain numeric formats like "#0.00" as a shorthand for "{1,number,#0.00}".
         if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
-            pattern = "{1,number," + pattern + "}";
+            try {
+                new DecimalFormat(pattern);  // check if it's a valid numeric format
+                pattern = "{1,number," + pattern + "}";
+            } catch (IllegalArgumentException e) { }
         }
         mRootObsFormat = rootObsFormat == null ? this : rootObsFormat;
         mFormat = new ExtendedMessageFormat(pattern, new FormatFactoryMap());

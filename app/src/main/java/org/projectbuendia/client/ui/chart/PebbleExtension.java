@@ -12,6 +12,7 @@ import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -137,7 +138,11 @@ public class PebbleExtension extends AbstractExtension {
             String pattern = (String) args.get("pattern");
             try {
                 return new ObsFormat(pattern).format(array);
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                while ((e instanceof InvocationTargetException ||
+                        e.getCause() instanceof InvocationTargetException) && e.getCause() != e) {
+                    e = e.getCause();
+                }
                 LOG.e(e, "Could not format data with pattern " + pattern);
                 return pattern;  // make the problem visible on the page to aid fixes
             }
