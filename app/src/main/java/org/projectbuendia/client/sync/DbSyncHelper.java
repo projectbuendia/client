@@ -79,7 +79,7 @@ public class DbSyncHelper {
                 .withValue(ChartItems._ID, nextId++)
                 .withValue(ChartItems.CHART_UUID, response.uuid)
                 .withValue(ChartItems.WEIGHT, nextWeight++)
-                .withValue(ChartItems.SECTION_TYPE, section.type.name())
+                .withValue(ChartItems.SECTION_TYPE, section.type == null ? null : section.type.name())
                 .withValue(ChartItems.LABEL, section.label)
                 .build());
             syncResult.stats.numInserts++;
@@ -101,6 +101,7 @@ public class DbSyncHelper {
                     .withValue(ChartItems.FORMAT, item.format)
                     .withValue(ChartItems.CAPTION_FORMAT, item.caption_format)
                     .withValue(ChartItems.CSS_CLASS, item.css_class)
+                    .withValue(ChartItems.CSS_STYLE, item.css_style)
                     .withValue(ChartItems.SCRIPT, item.script)
                     .build());
                 syncResult.stats.numInserts++;

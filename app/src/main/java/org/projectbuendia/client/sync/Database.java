@@ -143,6 +143,7 @@ public class Database extends SQLiteOpenHelper {
             + "format TEXT,"
             + "caption_format TEXT,"
             + "css_class TEXT,"
+            + "css_style TEXT,"
             + "script TEXT");
 
         SCHEMAS.put(Table.USERS, ""

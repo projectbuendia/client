@@ -23,12 +23,13 @@ public class ChartItem {
     public final @Nonnull String format;
     public final @Nonnull String captionFormat;
     public final @Nonnull String cssClass;
+    public final @Nonnull String cssStyle;
     public final @Nonnull String script;
 
     public ChartItem(@Nullable String label, @Nullable String type, boolean required,
                      @Nullable String[] conceptUuids, @Nullable String format,
                      @Nullable String captionFormat, @Nullable String cssClass,
-                     @Nullable String script) {
+                     @Nullable String cssStyle, @Nullable String script) {
         this.label = label == null ? "" : label;
         this.type = type == null ? "" : type;
         this.required = required;
@@ -36,6 +37,7 @@ public class ChartItem {
         this.format = format == null ? "" : format;
         this.captionFormat = captionFormat == null ? "" : captionFormat;
         this.cssClass = cssClass == null ? "" : cssClass;
+        this.cssStyle = cssStyle == null ? "" : cssStyle;
         this.script = script == null ? "" : script;
     }
 
@@ -43,14 +45,16 @@ public class ChartItem {
         String format = this.format;
         String captionFormat = this.captionFormat;
         String cssClass = this.cssClass;
+        String cssStyle = this.cssStyle;
         String script = this.script;
         if (defaults != null) {
             format = format.isEmpty() ? defaults.format : format;
             captionFormat = captionFormat.isEmpty() ? defaults.captionFormat : captionFormat;
             cssClass = cssClass.isEmpty() ? defaults.cssClass : cssClass;
+            cssStyle = cssStyle.isEmpty() ? defaults.cssStyle : cssStyle;
             script = script.isEmpty() ? defaults.script : script;
         }
         return new ChartItem(
-            label, type, required, conceptUuids, format, captionFormat, cssClass, script);
+            label, type, required, conceptUuids, format, captionFormat, cssClass, cssStyle, script);
     }
 }

@@ -20,5 +20,6 @@ public class JsonChartItem {
     public String format;  // format string, e.g. "##.# kg" or "{1} / {2}"
     public String caption_format;  // format string for tile caption or grid cell popup
     public String css_class;  // format string for CSS class on this tile or grid row
+    public String css_style;  // format string for CSS properties on this tile or grid row
     public String script;  // JavaScript for fancy rendering
 }

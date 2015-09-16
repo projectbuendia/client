@@ -224,6 +224,7 @@ public class ChartDataHelper {
                         Utils.getString(c, ChartItems.FORMAT),
                         Utils.getString(c, ChartItems.CAPTION_FORMAT),
                         Utils.getString(c, ChartItems.CSS_CLASS),
+                        Utils.getString(c, ChartItems.CSS_STYLE),
                         Utils.getString(c, ChartItems.SCRIPT));
                     ChartSection section = tileGroupsById.containsKey(parentId)
                         ? tileGroupsById.get(parentId) : rowGroupsById.get(parentId);
