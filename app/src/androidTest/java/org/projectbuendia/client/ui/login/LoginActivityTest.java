@@ -17,9 +17,6 @@ import org.projectbuendia.client.ui.matchers.UserMatchers;
 
 import java.util.Date;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasToString;
-
 /** Tests for {@link LoginActivity}. */
 public class LoginActivityTest extends FunctionalTestCase {
 
@@ -43,12 +40,11 @@ public class LoginActivityTest extends FunctionalTestCase {
         waitForProgressFragment();
 
         // Click new user
-        expectVisible(dataThat(hasToString(equalTo("TT"))));
+        expectVisible(dataThat(new UserMatchers.HasFullName(given + " " + family)));
         screenshot("In User Selection");
         click(dataThat(new UserMatchers.HasFullName(given + " " + family)));
 
         // Should be logged in
-        expectVisible(viewWithText(given + " " + family));
         screenshot("After User Selected");
         click(viewWithText("TT"));
         expectVisible(viewWithText(given + " " + family));
