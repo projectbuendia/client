@@ -414,9 +414,9 @@ public class ObsFormat extends Format {
                 case "<=":
                     return numValue != null && numValue.compareTo(numOperand) <= 0;
                 case ">":
-                    return numValue != null && numValue.compareTo(numOperand) < 0;
+                    return numValue != null && numValue.compareTo(numOperand) > 0;
                 case ">=":
-                    return numValue != null && numValue.compareTo(numOperand) <= 0;
+                    return numValue != null && numValue.compareTo(numOperand) >= 0;
             }
             return false;
         }

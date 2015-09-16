@@ -72,7 +72,8 @@ public class Contracts {
         String CONCEPT_UUIDS = "concept_uuids";  // comma-separated list of concept UUIDs
         String FORMAT = "format";  // format string (see ObsFormat)
         String CAPTION_FORMAT = "caption_format";  // format string for tile caption or grid popup
-        String SCRIPT = "script";  // JavaScript for complex rendering
+        String CSS_CLASS = "css_class";  // format string for CSS class on a tile or grid row
+        String SCRIPT = "script";  // JavaScript for fancy rendering
     }
 
     public interface ConceptNames extends BaseColumns {

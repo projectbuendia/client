@@ -77,3 +77,6 @@ th[scope="row"] div { max-width: 100%; overflow: hidden; }
   background-repeat: no-repeat;
   background-position: bottom;
 }
+
+/* Content */
+.critical { color: red; }

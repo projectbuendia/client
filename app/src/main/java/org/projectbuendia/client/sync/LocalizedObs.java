@@ -11,10 +11,16 @@
 
 package org.projectbuendia.client.sync;
 
+import android.support.annotation.NonNull;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.joda.time.DateTime;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.net.json.ConceptType;
 
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -23,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
 // TODO: rename to ObsValue and remove fields we no longer use
-public final class LocalizedObs {
+public final class LocalizedObs implements Comparable<LocalizedObs> {
     public static final Comparator<LocalizedObs> BY_OBS_TIME = new Comparator<LocalizedObs>() {
         @Override public int compare(LocalizedObs left, LocalizedObs right) {
             return left.encounterTime.compareTo(right.encounterTime);
@@ -100,5 +106,68 @@ public final class LocalizedObs {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Compares value instances according to a total ordering such that:
+     * - The empty value (present == false) is ordered before all others.
+     * - The Boolean value false is ordered before all other values and types.
+     * - Numeric values are ordered from least to greatest magnitude.
+     * - Text values are ordered lexicographically from A to Z.
+     * - Coded values are ordered from least severe to most severe (if they can
+     * be interpreted as having a severity); or from first to last (if they can
+     * be interpreted as having a typical temporal sequence).
+     * - The Boolean value true is ordered after all other values and types.
+     * @param other The other Value to compare to.
+     * @return
+     */
+    @Override public int compareTo(@NonNull LocalizedObs other) {
+        if (value == null || other.value == null) {
+            return value == other.value ? 0 : value == null ? -1 : 1;
+        }
+        if (conceptType != other.conceptType) {
+            return getTypeOrdering().compareTo(other.getTypeOrdering());
+        }
+        if (conceptType == ConceptType.NUMERIC) {
+            return Double.valueOf(value).compareTo(Double.valueOf(other.value));
+        }
+        if (conceptType == ConceptType.CODED || conceptType == ConceptType.BOOLEAN) {
+            return getCodedValueOrdering().compareTo(other.getCodedValueOrdering());
+        }
+        return value.compareTo(other.value);
+    }
+
+    /** Gets a number specifying the ordering of Values of different types. */
+    public Integer getTypeOrdering() {
+        switch (conceptType) {
+            case BOOLEAN:
+                return value == Concepts.YES_UUID ? 5 : 1;
+            case NUMERIC:
+                return 2;
+            case TEXT:
+                return 3;
+            case CODED:
+                return 4;
+        }
+        return 0;
+    }
+
+    /**
+     * Gets a number specifying the ordering of coded values.  These are
+     * arranged from least to most severe so that using the Pebble "max" filter
+     * will select the most severe value from a list of values.
+     */
+    public Integer getCodedValueOrdering() {
+        final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
+            .put(Concepts.NO_UUID, 0)
+            .put(Concepts.NONE_UUID, 1)
+            .put(Concepts.NORMAL_UUID, 2)
+            .put(Concepts.SOLID_FOOD_UUID, 3)
+            .put(Concepts.MILD_UUID, 4)
+            .put(Concepts.MODERATE_UUID, 5)
+            .put(Concepts.SEVERE_UUID, 6)
+            .put(Concepts.YES_UUID, 7).build();
+        Integer cvo = CODED_VALUE_ORDERING.get(value);
+        return cvo == null ? 0 : cvo;
     }
 }

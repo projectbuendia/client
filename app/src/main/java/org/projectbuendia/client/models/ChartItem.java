@@ -22,29 +22,35 @@ public class ChartItem {
     public final @Nonnull String[] conceptUuids;
     public final @Nonnull String format;
     public final @Nonnull String captionFormat;
+    public final @Nonnull String cssClass;
     public final @Nonnull String script;
 
     public ChartItem(@Nullable String label, @Nullable String type, boolean required,
                      @Nullable String[] conceptUuids, @Nullable String format,
-                     @Nullable String captionFormat, @Nullable String script) {
+                     @Nullable String captionFormat, @Nullable String cssClass,
+                     @Nullable String script) {
         this.label = label == null ? "" : label;
         this.type = type == null ? "" : type;
         this.required = required;
         this.conceptUuids = conceptUuids == null ? new String[0] : conceptUuids;
         this.format = format == null ? "" : format;
         this.captionFormat = captionFormat == null ? "" : captionFormat;
+        this.cssClass = cssClass == null ? "" : cssClass;
         this.script = script == null ? "" : script;
     }
 
     public ChartItem withDefaults(@Nullable ChartItem defaults) {
         String format = this.format;
         String captionFormat = this.captionFormat;
+        String cssClass = this.cssClass;
         String script = this.script;
         if (defaults != null) {
             format = format.isEmpty() ? defaults.format : format;
             captionFormat = captionFormat.isEmpty() ? defaults.captionFormat : captionFormat;
+            cssClass = cssClass.isEmpty() ? defaults.cssClass : cssClass;
             script = script.isEmpty() ? defaults.script : script;
         }
-        return new ChartItem(label, type, required, conceptUuids, format, captionFormat, script);
+        return new ChartItem(
+            label, type, required, conceptUuids, format, captionFormat, cssClass, script);
     }
 }

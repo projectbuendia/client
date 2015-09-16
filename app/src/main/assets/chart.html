@@ -14,7 +14,7 @@ $(document).ready(function() {
   {% for tileRow in tileRows %}
     <tr>
       {% for tile in tileRow %}
-        <td class="tile" width="{{100.0 / tileRow.size}}%">
+        <td class="tile concept-{{tile.item.concepts[0]}} {{tile.obsValues | obsformat(tile.item.cssClass)}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{tile.obsValues | obsformat(tile.item.format) | linebreak | raw}}</div>
           <div class="caption">{{tile.obsValues | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
@@ -50,7 +50,14 @@ $(document).ready(function() {
           </th>
           {% for column in columns %}
             {% set values = get_all(row=row, column=column) %}
-            <td class="{{column.start == nowColumnStart ? 'now' : ''}}"
+            {% if values is empty %}
+              {% set aggregate = null %}
+            {% elseif row.item.type == 'yes_no' %}
+              {% set aggregate = values | max %}
+            {% else %}
+              {% set aggregate = values | last %}
+            {% endif %}
+            <td class="{{column.start == nowColumnStart ? 'now' : ''}} concept-{{row.item.concepts[0]}} {{aggregate | obsformat(tile.item.cssClass)}}"
                onclick="popup({{row.item.label | js}},
               {% if values is empty %}
                 []
@@ -69,9 +76,9 @@ $(document).ready(function() {
                           + ' ----\n'
                           + {{value.value | js}}
                           + '\n\n'
-                        {%- endfor -%})">&#x1f4dd;</div>
+                        {%- endfor -%}); return false">&#x1f4dd;</div>
                 {% else %}
-                  {{values | last | obsformat(row.item.format)}}
+                  {{aggregate | obsformat(row.item.format)}}
                 {% endif %}
               {% endif %}
             </td>

@@ -100,6 +100,7 @@ public class DbSyncHelper {
                     .withValue(ChartItems.CONCEPT_UUIDS, Joiner.on(",").join(conceptUuids))
                     .withValue(ChartItems.FORMAT, item.format)
                     .withValue(ChartItems.CAPTION_FORMAT, item.caption_format)
+                    .withValue(ChartItems.CSS_CLASS, item.css_class)
                     .withValue(ChartItems.SCRIPT, item.script)
                     .build());
                 syncResult.stats.numInserts++;

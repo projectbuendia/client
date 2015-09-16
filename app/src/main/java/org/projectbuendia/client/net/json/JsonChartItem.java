@@ -17,7 +17,8 @@ public class JsonChartItem {
     public String type;  // rendering type (not the same as a concept data type)
     public boolean required;  // always show this grid row even if there are no observations
     public String[] concepts;  // one or more concepts rendered for this item
-    public String format;  // format string, e.g. "##.# kg" or "{1,number,##} / {2,number,##}"
-    public String caption_format;  // format string for tile captions
+    public String format;  // format string, e.g. "##.# kg" or "{1} / {2}"
+    public String caption_format;  // format string for tile caption or grid cell popup
+    public String css_class;  // format string for CSS class on this tile or grid row
     public String script;  // JavaScript for fancy rendering
 }

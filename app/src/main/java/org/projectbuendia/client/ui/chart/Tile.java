@@ -15,14 +15,14 @@ public class Tile {
 
     static Map<String, ChartItem> DEFAULTS = new HashMap<>();
     static {
-        DEFAULTS.put("select_one", new ChartItem("", "", false, null, "{1,abbr}", "{1,name}", ""));
-        DEFAULTS.put("yes_no", new ChartItem("", "", false, null, "{1,yes_no,Yes;No}", "", ""));
-        DEFAULTS.put("number", new ChartItem("", "", false, null, "0", "", ""));
-        DEFAULTS.put("text", new ChartItem("", "", false, null, "{1,text,60}", "", ""));
-        DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,YYYY-MM-dd}", "", ""));
-        DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "", ""));
-        DEFAULTS.put("obs_date", new ChartItem("", "", false, null, "{1,obs_time,YYYY-MM-dd}", "", ""));
-        DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "", ""));
+        DEFAULTS.put("select_one", new ChartItem("", "", false, null, "{1,abbr}", "{1,name}", "", ""));
+        DEFAULTS.put("yes_no", new ChartItem("", "", false, null, "{1,yes_no,Yes;No}", "", "", ""));
+        DEFAULTS.put("number", new ChartItem("", "", false, null, "0", "", "", ""));
+        DEFAULTS.put("text", new ChartItem("", "", false, null, "{1,text,60}", "", "", ""));
+        DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,YYYY-MM-dd}", "", "", ""));
+        DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "", "", ""));
+        DEFAULTS.put("obs_date", new ChartItem("", "", false, null, "{1,obs_time,YYYY-MM-dd}", "", "", ""));
+        DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "", "", ""));
     }
     
     public Tile(@Nonnull ChartItem item, @Nonnull LocalizedObs[] obsValues) {
