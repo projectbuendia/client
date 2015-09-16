@@ -68,7 +68,7 @@ public class SyncAccountService extends Service {
             Bundle b = new Bundle();
             b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
             b.putBoolean(SyncPhase.SYNC_CONCEPTS.name(), true);
-            b.putBoolean(SyncPhase.SYNC_CHART_STRUCTURE.name(), true);
+            b.putBoolean(SyncPhase.SYNC_CHART_ITEMS.name(), true);
             b.putBoolean(SyncPhase.SYNC_LOCATIONS.name(), true);
             b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
             b.putBoolean(SyncPhase.SYNC_USERS.name(), true);
@@ -89,7 +89,7 @@ public class SyncAccountService extends Service {
         b.putBoolean(SyncOption.FULL_SYNC.name(), true);
         b.putBoolean(SyncPhase.SYNC_PATIENTS.name(), true);
         b.putBoolean(SyncPhase.SYNC_CONCEPTS.name(), true);
-        b.putBoolean(SyncPhase.SYNC_CHART_STRUCTURE.name(), true);
+        b.putBoolean(SyncPhase.SYNC_CHART_ITEMS.name(), true);
         b.putBoolean(SyncPhase.SYNC_LOCATIONS.name(), true);
         b.putBoolean(SyncPhase.SYNC_OBSERVATIONS.name(), true);
         b.putBoolean(SyncPhase.SYNC_USERS.name(), true);

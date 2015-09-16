@@ -1,5 +1,6 @@
 package org.projectbuendia.client.ui.chart;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.lang3.text.ExtendedMessageFormat;
@@ -7,6 +8,7 @@ import org.apache.commons.lang3.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.Utils;
 
@@ -14,18 +16,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.Format;
-import java.text.MessageFormat;
 import java.text.ParsePosition;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+/**
+ * Formats an array of LocalizedObs objects according to a format string.  The format string is
+ * based on the MessageFormat syntax, but is 1-based so that "{1}" is replaced with the first
+ * observation, "{2} is replaced with the second, and so on.
+ *
+ * A variety of formats are available for rendering individual observations; see the various
+ * ObsOutputFormat classes below.  Each one may be invoked with a short name, e.g.
+ * "{1,number,##.#}" renders a numeric value to one decimal place; "{1,yes_no,YES;NO}" renders
+ * a coded answer to "YES" or "NO"; "{1,date,YYYY-mm-dd}" renders a date value, etc.
+ */
 public class ObsFormat extends Format {
-    public static final LocalizedObs NULL_OBS = new LocalizedObs(0, 0, "", "", "", "NONE", null, null);
+    public static final LocalizedObs NULL_OBS = new LocalizedObs(0, 0, "", "", "NONE", null, null);
 
     private static final Set<String> FALSE_CONCEPT_UUIDS = ImmutableSet.of(
         Concepts.NO_UUID,
@@ -34,16 +50,17 @@ public class ObsFormat extends Format {
         Concepts.UNKNOWN_UUID
     );
 
-    private static final FormatFactoryMap FACTORY_MAP = new FormatFactoryMap();
+    private static final Map<String, Class<? extends Format>> FORMAT_CLASSES = new HashMap<>();
     static {
-        FACTORY_MAP.add("yes_no", ObsYesNoFormat.class);
-        FACTORY_MAP.add("abbr", ObsAbbrFormat.class);
-        FACTORY_MAP.add("name", ObsNameFormat.class);
-        FACTORY_MAP.add("number", ObsDecimalFormat.class);
-        FACTORY_MAP.add("text", ObsTextFormat.class);
-        FACTORY_MAP.add("date", ObsDateFormat.class);
-        FACTORY_MAP.add("time", ObsTimeFormat.class);
-        FACTORY_MAP.add("encounter_time", ObsEncounterTimeFormat.class);
+        FORMAT_CLASSES.put("yes_no", ObsYesNoFormat.class);
+        FORMAT_CLASSES.put("abbr", ObsAbbrFormat.class);
+        FORMAT_CLASSES.put("name", ObsNameFormat.class);
+        FORMAT_CLASSES.put("number", ObsDecimalFormat.class);
+        FORMAT_CLASSES.put("text", ObsTextFormat.class);
+        FORMAT_CLASSES.put("date", ObsDateFormat.class);
+        FORMAT_CLASSES.put("time", ObsTimeFormat.class);
+        FORMAT_CLASSES.put("obs_time", ObsEncounterTimeFormat.class);
+        FORMAT_CLASSES.put("select", ObsSelectFormat.class);
     }
 
     public static final String ELLIPSIS = "\u2026";
@@ -51,20 +68,45 @@ public class ObsFormat extends Format {
 
     private Format mFormat;
 
-    public ObsFormat(String pattern) {
+    /**
+     * Formats can instantiate sub-formats; e.g. when "{1,number,0.0}" appears in the format
+     * pattern, ObsNumberFormat will get instantiated and invoked with the first argument.
+     * In some cases, most notably ObsSelectFormat, the sub-format invokes other formats.
+     * We'd like those sub-formats to have access to all the arguments, not just the single
+     * argument that they're being asked to format.  So, we keep a reference to the root
+     * ObsFormat from which all others descended, which holds onto the original array of all
+     * the arguments.  The sub-format classes are all inner classes, so they can see mRootObsFormat.
+     */
+    private ObsFormat mRootObsFormat;  // root ObsFormat from which this ObsFormat descended
+    private Object[] mCurrentArgs;  // args currently being formatted by this ObsFormat
+
+    public ObsFormat(String pattern, ObsFormat rootObsFormat) {
         if (pattern == null) {
             pattern = "";
         }
-        if (!pattern.contains("{") && pattern.contains("#")) {
-            pattern = "{1,number," + pattern + "}";
+        // Allow plain numeric formats like "#0.00" as a shorthand for "{1,number,#0.00}".
+        if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
+            try {
+                new DecimalFormat(pattern);  // check if it's a valid numeric format
+                pattern = "{1,number," + pattern + "}";
+            } catch (IllegalArgumentException e) { }
         }
-        mFormat = new ExtendedMessageFormat(pattern, FACTORY_MAP);
+        mRootObsFormat = rootObsFormat == null ? this : rootObsFormat;
+        mFormat = new ExtendedMessageFormat(pattern, new FormatFactoryMap());
+    }
+    
+    public ObsFormat(String pattern) {
+        this(pattern, null);
+    }
+
+    public Object[] getCurrentArgs() {
+        return mCurrentArgs;
     }
 
     @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                          @Nonnull FieldPosition pos) {
-        StringBuffer result = mFormat.format(obj, buf, pos);
-        return result;
+        mCurrentArgs = (Object[]) obj;
+        return mFormat.format(obj, buf, pos);
     }
 
     @Override public Object parseObject(String str, @Nonnull ParsePosition pos) {
@@ -72,16 +114,10 @@ public class ObsFormat extends Format {
     }
 
     /** A FormatFactory that can look up and instantiate Format classes by name. */
-    static class FormatFactoryMap extends AbstractMap<String, FormatFactory> implements FormatFactory {
-        static final Map<String, Class<? extends Format>> FORMATS = new HashMap<>();
-
+    class FormatFactoryMap extends AbstractMap<String, FormatFactory> implements FormatFactory {
         public FormatFactoryMap() { }
 
-        public void add(String name, Class<? extends Format> formatClass) {
-            FORMATS.put(name, formatClass);
-        }
-
-        @Override public Set<Map.Entry<String, FormatFactory>> entrySet() {
+        @Override public @Nonnull Set<Map.Entry<String, FormatFactory>> entrySet() {
             throw new UnsupportedOperationException();
         }
 
@@ -89,21 +125,17 @@ public class ObsFormat extends Format {
          * ExtendedMessageFormat expects a Map containing FormatFactory instances;
          * rather than defining a separate FormatFactory class to go with every Format,
          * we simply return this class, which can instantiate any Format.
-         * @param name
-         * @return
          */
-        @Override public FormatFactory get(Object name) {
-            return name instanceof String && FORMATS.containsKey(name) ? this : null;
+        @Override public @Nullable FormatFactory get(Object name) {
+            return FORMAT_CLASSES.containsKey(name) ? this : null;
         }
 
         /** Instantiates a Format class, whose constructor must take one String argument. */
         @Override public Format getFormat(String name, String args, Locale locale) {
-            Class formatClass = FORMATS.get(name);
-            if (formatClass == null) {
-                return new MessageFormat("<invalid format type \"" + name + "\">");
-            }
+            Class formatClass = FORMAT_CLASSES.get(name);
             try {
-                return (Format) formatClass.getConstructor(String.class).newInstance(args);
+                return (Format) formatClass.getConstructor(
+                    ObsFormat.class, String.class).newInstance(ObsFormat.this, args);
             } catch (NoSuchMethodException | InstantiationException |
                      IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
@@ -111,11 +143,15 @@ public class ObsFormat extends Format {
         }
     }
 
-    static abstract class ObsOutputFormat extends Format {
+    /**
+     * Base class for formats that format a single LocalizedObs.  Subclasses should have a
+     * public constructor that takes a single String argument, and should implement formatObs.
+     */
+    abstract class ObsOutputFormat extends Format {
         @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                              @Nonnull FieldPosition pos) {
             LocalizedObs obs = (LocalizedObs) obj;
-            buf.append(obs == NULL_OBS || obs.value == null ? EN_DASH : formatObs(obs));
+            buf.append(formatObs(obs == NULL_OBS ? null : obs));
             return buf;
         }
 
@@ -123,33 +159,42 @@ public class ObsFormat extends Format {
             throw new UnsupportedOperationException();
         }
 
-        public abstract String formatObs(LocalizedObs obs);
+        /** Returns the array of arguments that were given to the top-level formatter. */
+        public Object[] getRootArgs() {
+            return mRootObsFormat.getCurrentArgs();
+        }
+
+        public abstract String formatObs(@Nullable LocalizedObs obs);
     }
 
     /** "yes_no" format for boolean values (UUIDs).  Typical use: {1,yes_no,Present;Not present} */
-    static class ObsYesNoFormat extends ObsOutputFormat {
+    class ObsYesNoFormat extends ObsOutputFormat {
         String mYesText;
         String mNoText;
+        String mNullText;
 
         public ObsYesNoFormat(String pattern) {
-            int split = pattern.indexOf(';');
-            mYesText = split >= 0 ? pattern.substring(0, split) : "";
-            mNoText = split >= 0 ? pattern.substring(split + 1) : pattern;
+            String[] parts = pattern.split(";");
+            mYesText = parts.length >= 1 ? parts[0] : "";
+            mNoText = parts.length >= 2 ? parts[1] : "";
+            mNullText = parts.length >= 3 ? parts[2] : EN_DASH;
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return mNullText;
             String str = Utils.valueOrDefault(obs.value, "").trim();
             return str.isEmpty() || FALSE_CONCEPT_UUIDS.contains(str) ? mNoText : mYesText;
         }
     }
 
     /** "abbr" format for coded values (UUIDs).  Typical use: {1,abbr} */
-    static class ObsAbbrFormat extends ObsOutputFormat {
+    class ObsAbbrFormat extends ObsOutputFormat {
         public static final int MAX_ABBR_CHARS = 3;
 
         public ObsAbbrFormat(String pattern) { }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             String name = Utils.valueOrDefault(obs.localizedValue, "");
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= MAX_ABBR_CHARS) {
@@ -161,7 +206,7 @@ public class ObsFormat extends Format {
     }
 
     /** "name" format for coded values (UUIDs).  Typical use: {1,name} */
-    static class ObsNameFormat extends ObsOutputFormat {
+    class ObsNameFormat extends ObsOutputFormat {
         int maxLength;
 
         public ObsNameFormat(String pattern) {
@@ -172,7 +217,8 @@ public class ObsFormat extends Format {
             }
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             String name = Utils.valueOrDefault(obs.localizedValue, "");
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= ObsAbbrFormat.MAX_ABBR_CHARS) {
@@ -183,14 +229,15 @@ public class ObsFormat extends Format {
     }
 
     /** "number" format for numeric values.  Typical use: {1,number,##.# kg} */
-    static class ObsDecimalFormat extends ObsOutputFormat {
+    class ObsDecimalFormat extends ObsOutputFormat {
         DecimalFormat mFormat;
 
         public ObsDecimalFormat(String pattern) {
             mFormat = new DecimalFormat(pattern);
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             try {
                 return mFormat.format(Double.valueOf(obs.value));
             } catch (NumberFormatException e) {
@@ -199,8 +246,8 @@ public class ObsFormat extends Format {
         }
     }
 
-    /** "text" format for text values.  Typical use: {1,text,20} */
-    static class ObsTextFormat extends ObsOutputFormat {
+    /** "text" format for text values (with optional length limit).  Typical use: {1,text,20} */
+    class ObsTextFormat extends ObsOutputFormat {
         int maxLength;
 
         public ObsTextFormat(String pattern) {
@@ -211,48 +258,179 @@ public class ObsFormat extends Format {
             }
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             String value = Utils.valueOrDefault(obs.value, "");
             return maxLength < value.length() ? value.substring(0, maxLength) + ELLIPSIS : value;
         }
     }
 
     /** "date" format for date values ("2015-02-26").  Typical use: {1,date,dd MMM} */
-    static class ObsDateFormat extends ObsOutputFormat {
+    class ObsDateFormat extends ObsOutputFormat {
         String mPattern;
 
         public ObsDateFormat(String pattern) {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             return new LocalDate(obs.value).toString(mPattern);
         }
     }
 
     /** "time" format for timestamp values (seconds since epoch).  Typical use: {1,time,MMM dd 'at' HH:mm} */
-    static class ObsTimeFormat extends ObsOutputFormat {
+    class ObsTimeFormat extends ObsOutputFormat {
         String mPattern;
 
         public ObsTimeFormat(String pattern) {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             return new DateTime(Double.valueOf(obs.value) * 1000).toString(mPattern);
         }
     }
 
-    /** "encounter_time" format for encounter times.  Typical use: {1,encounter_time,HH:mm 'on' MMM dd} */
-    static class ObsEncounterTimeFormat extends ObsOutputFormat {
+    /** "obs_time" format for observation times.  Typical use: {1,obs_time,HH:mm 'on' MMM dd} */
+    class ObsEncounterTimeFormat extends ObsOutputFormat {
         String mPattern;
 
         public ObsEncounterTimeFormat(String pattern) {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(LocalizedObs obs) {
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            if (obs == null) return EN_DASH;
             return obs.encounterTime.toString(mPattern);
+        }
+    }
+
+    private static final Pattern CONDITION_PATTERN = Pattern.compile("([<>=]*)(.*)");
+
+    /**
+     * "select" format for coded or numeric values.  Typical use:
+     * {1,select,1065:Yes;1066:No;1067:Unknown} - converts a coded value to a string
+     * {1,select,>=10:#;>1:#.0;#.00} - selects a format based on the value
+     */
+    class ObsSelectFormat extends ObsOutputFormat {
+        class Option {
+            public String operator = "";
+            public String operand = "";
+            public ObsFormat format;
+        }
+        private final List<Option> mOptions;
+
+        public ObsSelectFormat(String pattern) {
+            mOptions = parse(pattern);
+        }
+
+        private List<Option> parse(String pattern) {
+            List<Option> options = new ArrayList<>();
+
+            pattern += ";";  // ensure every condition:pattern pair is terminated with ;
+            int n = pattern.length();
+
+            int pos = 0;
+            int start = 0;  // start of the next condition or pattern
+            int depth = 0;  // brace nesting depth
+            Option option = new Option();
+            while (pos < n) {
+                char ch = pattern.charAt(pos);
+                if (ch == '\'') {
+                    pos = skipQuotedString(pattern, pos);
+                } else if (option.operand.isEmpty() && ch == ':') {
+                    // A colon separates the condition from its pattern.
+                    Matcher matcher = CONDITION_PATTERN.matcher(pattern.substring(start, pos));
+                    if (matcher.matches()) {
+                        option.operator = matcher.group(1);
+                        option.operand = matcher.group(2);
+                    }
+                    pos += 1;
+                    start = pos;
+                } else if (depth == 0 && ch == ';') {
+                    // A semicolon terminates this condition:pattern pair.
+                    option.format = new ObsFormat(pattern.substring(start, pos), mRootObsFormat);
+                    options.add(option);
+                    option = new Option();
+                    pos += 1;
+                    start = pos;
+                } else {
+                    depth += (ch == '{' ? 1 : ch == '}' ? -1 : 0);
+                    pos += 1;
+                }
+            }
+            return options;
+        }
+
+        /** Skips a quoted string, beginning at the index of the opening quote. */
+        private int skipQuotedString(String str, int pos) {
+            int n = str.length();
+            pos += 1;  // skip opening quote
+            while (pos < n) {
+                if (str.charAt(pos) == '\'') {
+                    if (pos + 1 < n && str.charAt(pos + 1) == '\'') {
+                        // Two single quotes are an escaped literal single quote.
+                        pos += 2;
+                        continue;
+                    }
+                    return pos + 1;  // skip closing quote
+                }
+                pos += 1;
+            }
+            return n;  // not terminated
+        }
+
+        /** Returns true if the value of an observation matches the given condition. */
+        private boolean matches(LocalizedObs obs, String operator, String operand) {
+            if (operand.isEmpty()) return true;
+
+            String strValue = null;
+            String strOperand = operand;
+            Double numValue = null;
+            Double numOperand = null;
+            if (obs != null) {
+                strValue = obs.value;
+                if (obs.conceptType == ConceptType.CODED) {
+                    // Coded UUIDs can be compared according to their short form.
+                    strOperand = Utils.expandUuid(operand);
+                } else if (obs.conceptType == ConceptType.NUMERIC) {
+                    numValue = Utils.toDoubleOrNull(obs.value);
+                    numOperand = Utils.toDoubleOrNull(operand);
+                }
+            }
+
+            // To test for null, use = to compare to an empty string.
+            // The comparison operators <, <=, >, >= are only valid for numbers.
+            switch (operator) {
+                case "":
+                case "=":
+                case "==":
+                    if (operand.isEmpty()) {
+                        return (strValue == null || strValue.isEmpty()) && numValue == null;
+                    }
+                    return numValue != null ? numValue.equals(numOperand)
+                        : Objects.equal(strOperand, strValue);
+                case "<":
+                    return numValue != null && numValue.compareTo(numOperand) < 0;
+                case "<=":
+                    return numValue != null && numValue.compareTo(numOperand) <= 0;
+                case ">":
+                    return numValue != null && numValue.compareTo(numOperand) > 0;
+                case ">=":
+                    return numValue != null && numValue.compareTo(numOperand) >= 0;
+            }
+            return false;
+        }
+
+        @Override public String formatObs(@Nullable LocalizedObs obs) {
+            for (Option option : mOptions) {
+                if (matches(obs, option.operator, option.operand)) {
+                    return option.format.format(getRootArgs());
+                }
+            }
+            return "";
         }
     }
 }

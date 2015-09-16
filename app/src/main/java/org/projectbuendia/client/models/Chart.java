@@ -9,13 +9,19 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.models;
 
-import org.projectbuendia.client.models.ChartSectionType;
+import java.util.List;
 
-/** A section in a chart (a row of tiles or a group of grid rows). */
-public class JsonChartSection {
-    public ChartSectionType type;
-    public String label;
-    public JsonChartItem[] items;
+/** A chart definition. */
+public class Chart {
+    public final String uuid;  // UUID of the OpenMRS Form containing this chart definition
+    public final List<ChartSection> tileGroups;
+    public final List<ChartSection> rowGroups;
+
+    public Chart(String uuid, List<ChartSection> tileGroups, List<ChartSection> rowGroups) {
+        this.uuid = uuid;
+        this.tileGroups = tileGroups;
+        this.rowGroups = rowGroups;
+    }
 }

@@ -31,6 +31,7 @@ import java.util.List;
 
 /** An interface abstracting the idea of an RPC to a server. */
 public interface Server {
+    // TODO: Get rid of all these constants; use JsonPatient, JsonEncounter, etc. types instead.
     public static final String PATIENT_ID_KEY = "id";
     public static final String PATIENT_UUID_KEY = "uuid";
     public static final String PATIENT_GIVEN_NAME_KEY = "given_name";

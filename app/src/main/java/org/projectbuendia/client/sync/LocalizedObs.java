@@ -11,10 +11,16 @@
 
 package org.projectbuendia.client.sync;
 
+import android.support.annotation.NonNull;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.joda.time.DateTime;
+import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.net.json.ConceptType;
 
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -22,7 +28,8 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
-public final class LocalizedObs {
+// TODO: rename to ObsValue and remove fields we no longer use
+public final class LocalizedObs implements Comparable<LocalizedObs> {
     public static final Comparator<LocalizedObs> BY_OBS_TIME = new Comparator<LocalizedObs>() {
         @Override public int compare(LocalizedObs left, LocalizedObs right) {
             return left.encounterTime.compareTo(right.encounterTime);
@@ -33,9 +40,6 @@ public final class LocalizedObs {
 
     /** The time of the encounter in which this observation was taken. */
     public final DateTime encounterTime;
-
-    /** The localized name of the group in which this observation should be displayed. */
-    public final String groupName;
 
     /** The UUID of the concept that was observed, unique and stable (suitable as a map key). */
     public final String conceptUuid;
@@ -58,7 +62,6 @@ public final class LocalizedObs {
      * Instantiates a {@link LocalizedObs} with specified initial values.
      * @param id                  the unique id
      * @param encounterTimeMillis The time of the encounter in milliseconds since epoch
-     * @param groupName           The localized name of the group/section the observation belongs in
      * @param conceptUuid         The UUID of the concept that was observed
      * @param conceptName         The localized name of the concept that was observed
      * @param value               The unlocalized value (a numeric value, text string, concept UUID of the
@@ -68,7 +71,6 @@ public final class LocalizedObs {
     public LocalizedObs(
         long id,
         long encounterTimeMillis,
-        String groupName,
         String conceptUuid,
         String conceptName,
         String conceptType,
@@ -76,7 +78,6 @@ public final class LocalizedObs {
         @Nullable String localizedValue) {
         this.id = id;
         this.encounterTime = new DateTime(encounterTimeMillis);
-        this.groupName = checkNotNull(groupName);
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptName = checkNotNull(conceptName);
         this.conceptType = ConceptType.valueOf(conceptType);
@@ -87,7 +88,6 @@ public final class LocalizedObs {
     @Override public String toString() {
         return "id=" + id
             + ",time=" + encounterTime
-            + ",group=" + groupName
             + ",conceptUuid=" + conceptUuid
             + ",conceptName=" + conceptName
             + ",conceptType=" + conceptType
@@ -98,7 +98,6 @@ public final class LocalizedObs {
         if (other instanceof LocalizedObs) {
             LocalizedObs o = (LocalizedObs) other;
             return Objects.equals(encounterTime, o.encounterTime)
-                && Objects.equals(groupName, o.groupName)
                 && Objects.equals(conceptUuid, o.conceptUuid)
                 && Objects.equals(conceptName, o.conceptName)
                 && Objects.equals(conceptType, o.conceptType)
@@ -107,5 +106,68 @@ public final class LocalizedObs {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Compares value instances according to a total ordering such that:
+     * - The empty value (present == false) is ordered before all others.
+     * - The Boolean value false is ordered before all other values and types.
+     * - Numeric values are ordered from least to greatest magnitude.
+     * - Text values are ordered lexicographically from A to Z.
+     * - Coded values are ordered from least severe to most severe (if they can
+     * be interpreted as having a severity); or from first to last (if they can
+     * be interpreted as having a typical temporal sequence).
+     * - The Boolean value true is ordered after all other values and types.
+     * @param other The other Value to compare to.
+     * @return
+     */
+    @Override public int compareTo(@NonNull LocalizedObs other) {
+        if (value == null || other.value == null) {
+            return value == other.value ? 0 : value == null ? -1 : 1;
+        }
+        if (conceptType != other.conceptType) {
+            return getTypeOrdering().compareTo(other.getTypeOrdering());
+        }
+        if (conceptType == ConceptType.NUMERIC) {
+            return Double.valueOf(value).compareTo(Double.valueOf(other.value));
+        }
+        if (conceptType == ConceptType.CODED || conceptType == ConceptType.BOOLEAN) {
+            return getCodedValueOrdering().compareTo(other.getCodedValueOrdering());
+        }
+        return value.compareTo(other.value);
+    }
+
+    /** Gets a number specifying the ordering of Values of different types. */
+    public Integer getTypeOrdering() {
+        switch (conceptType) {
+            case BOOLEAN:
+                return value == Concepts.YES_UUID ? 5 : 1;
+            case NUMERIC:
+                return 2;
+            case TEXT:
+                return 3;
+            case CODED:
+                return 4;
+        }
+        return 0;
+    }
+
+    /**
+     * Gets a number specifying the ordering of coded values.  These are
+     * arranged from least to most severe so that using the Pebble "max" filter
+     * will select the most severe value from a list of values.
+     */
+    public Integer getCodedValueOrdering() {
+        final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
+            .put(Concepts.NO_UUID, 0)
+            .put(Concepts.NONE_UUID, 1)
+            .put(Concepts.NORMAL_UUID, 2)
+            .put(Concepts.SOLID_FOOD_UUID, 3)
+            .put(Concepts.MILD_UUID, 4)
+            .put(Concepts.MODERATE_UUID, 5)
+            .put(Concepts.SEVERE_UUID, 6)
+            .put(Concepts.YES_UUID, 7).build();
+        Integer cvo = CODED_VALUE_ORDERING.get(value);
+        return cvo == null ? 0 : cvo;
     }
 }

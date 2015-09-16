@@ -12,7 +12,6 @@
 package org.projectbuendia.client.ui.chart;
 
 import android.test.AndroidTestCase;
-import android.util.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +29,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
@@ -39,7 +38,6 @@ import org.projectbuendia.client.ui.chart.PatientChartController.MinimalHandler;
 import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,14 +54,14 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_ID_1 = "id1";
 
     private static final LocalizedObs OBSERVATION_A =
-        new LocalizedObs(0, 0, "g", "c", "c", "TEXT", "val", "localizedVal");
+        new LocalizedObs(0, 0, "c", "c", "TEXT", "val", "localizedVal");
 
     private PatientChartController mController;
 
     @Mock private AppModel mMockAppModel;
     @Mock private PatientChartController.Ui mMockUi;
     @Mock private OdkResultSender mMockOdkResultSender;
-    @Mock private LocalizedChartHelper mMockChartHelper;
+    @Mock private ChartDataHelper mMockChartHelper;
     @Mock private SyncManager mMockSyncManager;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
@@ -107,10 +105,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // also be removed.
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
-        verify(mMockUi).updatePatientHistoryUi(
-            new ArrayList<Pair<String, String>>(), new HashMap<String, LocalizedObs>(),
-            new ArrayList<Pair<String, String>>(), allObservations,
-            ImmutableList.<Order> of(), null, null);
+        verify(mMockUi).updateTilesAndGrid(
+            null, new HashMap<String, LocalizedObs>(),
+            allObservations, ImmutableList.<Order> of(), null, null);
         verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
     }
 

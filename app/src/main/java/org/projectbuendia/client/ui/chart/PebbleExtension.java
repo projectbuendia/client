@@ -8,10 +8,11 @@ import com.mitchellbosecke.pebble.extension.Function;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
+import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.utils.Logger;
 
-import java.text.FieldPosition;
-import java.text.Format;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import javax.annotation.Nullable;
+
 public class PebbleExtension extends AbstractExtension {
+    private static final Logger LOG = Logger.create();
 
     static Map<String, Filter> filters = new HashMap<>();
     static {
@@ -30,6 +34,7 @@ public class PebbleExtension extends AbstractExtension {
         filters.put("js", new JsFilter());
         filters.put("obsformat", new ObsFormatFilter());
         filters.put("dateformat", new DateFormatFilter());
+        filters.put("linebreak", new LineBreakFilter());
     }
     static Map<String, Function> functions = new HashMap<>();
     static {
@@ -47,28 +52,28 @@ public class PebbleExtension extends AbstractExtension {
         return functions;
     }
 
-    abstract static class NullaryFilter implements Filter {
+    abstract static class ZeroArgFilter implements Filter {
         @Override public List<String> getArgumentNames() {
             return null;
         }
     }
 
-    static class MinFilter extends NullaryFilter {
-        @Override public Object apply(Object input, Map<String, Object> args) {
+    static class MinFilter extends ZeroArgFilter {
+        @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
             Collection<Comparable> values = (Collection<Comparable>) input;
             return values == null || values.isEmpty() ? null : Collections.min(values);
         }
     }
 
-    static class MaxFilter extends NullaryFilter {
-        @Override public Object apply(Object input, Map<String, Object> args) {
+    static class MaxFilter extends ZeroArgFilter {
+        @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
             Collection<Comparable> values = (Collection<Comparable>) input;
             return values == null || values.isEmpty() ? null : Collections.max(values);
         }
     }
 
-    static class AvgFilter extends NullaryFilter {
-        @Override public Object apply(Object input, Map<String, Object> args) {
+    static class AvgFilter extends ZeroArgFilter {
+        @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
             Collection<LocalizedObs> values = (Collection<LocalizedObs>) input;
             if (values == null || values.isEmpty()) return null;
             double sum = 0;
@@ -87,7 +92,7 @@ public class PebbleExtension extends AbstractExtension {
     }
 
     /** Converts a Java null, boolean, integer, double, string, or DateTime to a JS expression. */
-    static class JsFilter extends NullaryFilter {
+    static class JsFilter extends ZeroArgFilter {
         @Override public Object apply(Object input, Map<String, Object> args) {
             if (input instanceof Boolean) {
                 return ((Boolean) input) ? "true" : "false";
@@ -116,22 +121,31 @@ public class PebbleExtension extends AbstractExtension {
 
             // ObsFormat takes an array of LocalizedObs instances with a 1-based index.
             objects.add(null);
-            if (input instanceof Collection) {
-                objects.addAll((Collection) input);
+            if (input instanceof Object[] || input instanceof Collection) {
+                Collections.addAll(objects, (Object[]) input);
             } else {
                 objects.add(input);
             }
             Object[] array = objects.toArray();
+            // ExtendedMessageFormat has a bad bug: it silently fails to pass along null values
+            // to sub-formatters.  To work around this, replace all nulls with a sentinel object.
+            // (See the ObsOutputFormat.format() method, which checks for NULL_OBS.)
             for (int i = 0; i < array.length; i++) {
                 if (array[i] == null) {
-                    // MessageFormat has a terrible bug in that it silently fails to
-                    // pass null values along to a sub-formatter.  To work around this,
-                    // we replace all nulls with a sentinel object.  See the
-                    // ObsOutputFormat.format() method, which checks for NULL_OBS.
                     array[i] = ObsFormat.NULL_OBS;
                 }
             }
-            return new ObsFormat((String) args.get("pattern")).format(array);
+            String pattern = (String) args.get("pattern");
+            try {
+                return new ObsFormat(pattern).format(array);
+            } catch (Throwable e) {
+                while ((e instanceof InvocationTargetException ||
+                        e.getCause() instanceof InvocationTargetException) && e.getCause() != e) {
+                    e = e.getCause();
+                }
+                LOG.e(e, "Could not format data with pattern " + pattern);
+                return pattern;  // make the problem visible on the page to aid fixes
+            }
         }
     }
 
@@ -146,6 +160,12 @@ public class PebbleExtension extends AbstractExtension {
         }
     }
 
+    static class LineBreakFilter extends ZeroArgFilter {
+        @Override public Object apply(Object input, Map<String, Object> args) {
+            return ("" + input).replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+        }
+    }
+
     static class GetAllFunction implements Function {
         @Override public List<String> getArgumentNames() {
             return ImmutableList.of("row", "column");
@@ -154,7 +174,7 @@ public class PebbleExtension extends AbstractExtension {
         @Override public Object execute(Map<String, Object> args) {
             Row row = (Row) args.get("row");
             Column column = (Column) args.get("column");
-            return column.obsMap.get(row.conceptUuid);
+            return column.obsMap.get(row.item.conceptUuids[0]);
         }
     }
 
@@ -163,10 +183,10 @@ public class PebbleExtension extends AbstractExtension {
             return ImmutableList.of("row", "column");
         }
 
-        @Override public Object execute(Map<String, Object> args) {
-            Row row = (Row) args.get("row");
+        @Override public @Nullable Object execute(Map<String, Object> args) {
+            ChartItem itemDef = (ChartItem) args.get("row");
             Column column = (Column) args.get("column");
-            SortedSet<LocalizedObs> obsSet = column.obsMap.get(row.conceptUuid);
+            SortedSet<LocalizedObs> obsSet = column.obsMap.get(itemDef.conceptUuids[0]);
             return obsSet.isEmpty() ? null : obsSet.last();
         }
     }

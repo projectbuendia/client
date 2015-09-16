@@ -34,10 +34,10 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
 
         // Providers for groups of things (e.g., all charts).
         registry.registerDelegate(
-            Contracts.Charts.CONTENT_URI.getPath(),
+            Contracts.ChartItems.CONTENT_URI.getPath(),
             new GroupProviderDelegate(
-                Contracts.Charts.GROUP_CONTENT_TYPE,
-                Table.CHARTS));
+                Contracts.ChartItems.GROUP_CONTENT_TYPE,
+                Table.CHART_ITEMS));
         registry.registerDelegate(
             Contracts.Concepts.CONTENT_URI.getPath(),
             new GroupProviderDelegate(
@@ -127,14 +127,14 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             Contracts.PatientCounts.CONTENT_URI.getPath(),
             new PatientCountsDelegate());
         registry.registerDelegate(
-            Contracts.LocalizedCharts.CONTENT_URI.getPath() + "/*/*/*",
-            new LocalizedChartsDelegate());
+            Contracts.HistoricalLocalizedObs.CONTENT_URI.getPath() + "/*/*/*",
+            new HistoricalLocalizedObsDelegate());
         registry.registerDelegate(
             Contracts.LocalizedLocations.CONTENT_URI.getPath() + "/*",
             new LocalizedLocationsDelegate());
         registry.registerDelegate(
-            Contracts.MostRecentLocalizedCharts.CONTENT_URI.getPath() + "/*/*",
-            new MostRecentLocalizedChartsDelegate());
+            Contracts.LatestLocalizedObs.CONTENT_URI.getPath() + "/*/*",
+            new LatestLocalizedObsDelegate());
         // Content provider for our single item table for storing miscellaneous values.
         registry.registerDelegate(
             Contracts.Misc.CONTENT_URI.getPath(),

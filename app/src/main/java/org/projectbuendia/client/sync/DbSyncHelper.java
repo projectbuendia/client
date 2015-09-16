@@ -18,8 +18,10 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import com.android.volley.toolbox.RequestFuture;
+import com.google.common.base.Joiner;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
@@ -27,6 +29,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.net.json.JsonChart;
+import org.projectbuendia.client.net.json.JsonChartItem;
 import org.projectbuendia.client.net.json.JsonChartSection;
 import org.projectbuendia.client.net.json.JsonEncounter;
 import org.projectbuendia.client.net.json.JsonForm;
@@ -36,7 +39,7 @@ import org.projectbuendia.client.net.json.JsonPatient;
 import org.projectbuendia.client.net.json.JsonPatientRecord;
 import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.sync.providers.Contracts.Charts;
+import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
 import org.projectbuendia.client.sync.providers.Contracts.Locations;
 import org.projectbuendia.client.sync.providers.Contracts.Observations;
@@ -63,23 +66,43 @@ public class DbSyncHelper {
     /** Converts a JsonChart response into appropriate inserts in the chart table. */
     public static ArrayList<ContentProviderOperation> getChartUpdateOps(
         JsonChart response, SyncResult syncResult) {
-        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         if (response.uuid == null) {
             LOG.e("null chart uuid when fetching chart structure");
         }
-        int chartRow = 0;
-        for (JsonChartSection section : response.groups) {
-            if (section.uuid == null) {
-                LOG.e("null group uuid for chart " + response.uuid);
-                continue;
-            }
-            for (String conceptUuid : section.concepts) {
-                ops.add(ContentProviderOperation
-                    .newInsert(Charts.CONTENT_URI)
-                    .withValue(Charts.CHART_UUID, response.uuid)
-                    .withValue(Charts.CHART_ROW, chartRow++)
-                    .withValue(Charts.GROUP_UUID, section.uuid)
-                    .withValue(Charts.CONCEPT_UUID, conceptUuid)
+
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        int nextId = 1;
+        int nextWeight = 1;
+        for (JsonChartSection section : response.sections) {
+            int parentId = nextId;
+            ops.add(ContentProviderOperation.newInsert(ChartItems.CONTENT_URI)
+                .withValue(ChartItems._ID, nextId++)
+                .withValue(ChartItems.CHART_UUID, response.uuid)
+                .withValue(ChartItems.WEIGHT, nextWeight++)
+                .withValue(ChartItems.SECTION_TYPE, section.type == null ? null : section.type.name())
+                .withValue(ChartItems.LABEL, section.label)
+                .build());
+            syncResult.stats.numInserts++;
+
+            for (JsonChartItem item : section.items) {
+                Object[] conceptUuids = new Object[item.concepts.length];
+                for (int i = 0; i < conceptUuids.length; i++) {
+                    conceptUuids[i] = Utils.expandUuid(item.concepts[i]);
+                }
+                ops.add(ContentProviderOperation.newInsert(ChartItems.CONTENT_URI)
+                    .withValue(BaseColumns._ID, nextId++)
+                    .withValue(ChartItems.CHART_UUID, response.uuid)
+                    .withValue(ChartItems.WEIGHT, nextWeight++)
+                    .withValue(ChartItems.PARENT_ID, parentId)
+                    .withValue(ChartItems.LABEL, item.label)
+                    .withValue(ChartItems.TYPE, item.type)
+                    .withValue(ChartItems.REQUIRED, item.required ? 1 : 0)
+                    .withValue(ChartItems.CONCEPT_UUIDS, Joiner.on(",").join(conceptUuids))
+                    .withValue(ChartItems.FORMAT, item.format)
+                    .withValue(ChartItems.CAPTION_FORMAT, item.caption_format)
+                    .withValue(ChartItems.CSS_CLASS, item.css_class)
+                    .withValue(ChartItems.CSS_STYLE, item.css_style)
+                    .withValue(ChartItems.SCRIPT, item.script)
                     .build());
                 syncResult.stats.numInserts++;
             }
@@ -89,8 +112,6 @@ public class DbSyncHelper {
 
     public static List<ContentProviderOperation> getFormUpdateOps(SyncResult syncResult)
         throws ExecutionException, InterruptedException {
-        final ContentResolver resolver = App.getInstance().getContentResolver();
-
         LOG.i("Listing all forms on server");
         RequestFuture<List<JsonForm>> future = RequestFuture.newFuture();
         App.getServer().listForms(future, future);
@@ -99,10 +120,10 @@ public class DbSyncHelper {
             cvs.put(form.id, Form.fromJson(form).toContentValues());
         }
 
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        final ContentResolver resolver = App.getInstance().getContentResolver();
         Cursor c = resolver.query(Contracts.Forms.CONTENT_URI, null, null, null, null);
         LOG.i("Examining forms: " + c.getCount() + " local, " + cvs.size() + " from server");
-
-        List<ContentProviderOperation> ops = new ArrayList<>();
         try {
             while (c.moveToNext()) {
                 String localId = Utils.getString(c, Contracts.Forms._ID);

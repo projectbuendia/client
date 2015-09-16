@@ -28,7 +28,7 @@ public class Colorizer {
     public static final Colorizer C_96;
     private static int[] sDefaultPalette;
     private static int[][] sDefaultPaletteBytes;
-    
+
     static {
         // The above fields are initialized here because initialization must occur in a
         // specific order; the palettes must be set before any constructors are safe to call.
@@ -41,7 +41,7 @@ public class Colorizer {
         C_48 = new Colorizer(2);
         C_96 = new Colorizer(3);
     }
-    
+
     private final LruCache<Integer, Integer> mCache = new LruCache<>(128);
     private final int[][] mPaletteBytes;
     private final int mInterpolations;

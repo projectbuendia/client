@@ -2,7 +2,6 @@ package org.projectbuendia.client.ui.chart;
 
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
-import android.util.Pair;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
@@ -16,7 +15,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.models.Chart;
+import org.projectbuendia.client.models.ChartItem;
+import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.utils.Logger;
@@ -33,8 +34,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/** Renders a patient's history of observations to an HTML table displayed in a WebView. */
-public class GridRenderer {
+/** Renders a patient's chart to HTML displayed in a WebView. */
+public class ChartRenderer {
     static PebbleEngine sEngine;
     private static final Logger LOG = Logger.create();
 
@@ -51,15 +52,13 @@ public class GridRenderer {
         void onOrderCellPressed(String orderUuid, long startMillis);
     }
 
-    public GridRenderer(WebView view, Resources resources) {
+    public ChartRenderer(WebView view, Resources resources) {
         mView = view;
         mResources = resources;
     }
 
     /** Renders a patient's history of observations to an HTML table in the WebView. */
-    public void render(List<Pair<String, String>> tileConceptUuidsAndNames,
-                       Map<String, LocalizedObs> latestObservations,
-                       List<Pair<String, String>> gridConceptUuidsAndNames,
+    public void render(Chart chart, Map<String, LocalizedObs> latestObservations,
                        List<LocalizedObs> observations, List<Order> orders,
                        LocalDate admissionDate, LocalDate firstSymptomsDate,
                        GridJsInterface controllerInterface) {
@@ -78,14 +77,12 @@ public class GridRenderer {
         mView.getSettings().setJavaScriptEnabled(true);
         mView.addJavascriptInterface(controllerInterface, "controller");
         mView.setWebChromeClient(new WebChromeClient());
-        String html = new GridHtmlGenerator(
-            tileConceptUuidsAndNames, latestObservations,
-            gridConceptUuidsAndNames, observations, orders,
-            admissionDate, firstSymptomsDate).getHtml();
+        String html = new GridHtmlGenerator(chart, latestObservations, observations, orders,
+                                            admissionDate, firstSymptomsDate).getHtml();
         // If we only call loadData once, the WebView doesn't render the new HTML.
         // If we call loadData twice, it works.  TODO: Figure out what's going on.
-        // mView.loadData(html, "text/html; charset=utf-8", null);
-        // mView.loadData(html, "text/html; charset=utf-8", null);
+        mView.loadDataWithBaseURL("file:///android_asset/", html,
+            "text/html; charset=utf-8", "utf-8", null);
         mView.loadDataWithBaseURL("file:///android_asset/", html,
             "text/html; charset=utf-8", "utf-8", null);
         mView.setWebContentsDebuggingEnabled(true);
@@ -102,39 +99,39 @@ public class GridRenderer {
         LocalDate mAdmissionDate;
         LocalDate mFirstSymptomsDate;
 
-        List<Tile> mTiles = new ArrayList<>();
+        List<List<Tile>> mTileRows = new ArrayList<>();
         List<Row> mRows = new ArrayList<>();
         Map<String, Row> mRowsByUuid = new HashMap<>();  // unordered, keyed by concept UUID
         SortedMap<Long, Column> mColumnsByStartMillis = new TreeMap<>();  // ordered by start millis
         SortedSet<LocalDate> mDays = new TreeSet<>();
 
-        GridHtmlGenerator(List<Pair<String, String>> tileConceptUuidsAndNames,
-                          Map<String, LocalizedObs> latestObservations,
-                          List<Pair<String, String>> gridConceptUuidsAndNames,
+        GridHtmlGenerator(Chart chart, Map<String, LocalizedObs> latestObservations,
                           List<LocalizedObs> observations, List<Order> orders,
                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             mAdmissionDate = admissionDate;
             mFirstSymptomsDate = firstSymptomsDate;
             mToday = LocalDate.now(chronology);
             mOrders = orders;
-            for (Pair<String, String> uuidAndName : tileConceptUuidsAndNames) {
-                mTiles.add(new Tile(uuidAndName.first, uuidAndName.second,
-                                    latestObservations.get(uuidAndName.first)));
+
+            for (ChartSection tileGroup : chart.tileGroups) {
+                List<Tile> tileRow = new ArrayList<>();
+                for (ChartItem item : tileGroup.items) {
+                    LocalizedObs[] obsValues = new LocalizedObs[item.conceptUuids.length];
+                    for (int i = 0; i < obsValues.length; i++) {
+                        obsValues[i] = latestObservations.get(item.conceptUuids[i]);
+                    }
+                    tileRow.add(new Tile(item, obsValues));
+                }
+                mTileRows.add(tileRow);
             }
-            for (Pair<String, String> uuidAndName : gridConceptUuidsAndNames) {
-                addRow(uuidAndName.first, uuidAndName.second);
+            for (ChartSection chartSection : chart.rowGroups) {
+                for (ChartItem chartItem : chartSection.items) {
+                    Row row = new Row(chartItem);
+                    mRows.add(row);
+                    mRowsByUuid.put(chartItem.conceptUuids[0], row);
+                }
             }
             addObservations(observations);
-        }
-
-        void addRow(String conceptUuid, String conceptName) {
-            Row row = mRowsByUuid.get(conceptUuid);
-            if (row == null) {
-                row = new Row(conceptUuid, conceptName, "" + Value.getValueType(conceptUuid,
-                    ConceptType.NONE, null));
-                mRows.add(row);
-                mRowsByUuid.put(conceptUuid, row);
-            }
         }
 
         void addObservations(List<LocalizedObs> observations) {
@@ -151,8 +148,6 @@ public class GridRenderer {
                     Integer count = column.orderExecutionCounts.get(obs.value);
                     column.orderExecutionCounts.put(
                         obs.value, count == null ? 1 : count + 1);
-                } else {
-                    addRow(obs.conceptUuid, obs.conceptName);
                 }
             }
         }
@@ -203,12 +198,12 @@ public class GridRenderer {
             }
 
             Map<String, Object> context = new HashMap<>();
-            context.put("tiles", mTiles);
+            context.put("tileRows", mTileRows);
             context.put("rows", mRows);
             context.put("columns", Lists.newArrayList(mColumnsByStartMillis.values()));
             context.put("nowColumnStart", getColumnContainingTime(DateTime.now()).start);
             context.put("orders", mOrders);
-            return renderTemplate("assets/grid.html", context);
+            return renderTemplate("assets/chart.html", context);
         }
 
         /** Renders a Pebble template. */
@@ -226,7 +221,7 @@ public class GridRenderer {
             } catch (Exception e) {
                 StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
-                return writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
+                return "<div style=\"font-size: 150%\">" + writer.toString().replace("&", "&amp;").replace("<", "&lt;").replace("\n", "<br>");
             }
         }
     }
