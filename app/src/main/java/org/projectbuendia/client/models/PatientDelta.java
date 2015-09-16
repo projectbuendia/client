@@ -78,6 +78,7 @@ public class PatientDelta {
      * @return whether serialization succeeded
      */
     public boolean toJson(JSONObject json) {
+        // TODO: Use a JsonPatient instead of all these field name constants.
         try {
             if (id.isPresent()) {
                 json.put(Server.PATIENT_ID_KEY, id.get());

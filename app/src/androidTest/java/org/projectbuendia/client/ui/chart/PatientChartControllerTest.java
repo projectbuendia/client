@@ -30,7 +30,7 @@ import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
@@ -63,7 +63,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     @Mock private AppModel mMockAppModel;
     @Mock private PatientChartController.Ui mMockUi;
     @Mock private OdkResultSender mMockOdkResultSender;
-    @Mock private LocalizedChartHelper mMockChartHelper;
+    @Mock private ChartDataHelper mMockChartHelper;
     @Mock private SyncManager mMockSyncManager;
     private FakeEventBus mFakeCrudEventBus;
     private FakeEventBus mFakeGlobalEventBus;
@@ -107,7 +107,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // also be removed.
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
-        verify(mMockUi).updatePatientHistoryUi(
+        verify(mMockUi).updateTilesAndGrid(
             new ArrayList<Pair<String, String>>(), new HashMap<String, LocalizedObs>(),
             new ArrayList<Pair<String, String>>(), allObservations,
             ImmutableList.<Order> of(), null, null);

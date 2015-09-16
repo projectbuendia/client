@@ -20,68 +20,68 @@ import org.projectbuendia.client.sync.Database;
 
 import java.util.List;
 
-/** A {@link ProviderDelegate} that provides query access to all localized locations. */
-public class LocalizedChartsDelegate implements ProviderDelegate<Database> {
+/** A {@link ProviderDelegate} that provides access to the latest observation for each concept. */
+public class LatestLocalizedObsDelegate implements ProviderDelegate<Database> {
 
     @Override public String getType() {
-        return Contracts.LocalizedCharts.GROUP_CONTENT_TYPE;
+        return Contracts.HistoricalLocalizedObs.GROUP_CONTENT_TYPE;
     }
 
     @Override public Cursor query(
         Database dbHelper, ContentResolver contentResolver, Uri uri, String[] projection,
         String selection, String[] selectionArgs, String sortOrder) {
         // Decode the uri, expected:
-        // content://org.projectbuendia.client/localizedchart/{chart_uuid}/{locale}/{patient_uuid}
+        // content://org.projectbuendia.client/mostrecent/{patient_uuid}/{locale}
         List<String> pathSegments = uri.getPathSegments();
-        if (pathSegments.size() != 4) {
+        if (pathSegments.size() != 3) {
             throw new UnsupportedOperationException("Unknown URI " + uri);
         }
-        String patientUuid = pathSegments.get(pathSegments.size() - 1);
-        String locale = pathSegments.get(pathSegments.size() - 2);
-        @SuppressWarnings("UnusedAssignment") // May be used in the future.
-            String chartUuid = pathSegments.get(pathSegments.size() - 3);
+        String locale = pathSegments.get(pathSegments.size() - 1);
+        String patientUuid = pathSegments.get(pathSegments.size() - 2);
 
-        // This scary SQL statement joins the observations with appropriate concept names to give
-        // localized output in the correct order specified by a chart.
+        // This scary SQL statement joins the observations a subselect for the latest for each
+        // concept with appropriate concept names to give localized output.
         String query = ""
             + " SELECT obs._id,"
             + "     obs.encounter_time,"
-            + "     group_names.name AS group_name,"
-            + "     chart.concept_uuid,"
+            + "     obs.concept_uuid,"
             + "     names.name AS concept_name,"
             + "     concepts.concept_type,"
             // Localized value for concept values
             + "     obs.value,"
             + "     COALESCE(value_names.name, obs.value) AS localized_value"
-            + " FROM charts AS chart"
+            + " FROM observations AS obs"
 
-            + "     INNER JOIN concept_names names"
-            + "     ON chart.concept_uuid = names.concept_uuid"
+            + " INNER JOIN ("
+            + "     SELECT concept_uuid,"
+            + "         max(encounter_time) AS maxtime"
+            + "     FROM observations"
+            + "     WHERE patient_uuid = ?" // 1st selection arg
+            + "     GROUP BY concept_uuid"
+            + " ) maxs"
+            + " ON obs.encounter_time = maxs.maxtime AND"
+            + "     obs.concept_uuid = maxs.concept_uuid"
 
-            + "     INNER JOIN concept_names group_names"
-            + "     ON chart.group_uuid = group_names.concept_uuid"
+            + " INNER JOIN concept_names names"
+            + " ON obs.concept_uuid = names.concept_uuid"
 
-            + "     INNER JOIN concepts"
-            + "     ON chart.concept_uuid = concepts._id"
-
-            + "     LEFT JOIN observations obs"
-            + "     ON chart.concept_uuid = obs.concept_uuid AND "
-            + "         (obs.patient_uuid = ? OR" // 2nd selection arg
-            + "          obs.patient_uuid is null)"
+            + " INNER JOIN concepts"
+            + " ON obs.concept_uuid = concepts._id"
 
             // Some of the results are CODED so value is a concept UUID
             // Some are numeric so the value is fine.
-            // To cope we will do a LEFT JOIN on the value AND the name
-            + "     LEFT JOIN concept_names value_names"
-            + "     ON obs.value = value_names.concept_uuid"
-            + "         AND value_names.locale = ?" // 1st selection arg
+            // To cope we will do a LEFT JOIN ON the value AND the name
+            + " LEFT JOIN concept_names value_names"
+            + " ON obs.value = value_names.concept_uuid"
+            + "     AND value_names.locale = ?" // 2nd selection arg
 
-            + " WHERE names.locale = ? AND " // 3rd selection arg
-            + "     group_names.locale = ?" // 4th selection arg
+            + " WHERE obs.patient_uuid = ? AND " // 3rd sel. arg
+            + "     names.locale = ? " // 4th selection arg
 
-            + " ORDER BY chart.chart_row, obs.encounter_time, obs._id";
+            + " ORDER BY obs.concept_uuid, obs._id";
+
         return dbHelper.getReadableDatabase()
-            .rawQuery(query, new String[] {patientUuid, locale, locale, locale});
+            .rawQuery(query, new String[] {patientUuid, locale, patientUuid, locale});
     }
 
     @Override public Uri insert(

@@ -9,7 +9,7 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.net.json.ConceptType;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 
 import java.util.Comparator;
@@ -20,6 +20,7 @@ import java.util.Set;
  * The observed value for a concept, broken out into fields of various types
  * and representations to facilitate rendering in a template.
  */
+@Deprecated // to be replaced by LocalizedObs
 class Value implements Comparable<Value> {
     public static ObsTimeComparator BY_OBS_TIME = new ObsTimeComparator();
     public DateTime observed;  // when the observation was taken
@@ -36,7 +37,7 @@ class Value implements Comparable<Value> {
 
     public Value(LocalizedObs obs, Chronology chronology) {
         final Set<String> FALSE_CODED_VALUES = new ImmutableSet.Builder<String>().add(
-            Concepts.UNKNOWN_UUID).addAll(LocalizedChartHelper.NO_SYMPTOM_VALUES).build();
+            Concepts.UNKNOWN_UUID).addAll(ChartDataHelper.NO_SYMPTOM_VALUES).build();
         if (obs == null) {
             observed = null;
             present = false;
@@ -78,7 +79,8 @@ class Value implements Comparable<Value> {
             Concepts.MOBILITY_UUID,
             Concepts.PAIN_UUID,
             Concepts.WEAKNESS_UUID,
-            "777000003AAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            Concepts.APPETITE_UUID,
+            Concepts.OEDEMA_UUID);
         final Set<String> NUMERIC_CONCEPTS = ImmutableSet.of(
             Concepts.TEMPERATURE_UUID,
             Concepts.VOMITING_UUID,

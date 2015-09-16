@@ -24,8 +24,9 @@ public class Contracts {
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     private static final String TYPE_PACKAGE_PREFIX = "/vnd.projectbuendia.client.";
 
+    /** Names of tables in the local datastore. */
     public enum Table {
-        CHARTS("charts"),
+        CHART_ITEMS("chart_items"),
         CONCEPT_NAMES("concept_names"),
         CONCEPTS("concepts"),
         FORMS("forms"),
@@ -48,15 +49,30 @@ public class Contracts {
         }
     }
 
-    public interface Charts extends BaseColumns {
-        Uri CONTENT_URI = buildContentUri("charts");
-        String GROUP_CONTENT_TYPE = buildGroupType("chart");
-        String ITEM_CONTENT_TYPE = buildItemType("chart");
+    // Each interface below corresponds to one SQLite table in the local datastore.  The column
+    // names defined in the constants should exactly match the schemas defined in Database.java.
+
+    public interface ChartItems extends BaseColumns {
+        Uri CONTENT_URI = buildContentUri("chart-items");
+        String GROUP_CONTENT_TYPE = buildGroupType("chart-item");
+        String ITEM_CONTENT_TYPE = buildItemType("chart-item");
+
+        // Sections and items from all charts are stored in this table.  Sections are rows with
+        // a section_type and no parent_id; items are rows with a parent_id pointing to a section.
+        // To get the description of a chart, filter for a specific chart_uuid and order by weight.
 
         String CHART_UUID = "chart_uuid";
-        String CHART_ROW = "chart_row";  // 0-based row number in the chart history grid
-        String CONCEPT_UUID = "concept_uuid";  // the concept displayed in that row
-        String GROUP_UUID = "group_uuid";  // UUID of a concept for a section grouping
+        String WEIGHT = "weight";  // sort order
+        String SECTION_TYPE = "section_type";  // "TILE_ROW" or "GRID_SECTION" (for sections only)
+        String PARENT_ID = "parent_id";  // null for sections, non-null for items only
+
+        String LABEL = "label";  // label for sections or items
+        String TYPE = "type";  // null for sections, rendering type for items only
+        String REQUIRED = "required";  // 0 = show in grid if obs exist; 1 = show in grid always
+        String CONCEPT_UUIDS = "concept_uuids";  // comma-separated list of concept UUIDs
+        String FORMAT = "format";  // format string (see ObsFormat)
+        String CAPTION_FORMAT = "caption_format";  // format string for tile caption or grid popup
+        String SCRIPT = "script";  // JavaScript for complex rendering
     }
 
     public interface ConceptNames extends BaseColumns {
@@ -77,9 +93,6 @@ public class Contracts {
         String XFORM_ID = "xform_id";  // ID for the concept in XForms (OpenMRS ID)
         String CONCEPT_TYPE = "concept_type";  // data type name, e.g. NUMERIC, TEXT
     }
-
-    // Each interface below corresponds to one SQLite table.  The column names
-    // defined in the constants should match the schemas defined in Database.java.
 
     public interface Forms extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("forms");
@@ -194,6 +207,10 @@ public class Contracts {
         String FULL_NAME = "full_name";
     }
 
+    // Each interface below describes a derived view implemented by a custom
+    // ProviderDelegate.  The column name constants should match the columns
+    // returned by the query() method of the corresponding ProviderDelegate.
+
     public interface LocalizedLocations extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("localized-locations");
         String GROUP_CONTENT_TYPE = buildGroupType("localized-location");
@@ -206,23 +223,18 @@ public class Contracts {
         String PATIENT_COUNT = "patient_count";
     }
 
-    // TODO: rename to LocalizedObservations
-    public interface LocalizedCharts extends LocalizedChartColumns {
-        Uri CONTENT_URI = buildContentUri("localized-charts");
-        String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
-        String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
+    public interface HistoricalLocalizedObs extends LocalizedObsColumns {
+        Uri CONTENT_URI = buildContentUri("historical-localized-obs");
+        String GROUP_CONTENT_TYPE = buildGroupType("localized-obs");
+        String ITEM_CONTENT_TYPE = buildItemType("localized-obs");
 
     }
 
-    public interface MostRecentLocalizedCharts extends LocalizedChartColumns {
-        Uri CONTENT_URI = buildContentUri("latest-localized-charts");
-        String GROUP_CONTENT_TYPE = buildGroupType("localized-chart");
-        String ITEM_CONTENT_TYPE = buildItemType("localized-chart");
+    public interface LatestLocalizedObs extends LocalizedObsColumns {
+        Uri CONTENT_URI = buildContentUri("latest-localized-obs");
+        String GROUP_CONTENT_TYPE = buildGroupType("localized-obs");
+        String ITEM_CONTENT_TYPE = buildItemType("localized-obs");
     }
-
-    // Each interface below describes a derived view implemented by a custom
-    // ProviderDelegate.  The column name constants should match the columns
-    // returned by the query() method of the corresponding ProviderDelegate.
 
     public interface PatientCounts extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("patient-counts");
@@ -253,31 +265,25 @@ public class Contracts {
             .build();
     }
 
-    /**
-     * Returns the content URI for a localized chart for a given chart UUID, patient UUID, and
-     * locale.
-     */
-    public static Uri getLocalizedChartUri(
+    /** Returns the content URI for the observation history for a given patient and chart. */
+    public static Uri getHistoricalLocalizedObsUri(
         String chartUuid, String patientUuid, String locale) {
-        return LocalizedCharts.CONTENT_URI.buildUpon()
+        return HistoricalLocalizedObs.CONTENT_URI.buildUpon()
             .appendPath(chartUuid)
             .appendPath(locale)
             .appendPath(patientUuid)
             .build();
     }
 
-    /**
-     * Returns the content URI for the most recent localized chart for a given patient UUID and
-     * locale.
-     */
-    public static Uri getMostRecentChartUri(String patientUuid, String locale) {
-        return MostRecentLocalizedCharts.CONTENT_URI.buildUpon()
+    /** Returns the content URI for the latest observations of each concept for a given patient. */
+    public static Uri getLatestLocalizedObsUri(String patientUuid, String locale) {
+        return LatestLocalizedObs.CONTENT_URI.buildUpon()
             .appendPath(patientUuid)
             .appendPath(locale)
             .build();
     }
 
-    interface LocalizedChartColumns {
+    private interface LocalizedObsColumns {
         String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
         String GROUP_NAME = "group_name";
         String CONCEPT_UUID = "concept_uuid";

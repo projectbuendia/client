@@ -1,40 +1,29 @@
 package org.projectbuendia.client.ui.chart;
 
-import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.models.ChartItem;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /** Descriptor for a row (observed attribute) in the patient history grid. */
 public class Row {
-    public String conceptUuid;
-    public String heading;
-    public String type;
-    public String format;
+    public ChartItem item;
 
-    static Map<String, String> CONCEPT_FORMATS = new HashMap<>();
+    static Map<String, ChartItem> DEFAULTS = new HashMap<>();
     static {
-        CONCEPT_FORMATS.put(Concepts.TEMPERATURE_UUID, "##.#");
-        CONCEPT_FORMATS.put(Concepts.WEIGHT_UUID, "##.#");
-        CONCEPT_FORMATS.put(Concepts.PULSE_UUID, "##");
-        CONCEPT_FORMATS.put(Concepts.RESPIRATION_UUID, "##");
+        DEFAULTS.put("select_one", new ChartItem("", "", false, null, "{1,abbr}", "{1,name}", ""));
+        DEFAULTS.put("yes_no", new ChartItem("", "", false, null, "{1,yes_no,\u25cf}", "{1,yes_no,Yes;No}", ""));
+        DEFAULTS.put("number", new ChartItem("", "", false, null, "0", "0", ""));
+        DEFAULTS.put("text", new ChartItem("", "", false, null, "{1,text,5}", "{1,text,40}", ""));
+        DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,MMM dd}", "{1,date,MMM dd}", ""));
+        DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "{1,time,HH:mm}", ""));
+        DEFAULTS.put("obs_date", new ChartItem("", "", false, null, "{1,obs_time,MMM dd}", "{1,obs_time,MMM dd}", ""));
+        DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "{1,obs_time,MMM dd 'at' HH:mm}", ""));
     }
 
-    static Map<Value.Type, String> DEFAULT_FORMATS = new HashMap<>();
-    static {
-        DEFAULT_FORMATS.put(Value.Type.CODED, "{1,abbr}");
-        DEFAULT_FORMATS.put(Value.Type.DATE, "{1,date,dd MMM}");
-        DEFAULT_FORMATS.put(Value.Type.NUMERIC, "###");
-        DEFAULT_FORMATS.put(Value.Type.TEXT, "{1}");
-        DEFAULT_FORMATS.put(Value.Type.BOOLEAN, "{1,yes_no,\u25cf}");
-    }
-
-    public Row(String conceptUuid, String heading, String type) {
-        this.conceptUuid = conceptUuid;
-        this.heading = heading;
-        this.type = type;
-        this.format = CONCEPT_FORMATS.get(conceptUuid);
-        if (format == null) format = DEFAULT_FORMATS.get(Value.getValueType(conceptUuid, ConceptType.NONE, null));
+    public Row(@Nonnull ChartItem item) {
+        this.item = item.withDefaults(DEFAULTS.get(item.type));
     }
 }

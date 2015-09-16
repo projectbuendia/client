@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
+// TODO: rename to ObsValue and remove fields we no longer use
 public final class LocalizedObs {
     public static final Comparator<LocalizedObs> BY_OBS_TIME = new Comparator<LocalizedObs>() {
         @Override public int compare(LocalizedObs left, LocalizedObs right) {
@@ -33,9 +34,6 @@ public final class LocalizedObs {
 
     /** The time of the encounter in which this observation was taken. */
     public final DateTime encounterTime;
-
-    /** The localized name of the group in which this observation should be displayed. */
-    public final String groupName;
 
     /** The UUID of the concept that was observed, unique and stable (suitable as a map key). */
     public final String conceptUuid;
@@ -58,7 +56,6 @@ public final class LocalizedObs {
      * Instantiates a {@link LocalizedObs} with specified initial values.
      * @param id                  the unique id
      * @param encounterTimeMillis The time of the encounter in milliseconds since epoch
-     * @param groupName           The localized name of the group/section the observation belongs in
      * @param conceptUuid         The UUID of the concept that was observed
      * @param conceptName         The localized name of the concept that was observed
      * @param value               The unlocalized value (a numeric value, text string, concept UUID of the
@@ -68,7 +65,6 @@ public final class LocalizedObs {
     public LocalizedObs(
         long id,
         long encounterTimeMillis,
-        String groupName,
         String conceptUuid,
         String conceptName,
         String conceptType,
@@ -76,7 +72,6 @@ public final class LocalizedObs {
         @Nullable String localizedValue) {
         this.id = id;
         this.encounterTime = new DateTime(encounterTimeMillis);
-        this.groupName = checkNotNull(groupName);
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptName = checkNotNull(conceptName);
         this.conceptType = ConceptType.valueOf(conceptType);
@@ -87,7 +82,6 @@ public final class LocalizedObs {
     @Override public String toString() {
         return "id=" + id
             + ",time=" + encounterTime
-            + ",group=" + groupName
             + ",conceptUuid=" + conceptUuid
             + ",conceptName=" + conceptName
             + ",conceptType=" + conceptType
@@ -98,7 +92,6 @@ public final class LocalizedObs {
         if (other instanceof LocalizedObs) {
             LocalizedObs o = (LocalizedObs) other;
             return Objects.equals(encounterTime, o.encounterTime)
-                && Objects.equals(groupName, o.groupName)
                 && Objects.equals(conceptUuid, o.conceptUuid)
                 && Objects.equals(conceptName, o.conceptName)
                 && Objects.equals(conceptType, o.conceptType)

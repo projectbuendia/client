@@ -20,10 +20,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Chart;
+import org.projectbuendia.client.models.ChartItem;
+import org.projectbuendia.client.models.ChartSection;
+import org.projectbuendia.client.models.ChartSectionType;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -35,10 +40,11 @@ import java.util.TreeSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/** A simple helper class for retrieving and localizing data from patient charts. */
-public class LocalizedChartHelper {
-
+/** A helper class for retrieving and localizing data to show in patient charts. */
+public class ChartDataHelper {
+    @Deprecated
     public static final String CHART_GRID_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
+    @Deprecated
     public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
     public static final String ENGLISH_LOCALE = "en";
 
@@ -51,7 +57,7 @@ public class LocalizedChartHelper {
 
     private final ContentResolver mContentResolver;
 
-    public LocalizedChartHelper(ContentResolver contentResolver) {
+    public ChartDataHelper(ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
     }
 
@@ -84,14 +90,12 @@ public class LocalizedChartHelper {
 
             // Get all the regular observations with localized names.
             cursor = mContentResolver.query(
-                Contracts.getLocalizedChartUri(
-                    CHART_GRID_UUID, patientUuid, locale),
+                Contracts.getHistoricalLocalizedObsUri(CHART_GRID_UUID, patientUuid, locale),
                 null, null, null, null);
             while (cursor.moveToNext()) {
                 results.add(new LocalizedObs(
                     cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                     cursor.getLong(cursor.getColumnIndex("encounter_time"))*1000L,
-                    cursor.getString(cursor.getColumnIndex("group_name")),
                     cursor.getString(cursor.getColumnIndex("concept_uuid")),
                     cursor.getString(cursor.getColumnIndex("concept_name")),
                     cursor.getString(cursor.getColumnIndex("concept_type")),
@@ -110,7 +114,6 @@ public class LocalizedChartHelper {
                 results.add(new LocalizedObs(
                     cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                     cursor.getLong(cursor.getColumnIndex("encounter_time"))*1000L,
-                    "",
                     cursor.getString(cursor.getColumnIndex("concept_uuid")),
                     "",
                     ConceptType.NONE.name(),
@@ -145,7 +148,7 @@ public class LocalizedChartHelper {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
-                Contracts.getMostRecentChartUri(patientUuid, locale),
+                Contracts.getLatestLocalizedObsUri(patientUuid, locale),
                 null, null, null, null);
 
             Map<String, LocalizedObs> result = Maps.newLinkedHashMap();
@@ -155,7 +158,6 @@ public class LocalizedChartHelper {
                 LocalizedObs obs = new LocalizedObs(
                     cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
                     cursor.getLong(cursor.getColumnIndex("encounter_time"))*1000L,
-                    "", /* no group */
                     conceptUuid,
                     cursor.getString(cursor.getColumnIndex("concept_name")),
                     cursor.getString(cursor.getColumnIndex("concept_type")),
@@ -186,7 +188,53 @@ public class LocalizedChartHelper {
         return observations;
     }
 
+    /** Retrieves and assembles a Chart from the local datastore. */
+    public Chart getChart(String uuid) {
+        Map<Long, ChartSection> tileGroupsById = new HashMap<>();
+        Map<Long, ChartSection> rowGroupsById = new HashMap<>();
+        List<ChartSection> tileGroups = new ArrayList<>();
+        List<ChartSection> rowGroups = new ArrayList<>();
+
+        try (Cursor c = mContentResolver.query(
+            ChartItems.CONTENT_URI, null, "chart_uuid = ?", new String[] {uuid}, "weight")) {
+            while (c.moveToNext()) {
+                Long id = Utils.getLong(c, ChartItems._ID);
+                Long parentId = Utils.getLong(c, ChartItems.PARENT_ID);
+                String label = Utils.getString(c, ChartItems.LABEL, "");
+                if (parentId == null) {
+                    // Add a section.
+                    switch (ChartSectionType.valueOf(Utils.getString(c, ChartItems.SECTION_TYPE))) {
+                        case TILE_ROW:
+                            ChartSection tileGroup = new ChartSection(label);
+                            tileGroups.add(tileGroup);
+                            tileGroupsById.put(id, tileGroup);
+                            break;
+                        case GRID_SECTION:
+                            ChartSection rowGroup = new ChartSection(label);
+                            rowGroups.add(rowGroup);
+                            rowGroupsById.put(id, rowGroup);
+                            break;
+                    }
+                } else {
+                    // Add a tile to its tile group or a grid row to its row group.
+                    ChartItem item = new ChartItem(label,
+                        Utils.getString(c, ChartItems.TYPE),
+                        Utils.getLong(c, ChartItems.REQUIRED, 0L) > 0L,
+                        Utils.getString(c, ChartItems.CONCEPT_UUIDS, "").split(","),
+                        Utils.getString(c, ChartItems.FORMAT),
+                        Utils.getString(c, ChartItems.CAPTION_FORMAT),
+                        Utils.getString(c, ChartItems.SCRIPT));
+                    ChartSection section = tileGroupsById.containsKey(parentId)
+                        ? tileGroupsById.get(parentId) : rowGroupsById.get(parentId);
+                    section.items.add(item);
+                }
+            }
+        }
+        return new Chart(uuid, tileGroups, rowGroups);
+    }
+
     /** Gets a list of the concept UUIDs and names to show in the chart tiles. */
+    @Deprecated
     public List<Pair<String, String>> getTileConcepts() {
         Map<String, String> conceptNames = new HashMap<>();
         Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
@@ -200,7 +248,7 @@ public class LocalizedChartHelper {
             cursor.close();
         }
         List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
-        cursor = mContentResolver.query(Contracts.Charts.CONTENT_URI, null,
+        cursor = mContentResolver.query(Contracts.ChartItems.CONTENT_URI, null,
             "chart_uuid = ?", new String[] {CHART_TILES_UUID}, "chart_row");
         try {
             while (cursor.moveToNext()) {
@@ -214,6 +262,7 @@ public class LocalizedChartHelper {
     }
 
     /** Gets a list of the concept UUIDs and names to show in the rows of the chart grid. */
+    @Deprecated
     public List<Pair<String, String>> getGridRowConcepts() {
         Map<String, String> conceptNames = new HashMap<>();
         Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
@@ -227,7 +276,7 @@ public class LocalizedChartHelper {
             cursor.close();
         }
         List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
-        cursor = mContentResolver.query(Contracts.Charts.CONTENT_URI, null,
+        cursor = mContentResolver.query(Contracts.ChartItems.CONTENT_URI, null,
             "chart_uuid = ?", new String[] {CHART_GRID_UUID}, "chart_row");
         try {
             while (cursor.moveToNext()) {

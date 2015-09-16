@@ -93,18 +93,45 @@ $(document).ready(function() {
 <!-- Use double-quotes for HTML attributes; single-quotes for JS/Pebble strings. -->
 
 <table id="tiles" cellspacing="0" cellpadding="0">
-  {% for tileRow in tileRows %}
-    <tr>
-      {% for tile in tileRow %}
-        <td class="tile" width="{{100.0 / tileRow.size}}%">
-          <div class="heading">{{tile.item.label}}</div>
-          <div class="value">{{tile.obsValues | obsformat(tile.item.format) | linebreak | raw}}</div>
-          <div class="caption">{{tile.obsValues | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
-        </td>
-      {% endfor %}
-    </tr>
+  {% for section in tilesections %}
+  <tr>
+  {% for tile in section %}
+    {% if loop.index % 4 == 0 %}<tr>{% endif %}
+    <td class="tile" width="25%" class="{{...tile.in_range ? ...}}">
+      <div class="heading">{{ tile.heading }}</div>
+      <div class="value" id="uuid...">
+        {% if js[tile.concept] is null %}
+
+        {% set value = tile.value %}
+          {{value | defaultformat(tile.format) }}
+
+        {% if value.number != null %}
+          {{value.number | numberformat(tile.numberformat)}}
+        {% elseif value.abbrev != null %}
+          {{value.abbrev}}
+        {% elseif value.text != null %}
+          {{value.text}}
+        {% elseif value.bool != null %}
+          {{value.bool ? 'Yes' : 'No'}}
+        {% else %}
+          &#x2013;
+        {% endif %}
+      </div>
+      {% if value.abbrev != null %}
+        <div class="caption">{{value.name}}</div>
+      {% endif %}
+    </td>
+    {% if loop.index % 4 == 3 or loop.index == tiles.size - 1 %}</tr>{% endif %}
   {% endfor %}
 </table>
+
+<script>
+  {% for tile in tiles %}
+    {% if js[tile.concept] %}
+      element.innerText = {{ js[tile.concept] }}({{ tile.value }})
+    {% endif %}
+  {% endfor %}
+</script>
 
 <div id="grid-scroller" style="width: 100%; overflow: scroll">
   <table id="grid" cellspacing="0" cellpadding="0">
@@ -128,32 +155,40 @@ $(document).ready(function() {
       {% for row in rows %}
         <tr class="obs">
           <th scope="row">
-            {{row.item.label}}
+            {{row.heading}}
           </th>
           {% for column in columns %}
-            {% set values = get_all(row=row, column=column) %}
+            {% set values = get_values(row=row, column=column) %}
             <td class="{{column.start == nowColumnStart ? 'now' : ''}}"
-               onclick="popup({{row.item.label | js}},
+               onclick="popup({{row.heading | js}},
               {% if values is empty %}
                 []
               {% else %}
                 [ {%- for value in values -%}
-                  [{{value | obsformat(row.item.captionFormat) | js}},
-                   {{value | obsformat('{1,obs_time,HH:mm}') | js}}],
+                  [{% if value.name != null %}{{value.name | js}}
+                  {% elseif value.text != null %}{{value.text | js}}
+                  {% elseif value.number != null %}{{value.number | js}}
+                  {% else %}{{value.bool ? '\'Yes\'' : '\'No\''}}{% endif %},
+                  {{value.observed | dateformat('HH:mm') | js}}],
                 {%- endfor -%} ]
               {% endif %} )">
               {% if values is not empty %}
-                {% if row.item.type == 'text_icon' %}
+                {% set last = values | last %}
+                {% if last.number != null %}
+                  {{values | avg | numberformat('#.#')}}
+                {% elseif last.abbrev != null %}
+                  {{last.abbrev}}
+                {% elseif last.text != null %}
                   <div onclick="alert(''
-                        {%- for value in values -%}
-                          + '---- '
-                          + {{value.encounterTime | dateformat('dd MMM \'at\' HH:mm') | js}}
-                          + ' ----\n'
-                          + {{value.value | js}}
-                          + '\n\n'
-                        {%- endfor -%})">&#x1f4dd;</div>
-                {% else %}
-                  {{values | last | obsformat(row.item.format)}}
+                    {%- for value in values -%}
+                      + '---- '
+                      + {{value.observed | dateformat('dd MMM \'at\' HH:mm') | js}}
+                      + ' ----\n'
+                      + {{value.text | js}}
+                      + '\n\n'
+                    {%- endfor -%})">&#x1f4dd;</div>
+                {% elseif last.bool != null %}
+                  {{(values | max).bool ? '&#x25cf;' : '' | raw}}
                 {% endif %}
               {% endif %}
             </td>

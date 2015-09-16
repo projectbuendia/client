@@ -85,7 +85,8 @@ public class Utils {
         };
     static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
     static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
-    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("d MMM 'at' HH:mm");
+    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("d MMM "
+        + "'at' HH:mm");
     static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
     static final DateTimeFormatter TIME_OF_DAY_FORMATTER = DateTimeFormat.forPattern("HH:mm");
     // Note: Use of \L here assumes a string that is already NFC-normalized.
@@ -142,6 +143,26 @@ public class Utils {
             return parts;
         }
     };
+
+    /** Parses a long integer value from a string, or returns null if parsing fails. */
+    public static @Nullable Long toLongOrNull(@Nullable String str) {
+        if (str == null) return null;
+        try {
+            return Long.parseLong(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /** Parses a double value from a string, or returns null if parsing fails. */
+    public static @Nullable Double toDoubleOrNull(@Nullable String str) {
+        if (str == null) return null;
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
     /** Converts objects with integer type to BigInteger. */
     public static BigInteger toBigInteger(Object obj) {
@@ -240,7 +261,7 @@ public class Utils {
     }
 
     /** Gets a nullable string value from a cursor. */
-    public static String getString(Cursor c, String columnName) {
+    public static @Nullable String getString(Cursor c, String columnName) {
         return getString(c, columnName, null);
     }
 
@@ -268,7 +289,7 @@ public class Utils {
     }
 
     /** Gets a long integer value from a cursor, returning a default value instead of null. */
-    public static Long getLong(Cursor c, String columnName, Long defaultValue) {
+    public static Long getLong(Cursor c, String columnName, @Nullable Long defaultValue) {
         int index = c.getColumnIndex(columnName);
         // The cast (Long) c.getLong(index) is necessary to work around the fact that
         // the Java compiler chooses type (long) for (boolean) ? (Long) : (long),
@@ -357,6 +378,15 @@ public class Utils {
     public static Interval toInterval(DateTime start, DateTime stop) {
         return new Interval(start == null ? MIN_DATE : start,
             stop == null ? MAX_DATE : stop);
+    }
+
+    /** Expands a UUID that has been optionally compressed to a small integer. */
+    public static String expandUuid(Object id) {
+        String str = "" + id;
+        if (str.matches("^[0-9]+$")) {
+            return (str + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").substring(0, 36);
+        }
+        return (String) id;
     }
 
     /** Shows or hides a dialog based on a boolean flag. */

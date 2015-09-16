@@ -38,12 +38,13 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
@@ -91,7 +92,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject SyncManager mSyncManager;
-    @Inject LocalizedChartHelper mLocalizedChartHelper;
+    @Inject ChartDataHelper mChartDataHelper;
     @Inject AppSettings mSettings;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
     @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
@@ -105,7 +106,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.patient_chart_gender_age) TextView mPatientGenderAgeView;
     @InjectView(R.id.patient_chart_pregnant) TextView mPatientPregnantOrIvView;
     @InjectView(R.id.chart_webview) WebView mGridWebView;
-    GridRenderer mGridRenderer;
+    ChartRenderer mChartRenderer;
 
     public static void start(Context caller, String uuid) {
         Intent intent = new Intent(caller, PatientChartActivity.class);
@@ -145,7 +146,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         boolean clinicalObservationFormEnabled = false;
         boolean ebolaLabTestFormEnabled = false;
-        for (final Form form : mLocalizedChartHelper.getForms()) {
+        for (final Form form : mChartDataHelper.getForms()) {
             MenuItem item = menu.add(form.name);
             item.setOnMenuItemClickListener(
                 new MenuItem.OnMenuItemClickListener() {
@@ -203,7 +204,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         mFormSubmissionDialog.setIndeterminate(true);
         mFormSubmissionDialog.setCancelable(false);
 
-        mGridRenderer = new GridRenderer(mGridWebView, getResources());
+        mChartRenderer = new ChartRenderer(mGridWebView, getResources());
 
         final OdkResultSender odkResultSender = new OdkResultSender() {
             @Override public void sendOdkResultToServer(String patientUuid, int resultCode, Intent data) {
@@ -226,7 +227,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             new Ui(),
             getIntent().getStringExtra("uuid"),
             odkResultSender,
-            mLocalizedChartHelper,
+            mChartDataHelper,
             controllerState,
             mSyncManager,
             minimalHandler);
@@ -422,18 +423,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             */
         }
 
-        @Override public void updatePatientHistoryUi(
-            List<Pair<String, String>> tileConceptUuidsAndNames,
+        @Override public void updateTilesAndGrid(
+            Chart chart,
             Map<String, LocalizedObs> latestObservations,
-            List<Pair<String, String>> gridConceptUuidsAndNames,
             List<LocalizedObs> observations,
             List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate) {
-            mGridRenderer.render(
-                tileConceptUuidsAndNames, latestObservations,
-                gridConceptUuidsAndNames, observations, orders,
-                admissionDate, firstSymptomsDate, mController);
+            mChartRenderer.render(chart, latestObservations, observations, orders,
+                                  admissionDate, firstSymptomsDate, mController);
             mRootView.invalidate();
         }
 

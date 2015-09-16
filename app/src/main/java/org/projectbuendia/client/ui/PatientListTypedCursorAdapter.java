@@ -29,7 +29,7 @@ import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
@@ -54,7 +54,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
     private final LocationTree mLocationTree;
-    private final LocalizedChartHelper mLocalizedChartHelper;
+    private final ChartDataHelper mChartDataHelper;
 
     private Location[] mLocations;
     private Map<String, Map<String, LocalizedObs>> mObservations;
@@ -69,7 +69,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         mPatientsByLocation = new HashMap<Location, List<Patient>>();
 
         mLocationTree = locationTree;
-        mLocalizedChartHelper = new LocalizedChartHelper(context.getContentResolver());
+        mChartDataHelper = new ChartDataHelper(context.getContentResolver());
     }
 
     @Override public int getGroupCount() {
@@ -256,7 +256,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            mObservations = mLocalizedChartHelper.getMostRecentObservationsBatch(params, "en");
+            mObservations = mChartDataHelper.getMostRecentObservationsBatch(params, "en");
             return null;
         }
 

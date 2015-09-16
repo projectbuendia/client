@@ -17,7 +17,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Pair;
 
 import com.google.common.base.Optional;
 
@@ -40,6 +39,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
@@ -48,7 +48,7 @@ import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.net.json.JsonUser;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
@@ -65,14 +65,15 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Controller for {@link PatientChartActivity}. */
-final class PatientChartController implements GridRenderer.GridJsInterface {
+final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     private static final Logger LOG = Logger.create();
     private static final boolean DEBUG = true;
     private static final String KEY_PENDING_UUIDS = "pendingUuids";
+
+    // Form UUIDs specific to Ebola deployments.
     static final String OBSERVATION_FORM_UUID = "buendia-form-clinical_observation";
     static final String EBOLA_LAB_TEST_FORM_UUID = "buendia-form-ebola_lab_test";
-
 
     /**
      * Period between observation syncs while the chart view is active.  It would be nice for
@@ -83,17 +84,17 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
      */
     private static final int OBSERVATION_SYNC_PERIOD_MILLIS = 60000;
 
+    // TODO: Get rid of mPatientUuids, mNextIndex etc. now that we have mFormRequests.
+    /** Maximum concurrent ODK forms assigned request codes. */
+    private static final int MAX_ODK_REQUESTS = 10;
     // The ODK code for filling in a form has no way of attaching metadata to it.
     // This means we can't pass which patient is currently being edited. Instead, we keep an array
     // of up to MAX_ODK_REQUESTS patientUuids. The array is persisted through activity restart in
     // the savedInstanceState.
-
-    /** Maximum concurrent ODK forms assigned request codes. */
-    private static final int MAX_ODK_REQUESTS = 10;
-    private int mNextIndex = 0;
-
     // TODO: Use a map for this instead of an array.
     private final String[] mPatientUuids;
+    private int mNextIndex = 0;
+
     private Patient mPatient = Patient.builder().build();
     private LocationTree mLocationTree;
     private DateTime mLastObsTime = null;
@@ -108,7 +109,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
     private final CrudEventBus mCrudEventBus;
     private final OdkResultSender mOdkResultSender;
     private final Ui mUi;
-    private final LocalizedChartHelper mChartHelper;
+    private final ChartDataHelper mChartHelper;
     private final AppModel mAppModel;
     private final EventSubscriber mEventBusSubscriber = new EventSubscriber();
     private final SyncManager mSyncManager;
@@ -136,10 +137,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void updatePatientLocationUi(LocationTree locationTree, Patient patient);
 
         /** Updates the UI showing the history of observations and orders for this patient. */
-        void updatePatientHistoryUi(
-            List<Pair<String, String>> tileConceptUuidsAndNames,
+        void updateTilesAndGrid(
+            Chart chart,
             Map<String, LocalizedObs> latestObservations,
-            List<Pair<String, String>> gridConceptUuidsAndNames,
             List<LocalizedObs> observations,
             List<org.projectbuendia.client.sync.Order> orders,
             LocalDate admissionDate,
@@ -166,7 +166,8 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         void showFormLoadingDialog(boolean show);
         void showFormSubmissionDialog(boolean show);
         void showNewOrderDialog(String patientUuid);
-        void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval interval, List<DateTime> executionTimes);
+        void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval
+            interval, List<DateTime> executionTimes);
     }
 
     /** Sends ODK form data. */
@@ -188,7 +189,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         Ui ui,
         String patientUuid,
         OdkResultSender odkResultSender,
-        LocalizedChartHelper chartHelper,
+        ChartDataHelper chartHelper,
         @Nullable Bundle savedState,
         SyncManager syncManager,
         MinimalHandler mainThreadHandler) {
@@ -214,7 +215,7 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
      */
     public Bundle getState() {
         Bundle bundle = new Bundle();
-        bundle.putStringArray("pendingUuids", mPatientUuids);
+        bundle.putStringArray(KEY_PENDING_UUIDS, mPatientUuids);
         return bundle;
     }
 
@@ -497,9 +498,9 @@ final class PatientChartController implements GridRenderer.GridJsInterface {
         mUi.updateLastObsTimeUi(mLastObsTime);
         mUi.updatePatientVitalsUi(
             conceptsToLatestObservations, admissionDate, firstSymptomsDate);
-        mUi.updatePatientHistoryUi(
-            mChartHelper.getTileConcepts(), conceptsToLatestObservations,
-            mChartHelper.getGridRowConcepts(), mObservations, orders,
+        mUi.updateTilesAndGrid(
+            mChartHelper.getChart(AppModel.CHART_UUID),
+            conceptsToLatestObservations, mObservations, orders,
             admissionDate, firstSymptomsDate);
     }
 

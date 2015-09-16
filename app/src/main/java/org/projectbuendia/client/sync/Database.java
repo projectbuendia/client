@@ -28,7 +28,7 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 21;
+    public static final int DATABASE_VERSION = 22;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "buendia.db";
@@ -71,6 +71,7 @@ public class Database extends SQLiteOpenHelper {
      */
     static final Map<Table, String> SCHEMAS = new HashMap();
 
+    // For descriptions of these tables and the meanings of their columns, see Contracts.java.
     static {
         SCHEMAS.put(Table.PATIENTS, ""
             + "_id TEXT PRIMARY KEY NOT NULL,"
@@ -129,16 +130,19 @@ public class Database extends SQLiteOpenHelper {
             + "start_time INTEGER,"
             + "stop_time INTEGER");
 
-        // TODO: rename to chart_rows
-        SCHEMAS.put(Table.CHARTS, ""
+        SCHEMAS.put(Table.CHART_ITEMS, ""
             + "_id INTEGER PRIMARY KEY NOT NULL,"
             + "chart_uuid TEXT,"
-            + "chart_row INTEGER,"
-            + "group_uuid TEXT,"
-            + "group_name TEXT,"
-            + "concept_uuid TEXT,"
-            + "field_name TEXT,"
-            + "UNIQUE (chart_uuid, concept_uuid)");
+            + "weight INTEGER,"
+            + "section_type TEXT,"
+            + "parent_id INTEGER,"
+            + "label TEXT,"
+            + "type TEXT,"
+            + "required INTEGER,"
+            + "concept_uuids TEXT,"
+            + "format TEXT,"
+            + "caption_format TEXT,"
+            + "script TEXT");
 
         SCHEMAS.put(Table.USERS, ""
             + "_id INTEGER PRIMARY KEY NOT NULL,"

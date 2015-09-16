@@ -1,54 +1,32 @@
 package org.projectbuendia.client.ui.chart;
 
-import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.sync.LocalizedObs;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 /** Descriptor for a tile (latest observed value) in the patient chart. */
 public class Tile {
-    public String conceptUuid;
-    public String heading;
-    public LocalizedObs obs;
-    public String format;
-    public String captionFormat;
+    public final ChartItem item;
+    public final LocalizedObs[] obsValues;
 
-
-    static Map<String, String> CONCEPT_FORMATS = new HashMap<>();
+    static Map<String, ChartItem> DEFAULTS = new HashMap<>();
     static {
-        CONCEPT_FORMATS.put(Concepts.TEMPERATURE_UUID, "##.#° C");
-        CONCEPT_FORMATS.put(Concepts.WEIGHT_UUID, "##.# kg");
-        CONCEPT_FORMATS.put(Concepts.PULSE_UUID, "## bpm");
-        CONCEPT_FORMATS.put(Concepts.RESPIRATION_UUID, "## bpm");
+        DEFAULTS.put("select_one", new ChartItem("", "", false, null, "{1,abbr}", "{1,name}", ""));
+        DEFAULTS.put("yes_no", new ChartItem("", "", false, null, "{1,yes_no,Yes:No}", "", ""));
+        DEFAULTS.put("number", new ChartItem("", "", false, null, "0", "", ""));
+        DEFAULTS.put("text", new ChartItem("", "", false, null, "{1,text,60}", "", ""));
+        DEFAULTS.put("date", new ChartItem("", "", false, null, "{1,date,YYYY-MM-dd}", "", ""));
+        DEFAULTS.put("time", new ChartItem("", "", false, null, "{1,time,HH:mm}", "", ""));
+        DEFAULTS.put("obs_date", new ChartItem("", "", false, null, "{1,obs_time,YYYY-MM-dd}", "", ""));
+        DEFAULTS.put("obs_time", new ChartItem("", "", false, null, "{1,obs_time,HH:mm}", "", ""));
     }
-
-    static Map<Value.Type, String> DEFAULT_FORMATS = new HashMap<>();
-    static {
-        DEFAULT_FORMATS.put(Value.Type.CODED, "{1,abbr}");
-        DEFAULT_FORMATS.put(Value.Type.DATE, "{1,date,dd MMM}");
-        DEFAULT_FORMATS.put(Value.Type.NUMERIC, "###");
-        DEFAULT_FORMATS.put(Value.Type.TEXT, "{1}");
-        DEFAULT_FORMATS.put(Value.Type.BOOLEAN, "{1,yes_no,Yes;No}");
-    }
-
-    static Map<Value.Type, String> DEFAULT_CAPTION_FORMATS = new HashMap<>();
-    static {
-        DEFAULT_CAPTION_FORMATS.put(Value.Type.CODED, "{1,name}");
-        DEFAULT_CAPTION_FORMATS.put(Value.Type.DATE, "");
-        DEFAULT_CAPTION_FORMATS.put(Value.Type.NUMERIC, "");
-        DEFAULT_CAPTION_FORMATS.put(Value.Type.TEXT, "");
-        DEFAULT_CAPTION_FORMATS.put(Value.Type.BOOLEAN, "");
-    }
-
-    public Tile(String conceptUuid, String heading, LocalizedObs obs) {
-        this.conceptUuid = conceptUuid;
-        this.heading = heading;
-        this.obs = obs;
-        Value.Type type = Value.getValueType(conceptUuid, ConceptType.NONE, null);
-        this.format = CONCEPT_FORMATS.get(conceptUuid);
-        if (format == null) format = DEFAULT_FORMATS.get(type);
-        this.captionFormat = DEFAULT_CAPTION_FORMATS.get(type);
+    
+    public Tile(@Nonnull ChartItem item, @Nonnull LocalizedObs[] obsValues) {
+        this.item = item.withDefaults(DEFAULTS.get(item.type));
+        this.obsValues = obsValues;
     }
 }

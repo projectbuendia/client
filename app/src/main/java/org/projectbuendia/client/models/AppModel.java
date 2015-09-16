@@ -50,6 +50,7 @@ import de.greenrobot.event.NoSubscriberEvent;
  */
 public class AppModel {
     public static final String ORDER_EXECUTED_CONCEPT_UUID = "buendia-concept-order_executed";
+    public static final String CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
     private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;
     private final ConverterPack mConverterPack;

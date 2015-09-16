@@ -33,6 +33,7 @@ import com.android.volley.toolbox.RequestFuture;
 import org.joda.time.Instant;
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
+import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsChartServer;
 import org.projectbuendia.client.net.json.JsonChart;
 import org.projectbuendia.client.net.json.JsonConcept;
@@ -41,7 +42,7 @@ import org.projectbuendia.client.net.json.JsonPatientRecord;
 import org.projectbuendia.client.net.json.JsonPatientRecordResponse;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.sync.providers.Contracts.Charts;
+import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
 import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
 import org.projectbuendia.client.sync.providers.Contracts.Concepts;
 import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
@@ -67,8 +68,6 @@ import java.util.concurrent.TimeoutException;
 
 /** Global sync adapter for syncing all client side database caches. */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
-    public static final String GRID_CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
-    public static final String CHART_TILES_UUID = "975afbce-d4e3-4060-a25f-afcd0e5564ef";
 
     private static final Logger LOG = Logger.create();
     /** RPC timeout for getting observations. */
@@ -82,7 +81,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     static {
         PHASE_MESSAGES.put(SyncPhase.SYNC_USERS, R.string.syncing_users);
         PHASE_MESSAGES.put(SyncPhase.SYNC_LOCATIONS, R.string.syncing_locations);
-        PHASE_MESSAGES.put(SyncPhase.SYNC_CHART_STRUCTURE, R.string.syncing_charts);
+        PHASE_MESSAGES.put(SyncPhase.SYNC_CHART_ITEMS, R.string.syncing_charts);
         PHASE_MESSAGES.put(SyncPhase.SYNC_CONCEPTS, R.string.syncing_concepts);
         PHASE_MESSAGES.put(SyncPhase.SYNC_PATIENTS, R.string.syncing_patients);
         PHASE_MESSAGES.put(SyncPhase.SYNC_OBSERVATIONS, R.string.syncing_observations);
@@ -102,7 +101,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public enum SyncPhase {
         SYNC_USERS,
         SYNC_LOCATIONS,
-        SYNC_CHART_STRUCTURE,
+        SYNC_CHART_ITEMS,
         SYNC_CONCEPTS,
         SYNC_PATIENTS,
         SYNC_OBSERVATIONS,
@@ -232,8 +231,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
                     // Chart layouts: Always fetch everything.  This is okay because
                     // profiles (and hence chart layouts) change infrequently.
-                    case SYNC_CHART_STRUCTURE:
-                        updateChartStructure(provider, syncResult);
+                    case SYNC_CHART_ITEMS:
+                        updateChartItems(provider, syncResult);
                         break;
 
                     // Concepts: Always fetch all concepts.  This is okay because
@@ -352,26 +351,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.notifyChange(LocationNames.CONTENT_URI, null, false);
     }
 
-    private void updateChartStructure(final ContentProviderClient provider, SyncResult syncResult)
+    private void updateChartItems(final ContentProviderClient provider, SyncResult syncResult)
         throws InterruptedException, ExecutionException, RemoteException,
         OperationApplicationException {
         OpenMrsChartServer chartServer = new OpenMrsChartServer(App.getConnectionDetails());
         RequestFuture<JsonChart> future = RequestFuture.newFuture();
-        chartServer.getChartStructure(GRID_CHART_UUID, future, future); // errors handled by caller
-        final JsonChart conceptList = future.get();
-        RequestFuture<JsonChart> future2 = RequestFuture.newFuture();
-        chartServer.getChartStructure(CHART_TILES_UUID, future2, future2); // errors handled by caller
-        final JsonChart tilesList = future2.get();
+        chartServer.getChartStructure(AppModel.CHART_UUID, future, future); // errors handled by caller
+        final JsonChart chart = future.get();
 
-        // When we do a chart update, delete everything first.
+        // When we do a chart update, delete everything first, then insert all the new rows.
         checkCancellation("before applying chart structure deletions");
-        provider.delete(Charts.CONTENT_URI, null, null);
+        provider.delete(ChartItems.CONTENT_URI, null, null);
         syncResult.stats.numDeletes++;
-
-        // Insert the rows from both charts.
         checkCancellation("before applying chart structure insertions");
-        provider.applyBatch(DbSyncHelper.getChartUpdateOps(conceptList, syncResult));
-        provider.applyBatch(DbSyncHelper.getChartUpdateOps(tilesList, syncResult));
+        provider.applyBatch(DbSyncHelper.getChartUpdateOps(chart, syncResult));
     }
 
     private void updateConcepts(final ContentProviderClient provider, SyncResult syncResult)

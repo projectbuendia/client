@@ -90,6 +90,12 @@ public class Concepts {
     /** UUID for the (question) concept for (severe) weakness. */
     public static final String WEAKNESS_UUID = "5226AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+    /** UUID for the (question) concept for appetite. */
+    public static final String APPETITE_UUID = "777000003AAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    /** UUID for the (question) concept for oedema. */
+    public static final String OEDEMA_UUID = "460AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
     /** UUID for the (question) concept for the notes field. */
     public static final String NOTES_UUID = "162169AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 

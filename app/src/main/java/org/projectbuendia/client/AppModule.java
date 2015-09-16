@@ -19,7 +19,7 @@ import org.projectbuendia.client.diagnostics.DiagnosticsModule;
 import org.projectbuendia.client.events.EventsModule;
 import org.projectbuendia.client.models.AppModelModule;
 import org.projectbuendia.client.net.NetModule;
-import org.projectbuendia.client.sync.LocalizedChartHelper;
+import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseActivity;
@@ -111,8 +111,7 @@ public final class AppModule {
     }
 
     @Provides
-    @Singleton
-    LocalizedChartHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
-        return new LocalizedChartHelper(contentResolver);
+    @Singleton ChartDataHelper provideLocalizedChartHelper(ContentResolver contentResolver) {
+        return new ChartDataHelper(contentResolver);
     }
 }

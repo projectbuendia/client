@@ -11,11 +11,13 @@
 
 package org.projectbuendia.client.net.json;
 
-import org.projectbuendia.client.models.ChartSectionType;
-
 /** A section in a chart (a row of tiles or a group of grid rows). */
-public class JsonChartSection {
-    public ChartSectionType type;
+public class JsonChartItem {
     public String label;
-    public JsonChartItem[] items;
+    public String type;  // rendering type (not the same as a concept data type)
+    public boolean required;  // always show this grid row even if there are no observations
+    public String[] concepts;  // one or more concepts rendered for this item
+    public String format;  // format string, e.g. "##.# kg" or "{1,number,##} / {2,number,##}"
+    public String caption_format;  // format string for tile captions
+    public String script;  // JavaScript for fancy rendering
 }

@@ -9,13 +9,10 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.models;
 
-import org.projectbuendia.client.models.ChartSectionType;
-
-/** A section in a chart (a row of tiles or a group of grid rows). */
-public class JsonChartSection {
-    public ChartSectionType type;
-    public String label;
-    public JsonChartItem[] items;
+/** Chart section type identifiers, used in the ChartItems.SECTION_TYPE column. */
+public enum ChartSectionType {
+    TILE_ROW,
+    GRID_SECTION
 }

@@ -9,13 +9,22 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.models;
 
-import org.projectbuendia.client.models.ChartSectionType;
+import java.util.ArrayList;
+import java.util.List;
 
-/** A section in a chart (a row of tiles or a group of grid rows). */
-public class JsonChartSection {
-    public ChartSectionType type;
-    public String label;
-    public JsonChartItem[] items;
+/** A group of tiles (shown in one row) or a group of grid rows (with a heading) in a chart. */
+public class ChartSection {
+    public final String label;
+    public final List<ChartItem> items;
+
+    public ChartSection(String label) {
+        this(label, new ArrayList<ChartItem>());
+    }
+
+    public ChartSection(String label, List<ChartItem> items) {
+        this.label = label;
+        this.items = items;
+    }
 }
