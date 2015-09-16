@@ -1,0 +1,79 @@
+/* Specify font sizes in em (1 em = 10 sp). */
+/* Specify margins and paddings in px (1 px = 1 dp). */
+
+body { margin: 0; }
+div, th, td { text-overflow: ellipsis; }
+table { background: #fff; }  /* opaque so that frozen headers are opaque */
+th, td {
+  font-weight: normal;
+  padding: 8px 0;
+  text-align: left;
+  vertical-align: baseline;
+
+  /* Use linear-gradient to get a border thickness of 1 device pixel. */
+  background-image: linear-gradient(
+      90deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
+  background-size: 1px 100%;
+  background-repeat: no-repeat;
+  background-position: right;
+}
+
+/* History grid */
+#grid th[scope="row"], #grid td { font-size: 2.4em; }
+
+/* Row and column shading */
+#grid .now { font-weight: bold; background: #e0f0ff; }
+#grid tr:nth-child(even) { background: #f8f8f8; }
+#grid tr:nth-child(even) .now { background: #d8e8f8; }
+
+/* Column headers */
+thead th { text-align: center; font-size: 1.8em; padding: 8px 0; }
+
+/* Row headers */
+tbody th { white-space: nowrap; padding: 8px 16px; }
+tbody th[scope="rowgroup"] {
+  text-transform: uppercase;
+  font-size: 1.8em;
+  font-weight: bold;
+  background: #fff;
+}
+tbody + tbody th[scope="rowgroup"] {
+  padding-top: 3.6em;
+}
+th[scope="row"] { max-width: 40%; overflow: hidden; }
+th[scope="row"] div { max-width: 100%; overflow: hidden; }
+
+/* Cells */
+.obs td, .order td { text-align: center; min-width: 3em; }
+.order .future { font-size: 75%; color: #999; vertical-align: center; }
+.order .stop { font-weight: bold; color: #f66; font-size: 60%; text-transform: uppercase; }
+.command {
+  color: #09e;
+  background: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 1.8em;
+  padding-top: 1em;
+  padding-bottom: 3em;
+}
+
+/* Tiles */
+#tiles { table-layout: fixed; width: 100%; }
+.tile { height: 3em; overflow: hidden; white-space: nowrap; padding: 16px; }
+.tile div { width: 100%; overflow: hidden; }
+.tile .heading {
+  font-size: 1.8em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.tile .value { font-size: 3.6em; }
+.tile .caption { font-size: 1.8em; }
+
+#tiles tr, thead tr {
+  /* Use linear-gradient to get a border thickness of 1 device pixel. */
+  background-image: linear-gradient(
+      0deg, transparent 33%, rgba(0, 0, 0, 0.2) 33%, rgba(0, 0, 0, 0.2));
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+}

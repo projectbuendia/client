@@ -1,5 +1,6 @@
 package org.projectbuendia.client.ui.chart;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.lang3.text.ExtendedMessageFormat;
@@ -383,20 +384,17 @@ public class ObsFormat extends Format {
             if (operand.isEmpty()) return true;
 
             String strValue = null;
-            String strOperand = null;
+            String strOperand = operand;
             Double numValue = null;
             Double numOperand = null;
             if (obs != null) {
-                if (obs.value != null) {
-                    strValue = obs.value;
-                    strOperand = operand;
-                    if (obs.conceptType == ConceptType.CODED) {
-                        // Coded UUIDs can be compared according to their short form.
-                        strOperand = Utils.expandUuid(operand);
-                    } else if (obs.conceptType == ConceptType.NUMERIC) {
-                        numValue = Utils.toDoubleOrNull(obs.value);
-                        numOperand = Utils.toDoubleOrNull(operand);
-                    }
+                strValue = obs.value;
+                if (obs.conceptType == ConceptType.CODED) {
+                    // Coded UUIDs can be compared according to their short form.
+                    strOperand = Utils.expandUuid(operand);
+                } else if (obs.conceptType == ConceptType.NUMERIC) {
+                    numValue = Utils.toDoubleOrNull(obs.value);
+                    numOperand = Utils.toDoubleOrNull(operand);
                 }
             }
 
@@ -410,7 +408,7 @@ public class ObsFormat extends Format {
                         return (strValue == null || strValue.isEmpty()) && numValue == null;
                     }
                     return numValue != null ? numValue.equals(numOperand)
-                        : strOperand.equals(strValue);
+                        : Objects.equal(strOperand, strValue);
                 case "<":
                     return numValue != null && numValue.compareTo(numOperand) < 0;
                 case "<=":
