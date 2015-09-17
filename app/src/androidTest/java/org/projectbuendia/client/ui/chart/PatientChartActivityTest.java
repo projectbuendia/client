@@ -130,12 +130,13 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         checkObservationValueEquals(0, "29.1", "1 Jan"); // Temperature
     }*/
     protected void openEncounterForm() {
-        expectVisibleSoon(viewWithId(R.id.action_update_chart));
+        openActionBarOptionsMenu();
+
         EventBusIdlingResource<FetchXformSucceededEvent> xformIdlingResource =
             new EventBusIdlingResource<FetchXformSucceededEvent>(
                 UUID.randomUUID().toString(),
                 mEventBus);
-        click(viewWithId(R.id.action_update_chart));
+        click(viewWithText("[test] Form"));
         Espresso.registerIdlingResources(xformIdlingResource);
 
         // Give the form time to be parsed on the client (this does not result in an event firing).

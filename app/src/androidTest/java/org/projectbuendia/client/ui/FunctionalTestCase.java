@@ -288,6 +288,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         inUserLoginGoToLocationSelection();
         inLocationSelectionAddNewPatient(delta, LOCATION_NAME); // add the patient
         sDemoPatientId = id; // record ID so future tests can reuse the patient
+        pressBack(); // return to location list
         pressBack(); // return to user login activity
     }
 
