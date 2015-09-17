@@ -144,6 +144,11 @@ public class Utils {
         }
     };
 
+    /** Performs a null-safe check for a null or empty string. */
+    public static boolean isEmpty(@Nullable String str) {
+        return str == null || str.isEmpty();
+    }
+
     /** Parses a long integer value from a string, or returns null if parsing fails. */
     public static @Nullable Long toLongOrNull(@Nullable String str) {
         if (str == null) return null;

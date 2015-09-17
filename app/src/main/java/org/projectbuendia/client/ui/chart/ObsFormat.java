@@ -66,6 +66,7 @@ public class ObsFormat extends Format {
     public static final String ELLIPSIS = "\u2026";
     public static final String EN_DASH = "\u2013";
 
+    private String mPattern;
     private Format mFormat;
 
     /**
@@ -84,6 +85,7 @@ public class ObsFormat extends Format {
         if (pattern == null) {
             pattern = "";
         }
+        mPattern = pattern;
         // Allow plain numeric formats like "#0.00" as a shorthand for "{1,number,#0.00}".
         if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
             try {
@@ -97,6 +99,16 @@ public class ObsFormat extends Format {
     
     public ObsFormat(String pattern) {
         this(pattern, null);
+    }
+
+    public String toString() {
+        return mPattern;
+    }
+
+    /** Returns an ObsFormat for the given pattern, or null for a null or empty pattern. */
+    public static ObsFormat fromPattern(@Nullable String pattern) {
+        // TODO/speed: If creating ObsFormats is slow, we could cache instances here by pattern.
+        return Utils.isEmpty(pattern) ? null : new ObsFormat(pattern);
     }
 
     public Object[] getCurrentArgs() {
