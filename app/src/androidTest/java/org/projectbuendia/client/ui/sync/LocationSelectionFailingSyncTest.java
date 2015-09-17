@@ -26,33 +26,32 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
     /** Tests that sync failure results in the sync failed dialog appearing. */
     public void testSyncFailedDialogAppearsWhenSyncFails() {
         setWifiEnabled(false);
-        waitForSyncFailure();
+        try (WifiDisabler wd = new WifiDisabler()) {
+            waitForSyncFailure();
 
-        expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
-        screenshot("After Sync Fails");
+            expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
+            screenshot("After Sync Fails");
 
-        expectVisible(viewWithText(R.string.sync_failed_settings));
-        expectVisible(viewWithText(R.string.sync_failed_retry));
-        click(viewWithText("Back"));
-        screenshot("Test Finish");
-
-        cleanupWifi();
+            expectVisible(viewWithText(R.string.sync_failed_settings));
+            expectVisible(viewWithText(R.string.sync_failed_retry));
+            click(viewWithText("Back"));
+            screenshot("Test Finish");
+        }
     }
 
     /** Tests that the back button in the sync failed dialog returns to user selection. */
     public void testSyncFailedDialog_backButtonReturnsToUserSelection() {
-        setWifiEnabled(false);
-        waitForSyncFailure();
+        try (WifiDisabler wd = new WifiDisabler()) {
+            waitForSyncFailure();
 
-        expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
+            expectVisibleSoon(viewWithText(R.string.sync_failed_dialog_message));
 
-        click(viewWithText(R.string.sync_failed_back));
-        screenshot("After Sync Fails");
-        waitForProgressFragment(); // Wait for user screen to display.
-        expectVisible(viewWithText("GU"));
-        screenshot("Test Finish");
-
-        cleanupWifi();
+            click(viewWithText(R.string.sync_failed_back));
+            screenshot("After Sync Fails");
+            waitForProgressFragment(); // Wait for user screen to display.
+            expectVisible(viewWithText("GU"));
+            screenshot("Test Finish");
+        }
     }
 
     /** Tests that clicking 'Settings' in sync failed dialog loads settings activity. */
@@ -97,23 +96,28 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
-        waitForSyncFailure();
         setWifiEnabled(false);
+        try {
+            waitForSyncFailure();
 
-        expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
-        screenshot("After Sync Failed");
+            expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
+            screenshot("After Sync Failed");
 
-        setWifiEnabled(true);
-        click(viewWithText(R.string.sync_failed_retry));
+            setWifiEnabled(true);
+            click(viewWithText(R.string.sync_failed_retry));
 
-        waitForInitialSync();
-        waitForProgressFragment();
-        screenshot("After Retry Clicked");
+            waitForInitialSync();
+            waitForProgressFragment();
+            screenshot("After Retry Clicked");
 
-        // Should be at location selection screen with locations available.
-        expectVisible(viewWithText("S1"));
+            // Should be at location selection screen with locations available.
+            expectVisible(viewWithText("Triage"));
+            expectVisible(viewWithText("Discharged"));
 
-        screenshot("After Sync Completed");
+            screenshot("After Sync Completed");
+        } finally {
+            cleanupWifi();
+        }
     }
 
     /**

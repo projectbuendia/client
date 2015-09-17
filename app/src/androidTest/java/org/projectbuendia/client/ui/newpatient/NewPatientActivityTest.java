@@ -30,16 +30,16 @@ public class NewPatientActivityTest extends FunctionalTestCase {
         populateNewPatientFieldsExceptLocation(id);
         scrollToAndClick(viewWithId(R.id.patient_creation_button_change_location));
         screenshot("After Location Dialog Shown");
-        click(viewWithText("S1"));
+        click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");
         click(viewWithText("Create"));
         screenshot("After Create Pressed");
 
         waitForProgressFragment();
 
-        // The new patient should be visible in the list for tent S1
-        click(viewWithText("S1"));
-        screenshot("In S1");
+        // The new patient should be visible in the list for their location
+        click(viewWithText(LOCATION_NAME));
+        screenshot("In " + LOCATION_NAME);
         inPatientListClickPatientWithId(id);
         screenshot("After Patient Clicked");
     }
