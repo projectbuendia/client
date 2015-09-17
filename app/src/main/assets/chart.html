@@ -14,10 +14,10 @@ $(document).ready(function() {
   {% for tileRow in tileRows %}
     <tr>
       {% for tile in tileRow %}
-        {% set uuid = tile.item.conceptUuids[0] %}
+        {% set id = tile.item.conceptIds | first %}
         {% set class = tile.obsValues | obsformat(tile.item.cssClass) %}
         {% set style = tile.obsValues | obsformat(tile.item.cssStyle) %}
-        <td class="tile concept-{{uuid}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
+        <td class="tile concept-{{id}} {{class}}" style="{{style}}" width="{{100.0 / tileRow.size}}%">
           <div class="heading">{{tile.item.label}}</div>
           <div class="value">{{tile.obsValues | obsformat(tile.item.format) | linebreak | raw}}</div>
           <div class="caption">{{tile.obsValues | obsformat(tile.item.captionFormat) | linebreak | raw}}</div>
@@ -47,7 +47,8 @@ $(document).ready(function() {
         </th>
       </tr>
       {% for row in rows %}
-        <tr class="obs">
+        {% set id = row.item.conceptIds | first %}
+        <tr class="obs concept-{{id}}">
           <th scope="row">
             {{row.item.label}}
           </th>
@@ -60,10 +61,9 @@ $(document).ready(function() {
             {% else %}
               {% set aggregate = values | last %}
             {% endif %}
-            {% set uuid = row.item.conceptUuids[0] %}
             {% set class = aggregate | obsformat(row.item.cssClass) %}
             {% set style = aggregate | obsformat(row.item.cssStyle) %}
-            <td class="{{column.start == nowColumnStart ? 'now' : ''}} concept-{{uuid}} {{class}}"
+            <td class="{{column.start == nowColumnStart ? 'now' : ''}} {{class}}"
                style="{{style}}" onclick="popup({{row.item.label | js}},
               {% if values is empty %}
                 []

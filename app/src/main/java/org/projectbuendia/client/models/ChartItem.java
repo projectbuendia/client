@@ -12,8 +12,11 @@
 package org.projectbuendia.client.models;
 
 import org.projectbuendia.client.ui.chart.ObsFormat;
+import org.projectbuendia.client.utils.Utils;
 
 import java.text.Format;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,6 +27,7 @@ public class ChartItem {
     public final @Nonnull String type;
     public final boolean required;
     public final @Nonnull String[] conceptUuids;
+    public final @Nonnull List<Object> conceptIds;
     public final @Nullable Format format;
     public final @Nullable Format captionFormat;
     public final @Nullable Format cssClass;
@@ -52,6 +56,11 @@ public class ChartItem {
         this.cssClass = cssClass;
         this.cssStyle = cssStyle;
         this.script = script == null ? "" : script;
+
+        this.conceptIds = new ArrayList<>();
+        for (String uuid : this.conceptUuids) {
+            this.conceptIds.add(Utils.compressUuid(uuid));
+        }
     }
 
     public ChartItem withDefaults(@Nullable ChartItem defaults) {
