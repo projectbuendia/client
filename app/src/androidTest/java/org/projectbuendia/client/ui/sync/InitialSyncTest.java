@@ -67,6 +67,6 @@ public class InitialSyncTest extends SyncTestCase {
         // The second sync should actually complete.
         waitForProgressFragment();
         expectVisibleSoon(viewWithText("ALL PRESENT PATIENTS"));
-        expectVisibleSoon(viewWithText("S1"));
+        expectVisibleSoon(viewWithText(LOCATION_NAME));
     }
 }

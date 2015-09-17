@@ -93,4 +93,14 @@ public class SyncTestCase extends FunctionalTestCase {
             new EventBusIdlingResource<>(UUID.randomUUID().toString(), mEventBus);
         Espresso.registerIdlingResources(syncFailedEventIdlingResource);
     }
+
+    class WifiDisabler implements AutoCloseable {
+        public WifiDisabler() {
+            setWifiEnabled(false);
+        }
+
+        public void close() {
+            cleanupWifi();
+        }
+    }
 }

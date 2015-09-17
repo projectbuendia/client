@@ -59,6 +59,9 @@ import static org.projectbuendia.client.ui.matchers.AppPatientMatchers.isPatient
  */
 public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity> {
     private static final Logger LOG = Logger.create();
+
+    public static final String LOCATION_NAME = "ITFC ICU";
+
     // For now, we create a new demo patient for tests using the real patient
     // creation UI on each test run (see {@link #inUserLoginInitDemoPatient()}).
     // TODO/robustness: Use externally preloaded demo data instead.
@@ -283,7 +286,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         // delta.assignedLocationUuid = Optional.of(Zones.TRIAGE_ZONE_UUID);
 
         inUserLoginGoToLocationSelection();
-        inLocationSelectionAddNewPatient(delta, "S1"); // add the patient
+        inLocationSelectionAddNewPatient(delta, LOCATION_NAME); // add the patient
         sDemoPatientId = id; // record ID so future tests can reuse the patient
         pressBack(); // return to user login activity
     }
@@ -409,12 +412,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
 
         // Zones and tents should be visible
         expectVisible(viewWithText("Triage"));
-        expectVisible(viewWithText("S1"));
-        expectVisible(viewWithText("S2"));
-        expectVisible(viewWithText("P1"));
-        expectVisible(viewWithText("P2"));
-        expectVisible(viewWithText("C1"));
-        expectVisible(viewWithText("C2"));
+        expectVisible(viewWithText(LOCATION_NAME));
         expectVisible(viewWithText("Discharged"));
     }
 
