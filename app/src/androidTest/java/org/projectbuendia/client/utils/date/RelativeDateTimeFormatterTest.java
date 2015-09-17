@@ -29,19 +29,19 @@ public class RelativeDateTimeFormatterTest extends InstrumentationTestCase {
     }
 
     public void testFormat_inTheFuture() throws Exception {
-        assertEquals("in the future", mFormatter.format(mNow, mNow.plusDays(1)));
+        assertEquals("in the future", mFormatter.format(mNow.plusDays(1), mNow));
     }
 
     public void testFormat_60minutesAgo() throws Exception {
-        assertEquals("60 minutes ago", mFormatter.format(mNow, mNow.minusHours(1)));
+        assertEquals("60 min ago", mFormatter.format(mNow.minusHours(1), mNow));
     }
 
     public void testFormat_yesterday() throws Exception {
-        assertEquals("yesterday", mFormatter.format(mToday, mToday.minusDays(1)));
+        assertEquals("yesterday", mFormatter.format(mToday.minusDays(1), mToday));
     }
 
     public void testFormat_daysAgo() throws Exception {
-        assertEquals("2 days ago", mFormatter.format(mNow, mNow.minusDays(2)));
+        assertEquals("2 days ago", mFormatter.format(mNow.minusDays(2), mNow));
     }
 
     public void testFormatLocalDate_today() {
