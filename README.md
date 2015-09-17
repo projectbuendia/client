@@ -49,7 +49,7 @@ Wait a few minutes for the app to build (you can see progress in the status bar 
 
 The client-side tests include both unit tests and functional tests, all located under the project's `androidTest` folder.  These tests run best on a real tablet attached to your computer.  (When run on an Android emulator, some tests work and some don't.)
 
-You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  It's necessary to set the **Specific instrumentation runner** to `AndroidJUnitTestRunner`.  Then you can **Run** or **Debug** this run configuration to run the tests.
+You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  It's necessary to set the **Specific instrumentation runner** to `AndroidJUnitRunner`.  Then you can **Run** or **Debug** this run configuration to run the tests.
 
 ## Changing the default OpenMRS server settings
 
