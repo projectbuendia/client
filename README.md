@@ -1,11 +1,32 @@
-# Buendia client app
+# client
 
-The Buendia app runs on tablets with Android 4.4.2 (KitKat) or higher.
+This repository contains the Buendia app,
+which runs on tablets with Android 4.4.2 (KitKat) or higher.
+See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more details about the project and about the OpenMRS module that this app communicates with.
 
-Follow these instructions to get your system set up to do Buendia client development.
-See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more details about the app.
+#### Copyright notice
 
-## Prerequisites
+    Copyright 2015 The Project Buendia Authors
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+## Developer setup
+
+Follow the instructions below to get your system set up to do Buendia client development.
+
+
+### Prerequisites
 
 ##### JDK 7
   * If `java -version` does not report a version >= 1.7, install JDK 7:
@@ -19,7 +40,7 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
   * We use [Sony Xperia Z2](http://www.sonymobile.com/gb/products/tablets/xperia-z2-tablet/) tablets in the field: they are waterproof, have a great screen, and come with KitKat.  Otherwise, we recommend at least a 10" tablet; the app is designed for 1200 x 1920 resolution.  Without a tablet, you can use an emulator (see below).
 
 
-## Android Studio project setup
+### Android Studio project setup
 
 1.  Get the Buendia client source code:
 
@@ -35,7 +56,7 @@ See the [Buendia wiki](https://github.com/projectbuendia/buendia/wiki) for more 
 
 You are now ready to develop the Buendia client in Android Studio.
 
-## Building and running the client on a tablet
+### Building and running the client on a tablet
 
 On your tablet, enable Developer options by opening the Settings app, selecting **About tablet**, and tapping the Build number 7 times.  Then, in the Settings app under **Developer options**, turn on **USB debugging**.
 
@@ -45,13 +66,13 @@ Click the Run button (green triangle in the toolbar at the top).  For **Module**
 
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
-## Client tests
+### Client tests
 
 The client-side tests include both unit tests and functional tests, all located under the project's `androidTest` folder.  These tests run best on a real tablet attached to your computer.  (When run on an Android emulator, some tests work and some don't.)
 
 You can run just the tests in a single file, or run all the tests under a given folder (such as the `androidTest/java` folder for all the tests in the entire project).  In the Project pane, right-click a file or folder, choose **Create Run Configuration**, and then choose **Android Tests** (the one with the icon containing the little green Android robot).  It's necessary to set the **Specific instrumentation runner** to `AndroidJUnitTestRunner`.  Then you can **Run** or **Debug** this run configuration to run the tests.
 
-## Changing the default OpenMRS server settings
+### Changing the default OpenMRS server settings
 
 You can always manually change the OpenMRS server, username, and password on the Settings page in the app.  It's tedious to keep doing this every time the app is uninstalled and reinstalled, though.  To change the default settings, which are built into the app, edit these lines in `app/build.gradle`:
 
@@ -69,7 +90,7 @@ If you want to run the client with an OpenMRS server that you have built locally
 
 An Android emulator runs significantly slower than a real tablet, but in terms of setup it's usually the quickest way to get a locally built client running with a locally built OpenMRS server.  Using a local client and local server also enables you to do development while completely offline.
 
-## Using an emulator and a locally built OpenMRS server
+### Using an emulator and a locally built OpenMRS server
 
 To set up an emulator with some settings that are known to work:
 
@@ -121,7 +142,7 @@ to
 
 the client will have its server URL set to `http://10.0.2.2:9000/openmrs` by default.
 
-## Android SDK packages
+### Android SDK packages
 
 If you're using Android Studio, you don't need to worry about installing SDK packages; Android Studio will take care of it for you (see **Android Studio project setup** above).  You only need to install the packages yourself if you want to build the client from the command line.
 
