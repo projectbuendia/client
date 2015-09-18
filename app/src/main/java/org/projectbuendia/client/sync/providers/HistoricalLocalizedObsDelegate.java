@@ -41,6 +41,11 @@ public class HistoricalLocalizedObsDelegate implements ProviderDelegate<Database
         @SuppressWarnings("UnusedAssignment") // May be used in the future.
             String chartUuid = pathSegments.get(pathSegments.size() - 3);
 
+        // TODO/cleanup: Instead of doing this crazy complicated SQL query with all these table
+        // joins, load the concept names into a small map in memory (there will probably only be
+        // 100 entries or less) in a separate query; then eliminate this class, query directly
+        // on the obs table, and look up concept names only as they're needed for display.
+
         // This scary SQL statement joins the observations with appropriate concept names to give
         // localized output in the correct order specified by a chart.
         String query = ""

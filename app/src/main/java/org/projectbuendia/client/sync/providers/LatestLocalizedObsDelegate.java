@@ -39,6 +39,11 @@ public class LatestLocalizedObsDelegate implements ProviderDelegate<Database> {
         String locale = pathSegments.get(pathSegments.size() - 1);
         String patientUuid = pathSegments.get(pathSegments.size() - 2);
 
+        // TODO/cleanup: Instead of doing this crazy complicated SQL query with all these table
+        // joins, load the concept names into a small map in memory (there will probably only be
+        // 100 entries or less) in a separate query; then eliminate this class, query directly
+        // on the obs table, and look up concept names only as they're needed for display.
+
         // This scary SQL statement joins the observations a subselect for the latest for each
         // concept with appropriate concept names to give localized output.
         String query = ""
