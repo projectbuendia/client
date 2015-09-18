@@ -44,7 +44,7 @@ public class PatientCountDisplay {
         return context.getResources().getString(resource, patientCount);
     }
 
-    // TODO/refactor: Switch to built in support for plurals in Android.
+    // TODO/i18n: Switch to built in support for plurals in Android.
     private static int resourceForPatientCount(int patientCount, boolean usePresentResource) {
         int resource;
         if (patientCount < 1) {
@@ -68,5 +68,4 @@ public class PatientCountDisplay {
         }
         return resource;
     }
-
 }

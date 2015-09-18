@@ -256,6 +256,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
+            // TODO/speed: Do a single query for just the observations that are shown the
+            // patient list (condition and pregnancy) across all patients, not a separate
+            // getMostRecentObservations query for every single patient in the list!
             mObservations = mChartDataHelper.getMostRecentObservationsBatch(params, "en");
             return null;
         }

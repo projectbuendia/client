@@ -32,6 +32,7 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
     @Override protected ProviderDelegateRegistry<Database> getRegistry() {
         ProviderDelegateRegistry<Database> registry = new ProviderDelegateRegistry<>();
 
+        // TODO/cleanup: Factor out all the repetitive code below.
         // Providers for groups of things (e.g., all charts).
         registry.registerDelegate(
             Contracts.ChartItems.CONTENT_URI.getPath(),

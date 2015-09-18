@@ -57,7 +57,7 @@ public class Database extends SQLiteOpenHelper {
      * technically savvy enough to use adb can almost certainly find it, but at least it isn't as
      * simple as using grep or strings.
      *
-     * TODO: add something better. At the very minimum a server call and local storage
+     * TODO/security: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
      *
@@ -151,7 +151,8 @@ public class Database extends SQLiteOpenHelper {
             + "uuid TEXT,"
             + "full_name TEXT");
 
-        // TODO: store misc as key-value rows, not one row
+        // TODO/cleanup: Store miscellaneous values in the "misc" table as rows with a key column
+        // and a value column, not all values in one row with an ever-growing number of columns.
         SCHEMAS.put(Table.MISC, ""
             + "_id INTEGER PRIMARY KEY NOT NULL,"
             + "full_sync_start_time INTEGER,"

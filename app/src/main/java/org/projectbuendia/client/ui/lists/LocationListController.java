@@ -346,7 +346,7 @@ final class LocationListController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
-            // TODO/deprecate: Remove -- likely unnecessary.
+            // TODO/cleanup: Remove -- likely unnecessary.
             mPatientSearchController.setLocations(mLocationTree);
         }
     }
