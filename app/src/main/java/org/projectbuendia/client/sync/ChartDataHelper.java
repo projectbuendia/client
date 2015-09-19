@@ -131,12 +131,12 @@ public class ChartDataHelper {
     }
 
     /**
-     * Gets the most recent observations for each concept for a given patient from the local cache,
+     * Gets the latest observations for each concept for a given patient from the local cache,
      * localized to English. Ordering will be by concept uuid, and there are not groups or other
      * chart based configurations.
      */
-    public Map<String, LocalizedObs> getMostRecentObservations(String patientUuid) {
-        return getMostRecentObservations(patientUuid, ENGLISH_LOCALE);
+    public Map<String, LocalizedObs> getLatestObservations(String patientUuid) {
+        return getLatestObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /**
@@ -144,7 +144,7 @@ public class ChartDataHelper {
      * Ordering will be by concept uuid, and there are not groups or other chart-based
      * configurations.
      */
-    public Map<String, LocalizedObs> getMostRecentObservations(String patientUuid, String locale) {
+    public Map<String, LocalizedObs> getLatestObservations(String patientUuid, String locale) {
         Cursor cursor = null;
         try {
             cursor = mContentResolver.query(
@@ -180,10 +180,10 @@ public class ChartDataHelper {
      * configurations.
      */
     public Map<String, Map<String, LocalizedObs>>
-    getMostRecentObservationsBatch(String[] patientUuids, String locale) {
+    getLatestObservationsForPatients(String[] patientUuids, String locale) {
         Map<String, Map<String, LocalizedObs>> observations = new HashMap<String, Map<String, LocalizedObs>>();
         for (String patientUuid : patientUuids) {
-            observations.put(patientUuid, getMostRecentObservations(patientUuid, locale));
+            observations.put(patientUuid, getLatestObservations(patientUuid, locale));
         }
         return observations;
     }

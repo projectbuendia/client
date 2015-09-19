@@ -258,8 +258,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         @Override protected Void doInBackground(String... params) {
             // TODO/speed: Do a single query for just the observations that are shown the
             // patient list (condition and pregnancy) across all patients, not a separate
-            // getMostRecentObservations query for every single patient in the list!
-            mObservations = mChartDataHelper.getMostRecentObservationsBatch(params, "en");
+            // getLatestObservations query for every single patient in the list!
+            mObservations = mChartDataHelper.getLatestObservationsForPatients(params, "en");
             return null;
         }
 

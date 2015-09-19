@@ -94,7 +94,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
             ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
         when(mMockChartHelper.getObservations(PATIENT_UUID_1))
             .thenReturn(allObservations);
-        when(mMockChartHelper.getMostRecentObservations(PATIENT_UUID_1))
+        when(mMockChartHelper.getLatestObservations(PATIENT_UUID_1))
             .thenReturn(recentObservations);
         // GIVEN controller is initialized
         mController.init();

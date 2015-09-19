@@ -316,7 +316,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         }
 
         Map<String, LocalizedObs> observations =
-            mChartHelper.getMostRecentObservations(mPatientUuid);
+            mChartHelper.getLatestObservations(mPatientUuid);
 
         if (observations.containsKey(Concepts.PREGNANCY_UUID)
             && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
@@ -479,7 +479,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         // TODO: Background thread this, or make this call async-like.
         mObservations = mChartHelper.getObservations(mPatientUuid);
         Map<String, LocalizedObs> conceptsToLatestObservations =
-            new HashMap<>(mChartHelper.getMostRecentObservations(mPatientUuid));
+            new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
         for (LocalizedObs obs : mObservations) {
             mLastObsTime = Utils.max(mLastObsTime, obs.encounterTime);
         }
