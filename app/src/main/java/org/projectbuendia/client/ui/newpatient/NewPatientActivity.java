@@ -227,7 +227,7 @@ public final class NewPatientActivity extends BaseLoggedInActivity {
         mLocationText.setEnabled(enable);
         mCreateButton.setEnabled(enable);
         mCancelButton.setEnabled(enable);
-        mCreateButton.setText(enable ? R.string.patient_creation_create
+        mCreateButton.setText(enable ? R.string.add_patient
             : R.string.patient_creation_create_busy);
         setFocus(mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);
         showKeyboard(mId, mGivenName, mFamilyName, mAgeYears, mAgeMonths);

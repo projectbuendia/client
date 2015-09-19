@@ -11,7 +11,6 @@
     specific language governing permissions and limitations under the License.
 -->
 <resources>
-
     <!-- Statuses -->
     <string name="status_unknown">Unknown</string>
     <string name="status_well">Well</string>
@@ -103,8 +102,8 @@
     <string name="unknown_tent_in_zone">%s (no tent assigned)</string>
     <string name="chart_last_updated">"Chart last updated: "</string>
     <string name="last_observation_none">No observations</string>
-    <string name="sex_male">Male</string>
-    <string name="sex_female">Female</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
     <string name="title_updating_patient">Updating patient</string>
     <string name="please_wait">Please wait&#8230;</string>
 
@@ -115,16 +114,16 @@
     <string name="go_to_patient_not_found">No such patient on server</string>
     <string name="go_to_patient_go">Go to chart</string>
 
-    <string name="patient_creation_id_label">ID</string>
+    <string name="id">ID</string>
     <string name="patient_creation_given_name_label">Given name</string>
     <string name="patient_creation_family_name_label">Family name</string>
-    <string name="patient_creation_age_label">Age</string>
-    <string name="patient_creation_age_years">years</string>
-    <string name="patient_creation_age_months">months</string>
-    <string name="patient_creation_sex_label">Sex</string>
+    <string name="age">Age</string>
+    <string name="years">years</string>
+    <string name="months">months</string>
+    <string name="sex">Sex</string>
     <string name="patient_creation_location_label">Location</string>
     <string name="patient_creation_location_assign">Assign location</string>
-    <string name="patient_creation_create">Create</string>
+    <string name="add_patient">Create</string>
     <string name="patient_creation_create_busy">Working&#8230;</string>
     <string name="patient_creation_cancel">Cancel</string>
     <string name="title_add_patient_cancel">Discard changes?</string>
