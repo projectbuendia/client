@@ -9,13 +9,17 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
-import org.projectbuendia.client.models.ChartSectionType;
+import com.google.gson.annotations.SerializedName;
 
-/** A section in a chart (a row of tiles or a group of grid rows). */
-public class JsonChartSection {
-    public ChartSectionType type;
-    public String label;
-    public JsonChartItem[] items;
+/** OpenMRS concept types (used for JSON representation and elsewhere) */
+public enum ConceptType {
+    @SerializedName("numeric")NUMERIC,
+    @SerializedName("boolean")BOOLEAN,
+    @SerializedName("coded")CODED,
+    @SerializedName("text")TEXT,
+    @SerializedName("date")DATE,
+    @SerializedName("datetime")DATETIME,
+    @SerializedName("none")NONE
 }

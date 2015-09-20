@@ -27,7 +27,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.user.ActiveUserUnsetEvent;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.utils.Colorizer;

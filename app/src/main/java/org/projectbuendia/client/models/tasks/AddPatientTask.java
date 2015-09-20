@@ -28,7 +28,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
 import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.sync.SyncAccountService;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;

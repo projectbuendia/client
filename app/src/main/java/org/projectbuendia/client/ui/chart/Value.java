@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 

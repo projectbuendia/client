@@ -11,7 +11,7 @@
 
 package org.projectbuendia.client.events.user;
 
-import org.projectbuendia.client.net.json.JsonNewUser;
+import org.projectbuendia.client.json.JsonNewUser;
 
 /** An event bus event indicating that a user could not be successfully added. */
 public class UserAddFailedEvent {

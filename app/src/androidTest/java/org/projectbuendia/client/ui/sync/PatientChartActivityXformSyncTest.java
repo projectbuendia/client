@@ -20,7 +20,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.json.JsonPatient;
 
 import java.util.UUID;
 

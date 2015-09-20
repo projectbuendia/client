@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
 /** A section in a chart (a row of tiles or a group of grid rows). */
 public class JsonChartItem {

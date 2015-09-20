@@ -15,11 +15,11 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Response;
 
 import org.joda.time.Instant;
-import org.projectbuendia.client.net.json.JsonChart;
-import org.projectbuendia.client.net.json.JsonConceptResponse;
-import org.projectbuendia.client.net.json.JsonPatientRecord;
-import org.projectbuendia.client.net.json.JsonPatientRecordResponse;
-import org.projectbuendia.client.net.json.Serializers;
+import org.projectbuendia.client.json.JsonChart;
+import org.projectbuendia.client.json.JsonConceptResponse;
+import org.projectbuendia.client.json.JsonPatientRecord;
+import org.projectbuendia.client.json.JsonPatientRecordResponse;
+import org.projectbuendia.client.json.Serializers;
 
 import java.util.HashMap;
 

@@ -9,12 +9,10 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
-public class JsonOrder {
+/** JSON representation of a single patient's set of encounters; call Serializers.registerTo before use. */
+public class JsonPatientRecord {
     public String uuid;
-    public String patient_uuid;
-    public String instructions;
-    public Long start;
-    public Long stop;
+    public JsonEncounter[] encounters;
 }

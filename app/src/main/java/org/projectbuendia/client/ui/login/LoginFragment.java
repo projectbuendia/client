@@ -19,7 +19,7 @@ import android.widget.GridView;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.ProgressFragment;
 import org.projectbuendia.client.utils.Colorizer;
 import org.projectbuendia.client.utils.Logger;

@@ -9,10 +9,20 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
-/** JSON representation of a single patient's set of encounters; call Serializers.registerTo before use. */
-public class JsonPatientRecord {
+import java.util.Map;
+
+/** JSON representation of an OpenMRS Concept */
+public class JsonConcept {
+
     public String uuid;
-    public JsonEncounter[] encounters;
+
+    /** Server-side ID, needed for some XForms tasks. */
+    public Integer xform_id;
+
+    public ConceptType type;
+
+    /** A map from locales to localized names, e.g. {'en': 'heart', 'fr': 'coeur'} */
+    public Map<String, String> names;
 }

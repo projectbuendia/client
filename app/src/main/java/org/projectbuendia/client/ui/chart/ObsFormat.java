@@ -8,7 +8,7 @@ import org.apache.commons.lang3.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.utils.Utils;
 

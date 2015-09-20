@@ -47,7 +47,7 @@ import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
 import org.projectbuendia.client.sync.SyncManager;

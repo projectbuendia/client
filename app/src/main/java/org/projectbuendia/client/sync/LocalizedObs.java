@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.json.ConceptType;
 
 import java.util.Comparator;
 import java.util.Map;

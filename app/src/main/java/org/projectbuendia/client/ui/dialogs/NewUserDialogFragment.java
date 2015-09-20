@@ -25,7 +25,7 @@ import android.widget.EditText;
 
 import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.json.JsonNewUser;
+import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.utils.Utils;
 
 import butterknife.ButterKnife;

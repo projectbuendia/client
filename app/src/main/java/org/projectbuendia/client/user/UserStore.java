@@ -25,8 +25,8 @@ import com.android.volley.toolbox.RequestFuture;
 import net.sqlcipher.database.SQLiteException;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.net.json.JsonNewUser;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonNewUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.sync.DbSyncHelper;
 import org.projectbuendia.client.sync.providers.BuendiaProvider;
 import org.projectbuendia.client.sync.providers.Contracts.Users;

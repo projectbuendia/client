@@ -19,7 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.utils.Colorizer;
 
 import butterknife.ButterKnife;

@@ -13,7 +13,7 @@ package org.projectbuendia.client.events.user;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 
 /** An event bus event indicating that the set of known users has changed. */
 public class KnownUsersChangedEvent {

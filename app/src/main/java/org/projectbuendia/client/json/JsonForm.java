@@ -9,12 +9,11 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
-import org.joda.time.DateTime;
-
-/** JSON representation of a set of patient records returned by the server. */
-public class JsonPatientRecordResponse {
-    public JsonPatientRecord[] results;
-    public DateTime snapshotTime;
+public class JsonForm {
+    public String id;
+    public String uuid;
+    public String name;
+    public String version;
 }

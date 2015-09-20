@@ -13,7 +13,7 @@ package org.projectbuendia.client.events.user;
 
 import com.google.common.collect.ImmutableSet;
 
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 
 /** An event bus event indicating that a user was successfully added, both locally and on the server. */
 public class UserAddedEvent extends KnownUsersChangedEvent {

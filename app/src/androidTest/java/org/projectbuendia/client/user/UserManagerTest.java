@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.projectbuendia.client.FakeAsyncTaskRunner;
 import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 
 import static org.mockito.Mockito.when;

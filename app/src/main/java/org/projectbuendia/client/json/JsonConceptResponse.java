@@ -9,17 +9,9 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
-import com.google.gson.annotations.SerializedName;
-
-/** OpenMRS concept types (used for JSON representation and elsewhere) */
-public enum ConceptType {
-    @SerializedName("numeric")NUMERIC,
-    @SerializedName("boolean")BOOLEAN,
-    @SerializedName("coded")CODED,
-    @SerializedName("text")TEXT,
-    @SerializedName("date")DATE,
-    @SerializedName("datetime")DATETIME,
-    @SerializedName("none")NONE
+/** A list of concept results returned by the server. */
+public class JsonConceptResponse {
+    public JsonConcept[] results;
 }

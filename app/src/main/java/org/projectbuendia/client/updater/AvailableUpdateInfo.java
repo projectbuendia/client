@@ -13,7 +13,7 @@ package org.projectbuendia.client.updater;
 
 import android.net.Uri;
 
-import org.projectbuendia.client.net.json.JsonUpdateInfo;
+import org.projectbuendia.client.json.JsonUpdateInfo;
 import org.projectbuendia.client.utils.LexicographicVersion;
 import org.projectbuendia.client.utils.Logger;
 

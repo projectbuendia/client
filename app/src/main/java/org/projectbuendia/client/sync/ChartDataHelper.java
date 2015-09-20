@@ -24,7 +24,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ChartSectionType;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
 import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;

@@ -12,7 +12,7 @@
 package org.projectbuendia.client.ui.matchers;
 
 import org.mockito.ArgumentMatcher;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonUser;
 
 /** Matchers for {@link JsonUser} objects. */
 public class UserMatchers {

@@ -14,7 +14,7 @@ package org.projectbuendia.client.models;
 import android.content.ContentValues;
 
 import org.joda.time.LocalDate;
-import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.utils.Utils;
 

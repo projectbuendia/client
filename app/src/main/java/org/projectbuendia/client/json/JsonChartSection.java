@@ -9,18 +9,13 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.net.json;
+package org.projectbuendia.client.json;
 
-import org.joda.time.DateTime;
+import org.projectbuendia.client.models.ChartSectionType;
 
-import java.util.Map;
-
-/** JSON representation of an OpenMRS Encounter; call Serializers.registerTo before use. */
-public class JsonEncounter {
-    public String uuid;
-    public DateTime timestamp;
-    public String enterer_id;
-    /** A {conceptUuid: value} map, where value can be a number, string, or answer UUID. */
-    public Map<Object, Object> observations;
-    public String[] order_uuids;  // orders executed during this encounter
+/** A section in a chart (a row of tiles or a group of grid rows). */
+public class JsonChartSection {
+    public ChartSectionType type;
+    public String label;
+    public JsonChartItem[] items;
 }

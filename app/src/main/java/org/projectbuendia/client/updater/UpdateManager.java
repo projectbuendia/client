@@ -32,7 +32,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.events.UpdateAvailableEvent;
 import org.projectbuendia.client.events.UpdateNotAvailableEvent;
 import org.projectbuendia.client.events.UpdateReadyToInstallEvent;
-import org.projectbuendia.client.net.json.JsonUpdateInfo;
+import org.projectbuendia.client.json.JsonUpdateInfo;
 import org.projectbuendia.client.utils.LexicographicVersion;
 import org.projectbuendia.client.utils.Logger;
 
