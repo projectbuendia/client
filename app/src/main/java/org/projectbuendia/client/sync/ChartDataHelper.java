@@ -13,18 +13,17 @@ package org.projectbuendia.client.sync;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.provider.BaseColumns;
 import android.util.Pair;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ChartSectionType;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
-import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
@@ -52,10 +51,10 @@ public class ChartDataHelper {
 
     /** UUIDs for concepts that mean everything is normal; there is no worrying symptom. */
     public static final ImmutableSet<String> NO_SYMPTOM_VALUES = ImmutableSet.of(
-        Concepts.NO_UUID, // NO
-        Concepts.SOLID_FOOD_UUID, // Solid food
-        Concepts.NORMAL_UUID, // NORMAL
-        Concepts.NONE_UUID); // None
+        ConceptUuids.NO_UUID, // NO
+        ConceptUuids.SOLID_FOOD_UUID, // Solid food
+        ConceptUuids.NORMAL_UUID, // NORMAL
+        ConceptUuids.NONE_UUID); // None
 
     private final ContentResolver mContentResolver;
 
@@ -121,12 +120,11 @@ public class ChartDataHelper {
     }
 
     /** Gets all observations for a given patient from the local cache, localized to English. */
-    public List<LocalizedObs> getObservations(String patientUuid) {
+    public List<ObsValue> getObservations(String patientUuid) {
         return getObservations(patientUuid, ENGLISH_LOCALE);
     }
 
-    private LocalizedObs obsFromCursor(Cursor c) {
-        long id = c.getLong(c.getColumnIndex(BaseColumns._ID));
+    private ObsValue obsFromCursor(Cursor c) {
         long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
         String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
         String conceptName = sConceptNames.get(conceptUuid);
@@ -136,13 +134,13 @@ public class ChartDataHelper {
         if (ConceptType.CODED.name().equals(conceptType)) {
             localizedValue = sConceptNames.get(value);
         }
-        return new LocalizedObs(id, millis, conceptUuid, conceptName, conceptType, value, localizedValue);
+        return new ObsValue(millis, conceptUuid, conceptName, conceptType, value, localizedValue);
     }
 
     /** Gets all observations for a given patient, localized for a given locale. */
-    public List<LocalizedObs> getObservations(String patientUuid, String locale) {
+    public List<ObsValue> getObservations(String patientUuid, String locale) {
         loadConceptData(locale);
-        List<LocalizedObs> results = new ArrayList<>();
+        List<ObsValue> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
             "patient_uuid = ?", new String[] {patientUuid}, null)) {
@@ -154,16 +152,16 @@ public class ChartDataHelper {
     }
 
     /** Gets the latest observation of each concept for a given patient, localized to English. */
-    public Map<String, LocalizedObs> getLatestObservations(String patientUuid) {
+    public Map<String, ObsValue> getLatestObservations(String patientUuid) {
         return getLatestObservations(patientUuid, ENGLISH_LOCALE);
     }
 
     /** Gets the latest observation of each concept for a given patient from the app db. */
-    public Map<String, LocalizedObs> getLatestObservations(String patientUuid, String locale) {
-        Map<String, LocalizedObs> result = new HashMap<>();
-        for (LocalizedObs obs : getObservations(patientUuid, locale)) {
-            LocalizedObs existing = result.get(obs.conceptUuid);
-            if (existing == null || obs.encounterTime.isAfter(existing.encounterTime)) {
+    public Map<String, ObsValue> getLatestObservations(String patientUuid, String locale) {
+        Map<String, ObsValue> result = new HashMap<>();
+        for (ObsValue obs : getObservations(patientUuid, locale)) {
+            ObsValue existing = result.get(obs.conceptUuid);
+            if (existing == null || obs.obsTime.isAfter(existing.obsTime)) {
                 result.put(obs.conceptUuid, obs);
             }
         }
@@ -175,9 +173,9 @@ public class ChartDataHelper {
      * cache. Ordering will be by concept uuid, and there are not groups or other chart-based
      * configurations.
      */
-    public Map<String, Map<String, LocalizedObs>>
+    public Map<String, Map<String, ObsValue>>
     getLatestObservationsForPatients(String[] patientUuids, String locale) {
-        Map<String, Map<String, LocalizedObs>> observations = new HashMap<String, Map<String, LocalizedObs>>();
+        Map<String, Map<String, ObsValue>> observations = new HashMap<String, Map<String, ObsValue>>();
         for (String patientUuid : patientUuids) {
             observations.put(patientUuid, getLatestObservations(patientUuid, locale));
         }
@@ -185,14 +183,14 @@ public class ChartDataHelper {
     }
 
     /** Gets the latest observation of the specified concept for all patients. */
-    public Map<String, LocalizedObs> getLatestObservationsForConcept(
+    public Map<String, ObsValue> getLatestObservationsForConcept(
         String conceptUuid, String locale) {
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
             Observations.CONCEPT_UUID + " = ?", new String[] {conceptUuid},
             Observations.ENCOUNTER_MILLIS + " DESC")) {
-            Map<String, LocalizedObs> result = new HashMap<>();
+            Map<String, ObsValue> result = new HashMap<>();
             while (c.moveToNext()) {
                 String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
                 if (result.containsKey(patientUuid)) continue;

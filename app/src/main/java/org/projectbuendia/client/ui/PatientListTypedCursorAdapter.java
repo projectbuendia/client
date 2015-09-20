@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationComparator;
 import org.projectbuendia.client.models.LocationTree;
@@ -30,7 +30,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
@@ -59,8 +59,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private static final Logger LOG = Logger.create();
 
     private Location[] mLocations;
-    private Map<String, LocalizedObs> mPregnancyObs = new HashMap<>();
-    private Map<String, LocalizedObs> mConditionObs = new HashMap<>();
+    private Map<String, ObsValue> mPregnancyObs = new HashMap<>();
+    private Map<String, ObsValue> mConditionObs = new HashMap<>();
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
@@ -138,8 +138,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
         // Show pregnancy status and condition, if the data for these has been loaded.
-        LocalizedObs obs = mPregnancyObs.get(patient.uuid);
-        boolean pregnant = obs != null && Concepts.YES_UUID.equals(obs.value);
+        ObsValue obs = mPregnancyObs.get(patient.uuid);
+        boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
 
         obs = mConditionObs.get(patient.uuid);
         String condition = obs == null ? null : obs.value;
@@ -149,7 +149,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         }
 
         ResStatus.Resolved status =
-            Concepts.getResStatus(condition).resolve(mContext.getResources());
+            ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
         holder.mPatientName.setText(patient.givenName + " " + patient.familyName);
@@ -246,8 +246,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(Concepts.PREGNANCY_UUID, "en");
-            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(Concepts.GENERAL_CONDITION_UUID, "en");
+            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, "en");
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, "en");
             return null;
         }
 

@@ -21,7 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.resolvables.ResStatus;
 
 import butterknife.ButterKnife;
@@ -68,7 +68,7 @@ public class GeneralConditionAdapter extends ArrayAdapter<String> {
 
         String conditionUuid = getItem(position);
         ResStatus.Resolved condition =
-            Concepts.getResStatus(conditionUuid).resolve(getContext().getResources());
+            ConceptUuids.getResStatus(conditionUuid).resolve(getContext().getResources());
 
         holder.mConditionNumber.setText(condition.getShortDescription());
         holder.mConditionNumber.setTextColor(condition.getForegroundColor());

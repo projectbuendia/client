@@ -18,7 +18,7 @@ import org.projectbuendia.client.resolvables.ResStatus;
  * file should be phased out and replaced with modular configuration, either on the server or the
  * client.
  */
-public class Concepts {
+public class ConceptUuids {
     public static final String CONSCIOUS_STATE_UUID = "162643AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     public static final String FLUIDS_UUID = "e96f504e-229a-4933-84d1-358abbd687e3";
     public static final String GENERAL_CONDITION_UUID = "a3657203-cfed-44b8-8e3f-960f8d4cf3b3";
@@ -136,29 +136,29 @@ public class Concepts {
         }
 
         switch (conditionUuid) {
-            case Concepts.GENERAL_CONDITION_WELL_UUID:
+            case ConceptUuids.GENERAL_CONDITION_WELL_UUID:
                 return ResStatus.WELL;
-            case Concepts.GENERAL_CONDITION_UNWELL_UUID:
+            case ConceptUuids.GENERAL_CONDITION_UNWELL_UUID:
                 return ResStatus.UNWELL;
-            case Concepts.GENERAL_CONDITION_CRITICAL_UUID:
+            case ConceptUuids.GENERAL_CONDITION_CRITICAL_UUID:
                 return ResStatus.CRITICAL;
-            case Concepts.GENERAL_CONDITION_PALLIATIVE_UUID:
+            case ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID:
                 return ResStatus.PALLIATIVE;
-            case Concepts.GENERAL_CONDITION_CONVALESCENT_UUID:
+            case ConceptUuids.GENERAL_CONDITION_CONVALESCENT_UUID:
                 return ResStatus.CONVALESCENT;
-            case Concepts.GENERAL_CONDITION_DISCHARGED_NON_CASE:
+            case ConceptUuids.GENERAL_CONDITION_DISCHARGED_NON_CASE:
                 return ResStatus.DISCHARGED_NON_CASE;
-            case Concepts.GENERAL_CONDITION_CURED:
+            case ConceptUuids.GENERAL_CONDITION_CURED:
                 return ResStatus.DISCHARGED_CURED;
-            case Concepts.GENERAL_CONDITION_SUSPECTED_DEAD:
+            case ConceptUuids.GENERAL_CONDITION_SUSPECTED_DEAD:
                 return ResStatus.SUSPECTED_DEAD;
-            case Concepts.GENERAL_CONDITION_CONFIRMED_DEAD:
+            case ConceptUuids.GENERAL_CONDITION_CONFIRMED_DEAD:
                 return ResStatus.CONFIRMED_DEAD;
             default:
                 return ResStatus.UNKNOWN;
         }
     }
 
-    private Concepts() {
+    private ConceptUuids() {
     }
 }

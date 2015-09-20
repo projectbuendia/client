@@ -26,7 +26,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.net.OpenMrsConnectionDetails;
 import org.projectbuendia.client.utils.Logger;
 
@@ -61,7 +61,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
     // Retrieving a concept should be quick and ensures that the module is both
     // running and has database access.
     private static final String HEALTH_CHECK_ENDPOINT =
-        "/concept/" + Concepts.GENERAL_CONDITION_UUID;
+        "/concept/" + ConceptUuids.GENERAL_CONDITION_UUID;
 
     private final Object mLock = new Object();
 

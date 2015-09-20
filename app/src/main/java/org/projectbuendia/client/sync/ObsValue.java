@@ -16,7 +16,7 @@ import android.support.annotation.NonNull;
 import com.google.common.collect.ImmutableMap;
 
 import org.joda.time.DateTime;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.json.ConceptType;
 
 import java.util.Comparator;
@@ -28,89 +28,74 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /** A simple bean class representing an observation with localized names and values. */
-// TODO: rename to ObsValue and remove fields we no longer use
-public final class LocalizedObs implements Comparable<LocalizedObs> {
-    public static final Comparator<LocalizedObs> BY_OBS_TIME = new Comparator<LocalizedObs>() {
-        @Override public int compare(LocalizedObs left, LocalizedObs right) {
-            return left.encounterTime.compareTo(right.encounterTime);
+public final class ObsValue implements Comparable<ObsValue> {
+    public static final Comparator<ObsValue> BY_OBS_TIME = new Comparator<ObsValue>() {
+        @Override public int compare(ObsValue left, ObsValue right) {
+            return left.obsTime.compareTo(right.obsTime);
         }
     };
 
-    public final long id;
+    /** The time at which this observation was taken. */
+    public final DateTime obsTime;
 
-    /** The time of the encounter in which this observation was taken. */
-    public final DateTime encounterTime;
-
-    /** The UUID of the concept that was observed, unique and stable (suitable as a map key). */
+    /** The UUID of the concept that was observed. */
     public final String conceptUuid;
 
     /** The data type of the concept that was observed. */
+    // TODO: Instead of conceptType, have separate valueUuid, valueNumber, and valueText fields.
     public final ConceptType conceptType;
 
     /** The localized name of the concept that was observed. */
     public final String conceptName;
 
-    /** The observed value (a number, text, or answer concept UUID). */
-    // TODO: It's not clear in what situations this value can be null.
+    /** The observed value (a string, number as a string, or answer concept UUID). */
     @Nullable public final String value;
 
-    /** The localized observed value (a number, text, or localized concept name). */
-    // TODO: It's not clear in what situations this value can be null.
-    @Nullable public final String localizedValue;
+    /** The name of the answer concept, if the value is an answer concept. */
+    @Nullable public final String valueName;
 
-    /**
-     * Instantiates a {@link LocalizedObs} with specified initial values.
-     * @param id                  the unique id
-     * @param encounterTimeMillis The time of the encounter in milliseconds since epoch
-     * @param conceptUuid         The UUID of the concept that was observed
-     * @param conceptName         The localized name of the concept that was observed
-     * @param value               The unlocalized value (a numeric value, text string, concept UUID of the
-     *                            answer, or UUID of the order that was executed).
-     * @param localizedValue      The localized value (a numeric value or a localized concept name).
-     */
-    public LocalizedObs(
-        long id,
-        long encounterTimeMillis,
+    public ObsValue(
+        long millis,
         String conceptUuid,
         String conceptName,
         String conceptType,
         @Nullable String value,
-        @Nullable String localizedValue) {
-        this.id = id;
-        this.encounterTime = new DateTime(encounterTimeMillis);
+        @Nullable String valueName) {
+        this.obsTime = new DateTime(millis);
         this.conceptUuid = checkNotNull(conceptUuid);
         this.conceptName = conceptName == null ? "" : conceptName;
         this.conceptType = conceptType == null ? null : ConceptType.valueOf(conceptType);
         this.value = value;
-        this.localizedValue = localizedValue;
+        this.valueName = valueName;
     }
 
     @Override public String toString() {
-        return "id=" + id
-            + ",time=" + encounterTime
-            + ",conceptUuid=" + conceptUuid
-            + ",conceptName=" + conceptName
-            + ",conceptType=" + conceptType
-            + ",value=" + localizedValue;
+        return "ObsValue(obsTime=" + obsTime
+            + ", conceptUuid=" + conceptUuid
+            + ", conceptName=" + conceptName
+            + ", conceptType=" + conceptType
+            + ", value=" + value
+            + ", valueName=" + valueName + ")";
     }
 
     @Override public boolean equals(Object other) {
-        if (other instanceof LocalizedObs) {
-            LocalizedObs o = (LocalizedObs) other;
-            return Objects.equals(encounterTime, o.encounterTime)
+        if (other instanceof ObsValue) {
+            ObsValue o = (ObsValue) other;
+            return Objects.equals(obsTime, o.obsTime)
                 && Objects.equals(conceptUuid, o.conceptUuid)
                 && Objects.equals(conceptName, o.conceptName)
                 && Objects.equals(conceptType, o.conceptType)
                 && Objects.equals(value, o.value)
-                && Objects.equals(localizedValue, o.localizedValue);
+                && Objects.equals(valueName, o.valueName);
         } else {
             return false;
         }
     }
 
     @Override public int hashCode() {
-        return (int) id + (int) encounterTime.getMillis() + conceptUuid.hashCode() + conceptName.hashCode() + conceptType.hashCode()
-            + value.hashCode() + localizedValue.hashCode();
+        return (int) obsTime.getMillis() + conceptUuid.hashCode() + conceptName.hashCode()
+            + conceptType.hashCode() + (value == null ? 0 : value.hashCode())
+            + (valueName == null ? 0 : valueName.hashCode());
     }
 
     /**
@@ -126,7 +111,7 @@ public final class LocalizedObs implements Comparable<LocalizedObs> {
      * @param other The other Value to compare to.
      * @return
      */
-    @Override public int compareTo(@NonNull LocalizedObs other) {
+    @Override public int compareTo(@NonNull ObsValue other) {
         if (value == null || other.value == null) {
             return value == other.value ? 0 : value == null ? -1 : 1;
         }
@@ -146,7 +131,7 @@ public final class LocalizedObs implements Comparable<LocalizedObs> {
     public Integer getTypeOrdering() {
         switch (conceptType) {
             case BOOLEAN:
-                return value == Concepts.YES_UUID ? 5 : 1;
+                return ConceptUuids.YES_UUID.equals(value) ? 5 : 1;
             case NUMERIC:
                 return 2;
             case TEXT:
@@ -164,14 +149,14 @@ public final class LocalizedObs implements Comparable<LocalizedObs> {
      */
     public Integer getCodedValueOrdering() {
         final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
-            .put(Concepts.NO_UUID, 0)
-            .put(Concepts.NONE_UUID, 1)
-            .put(Concepts.NORMAL_UUID, 2)
-            .put(Concepts.SOLID_FOOD_UUID, 3)
-            .put(Concepts.MILD_UUID, 4)
-            .put(Concepts.MODERATE_UUID, 5)
-            .put(Concepts.SEVERE_UUID, 6)
-            .put(Concepts.YES_UUID, 7).build();
+            .put(ConceptUuids.NO_UUID, 0)
+            .put(ConceptUuids.NONE_UUID, 1)
+            .put(ConceptUuids.NORMAL_UUID, 2)
+            .put(ConceptUuids.SOLID_FOOD_UUID, 3)
+            .put(ConceptUuids.MILD_UUID, 4)
+            .put(ConceptUuids.MODERATE_UUID, 5)
+            .put(ConceptUuids.SEVERE_UUID, 6)
+            .put(ConceptUuids.YES_UUID, 7).build();
         Integer cvo = CODED_VALUE_ORDERING.get(value);
         return cvo == null ? 0 : cvo;
     }

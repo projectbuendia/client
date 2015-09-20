@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,13 +38,13 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
@@ -322,7 +321,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         }
 
-        @Override public void updatePatientVitalsUi(Map<String, LocalizedObs> observations,
+        @Override public void updatePatientVitalsUi(Map<String, ObsValue> observations,
                                           LocalDate admissionDate, LocalDate firstSymptomsDate) {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
@@ -333,41 +332,41 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
 
             // PCR
-            LocalizedObs pcrLObservation = observations.get(Concepts.PCR_L_UUID);
-            LocalizedObs pcrNpObservation = observations.get(Concepts.PCR_NP_UUID);
+            ObsValue pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
+            ObsValue pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
             mPcr.setIconDrawable(
                 new IconDrawable(PatientChartActivity.this, Iconify.IconValue.fa_flask)
                     .color(0x00000000)
                     .sizeDp(36));
-            if ((pcrLObservation == null || pcrLObservation.localizedValue == null)
+            if ((pcrLObservation == null || pcrLObservation.valueName == null)
                 && (pcrNpObservation == null || pcrNpObservation == null)) {
                 mPcr.setValue("–");
             } else {
                 String pcrLString = "–";
                 DateTime pcrObsTime = null;
-                if (pcrLObservation != null && pcrLObservation.localizedValue != null) {
-                    pcrObsTime = pcrLObservation.encounterTime;
+                if (pcrLObservation != null && pcrLObservation.valueName != null) {
+                    pcrObsTime = pcrLObservation.obsTime;
                     try {
-                        double pcrL = Double.parseDouble(pcrLObservation.localizedValue);
+                        double pcrL = Double.parseDouble(pcrLObservation.valueName);
                         pcrLString = getFormattedPcrString(pcrL);
                     } catch (NumberFormatException e) {
                         LOG.w(
                             "Retrieved a malformed L-gene PCR value: '%1$s'.",
-                            pcrLObservation.localizedValue);
-                        pcrLString = pcrLObservation.localizedValue;
+                            pcrLObservation.valueName);
+                        pcrLString = pcrLObservation.valueName;
                     }
                 }
                 String pcrNpString = "–";
-                if (pcrNpObservation != null && pcrNpObservation.localizedValue != null) {
-                    pcrObsTime = pcrNpObservation.encounterTime;
+                if (pcrNpObservation != null && pcrNpObservation.valueName != null) {
+                    pcrObsTime = pcrNpObservation.obsTime;
                     try {
-                        double pcrNp = Double.parseDouble(pcrNpObservation.localizedValue);
+                        double pcrNp = Double.parseDouble(pcrNpObservation.valueName);
                         pcrNpString = getFormattedPcrString(pcrNp);
                     } catch (NumberFormatException e) {
                         LOG.w(
                             "Retrieved a malformed Np-gene PCR value: '%1$s'.",
-                            pcrNpObservation.localizedValue);
-                        pcrNpString = pcrNpObservation.localizedValue;
+                            pcrNpObservation.valueName);
+                        pcrNpString = pcrNpObservation.valueName;
                     }
                 }
 
@@ -383,14 +382,14 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
-            LocalizedObs obs;
+            ObsValue obs;
 
-            obs = observations.get(Concepts.PREGNANCY_UUID);
-            if (obs != null && Concepts.YES_UUID.equals(obs.value)) {
+            obs = observations.get(ConceptUuids.PREGNANCY_UUID);
+            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.pregnant));
             }
-            obs = observations.get(Concepts.IV_UUID);
-            if (obs != null && Concepts.YES_UUID.equals(obs.value)) {
+            obs = observations.get(ConceptUuids.IV_UUID);
+            if (obs != null && ConceptUuids.YES_UUID.equals(obs.value)) {
                 specialLabels.add(getString(R.string.iv_fitted));
             }
             mPatientPregnantOrIvView.setText(Joiner.on(", ").join(specialLabels));
@@ -409,7 +408,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                 mGeneralCondition.setText("–"); // en dash
                 mGeneralConditionNum.setText("–");
             } else {
-                ResStatus resStatus = Concepts.getResStatus(generalConditionUuid);
+                ResStatus resStatus = ConceptUuids.getResStatus(generalConditionUuid);
                 ResStatus.Resolved status = resStatus.resolve(getResources());
 
                 mGeneralConditionParent.setBackgroundColor(status.getBackgroundColor());
@@ -425,8 +424,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
 
         @Override public void updateTilesAndGrid(
             Chart chart,
-            Map<String, LocalizedObs> latestObservations,
-            List<LocalizedObs> observations,
+            Map<String, ObsValue> latestObservations,
+            List<ObsValue> observations,
             List<Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate) {

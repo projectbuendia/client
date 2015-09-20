@@ -26,11 +26,11 @@ import org.projectbuendia.client.events.SubmitXformFailedEvent;
 import org.projectbuendia.client.events.SubmitXformSucceededEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.sync.Order;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.FakeEventBus;
@@ -53,8 +53,8 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     private static final String PATIENT_NAME_1 = "bob";
     private static final String PATIENT_ID_1 = "id1";
 
-    private static final LocalizedObs OBSERVATION_A =
-        new LocalizedObs(0, 0, "c", "c", "TEXT", "val", "localizedVal");
+    private static final ObsValue OBSERVATION_A =
+        new ObsValue(0, "c", "c", "TEXT", "value", "");
 
     private PatientChartController mController;
 
@@ -88,9 +88,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
     /** Tests that observations are updated in the UI when patient details fetched. */
     public void testPatientDetailsLoaded_SetsObservationsOnUi() {
         // GIVEN the observations provider is set up to return some dummy data
-        List<LocalizedObs> allObservations =
+        List<ObsValue> allObservations =
             ImmutableList.of(OBSERVATION_A);
-        Map<String, LocalizedObs> recentObservations =
+        Map<String, ObsValue> recentObservations =
             ImmutableMap.of(OBSERVATION_A.conceptUuid, OBSERVATION_A);
         when(mMockChartHelper.getObservations(PATIENT_UUID_1))
             .thenReturn(allObservations);
@@ -106,7 +106,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         mFakeHandler.runUntilEmpty();
         // THEN the controller puts observations on the UI
         verify(mMockUi).updateTilesAndGrid(
-            null, new HashMap<String, LocalizedObs>(),
+            null, new HashMap<String, ObsValue>(),
             allObservations, ImmutableList.<Order> of(), null, null);
         verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
     }
@@ -127,7 +127,7 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         // GIVEN controller is initialized
         mController.init();
         // WHEN a new general condition is set from the dialog
-        mController.setCondition(Concepts.GENERAL_CONDITION_PALLIATIVE_UUID);
+        mController.setCondition(ConceptUuids.GENERAL_CONDITION_PALLIATIVE_UUID);
         // THEN a new encounter is added
         verify(mMockAppModel).addEncounter(
             any(CrudEventBus.class),

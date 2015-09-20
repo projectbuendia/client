@@ -29,7 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
@@ -78,7 +78,7 @@ public class OpenMrsServer implements Server {
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
         // ignored by the REST resource handler, which just returns the "Pulse" concept.
-        final String urlPath = "/concept/" + Concepts.PULSE_UUID;
+        final String urlPath = "/concept/" + ConceptUuids.PULSE_UUID;
         List<String> params = new ArrayList<>();
         params.add("time=" + (new Date().getTime()));
         JsonUser user = App.getUserManager().getActiveUser();
