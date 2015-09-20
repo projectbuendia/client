@@ -27,8 +27,6 @@ import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEventFactory;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
-import org.projectbuendia.client.models.converters.Converter;
-import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.models.tasks.AddPatientTask;
 import org.projectbuendia.client.models.tasks.AppUpdatePatientTask;
 import org.projectbuendia.client.models.tasks.TaskFactory;
@@ -53,7 +51,7 @@ public class AppModel {
     public static final String CHART_UUID = "ea43f213-66fb-4af6-8a49-70fd6b9ce5d4";
     private static final Logger LOG = Logger.create();
     private final ContentResolver mContentResolver;
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final TaskFactory mTaskFactory;
 
     /**
@@ -97,7 +95,7 @@ public class AppModel {
     public void fetchLocationTree(CrudEventBus bus, String locale) {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
         new FetchLocationTreeAsyncTask(
-            mContentResolver, locale, mConverterPack.location, bus).execute();
+            mContentResolver, locale, mLoaderSet.locationLoader, bus).execute();
     }
 
     /** Asynchronously downloads one patient from the server and saves it locally. */
@@ -115,11 +113,11 @@ public class AppModel {
         new FetchTypedCursorAsyncTask<>(
             Contracts.Patients.CONTENT_URI,
             // The projection must contain an "_id" column for the ListAdapter as well as all
-            // the columns used in PatientConverter.fromCursor().
+            // the columns used in Patient.Loader.fromCursor().
             null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
                 //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.GENDER, Patients.LOCATION_UUID},
             Patient.class, mContentResolver,
-            filter, constraint, mConverterPack.patient, bus).execute();
+            filter, constraint, mLoaderSet.patientLoader, bus).execute();
     }
 
     /**
@@ -129,7 +127,7 @@ public class AppModel {
     public void fetchSinglePatient(CrudEventBus bus, String uuid) {
         mTaskFactory.newFetchItemTask(
             Contracts.Patients.CONTENT_URI, null, new UuidFilter(), uuid,
-            mConverterPack.patient, bus).execute();
+            mLoaderSet.patientLoader, bus).execute();
     }
 
     /**
@@ -192,10 +190,10 @@ public class AppModel {
     }
 
     AppModel(ContentResolver contentResolver,
-             ConverterPack converters,
+             LoaderSet loaderSet,
              TaskFactory taskFactory) {
         mContentResolver = contentResolver;
-        mConverterPack = converters;
+        mLoaderSet = loaderSet;
         mTaskFactory = taskFactory;
     }
 
@@ -230,17 +228,17 @@ public class AppModel {
 
         private final ContentResolver mContentResolver;
         private final String mLocale;
-        private final Converter<Location> mConverter;
+        private final CursorLoader<Location> mLoader;
         private final CrudEventBus mBus;
 
         public FetchLocationTreeAsyncTask(
             ContentResolver contentResolver,
             String locale,
-            Converter<Location> converter,
+            CursorLoader<Location> loader,
             CrudEventBus bus) {
             mContentResolver = contentResolver;
             mLocale = locale;
-            mConverter = converter;
+            mLoader = loader;
             mBus = bus;
         }
 
@@ -251,7 +249,7 @@ public class AppModel {
                 // job here because the cursor has to stay open for the TypedCursor to work.
                 cursor = mContentResolver.query(
                     Contracts.getLocalizedLocationsUri(mLocale), null, null, null, null);
-                return LocationTree.forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
+                return LocationTree.forTypedCursor(new TypedCursorWithLoader<>(cursor, mLoader));
             } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();
@@ -274,7 +272,7 @@ public class AppModel {
         private final ContentResolver mContentResolver;
         private final SimpleSelectionFilter mFilter;
         private final String mConstraint;
-        private final Converter<T> mConverter;
+        private final CursorLoader<T> mLoader;
         private final CrudEventBus mBus;
 
         public FetchTypedCursorAsyncTask(
@@ -284,7 +282,7 @@ public class AppModel {
             ContentResolver contentResolver,
             SimpleSelectionFilter<T> filter,
             String constraint,
-            Converter<T> converter,
+            CursorLoader<T> loader,
             CrudEventBus bus) {
             mContentUri = contentUri;
             mProjection = projection;
@@ -292,7 +290,7 @@ public class AppModel {
             mContentResolver = contentResolver;
             mFilter = filter;
             mConstraint = constraint;
-            mConverter = converter;
+            mLoader = loader;
             mBus = bus;
         }
 
@@ -306,7 +304,7 @@ public class AppModel {
                     mFilter.getSelectionArgs(mConstraint),
                     null);
 
-                return new TypedConvertedCursor<>(mConverter, cursor);
+                return new TypedCursorWithLoader<>(cursor, mLoader);
             } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();

@@ -26,7 +26,7 @@ import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.providers.Contracts;
@@ -44,7 +44,7 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
     private static final SimpleSelectionFilter FILTER = new UuidFilter();
 
     private final TaskFactory mTaskFactory;
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mUuid;
@@ -54,14 +54,14 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
 
     AppUpdatePatientTask(
         TaskFactory taskFactory,
-        ConverterPack converters,
+        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         Patient originalPatient,
         PatientDelta patientDelta,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mConverterPack = converters;
+        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mUuid = (originalPatient == null) ? null : originalPatient.uuid;
@@ -116,7 +116,7 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
             null,
             new UuidFilter(),
             mUuid,
-            mConverterPack.patient,
+            mLoaderSet.patientLoader,
             mBus);
         task.execute();
     }

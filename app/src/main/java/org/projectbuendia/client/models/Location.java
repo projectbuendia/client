@@ -11,6 +11,11 @@
 
 package org.projectbuendia.client.models;
 
+import android.database.Cursor;
+
+import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.utils.Utils;
+
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -40,5 +45,16 @@ public final class Location extends Base<String> {
 
     @Override public String toString() {
         return name;
+    }
+
+    /** An {@link CursorLoader} that converts {@link Location}s. */
+    public static class Loader implements CursorLoader<Location> {
+        @Override public Location fromCursor(Cursor cursor) {
+            return new Location(
+                Utils.getString(cursor, Contracts.LocalizedLocations.UUID),
+                Utils.getString(cursor, Contracts.LocalizedLocations.PARENT_UUID),
+                Utils.getString(cursor, Contracts.LocalizedLocations.NAME),
+                Utils.getLong(cursor, Contracts.LocalizedLocations.PATIENT_COUNT));
+        }
     }
 }

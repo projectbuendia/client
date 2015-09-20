@@ -26,8 +26,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.encounter.EncounterUuidFilter;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.converters.ConverterPack;
-import org.projectbuendia.client.models.converters.EncounterConverter;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonEncounter;
 import org.projectbuendia.client.providers.Contracts.Observations;
@@ -55,7 +54,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     };
 
     private final TaskFactory mTaskFactory;
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final Patient mPatient;
@@ -67,7 +66,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
     /** Creates a new {@link AddEncounterTask}. */
     public AddEncounterTask(
         TaskFactory taskFactory,
-        ConverterPack converters,
+        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         Patient patient,
@@ -75,7 +74,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
         CrudEventBus bus
     ) {
         mTaskFactory = taskFactory;
-        mConverterPack = converters;
+        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mPatient = patient;
@@ -164,7 +163,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
             ENCOUNTER_PROJECTION,
             new EncounterUuidFilter(),
             mUuid,
-            new EncounterConverter(mPatient.uuid),
+            new Encounter.Loader(mPatient.uuid),
             mBus);
         task.execute();
     }

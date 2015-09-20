@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import org.joda.time.LocalDate;
 import org.projectbuendia.client.json.JsonPatient;
@@ -20,10 +21,8 @@ import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;
 
-/** A patient in the app model. */
 @Immutable
 public final class Patient extends Base<String> implements Comparable<Patient> {
-
     public static final int GENDER_UNKNOWN = 0;
     public static final int GENDER_MALE = 1;
     public static final int GENDER_FEMALE = 2;
@@ -53,10 +52,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         return new Builder();
     }
 
-    /**
-     * Converts this instance of {@link Patient} to a {@link ContentValues} object for insertion
-     * into a database or content provider.
-     */
+    /** Puts this object's fields in a {@link ContentValues} object for insertion into a database. */
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
         cv.put(Contracts.Patients.UUID, uuid);
@@ -140,5 +136,32 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         this.gender = builder.mGender;
         this.birthdate = builder.mBirthdate;
         this.locationUuid = builder.mLocationUuid;
+    }
+
+    /** An {@link CursorLoader} that loads {@link Patient}s. */
+    @Immutable
+    public static class Loader implements CursorLoader<Patient> {
+        @Override public Patient fromCursor(Cursor cursor) {
+            return builder()
+                .setUuid(Utils.getString(cursor, Contracts.Patients.UUID))
+                .setId(Utils.getString(cursor, Contracts.Patients.ID))
+                .setGivenName(Utils.getString(cursor, Contracts.Patients.GIVEN_NAME))
+                .setFamilyName(Utils.getString(cursor, Contracts.Patients.FAMILY_NAME))
+                .setBirthdate(Utils.getLocalDate(cursor, Contracts.Patients.BIRTHDATE))
+                .setGender(getGenderFromString(Utils.getString(cursor, Contracts.Patients.GENDER)))
+                .setLocationUuid(Utils.getString(cursor, Contracts.Patients.LOCATION_UUID))
+                .build();
+        }
+
+        private static int getGenderFromString(String genderString) {
+            switch (genderString) {
+                case "M":
+                    return GENDER_MALE;
+                case "F":
+                    return GENDER_FEMALE;
+                default:
+                    return GENDER_UNKNOWN;
+            }
+        }
     }
 }

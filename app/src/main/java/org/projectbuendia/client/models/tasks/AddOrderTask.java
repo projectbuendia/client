@@ -24,7 +24,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.OrderAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.providers.Contracts;
@@ -44,7 +44,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final Order mOrder;
@@ -55,13 +55,13 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
     /** Creates a new {@link AddOrderTask}. */
     public AddOrderTask(
         TaskFactory taskFactory,
-        ConverterPack converters,
+        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         Order order,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mConverterPack = converters;
+        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mOrder = order;
@@ -108,7 +108,7 @@ public class AddOrderTask extends AsyncTask<Void, Void, OrderAddFailedEvent> {
             null,
             new UuidFilter(),
             mUuid,
-            mConverterPack.order,
+            mLoaderSet.orderLoader,
             mBus);
         task.execute();
     }

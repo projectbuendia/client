@@ -16,12 +16,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.SparseArray;
 
-import org.projectbuendia.client.models.converters.Converter;
-
 import java.util.Iterator;
 
 /**
- * A {@link TypedCursor} that's backed by a {@link Converter} and a {@link Cursor}.
+ * A {@link TypedCursor} that's backed by a {@link CursorLoader} and a {@link Cursor}.
  * <p/>
  * <p>This data structure is NOT thread-safe. It should only be accessed from one thread at a time,
  * generally the main thread. Furthermore, only one {@link Iterator} should be created on it at a
@@ -32,18 +30,17 @@ import java.util.Iterator;
  * associated {@link Cursor#requery} and {@link Cursor#deactivate} methods have been deprecated. It
  * does, however, pass along {@link ContentObserver} callbacks.
  */
-class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> {
+class TypedCursorWithLoader<T, U extends CursorLoader<T>> implements TypedCursor<T> {
 
-    private final U mConverter;
+    private final U mLoader;
     private final Cursor mCursor;
 
-    private final SparseArray<T> mConvertedItems;
+    private final SparseArray<T> mLoadedItems;
 
-    public TypedConvertedCursor(U converter, Cursor cursor) {
-        mConverter = converter;
+    public TypedCursorWithLoader(Cursor cursor, U loader) {
+        mLoader = loader;
         mCursor = cursor;
-
-        mConvertedItems = new SparseArray<>();
+        mLoadedItems = new SparseArray<>();
     }
 
     /**
@@ -65,7 +62,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
             return null;
         }
 
-        T convertedItem = mConvertedItems.get(position);
+        T convertedItem = mLoadedItems.get(position);
         if (convertedItem == null) {
             int originalPosition = mCursor.getPosition();
 
@@ -73,10 +70,10 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
                 return null;
             }
 
-            convertedItem = mConverter.fromCursor(mCursor);
+            convertedItem = mLoader.fromCursor(mCursor);
             mCursor.moveToPosition(originalPosition);
 
-            mConvertedItems.put(position, convertedItem);
+            mLoadedItems.put(position, convertedItem);
         }
 
         return convertedItem;
@@ -87,7 +84,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
     }
 
     @Override public Iterator<T> iterator() {
-        return new LazyConverterIterator();
+        return new LazyLoaderIterator();
     }
 
     @Override public void close() {
@@ -102,7 +99,7 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
         mCursor.unregisterContentObserver(observer);
     }
 
-    private class LazyConverterIterator implements Iterator<T> {
+    private class LazyLoaderIterator implements Iterator<T> {
 
         @Override public boolean hasNext() {
             return !mCursor.isLast() && !mCursor.isAfterLast();
@@ -115,13 +112,13 @@ class TypedConvertedCursor<T, U extends Converter<T>> implements TypedCursor<T> 
 
             int position = mCursor.getPosition();
 
-            T convertedItem = mConvertedItems.get(position);
-            if (convertedItem == null) {
-                convertedItem = mConverter.fromCursor(mCursor);
-                mConvertedItems.put(position, convertedItem);
+            T loadedItem = mLoadedItems.get(position);
+            if (loadedItem == null) {
+                loadedItem = mLoader.fromCursor(mCursor);
+                mLoadedItems.put(position, loadedItem);
             }
 
-            return convertedItem;
+            return loadedItem;
         }
 
         @Override public void remove() {

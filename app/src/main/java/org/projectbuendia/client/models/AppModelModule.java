@@ -12,8 +12,6 @@
 package org.projectbuendia.client.models;
 
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.models.converters.ConverterModule;
-import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.models.tasks.TaskFactory;
 import org.projectbuendia.client.models.tasks.TaskModule;
 
@@ -25,7 +23,7 @@ import dagger.Provides;
 /** A Dagger module that provides bindings for the {@link AppModel}. */
 @Module(
     includes = {
-        ConverterModule.class,
+        LoaderModule.class,
         TaskModule.class
     },
     complete = false,
@@ -34,7 +32,7 @@ public class AppModelModule {
 
     @Provides
     @Singleton
-    AppModel provideAppModel(ConverterPack converters, TaskFactory taskFactory) {
-        return new AppModel(App.getInstance().getContentResolver(), converters, taskFactory);
+    AppModel provideAppModel(LoaderSet loaderSet, TaskFactory taskFactory) {
+        return new AppModel(App.getInstance().getContentResolver(), loaderSet, taskFactory);
     }
 }

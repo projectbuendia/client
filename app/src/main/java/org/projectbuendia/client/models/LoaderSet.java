@@ -9,26 +9,24 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.models.converters;
+package org.projectbuendia.client.models;
 
 import javax.annotation.concurrent.Immutable;
 
 /**
- * A convenience object that provides access to all {@link Converter} instances available
- * (an instance for each {@link Converter} with a default constructor).
+ * A convenience object that provides access to all {@link CursorLoader} instances available
+ * (an instance for each {@link CursorLoader} with a default constructor).
  */
 @Immutable
-public class ConverterPack {
-    public final PatientConverter patient;
-    public final LocationConverter location;
-    public final OrderConverter order;
+public class LoaderSet {
+    public final Patient.Loader patientLoader;
+    public final Location.Loader locationLoader;
+    public final Order.Loader orderLoader;
 
-    ConverterPack(
-        PatientConverter patientConverter,
-        LocationConverter locationConverter,
-        OrderConverter orderConverter) {
-        patient = patientConverter;
-        location = locationConverter;
-        order = orderConverter;
+    LoaderSet(Patient.Loader patientLoader, Location.Loader locationLoader,
+        Order.Loader orderLoader) {
+        this.patientLoader = patientLoader;
+        this.locationLoader = locationLoader;
+        this.orderLoader = orderLoader;
     }
 }

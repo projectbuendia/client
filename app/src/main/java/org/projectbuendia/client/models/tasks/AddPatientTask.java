@@ -26,7 +26,7 @@ import org.projectbuendia.client.events.data.PatientAddFailedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.sync.SyncAccountService;
@@ -47,7 +47,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final PatientDelta mPatientDelta;
@@ -58,13 +58,13 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
     /** Creates a new {@link AddPatientTask}. */
     public AddPatientTask(
         TaskFactory taskFactory,
-        ConverterPack converters,
+        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         PatientDelta patientDelta,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mConverterPack = converters;
+        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mPatientDelta = patientDelta;
@@ -153,7 +153,7 @@ public class AddPatientTask extends AsyncTask<Void, Void, PatientAddFailedEvent>
             null,
             new UuidFilter(),
             mUuid,
-            mConverterPack.patient,
+            mLoaderSet.patientLoader,
             mBus);
         task.execute();
     }

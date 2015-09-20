@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;
@@ -177,6 +178,41 @@ public class Encounter extends Base<String> {
             } catch (Exception e) {
                 return Type.NON_DATE;
             }
+        }
+    }
+
+    /**
+     * An {@link CursorLoader} that loads {@link Encounter}s. Expects the {@link Cursor} to
+     * contain only a single encounter, represented by multiple observations, with one observation per
+     * row.
+     * <p/>
+     * <p>Unlike other {@link CursorLoader}s, {@link Encounter.Loader} must be instantiated
+     * once per patient, since {@link Encounter} contains the patient's UUID as one of its fields,
+     * which is not present in the database representation of an encounter.
+     */
+    public static class Loader implements CursorLoader<Encounter> {
+        private String mPatientUuid;
+
+        public Loader(String patientUuid) {
+            mPatientUuid = patientUuid;
+        }
+
+        @Override public Encounter fromCursor(Cursor cursor) {
+            final String encounterUuid = cursor.getString(
+                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
+            final long millis = cursor.getLong(
+                cursor.getColumnIndex(Observations.ENCOUNTER_MILLIS));
+            List<Observation> observations = new ArrayList<>();
+            cursor.move(-1);
+            while (cursor.moveToNext()) {
+                String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
+                observations.add(new Observation(
+                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
+                    value, Observation.estimatedTypeFor(value)
+                ));
+            }
+            return new Encounter(mPatientUuid, encounterUuid, new DateTime(millis),
+                observations.toArray(new Observation[observations.size()]), null);
         }
     }
 }

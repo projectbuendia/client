@@ -9,19 +9,27 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.models.converters;
+package org.projectbuendia.client.models;
 
-import android.database.Cursor;
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * An interface for a converter that converts a model data type and a corresponding Android database
- * abstraction.
+ * A Dagger module that provides bindings for some of the app model's {@link CursorLoader}s.
+ * Other {@link CursorLoader} objects may require manual instantiation.
  */
-// TODO: This doesn't really convert anything; it actually constructs a model object using
-// content values from a cursor.  Rename this to a less confusing name like CursorLoader and
-// make it an inner class of each corresponding model type.
-public interface Converter<T> {
+@Module(
+    complete = false,
+    library = true)
+public class LoaderModule {
 
-    /** Converts the current position in a {@link Cursor} to a model data type. */
-    T fromCursor(Cursor cursor);
+    @Provides
+    @Singleton LoaderSet provideLoaders() {
+        return new LoaderSet(
+            new Patient.Loader(),
+            new Location.Loader(),
+            new Order.Loader());
+    }
 }

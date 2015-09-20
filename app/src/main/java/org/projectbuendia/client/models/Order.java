@@ -12,6 +12,7 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
@@ -82,5 +83,19 @@ public final class Order extends Base<String> implements Comparable<Order> {
         cv.put(Contracts.Orders.START_MILLIS, start.getMillis());
         cv.put(Contracts.Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
         return cv;
+    }
+
+    /** An {@link CursorLoader} that reads a Cursor and creates an {@link Order}. */
+    @Immutable
+    public static class Loader implements CursorLoader<Order> {
+        @Override public Order fromCursor(Cursor cursor) {
+            return new Order(
+                cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
+                cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),
+                cursor.getString(cursor.getColumnIndex(Contracts.Orders.INSTRUCTIONS)),
+                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_MILLIS)),
+                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_MILLIS))
+            );
+        }
     }
 }
