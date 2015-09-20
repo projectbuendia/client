@@ -14,6 +14,8 @@ package org.projectbuendia.client;
 import android.app.Application;
 import android.preference.PreferenceManager;
 
+import com.facebook.stetho.Stetho;
+
 import net.sqlcipher.database.SQLiteDatabase;
 
 import org.odk.collect.android.application.Collect;
@@ -60,7 +62,12 @@ public class App extends Application {
         Collect.onCreate(this);
         super.onCreate();
 
-        initializeSqlCipher();
+        Stetho.initialize(Stetho.newInitializerBuilder(this)
+            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+            .build());
+
+        SQLiteDatabase.loadLibs(this);
 
         mObjectGraph = ObjectGraph.create(Modules.list(this));
         mObjectGraph.inject(this);
@@ -77,10 +84,6 @@ public class App extends Application {
         }
 
         mHealthMonitor.start();
-    }
-
-    private void initializeSqlCipher() {
-        SQLiteDatabase.loadLibs(this);
     }
 
     public void inject(Object obj) {

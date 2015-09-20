@@ -14,10 +14,13 @@ package org.projectbuendia.client.sync;
 import android.content.Context;
 
 import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
+import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.sync.providers.Contracts.Table;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +31,12 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 23;
+    public static final int DATABASE_VERSION = 24;
 
     /** Filename for SQLite file. */
-    public static final String DATABASE_NAME = "buendia.db";
+    public static final String DATABASE_FILENAME = "buendia.db";
+
+    File file;
 
     /*
      * This deserves a brief comment on security. Patient data encrypted by a hardcoded key
@@ -60,10 +65,8 @@ public class Database extends SQLiteOpenHelper {
      * TODO/security: add something better. At the very minimum a server call and local storage
      * with expiry so that it has to sync to the server every so often. Even better some sort of
      * public key based scheme to only deliver the key on login with registered user on good device.
-     *
-     * A final note - we know the quote should be brillig, not brilling. No need to correct it.
      */
-    private static final String ENCRYPTION_PASSWORD = "Twas brilling and the slithy toves";
+    private static final String ENCRYPTION_PASSWORD = BuildConfig.ENCRYPTION_PASSWORD;
 
     /**
      * A map of SQL table schemas, with one entry per table.  The values should
@@ -161,7 +164,8 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public Database(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DATABASE_FILENAME, null, DATABASE_VERSION);
+        file = context.getDatabasePath(DATABASE_FILENAME);
     }
 
     @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -189,11 +193,24 @@ public class Database extends SQLiteOpenHelper {
         clear(getWritableDatabase());
     }
 
+    private void deleteDatabaseIfPasswordIncorrect() {
+        try {
+            getWritableDatabase(ENCRYPTION_PASSWORD);
+        } catch (SQLiteException e) {
+            if (e.getMessage().contains("encrypt")) {
+                // Incorrect or missing encryption password; delete the database and start over.
+                file.delete();
+            }
+        }
+    }
+
     public SQLiteDatabase getWritableDatabase() {
-        return super.getWritableDatabase(ENCRYPTION_PASSWORD);
+        deleteDatabaseIfPasswordIncorrect();
+        return getWritableDatabase(ENCRYPTION_PASSWORD);
     }
 
     public SQLiteDatabase getReadableDatabase() {
-        return super.getReadableDatabase(ENCRYPTION_PASSWORD);
+        deleteDatabaseIfPasswordIncorrect();
+        return getReadableDatabase(ENCRYPTION_PASSWORD);
     }
 }

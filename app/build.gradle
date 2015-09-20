@@ -60,6 +60,7 @@ dependencies {
     compile 'com.squareup.dagger:dagger:1.2.2' // Dependency injection
     compile 'de.greenrobot:eventbus:2.4.0' // The event bus
     compile 'joda-time:joda-time:2.5' // Better dates and times
+    compile 'com.facebook.stetho:stetho:1.2.0' // Handy debugging bridge
 
     // Testing
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2'
@@ -69,6 +70,7 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
     androidTestCompile 'com.squareup.spoon:spoon-client:1.1.1'
     androidTestCompile 'org.mockito:mockito-core:1.9.5'
+    androidTestCompile 'com.google.code.findbugs:jsr305:2.0.3'
     compile 'com.mitchellbosecke:pebble:1.5.1'
     compile 'org.slf4j:slf4j-simple:1.7.12'
     compile 'org.apache.commons:commons-lang3:3.4'
@@ -82,8 +84,8 @@ spoon {
     }
 }
 
-// Consider spoon to always be "out-of-date" so that spoon tests will run (when requested) even
-// when no changes have been made to the build.
+// Consider spoon to always be "out-of-date" so that spoon tests will run (when
+// requested) even when no changes have been made to the build.
 tasks['spoon'].outputs.upToDateWhen { false }
 
 // Development builds get the lowest possible version code, so that any release
@@ -136,14 +138,14 @@ def serverEmulatorHost = '10.0.2.2';
 def serverFantastica = '192.168.1.161';
 
 // Just for development.  In production builds, these should be overridden
-// using -PopenmrsRootUrl=url -PopenmrsUser=user -PopenmrsPassword=pass etc.
+// using -Pserver=server -PopenmrsUser=user -PopenmrsPassword=pass etc.
 def serverDefault = serverDev;
 def openmrsRootUrlDefault = 'http://' + serverDefault + ':9000/openmrs';
 def openmrsUserDefault = 'buendia'
 def openmrsPasswordDefault = 'buendia'
 def packageServerRootUrlDefault = 'http://' + serverDefault + ':9001';
 
-// Apply overrides such as -PopenmrsRootUrl=url etc.
+// Apply overrides such as -Pserver=server -PrequireWifi=true etc.
 project.metaClass.propertyMissing = { null }
 def server = project.server ?: serverDefault;
 def openmrsRootUrl = project.server ? 'http://' + project.server + ':9000/openmrs'
@@ -152,13 +154,19 @@ def openmrsUser = project.openmrsUser ?: openmrsUserDefault
 def openmrsPassword = project.openmrsPassword ?: openmrsPasswordDefault
 def packageServerRootUrl = project.server ? 'http://' + project.server + ':9001'
     : project.packageServerRootUrl ?: packageServerRootUrlDefault
-def requireWifi = "true"
+def requireWifi = project.requireWifi ?: 'false';
 
-logger.info('Default preference values:')
-logger.info("OpenMRS root URL: ${openmrsRootUrl}")
-logger.info("OpenMRS user: ${openmrsUser}")
-logger.info("OpenMRS password: ${openmrsPassword}")
-logger.info("Package server root URL: ${packageServerRootUrl}")
+// This is the password used to encrypt the SQLite database on the tablet.
+// In development builds, the password is an empty string, which leaves the
+// database unencrypted so that it can be easily inspected using Stetho.
+def encryptionPassword = project.encryptionPassword ?: '';
+
+logger.info('Default server hostname: ${server}')
+logger.info("Default OpenMRS root URL: ${openmrsRootUrl}")
+logger.info("Default OpenMRS user: ${openmrsUser}")
+logger.info("Default OpenMRS password: ${openmrsPassword}")
+logger.info("Default package server root URL: ${packageServerRootUrl}")
+logger.info("Database encryption password: ${encryptionPassword}")
 
 android {
     compileSdkVersion 21
@@ -187,6 +195,7 @@ android {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         testApplicationId appId + '.test'
 
+        // Set the default values of preferences.
         resValue 'string', 'server_default', server
         resValue 'string', 'openmrs_root_url_default', openmrsRootUrl
         resValue 'string', 'openmrs_user_default', openmrsUser
@@ -199,6 +208,9 @@ android {
         buildConfigField 'String', 'CONTENT_AUTHORITY', '"' + contentAuthority + '"'
         resValue 'string', 'account_type', appId
         buildConfigField 'String', 'ACCOUNT_TYPE', '"' + appId + '"'
+
+        // Set the SQLite database encryption password.
+        buildConfigField 'String', 'ENCRYPTION_PASSWORD', '"' + encryptionPassword + '"'
     }
 
     signingConfigs {
