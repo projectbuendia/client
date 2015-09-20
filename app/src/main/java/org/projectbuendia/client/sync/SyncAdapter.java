@@ -330,7 +330,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_START_TIME, syncStartTime.getMillis());
+        cv.put(Misc.FULL_SYNC_START_MILLIS, syncStartTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
@@ -489,7 +489,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_END_TIME, syncEndTime.getMillis());
+        cv.put(Misc.FULL_SYNC_END_MILLIS, syncEndTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
@@ -514,7 +514,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             c = provider.query(
                 Misc.CONTENT_URI,
-                new String[] {Misc.OBS_SYNC_TIME}, null, null, null);
+                new String[] {Misc.OBS_SYNC_END_MILLIS}, null, null, null);
             if (c.moveToNext()) {
                 return new Instant(c.getLong(0));
             } else {
@@ -607,7 +607,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.OBS_SYNC_TIME, newSyncTime.getMillis());
+        cv.put(Misc.OBS_SYNC_END_MILLIS, newSyncTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 

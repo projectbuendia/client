@@ -260,8 +260,8 @@ public class DbSyncHelper {
             Orders.UUID,
             Orders.PATIENT_UUID,
             Orders.INSTRUCTIONS,
-            Orders.START_TIME,
-            Orders.STOP_TIME
+            Orders.START_MILLIS,
+            Orders.STOP_MILLIS
         }, null, null, null);
         try {
             LOG.i("Examining orders: %d local, %d from server.", c.getCount(), ordersToStore.size());
@@ -275,8 +275,8 @@ public class DbSyncHelper {
                     ops.add(ContentProviderOperation.newUpdate(uri)
                         .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                         .withValue(Orders.INSTRUCTIONS, order.instructions)
-                        .withValue(Orders.START_TIME, order.start)
-                        .withValue(Orders.STOP_TIME, order.stop)
+                        .withValue(Orders.START_MILLIS, order.start_millis)
+                        .withValue(Orders.STOP_MILLIS, order.stop_millis)
                         .build());
                     ordersToStore.remove(uuid);  // done with this incoming order
                     syncResult.stats.numUpdates++;
@@ -297,8 +297,8 @@ public class DbSyncHelper {
                 .withValue(Orders.UUID, order.uuid)
                 .withValue(Orders.PATIENT_UUID, order.patient_uuid)
                 .withValue(Orders.INSTRUCTIONS, order.instructions)
-                .withValue(Orders.START_TIME, order.start)
-                .withValue(Orders.STOP_TIME, order.stop)
+                .withValue(Orders.START_MILLIS, order.start_millis)
+                .withValue(Orders.STOP_MILLIS, order.stop_millis)
                 .build());
             syncResult.stats.numInserts++;
         }

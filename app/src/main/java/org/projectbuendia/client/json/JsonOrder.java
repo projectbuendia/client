@@ -15,6 +15,6 @@ public class JsonOrder {
     public String uuid;
     public String patient_uuid;
     public String instructions;
-    public Long start;
-    public Long stop;
+    public Long start_millis;
+    public Long stop_millis;
 }

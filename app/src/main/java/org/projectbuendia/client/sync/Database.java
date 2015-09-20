@@ -31,7 +31,7 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 25;
+    public static final int DATABASE_VERSION = 26;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
@@ -130,8 +130,8 @@ public class Database extends SQLiteOpenHelper {
             + "uuid TEXT,"
             + "patient_uuid TEXT,"
             + "instructions TEXT,"
-            + "start_time INTEGER,"
-            + "stop_time INTEGER");
+            + "start_millis INTEGER,"
+            + "stop_millis INTEGER");
 
         SCHEMAS.put(Table.CHART_ITEMS, ""
             + "_id INTEGER PRIMARY KEY NOT NULL,"
@@ -158,9 +158,9 @@ public class Database extends SQLiteOpenHelper {
         // and a value column, not all values in one row with an ever-growing number of columns.
         SCHEMAS.put(Table.MISC, ""
             + "_id INTEGER PRIMARY KEY NOT NULL,"
-            + "full_sync_start_time INTEGER,"
-            + "full_sync_end_time INTEGER,"
-            + "obs_sync_time INTEGER");
+            + "full_sync_start_millis INTEGER,"
+            + "full_sync_end_millis INTEGER,"
+            + "obs_sync_end_millis INTEGER");
     }
 
     public Database(Context context) {

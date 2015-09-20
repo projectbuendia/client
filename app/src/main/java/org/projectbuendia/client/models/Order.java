@@ -54,7 +54,7 @@ public final class Order extends Base<String> implements Comparable<Order> {
 
     public static Order fromJson(JsonOrder order) {
         return new Order(order.uuid, order.patient_uuid, order.instructions,
-            order.start, order.stop);
+            order.start_millis, order.stop_millis);
     }
 
     @Override public int compareTo(@NonNull Order other) {
@@ -79,8 +79,8 @@ public final class Order extends Base<String> implements Comparable<Order> {
         cv.put(Contracts.Orders.UUID, uuid);
         cv.put(Contracts.Orders.PATIENT_UUID, patientUuid);
         cv.put(Contracts.Orders.INSTRUCTIONS, instructions);
-        cv.put(Contracts.Orders.START_TIME, start.getMillis());
-        cv.put(Contracts.Orders.STOP_TIME, stop == null ? null : stop.getMillis());
+        cv.put(Contracts.Orders.START_MILLIS, start.getMillis());
+        cv.put(Contracts.Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
         return cv;
     }
 }

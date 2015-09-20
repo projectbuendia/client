@@ -27,8 +27,8 @@ public class OrderConverter implements Converter<Order> {
             cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
             cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),
             cursor.getString(cursor.getColumnIndex(Contracts.Orders.INSTRUCTIONS)),
-            cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_TIME)),
-            cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_TIME))
+            cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_MILLIS)),
+            cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_MILLIS))
         );
     }
 }

@@ -69,18 +69,18 @@ public class AppModel {
     public DateTime getLastFullSyncTime() {
         // The sync process is transactional, but in rare cases, a sync may complete without ever
         // having started--this is the case if user data is cleared mid-sync, for example. To check
-        // that a sync actually completed, we look at the FULL_SYNC_START_TIME and
-        // FULL_SYNC_END_TIME columns in the Misc table, which are written to as the first and
+        // that a sync actually completed, we look at the FULL_SYNC_START_MILLIS and
+        // FULL_SYNC_END_MILLIS columns in the Misc table, which are written to as the first and
         // last operations of a complete sync. If both of these fields are present, and the last
         // end time is greater than the last start time, then a full sync must have completed.
         try (Cursor c = mContentResolver.query(
             Contracts.Misc.CONTENT_URI, null, null, null, null)) {
             LOG.d("Sync timing result count: %d", c.getCount());
             if (c.moveToNext()) {
-                DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_TIME);
-                DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_TIME);
-                DateTime obsSyncEnd = Utils.getDateTime(c, Contracts.Misc.OBS_SYNC_TIME);
-                LOG.i("full_sync_start_time = %s, full_sync_end_time = %s, obs_sync_time = %s",
+                DateTime fullSyncStart = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_START_MILLIS);
+                DateTime fullSyncEnd = Utils.getDateTime(c, Contracts.Misc.FULL_SYNC_END_MILLIS);
+                DateTime obsSyncEnd = Utils.getDateTime(c, Contracts.Misc.OBS_SYNC_END_MILLIS);
+                LOG.i("full_sync_start_millis = %s, full_sync_end_millis = %s, obs_sync_end_millis = %s",
                     fullSyncStart, fullSyncEnd, obsSyncEnd);
                 if (fullSyncStart != null && fullSyncEnd != null && fullSyncEnd.isAfter(fullSyncStart)) {
                     return fullSyncEnd;

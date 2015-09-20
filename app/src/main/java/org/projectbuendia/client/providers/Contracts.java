@@ -136,7 +136,7 @@ public class Contracts {
          * <p/>
          * <p>Updated at the very beginning of full sync operations.
          */
-        String FULL_SYNC_START_TIME = "full_sync_start_time";
+        String FULL_SYNC_START_MILLIS = "full_sync_start_millis";
 
         /**
          * The end time of the last full sync operation, according to the
@@ -145,7 +145,7 @@ public class Contracts {
          * <p/>
          * <p>Updated at the very end of full sync operations.
          */
-        String FULL_SYNC_END_TIME = "full_sync_end_time";
+        String FULL_SYNC_END_MILLIS = "full_sync_end_millis";
 
         /**
          * The "snapshot time" of the last observation sync operation, according
@@ -154,7 +154,7 @@ public class Contracts {
          * <p/>
          * <p>Updated after observation sync to the snapshot time reported by the server.
          */
-        String OBS_SYNC_TIME = "obs_sync_time";
+        String OBS_SYNC_END_MILLIS = "obs_sync_end_millis";
     }
 
     public interface Observations extends BaseColumns {
@@ -183,8 +183,8 @@ public class Contracts {
         String UUID = "uuid";
         String PATIENT_UUID = "patient_uuid";
         String INSTRUCTIONS = "instructions";
-        String START_TIME = "start_time";  // seconds since epoch
-        String STOP_TIME = "stop_time";  // seconds since epoch
+        String START_MILLIS = "start_millis";  // milliseconds since epoch
+        String STOP_MILLIS = "stop_millis";  // milliseconds since epoch
     }
 
     public interface Patients extends BaseColumns {

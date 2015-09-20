@@ -105,15 +105,16 @@ public class ChartDataHelper {
     /** Gets all the orders for a given patient. */
     public List<Order> getOrders(String patientUuid) {
         Cursor c = mContentResolver.query(
-            Orders.CONTENT_URI,
-            null, "patient_uuid = ?", new String[] {patientUuid}, "start_time");
+            Orders.CONTENT_URI, null,
+            Orders.PATIENT_UUID + " = ?", new String[] {patientUuid},
+            Orders.START_MILLIS);
         List<Order> orders = new ArrayList<>();
         while (c.moveToNext()) {
             orders.add(new Order(
-                Utils.getString(c, "uuid", ""),
-                Utils.getString(c, "instructions", ""),
-                Utils.getLong(c, "start_time", null),
-                Utils.getLong(c, "stop_time", null)));
+                Utils.getString(c, Orders.UUID, ""),
+                Utils.getString(c, Orders.INSTRUCTIONS, ""),
+                Utils.getLong(c, Orders.START_MILLIS, null),
+                Utils.getLong(c, Orders.STOP_MILLIS, null)));
         }
         c.close();
         return orders;
