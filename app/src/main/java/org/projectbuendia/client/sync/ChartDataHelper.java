@@ -13,7 +13,6 @@ package org.projectbuendia.client.sync;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.util.Pair;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -26,8 +25,8 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
-import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
@@ -169,20 +168,6 @@ public class ChartDataHelper {
         return result;
     }
 
-    /**
-     * Gets the most recent observations for all concepts for a set of patients from the local
-     * cache. Ordering will be by concept uuid, and there are not groups or other chart-based
-     * configurations.
-     */
-    public Map<String, Map<String, ObsValue>>
-    getLatestObservationsForPatients(String[] patientUuids, String locale) {
-        Map<String, Map<String, ObsValue>> observations = new HashMap<String, Map<String, ObsValue>>();
-        for (String patientUuid : patientUuids) {
-            observations.put(patientUuid, getLatestObservations(patientUuid, locale));
-        }
-        return observations;
-    }
-
     /** Gets the latest observation of the specified concept for all patients. */
     public Map<String, ObsValue> getLatestObservationsForConcept(
         String conceptUuid, String locale) {
@@ -247,62 +232,6 @@ public class ChartDataHelper {
             }
         }
         return new Chart(uuid, tileGroups, rowGroups);
-    }
-
-    /** Gets a list of the concept UUIDs and names to show in the chart tiles. */
-    @Deprecated
-    public List<Pair<String, String>> getTileConcepts() {
-        Map<String, String> conceptNames = new HashMap<>();
-        Cursor cursor = mContentResolver.query(ConceptNames.CONTENT_URI, null,
-            ConceptNames.LOCALE + " = ?", new String[] {ENGLISH_LOCALE}, null);
-        try {
-            while (cursor.moveToNext()) {
-                conceptNames.put(Utils.getString(cursor, "concept_uuid"),
-                    Utils.getString(cursor, "name"));
-            }
-        } finally {
-            cursor.close();
-        }
-        List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
-        cursor = mContentResolver.query(ChartItems.CONTENT_URI, null,
-            ChartItems.CHART_UUID + " = ?", new String[] {CHART_TILES_UUID}, "chart_row");
-        try {
-            while (cursor.moveToNext()) {
-                String uuid = Utils.getString(cursor, "concept_uuid");
-                conceptUuidsAndNames.add(new Pair<>(uuid, conceptNames.get(uuid)));
-            }
-        } finally {
-            cursor.close();
-        }
-        return conceptUuidsAndNames;
-    }
-
-    /** Gets a list of the concept UUIDs and names to show in the rows of the chart grid. */
-    @Deprecated
-    public List<Pair<String, String>> getGridRowConcepts() {
-        Map<String, String> conceptNames = new HashMap<>();
-        Cursor cursor = mContentResolver.query(ConceptNames.CONTENT_URI, null,
-            ConceptNames.LOCALE + " = ?", new String[] {ENGLISH_LOCALE}, null);
-        try {
-            while (cursor.moveToNext()) {
-                conceptNames.put(Utils.getString(cursor, "concept_uuid"),
-                    Utils.getString(cursor, "name"));
-            }
-        } finally {
-            cursor.close();
-        }
-        List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
-        cursor = mContentResolver.query(ChartItems.CONTENT_URI, null,
-            ChartItems.CHART_UUID + " = ?", new String[] {CHART_GRID_UUID}, "chart_row");
-        try {
-            while (cursor.moveToNext()) {
-                String uuid = Utils.getString(cursor, "concept_uuid");
-                conceptUuidsAndNames.add(new Pair<>(uuid, conceptNames.get(uuid)));
-            }
-        } finally {
-            cursor.close();
-        }
-        return conceptUuidsAndNames;
     }
 
     public List<Form> getForms() {

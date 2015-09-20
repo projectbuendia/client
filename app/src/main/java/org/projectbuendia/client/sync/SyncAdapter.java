@@ -630,8 +630,4 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         provider.delete(Observations.CONTENT_URI, select.toString(),
             new String[0]);
     }
-
-    private void reportProgress(int progressIncrement) {
-        reportProgress(progressIncrement, null);
-    }
 }
