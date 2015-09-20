@@ -87,23 +87,29 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
 
         // Providers for individual things (e.g., user with a specific ID).
         registry.registerDelegate(
+            Contracts.Concepts.CONTENT_URI.getPath() + "/*",
+            new ItemProviderDelegate(
+                Contracts.Forms.GROUP_CONTENT_TYPE,
+                Table.CONCEPTS,
+                Contracts.Concepts.UUID));
+        registry.registerDelegate(
             Contracts.Forms.CONTENT_URI.getPath() + "/*",
             new ItemProviderDelegate(
                 Contracts.Forms.GROUP_CONTENT_TYPE,
                 Table.FORMS,
-                Contracts.Forms._ID));
+                Contracts.Forms.UUID));
         registry.registerDelegate(
             Contracts.Locations.CONTENT_URI.getPath() + "/*",
             new ItemProviderDelegate(
                 Contracts.Locations.ITEM_CONTENT_TYPE,
                 Table.LOCATIONS,
-                Contracts.Locations.LOCATION_UUID));
+                Contracts.Locations.UUID));
         registry.registerDelegate(
             Contracts.LocationNames.CONTENT_URI.getPath() + "/*",
             new InsertableItemProviderDelegate(
                 Contracts.LocationNames.ITEM_CONTENT_TYPE,
                 Table.LOCATION_NAMES,
-                Contracts.Locations.LOCATION_UUID));
+                null));
         registry.registerDelegate(
             Contracts.Orders.CONTENT_URI.getPath() + "/*",
             new InsertableItemProviderDelegate(
@@ -115,13 +121,13 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new ItemProviderDelegate(
                 Contracts.Patients.ITEM_CONTENT_TYPE,
                 Table.PATIENTS,
-                Contracts.Patients._ID));
+                Contracts.Patients.UUID));
         registry.registerDelegate(
             Contracts.Users.CONTENT_URI.getPath() + "/*",
             new ItemProviderDelegate(
                 Contracts.Users.ITEM_CONTENT_TYPE,
                 Table.USERS,
-                Contracts.Users._ID));
+                Contracts.Users.UUID));
 
         // Custom providers, usually with special logic.
         registry.registerDelegate(
@@ -136,7 +142,7 @@ public class BuendiaProvider extends DelegatingProvider<Database> {
             new InsertableItemProviderDelegate(
                 Contracts.Misc.ITEM_CONTENT_TYPE,
                 Table.MISC,
-                Contracts.Misc._ID));
+                "rowid"));
 
         return registry;
     }

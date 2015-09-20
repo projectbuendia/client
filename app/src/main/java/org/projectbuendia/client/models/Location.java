@@ -28,10 +28,10 @@ public final class Location extends Base<String> {
     public final String uuid;
     public final String parentUuid;
     public final String name;
-    public final int patientCount;
+    public final long patientCount;
 
     /** Creates an instance of {@link Location}. */
-    public Location(String uuid, String parentUuid, String name, int patientCount) {
+    public Location(String uuid, String parentUuid, String name, long patientCount) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
         this.name = name;

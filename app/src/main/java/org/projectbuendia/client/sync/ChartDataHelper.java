@@ -26,6 +26,7 @@ import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
+import org.projectbuendia.client.providers.Contracts.Concepts;
 import org.projectbuendia.client.providers.Contracts.ConceptNames;
 import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.providers.Contracts.Orders;
@@ -82,15 +83,15 @@ public class ChartDataHelper {
             if (!locale.equals(sLoadedLocale)) {
                 sConceptNames = new HashMap<>();
                 try (Cursor c = mContentResolver.query(
-                    ConceptNames.CONTENT_URI, new String[] {"concept_uuid", "name"},
-                    "locale = ?", new String[] {locale}, null)) {
+                    ConceptNames.CONTENT_URI, new String[] {ConceptNames.CONCEPT_UUID, ConceptNames.NAME},
+                    ConceptNames.LOCALE + " = ?", new String[] {locale}, null)) {
                     while (c.moveToNext()) {
                         sConceptNames.put(c.getString(0), c.getString(1));
                     }
                 }
                 sConceptTypes = new HashMap<>();
                 try (Cursor c = mContentResolver.query(
-                    Contracts.Concepts.CONTENT_URI, new String[] {"_id", "concept_type"},
+                    Concepts.CONTENT_URI, new String[] {Concepts.UUID, Concepts.CONCEPT_TYPE},
                     null, null, null)) {
                     while (c.moveToNext()) {
                         sConceptTypes.put(c.getString(0), c.getString(1));
@@ -143,7 +144,7 @@ public class ChartDataHelper {
         List<ObsValue> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            "patient_uuid = ?", new String[] {patientUuid}, null)) {
+            Observations.PATIENT_UUID + " = ?", new String[] {patientUuid}, null)) {
             while (c.moveToNext()) {
                 results.add(obsFromCursor(c));
             }
@@ -208,23 +209,24 @@ public class ChartDataHelper {
         List<ChartSection> rowGroups = new ArrayList<>();
 
         try (Cursor c = mContentResolver.query(
-            ChartItems.CONTENT_URI, null, "chart_uuid = ?", new String[] {uuid}, "weight")) {
+            ChartItems.CONTENT_URI, null,
+            ChartItems.CHART_UUID + " = ?", new String[] {uuid}, "weight")) {
             while (c.moveToNext()) {
-                Long id = Utils.getLong(c, ChartItems._ID);
-                Long parentId = Utils.getLong(c, ChartItems.PARENT_ID);
+                Long rowid = Utils.getLong(c, ChartItems.ROWID);
+                Long parentRowid = Utils.getLong(c, ChartItems.PARENT_ROWID);
                 String label = Utils.getString(c, ChartItems.LABEL, "");
-                if (parentId == null) {
+                if (parentRowid == null) {
                     // Add a section.
                     switch (ChartSectionType.valueOf(Utils.getString(c, ChartItems.SECTION_TYPE))) {
                         case TILE_ROW:
                             ChartSection tileGroup = new ChartSection(label);
                             tileGroups.add(tileGroup);
-                            tileGroupsById.put(id, tileGroup);
+                            tileGroupsById.put(rowid, tileGroup);
                             break;
                         case GRID_SECTION:
                             ChartSection rowGroup = new ChartSection(label);
                             rowGroups.add(rowGroup);
-                            rowGroupsById.put(id, rowGroup);
+                            rowGroupsById.put(rowid, rowGroup);
                             break;
                     }
                 } else {
@@ -238,8 +240,8 @@ public class ChartDataHelper {
                         Utils.getString(c, ChartItems.CSS_CLASS),
                         Utils.getString(c, ChartItems.CSS_STYLE),
                         Utils.getString(c, ChartItems.SCRIPT));
-                    ChartSection section = tileGroupsById.containsKey(parentId)
-                        ? tileGroupsById.get(parentId) : rowGroupsById.get(parentId);
+                    ChartSection section = tileGroupsById.containsKey(parentRowid)
+                        ? tileGroupsById.get(parentRowid) : rowGroupsById.get(parentRowid);
                     section.items.add(item);
                 }
             }
@@ -251,8 +253,8 @@ public class ChartDataHelper {
     @Deprecated
     public List<Pair<String, String>> getTileConcepts() {
         Map<String, String> conceptNames = new HashMap<>();
-        Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
-            "locale = ?", new String[] {ENGLISH_LOCALE}, null);
+        Cursor cursor = mContentResolver.query(ConceptNames.CONTENT_URI, null,
+            ConceptNames.LOCALE + " = ?", new String[] {ENGLISH_LOCALE}, null);
         try {
             while (cursor.moveToNext()) {
                 conceptNames.put(Utils.getString(cursor, "concept_uuid"),
@@ -262,8 +264,8 @@ public class ChartDataHelper {
             cursor.close();
         }
         List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
-        cursor = mContentResolver.query(Contracts.ChartItems.CONTENT_URI, null,
-            "chart_uuid = ?", new String[] {CHART_TILES_UUID}, "chart_row");
+        cursor = mContentResolver.query(ChartItems.CONTENT_URI, null,
+            ChartItems.CHART_UUID + " = ?", new String[] {CHART_TILES_UUID}, "chart_row");
         try {
             while (cursor.moveToNext()) {
                 String uuid = Utils.getString(cursor, "concept_uuid");
@@ -279,8 +281,8 @@ public class ChartDataHelper {
     @Deprecated
     public List<Pair<String, String>> getGridRowConcepts() {
         Map<String, String> conceptNames = new HashMap<>();
-        Cursor cursor = mContentResolver.query(Contracts.ConceptNames.CONTENT_URI, null,
-            "locale = ?", new String[] {ENGLISH_LOCALE}, null);
+        Cursor cursor = mContentResolver.query(ConceptNames.CONTENT_URI, null,
+            ConceptNames.LOCALE + " = ?", new String[] {ENGLISH_LOCALE}, null);
         try {
             while (cursor.moveToNext()) {
                 conceptNames.put(Utils.getString(cursor, "concept_uuid"),
@@ -290,8 +292,8 @@ public class ChartDataHelper {
             cursor.close();
         }
         List<Pair<String, String>> conceptUuidsAndNames = new ArrayList<>();
-        cursor = mContentResolver.query(Contracts.ChartItems.CONTENT_URI, null,
-            "chart_uuid = ?", new String[] {CHART_GRID_UUID}, "chart_row");
+        cursor = mContentResolver.query(ChartItems.CONTENT_URI, null,
+            ChartItems.CHART_UUID + " = ?", new String[] {CHART_GRID_UUID}, "chart_row");
         try {
             while (cursor.moveToNext()) {
                 String uuid = Utils.getString(cursor, "concept_uuid");
@@ -310,7 +312,6 @@ public class ChartDataHelper {
         try {
             while (cursor.moveToNext()) {
                 forms.add(new Form(
-                    Utils.getString(cursor, Contracts.Forms._ID),
                     Utils.getString(cursor, Contracts.Forms.UUID),
                     Utils.getString(cursor, Contracts.Forms.NAME),
                     Utils.getString(cursor, Contracts.Forms.VERSION)));

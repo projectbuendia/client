@@ -36,9 +36,9 @@ public class PatientCountsDelegate implements ProviderDelegate<Database> {
             .groupBy(Contracts.Patients.LOCATION_UUID)
             .orderBy(sortOrder)
             .select(dbHelper.getReadableDatabase(),
-                Contracts.Patients._ID,
+                Contracts.Patients.ID,
                 Contracts.Patients.LOCATION_UUID,
-                "count(*) as " + Contracts.Patients._COUNT);
+                "count(*) as " + Contracts.PatientCounts.PATIENT_COUNT);
     }
 
     @Override public Uri insert(

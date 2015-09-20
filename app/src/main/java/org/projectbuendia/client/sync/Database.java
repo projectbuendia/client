@@ -31,7 +31,7 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 26;
+    public static final int DATABASE_VERSION = 27;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";
@@ -77,46 +77,41 @@ public class Database extends SQLiteOpenHelper {
     // For descriptions of these tables and the meanings of their columns, see Contracts.java.
     static {
         SCHEMAS.put(Table.PATIENTS, ""
-            + "_id TEXT PRIMARY KEY NOT NULL,"
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
+            + "id TEXT,"
             + "given_name TEXT,"
             + "family_name TEXT,"
-            + "uuid TEXT,"
             + "location_uuid TEXT,"
             + "birthdate TEXT,"
             + "gender TEXT");
 
         SCHEMAS.put(Table.CONCEPTS, ""
-            + "_id TEXT PRIMARY KEY NOT NULL,"
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "xform_id INTEGER UNIQUE NOT NULL,"
             + "concept_type TEXT");
 
         SCHEMAS.put(Table.CONCEPT_NAMES, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
             + "concept_uuid TEXT,"
             + "locale TEXT,"
             + "name TEXT,"
             + "UNIQUE (concept_uuid, locale)");
 
         SCHEMAS.put(Table.FORMS, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
-            + "uuid TEXT,"
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "name TEXT,"
             + "version TEXT");
 
         SCHEMAS.put(Table.LOCATIONS, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
-            + "location_uuid TEXT,"
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "parent_uuid TEXT");
 
         SCHEMAS.put(Table.LOCATION_NAMES, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
             + "location_uuid TEXT,"
             + "locale TEXT,"
             + "name TEXT,"
             + "UNIQUE (location_uuid, locale)");
 
         SCHEMAS.put(Table.OBSERVATIONS, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
             + "patient_uuid TEXT,"
             + "encounter_uuid TEXT,"
             + "encounter_millis INTEGER,"
@@ -126,19 +121,18 @@ public class Database extends SQLiteOpenHelper {
             + "UNIQUE (patient_uuid, encounter_uuid, concept_uuid)");
 
         SCHEMAS.put(Table.ORDERS, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
-            + "uuid TEXT,"
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "patient_uuid TEXT,"
             + "instructions TEXT,"
             + "start_millis INTEGER,"
             + "stop_millis INTEGER");
 
         SCHEMAS.put(Table.CHART_ITEMS, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
+            + "rowid INTEGER PRIMARY KEY NOT NULL,"
             + "chart_uuid TEXT,"
             + "weight INTEGER,"
             + "section_type TEXT,"
-            + "parent_id INTEGER,"
+            + "parent_rowid INTEGER,"
             + "label TEXT,"
             + "type TEXT,"
             + "required INTEGER,"
@@ -150,14 +144,12 @@ public class Database extends SQLiteOpenHelper {
             + "script TEXT");
 
         SCHEMAS.put(Table.USERS, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
-            + "uuid TEXT,"
+            + "uuid TEXT PRIMARY KEY NOT NULL,"
             + "full_name TEXT");
 
         // TODO/cleanup: Store miscellaneous values in the "misc" table as rows with a key column
         // and a value column, not all values in one row with an ever-growing number of columns.
         SCHEMAS.put(Table.MISC, ""
-            + "_id INTEGER PRIMARY KEY NOT NULL,"
             + "full_sync_start_millis INTEGER,"
             + "full_sync_end_millis INTEGER,"
             + "obs_sync_end_millis INTEGER");

@@ -90,12 +90,12 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         Patient patient = Patient.fromJson(json);
         Uri uri = null;
         try (Cursor c = mContentResolver.query(Patients.CONTENT_URI, null,
-            "_id = ?", new String[] {mPatientId}, null)) {
+            Patients.ID + " = ?", new String[] {mPatientId}, null)) {
             if (c.moveToNext()) {
                 LOG.i("Updating existing local patient.");
                 uri = Patients.CONTENT_URI.buildUpon().appendPath(mPatientId).build();
                 mContentResolver.update(uri, patient.toContentValues(),
-                    "_id = ?", new String[] {mPatientId});
+                    Patients.ID + " = ?", new String[] {mPatientId});
             } else {
                 LOG.i("Adding new local copy of patient.");
                 uri = mContentResolver.insert(

@@ -379,7 +379,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             // This is safe because we have implemented insert on the content provider
             // with replace.
             ContentValues conceptInsert = new ContentValues();
-            conceptInsert.put(Concepts._ID, concept.uuid);
+            conceptInsert.put(Concepts.UUID, concept.uuid);
             conceptInsert.put(Concepts.XFORM_ID, concept.xform_id);
             conceptInsert.put(Concepts.CONCEPT_TYPE, concept.type.name());
             conceptInserts.add(conceptInsert);

@@ -40,17 +40,17 @@ public class LocalizedLocationsDelegate implements ProviderDelegate<Database> {
      */
     private static final String QUERY = ""
         + " SELECT"
-        + "     locations.location_uuid AS location_uuid,"
+        + "     locations.uuid AS uuid,"
         + "     locations.parent_uuid AS parent_uuid,"
         + "     location_names.name AS name,"
         + "     COUNT(patients.location_uuid) AS patient_count"
         + " FROM locations"
         + "     INNER JOIN location_names"
-        + "     ON locations.location_uuid = location_names.location_uuid"
+        + "     ON locations.uuid = location_names.location_uuid"
         + "     LEFT JOIN patients"
-        + "     ON locations.location_uuid = patients.location_uuid"
+        + "     ON locations.uuid = patients.location_uuid"
         + " WHERE location_names.locale = ?"
-        + " GROUP BY locations.location_uuid";
+        + " GROUP BY locations.uuid";
 
     @Override public String getType() {
         return Contracts.LocalizedLocations.GROUP_CONTENT_TYPE;

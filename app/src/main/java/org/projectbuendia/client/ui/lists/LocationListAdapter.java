@@ -80,7 +80,7 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         ResZone.Resolved zone = Zones.getResZone(
             location.parentUuid).resolve(mContext.getResources());
 
-        int count = mLocationTree.getTotalPatientCount(location);
+        long count = mLocationTree.getTotalPatientCount(location);
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle("" + count);
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());

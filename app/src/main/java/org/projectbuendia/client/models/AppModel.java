@@ -113,7 +113,12 @@ public class AppModel {
     public void fetchPatients(CrudEventBus bus, SimpleSelectionFilter filter, String constraint) {
         bus.registerCleanupSubscriber(new CrudEventBusCleanupSubscriber(bus));
         new FetchTypedCursorAsyncTask<>(
-            Contracts.Patients.CONTENT_URI, null, Patient.class, mContentResolver,
+            Contracts.Patients.CONTENT_URI,
+            // The projection must contain an "_id" column for the ListAdapter as well as all
+            // the columns used in PatientConverter.fromCursor().
+            null, //new String[] {"rowid as _id", Patients.UUID, Patients.ID, Patients.GIVEN_NAME,
+                //Patients.FAMILY_NAME, Patients.BIRTHDATE, Patients.GENDER, Patients.LOCATION_UUID},
+            Patient.class, mContentResolver,
             filter, constraint, mConverterPack.patient, bus).execute();
     }
 
@@ -242,21 +247,15 @@ public class AppModel {
         @Override protected LocationTree doInBackground(Void... voids) {
             Cursor cursor = null;
             try {
-                // TODO: Ensure this cursor is closed.
+                // TODO: Ensure this cursor is closed.  A straightforward try/finally doesn't do the
+                // job here because the cursor has to stay open for the TypedCursor to work.
                 cursor = mContentResolver.query(
-                    Contracts.getLocalizedLocationsUri(mLocale),
-                    null,
-                    null,
-                    null,
-                    null);
-
-                return LocationTree
-                    .forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
+                    Contracts.getLocalizedLocationsUri(mLocale), null, null, null, null);
+                return LocationTree.forTypedCursor(new TypedConvertedCursor<>(mConverter, cursor));
             } catch (Exception e) {
                 if (cursor != null) {
                     cursor.close();
                 }
-
                 throw e;
             }
         }

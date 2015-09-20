@@ -26,7 +26,7 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
     private String mLocationUuid;
     private int mPatientCount;
 
-    public static void start(Context caller, String locationUuid, String locationName, int patientCount) {
+    public static void start(Context caller, String locationUuid, String locationName, long patientCount) {
         Intent intent = new Intent(caller, SingleLocationActivity.class);
         intent.putExtra("uuid", locationUuid);
         intent.putExtra("name", locationName);

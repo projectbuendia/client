@@ -44,7 +44,7 @@ public class PatientDelta {
         ContentValues cv = new ContentValues();
 
         if (id.isPresent()) {
-            cv.put(Contracts.Patients._ID, id.get());
+            cv.put(Contracts.Patients.ID, id.get());
         }
         if (givenName.isPresent()) {
             cv.put(Contracts.Patients.GIVEN_NAME, givenName.get());

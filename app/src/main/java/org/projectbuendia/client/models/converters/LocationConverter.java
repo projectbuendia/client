@@ -15,15 +15,16 @@ import android.database.Cursor;
 
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.utils.Utils;
 
 /** An {@link Converter} that converts {@link Location}s. */
 public class LocationConverter implements Converter<Location> {
 
     @Override public Location fromCursor(Cursor cursor) {
         return new Location(
-            cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.LOCATION_UUID)),
-            cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.PARENT_UUID)),
-            cursor.getString(cursor.getColumnIndex(Contracts.LocalizedLocations.NAME)),
-            cursor.getInt(cursor.getColumnIndex(Contracts.LocalizedLocations.PATIENT_COUNT)));
+            Utils.getString(cursor, Contracts.LocalizedLocations.UUID),
+            Utils.getString(cursor, Contracts.LocalizedLocations.PARENT_UUID),
+            Utils.getString(cursor, Contracts.LocalizedLocations.NAME),
+            Utils.getLong(cursor, Contracts.LocalizedLocations.PATIENT_COUNT));
     }
 }

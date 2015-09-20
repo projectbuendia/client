@@ -17,6 +17,9 @@ import android.database.Cursor;
  * An interface for a converter that converts a model data type and a corresponding Android database
  * abstraction.
  */
+// TODO: This doesn't really convert anything; it actually constructs a model object using
+// content values from a cursor.  Rename this to a less confusing name like CursorLoader and
+// make it an inner class of each corresponding model type.
 public interface Converter<T> {
 
     /** Converts the current position in a {@link Cursor} to a model data type. */

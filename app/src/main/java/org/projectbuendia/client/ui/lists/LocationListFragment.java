@@ -71,7 +71,7 @@ public final class LocationListFragment extends ProgressFragment {
         super.onDestroyView();
     }
 
-    public void setPatientCount(SubtitledButtonView button, int count) {
+    public void setPatientCount(SubtitledButtonView button, long count) {
         button.setSubtitle("" + count);
         button.setTextColor(0xff000000);
         button.setSubtitleColor(count == 0 ? 0x40000000 : 0xff000000);
@@ -97,15 +97,15 @@ public final class LocationListFragment extends ProgressFragment {
     }
 
     private final class Ui implements LocationListController.LocationFragmentUi {
-        @Override public void setDischargedPatientCount(int patientCount) {
+        @Override public void setDischargedPatientCount(long patientCount) {
             setPatientCount(mDischargedButton, patientCount);
         }
 
-        @Override public void setTriagePatientCount(int patientCount) {
+        @Override public void setTriagePatientCount(long patientCount) {
             setPatientCount(mTriageButton, patientCount);
         }
 
-        @Override public void setPresentPatientCount(int patientCount) {
+        @Override public void setPresentPatientCount(long patientCount) {
             setPatientCount(mAllPatientsButton, patientCount);
         }
 

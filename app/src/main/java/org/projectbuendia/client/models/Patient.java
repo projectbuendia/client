@@ -59,8 +59,8 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
      */
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(Contracts.Patients._ID, id);
         cv.put(Contracts.Patients.UUID, uuid);
+        cv.put(Contracts.Patients.ID, id);
         cv.put(Contracts.Patients.GIVEN_NAME, givenName);
         cv.put(Contracts.Patients.FAMILY_NAME, familyName);
         cv.put(Contracts.Patients.GENDER,

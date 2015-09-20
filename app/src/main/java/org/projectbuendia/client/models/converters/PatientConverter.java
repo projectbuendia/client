@@ -25,8 +25,8 @@ public class PatientConverter implements Converter<Patient> {
 
     @Override public Patient fromCursor(Cursor cursor) {
         return Patient.builder()
-            .setId(Utils.getString(cursor, Patients._ID))
             .setUuid(Utils.getString(cursor, Patients.UUID))
+            .setId(Utils.getString(cursor, Patients.ID))
             .setGivenName(Utils.getString(cursor, Patients.GIVEN_NAME))
             .setFamilyName(Utils.getString(cursor, Patients.FAMILY_NAME))
             .setBirthdate(Utils.getLocalDate(cursor, Patients.BIRTHDATE))

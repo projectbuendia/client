@@ -34,22 +34,18 @@ public class InsertableItemProviderDelegate extends ItemProviderDelegate {
     @Override public Uri insert(
         Database dbHelper, ContentResolver contentResolver, Uri uri,
         ContentValues values) {
-        values.put(mIdColumn, uri.getLastPathSegment());
-        // Perform an upsert operation, not replacing any values of fields not being explicitly
-        // updated.
-        dbHelper.getWritableDatabase().updateWithOnConflict(
-            mTable.name,
-            values,
-            mIdColumn + "=?",
-            new String[] {uri.getLastPathSegment()},
-            SQLiteDatabase.CONFLICT_IGNORE
-        );
-        dbHelper.getWritableDatabase().insertWithOnConflict(
-            mTable.name,
-            null,
-            values,
-            SQLiteDatabase.CONFLICT_IGNORE
-        );
+        // Perform an upsert operation, updating only the columns specified in values.
+        int done = 0;
+        if (mIdColumn != null) {
+            values.put(mIdColumn, uri.getLastPathSegment());
+            done = dbHelper.getWritableDatabase().updateWithOnConflict(
+                mTable.name, values, mIdColumn + "= ?", new String[] {uri.getLastPathSegment()},
+                SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        if (done == 0) {
+            dbHelper.getWritableDatabase().insertWithOnConflict(
+                mTable.name, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        }
         contentResolver.notifyChange(uri, null, false);
         return getPrefixUriBuilder(uri).appendPath(uri.getLastPathSegment()).build();
     }

@@ -18,16 +18,12 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 import com.android.volley.toolbox.RequestFuture;
 import com.google.common.base.Joiner;
 
 import org.joda.time.DateTime;
 import org.projectbuendia.client.App;
-import org.projectbuendia.client.models.AppModel;
-import org.projectbuendia.client.models.Form;
-import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.json.JsonChart;
 import org.projectbuendia.client.json.JsonChartItem;
 import org.projectbuendia.client.json.JsonChartSection;
@@ -38,6 +34,9 @@ import org.projectbuendia.client.json.JsonOrder;
 import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.json.JsonPatientRecord;
 import org.projectbuendia.client.json.JsonUser;
+import org.projectbuendia.client.models.AppModel;
+import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.providers.Contracts.ChartItems;
 import org.projectbuendia.client.providers.Contracts.LocationNames;
@@ -76,7 +75,7 @@ public class DbSyncHelper {
         for (JsonChartSection section : response.sections) {
             int parentId = nextId;
             ops.add(ContentProviderOperation.newInsert(ChartItems.CONTENT_URI)
-                .withValue(ChartItems._ID, nextId++)
+                .withValue("rowid", nextId++)
                 .withValue(ChartItems.CHART_UUID, response.uuid)
                 .withValue(ChartItems.WEIGHT, nextWeight++)
                 .withValue(ChartItems.SECTION_TYPE, section.type == null ? null : section.type.name())
@@ -90,10 +89,10 @@ public class DbSyncHelper {
                     conceptUuids[i] = Utils.expandUuid(item.concepts[i]);
                 }
                 ops.add(ContentProviderOperation.newInsert(ChartItems.CONTENT_URI)
-                    .withValue(BaseColumns._ID, nextId++)
+                    .withValue("rowid", nextId++)
                     .withValue(ChartItems.CHART_UUID, response.uuid)
                     .withValue(ChartItems.WEIGHT, nextWeight++)
-                    .withValue(ChartItems.PARENT_ID, parentId)
+                    .withValue(ChartItems.PARENT_ROWID, parentId)
                     .withValue(ChartItems.LABEL, item.label)
                     .withValue(ChartItems.TYPE, item.type)
                     .withValue(ChartItems.REQUIRED, item.required ? 1 : 0)
@@ -126,9 +125,9 @@ public class DbSyncHelper {
         LOG.i("Examining forms: " + c.getCount() + " local, " + cvs.size() + " from server");
         try {
             while (c.moveToNext()) {
-                String localId = Utils.getString(c, Contracts.Forms._ID);
-                Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(localId).build();
-                LOG.i("  - will delete form " + localId);
+                String uuid = Utils.getString(c, Contracts.Forms.UUID);
+                Uri uri = Contracts.Forms.CONTENT_URI.buildUpon().appendPath(uuid).build();
+                LOG.i("  - will delete form " + uuid);
                 ops.add(ContentProviderOperation.newDelete(uri).build());
             }
         } finally {
@@ -136,7 +135,7 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert form " + values.getAsString(Contracts.Forms._ID));
+            LOG.i("  - will insert form " + values.getAsString(Contracts.Forms.UUID));
             ops.add(ContentProviderOperation.newInsert(Contracts.Forms.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -164,21 +163,21 @@ public class DbSyncHelper {
         List<ContentProviderOperation> ops = new ArrayList<>();
         try {
             while (c.moveToNext()) {
-                String localId = Utils.getString(c, Patients._ID);
-                Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(localId).build();
+                String uuid = Utils.getString(c, Patients.UUID);
+                Uri uri = Patients.CONTENT_URI.buildUpon().appendPath(uuid).build();
                 syncResult.stats.numEntries++;
 
-                ContentValues cv = cvs.remove(localId);
+                ContentValues cv = cvs.remove(uuid);
                 if (cv != null) {
                     ContentValues localCv = new ContentValues();
                     DatabaseUtils.cursorRowToContentValues(c, localCv);
                     if (!cv.equals(localCv)) {  // record has changed on server
-                        LOG.i("  - will update patient " + localId);
+                        LOG.i("  - will update patient " + uuid);
                         ops.add(ContentProviderOperation.newUpdate(uri).withValues(cv).build());
                         syncResult.stats.numUpdates++;
                     }
                 } else {  // record doesn't exist on server
-                    LOG.i("  - will delete patient " + localId);
+                    LOG.i("  - will delete patient " + uuid);
                     ops.add(ContentProviderOperation.newDelete(uri).build());
                     syncResult.stats.numDeletes++;
                 }
@@ -188,7 +187,7 @@ public class DbSyncHelper {
         }
 
         for (ContentValues values : cvs.values()) {  // server has a new record
-            LOG.i("  - will insert patient " + values.getAsString(Patients._ID));
+            LOG.i("  - will insert patient " + values.getAsString(Patients.UUID));
             ops.add(ContentProviderOperation.newInsert(Patients.CONTENT_URI).withValues(values).build());
             syncResult.stats.numInserts++;
         }
@@ -331,11 +330,10 @@ public class DbSyncHelper {
         final ContentResolver contentResolver = App.getInstance().getContentResolver();
 
         final String[] projection = new String[] {
-            Locations.LOCATION_UUID,
+            Locations.UUID,
             Locations.PARENT_UUID
         };
         final String[] namesProjection = new String[] {
-            LocationNames._ID,
             LocationNames.LOCATION_UUID,
             LocationNames.LOCALE,
             LocationNames.NAME
@@ -365,25 +363,25 @@ public class DbSyncHelper {
         assert namesCur != null;
         LOG.i("Examining locations: %d local, %d from server", c.getCount(), locations.size());
 
-        String id;
-        String parentId;
+        String uuid;
+        String parentUuid;
 
         // Build map of location names from the database.
         Map<String, Map<String, String>> dbLocationNames = new HashMap<>();
         while (namesCur.moveToNext()) {
-            String locationId = namesCur.getString(
+            String locationUuid = namesCur.getString(
                 namesCur.getColumnIndex(LocationNames.LOCATION_UUID));
             String locale = namesCur.getString(
                 namesCur.getColumnIndex(LocationNames.LOCALE));
             String name = namesCur.getString(
                 namesCur.getColumnIndex(LocationNames.NAME));
-            if (locationId == null || locale == null || name == null) continue;
+            if (locationUuid == null || locale == null || name == null) continue;
 
-            if (!dbLocationNames.containsKey(locationId)) {
-                dbLocationNames.put(locationId, new HashMap<String, String>());
+            if (!dbLocationNames.containsKey(locationUuid)) {
+                dbLocationNames.put(locationUuid, new HashMap<String, String>());
             }
 
-            dbLocationNames.get(locationId).put(locale, name);
+            dbLocationNames.get(locationUuid).put(locale, name);
         }
         namesCur.close();
 
@@ -391,26 +389,26 @@ public class DbSyncHelper {
         while (c.moveToNext()) {
             syncResult.stats.numEntries++;
 
-            id = c.getString(c.getColumnIndex(Locations.LOCATION_UUID));
-            parentId = c.getString(c.getColumnIndex(Locations.PARENT_UUID));
+            uuid = c.getString(c.getColumnIndex(Locations.UUID));
+            parentUuid = c.getString(c.getColumnIndex(Locations.PARENT_UUID));
 
-            JsonLocation location = locationsByUuid.get(id);
+            JsonLocation location = locationsByUuid.get(uuid);
             if (location != null) {
                 // Entry exists. Remove from entry map to prevent insert later.
-                locationsByUuid.remove(id);
+                locationsByUuid.remove(uuid);
 
                 // Grab the names stored in the database for this location.
-                Map<String, String> locationNames = dbLocationNames.get(id);
+                Map<String, String> locationNames = dbLocationNames.get(uuid);
 
                 // Check to see if the entry needs to be updated
-                Uri existingUri = uri.buildUpon().appendPath(String.valueOf(id)).build();
+                Uri existingUri = uri.buildUpon().appendPath(String.valueOf(uuid)).build();
 
-                if (location.parent_uuid != null && !location.parent_uuid.equals(parentId)) {
+                if (location.parent_uuid != null && !location.parent_uuid.equals(parentUuid)) {
                     // Update existing record
-                    LOG.i("  - will update location " + id);
+                    LOG.i("  - will update location " + uuid);
                     batch.add(ContentProviderOperation.newUpdate(existingUri)
-                        .withValue(Locations.LOCATION_UUID, id)
-                        .withValue(Locations.PARENT_UUID, parentId)
+                        .withValue(Locations.UUID, uuid)
+                        .withValue(Locations.PARENT_UUID, parentUuid)
                         .build());
                     syncResult.stats.numUpdates++;
                 }
@@ -418,7 +416,7 @@ public class DbSyncHelper {
                 if (location.names != null
                     && (locationNames == null || !location.names.equals(locationNames))) {
                     Uri existingNamesUri = namesUri.buildUpon().appendPath(
-                        String.valueOf(id)).build();
+                        String.valueOf(uuid)).build();
                     // Update location names by deleting any existing location names and
                     // repopulating.
                     batch.add(ContentProviderOperation.newDelete(existingNamesUri).build());
@@ -426,7 +424,7 @@ public class DbSyncHelper {
                     for (String locale : location.names.keySet()) {
 
                         batch.add(ContentProviderOperation.newInsert(existingNamesUri)
-                            .withValue(LocationNames.LOCATION_UUID, id)
+                            .withValue(LocationNames.LOCATION_UUID, uuid)
                             .withValue(LocationNames.LOCALE, locale)
                             .withValue(LocationNames.NAME, location.names.get(locale))
                             .build());
@@ -435,11 +433,11 @@ public class DbSyncHelper {
                 }
             } else {
                 // Entry doesn't exist. Remove it from the database.
-                LOG.i("  - will delete location " + id);
-                Uri deleteUri = uri.buildUpon().appendPath(id).build();
+                LOG.i("  - will delete location " + uuid);
+                Uri deleteUri = uri.buildUpon().appendPath(uuid).build();
                 batch.add(ContentProviderOperation.newDelete(deleteUri).build());
                 syncResult.stats.numDeletes++;
-                Uri namesDeleteUri = namesUri.buildUpon().appendPath(id).build();
+                Uri namesDeleteUri = namesUri.buildUpon().appendPath(uuid).build();
                 batch.add(ContentProviderOperation.newDelete(namesDeleteUri).build());
                 syncResult.stats.numDeletes++;
             }
@@ -449,7 +447,7 @@ public class DbSyncHelper {
         for (JsonLocation location : locationsByUuid.values()) {
             LOG.i("  - will insert location " + location.uuid);
             batch.add(ContentProviderOperation.newInsert(Locations.CONTENT_URI)
-                .withValue(Locations.LOCATION_UUID, location.uuid)
+                .withValue(Locations.UUID, location.uuid)
                 .withValue(Locations.PARENT_UUID, location.parent_uuid)
                 .build());
             syncResult.stats.numInserts++;
