@@ -225,19 +225,6 @@ public class Contracts {
         String PATIENT_COUNT = "patient_count";
     }
 
-    public interface HistoricalLocalizedObs extends LocalizedObsColumns {
-        Uri CONTENT_URI = buildContentUri("historical-localized-obs");
-        String GROUP_CONTENT_TYPE = buildGroupType("localized-obs");
-        String ITEM_CONTENT_TYPE = buildItemType("localized-obs");
-
-    }
-
-    public interface LatestLocalizedObs extends LocalizedObsColumns {
-        Uri CONTENT_URI = buildContentUri("latest-localized-obs");
-        String GROUP_CONTENT_TYPE = buildGroupType("localized-obs");
-        String ITEM_CONTENT_TYPE = buildItemType("localized-obs");
-    }
-
     public interface PatientCounts extends BaseColumns {
         Uri CONTENT_URI = buildContentUri("patient-counts");
         String GROUP_CONTENT_TYPE = buildGroupType("patient-count");
@@ -263,24 +250,6 @@ public class Contracts {
     /** Returns the content URI for the localized locations for a given locale. */
     public static Uri getLocalizedLocationsUri(String locale) {
         return LocalizedLocations.CONTENT_URI.buildUpon()
-            .appendPath(locale)
-            .build();
-    }
-
-    /** Returns the content URI for the observation history for a given patient and chart. */
-    public static Uri getHistoricalLocalizedObsUri(
-        String chartUuid, String patientUuid, String locale) {
-        return HistoricalLocalizedObs.CONTENT_URI.buildUpon()
-            .appendPath(chartUuid)
-            .appendPath(locale)
-            .appendPath(patientUuid)
-            .build();
-    }
-
-    /** Returns the content URI for the latest observations of each concept for a given patient. */
-    public static Uri getLatestLocalizedObsUri(String patientUuid, String locale) {
-        return LatestLocalizedObs.CONTENT_URI.buildUpon()
-            .appendPath(patientUuid)
             .appendPath(locale)
             .build();
     }

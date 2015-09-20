@@ -79,8 +79,8 @@ public final class LocalizedObs implements Comparable<LocalizedObs> {
         this.id = id;
         this.encounterTime = new DateTime(encounterTimeMillis);
         this.conceptUuid = checkNotNull(conceptUuid);
-        this.conceptName = checkNotNull(conceptName);
-        this.conceptType = ConceptType.valueOf(conceptType);
+        this.conceptName = conceptName == null ? "" : conceptName;
+        this.conceptType = conceptType == null ? null : ConceptType.valueOf(conceptType);
         this.value = value;
         this.localizedValue = localizedValue;
     }
@@ -106,6 +106,11 @@ public final class LocalizedObs implements Comparable<LocalizedObs> {
         } else {
             return false;
         }
+    }
+
+    @Override public int hashCode() {
+        return (int) id + (int) encounterTime.getMillis() + conceptUuid.hashCode() + conceptName.hashCode() + conceptType.hashCode()
+            + value.hashCode() + localizedValue.hashCode();
     }
 
     /**

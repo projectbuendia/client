@@ -17,18 +17,17 @@ import android.provider.BaseColumns;
 import android.util.Pair;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
-import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ChartSectionType;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
-import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
+import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
 import java.util.ArrayList;
@@ -57,10 +56,50 @@ public class ChartDataHelper {
 
     private final ContentResolver mContentResolver;
 
+    private static final Logger LOG = Logger.create();
+
+    /** When non-null, sConceptNames and sConceptTypes contain valid data for this locale. */
+    private static Object sLoadingLock = new Object();
+    private static String sLoadedLocale;
+
+    private static Map<String, String> sConceptNames;
+    private static Map<String, String> sConceptTypes;
+
     public ChartDataHelper(ContentResolver contentResolver) {
         mContentResolver = checkNotNull(contentResolver);
     }
 
+    /** Marks in-memory concept data out of date.  Call this when concepts change in the app db. */
+    public static void invalidateLoadedConceptData() {
+        sLoadedLocale = null;
+    }
+
+    /** Loads concept names and types from the app db into HashMaps in memory. */
+    public void loadConceptData(String locale) {
+        synchronized (sLoadingLock) {
+            if (!locale.equals(sLoadedLocale)) {
+                sConceptNames = new HashMap<>();
+                try (Cursor c = mContentResolver.query(
+                    ConceptNames.CONTENT_URI, new String[] {"concept_uuid", "name"},
+                    "locale = ?", new String[] {locale}, null)) {
+                    while (c.moveToNext()) {
+                        sConceptNames.put(c.getString(0), c.getString(1));
+                    }
+                }
+                sConceptTypes = new HashMap<>();
+                try (Cursor c = mContentResolver.query(
+                    Contracts.Concepts.CONTENT_URI, new String[] {"_id", "concept_type"},
+                    null, null, null)) {
+                    while (c.moveToNext()) {
+                        sConceptTypes.put(c.getString(0), c.getString(1));
+                    }
+                }
+                sLoadedLocale = locale;
+            }
+        }
+    }
+
+    /** Gets all the orders for a given patient. */
     public List<Order> getOrders(String patientUuid) {
         Cursor c = mContentResolver.query(
             Contracts.Orders.CONTENT_URI,
@@ -84,94 +123,44 @@ public class ChartDataHelper {
 
     /** Gets all observations for a given patient, localized for a given locale. */
     public List<LocalizedObs> getObservations(String patientUuid, String locale) {
-        Cursor cursor = null;
-        try {
-            List<LocalizedObs> results = new ArrayList<>();
-
-            // Get all the regular observations with localized names.
-            cursor = mContentResolver.query(
-                Contracts.getHistoricalLocalizedObsUri(CHART_GRID_UUID, patientUuid, locale),
-                null, null, null, null);
-            while (cursor.moveToNext()) {
+        loadConceptData(locale);
+        List<LocalizedObs> results = new ArrayList<>();
+        try (Cursor c = mContentResolver.query(
+            Contracts.Observations.CONTENT_URI, null,
+            "patient_uuid = ?", new String[] {patientUuid}, null)) {
+            while (c.moveToNext()) {
+                long id = c.getLong(c.getColumnIndex(BaseColumns._ID));
+                long millis = c.getLong(c.getColumnIndex("encounter_time"))*1000L;
+                String conceptUuid = c.getString(c.getColumnIndex("concept_uuid"));
+                String conceptName = sConceptNames.get(conceptUuid);
+                String conceptType = sConceptTypes.get(conceptUuid);
+                String value = c.getString(c.getColumnIndex("value"));
+                String localizedValue = value;
+                if ("CODED".equals(conceptType)) {
+                    localizedValue = sConceptNames.get(value);
+                }
                 results.add(new LocalizedObs(
-                    cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
-                    cursor.getLong(cursor.getColumnIndex("encounter_time"))*1000L,
-                    cursor.getString(cursor.getColumnIndex("concept_uuid")),
-                    cursor.getString(cursor.getColumnIndex("concept_name")),
-                    cursor.getString(cursor.getColumnIndex("concept_type")),
-                    cursor.getString(cursor.getColumnIndex("value")),
-                    cursor.getString(cursor.getColumnIndex("localized_value"))
-                ));
-            }
-            cursor.close();
-
-            // Also get observations representing executed orders.
-            cursor = mContentResolver.query(
-                Contracts.Observations.CONTENT_URI, null,
-                "concept_uuid = ? and patient_uuid = ?",
-                new String[] {AppModel.ORDER_EXECUTED_CONCEPT_UUID, patientUuid}, null);
-            while (cursor.moveToNext()) {
-                results.add(new LocalizedObs(
-                    cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
-                    cursor.getLong(cursor.getColumnIndex("encounter_time"))*1000L,
-                    cursor.getString(cursor.getColumnIndex("concept_uuid")),
-                    "",
-                    ConceptType.NONE.name(),
-                    cursor.getString(cursor.getColumnIndex("value")),
-                    ""
-                ));
-            }
-
-            return results;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+                    id, millis, conceptUuid, conceptName, conceptType, value, localizedValue));
             }
         }
+        return results;
     }
 
-    /**
-     * Gets the latest observations for each concept for a given patient from the local cache,
-     * localized to English. Ordering will be by concept uuid, and there are not groups or other
-     * chart based configurations.
-     */
+    /** Gets the latest observation of each concept for a given patient, localized to English. */
     public Map<String, LocalizedObs> getLatestObservations(String patientUuid) {
         return getLatestObservations(patientUuid, ENGLISH_LOCALE);
     }
 
-    /**
-     * Gets the most recent observations for each concept for a given patient from the local cache,
-     * Ordering will be by concept uuid, and there are not groups or other chart-based
-     * configurations.
-     */
+    /** Gets the latest observation of each concept for a given patient from the app db. */
     public Map<String, LocalizedObs> getLatestObservations(String patientUuid, String locale) {
-        Cursor cursor = null;
-        try {
-            cursor = mContentResolver.query(
-                Contracts.getLatestLocalizedObsUri(patientUuid, locale),
-                null, null, null, null);
-
-            Map<String, LocalizedObs> result = Maps.newLinkedHashMap();
-            while (cursor.moveToNext()) {
-                String conceptUuid = cursor.getString(cursor.getColumnIndex("concept_uuid"));
-
-                LocalizedObs obs = new LocalizedObs(
-                    cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)),
-                    cursor.getLong(cursor.getColumnIndex("encounter_time"))*1000L,
-                    conceptUuid,
-                    cursor.getString(cursor.getColumnIndex("concept_name")),
-                    cursor.getString(cursor.getColumnIndex("concept_type")),
-                    cursor.getString(cursor.getColumnIndex("value")),
-                    cursor.getString(cursor.getColumnIndex("localized_value"))
-                );
-                result.put(conceptUuid, obs);
-            }
-            return result;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+        Map<String, LocalizedObs> result = new HashMap<>();
+        for (LocalizedObs obs : getObservations(patientUuid, locale)) {
+            LocalizedObs existing = result.get(obs.conceptUuid);
+            if (existing == null || obs.encounterTime.isAfter(existing.encounterTime)) {
+                result.put(obs.conceptUuid, obs);
             }
         }
+        return result;
     }
 
     /**
