@@ -14,7 +14,7 @@ package org.projectbuendia.client.models.converters;
 import android.database.Cursor;
 
 import org.projectbuendia.client.models.Order;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 import javax.annotation.concurrent.Immutable;
 

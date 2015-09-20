@@ -9,7 +9,7 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.sync.providers;
+package org.projectbuendia.client.providers;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -18,7 +18,7 @@ import android.net.Uri;
 
 import org.projectbuendia.client.sync.Database;
 import org.projectbuendia.client.sync.QueryBuilder;
-import org.projectbuendia.client.sync.providers.Contracts.Table;
+import org.projectbuendia.client.providers.Contracts.Table;
 
 /** A {@link ProviderDelegate} that provides query access to the count of patients in each location. */
 public class PatientCountsDelegate implements ProviderDelegate<Database> {

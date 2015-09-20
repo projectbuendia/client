@@ -18,7 +18,7 @@ import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.json.JsonOrder;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;

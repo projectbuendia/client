@@ -9,10 +9,10 @@
 // OR CONDITIONS OF ANY KIND, either express or implied.  See the License for
 // specific language governing permissions and limitations under the License.
 
-package org.projectbuendia.client.sync.providers;
+package org.projectbuendia.client.providers;
 
 import org.projectbuendia.client.sync.Database;
-import org.projectbuendia.client.sync.providers.Contracts.Table;
+import org.projectbuendia.client.providers.Contracts.Table;
 
 /** A {@link DelegatingProvider} for MSF record info such as patients and locations. */
 public class BuendiaProvider extends DelegatingProvider<Database> {

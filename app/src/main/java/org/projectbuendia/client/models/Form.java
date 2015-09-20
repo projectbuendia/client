@@ -16,7 +16,7 @@ import android.content.ContentValues;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.json.JsonForm;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 import javax.annotation.concurrent.Immutable;
 

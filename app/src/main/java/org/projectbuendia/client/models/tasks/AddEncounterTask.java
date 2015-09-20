@@ -30,7 +30,7 @@ import org.projectbuendia.client.models.converters.ConverterPack;
 import org.projectbuendia.client.models.converters.EncounterConverter;
 import org.projectbuendia.client.net.Server;
 import org.projectbuendia.client.json.JsonEncounter;
-import org.projectbuendia.client.sync.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;

@@ -18,7 +18,7 @@ import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
 import org.projectbuendia.client.BuildConfig;
-import org.projectbuendia.client.sync.providers.Contracts.Table;
+import org.projectbuendia.client.providers.Contracts.Table;
 
 import java.io.File;
 import java.util.HashMap;

@@ -14,7 +14,7 @@ package org.projectbuendia.client.models.converters;
 import android.database.Cursor;
 
 import org.projectbuendia.client.models.Location;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 /** An {@link Converter} that converts {@link Location}s. */
 public class LocationConverter implements Converter<Location> {

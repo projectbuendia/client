@@ -13,7 +13,7 @@ package org.projectbuendia.client.filter.db.patient;
 
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 /** Matches only the patient with the given patient UUID. */
 public final class UuidFilter extends SimpleSelectionFilter<Patient> {

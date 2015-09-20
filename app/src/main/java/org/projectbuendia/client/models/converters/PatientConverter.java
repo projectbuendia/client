@@ -14,7 +14,7 @@ package org.projectbuendia.client.models.converters;
 import android.database.Cursor;
 
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.sync.providers.Contracts.Patients;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.annotation.concurrent.Immutable;

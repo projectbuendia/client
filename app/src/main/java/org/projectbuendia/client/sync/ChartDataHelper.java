@@ -25,11 +25,11 @@ import org.projectbuendia.client.models.ChartSectionType;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.json.ConceptType;
-import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
-import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
-import org.projectbuendia.client.sync.providers.Contracts.Observations;
-import org.projectbuendia.client.sync.providers.Contracts.Orders;
+import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.ChartItems;
+import org.projectbuendia.client.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 

@@ -16,7 +16,7 @@ import android.database.Cursor;
 import org.joda.time.DateTime;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
-import org.projectbuendia.client.sync.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Observations;
 
 import java.util.ArrayList;
 import java.util.List;

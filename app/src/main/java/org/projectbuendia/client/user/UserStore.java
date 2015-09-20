@@ -28,9 +28,9 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.json.JsonNewUser;
 import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.sync.DbSyncHelper;
-import org.projectbuendia.client.sync.providers.BuendiaProvider;
-import org.projectbuendia.client.sync.providers.Contracts.Users;
-import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
+import org.projectbuendia.client.providers.BuendiaProvider;
+import org.projectbuendia.client.providers.Contracts.Users;
+import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.HashSet;

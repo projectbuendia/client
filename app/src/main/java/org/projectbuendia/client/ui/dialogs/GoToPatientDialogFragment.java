@@ -36,7 +36,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.SyncAccountService;
-import org.projectbuendia.client.sync.providers.Contracts.Patients;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
 

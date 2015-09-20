@@ -66,7 +66,7 @@
 
         <!-- Content Provider for medical records. -->
         <provider
-            android:name=".sync.providers.BuendiaProvider"
+            android:name=".providers.BuendiaProvider"
             android:authorities="@string/content_authority"
             android:exported="false" />
 

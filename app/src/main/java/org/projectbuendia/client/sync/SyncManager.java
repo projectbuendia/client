@@ -22,7 +22,7 @@ import org.projectbuendia.client.events.sync.SyncFailedEvent;
 import org.projectbuendia.client.events.sync.SyncProgressEvent;
 import org.projectbuendia.client.events.sync.SyncStartedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.annotation.Nullable;
