@@ -27,6 +27,8 @@ import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
 import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.sync.providers.Contracts.Observations;
+import org.projectbuendia.client.sync.providers.Contracts.Orders;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -102,7 +104,7 @@ public class ChartDataHelper {
     /** Gets all the orders for a given patient. */
     public List<Order> getOrders(String patientUuid) {
         Cursor c = mContentResolver.query(
-            Contracts.Orders.CONTENT_URI,
+            Orders.CONTENT_URI,
             null, "patient_uuid = ?", new String[] {patientUuid}, "start_time");
         List<Order> orders = new ArrayList<>();
         while (c.moveToNext()) {
@@ -121,26 +123,29 @@ public class ChartDataHelper {
         return getObservations(patientUuid, ENGLISH_LOCALE);
     }
 
+    private LocalizedObs obsFromCursor(Cursor c) {
+        long id = c.getLong(c.getColumnIndex(BaseColumns._ID));
+        long millis = c.getLong(c.getColumnIndex("encounter_time"))*1000L;
+        String conceptUuid = c.getString(c.getColumnIndex("concept_uuid"));
+        String conceptName = sConceptNames.get(conceptUuid);
+        String conceptType = sConceptTypes.get(conceptUuid);
+        String value = c.getString(c.getColumnIndex("value"));
+        String localizedValue = value;
+        if ("CODED".equals(conceptType)) {
+            localizedValue = sConceptNames.get(value);
+        }
+        return new LocalizedObs(id, millis, conceptUuid, conceptName, conceptType, value, localizedValue);
+    }
+
     /** Gets all observations for a given patient, localized for a given locale. */
     public List<LocalizedObs> getObservations(String patientUuid, String locale) {
         loadConceptData(locale);
         List<LocalizedObs> results = new ArrayList<>();
         try (Cursor c = mContentResolver.query(
-            Contracts.Observations.CONTENT_URI, null,
+            Observations.CONTENT_URI, null,
             "patient_uuid = ?", new String[] {patientUuid}, null)) {
             while (c.moveToNext()) {
-                long id = c.getLong(c.getColumnIndex(BaseColumns._ID));
-                long millis = c.getLong(c.getColumnIndex("encounter_time"))*1000L;
-                String conceptUuid = c.getString(c.getColumnIndex("concept_uuid"));
-                String conceptName = sConceptNames.get(conceptUuid);
-                String conceptType = sConceptTypes.get(conceptUuid);
-                String value = c.getString(c.getColumnIndex("value"));
-                String localizedValue = value;
-                if ("CODED".equals(conceptType)) {
-                    localizedValue = sConceptNames.get(value);
-                }
-                results.add(new LocalizedObs(
-                    id, millis, conceptUuid, conceptName, conceptType, value, localizedValue));
+                results.add(obsFromCursor(c));
             }
         }
         return results;
@@ -175,6 +180,23 @@ public class ChartDataHelper {
             observations.put(patientUuid, getLatestObservations(patientUuid, locale));
         }
         return observations;
+    }
+
+    /** Gets the latest observation of the specified concept for all patients. */
+    public Map<String, LocalizedObs> getLatestObservationsForConcept(
+        String conceptUuid, String locale) {
+        loadConceptData(locale);
+        try (Cursor c = mContentResolver.query(
+            Observations.CONTENT_URI, null,
+            "concept_uuid = ?", new String[] {conceptUuid}, "encounter_time desc")) {
+            Map<String, LocalizedObs> result = new HashMap<>();
+            while (c.moveToNext()) {
+                String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);
+                if (result.containsKey(patientUuid)) continue;
+                result.put(patientUuid, obsFromCursor(c));
+            }
+            return result;
+        }
     }
 
     /** Retrieves and assembles a Chart from the local datastore. */

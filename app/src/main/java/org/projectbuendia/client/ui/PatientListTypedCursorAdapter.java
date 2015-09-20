@@ -31,6 +31,7 @@ import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
 
@@ -55,9 +56,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
     private final LocationTree mLocationTree;
     private final ChartDataHelper mChartDataHelper;
+    private static final Logger LOG = Logger.create();
 
     private Location[] mLocations;
-    private Map<String, Map<String, LocalizedObs>> mObservations;
+    private Map<String, LocalizedObs> mPregnancyObs = new HashMap<>();
+    private Map<String, LocalizedObs> mConditionObs = new HashMap<>();
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
@@ -134,18 +137,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ViewGroup parent) {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
-        // Show pregnancy status and condition if present.
-        boolean pregnant = false;
-        String condition = null;
-        if (mObservations != null) {
-            Map<String, LocalizedObs> obsMap = mObservations.get(patient.uuid);
-            if (obsMap != null) {
-                LocalizedObs pregObs = obsMap.get(Concepts.PREGNANCY_UUID);
-                pregnant = pregObs == null ? false : Concepts.YES_UUID.equals(pregObs.value);
-                LocalizedObs condObs = obsMap.get(Concepts.GENERAL_CONDITION_UUID);
-                condition = condObs == null ? null : condObs.value;
-            }
-        }
+        // Show pregnancy status and condition, if the data for these has been loaded.
+        LocalizedObs obs = mPregnancyObs.get(patient.uuid);
+        boolean pregnant = obs != null && Concepts.YES_UUID.equals(obs.value);
+
+        obs = mConditionObs.get(patient.uuid);
+        String condition = obs == null ? null : obs.value;
 
         if (convertView == null) {
             convertView = newChildView();
@@ -215,18 +212,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      */
     public void setPatients(TypedCursor<Patient> cursor) {
         mPatientsByLocation.clear();
-        if (mObservations != null) {
-            mObservations.clear();
-        }
-
-        int count = cursor.getCount();
-        String[] patientUuids = new String[count];
 
         // Add all patients from cursor.
+        int count = cursor.getCount();
         for (int i = 0; i < count; i++) {
-            Patient patient = cursor.get(i);
-            addPatient(patient);
-            patientUuids[i] = patient.uuid;
+            addPatient(cursor.get(i));
         }
 
         // Produce a sorted list of all the locations that have patients.
@@ -239,7 +229,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             Collections.sort(patients);
         }
 
-        new FetchObservationsTask().execute(patientUuids);
+        new FetchObservationsTask().execute();
         notifyDataSetChanged();
     }
 
@@ -256,10 +246,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            // TODO/speed: Do a single query for just the observations that are shown the
-            // patient list (condition and pregnancy) across all patients, not a separate
-            // getLatestObservations query for every single patient in the list!
-            mObservations = mChartDataHelper.getLatestObservationsForPatients(params, "en");
+            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(Concepts.PREGNANCY_UUID, "en");
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(Concepts.GENERAL_CONDITION_UUID, "en");
             return null;
         }
 
