@@ -397,8 +397,7 @@ public class OdkActivityLauncher {
 
             DateTime encounterTime =
                 ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
-            long secondsSinceEpoch = encounterTime.getMillis()/1000L;
-            common.put(Contracts.Observations.ENCOUNTER_TIME, secondsSinceEpoch);
+            common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
             common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
             common.put(Contracts.Observations.TEMP_CACHE, 1);
         } catch (IllegalArgumentException e) {

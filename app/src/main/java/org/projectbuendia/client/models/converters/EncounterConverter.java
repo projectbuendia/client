@@ -40,8 +40,8 @@ public class EncounterConverter implements Converter<Encounter> {
     @Override public Encounter fromCursor(Cursor cursor) {
         final String encounterUuid = cursor.getString(
             cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
-        final long timestamp = cursor.getLong(
-            cursor.getColumnIndex(Observations.ENCOUNTER_TIME));
+        final long millis = cursor.getLong(
+            cursor.getColumnIndex(Observations.ENCOUNTER_MILLIS));
         List<Observation> observations = new ArrayList<>();
         cursor.move(-1);
         while (cursor.moveToNext()) {
@@ -51,7 +51,7 @@ public class EncounterConverter implements Converter<Encounter> {
                 value, Observation.estimatedTypeFor(value)
             ));
         }
-        return new Encounter(mPatientUuid, encounterUuid, new DateTime(timestamp),
+        return new Encounter(mPatientUuid, encounterUuid, new DateTime(millis),
             observations.toArray(new Observation[observations.size()]), null);
     }
 }

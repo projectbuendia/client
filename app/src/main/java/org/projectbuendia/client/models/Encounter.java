@@ -126,12 +126,11 @@ public class Encounter extends Base<String> {
      */
     public ContentValues[] toContentValuesArray() {
         ContentValues[] cvs = new ContentValues[observations.length + orderUuids.length];
-        long timestampSec = timestamp.getMillis()/1000;
         for (int i = 0; i < observations.length; i++) {
             Observation obs = observations[i];
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
-            cv.put(Observations.ENCOUNTER_TIME, timestampSec);
+            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, obs.value);
@@ -140,7 +139,7 @@ public class Encounter extends Base<String> {
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
-            cv.put(Observations.ENCOUNTER_TIME, timestampSec);
+            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, orderUuids[i]);

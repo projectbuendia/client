@@ -212,11 +212,10 @@ public class DbSyncHelper {
                 LOG.e("Encounter %s has timestamp = null", encounterUuid);
                 continue;
             }
-            final int encounterTime = (int) (timestamp.getMillis()/1000); // seconds since epoch
             ContentValues base = new ContentValues();
             base.put(Observations.PATIENT_UUID, patientUuid);
             base.put(Observations.ENCOUNTER_UUID, encounterUuid);
-            base.put(Observations.ENCOUNTER_TIME, encounterTime);
+            base.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
 
             if (encounter.observations != null) {
                 for (Map.Entry<Object, Object> entry : encounter.observations.entrySet()) {

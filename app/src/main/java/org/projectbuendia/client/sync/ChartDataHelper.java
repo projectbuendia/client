@@ -24,6 +24,7 @@ import org.projectbuendia.client.models.ChartSection;
 import org.projectbuendia.client.models.ChartSectionType;
 import org.projectbuendia.client.models.Concepts;
 import org.projectbuendia.client.models.Form;
+import org.projectbuendia.client.net.json.ConceptType;
 import org.projectbuendia.client.sync.providers.Contracts;
 import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
 import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
@@ -125,13 +126,13 @@ public class ChartDataHelper {
 
     private LocalizedObs obsFromCursor(Cursor c) {
         long id = c.getLong(c.getColumnIndex(BaseColumns._ID));
-        long millis = c.getLong(c.getColumnIndex("encounter_time"))*1000L;
-        String conceptUuid = c.getString(c.getColumnIndex("concept_uuid"));
+        long millis = c.getLong(c.getColumnIndex(Observations.ENCOUNTER_MILLIS));
+        String conceptUuid = c.getString(c.getColumnIndex(Observations.CONCEPT_UUID));
         String conceptName = sConceptNames.get(conceptUuid);
         String conceptType = sConceptTypes.get(conceptUuid);
-        String value = c.getString(c.getColumnIndex("value"));
+        String value = c.getString(c.getColumnIndex(Observations.VALUE));
         String localizedValue = value;
-        if ("CODED".equals(conceptType)) {
+        if (ConceptType.CODED.name().equals(conceptType)) {
             localizedValue = sConceptNames.get(value);
         }
         return new LocalizedObs(id, millis, conceptUuid, conceptName, conceptType, value, localizedValue);
@@ -188,7 +189,8 @@ public class ChartDataHelper {
         loadConceptData(locale);
         try (Cursor c = mContentResolver.query(
             Observations.CONTENT_URI, null,
-            "concept_uuid = ?", new String[] {conceptUuid}, "encounter_time desc")) {
+            Observations.CONCEPT_UUID + " = ?", new String[] {conceptUuid},
+            Observations.ENCOUNTER_MILLIS + " DESC")) {
             Map<String, LocalizedObs> result = new HashMap<>();
             while (c.moveToNext()) {
                 String patientUuid = Utils.getString(c, Observations.PATIENT_UUID);

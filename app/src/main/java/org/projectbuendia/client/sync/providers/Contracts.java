@@ -164,7 +164,7 @@ public class Contracts {
 
         String PATIENT_UUID = "patient_uuid";
         String ENCOUNTER_UUID = "encounter_uuid";
-        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
+        String ENCOUNTER_MILLIS = "encounter_millis";  // milliseconds since epoch
         String CONCEPT_UUID = "concept_uuid";
         String VALUE = "value";  // concept value or order UUID
 
@@ -252,15 +252,5 @@ public class Contracts {
         return LocalizedLocations.CONTENT_URI.buildUpon()
             .appendPath(locale)
             .build();
-    }
-
-    private interface LocalizedObsColumns {
-        String ENCOUNTER_TIME = "encounter_time";  // seconds since epoch
-        String GROUP_NAME = "group_name";
-        String CONCEPT_UUID = "concept_uuid";
-        String CONCEPT_NAME = "concept_name";
-        String CONCEPT_TYPE = "concept_type";
-        String VALUE = "value";
-        String LOCALIZED_VALUE = "localized_value";
     }
 }

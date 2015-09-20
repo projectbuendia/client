@@ -48,7 +48,7 @@ public class AddEncounterTask extends AsyncTask<Void, Void, EncounterAddFailedEv
 
     private static final String[] ENCOUNTER_PROJECTION = new String[] {
         Observations.CONCEPT_UUID,
-        Observations.ENCOUNTER_TIME,
+        Observations.ENCOUNTER_MILLIS,
         Observations.ENCOUNTER_UUID,
         Observations.PATIENT_UUID,
         Observations.VALUE
