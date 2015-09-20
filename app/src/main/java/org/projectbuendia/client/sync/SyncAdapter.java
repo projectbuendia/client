@@ -410,6 +410,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         checkCancellation("before inserting concept names");
         provider.bulkInsert(ConceptNames.CONTENT_URI,
             conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
+
+        ChartDataHelper.invalidateLoadedConceptData();
     }
 
     private void updatePatients(SyncResult syncResult)
