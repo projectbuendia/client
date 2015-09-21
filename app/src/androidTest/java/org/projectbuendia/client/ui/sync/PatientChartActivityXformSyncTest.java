@@ -16,6 +16,7 @@ import android.support.test.espresso.Espresso;
 import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.events.FetchXformSucceededEvent;
 import org.projectbuendia.client.models.Patient;
@@ -73,7 +74,7 @@ public class PatientChartActivityXformSyncTest extends SyncTestCase {
         newPatient.givenName = Optional.of("TestPatientFor");
         newPatient.gender = Optional.of(JsonPatient.GENDER_FEMALE);
         newPatient.id = Optional.of(UUID.randomUUID().toString().substring(30));
-        newPatient.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
+        newPatient.birthdate = Optional.of(LocalDate.now().minusYears(12).minusMonths(3));
         return newPatient;
     }
 }
