@@ -57,7 +57,7 @@ public class PatientDelta {
                 gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
         }
         if (birthdate.isPresent()) {
-            cv.put(Contracts.Patients.BIRTHDATE, birthdate.toString());
+            cv.put(Contracts.Patients.BIRTHDATE, birthdate.get().toString());
         }
         if (assignedLocationUuid.isPresent()) {
             cv.put(Contracts.Patients.LOCATION_UUID, assignedLocationUuid.get());

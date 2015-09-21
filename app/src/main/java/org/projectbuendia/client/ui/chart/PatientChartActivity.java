@@ -121,20 +121,6 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
 
-        MenuItem editPatient = menu.findItem(R.id.action_edit_patient);
-        editPatient.setIcon(
-            new IconDrawable(this, Iconify.IconValue.fa_pencil_square_o)
-                .color(0xCCFFFFFF)
-                .sizeDp(36));
-        editPatient.setOnMenuItemClickListener(
-            new MenuItem.OnMenuItemClickListener() {
-
-                @Override public boolean onMenuItemClick(MenuItem item) {
-                    mController.onEditPatientPressed();
-                    return true;
-                }
-            });
-
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
 
@@ -251,6 +237,18 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // Show the Up button in the action bar.
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+        mPatientFullNameView.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                Utils.logUserAction("full_name_pressed");
+                mController.onEditPatientPressed();
+            }
+        });
+        mPatientGenderAgeView.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                Utils.logUserAction("full_name_pressed");
+                mController.onEditPatientPressed();
+            }
+        });
         mPatientLocationView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
                 Utils.logUserAction("location_view_pressed");
