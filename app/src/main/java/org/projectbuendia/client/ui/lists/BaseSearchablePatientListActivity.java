@@ -81,7 +81,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
                     Utils.logEvent("add_patient_pressed");
                     EditPatientDialogFragment.newInstance(null)
                         .show(getSupportFragmentManager(), null);
-                    // NewPatientActivity.start(BaseSearchablePatientListActivity.this);
                     return true;
                 }
             });

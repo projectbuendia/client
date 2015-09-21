@@ -127,12 +127,6 @@
                 android:value=".ui.lists.FilteredPatientListActivity" />
         </activity>
         <activity
-            android:name=".ui.newpatient.NewPatientActivity"
-            android:label="@string/title_activity_patient_add"
-            android:screenOrientation="userPortrait"
-            android:windowSoftInputMode="adjustResize" >
-        </activity>
-        <activity
             android:name=".ui.lists.SingleLocationActivity"
             android:label="@string/title_single_location"
             android:parentActivityName=".ui.lists.LocationListActivity"
