@@ -27,7 +27,6 @@ import android.widget.RadioGroup;
 
 import com.google.common.base.Optional;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.projectbuendia.client.App;
@@ -46,7 +45,6 @@ import butterknife.InjectView;
 /** A {@link DialogFragment} for adding or editing a patient. */
 public class EditPatientDialogFragment extends DialogFragment {
     @Inject AppModel mModel;
-//    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject CrudEventBus mCrudEventBus;
 
     @InjectView(R.id.patient_id) EditText mId;
@@ -90,7 +88,6 @@ public class EditPatientDialogFragment extends DialogFragment {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         App.getInstance().inject(this);
-//        mCrudEventBus = mCrudEventBusProvider.get();
         mInflater = LayoutInflater.from(getActivity());
     }
 
@@ -120,9 +117,9 @@ public class EditPatientDialogFragment extends DialogFragment {
         String familyName = Utils.toNonemptyOrNull(mFamilyName.getText().toString().trim());
         String ageYears = mAgeYears.getText().toString().trim();
         String ageMonths = mAgeMonths.getText().toString().trim();
-        DateTime birthdate = null;
+        LocalDate birthdate = null;
         if (!ageYears.isEmpty() || !ageMonths.isEmpty()) {
-            birthdate = DateTime.now().minusYears(Integer.parseInt("0" + ageYears))
+            birthdate = LocalDate.now().minusYears(Integer.parseInt("0" + ageYears))
                 .minusMonths(Integer.parseInt("0" + ageMonths));
         }
         // TODO: This should start out as "Sex sex = null" and then get set to female, male,

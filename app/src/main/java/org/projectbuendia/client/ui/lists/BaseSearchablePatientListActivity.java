@@ -53,7 +53,6 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
-//    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
     @Inject CrudEventBus mCrudEventBus;
     @Inject SyncManager mSyncManager;
 
