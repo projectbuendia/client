@@ -31,6 +31,7 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
     public final String givenName;
     public final String familyName;
     public final int gender;
+    // TODO: Make PatientDelta.birthdate and Patient.birthdate same type (LocalDate or DateTime).
     public final LocalDate birthdate;
     public final String locationUuid;
 
@@ -41,7 +42,8 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
             .setUuid(patient.uuid)
             .setGivenName(patient.given_name)
             .setFamilyName(patient.family_name)
-            .setGender("M".equals(patient.gender) ? GENDER_MALE : GENDER_FEMALE)
+            .setGender("F".equals(patient.gender) ? GENDER_FEMALE :
+                "M".equals(patient.gender) ? GENDER_MALE : GENDER_UNKNOWN)
             .setBirthdate(patient.birthdate)
             .setLocationUuid(
                 patient.assigned_location == null ? null : patient.assigned_location.uuid)
@@ -60,7 +62,8 @@ public final class Patient extends Base<String> implements Comparable<Patient> {
         cv.put(Contracts.Patients.GIVEN_NAME, givenName);
         cv.put(Contracts.Patients.FAMILY_NAME, familyName);
         cv.put(Contracts.Patients.GENDER,
-            gender == JsonPatient.GENDER_MALE ? "M" : "F");
+            gender == JsonPatient.GENDER_MALE ? "M" :
+                gender == JsonPatient.GENDER_FEMALE ? "F" : "U");
         cv.put(Contracts.Patients.BIRTHDATE, Utils.toString(birthdate));
         cv.put(Contracts.Patients.LOCATION_UUID,
             locationUuid == null ? Zones.DEFAULT_LOCATION_UUID : locationUuid);

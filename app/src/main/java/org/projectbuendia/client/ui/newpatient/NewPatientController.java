@@ -120,7 +120,7 @@ final class NewPatientController {
             hasValidationErrors = true;
         }
         if (ageYears.isEmpty() && ageMonths.isEmpty()) {
-            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_validation_missing_age);
+            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_missing_age);
             hasValidationErrors = true;
         }
         int years = 0, months = 0;
@@ -128,7 +128,7 @@ final class NewPatientController {
             years = ageYears.isEmpty() ? 0 : Integer.parseInt(ageYears);
             months = ageMonths.isEmpty() ? 0 : Integer.parseInt(ageMonths);
         } catch (Throwable e) {  // shouldn't happen (text field only allows digits)
-            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_validation_missing_age);
+            mUi.showValidationError(Ui.FIELD_AGE_YEARS, R.string.patient_missing_age);
             hasValidationErrors = true;
         }
         if (admissionDate == null) {
@@ -137,7 +137,7 @@ final class NewPatientController {
             hasValidationErrors = true;
         }
         if (sex != SEX_MALE && sex != SEX_FEMALE) {
-            mUi.showValidationError(Ui.FIELD_SEX, R.string.patient_validation_select_gender);
+            mUi.showValidationError(Ui.FIELD_SEX, R.string.patient_missing_gender);
             hasValidationErrors = true;
         }
         if (admissionDate != null && admissionDate.isAfter(LocalDate.now())) {

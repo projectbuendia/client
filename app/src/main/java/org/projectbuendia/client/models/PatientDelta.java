@@ -33,6 +33,7 @@ public class PatientDelta {
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
     public Optional<Integer> gender = Optional.absent();
+    // TODO: Make PatientDelta.birthdate and Patient.birthdate same type (LocalDate or DateTime).
     public Optional<DateTime> birthdate = Optional.absent();
     public Optional<LocalDate> admissionDate = Optional.absent();
     public Optional<LocalDate> firstSymptomDate = Optional.absent();

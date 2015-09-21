@@ -24,7 +24,7 @@ public class PatientCountDisplay {
      * @param prefix       a String preceding the patient count (for example, the name of a location)
      * @return a String containing the prefix string and patient count in a displayable format
      */
-    public static String getPatientCountTitle(Context context, int patientCount, String prefix) {
+    public static String getPatientCountTitle(Context context, long patientCount, String prefix) {
         // If no patient count is available, only show the location name.
         if (patientCount == -1) {
             return prefix;
@@ -34,18 +34,18 @@ public class PatientCountDisplay {
             R.string.string_with_paren, prefix, getPatientCountSubtitle(context, patientCount));
     }
 
-    public static String getPatientCountSubtitle(Context context, int patientCount) {
+    public static String getPatientCountSubtitle(Context context, long patientCount) {
         return getPatientCountSubtitle(context, patientCount, false);
     }
 
     public static String getPatientCountSubtitle(
-        Context context, int patientCount, boolean usePresent) {
+        Context context, long patientCount, boolean usePresent) {
         int resource = resourceForPatientCount(patientCount, usePresent);
         return context.getResources().getString(resource, patientCount);
     }
 
     // TODO/i18n: Switch to built in support for plurals in Android.
-    private static int resourceForPatientCount(int patientCount, boolean usePresentResource) {
+    private static int resourceForPatientCount(long patientCount, boolean usePresentResource) {
         int resource;
         if (patientCount < 1) {
             if (usePresentResource) {

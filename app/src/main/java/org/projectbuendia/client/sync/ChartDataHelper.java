@@ -20,7 +20,6 @@ import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ChartItem;
 import org.projectbuendia.client.models.ChartSection;
-import org.projectbuendia.client.models.ChartSectionType;
 import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Form;
 import org.projectbuendia.client.providers.Contracts;
@@ -202,13 +201,13 @@ public class ChartDataHelper {
                 String label = Utils.getString(c, ChartItems.LABEL, "");
                 if (parentRowid == null) {
                     // Add a section.
-                    switch (ChartSectionType.valueOf(Utils.getString(c, ChartItems.SECTION_TYPE))) {
-                        case TILE_ROW:
+                    switch (Utils.getString(c, ChartItems.SECTION_TYPE)) {
+                        case "TILE_ROW":
                             ChartSection tileGroup = new ChartSection(label);
                             tileGroups.add(tileGroup);
                             tileGroupsById.put(rowid, tileGroup);
                             break;
-                        case GRID_SECTION:
+                        case "GRID_SECTION":
                             ChartSection rowGroup = new ChartSection(label);
                             rowGroups.add(rowGroup);
                             rowGroupsById.put(rowid, rowGroup);

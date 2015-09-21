@@ -18,11 +18,11 @@ import org.projectbuendia.client.events.DefaultCrudEventBus;
  * Should only be posted on a {@link DefaultCrudEventBus}.
  */
 public class ItemUpdatedEvent<T> {
-    public final T oldItem;
+    public final String uuid;
     public final T newItem;
 
-    public ItemUpdatedEvent(T oldItem, T newItem) {
-        this.oldItem = oldItem;
+    public ItemUpdatedEvent(String uuid, T newItem) {
+        this.uuid = uuid;
         this.newItem = newItem;
     }
 }

@@ -59,9 +59,9 @@ public class TaskFactory {
 
     /** Creates a new {@link AppUpdatePatientTask}. */
     public AppUpdatePatientTask newUpdatePatientAsyncTask(
-        Patient originalPatient, PatientDelta patientDelta, CrudEventBus bus) {
+        String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
         return new AppUpdatePatientTask(
-            this, mLoaderSet, mServer, mContentResolver, originalPatient, patientDelta, bus);
+            this, mLoaderSet, mServer, mContentResolver, patientUuid, patientDelta, bus);
     }
 
     /** Creates a new {@link AddEncounterTask}. */

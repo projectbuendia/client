@@ -38,6 +38,7 @@ import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
 import org.projectbuendia.client.models.ConceptUuids;
@@ -47,7 +48,6 @@ import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.sync.ChartDataHelper;
 import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.sync.SyncManager;
@@ -168,6 +168,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showNewOrderDialog(String patientUuid);
         void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval
             interval, List<DateTime> executionTimes);
+        void showEditPatientDialog(Patient patient);
     }
 
     /** Sends ODK form data. */
@@ -337,6 +338,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             mPatient.toOdkPatient(), preset);
     }
 
+    public void onEditPatientPressed() {
+        Utils.logUserAction("edit_patient_pressed", "uuid", mPatientUuid);
+        mUi.showEditPatientDialog(mPatient);
+    }
+
     private boolean dialogShowing() {
         return (mAssignGeneralConditionDialog != null && mAssignGeneralConditionDialog.isShowing())
             || (mAssignLocationDialog != null && mAssignLocationDialog.isShowing());
@@ -450,7 +456,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 @Override public boolean onLocationSelected(String locationUuid) {
                     PatientDelta delta = new PatientDelta();
                     delta.assignedLocationUuid = Optional.of(locationUuid);
-                    mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
+                    mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
                     Utils.logUserAction("location_assigned");
                     return false;
                 }

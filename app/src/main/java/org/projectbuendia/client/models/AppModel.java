@@ -157,9 +157,9 @@ public class AppModel {
      * {@link Patient} on the specified event bus when complete.
      */
     public void updatePatient(
-        CrudEventBus bus, Patient originalPatient, PatientDelta patientDelta) {
+        CrudEventBus bus, String patientUuid, PatientDelta patientDelta) {
         AppUpdatePatientTask task =
-            mTaskFactory.newUpdatePatientAsyncTask(originalPatient, patientDelta, bus);
+            mTaskFactory.newUpdatePatientAsyncTask(patientUuid, patientDelta, bus);
         task.execute();
     }
 

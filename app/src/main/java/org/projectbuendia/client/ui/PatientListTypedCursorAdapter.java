@@ -57,6 +57,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private final LocationTree mLocationTree;
     private final ChartDataHelper mChartDataHelper;
     private static final Logger LOG = Logger.create();
+    private static final String EN_DASH = "\u2013";
 
     private Location[] mLocations;
     private Map<String, ObsValue> mPregnancyObs = new HashMap<>();
@@ -152,7 +153,9 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        holder.mPatientName.setText(patient.givenName + " " + patient.familyName);
+        String givenName = Utils.valueOrDefault(patient.givenName, EN_DASH);
+        String familyName = Utils.valueOrDefault(patient.familyName, EN_DASH);
+        holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(patient.id);
         holder.mPatientId.setTextColor(status.getForegroundColor());
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());

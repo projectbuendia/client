@@ -156,6 +156,11 @@ public class Utils {
         return str == null || str.isEmpty();
     }
 
+    /** Converts empty strings to null. */
+    public static String toNonemptyOrNull(@Nullable String str) {
+        return isEmpty(str) ? null : str;
+    }
+
     /** Parses a long integer value from a string, or returns null if parsing fails. */
     public static @Nullable Long toLongOrNull(@Nullable String str) {
         if (str == null) return null;
@@ -264,6 +269,8 @@ public class Utils {
     public static @Nonnull <T> T valueOrDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value == null ? defaultValue : value;
     }
+
+
 
     /** Converts a list of Longs to an array of primitive longs. */
     public static long[] toArray(List<Long> items) {

@@ -50,7 +50,7 @@ public class FilteredPatientListActivity extends BaseSearchablePatientListActivi
 
         mFilterController = new PatientFilterController(
             new FilterUi(),
-            mCrudEventBusProvider.get(),
+            mCrudEventBus,
             mAppModel,
             mLocale);
         mFilterController.setupActionBarAsync();

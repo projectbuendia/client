@@ -32,6 +32,7 @@
   <string name="action_view_xform">+ View first saved xform</string>
   <string name="action_new_round">New round</string>
   <string name="action_assign_location">Assign location</string>
+  <string name="action_edit_patient">Edit patient</string>
   <string name="action_update_chart">Update chart</string>
   <string name="action_view_round_archive">Round archive</string>
   <string name="snackbar_update_available">Application update available</string>
@@ -104,6 +105,7 @@
   <string name="last_observation_none">No observations</string>
   <string name="male">Male</string>
   <string name="female">Female</string>
+  <string name="unknown">Unknown</string>
   <string name="title_updating_patient">Updating patient</string>
   <string name="please_wait">Please wait&#8230;</string>
 
@@ -276,12 +278,12 @@
   <string name="age_filter_description">Under %d years</string>
   <string name="filter_group_default_name">Multiple filters</string>
 
-  <string name="patient_validation_missing_age">Enter the age (using years, months, or both)</string>
+  <string name="patient_missing_age">Enter the age (using years, months, or both)</string>
   <string name="patient_validation_missing_family_name">Enter the family name</string>
   <string name="patient_validation_missing_given_name">Enter the given name</string>
   <string name="patient_validation_missing_id">Enter the patient ID</string>
   <string name="patient_validation_missing_admission_date">Enter the admission date</string>
-  <string name="patient_validation_select_gender">Please select Male or Female.</string>
+  <string name="patient_missing_gender">Please select Male or Female.</string>
   <string name="patient_validation_future_admission_date">Admission date cannot be in the future.</string>
   <string name="patient_validation_future_onset_date">Symptom onset date cannot be in the future.</string>
   <string name="patient_creation_clear_symptom_onset_date">Clear</string>

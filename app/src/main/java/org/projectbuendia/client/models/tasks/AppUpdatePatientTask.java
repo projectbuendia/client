@@ -48,7 +48,6 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mUuid;
-    private final Patient mOriginalPatient;
     private final PatientDelta mPatientDelta;
     private final CrudEventBus mBus;
 
@@ -57,15 +56,14 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
         LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
-        Patient originalPatient,
+        String patientUuid,
         PatientDelta patientDelta,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
         mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
-        mUuid = (originalPatient == null) ? null : originalPatient.uuid;
-        mOriginalPatient = originalPatient;
+        mUuid = patientUuid;
         mPatientDelta = patientDelta;
         mBus = bus;
     }
@@ -127,7 +125,7 @@ public class AppUpdatePatientTask extends AsyncTask<Void, Void, PatientUpdateFai
     @SuppressWarnings("unused") // Called by reflection from EventBus.
     private final class UpdateEventSubscriber {
         public void onEventMainThread(ItemFetchedEvent<Patient> event) {
-            mBus.post(new ItemUpdatedEvent<>(mOriginalPatient, event.item));
+            mBus.post(new ItemUpdatedEvent<>(mUuid, event.item));
             mBus.unregister(this);
         }
 

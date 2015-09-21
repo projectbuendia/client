@@ -55,6 +55,7 @@ import org.projectbuendia.client.ui.chart.PatientChartController.OdkResultSender
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderDialogFragment;
 import org.projectbuendia.client.ui.dialogs.OrderExecutionDialogFragment;
+import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
@@ -107,6 +108,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @InjectView(R.id.chart_webview) WebView mGridWebView;
     ChartRenderer mChartRenderer;
 
+    private static final String EN_DASH = "\u2013";
+
     public static void start(Context caller, String uuid) {
         Intent intent = new Intent(caller, PatientChartActivity.class);
         intent.putExtra("uuid", uuid);
@@ -117,6 +120,20 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chart, menu);
+
+        MenuItem editPatient = menu.findItem(R.id.action_edit_patient);
+        editPatient.setIcon(
+            new IconDrawable(this, Iconify.IconValue.fa_pencil_square_o)
+                .color(0xCCFFFFFF)
+                .sizeDp(36));
+        editPatient.setOnMenuItemClickListener(
+            new MenuItem.OnMenuItemClickListener() {
+
+                @Override public boolean onMenuItemClick(MenuItem item) {
+                    mController.onEditPatientPressed();
+                    return true;
+                }
+            });
 
         menu.findItem(R.id.action_go_to).setOnMenuItemClickListener(
             new MenuItem.OnMenuItemClickListener() {
@@ -448,7 +465,9 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void updatePatientDetailsUi(Patient patient) {
             // TODO: Localize everything below.
             mPatientFullNameView.setText(
-                patient.id + ": " + patient.givenName + " " + patient.familyName);
+                Utils.valueOrDefault(patient.id, EN_DASH) + ": " +
+                    Utils.valueOrDefault(patient.givenName, EN_DASH) + " " +
+                    Utils.valueOrDefault(patient.familyName, EN_DASH));
 
             List<String> labels = new ArrayList<>();
             if (patient.gender == Patient.GENDER_MALE) {
@@ -499,6 +518,11 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         @Override public void showOrderExecutionDialog(
             Order order, Interval interval, List<DateTime> executionTimes) {
             OrderExecutionDialogFragment.newInstance(order, interval, executionTimes)
+                .show(getSupportFragmentManager(), null);
+        }
+
+        @Override public void showEditPatientDialog(Patient patient) {
+            EditPatientDialogFragment.newInstance(patient)
                 .show(getSupportFragmentManager(), null);
         }
     }
