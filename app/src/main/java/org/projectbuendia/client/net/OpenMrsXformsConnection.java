@@ -53,7 +53,7 @@ public class OpenMrsXformsConnection {
     public void getXform(String uuid, final Response.Listener<String> resultListener,
                          Response.ErrorListener errorListener) {
         Request request = new OpenMrsJsonRequest(mConnectionDetails,
-            "/xform/" + uuid + "?v=full",
+            "/xforms/" + uuid + "?v=full",
             null, // null implies GET
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -81,7 +81,7 @@ public class OpenMrsXformsConnection {
      */
     public void listXforms(final Response.Listener<List<OpenMrsXformIndexEntry>> listener,
                            final Response.ErrorListener errorListener) {
-        Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xform", // list all forms
+        Request request = new OpenMrsJsonRequest(mConnectionDetails, "/xforms", // list all forms
             null, // null implies GET
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -161,7 +161,7 @@ public class OpenMrsXformsConnection {
             errorListener.onErrorResponse(new VolleyError("failed to convert to JSON", e));
         }
         OpenMrsJsonRequest request = new OpenMrsJsonRequest(
-            mConnectionDetails, "/xforminstance",
+            mConnectionDetails, "/xforminstances",
             postBody, // non-null implies POST
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {

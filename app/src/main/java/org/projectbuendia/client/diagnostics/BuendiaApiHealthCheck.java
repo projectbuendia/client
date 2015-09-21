@@ -61,7 +61,7 @@ public class BuendiaApiHealthCheck extends HealthCheck {
     // Retrieving a concept should be quick and ensures that the module is both
     // running and has database access.
     private static final String HEALTH_CHECK_ENDPOINT =
-        "/concept/" + ConceptUuids.GENERAL_CONDITION_UUID;
+        "/concepts/" + ConceptUuids.GENERAL_CONDITION_UUID;
 
     private final Object mLock = new Object();
 

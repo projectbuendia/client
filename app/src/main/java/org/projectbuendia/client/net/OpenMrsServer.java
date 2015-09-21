@@ -78,7 +78,7 @@ public class OpenMrsServer implements Server {
         // request that succeeds.  We assume "Pulse" will always be present on the server.
         // Conveniently, extra data after ";" in the URL is included in request logs, but
         // ignored by the REST resource handler, which just returns the "Pulse" concept.
-        final String urlPath = "/concept/" + ConceptUuids.PULSE_UUID;
+        final String urlPath = "/concepts/" + ConceptUuids.PULSE_UUID;
         List<String> params = new ArrayList<>();
         params.add("time=" + (new Date().getTime()));
         JsonUser user = App.getUserManager().getActiveUser();
@@ -116,7 +116,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patient",
+            "/patients",
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -194,7 +194,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patient/" + patientUuid,
+            "/patients/" + patientUuid,
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -232,7 +232,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/user",
+            "/users",
             requestBody,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -268,7 +268,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patientencounters",
+            "/encounters",
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -304,7 +304,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/order",
+            "/orders",
             json,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -328,7 +328,7 @@ public class OpenMrsServer implements Server {
                            final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patient?id=" + patientId,
+            "/patients?id=" + patientId,
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -362,7 +362,7 @@ public class OpenMrsServer implements Server {
         String query = filterQueryTerm != null ? filterQueryTerm : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/patient?q=" + Utils.urlEncode(query),
+            "/patients?q=" + Utils.urlEncode(query),
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -391,7 +391,7 @@ public class OpenMrsServer implements Server {
         String query = searchQuery != null ? "?q=" + Utils.urlEncode(searchQuery) : "";
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/user" + query,
+            "/users" + query,
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -437,7 +437,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/location",
+            "/locations",
             requestBody,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -475,7 +475,7 @@ public class OpenMrsServer implements Server {
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/location/" + location.uuid,
+            "/locations/" + location.uuid,
             requestBody,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -492,7 +492,7 @@ public class OpenMrsServer implements Server {
                                final Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            Request.Method.DELETE, "/location/" + locationUuid,
+            Request.Method.DELETE, "/locations/" + locationUuid,
             null,
             null,
             wrapErrorListener(errorListener)
@@ -506,7 +506,7 @@ public class OpenMrsServer implements Server {
 
 
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails, "/location",
+            mConnectionDetails, "/locations",
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -533,7 +533,7 @@ public class OpenMrsServer implements Server {
     @Override public void listOrders(final Response.Listener<List<JsonOrder>> successListener,
                            Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
-            mConnectionDetails, "/order",
+            mConnectionDetails, "/orders",
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {
@@ -560,7 +560,7 @@ public class OpenMrsServer implements Server {
                           Response.ErrorListener errorListener) {
         OpenMrsJsonRequest request = mRequestFactory.newOpenMrsJsonRequest(
             mConnectionDetails,
-            "/xform",
+            "/xforms",
             null,
             new Response.Listener<JSONObject>() {
                 @Override public void onResponse(JSONObject response) {

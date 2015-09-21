@@ -31,7 +31,7 @@ import java.util.Map;
 public class Database extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 28;
+    public static final int DATABASE_VERSION = 29;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_FILENAME = "buendia.db";

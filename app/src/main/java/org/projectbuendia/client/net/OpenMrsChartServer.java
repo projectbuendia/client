@@ -29,7 +29,7 @@ import java.util.HashMap;
  * <p/>
  * <p>There are essentially three endpoints:
  * <ul>
- * <li><code>/patientencounters</code> gives encoded details of the observations of concept
+ * <li><code>/encounters</code> gives encoded details of the observations of concept
  * values that happen at an encounter
  * <li><code>/concepts</code> gives localised string and type information for the concepts
  * observed
@@ -51,11 +51,11 @@ public class OpenMrsChartServer {
      * @param successListener a {@link Response.Listener} that handles successful chart retrieval
      * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
      */
-    public void getChart(String patientUuid,
-                         Response.Listener<JsonPatientRecord> successListener,
-                         Response.ErrorListener errorListener) {
+    public void getEncounters(String patientUuid,
+                              Response.Listener<JsonPatientRecord> successListener,
+                              Response.ErrorListener errorListener) {
         GsonRequest<JsonPatientRecord> request = new GsonRequest<>(
-            mConnectionDetails.getBuendiaApiUrl() + "/patientencounters/" + patientUuid,
+            mConnectionDetails.getBuendiaApiUrl() + "/encounters?patientUuid=" + patientUuid,
             JsonPatientRecord.class, false,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener);
@@ -64,13 +64,13 @@ public class OpenMrsChartServer {
     }
 
     /**
-     * Retrieves all charts from the server for all patients.
+     * Retrieves all observations from the server for all patients.
      * @param successListener a {@link Response.Listener} that handles successful chart retrieval
      * @param errorListener   a {@link Response.ErrorListener} that handles failed chart retrieval
      */
-    public void getAllCharts(Response.Listener<JsonPatientRecordResponse> successListener,
-                             Response.ErrorListener errorListener) {
-        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/patientencounters",
+    public void getAllEncounters(Response.Listener<JsonPatientRecordResponse> successListener,
+                                 Response.ErrorListener errorListener) {
+        doEncountersRequest(mConnectionDetails.getBuendiaApiUrl() + "/encounters",
             successListener, errorListener);
     }
 
@@ -96,12 +96,12 @@ public class OpenMrsChartServer {
      * @param successListener a listener to get the results on the event of success
      * @param errorListener   a (Volley) listener to get any errors
      */
-    public void getIncrementalCharts(
+    public void getIncrementalEncounters(
         Instant lastTime,
         Response.Listener<JsonPatientRecordResponse> successListener,
         Response.ErrorListener errorListener) {
         doEncountersRequest(mConnectionDetails.getBuendiaApiUrl()
-                + "/patientencounters?sm=" + lastTime.getMillis(),
+                + "/encounters?sm=" + lastTime.getMillis(),
             successListener, errorListener);
     }
 
@@ -113,7 +113,7 @@ public class OpenMrsChartServer {
     public void getConcepts(Response.Listener<JsonConceptResponse> successListener,
                             Response.ErrorListener errorListener) {
         GsonRequest<JsonConceptResponse> request = new GsonRequest<JsonConceptResponse>(
-            mConnectionDetails.getBuendiaApiUrl() + "/concept",
+            mConnectionDetails.getBuendiaApiUrl() + "/concepts",
             JsonConceptResponse.class, false,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener) {
@@ -132,7 +132,7 @@ public class OpenMrsChartServer {
         String uuid, Response.Listener<JsonChart> successListener,
         Response.ErrorListener errorListener) {
         GsonRequest<JsonChart> request = new GsonRequest<JsonChart>(
-            mConnectionDetails.getBuendiaApiUrl() + "/chart/" + uuid + "?v=full",
+            mConnectionDetails.getBuendiaApiUrl() + "/charts/" + uuid + "?v=full",
             JsonChart.class, false,
             mConnectionDetails.addAuthHeader(new HashMap<String, String>()),
             successListener, errorListener) {

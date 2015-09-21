@@ -534,7 +534,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                                   RequestFuture<JsonPatientRecordResponse> listFuture, TimingLogger timingLogger)
         throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting incremental charts");
-        chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
+        chartServer.getIncrementalEncounters(lastSyncTime, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
         final JsonPatientRecordResponse response =
@@ -571,7 +571,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<JsonPatientRecordResponse> future, TimingLogger timingLogger)
         throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting all charts");
-        chartServer.getAllCharts(future, future);
+        chartServer.getAllEncounters(future, future);
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
