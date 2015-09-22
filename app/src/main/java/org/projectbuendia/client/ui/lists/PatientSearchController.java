@@ -73,7 +73,7 @@ public class PatientSearchController {
 
     public interface Ui {
         void setPatients(TypedCursor<Patient> patients);
-        void goToPatientChart(String patientUuid);
+        void finishAndGoToPatientChart(String patientUuid);
     }
 
     public interface FragmentUi {
@@ -297,7 +297,7 @@ public class PatientSearchController {
     private class CreationSubscriber {
         public void onEventMainThread(ItemCreatedEvent<Patient> event) {
             Utils.logEvent("add_patient_succeeded");
-            mUi.goToPatientChart(event.item.uuid);
+            mUi.finishAndGoToPatientChart(event.item.uuid);
         }
     }
 

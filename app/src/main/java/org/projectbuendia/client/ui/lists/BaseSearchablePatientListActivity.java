@@ -179,8 +179,9 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
             BaseSearchablePatientListActivity.this.setPatients(patients);
         }
 
-        @Override public void goToPatientChart(String patientUuid) {
+        @Override public void finishAndGoToPatientChart(String patientUuid) {
             BigToast.show(BaseSearchablePatientListActivity.this, R.string.patient_creation_success);
+            finish();
             PatientChartActivity.start(BaseSearchablePatientListActivity.this, patientUuid);
         }
     }
