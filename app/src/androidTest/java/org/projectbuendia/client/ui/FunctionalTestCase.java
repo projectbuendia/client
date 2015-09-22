@@ -181,7 +181,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
             type(delta.familyName.get(), viewWithId(R.id.patient_creation_text_patient_family_name));
         }
         if (delta.birthdate.isPresent()) {
-            Period age = new Period(delta.birthdate.get().toLocalDate(), LocalDate.now());
+            Period age = new Period(delta.birthdate.get(), LocalDate.now());
             type(age.getMonths(), viewWithId(R.id.patient_creation_age_months));
             type(age.getYears(), viewWithId(R.id.patient_creation_age_years));
         }
@@ -281,7 +281,8 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         delta.familyName = Optional.of("Family" + id);
         delta.firstSymptomDate = Optional.of(LocalDate.now().minusMonths(7));
         delta.gender = Optional.of(JsonPatient.GENDER_FEMALE);
-        delta.birthdate = Optional.of(DateTime.now().minusYears(12).minusMonths(3));
+        delta.birthdate = Optional.of(LocalDate.now().minusYears(12).minusMonths(3));
+
         // Setting location within the PatientDelta is not yet supported.
         // delta.assignedLocationUuid = Optional.of(Zones.TRIAGE_ZONE_UUID);
 
