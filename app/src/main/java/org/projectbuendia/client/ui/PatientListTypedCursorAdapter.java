@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationComparator;
 import org.projectbuendia.client.models.LocationTree;
@@ -30,7 +30,8 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.resolvables.ResStatus;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
+import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.PatientCountDisplay;
 import org.projectbuendia.client.utils.Utils;
 
@@ -55,9 +56,12 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
     private final HashMap<Location, List<Patient>> mPatientsByLocation;
     private final LocationTree mLocationTree;
     private final ChartDataHelper mChartDataHelper;
+    private static final Logger LOG = Logger.create();
+    private static final String EN_DASH = "\u2013";
 
     private Location[] mLocations;
-    private Map<String, Map<String, LocalizedObs>> mObservations;
+    private Map<String, ObsValue> mPregnancyObs = new HashMap<>();
+    private Map<String, ObsValue> mConditionObs = new HashMap<>();
 
     /**
      * Creates a {@link PatientListTypedCursorAdapter}.
@@ -134,28 +138,24 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
         ViewGroup parent) {
         Patient patient = (Patient) getChild(groupPosition, childPosition);
 
-        // Show pregnancy status and condition if present.
-        boolean pregnant = false;
-        String condition = null;
-        if (mObservations != null) {
-            Map<String, LocalizedObs> obsMap = mObservations.get(patient.uuid);
-            if (obsMap != null) {
-                LocalizedObs pregObs = obsMap.get(Concepts.PREGNANCY_UUID);
-                pregnant = pregObs == null ? false : Concepts.YES_UUID.equals(pregObs.value);
-                LocalizedObs condObs = obsMap.get(Concepts.GENERAL_CONDITION_UUID);
-                condition = condObs == null ? null : condObs.value;
-            }
-        }
+        // Show pregnancy status and condition, if the data for these has been loaded.
+        ObsValue obs = mPregnancyObs.get(patient.uuid);
+        boolean pregnant = obs != null && ConceptUuids.YES_UUID.equals(obs.value);
+
+        obs = mConditionObs.get(patient.uuid);
+        String condition = obs == null ? null : obs.value;
 
         if (convertView == null) {
             convertView = newChildView();
         }
 
         ResStatus.Resolved status =
-            Concepts.getResStatus(condition).resolve(mContext.getResources());
+            ConceptUuids.getResStatus(condition).resolve(mContext.getResources());
 
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        holder.mPatientName.setText(patient.givenName + " " + patient.familyName);
+        String givenName = Utils.valueOrDefault(patient.givenName, EN_DASH);
+        String familyName = Utils.valueOrDefault(patient.familyName, EN_DASH);
+        holder.mPatientName.setText(givenName + " " + familyName);
         holder.mPatientId.setText(patient.id);
         holder.mPatientId.setTextColor(status.getForegroundColor());
         holder.mPatientId.setBackgroundColor(status.getBackgroundColor());
@@ -215,18 +215,11 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
      */
     public void setPatients(TypedCursor<Patient> cursor) {
         mPatientsByLocation.clear();
-        if (mObservations != null) {
-            mObservations.clear();
-        }
-
-        int count = cursor.getCount();
-        String[] patientUuids = new String[count];
 
         // Add all patients from cursor.
+        int count = cursor.getCount();
         for (int i = 0; i < count; i++) {
-            Patient patient = cursor.get(i);
-            addPatient(patient);
-            patientUuids[i] = patient.uuid;
+            addPatient(cursor.get(i));
         }
 
         // Produce a sorted list of all the locations that have patients.
@@ -239,7 +232,7 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
             Collections.sort(patients);
         }
 
-        new FetchObservationsTask().execute(patientUuids);
+        new FetchObservationsTask().execute();
         notifyDataSetChanged();
     }
 
@@ -256,7 +249,8 @@ public class PatientListTypedCursorAdapter extends BaseExpandableListAdapter {
 
     private class FetchObservationsTask extends AsyncTask<String, Void, Void> {
         @Override protected Void doInBackground(String... params) {
-            mObservations = mChartDataHelper.getMostRecentObservationsBatch(params, "en");
+            mPregnancyObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.PREGNANCY_UUID, "en");
+            mConditionObs = mChartDataHelper.getLatestObservationsForConcept(ConceptUuids.GENERAL_CONDITION_UUID, "en");
             return null;
         }
 

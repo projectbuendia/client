@@ -83,14 +83,21 @@ public class Utils {
                 return a.size() - b.size();
             }
         };
-    static final DateTimeFormatter SHORT_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM");
-    static final DateTimeFormatter MEDIUM_DATE_FORMATTER = DateTimeFormat.forPattern("d MMM yyyy");
-    static final DateTimeFormatter SHORT_DATETIME_FORMATTER = DateTimeFormat.forPattern("d MMM "
-        + "'at' HH:mm");
-    static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER = DateTimeFormat.mediumDateTime();
-    static final DateTimeFormatter TIME_OF_DAY_FORMATTER = DateTimeFormat.forPattern("HH:mm");
+
+    private static final DateTimeFormatter SHORT_DATE_FORMATTER =
+        DateTimeFormat.forPattern("d MMM");
+    private static final DateTimeFormatter MEDIUM_DATE_FORMATTER =
+        DateTimeFormat.forPattern("d MMM yyyy");
+    private static final DateTimeFormatter SHORT_DATETIME_FORMATTER =
+        DateTimeFormat.forPattern("d MMM 'at' HH:mm");
+    private static final DateTimeFormatter MEDIUM_DATETIME_FORMATTER =
+        DateTimeFormat.mediumDateTime();
+    private static final DateTimeFormatter TIME_OF_DAY_FORMATTER =
+        DateTimeFormat.forPattern("HH:mm");
     // Note: Use of \L here assumes a string that is already NFC-normalized.
     private static final Pattern NUMBER_OR_WORD_PATTERN = Pattern.compile("([0-9]+)|\\p{L}+");
+    private static final Pattern COMPRESSIBLE_UUID = Pattern.compile("^([0-9]+)A+$");
+
     /**
      * Compares two strings in a manner that sorts alphabetic parts in alphabetic
      * order and numeric parts in numeric order, while guaranteeing that:
@@ -143,6 +150,16 @@ public class Utils {
             return parts;
         }
     };
+
+    /** Performs a null-safe check for a null or empty string. */
+    public static boolean isEmpty(@Nullable String str) {
+        return str == null || str.isEmpty();
+    }
+
+    /** Converts empty strings to null. */
+    public static String toNonemptyOrNull(@Nullable String str) {
+        return isEmpty(str) ? null : str;
+    }
 
     /** Parses a long integer value from a string, or returns null if parsing fails. */
     public static @Nullable Long toLongOrNull(@Nullable String str) {
@@ -240,7 +257,10 @@ public class Utils {
         }
     }
 
-    /** Returns the specified name or a sentinel representing an unknown name, if the name is null. */
+    /**
+     * Returns the specified name or a sentinel representing an unknown name, if the name is
+     * null.
+     */
     public static @Nonnull String nameOrUnknown(@Nullable String name) {
         return valueOrDefault(name, App.getInstance().getString(R.string.unknown_name));
     }
@@ -249,6 +269,8 @@ public class Utils {
     public static @Nonnull <T> T valueOrDefault(@Nullable T value, @Nonnull T defaultValue) {
         return value == null ? defaultValue : value;
     }
+
+
 
     /** Converts a list of Longs to an array of primitive longs. */
     public static long[] toArray(List<Long> items) {
@@ -323,14 +345,12 @@ public class Utils {
     }
 
     /** Converts a nullable {@link LocalDate} to a nullable String with day and month only. */
-    public static @Nullable
-    String toShortString(@Nullable LocalDate localDate) {
+    public static @Nullable String toShortString(@Nullable LocalDate localDate) {
         return localDate == null ? null : SHORT_DATE_FORMATTER.print(localDate);
     }
 
     /** Converts a nullable {@link LocalDate} to a nullable String with day, month, and year. */
-    public static @Nullable
-    String toMediumString(@Nullable LocalDate localDate) {
+    public static @Nullable String toMediumString(@Nullable LocalDate localDate) {
         return localDate == null ? null : MEDIUM_DATE_FORMATTER.print(localDate);
     }
 
@@ -339,9 +359,11 @@ public class Utils {
         return dateTime == null ? null : SHORT_DATETIME_FORMATTER.print(dateTime);
     }
 
-    /** Converts a nullable {@link DateTime} to a nullable String with just the time in hours and minutes. */
-    public static @Nullable
-    String toTimeOfDayString(@Nullable DateTime dateTime) {
+    /**
+     * Converts a nullable {@link DateTime} to a nullable String with just the time in hours and
+     * minutes.
+     */
+    public static @Nullable String toTimeOfDayString(@Nullable DateTime dateTime) {
         return dateTime == null ? null : TIME_OF_DAY_FORMATTER.print(dateTime);
     }
 
@@ -378,6 +400,15 @@ public class Utils {
     public static Interval toInterval(DateTime start, DateTime stop) {
         return new Interval(start == null ? MIN_DATE : start,
             stop == null ? MAX_DATE : stop);
+    }
+
+    /** Compresses a UUID optionally to a small integer. */
+    public static Object compressUuid(String uuid) {
+        Matcher matcher = COMPRESSIBLE_UUID.matcher(uuid);
+        if (uuid.length() == 36 && matcher.matches()) {
+            return Integer.valueOf(matcher.group(1));
+        }
+        return uuid;
     }
 
     /** Expands a UUID that has been optionally compressed to a small integer. */

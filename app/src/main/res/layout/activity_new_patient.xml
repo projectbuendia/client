@@ -28,7 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/patient_creation_cancel"
+            android:text="@string/cancel"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_cancel_button"
             android:drawableStart="@drawable/ic_action_cancel"
@@ -41,7 +41,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/patient_creation_create"
+            android:text="@string/add_patient"
             android:textColor="@android:color/white"
             android:background="@drawable/bg_create_button"
             android:drawableStart="@drawable/ic_action_accept"
@@ -70,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
-                android:text="@string/patient_creation_id_label" />
+                android:text="@string/id" />
 
             <EditText
                 android:id="@+id/patient_creation_text_patient_id"
@@ -88,7 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
-                android:text="@string/patient_creation_given_name_label" />
+                android:text="@string/given_name" />
 
             <EditText
                 android:id="@+id/patient_creation_text_patient_given_name"
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
-                android:text="@string/patient_creation_family_name_label" />
+                android:text="@string/family_name" />
 
             <EditText
                 android:id="@+id/patient_creation_text_patient_family_name"
@@ -118,13 +118,12 @@
         </TableRow>
 
         <TableRow>
-
             <TextView
                 android:layout_height="85dp"
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
-                android:text="@string/patient_creation_age_label" />
+                android:text="@string/age" />
 
             <LinearLayout
                 android:layout_height="match_parent"
@@ -147,7 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_marginEnd="48dp"
                     android:gravity="center_vertical"
-                    android:text="@string/patient_creation_age_years" />
+                    android:text="@string/years" />
 
                 <EditText
                     android:id="@+id/patient_creation_age_months"
@@ -165,7 +164,7 @@
                     android:layout_width="wrap_content"
                     android:layout_marginEnd="24dp"
                     android:gravity="center_vertical"
-                    android:text="@string/patient_creation_age_months" />
+                    android:text="@string/months" />
 
             </LinearLayout>
 
@@ -178,7 +177,7 @@
                 android:layout_width="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:gravity="center_vertical"
-                android:text="@string/patient_creation_sex_label" />
+                android:text="@string/sex" />
 
             <RadioGroup
                 android:id="@+id/patient_creation_radiogroup_sex"
@@ -191,13 +190,13 @@
                     android:id="@+id/patient_creation_radiogroup_age_sex_male"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/sex_male"/>
+                    android:text="@string/male"/>
 
                 <RadioButton
                     android:id="@+id/patient_creation_radiogroup_age_sex_female"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/sex_female"/>
+                    android:text="@string/female"/>
 
             </RadioGroup>
 

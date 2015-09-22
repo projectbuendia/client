@@ -13,7 +13,7 @@ package org.projectbuendia.client.models.tasks;
 
 import android.content.ContentResolver;
 
-import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 
 import javax.inject.Singleton;
@@ -28,7 +28,7 @@ public class TaskModule {
     @Singleton TaskFactory provideAppAsyncTaskFactory(
         Server server,
         ContentResolver contentResolver,
-        ConverterPack converters) {
-        return new TaskFactory(converters, server, contentResolver);
+        LoaderSet loaderSet) {
+        return new TaskFactory(loaderSet, server, contentResolver);
     }
 }

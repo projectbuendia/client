@@ -21,7 +21,7 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.Base;
-import org.projectbuendia.client.models.converters.Converter;
+import org.projectbuendia.client.models.CursorLoader;
 
 /**
  * An {@link AsyncTask} that fetches a single item from the data store.
@@ -36,7 +36,7 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
     private final String[] mProjectionColumns;
     private final SimpleSelectionFilter<T> mFilter;
     private final String mConstraint;
-    private final Converter<T> mConverter;
+    private final CursorLoader<T> mLoader;
     private final CrudEventBus mBus;
 
     FetchItemTask(
@@ -45,14 +45,14 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
         String[] projectionColumns,
         SimpleSelectionFilter filter,
         String constraint,
-        Converter<T> converter,
+        CursorLoader<T> loader,
         CrudEventBus bus) {
         mContentResolver = contentResolver;
         mContentUri = contentUri;
         mProjectionColumns = projectionColumns;
         mFilter = filter;
         mConstraint = constraint;
-        mConverter = converter;
+        mLoader = loader;
         mBus = bus;
     }
 
@@ -70,7 +70,7 @@ public class FetchItemTask<T extends Base> extends AsyncTask<Void, Void, Object>
                 return new ItemFetchFailedEvent("no results");
             }
 
-            return new ItemFetchedEvent<>(mConverter.fromCursor(cursor));
+            return new ItemFetchedEvent<>(mLoader.fromCursor(cursor));
         } finally {
             if (cursor != null) {
                 cursor.close();

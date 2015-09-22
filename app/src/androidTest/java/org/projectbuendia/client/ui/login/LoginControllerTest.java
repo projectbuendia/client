@@ -25,8 +25,8 @@ import org.projectbuendia.client.events.user.KnownUsersLoadFailedEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.events.user.UserAddFailedEvent;
 import org.projectbuendia.client.events.user.UserAddedEvent;
-import org.projectbuendia.client.net.json.JsonNewUser;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonNewUser;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.ui.FakeEventBus;
 import org.projectbuendia.client.user.UserManager;
 

@@ -21,8 +21,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.json.JsonPatient;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 import org.projectbuendia.client.utils.Utils;
 
@@ -33,7 +33,7 @@ public class PatientDelta {
     public Optional<String> givenName = Optional.absent();
     public Optional<String> familyName = Optional.absent();
     public Optional<Integer> gender = Optional.absent();
-    public Optional<DateTime> birthdate = Optional.absent();
+    public Optional<LocalDate> birthdate = Optional.absent();
     public Optional<LocalDate> admissionDate = Optional.absent();
     public Optional<LocalDate> firstSymptomDate = Optional.absent();
     public Optional<String> assignedLocationUuid = Optional.absent();
@@ -44,7 +44,7 @@ public class PatientDelta {
         ContentValues cv = new ContentValues();
 
         if (id.isPresent()) {
-            cv.put(Contracts.Patients._ID, id.get());
+            cv.put(Contracts.Patients.ID, id.get());
         }
         if (givenName.isPresent()) {
             cv.put(Contracts.Patients.GIVEN_NAME, givenName.get());
@@ -57,7 +57,7 @@ public class PatientDelta {
                 gender.get() == JsonPatient.GENDER_MALE ? "M" : "F");
         }
         if (birthdate.isPresent()) {
-            cv.put(Contracts.Patients.BIRTHDATE, birthdate.toString());
+            cv.put(Contracts.Patients.BIRTHDATE, birthdate.get().toString());
         }
         if (assignedLocationUuid.isPresent()) {
             cv.put(Contracts.Patients.LOCATION_UUID, assignedLocationUuid.get());
@@ -96,13 +96,13 @@ public class PatientDelta {
             if (birthdate.isPresent()) {
                 json.put(
                     Server.PATIENT_BIRTHDATE_KEY,
-                    Utils.toString(birthdate.get().toLocalDate()));
+                    Utils.toString(birthdate.get()));
             }
 
             JSONArray observations = new JSONArray();
             if (admissionDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, Concepts.ADMISSION_DATE_UUID);
+                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.ADMISSION_DATE_UUID);
                 observation.put(
                     Server.OBSERVATION_ANSWER_DATE,
                     Utils.toString(admissionDate.get()));
@@ -110,7 +110,7 @@ public class PatientDelta {
             }
             if (firstSymptomDate.isPresent()) {
                 JSONObject observation = new JSONObject();
-                observation.put(Server.OBSERVATION_QUESTION_UUID, Concepts.FIRST_SYMPTOM_DATE_UUID);
+                observation.put(Server.OBSERVATION_QUESTION_UUID, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
                 observation.put(
                     Server.OBSERVATION_ANSWER_DATE,
                     Utils.toString(firstSymptomDate.get()));

@@ -18,6 +18,7 @@ import org.projectbuendia.client.events.CrudEventBus;
 import org.projectbuendia.client.events.actions.PatientChartRequestedEvent;
 import org.projectbuendia.client.events.actions.SyncCancelRequestedEvent;
 import org.projectbuendia.client.events.data.AppLocationTreeFetchedEvent;
+import org.projectbuendia.client.events.data.ItemCreatedEvent;
 import org.projectbuendia.client.events.data.TypedCursorFetchedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
@@ -35,6 +36,7 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
+import org.projectbuendia.client.utils.Utils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -67,9 +69,11 @@ public class PatientSearchController {
         new MatchingFilterGroup<Patient>(OR, new IdFilter(), new NameFilter());
     private TypedCursor<Patient> mPatientsCursor;
     private final SyncSubscriber mSyncSubscriber;
+    private final CreationSubscriber mCreationSubscriber;
 
     public interface Ui {
         void setPatients(TypedCursor<Patient> patients);
+        void finishAndGoToPatientChart(String patientUuid);
     }
 
     public interface FragmentUi {
@@ -109,6 +113,7 @@ public class PatientSearchController {
 
         mSyncSubscriber = new SyncSubscriber();
         mLocationTreeUpdatedSubscriber = new LocationTreeUpdatedSubscriber();
+        mCreationSubscriber = new CreationSubscriber();
     }
 
     /**
@@ -118,6 +123,7 @@ public class PatientSearchController {
     public void init() {
         mGlobalEventBus.register(mSyncSubscriber);
         mCrudEventBus.register(mLocationTreeUpdatedSubscriber);
+        mCrudEventBus.register(mCreationSubscriber);
         mModel.fetchLocationTree(mCrudEventBus, mLocale);
     }
 
@@ -125,6 +131,7 @@ public class PatientSearchController {
     public void suspend() {
         mGlobalEventBus.unregister(mSyncSubscriber);
         mCrudEventBus.unregister(mLocationTreeUpdatedSubscriber);
+        mCrudEventBus.unregister(mCreationSubscriber);
         // Close any outstanding cursors. New results will be fetched when requested.
         if (mPatientsCursor != null) {
             mPatientsCursor.close();
@@ -285,6 +292,13 @@ public class PatientSearchController {
      */
     public void setLocations(LocationTree locationTree) {
         mLocationTree = locationTree;
+    }
+
+    private class CreationSubscriber {
+        public void onEventMainThread(ItemCreatedEvent<Patient> event) {
+            Utils.logEvent("add_patient_succeeded");
+            mUi.finishAndGoToPatientChart(event.item.uuid);
+        }
     }
 
     private class SyncSubscriber {

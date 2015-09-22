@@ -86,11 +86,11 @@ final class LocationListController {
 
         void setLocations(LocationTree locationTree, List<Location> locations);
 
-        void setPresentPatientCount(int patientCount);
+        void setPresentPatientCount(long patientCount);
 
-        void setTriagePatientCount(int patientCount);
+        void setTriagePatientCount(long patientCount);
 
-        void setDischargedPatientCount(int dischargedPatientCount);
+        void setDischargedPatientCount(long dischargedPatientCount);
 
         void setBusyLoading(boolean busy);
 
@@ -161,9 +161,9 @@ final class LocationListController {
             fragmentUi.setBusyLoading(!hasValidTree);
 
             if (hasValidTree) {
-                int dischargedPatientCount = (mDischargedZone == null)
+                long dischargedPatientCount = (mDischargedZone == null)
                     ? 0 : mLocationTree.getTotalPatientCount(mDischargedZone);
-                int totalPatientCount =
+                long totalPatientCount =
                     mLocationTree.getTotalPatientCount(mLocationTree.getRoot());
                 fragmentUi.setLocations(
                     mLocationTree,
@@ -346,7 +346,7 @@ final class LocationListController {
 
             // Update the search controller immediately -- it does not listen for location updates
             // on this controller's bus and would otherwise be unaware of changes.
-            // TODO/deprecate: Remove -- likely unnecessary.
+            // TODO/cleanup: Remove -- likely unnecessary.
             mPatientSearchController.setLocations(mLocationTree);
         }
     }

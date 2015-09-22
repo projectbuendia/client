@@ -9,10 +9,11 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.projectbuendia.client.models.ChartItem;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.utils.Logger;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,11 +75,11 @@ public class PebbleExtension extends AbstractExtension {
 
     static class AvgFilter extends ZeroArgFilter {
         @Override public @Nullable Object apply(Object input, Map<String, Object> args) {
-            Collection<LocalizedObs> values = (Collection<LocalizedObs>) input;
+            Collection<ObsValue> values = (Collection<ObsValue>) input;
             if (values == null || values.isEmpty()) return null;
             double sum = 0;
             int count = 0;
-            for (LocalizedObs obs : values) {
+            for (ObsValue obs : values) {
                 try {
                     double value = Double.valueOf(obs.value);
                     sum += value;
@@ -112,14 +113,16 @@ public class PebbleExtension extends AbstractExtension {
     static class ObsFormatFilter implements Filter {
         @Override
         public List<String> getArgumentNames() {
-            return ImmutableList.of("pattern");
+            return ImmutableList.of("format");
         }
 
         @Override
         public Object apply(Object input, Map<String, Object> args) {
-            List<Object> objects = new ArrayList<>();
+            Object arg = args.get("format");
+            if (arg == null) return "";  // we use null to represent an empty format
 
-            // ObsFormat takes an array of LocalizedObs instances with a 1-based index.
+            // ObsFormat expects an array of ObsValue instances with a 1-based index.
+            List<Object> objects = new ArrayList<>();
             objects.add(null);
             if (input instanceof Object[] || input instanceof Collection) {
                 Collections.addAll(objects, (Object[]) input);
@@ -131,20 +134,19 @@ public class PebbleExtension extends AbstractExtension {
             // to sub-formatters.  To work around this, replace all nulls with a sentinel object.
             // (See the ObsOutputFormat.format() method, which checks for NULL_OBS.)
             for (int i = 0; i < array.length; i++) {
-                if (array[i] == null) {
-                    array[i] = ObsFormat.NULL_OBS;
-                }
+                array[i] = array[i] == null ? ObsFormat.NULL_OBS : array[i];
             }
-            String pattern = (String) args.get("pattern");
+
+            Format format = arg instanceof String ? new ObsFormat((String) arg) : (Format) arg;
             try {
-                return new ObsFormat(pattern).format(array);
+                return format.format(array);
             } catch (Throwable e) {
                 while ((e instanceof InvocationTargetException ||
                         e.getCause() instanceof InvocationTargetException) && e.getCause() != e) {
                     e = e.getCause();
                 }
-                LOG.e(e, "Could not format data with pattern " + pattern);
-                return pattern;  // make the problem visible on the page to aid fixes
+                LOG.e(e, "Could not apply format " + arg);
+                return arg;  // make the problem visible on the page to aid fixes
             }
         }
     }
@@ -186,7 +188,7 @@ public class PebbleExtension extends AbstractExtension {
         @Override public @Nullable Object execute(Map<String, Object> args) {
             ChartItem itemDef = (ChartItem) args.get("row");
             Column column = (Column) args.get("column");
-            SortedSet<LocalizedObs> obsSet = column.obsMap.get(itemDef.conceptUuids[0]);
+            SortedSet<ObsValue> obsSet = column.obsMap.get(itemDef.conceptUuids[0]);
             return obsSet.isEmpty() ? null : obsSet.last();
         }
     }

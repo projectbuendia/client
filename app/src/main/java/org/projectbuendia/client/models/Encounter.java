@@ -12,14 +12,15 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.json.JsonEncounter;
-import org.projectbuendia.client.sync.providers.Contracts.Observations;
+import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.providers.Contracts.Observations;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.ArrayList;
@@ -126,12 +127,11 @@ public class Encounter extends Base<String> {
      */
     public ContentValues[] toContentValuesArray() {
         ContentValues[] cvs = new ContentValues[observations.length + orderUuids.length];
-        long timestampSec = timestamp.getMillis()/1000;
         for (int i = 0; i < observations.length; i++) {
             Observation obs = observations[i];
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, obs.conceptUuid);
-            cv.put(Observations.ENCOUNTER_TIME, timestampSec);
+            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, obs.value);
@@ -140,7 +140,7 @@ public class Encounter extends Base<String> {
         for (int i = 0; i < orderUuids.length; i++) {
             ContentValues cv = new ContentValues();
             cv.put(Observations.CONCEPT_UUID, AppModel.ORDER_EXECUTED_CONCEPT_UUID);
-            cv.put(Observations.ENCOUNTER_TIME, timestampSec);
+            cv.put(Observations.ENCOUNTER_MILLIS, timestamp.getMillis());
             cv.put(Observations.ENCOUNTER_UUID, encounterUuid);
             cv.put(Observations.PATIENT_UUID, patientUuid);
             cv.put(Observations.VALUE, orderUuids[i]);
@@ -178,6 +178,41 @@ public class Encounter extends Base<String> {
             } catch (Exception e) {
                 return Type.NON_DATE;
             }
+        }
+    }
+
+    /**
+     * An {@link CursorLoader} that loads {@link Encounter}s. Expects the {@link Cursor} to
+     * contain only a single encounter, represented by multiple observations, with one observation per
+     * row.
+     * <p/>
+     * <p>Unlike other {@link CursorLoader}s, {@link Encounter.Loader} must be instantiated
+     * once per patient, since {@link Encounter} contains the patient's UUID as one of its fields,
+     * which is not present in the database representation of an encounter.
+     */
+    public static class Loader implements CursorLoader<Encounter> {
+        private String mPatientUuid;
+
+        public Loader(String patientUuid) {
+            mPatientUuid = patientUuid;
+        }
+
+        @Override public Encounter fromCursor(Cursor cursor) {
+            final String encounterUuid = cursor.getString(
+                cursor.getColumnIndex(Observations.ENCOUNTER_UUID));
+            final long millis = cursor.getLong(
+                cursor.getColumnIndex(Observations.ENCOUNTER_MILLIS));
+            List<Observation> observations = new ArrayList<>();
+            cursor.move(-1);
+            while (cursor.moveToNext()) {
+                String value = cursor.getString(cursor.getColumnIndex(Observations.VALUE));
+                observations.add(new Observation(
+                    cursor.getString(cursor.getColumnIndex(Observations.CONCEPT_UUID)),
+                    value, Observation.estimatedTypeFor(value)
+                ));
+            }
+            return new Encounter(mPatientUuid, encounterUuid, new DateTime(millis),
+                observations.toArray(new Observation[observations.size()]), null);
         }
     }
 }

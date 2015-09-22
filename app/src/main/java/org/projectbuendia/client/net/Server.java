@@ -19,13 +19,13 @@ import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.net.json.JsonEncounter;
-import org.projectbuendia.client.net.json.JsonForm;
-import org.projectbuendia.client.net.json.JsonLocation;
-import org.projectbuendia.client.net.json.JsonNewUser;
-import org.projectbuendia.client.net.json.JsonOrder;
-import org.projectbuendia.client.net.json.JsonPatient;
-import org.projectbuendia.client.net.json.JsonUser;
+import org.projectbuendia.client.json.JsonEncounter;
+import org.projectbuendia.client.json.JsonForm;
+import org.projectbuendia.client.json.JsonLocation;
+import org.projectbuendia.client.json.JsonNewUser;
+import org.projectbuendia.client.json.JsonOrder;
+import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.json.JsonUser;
 
 import java.util.List;
 

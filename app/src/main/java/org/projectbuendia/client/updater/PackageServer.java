@@ -18,7 +18,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.net.Common;
 import org.projectbuendia.client.net.GsonRequest;
 import org.projectbuendia.client.net.VolleySingleton;
-import org.projectbuendia.client.net.json.JsonUpdateInfo;
+import org.projectbuendia.client.json.JsonUpdateInfo;
 
 import java.util.List;
 

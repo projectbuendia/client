@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2015 The Project Buendia Authors -->
+<!-- -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not -->
+<!-- use this file except in compliance with the License.  You may obtain a copy -->
+<!-- of the License at: http://www.apache.org/licenses/LICENSE-2.0 -->
+<!-- -->
+<!-- Unless required by applicable law or agreed to in writing, software distrib- -->
+<!-- uted under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES -->
+<!-- OR CONDITIONS OF ANY KIND, either express or implied.  See the License for -->
+<!-- specific language governing permissions and limitations under the License. -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+  <TableLayout
+      android:padding="16dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:stretchColumns="1">
+
+    <TableRow>
+      <TextView
+          android:gravity="center_vertical"
+          android:layout_height="80sp"
+          android:layout_marginEnd="24sp"
+          android:labelFor="@+id/patient_id"
+          android:text="@string/id" />
+      <EditText
+          android:id="@+id/patient_id"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:inputType="numberDecimal"
+          android:digits="0123456789"
+          android:singleLine="true"
+          android:ems="10" />
+    </TableRow>
+
+    <TableRow>
+      <TextView
+          android:gravity="center_vertical"
+          android:layout_height="80sp"
+          android:layout_marginEnd="24sp"
+          android:labelFor="@+id/patient_given_name"
+          android:text="@string/given_name" />
+      <EditText
+          android:id="@+id/patient_given_name"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:inputType="textCapWords|textPersonName"
+          android:singleLine="true"
+          android:ems="10" />
+    </TableRow>
+
+    <TableRow>
+      <TextView
+          android:gravity="center_vertical"
+          android:layout_height="80sp"
+          android:layout_marginEnd="24sp"
+          android:labelFor="@+id/patient_family_name"
+          android:text="@string/family_name" />
+      <EditText
+          android:id="@+id/patient_family_name"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:inputType="textCapWords|textPersonName"
+          android:singleLine="true"
+          android:ems="10" />
+    </TableRow>
+
+    <TableRow>
+      <TextView
+          android:gravity="center_vertical"
+          android:layout_height="80sp"
+          android:layout_marginEnd="24sp"
+          android:labelFor="@+id/patient_age_years"
+          android:text="@string/age" />
+
+      <LinearLayout
+          android:layout_height="match_parent"
+          android:gravity="center_vertical">
+        <EditText
+            android:id="@+id/patient_age_years"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            android:singleLine="true"
+            android:ems="2"
+            android:maxLength="3"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginEnd="24sp"
+            android:text="@string/years"/>
+        <EditText
+            android:id="@+id/patient_age_months"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            android:singleLine="true"
+            android:ems="2"
+            android:maxLength="3"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginEnd="24sp"
+            android:text="@string/months"/>
+      </LinearLayout>
+    </TableRow>
+
+    <TableRow>
+      <TextView
+          android:gravity="center_vertical"
+          android:layout_height="80sp"
+          android:layout_marginEnd="24sp"
+          android:labelFor="@+id/patient_sex"
+          android:text="@string/sex" />
+
+      <RadioGroup
+          android:id="@+id/patient_sex"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:gravity="center_vertical"
+          android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/patient_sex_female"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/female" />
+        <RadioButton
+            android:id="@+id/patient_sex_male"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/male" />
+        <!--
+        <RadioButton
+            android:id="@+id/sex_other"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/other" />
+        <RadioButton
+            android:id="@+id/sex_unknown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/unknown" />
+        -->
+      </RadioGroup>
+    </TableRow>
+
+  </TableLayout>
+</ScrollView>

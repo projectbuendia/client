@@ -24,9 +24,9 @@ import org.projectbuendia.client.utils.PatientCountDisplay;
 public class SingleLocationActivity extends BaseSearchablePatientListActivity {
     private String mLocationName;
     private String mLocationUuid;
-    private int mPatientCount;
+    private long mPatientCount;
 
-    public static void start(Context caller, String locationUuid, String locationName, int patientCount) {
+    public static void start(Context caller, String locationUuid, String locationName, long patientCount) {
         Intent intent = new Intent(caller, SingleLocationActivity.class);
         intent.putExtra("uuid", locationUuid);
         intent.putExtra("name", locationName);
@@ -39,7 +39,7 @@ public class SingleLocationActivity extends BaseSearchablePatientListActivity {
 
         mLocationUuid = getIntent().getStringExtra("uuid");
         mLocationName = getIntent().getStringExtra("name");
-        mPatientCount = getIntent().getIntExtra("count", 0);
+        mPatientCount = getIntent().getLongExtra("count", 0);
         setTitle(PatientCountDisplay.getPatientCountTitle(this, mPatientCount, mLocationName));
         setContentView(R.layout.activity_round);
         getSearchController().setLocationFilter(mLocationUuid);

@@ -35,7 +35,7 @@ import org.projectbuendia.client.events.sync.SyncSucceededEvent;
 import org.projectbuendia.client.events.user.KnownUsersLoadedEvent;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.net.json.JsonPatient;
+import org.projectbuendia.client.json.JsonPatient;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.matchers.TestCaseWithMatcherMethods;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
@@ -288,6 +288,7 @@ public class FunctionalTestCase extends TestCaseWithMatcherMethods<LoginActivity
         inUserLoginGoToLocationSelection();
         inLocationSelectionAddNewPatient(delta, LOCATION_NAME); // add the patient
         sDemoPatientId = id; // record ID so future tests can reuse the patient
+        pressBack(); // return to location list
         pressBack(); // return to user login activity
     }
 

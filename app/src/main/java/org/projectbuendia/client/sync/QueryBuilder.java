@@ -18,9 +18,14 @@ import com.google.common.collect.ObjectArrays;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 /** Constructs and executes SQL queries. */
+// TODO/cleanup: Get rid of this class!  In most cases, a query is invoked on a ContentResolver
+// with separate table, projection, condition, and order arguments -- which then invokes a
+// ProviderDelegate, which instantiates a QueryBuilder, invokes its builder methods to pass in
+// the projection, condition, and arguments one by one, and then invokes its select() method,
+// which just calls db.query with separate table, projection, condition, and order arguments again!
 public class QueryBuilder {
     Contracts.Table mTable;
     String mCondition = "1";

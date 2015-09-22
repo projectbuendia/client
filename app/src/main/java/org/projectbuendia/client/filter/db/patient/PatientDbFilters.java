@@ -15,7 +15,7 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.AllFilter;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Location;
 import org.projectbuendia.client.models.LocationTree;
 
@@ -28,8 +28,8 @@ public final class PatientDbFilters {
     private static final SimpleSelectionFilter[] OTHER_FILTERS = new SimpleSelectionFilter[] {
         new ConceptFilter(
             App.getInstance().getString(R.string.pregnant),
-            Concepts.PREGNANCY_UUID,
-            Concepts.YES_UUID),
+            ConceptUuids.PREGNANCY_UUID,
+            ConceptUuids.YES_UUID),
         new AgeFilter(5),
         new AgeFilter(2)
     };

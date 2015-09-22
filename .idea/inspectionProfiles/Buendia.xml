@@ -43,7 +43,7 @@
     <inspection_tool class="InstanceMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_regex" value="[a-z][a-z0-9]*([A-Z][a-z0-9]+)*[A-Z]?" />
       <option name="m_minLength" value="2" />
-      <option name="m_maxLength" value="32" />
+      <option name="m_maxLength" value="40" />
     </inspection_tool>
     <inspection_tool class="InstanceVariableNamingConvention" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_regex" value="m([A-Z][a-z0-9]+)+" />

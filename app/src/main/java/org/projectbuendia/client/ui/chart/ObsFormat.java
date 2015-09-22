@@ -7,9 +7,9 @@ import org.apache.commons.lang3.text.ExtendedMessageFormat;
 import org.apache.commons.lang3.text.FormatFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.json.ConceptType;
+import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.utils.Utils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Formats an array of LocalizedObs objects according to a format string.  The format string is
+ * Formats an array of ObsValue objects according to a format string.  The format string is
  * based on the MessageFormat syntax, but is 1-based so that "{1}" is replaced with the first
  * observation, "{2} is replaced with the second, and so on.
  *
@@ -41,13 +41,13 @@ import javax.annotation.Nullable;
  * a coded answer to "YES" or "NO"; "{1,date,YYYY-mm-dd}" renders a date value, etc.
  */
 public class ObsFormat extends Format {
-    public static final LocalizedObs NULL_OBS = new LocalizedObs(0, 0, "", "", "NONE", null, null);
+    public static final ObsValue NULL_OBS = new ObsValue(0, "", "", "NONE", null, null);
 
     private static final Set<String> FALSE_CONCEPT_UUIDS = ImmutableSet.of(
-        Concepts.NO_UUID,
-        Concepts.NONE_UUID,
-        Concepts.NORMAL_UUID,
-        Concepts.UNKNOWN_UUID
+        ConceptUuids.NO_UUID,
+        ConceptUuids.NONE_UUID,
+        ConceptUuids.NORMAL_UUID,
+        ConceptUuids.UNKNOWN_UUID
     );
 
     private static final Map<String, Class<? extends Format>> FORMAT_CLASSES = new HashMap<>();
@@ -66,6 +66,7 @@ public class ObsFormat extends Format {
     public static final String ELLIPSIS = "\u2026";
     public static final String EN_DASH = "\u2013";
 
+    private String mPattern;
     private Format mFormat;
 
     /**
@@ -84,6 +85,7 @@ public class ObsFormat extends Format {
         if (pattern == null) {
             pattern = "";
         }
+        mPattern = pattern;
         // Allow plain numeric formats like "#0.00" as a shorthand for "{1,number,#0.00}".
         if (!pattern.contains("{") && (pattern.contains("#") || pattern.contains("0"))) {
             try {
@@ -97,6 +99,16 @@ public class ObsFormat extends Format {
     
     public ObsFormat(String pattern) {
         this(pattern, null);
+    }
+
+    public String toString() {
+        return mPattern;
+    }
+
+    /** Returns an ObsFormat for the given pattern, or null for a null or empty pattern. */
+    public static ObsFormat fromPattern(@Nullable String pattern) {
+        // TODO/speed: If creating ObsFormats is slow, we could cache instances here by pattern.
+        return Utils.isEmpty(pattern) ? null : new ObsFormat(pattern);
     }
 
     public Object[] getCurrentArgs() {
@@ -144,13 +156,13 @@ public class ObsFormat extends Format {
     }
 
     /**
-     * Base class for formats that format a single LocalizedObs.  Subclasses should have a
+     * Base class for formats that format a single ObsValue.  Subclasses should have a
      * public constructor that takes a single String argument, and should implement formatObs.
      */
     abstract class ObsOutputFormat extends Format {
         @Override public StringBuffer format(Object obj, @Nonnull StringBuffer buf,
                                              @Nonnull FieldPosition pos) {
-            LocalizedObs obs = (LocalizedObs) obj;
+            ObsValue obs = (ObsValue) obj;
             buf.append(formatObs(obs == NULL_OBS ? null : obs));
             return buf;
         }
@@ -164,7 +176,7 @@ public class ObsFormat extends Format {
             return mRootObsFormat.getCurrentArgs();
         }
 
-        public abstract String formatObs(@Nullable LocalizedObs obs);
+        public abstract String formatObs(@Nullable ObsValue obs);
     }
 
     /** "yes_no" format for boolean values (UUIDs).  Typical use: {1,yes_no,Present;Not present} */
@@ -180,7 +192,7 @@ public class ObsFormat extends Format {
             mNullText = parts.length >= 3 ? parts[2] : EN_DASH;
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return mNullText;
             String str = Utils.valueOrDefault(obs.value, "").trim();
             return str.isEmpty() || FALSE_CONCEPT_UUIDS.contains(str) ? mNoText : mYesText;
@@ -193,9 +205,9 @@ public class ObsFormat extends Format {
 
         public ObsAbbrFormat(String pattern) { }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
-            String name = Utils.valueOrDefault(obs.localizedValue, "");
+            String name = Utils.valueOrDefault(obs.valueName, "");
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= MAX_ABBR_CHARS) {
                 return name.substring(0, abbrevLength);
@@ -217,9 +229,9 @@ public class ObsFormat extends Format {
             }
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
-            String name = Utils.valueOrDefault(obs.localizedValue, "");
+            String name = Utils.valueOrDefault(obs.valueName, "");
             int abbrevLength = name.indexOf('.');
             if (abbrevLength >= 1 && abbrevLength <= ObsAbbrFormat.MAX_ABBR_CHARS) {
                 name = name.substring(abbrevLength + 1).trim();
@@ -236,7 +248,7 @@ public class ObsFormat extends Format {
             mFormat = new DecimalFormat(pattern);
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
             try {
                 return mFormat.format(Double.valueOf(obs.value));
@@ -258,7 +270,7 @@ public class ObsFormat extends Format {
             }
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
             String value = Utils.valueOrDefault(obs.value, "");
             return maxLength < value.length() ? value.substring(0, maxLength) + ELLIPSIS : value;
@@ -273,7 +285,7 @@ public class ObsFormat extends Format {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
             return new LocalDate(obs.value).toString(mPattern);
         }
@@ -287,7 +299,7 @@ public class ObsFormat extends Format {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
             return new DateTime(Double.valueOf(obs.value) * 1000).toString(mPattern);
         }
@@ -301,9 +313,9 @@ public class ObsFormat extends Format {
             mPattern = pattern;
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             if (obs == null) return EN_DASH;
-            return obs.encounterTime.toString(mPattern);
+            return obs.obsTime.toString(mPattern);
         }
     }
 
@@ -383,7 +395,7 @@ public class ObsFormat extends Format {
         }
 
         /** Returns true if the value of an observation matches the given condition. */
-        private boolean matches(LocalizedObs obs, String operator, String operand) {
+        private boolean matches(ObsValue obs, String operator, String operand) {
             if (operand.isEmpty()) return true;
 
             String strValue = null;
@@ -424,7 +436,7 @@ public class ObsFormat extends Format {
             return false;
         }
 
-        @Override public String formatObs(@Nullable LocalizedObs obs) {
+        @Override public String formatObs(@Nullable ObsValue obs) {
             for (Option option : mOptions) {
                 if (matches(obs, option.operator, option.operand)) {
                     return option.format.format(getRootArgs());

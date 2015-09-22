@@ -21,8 +21,8 @@ import org.projectbuendia.client.models.Patient;
  * <code>
  * ConceptFilter myFilter = new ConceptFilter(
  * "Pregnant",              // Filter description for display purposes
- * Concepts.PREGNANCY_UUID, // Concept id
- * Concepts.YES_UUID);      // Value
+ * ConceptUuids.PREGNANCY_UUID, // Concept id
+ * ConceptUuids.YES_UUID);      // Value
  * </code>
  */
 public final class ConceptFilter extends SimpleSelectionFilter<Patient> {
@@ -36,13 +36,13 @@ public final class ConceptFilter extends SimpleSelectionFilter<Patient> {
         + "         FROM observations AS obs"
         + "         INNER JOIN ("
         + "             SELECT concept_uuid, patient_uuid,"
-        + "                    max(encounter_time) AS maxtime"
+        + "                    max(encounter_millis) AS max_millis"
         + "             FROM observations"
         + "             GROUP BY patient_uuid, concept_uuid"
-        + "         ) maxs"
-        + "         ON obs.encounter_time = maxs.maxtime AND"
-        + "             obs.concept_uuid = maxs.concept_uuid AND"
-        + "             obs.patient_uuid = maxs.patient_uuid"
+        + "         ) max_times"
+        + "         ON obs.encounter_millis = max_times.max_millis AND"
+        + "             obs.concept_uuid = max_times.concept_uuid AND"
+        + "             obs.patient_uuid = max_times.patient_uuid"
         + "         WHERE obs.concept_uuid = ?"
         + "         ORDER BY obs.patient_uuid"
         + "     ) WHERE concept_value = ?"

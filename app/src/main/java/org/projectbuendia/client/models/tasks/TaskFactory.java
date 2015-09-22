@@ -23,8 +23,8 @@ import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.models.converters.Converter;
-import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.CursorLoader;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
 
 /**
@@ -32,14 +32,14 @@ import org.projectbuendia.client.net.Server;
  * operations.
  */
 public class TaskFactory {
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
 
     /** Creates a new {@link TaskFactory}. */
     public TaskFactory(
-        ConverterPack converters, Server server, ContentResolver contentResolver) {
-        mConverterPack = converters;
+        LoaderSet loaderSet, Server server, ContentResolver contentResolver) {
+        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
     }
@@ -48,34 +48,34 @@ public class TaskFactory {
     public AddPatientTask newAddPatientAsyncTask(
         PatientDelta patientDelta, CrudEventBus bus) {
         return new AddPatientTask(
-            this, mConverterPack, mServer, mContentResolver, patientDelta, bus);
+            this, mLoaderSet, mServer, mContentResolver, patientDelta, bus);
     }
 
     public DownloadSinglePatientTask newDownloadSinglePatientTask(
         String patientId, CrudEventBus bus) {
         return new DownloadSinglePatientTask(
-            this, mConverterPack, mServer, mContentResolver, patientId, bus);
+            this, mLoaderSet, mServer, mContentResolver, patientId, bus);
     }
 
     /** Creates a new {@link AppUpdatePatientTask}. */
     public AppUpdatePatientTask newUpdatePatientAsyncTask(
-        Patient originalPatient, PatientDelta patientDelta, CrudEventBus bus) {
+        String patientUuid, PatientDelta patientDelta, CrudEventBus bus) {
         return new AppUpdatePatientTask(
-            this, mConverterPack, mServer, mContentResolver, originalPatient, patientDelta, bus);
+            this, mLoaderSet, mServer, mContentResolver, patientUuid, patientDelta, bus);
     }
 
     /** Creates a new {@link AddEncounterTask}. */
     public AddEncounterTask newAddEncounterAsyncTask(
         Patient patient, Encounter encounter, CrudEventBus bus) {
         return new AddEncounterTask(
-            this, mConverterPack, mServer, mContentResolver, patient, encounter, bus);
+            this, mLoaderSet, mServer, mContentResolver, patient, encounter, bus);
     }
 
     /** Creates a new {@link AddOrderTask}. */
     public AddOrderTask newAddOrderAsyncTask(
         Order order, CrudEventBus bus) {
         return new AddOrderTask(
-            this, mConverterPack, mServer, mContentResolver, order, bus);
+            this, mLoaderSet, mServer, mContentResolver, order, bus);
     }
 
 
@@ -85,10 +85,10 @@ public class TaskFactory {
         String[] projectionColumns,
         SimpleSelectionFilter filter,
         String constraint,
-        Converter<T> converter,
+        CursorLoader<T> loader,
         CrudEventBus bus) {
         return new FetchItemTask<>(
-            mContentResolver, contentUri, projectionColumns, filter, constraint, converter,
+            mContentResolver, contentUri, projectionColumns, filter, constraint, loader,
             bus);
     }
 }

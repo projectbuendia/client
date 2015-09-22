@@ -207,12 +207,12 @@ public class LocationTree implements Observable {
     }
 
     /** Returns the total number of patients in this location and its descendant locations. */
-    public int getTotalPatientCount(Location location) {
+    public long getTotalPatientCount(Location location) {
         if (location == null) {
             return 0;
         }
 
-        int count = location.patientCount;
+        long count = location.patientCount;
         for (Location child : getChildren(location)) {
             count += getTotalPatientCount(child);
         }

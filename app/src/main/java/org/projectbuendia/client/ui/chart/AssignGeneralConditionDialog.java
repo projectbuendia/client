@@ -20,7 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import org.projectbuendia.client.R;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 
 import javax.annotation.Nullable;
 
@@ -76,7 +76,7 @@ public final class AssignGeneralConditionDialog
 
         if (mGridView != null) {
             mAdapter = new GeneralConditionAdapter(
-                mContext, Concepts.GENERAL_CONDITION_UUIDS, mCurrentConditionUuid);
+                mContext, ConceptUuids.GENERAL_CONDITION_UUIDS, mCurrentConditionUuid);
             mGridView.setAdapter(mAdapter);
             mGridView.setOnItemClickListener(this);
             mGridView.setSelection(1);

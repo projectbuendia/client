@@ -13,6 +13,7 @@ package org.projectbuendia.client.ui.matchers;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewInteraction;
@@ -94,6 +95,10 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
 
     public static void click(DataInteraction di) {
         di.perform(ViewActions.click());
+    }
+
+    public static void openActionBarOptionsMenu() {
+        Espresso.openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
     }
 
     public static void scrollToAndClick(ViewInteraction vi) {

@@ -15,28 +15,26 @@ import android.content.ContentValues;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.json.JsonForm;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.json.JsonForm;
+import org.projectbuendia.client.providers.Contracts;
 
 import javax.annotation.concurrent.Immutable;
 
 /** An order in the app model. */
 @Immutable
 public final class Form extends Base<String> implements Comparable<Form> {
-    public final String id;
     public final String uuid;
     public final String name;
     public final String version;
 
-    public Form(String id, String uuid, String name, String version) {
-        this.id = id;
+    public Form(String uuid, String name, String version) {
         this.uuid = uuid;
         this.name = name;
         this.version = version;
     }
 
     public static Form fromJson(JsonForm form) {
-        return new Form(form.id, form.uuid, form.name, form.version);
+        return new Form(form.uuid, form.name, form.version);
     }
 
     public int compareTo(Form other) {
@@ -47,7 +45,6 @@ public final class Form extends Base<String> implements Comparable<Form> {
 
     public JSONObject toJson() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put("id", id);
         json.put("uuid", uuid);
         json.put("name", name);
         json.put("version", version);
@@ -56,7 +53,6 @@ public final class Form extends Base<String> implements Comparable<Form> {
 
     public ContentValues toContentValues() {
         ContentValues cv = new ContentValues();
-        cv.put(Contracts.Forms._ID, id);
         cv.put(Contracts.Forms.UUID, uuid);
         cv.put(Contracts.Forms.NAME, name);
         cv.put(Contracts.Forms.VERSION, version);

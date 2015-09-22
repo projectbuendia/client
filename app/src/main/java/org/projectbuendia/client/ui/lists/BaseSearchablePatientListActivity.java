@@ -31,15 +31,16 @@ import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.TypedCursor;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.BaseLoggedInActivity;
+import org.projectbuendia.client.ui.BigToast;
 import org.projectbuendia.client.ui.LoadingState;
 import org.projectbuendia.client.ui.UpdateNotificationController;
+import org.projectbuendia.client.ui.chart.PatientChartActivity;
+import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
-import org.projectbuendia.client.ui.newpatient.NewPatientActivity;
 import org.projectbuendia.client.utils.EventBusWrapper;
 import org.projectbuendia.client.utils.Utils;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
@@ -52,7 +53,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
-    @Inject Provider<CrudEventBus> mCrudEventBusProvider;
+    @Inject CrudEventBus mCrudEventBus;
     @Inject SyncManager mSyncManager;
 
     private PatientSearchController mSearchController;
@@ -77,7 +78,8 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
 
                 @Override public boolean onMenuItemClick(MenuItem menuItem) {
                     Utils.logEvent("add_patient_pressed");
-                    NewPatientActivity.start(BaseSearchablePatientListActivity.this);
+                    EditPatientDialogFragment.newInstance(null)
+                        .show(getSupportFragmentManager(), null);
                     return true;
                 }
             });
@@ -143,7 +145,7 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         App.getInstance().inject(this);
         mSearchController = new PatientSearchController(
             new SearchUi(),
-            mCrudEventBusProvider.get(),
+            mCrudEventBus,
             new EventBusWrapper(mEventBus),
             mAppModel,
             mSyncManager,
@@ -175,6 +177,12 @@ public abstract class BaseSearchablePatientListActivity extends BaseLoggedInActi
         @Override public void setPatients(TypedCursor<Patient> patients) {
             // Delegate to implementers.
             BaseSearchablePatientListActivity.this.setPatients(patients);
+        }
+
+        @Override public void finishAndGoToPatientChart(String patientUuid) {
+            BigToast.show(BaseSearchablePatientListActivity.this, R.string.patient_creation_success);
+            finish();
+            PatientChartActivity.start(BaseSearchablePatientListActivity.this, patientUuid);
         }
     }
 

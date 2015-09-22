@@ -16,11 +16,8 @@ import org.projectbuendia.client.resolvables.ResZone;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Defines a hardcoded set of possible zones returned by the server and semantics/UI about those
- * zones. Over time, hardcoded UUID's should be phased out and replaced with modular configuration,
- * either on the server or the client.
- */
+/** Defines a hardcoded set of possible zones returned by the server and their semantics and UI. */
+// TODO/robustness: Get rid of these constants and use the actual locations on the server!
 public class Zones {
 
     public static final String CONFIRMED_ZONE_UUID = "b9038895-9c9d-4908-9e0d-51fd535ddd3c";

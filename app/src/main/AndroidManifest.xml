@@ -37,7 +37,7 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
+        android:name="android.support.test.runner.AndroidJUnitRunner"
         android:targetPackage="org.projectbuendia.client" />
 
     <application
@@ -66,7 +66,7 @@
 
         <!-- Content Provider for medical records. -->
         <provider
-            android:name=".sync.providers.BuendiaProvider"
+            android:name=".providers.BuendiaProvider"
             android:authorities="@string/content_authority"
             android:exported="false" />
 
@@ -125,12 +125,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.lists.FilteredPatientListActivity" />
-        </activity>
-        <activity
-            android:name=".ui.newpatient.NewPatientActivity"
-            android:label="@string/title_activity_patient_add"
-            android:screenOrientation="userPortrait"
-            android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity
             android:name=".ui.lists.SingleLocationActivity"

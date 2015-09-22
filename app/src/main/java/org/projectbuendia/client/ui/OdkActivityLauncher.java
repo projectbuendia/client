@@ -52,8 +52,9 @@ import org.projectbuendia.client.net.OdkDatabase;
 import org.projectbuendia.client.net.OdkXformSyncTask;
 import org.projectbuendia.client.net.OpenMrsXformIndexEntry;
 import org.projectbuendia.client.net.OpenMrsXformsConnection;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
+import org.projectbuendia.client.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -74,7 +75,8 @@ import de.greenrobot.event.EventBus;
 
 import static android.provider.BaseColumns._ID;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.CONTENT_URI;
-import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.INSTANCE_FILE_PATH;
+import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns
+    .INSTANCE_FILE_PATH;
 import static org.odk.collect.android.provider.InstanceProviderAPI.InstanceColumns.JR_FORM_ID;
 
 /** Convenience class for launching ODK to display an Xform. */
@@ -397,8 +399,7 @@ public class OdkActivityLauncher {
 
             DateTime encounterTime =
                 ISODateTimeFormat.dateTime().parseDateTime((String) dateTimeValue.getValue());
-            long secondsSinceEpoch = encounterTime.getMillis()/1000L;
-            common.put(Contracts.Observations.ENCOUNTER_TIME, secondsSinceEpoch);
+            common.put(Contracts.Observations.ENCOUNTER_MILLIS, encounterTime.getMillis());
             common.put(Contracts.Observations.ENCOUNTER_UUID, UUID.randomUUID().toString());
             common.put(Contracts.Observations.TEMP_CACHE, 1);
         } catch (IllegalArgumentException e) {
@@ -443,16 +444,16 @@ public class OdkActivityLauncher {
         }
 
         String inClause = Joiner.on(",").join(xformConceptIds);
-        // Get a map from client ids to UUIDs from our local concept database.
-        HashMap<String, String> idToUuid = new HashMap<>();
+        // Get a map from XForm ids to UUIDs from our local concept database.
+        HashMap<String, String> xformIdToUuid = new HashMap<>();
         Cursor cursor = resolver.query(Contracts.Concepts.CONTENT_URI,
-            new String[] {Contracts.Concepts._ID, Contracts.Concepts.XFORM_ID},
+            new String[] {Contracts.Concepts.UUID, Contracts.Concepts.XFORM_ID},
             Contracts.Concepts.XFORM_ID + " IN (" + inClause + ")",
             null, null);
         try {
             while (cursor.moveToNext()) {
-                idToUuid.put(cursor.getString(cursor.getColumnIndex(Contracts.Concepts.XFORM_ID)),
-                    cursor.getString(cursor.getColumnIndex(Contracts.Concepts._ID)));
+                xformIdToUuid.put(Utils.getString(cursor, Contracts.Concepts.XFORM_ID),
+                    Utils.getString(cursor, Contracts.Concepts.UUID));
             }
         } finally {
             cursor.close();
@@ -461,10 +462,10 @@ public class OdkActivityLauncher {
         // Remap concept ids to uuids, skipping anything we can't remap.
         for (Iterator<ContentValues> i = toInsert.iterator(); i.hasNext(); ) {
             ContentValues values = i.next();
-            if (!mapIdToUuid(idToUuid, values, Contracts.Observations.CONCEPT_UUID)) {
+            if (!mapIdToUuid(xformIdToUuid, values, Contracts.Observations.CONCEPT_UUID)) {
                 i.remove();
             }
-            mapIdToUuid(idToUuid, values, Contracts.Observations.VALUE);
+            mapIdToUuid(xformIdToUuid, values, Contracts.Observations.VALUE);
         }
         resolver.bulkInsert(Contracts.Observations.CONTENT_URI,
             toInsert.toArray(new ContentValues[toInsert.size()]));

@@ -58,7 +58,7 @@ public class LoginActivity extends BaseActivity {
             new Ui(),
             fragment.getFragmentUi());
 
-        // TODO/refactor: Consider refactoring out some common code between here and tent selection.
+        // TODO/cleanup: Consider factoring out some common code between here and tent selection.
         mSyncFailedDialog = new AlertDialog.Builder(this)
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setTitle(getString(R.string.sync_failed_dialog_title))

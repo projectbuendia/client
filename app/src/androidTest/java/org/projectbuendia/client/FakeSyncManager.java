@@ -20,7 +20,7 @@ import org.projectbuendia.client.sync.SyncManager;
 public class FakeSyncManager extends SyncManager {
     private boolean mSyncing;
 
-    // TODO/refactor: Create common interface between SyncManager and this class.
+    // TODO/cleanup: Create a common interface between SyncManager and this class.
     public FakeSyncManager() {
         super(null);
     }

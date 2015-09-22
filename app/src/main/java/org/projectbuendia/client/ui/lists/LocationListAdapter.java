@@ -76,12 +76,11 @@ public class LocationListAdapter extends ArrayAdapter<Location> {
         }
 
         Location location = getItem(position);
-        // TODO/generalize: Make this more robust. Currently, this line only works if 'location' is
-        // a tent; otherwise zone is ResZone.UNKNOWN
+        // TODO/robustness: This line only works if 'location' is a tent; otherwise zone is ResZone.UNKNOWN.
         ResZone.Resolved zone = Zones.getResZone(
             location.parentUuid).resolve(mContext.getResources());
 
-        int count = mLocationTree.getTotalPatientCount(location);
+        long count = mLocationTree.getTotalPatientCount(location);
         holder.mButton.setTitle(location.toString());
         holder.mButton.setSubtitle("" + count);
         holder.mButton.setBackgroundColor(zone.getBackgroundColor());

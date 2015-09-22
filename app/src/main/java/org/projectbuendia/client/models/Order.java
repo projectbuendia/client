@@ -12,13 +12,14 @@
 package org.projectbuendia.client.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.projectbuendia.client.net.json.JsonOrder;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.json.JsonOrder;
+import org.projectbuendia.client.providers.Contracts;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -54,7 +55,7 @@ public final class Order extends Base<String> implements Comparable<Order> {
 
     public static Order fromJson(JsonOrder order) {
         return new Order(order.uuid, order.patient_uuid, order.instructions,
-            order.start, order.stop);
+            order.start_millis, order.stop_millis);
     }
 
     @Override public int compareTo(@NonNull Order other) {
@@ -79,8 +80,22 @@ public final class Order extends Base<String> implements Comparable<Order> {
         cv.put(Contracts.Orders.UUID, uuid);
         cv.put(Contracts.Orders.PATIENT_UUID, patientUuid);
         cv.put(Contracts.Orders.INSTRUCTIONS, instructions);
-        cv.put(Contracts.Orders.START_TIME, start.getMillis());
-        cv.put(Contracts.Orders.STOP_TIME, stop == null ? null : stop.getMillis());
+        cv.put(Contracts.Orders.START_MILLIS, start.getMillis());
+        cv.put(Contracts.Orders.STOP_MILLIS, stop == null ? null : stop.getMillis());
         return cv;
+    }
+
+    /** An {@link CursorLoader} that reads a Cursor and creates an {@link Order}. */
+    @Immutable
+    public static class Loader implements CursorLoader<Order> {
+        @Override public Order fromCursor(Cursor cursor) {
+            return new Order(
+                cursor.getString(cursor.getColumnIndex(Contracts.Orders.UUID)),
+                cursor.getString(cursor.getColumnIndex(Contracts.Orders.PATIENT_UUID)),
+                cursor.getString(cursor.getColumnIndex(Contracts.Orders.INSTRUCTIONS)),
+                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.START_MILLIS)),
+                cursor.getLong(cursor.getColumnIndex(Contracts.Orders.STOP_MILLIS))
+            );
+        }
     }
 }

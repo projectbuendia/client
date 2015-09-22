@@ -19,7 +19,7 @@ import java.util.Date;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
-/** Tests for {@link NewPatientActivity}. */
+/** Tests for adding a new patient. */
 public class NewPatientActivityTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with a location. */

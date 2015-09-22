@@ -16,7 +16,7 @@ import org.projectbuendia.client.R;
 import org.projectbuendia.client.filter.db.SimpleSelectionFilter;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.Zones;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 
 /**
  * Matches patients that are present (not discharged). This filter does NOT account for any

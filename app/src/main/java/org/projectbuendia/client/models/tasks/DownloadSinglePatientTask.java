@@ -23,10 +23,10 @@ import org.projectbuendia.client.events.data.ItemFetchFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.filter.db.patient.UuidFilter;
 import org.projectbuendia.client.models.Patient;
-import org.projectbuendia.client.models.converters.ConverterPack;
+import org.projectbuendia.client.models.LoaderSet;
 import org.projectbuendia.client.net.Server;
-import org.projectbuendia.client.net.json.JsonPatient;
-import org.projectbuendia.client.sync.providers.Contracts.Patients;
+import org.projectbuendia.client.json.JsonPatient;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.Logger;
 
 import java.util.concurrent.ExecutionException;
@@ -43,7 +43,7 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
     private static final Logger LOG = Logger.create();
 
     private final TaskFactory mTaskFactory;
-    private final ConverterPack mConverterPack;
+    private final LoaderSet mLoaderSet;
     private final Server mServer;
     private final ContentResolver mContentResolver;
     private final String mPatientId;
@@ -54,13 +54,13 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
     /** Creates a new {@link DownloadSinglePatientTask}. */
     public DownloadSinglePatientTask(
         TaskFactory taskFactory,
-        ConverterPack converters,
+        LoaderSet loaderSet,
         Server server,
         ContentResolver contentResolver,
         String patientId,
         CrudEventBus bus) {
         mTaskFactory = taskFactory;
-        mConverterPack = converters;
+        mLoaderSet = loaderSet;
         mServer = server;
         mContentResolver = contentResolver;
         mPatientId = patientId;
@@ -90,12 +90,12 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         Patient patient = Patient.fromJson(json);
         Uri uri = null;
         try (Cursor c = mContentResolver.query(Patients.CONTENT_URI, null,
-            "_id = ?", new String[] {mPatientId}, null)) {
+            Patients.ID + " = ?", new String[] {mPatientId}, null)) {
             if (c.moveToNext()) {
                 LOG.i("Updating existing local patient.");
                 uri = Patients.CONTENT_URI.buildUpon().appendPath(mPatientId).build();
                 mContentResolver.update(uri, patient.toContentValues(),
-                    "_id = ?", new String[] {mPatientId});
+                    Patients.ID + " = ?", new String[] {mPatientId});
             } else {
                 LOG.i("Adding new local copy of patient.");
                 uri = mContentResolver.insert(
@@ -127,6 +127,6 @@ public class DownloadSinglePatientTask extends AsyncTask<Void, Void, ItemFetchFa
         // and propagates a new event to report success/failure.
         mTaskFactory.newFetchItemTask(
             Patients.CONTENT_URI, null, new UuidFilter(), mUuid,
-            mConverterPack.patient, mBus).execute();
+            mLoaderSet.patientLoader, mBus).execute();
     }
 }

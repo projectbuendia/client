@@ -36,7 +36,7 @@ import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.sync.SyncAccountService;
-import org.projectbuendia.client.sync.providers.Contracts.Patients;
+import org.projectbuendia.client.providers.Contracts.Patients;
 import org.projectbuendia.client.utils.RelativeDateTimeFormatter;
 import org.projectbuendia.client.utils.Utils;
 
@@ -137,7 +137,7 @@ public class GoToPatientDialogFragment extends DialogFragment {
                 mPatientSearchResult.setText("");
             } else {
                 try (Cursor cursor = getActivity().getContentResolver().query(
-                    Patients.CONTENT_URI, null, "_id = ?", new String[] {id}, null)) {
+                    Patients.CONTENT_URI, null, Patients.ID + " = ?", new String[] {id}, null)) {
                     if (cursor.moveToNext()) {
                         String uuid = Utils.getString(cursor, Patients.UUID, null);
                         String givenName = Utils.getString(cursor, Patients.GIVEN_NAME, "");

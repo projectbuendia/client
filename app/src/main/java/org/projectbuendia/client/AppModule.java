@@ -27,6 +27,7 @@ import org.projectbuendia.client.ui.SettingsActivity;
 import org.projectbuendia.client.ui.UpdateNotificationController;
 import org.projectbuendia.client.ui.chart.PatientChartActivity;
 import org.projectbuendia.client.ui.dialogs.GoToPatientDialogFragment;
+import org.projectbuendia.client.ui.dialogs.EditPatientDialogFragment;
 import org.projectbuendia.client.ui.lists.BaseSearchablePatientListActivity;
 import org.projectbuendia.client.ui.lists.FilteredPatientListActivity;
 import org.projectbuendia.client.ui.lists.LocationListActivity;
@@ -36,7 +37,6 @@ import org.projectbuendia.client.ui.lists.SingleLocationActivity;
 import org.projectbuendia.client.ui.lists.SingleLocationFragment;
 import org.projectbuendia.client.ui.login.LoginActivity;
 import org.projectbuendia.client.ui.login.LoginFragment;
-import org.projectbuendia.client.ui.newpatient.NewPatientActivity;
 import org.projectbuendia.client.updater.UpdateModule;
 import org.projectbuendia.client.user.UserModule;
 import org.projectbuendia.client.utils.UtilsModule;
@@ -62,12 +62,12 @@ import dagger.Provides;
 
         // TODO: Move these into activity-specific modules.
         // Activities
-        NewPatientActivity.class,
         BaseActivity.class,
         PatientChartActivity.class,
         FilteredPatientListActivity.class,
         PatientListController.class,
         GoToPatientDialogFragment.class,
+        EditPatientDialogFragment.class,
         BaseSearchablePatientListActivity.class,
         SingleLocationActivity.class,
         LocationListActivity.class,

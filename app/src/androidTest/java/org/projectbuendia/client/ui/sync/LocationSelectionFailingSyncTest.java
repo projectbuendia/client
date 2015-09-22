@@ -96,8 +96,7 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
 
     /** Tests that 'Retry' actually works if the the retried sync is successful. */
     public void testSyncFailedDialog_RetryButtonActuallyRetries() {
-        setWifiEnabled(false);
-        try {
+        try (WifiDisabler wd = new WifiDisabler()) {
             waitForSyncFailure();
 
             expectVisibleSoon(viewWithText(R.string.sync_failed_retry));
@@ -115,8 +114,6 @@ public class LocationSelectionFailingSyncTest extends SyncTestCase {
             expectVisible(viewWithText("Discharged"));
 
             screenshot("After Sync Completed");
-        } finally {
-            cleanupWifi();
         }
     }
 

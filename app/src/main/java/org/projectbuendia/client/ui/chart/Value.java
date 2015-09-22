@@ -7,10 +7,10 @@ import com.google.common.collect.ImmutableSet;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
-import org.projectbuendia.client.models.Concepts;
-import org.projectbuendia.client.net.json.ConceptType;
+import org.projectbuendia.client.models.ConceptUuids;
+import org.projectbuendia.client.json.ConceptType;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Set;
  * The observed value for a concept, broken out into fields of various types
  * and representations to facilitate rendering in a template.
  */
-@Deprecated // to be replaced by LocalizedObs
+@Deprecated // to be replaced by ObsValue
 class Value implements Comparable<Value> {
     public static ObsTimeComparator BY_OBS_TIME = new ObsTimeComparator();
     public DateTime observed;  // when the observation was taken
@@ -35,15 +35,15 @@ class Value implements Comparable<Value> {
     public Boolean bool;  // true or false for a boolean value (type "Boolean");
     static final int MAX_ABBREV_CHARS = 3;
 
-    public Value(LocalizedObs obs, Chronology chronology) {
+    public Value(ObsValue obs, Chronology chronology) {
         final Set<String> FALSE_CODED_VALUES = new ImmutableSet.Builder<String>().add(
-            Concepts.UNKNOWN_UUID).addAll(ChartDataHelper.NO_SYMPTOM_VALUES).build();
+            ConceptUuids.UNKNOWN_UUID).addAll(ChartDataHelper.NO_SYMPTOM_VALUES).build();
         if (obs == null) {
             observed = null;
             present = false;
             return;
         }
-        observed = obs.encounterTime;
+        observed = obs.obsTime;
         present = obs.value != null;
         if (present) {
             switch (getValueType(obs.conceptUuid, obs.conceptType, obs.value)) {
@@ -55,7 +55,7 @@ class Value implements Comparable<Value> {
                     break;
                 case CODED:
                     uuid = obs.value;
-                    name = obs.localizedValue;
+                    name = obs.valueName;
                     int abbrevLength = name.indexOf('.');
                     if (abbrevLength >= 1 && abbrevLength <= MAX_ABBREV_CHARS) {
                         abbrev = name.substring(0, abbrevLength);
@@ -74,26 +74,26 @@ class Value implements Comparable<Value> {
 
     static Type getValueType(String conceptUuid, ConceptType conceptType, String value) {
         final Set<String> CODED_CONCEPTS = ImmutableSet.of(
-            Concepts.GENERAL_CONDITION_UUID,
-            Concepts.RESPONSIVENESS_UUID,
-            Concepts.MOBILITY_UUID,
-            Concepts.PAIN_UUID,
-            Concepts.WEAKNESS_UUID,
-            Concepts.APPETITE_UUID,
-            Concepts.OEDEMA_UUID);
+            ConceptUuids.GENERAL_CONDITION_UUID,
+            ConceptUuids.RESPONSIVENESS_UUID,
+            ConceptUuids.MOBILITY_UUID,
+            ConceptUuids.PAIN_UUID,
+            ConceptUuids.WEAKNESS_UUID,
+            ConceptUuids.APPETITE_UUID,
+            ConceptUuids.OEDEMA_UUID);
         final Set<String> NUMERIC_CONCEPTS = ImmutableSet.of(
-            Concepts.TEMPERATURE_UUID,
-            Concepts.VOMITING_UUID,
-            Concepts.DIARRHEA_UUID,
-            Concepts.WEIGHT_UUID,
-            Concepts.PULSE_UUID,
-            Concepts.RESPIRATION_UUID);
+            ConceptUuids.TEMPERATURE_UUID,
+            ConceptUuids.VOMITING_UUID,
+            ConceptUuids.DIARRHEA_UUID,
+            ConceptUuids.WEIGHT_UUID,
+            ConceptUuids.PULSE_UUID,
+            ConceptUuids.RESPIRATION_UUID);
         final Set<String> TEXT_CONCEPTS = ImmutableSet.of(
-            Concepts.NOTES_UUID);
+            ConceptUuids.NOTES_UUID);
         final Set<String> BOOLEAN_ANSWERS = ImmutableSet.of(
-            Concepts.YES_UUID,
-            Concepts.NO_UUID,
-            Concepts.UNKNOWN_UUID);
+            ConceptUuids.YES_UUID,
+            ConceptUuids.NO_UUID,
+            ConceptUuids.UNKNOWN_UUID);
 
         if (NUMERIC_CONCEPTS.contains(conceptUuid)) return Type.NUMERIC;
         if (TEXT_CONCEPTS.contains(conceptUuid)) return Type.TEXT;
@@ -146,14 +146,14 @@ class Value implements Comparable<Value> {
      */
     public Integer getCodedValueOrdering() {
         final Map<String, Integer> CODED_VALUE_ORDERING = new ImmutableMap.Builder<String, Integer>()
-            .put(Concepts.NO_UUID, 0)
-            .put(Concepts.NONE_UUID, 1)
-            .put(Concepts.NORMAL_UUID, 2)
-            .put(Concepts.SOLID_FOOD_UUID, 3)
-            .put(Concepts.MILD_UUID, 4)
-            .put(Concepts.MODERATE_UUID, 5)
-            .put(Concepts.SEVERE_UUID, 6)
-            .put(Concepts.YES_UUID, 7).build();
+            .put(ConceptUuids.NO_UUID, 0)
+            .put(ConceptUuids.NONE_UUID, 1)
+            .put(ConceptUuids.NORMAL_UUID, 2)
+            .put(ConceptUuids.SOLID_FOOD_UUID, 3)
+            .put(ConceptUuids.MILD_UUID, 4)
+            .put(ConceptUuids.MODERATE_UUID, 5)
+            .put(ConceptUuids.SEVERE_UUID, 6)
+            .put(ConceptUuids.YES_UUID, 7).build();
         Integer cvo = CODED_VALUE_ORDERING.get(uuid);
         return cvo == null ? 0 : cvo;
     }

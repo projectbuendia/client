@@ -38,18 +38,18 @@ import org.projectbuendia.client.events.data.EncounterAddFailedEvent;
 import org.projectbuendia.client.events.data.ItemFetchedEvent;
 import org.projectbuendia.client.events.data.PatientUpdateFailedEvent;
 import org.projectbuendia.client.events.sync.SyncSucceededEvent;
+import org.projectbuendia.client.json.JsonUser;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.models.Chart;
-import org.projectbuendia.client.models.Concepts;
+import org.projectbuendia.client.models.ConceptUuids;
 import org.projectbuendia.client.models.Encounter;
 import org.projectbuendia.client.models.Encounter.Observation;
 import org.projectbuendia.client.models.LocationTree;
 import org.projectbuendia.client.models.Order;
 import org.projectbuendia.client.models.Patient;
 import org.projectbuendia.client.models.PatientDelta;
-import org.projectbuendia.client.net.json.JsonUser;
 import org.projectbuendia.client.sync.ChartDataHelper;
-import org.projectbuendia.client.sync.LocalizedObs;
+import org.projectbuendia.client.sync.ObsValue;
 import org.projectbuendia.client.sync.SyncManager;
 import org.projectbuendia.client.ui.dialogs.AssignLocationDialog;
 import org.projectbuendia.client.utils.EventBusRegistrationInterface;
@@ -100,7 +100,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
     private DateTime mLastObsTime = null;
     private String mPatientUuid = "";
     private Map<String, org.projectbuendia.client.sync.Order> mOrdersByUuid;
-    private List<LocalizedObs> mObservations;
+    private List<ObsValue> mObservations;
 
     // This value is incremented whenever the controller is activated or suspended.
     // A "phase" is a period of time between such transition points.
@@ -126,7 +126,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
         /** Updates the UI showing current observation values for this patient. */
         void updatePatientVitalsUi(
-            Map<String, LocalizedObs> observations,
+            Map<String, ObsValue> observations,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
 
@@ -139,8 +139,8 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         /** Updates the UI showing the history of observations and orders for this patient. */
         void updateTilesAndGrid(
             Chart chart,
-            Map<String, LocalizedObs> latestObservations,
-            List<LocalizedObs> observations,
+            Map<String, ObsValue> latestObservations,
+            List<ObsValue> observations,
             List<org.projectbuendia.client.sync.Order> orders,
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
@@ -168,6 +168,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         void showNewOrderDialog(String patientUuid);
         void showOrderExecutionDialog(org.projectbuendia.client.sync.Order order, Interval
             interval, List<DateTime> executionTimes);
+        void showEditPatientDialog(Patient patient);
     }
 
     /** Sends ODK form data. */
@@ -315,16 +316,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             preset.clinicianName = user.fullName;
         }
 
-        Map<String, LocalizedObs> observations =
-            mChartHelper.getMostRecentObservations(mPatientUuid);
+        Map<String, ObsValue> observations =
+            mChartHelper.getLatestObservations(mPatientUuid);
 
-        if (observations.containsKey(Concepts.PREGNANCY_UUID)
-            && Concepts.YES_UUID.equals(observations.get(Concepts.PREGNANCY_UUID).value)) {
+        if (observations.containsKey(ConceptUuids.PREGNANCY_UUID)
+            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.PREGNANCY_UUID).value)) {
             preset.pregnant = Preset.YES;
         }
 
-        if (observations.containsKey(Concepts.IV_UUID)
-            && Concepts.YES_UUID.equals(observations.get(Concepts.IV_UUID).value)) {
+        if (observations.containsKey(ConceptUuids.IV_UUID)
+            && ConceptUuids.YES_UUID.equals(observations.get(ConceptUuids.IV_UUID).value)) {
             preset.ivFitted = Preset.YES;
         }
 
@@ -335,6 +336,11 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         mUi.fetchAndShowXform(
             request.requestIndex, request.formUuid,
             mPatient.toOdkPatient(), preset);
+    }
+
+    public void onEditPatientPressed() {
+        Utils.logUserAction("edit_patient_pressed", "uuid", mPatientUuid);
+        mUi.showEditPatientDialog(mPatient);
     }
 
     private boolean dialogShowing() {
@@ -401,10 +407,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         DateTime start = new DateTime(startMillis);
         Interval interval = new Interval(start, start.plusDays(1));
         List<DateTime> executionTimes = new ArrayList<>();
-        for (LocalizedObs obs : mObservations) {
+        for (ObsValue obs : mObservations) {
             if (AppModel.ORDER_EXECUTED_CONCEPT_UUID.equals(obs.conceptUuid) &&
                 order.uuid.equals(obs.value)) {
-                executionTimes.add(obs.encounterTime);
+                executionTimes.add(obs.obsTime);
             }
         }
         mUi.showOrderExecutionDialog(order, interval, executionTimes);
@@ -435,7 +441,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             DateTime.now(),
             new Observation[] {
                 new Observation(
-                    Concepts.GENERAL_CONDITION_UUID,
+                    ConceptUuids.GENERAL_CONDITION_UUID,
                     newConditionUuid,
                     Observation.Type.NON_DATE)
             }, null);
@@ -450,7 +456,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
                 @Override public boolean onLocationSelected(String locationUuid) {
                     PatientDelta delta = new PatientDelta();
                     delta.assignedLocationUuid = Optional.of(locationUuid);
-                    mAppModel.updatePatient(mCrudEventBus, mPatient, delta);
+                    mAppModel.updatePatient(mCrudEventBus, mPatient.uuid, delta);
                     Utils.logUserAction("location_assigned");
                     return false;
                 }
@@ -478,10 +484,10 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
         mObservations = mChartHelper.getObservations(mPatientUuid);
-        Map<String, LocalizedObs> conceptsToLatestObservations =
-            new HashMap<>(mChartHelper.getMostRecentObservations(mPatientUuid));
-        for (LocalizedObs obs : mObservations) {
-            mLastObsTime = Utils.max(mLastObsTime, obs.encounterTime);
+        Map<String, ObsValue> conceptsToLatestObservations =
+            new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
+        for (ObsValue obs : mObservations) {
+            mLastObsTime = Utils.max(mLastObsTime, obs.obsTime);
         }
         List<org.projectbuendia.client.sync.Order> orders = mChartHelper.getOrders(mPatientUuid);
         mOrdersByUuid = new HashMap<>();
@@ -492,9 +498,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
-            conceptsToLatestObservations, Concepts.ADMISSION_DATE_UUID);
+            conceptsToLatestObservations, ConceptUuids.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
-            conceptsToLatestObservations, Concepts.FIRST_SYMPTOM_DATE_UUID);
+            conceptsToLatestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
         mUi.updateLastObsTimeUi(mLastObsTime);
         mUi.updatePatientVitalsUi(
             conceptsToLatestObservations, admissionDate, firstSymptomsDate);
@@ -506,9 +512,9 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
 
     /** Retrieves the value of a date observation as a LocalDate. */
     private LocalDate getObservedDate(
-        Map<String, LocalizedObs> observations, String conceptUuid) {
-        LocalizedObs obs = observations.get(conceptUuid);
-        return obs == null ? null : Utils.toLocalDate(obs.localizedValue);
+        Map<String, ObsValue> observations, String conceptUuid) {
+        ObsValue obs = observations.get(conceptUuid);
+        return obs == null ? null : Utils.toLocalDate(obs.valueName);
     }
 
     private synchronized void updatePatientLocationUi() {

@@ -26,7 +26,7 @@ import org.projectbuendia.client.AppSettings;
 import org.projectbuendia.client.BuildConfig;
 import org.projectbuendia.client.sync.SyncAdapter.SyncOption;
 import org.projectbuendia.client.sync.SyncAdapter.SyncPhase;
-import org.projectbuendia.client.sync.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts;
 import org.projectbuendia.client.utils.Logger;
 
 import javax.inject.Inject;

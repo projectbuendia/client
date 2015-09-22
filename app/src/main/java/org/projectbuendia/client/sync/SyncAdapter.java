@@ -35,23 +35,23 @@ import org.projectbuendia.client.App;
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.models.AppModel;
 import org.projectbuendia.client.net.OpenMrsChartServer;
-import org.projectbuendia.client.net.json.JsonChart;
-import org.projectbuendia.client.net.json.JsonConcept;
-import org.projectbuendia.client.net.json.JsonConceptResponse;
-import org.projectbuendia.client.net.json.JsonPatientRecord;
-import org.projectbuendia.client.net.json.JsonPatientRecordResponse;
-import org.projectbuendia.client.sync.providers.BuendiaProvider;
-import org.projectbuendia.client.sync.providers.Contracts;
-import org.projectbuendia.client.sync.providers.Contracts.ChartItems;
-import org.projectbuendia.client.sync.providers.Contracts.ConceptNames;
-import org.projectbuendia.client.sync.providers.Contracts.Concepts;
-import org.projectbuendia.client.sync.providers.Contracts.LocationNames;
-import org.projectbuendia.client.sync.providers.Contracts.Locations;
-import org.projectbuendia.client.sync.providers.Contracts.Misc;
-import org.projectbuendia.client.sync.providers.Contracts.Observations;
-import org.projectbuendia.client.sync.providers.Contracts.Orders;
-import org.projectbuendia.client.sync.providers.Contracts.Patients;
-import org.projectbuendia.client.sync.providers.SQLiteDatabaseTransactionHelper;
+import org.projectbuendia.client.json.JsonChart;
+import org.projectbuendia.client.json.JsonConcept;
+import org.projectbuendia.client.json.JsonConceptResponse;
+import org.projectbuendia.client.json.JsonPatientRecord;
+import org.projectbuendia.client.json.JsonPatientRecordResponse;
+import org.projectbuendia.client.providers.BuendiaProvider;
+import org.projectbuendia.client.providers.Contracts;
+import org.projectbuendia.client.providers.Contracts.ChartItems;
+import org.projectbuendia.client.providers.Contracts.ConceptNames;
+import org.projectbuendia.client.providers.Contracts.Concepts;
+import org.projectbuendia.client.providers.Contracts.LocationNames;
+import org.projectbuendia.client.providers.Contracts.Locations;
+import org.projectbuendia.client.providers.Contracts.Misc;
+import org.projectbuendia.client.providers.Contracts.Observations;
+import org.projectbuendia.client.providers.Contracts.Orders;
+import org.projectbuendia.client.providers.Contracts.Patients;
+import org.projectbuendia.client.providers.SQLiteDatabaseTransactionHelper;
 import org.projectbuendia.client.user.UserManager;
 import org.projectbuendia.client.utils.Logger;
 
@@ -330,7 +330,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeFullSyncStartTime(ContentProviderClient provider, Instant syncStartTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_START_TIME, syncStartTime.getMillis());
+        cv.put(Misc.FULL_SYNC_START_MILLIS, syncStartTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
@@ -379,7 +379,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             // This is safe because we have implemented insert on the content provider
             // with replace.
             ContentValues conceptInsert = new ContentValues();
-            conceptInsert.put(Concepts._ID, concept.uuid);
+            conceptInsert.put(Concepts.UUID, concept.uuid);
             conceptInsert.put(Concepts.XFORM_ID, concept.xform_id);
             conceptInsert.put(Concepts.CONCEPT_TYPE, concept.type.name());
             conceptInserts.add(conceptInsert);
@@ -410,6 +410,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         checkCancellation("before inserting concept names");
         provider.bulkInsert(ConceptNames.CONTENT_URI,
             conceptNameInserts.toArray(new ContentValues[conceptNameInserts.size()]));
+
+        ChartDataHelper.invalidateLoadedConceptData();
     }
 
     private void updatePatients(SyncResult syncResult)
@@ -489,7 +491,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeFullSyncEndTime(ContentProviderClient provider, Instant syncEndTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.FULL_SYNC_END_TIME, syncEndTime.getMillis());
+        cv.put(Misc.FULL_SYNC_END_MILLIS, syncEndTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
@@ -514,7 +516,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             c = provider.query(
                 Misc.CONTENT_URI,
-                new String[] {Misc.OBS_SYNC_TIME}, null, null, null);
+                new String[] {Misc.OBS_SYNC_END_MILLIS}, null, null, null);
             if (c.moveToNext()) {
                 return new Instant(c.getLong(0));
             } else {
@@ -532,7 +534,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                                   RequestFuture<JsonPatientRecordResponse> listFuture, TimingLogger timingLogger)
         throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting incremental charts");
-        chartServer.getIncrementalCharts(lastSyncTime, listFuture, listFuture);
+        chartServer.getIncrementalEncounters(lastSyncTime, listFuture, listFuture);
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed incremental response");
         final JsonPatientRecordResponse response =
@@ -569,7 +571,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         RequestFuture<JsonPatientRecordResponse> future, TimingLogger timingLogger)
         throws RemoteException, InterruptedException, ExecutionException, TimeoutException {
         LOG.d("requesting all charts");
-        chartServer.getAllCharts(future, future);
+        chartServer.getAllEncounters(future, future);
         ArrayList<String> toDelete = new ArrayList<>();
         ArrayList<ContentValues> toInsert = new ArrayList<>();
         LOG.d("awaiting parsed response");
@@ -607,7 +609,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void storeLastSyncTime(ContentProviderClient provider, Instant newSyncTime)
         throws RemoteException {
         ContentValues cv = new ContentValues();
-        cv.put(Misc.OBS_SYNC_TIME, newSyncTime.getMillis());
+        cv.put(Misc.OBS_SYNC_END_MILLIS, newSyncTime.getMillis());
         provider.insert(Misc.CONTENT_URI, cv);
     }
 
@@ -629,9 +631,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         select.append(")");
         provider.delete(Observations.CONTENT_URI, select.toString(),
             new String[0]);
-    }
-
-    private void reportProgress(int progressIncrement) {
-        reportProgress(progressIncrement, null);
     }
 }
