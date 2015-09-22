@@ -62,7 +62,15 @@ On your tablet, enable Developer options by opening the Settings app, selecting 
 
 Connect a USB cable from your computer to your tablet.  Click OK when asked if you want to allow USB debugging.
 
-Click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click **OK**.
+Set up your system to detect your device.
+  * if you're developing on Windows, you need to install a USB driver for adb. For an installation guide and links to OEM drivers, see this OEM USB Drivers [document](http://developer.android.com/tools/extras/oem-usb.html).
+  * If you're developing on Mac OS X, it just works. Skip this step.
+  * If you're developing on Ubuntu Linux, you need to add a `udev` rules file that contains a USB configuration for each type of device you want to use for development. In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the `ATTR{idVendor}` property. For a list of vendor IDs, see [USB Vendor IDs](http://developer.android.com/tools/device.html#VendorIds). To set up device detection on Ubuntu Linux.
+      * Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+      * Use this format to add each vendor to the file: `SUBSYSTEM=="usb", ATTR{idVendor}=="054c", MODE="0666", GROUP="plugdev"`. In this example, the vendor ID **054c** is for **Sony**. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+      * Now execute: `chmod a+r /etc/udev/rules.d/51-android.rules`.
+
+On Android Studio, click the Run button (green triangle in the toolbar at the top).  For **Module** select **app** and click **OK**.
 
 Wait a few minutes for the app to build (you can see progress in the status bar at the bottom).  When it's done, Android Studio will automatically install it on the tablet and start it.
 
