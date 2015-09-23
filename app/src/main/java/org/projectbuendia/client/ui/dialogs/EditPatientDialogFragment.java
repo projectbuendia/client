@@ -118,6 +118,8 @@ public class EditPatientDialogFragment extends DialogFragment {
         String ageYears = mAgeYears.getText().toString().trim();
         String ageMonths = mAgeMonths.getText().toString().trim();
         LocalDate birthdate = null;
+        LocalDate admissionDate = LocalDate.now();
+
         if (!ageYears.isEmpty() || !ageMonths.isEmpty()) {
             birthdate = LocalDate.now().minusYears(Integer.parseInt("0" + ageYears))
                 .minusMonths(Integer.parseInt("0" + ageMonths));
@@ -148,6 +150,8 @@ public class EditPatientDialogFragment extends DialogFragment {
         delta.familyName = Optional.fromNullable(familyName);
         delta.birthdate = Optional.fromNullable(birthdate);
         delta.gender = Optional.of(sex);
+        delta.admissionDate = Optional.of(admissionDate);
+
         Bundle args = getArguments();
         if (args.getBoolean("new")) {
             if (id != null || givenName != null || familyName != null || birthdate != null
