@@ -29,7 +29,6 @@ import org.projectbuendia.client.events.sync.SyncFinishedEvent;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 import org.projectbuendia.client.ui.sync.EventBusIdlingResource;
 import org.projectbuendia.client.utils.Logger;
-import org.projectbuendia.client.widgets.DataGridView;
 
 import java.util.UUID;
 
@@ -288,8 +287,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
 
         scrollToAndExpectVisible(viewThat(
             hasText(value),
-            hasAncestorThat(isInRow(row, ROW_HEIGHT)),
-            hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
+            hasAncestorThat(isInRow(row, ROW_HEIGHT))));
     }
 
     /** Ensures that non-overlapping observations for the same encounter are combined. */
@@ -321,8 +319,7 @@ public class PatientChartActivityTest extends FunctionalTestCase {
         // TODO/completeness: actually check dateKey
         scrollToAndExpectVisible(viewThat(
             hasAncestorThat(isInRow(row, ROW_HEIGHT)),
-            hasBackground(getActivity().getResources().getDrawable(R.drawable.chart_cell_active)),
-            hasAncestorThat(isA(DataGridView.LinkableRecyclerView.class))));
+            hasBackground(getActivity().getResources().getDrawable(R.drawable.chart_cell_active))));
     }
 
     /** Exercises all fields in the encounter form, except for encounter time. */
