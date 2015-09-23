@@ -108,7 +108,9 @@ public final class PatientChartControllerTest extends AndroidTestCase {
         verify(mMockUi).updateTilesAndGrid(
             null, new HashMap<String, ObsValue>(),
             allObservations, ImmutableList.<Order> of(), null, null);
-        verify(mMockUi).updatePatientVitalsUi(recentObservations, null, null);
+        verify(mMockUi).updateAdmissionDateAndFirstSymptomsDateUi(null, null);
+        verify(mMockUi).updateEbolaPcrTestResultUi(recentObservations);
+        verify(mMockUi).updatePregnancyAndIvStatusUi(recentObservations);
     }
 
     /** Tests that the UI is given updated patient data when patient data is fetched. */
