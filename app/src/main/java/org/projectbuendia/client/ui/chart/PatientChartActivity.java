@@ -248,7 +248,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
         });
         mPatientGenderAgeView.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
-                Utils.logUserAction("full_name_pressed");
+                Utils.logUserAction("gender_age_pressed");
                 mController.onEditPatientPressed();
             }
         });
@@ -329,6 +329,7 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             PatientChartActivity.this.setTitle(title);
         }
 
+        // TODO/cleanup: We should format this date in chart.html and get rid of this method.
         @Override public void updateLastObsTimeUi(DateTime lastObsTime) {
             if (lastObsTime == null) {
                 mLastObservationTimeView.setText(R.string.last_observation_none);
