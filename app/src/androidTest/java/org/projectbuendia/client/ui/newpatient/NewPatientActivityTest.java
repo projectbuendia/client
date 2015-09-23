@@ -11,6 +11,10 @@
 
 package org.projectbuendia.client.ui.newpatient;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormat;
+
 import org.projectbuendia.client.R;
 import org.projectbuendia.client.ui.FunctionalTestCase;
 
@@ -23,88 +27,61 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 public class NewPatientActivityTest extends FunctionalTestCase {
 
     /** Tests adding a new patient with a location. */
-    public void testNewPatientWithLocation() {
+    public void testNewPatient() {
+
+        // Create the patient
         inUserLoginGoToPatientCreation();
         screenshot("Test Start");
         String id = Long.toString(new Date().getTime()%100000);
-        populateNewPatientFieldsExceptLocation(id);
-        scrollToAndClick(viewWithId(R.id.patient_creation_button_change_location));
+        populateNewPatientField(id);
+        click(viewWithText("OK"));
+        waitForProgressFragment();
+        screenshot("On Patient Chart");
+
+        // Assign a location to the patient
+        click(viewWithId(R.id.attribute_location));
         screenshot("After Location Dialog Shown");
         click(viewWithText(LOCATION_NAME));
         screenshot("After Location Selected");
-        click(viewWithText("Create"));
-        screenshot("After Create Pressed");
 
-        waitForProgressFragment();
+        pressBack();
 
         // The new patient should be visible in the list for their location
         click(viewWithText(LOCATION_NAME));
         screenshot("In " + LOCATION_NAME);
         inPatientListClickPatientWithId(id);
         screenshot("After Patient Clicked");
-    }
-
-    /** Populates all the fields on the New Patient screen, except location. */
-    private void populateNewPatientFieldsExceptLocation(String id) {
-        screenshot("Before Patient Populated");
-        String given = "Given" + id;
-        String family = "Family" + id;
-        type(id, viewWithId(R.id.patient_creation_text_patient_id));
-        type(given, viewWithId(R.id.patient_creation_text_patient_given_name));
-        type(family, viewWithId(R.id.patient_creation_text_patient_family_name));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_age_years));
-        type(id.substring(id.length() - 2), viewWithId(R.id.patient_creation_age_months));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_male));
-        click(viewWithId(R.id.patient_creation_radiogroup_age_sex_female));
-        screenshot("After Patient Populated");
-    }
-
-    /** Tests adding a new patient with no location. */
-    public void testNewPatientWithoutLocation() {
-        inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
-        String id = Long.toString(new Date().getTime()%100000);
-        populateNewPatientFieldsExceptLocation(id);
-        screenshot("After Patient Populated");
-        click(viewWithText("Create"));
-        screenshot("After Create Pressed");
-
-        waitForProgressFragment();
-
-        // The new patient should be visible in the list for Triage zone.
-        click(viewWithText("Triage"));
-        screenshot("In Triage");
-        inPatientListClickPatientWithId(id);
-        screenshot("After Patient Clicked");
-
-        // The admission date should be visible right after adding a patient.
-        // Flaky because of potential periodic syncs.
-        expectVisibleWithin(90000, viewThat(
-            hasAncestorThat(withId(R.id.attribute_admission_days)),
-            hasText("Day 1")));
 
         // The symptom onset date should not be assigned a default value.
         expectVisible(viewThat(
             hasAncestorThat(withId(R.id.attribute_symptoms_onset_days)),
             hasText("–")));
+
+        // The admission date should be visible right after adding a patient.
+        // Flaky because of potential periodic syncs.
+        expectVisibleWithin(100000, viewThat(
+            hasAncestorThat(withId(R.id.attribute_admission_days)),
+            hasText("Day 1")));
+
+        // The last observation should be today.
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d, yyyy");
+        expectVisibleWithin(100000, viewThat(
+            withId(R.id.patient_chart_last_observation_date_time),
+            hasTextContaining(formatter.print(DateTime.now()))));
     }
 
-    /** Tests that a confirmation prompt appears upon cancelling the form. */
-    public void testNewPatientCancel() {
-        inUserLoginGoToPatientCreation();
-        screenshot("Test Start");
-        type("xyz", viewWithId(R.id.patient_creation_text_patient_id));
-        screenshot("After Id Added");
-        pressBack(); // close the keyboard
-        screenshot("After Keyboard Closed");
-
-        // Attempting to back out of the activity should trigger a prompt
-        pressBack();
-        expectVisible(viewThat(hasTextContaining("Discard")));
-        screenshot("Discard Prompt");
-
-        // Dismiss the prompt
-        click(viewWithText("Yes"));
-        screenshot("Discard Prompt Dismissed");
+    /** Populates all the fields on the New Patient screen. */
+    private void populateNewPatientField(String id) {
+        screenshot("Before Patient Populated");
+        String given = "Given" + id;
+        String family = "Family" + id;
+        type(id, viewWithId(R.id.patient_id));
+        type(given, viewWithId(R.id.patient_given_name));
+        type(family, viewWithId(R.id.patient_family_name));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_years));
+        type(id.substring(id.length() - 2), viewWithId(R.id.patient_age_months));
+        click(viewWithId(R.id.patient_sex_male));
+        click(viewWithId(R.id.patient_sex_female));
+        screenshot("After Patient Populated");
     }
 }
