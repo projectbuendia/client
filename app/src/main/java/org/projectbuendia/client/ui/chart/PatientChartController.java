@@ -124,11 +124,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         /** Sets the activity title. */
         void setTitle(String title);
 
-        /** Updates the UI showing current observation values for this patient. */
-        void updatePatientVitalsUi(
-            Map<String, ObsValue> observations,
+        /** Updates the UI showing the admission date and first symptoms date for this patient. */
+        void updateAdmissionDateAndFirstSymptomsDateUi(
             LocalDate admissionDate,
             LocalDate firstSymptomsDate);
+
+        /** Updates the UI showing Ebola PCR lab test results for this patient. */
+        void updateEbolaPcrTestResultUi(Map<String, ObsValue> observations);
+
+        /** Updates the UI showing the pregnancy status and IV status for this patient. */
+        void updatePregnancyAndIvStatusUi(Map<String, ObsValue> observations);
 
         /** Updates the general condition UI with the patient's current condition. */
         void updatePatientConditionUi(String generalConditionUuid);
@@ -484,7 +489,7 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
         // Get the observations and orders
         // TODO: Background thread this, or make this call async-like.
         mObservations = mChartHelper.getObservations(mPatientUuid);
-        Map<String, ObsValue> conceptsToLatestObservations =
+        Map<String, ObsValue> latestObservations =
             new HashMap<>(mChartHelper.getLatestObservations(mPatientUuid));
         for (ObsValue obs : mObservations) {
             mLastObsTime = Utils.max(mLastObsTime, obs.obsTime);
@@ -498,15 +503,16 @@ final class PatientChartController implements ChartRenderer.GridJsInterface {
             + orders.size() + " orders");
 
         LocalDate admissionDate = getObservedDate(
-            conceptsToLatestObservations, ConceptUuids.ADMISSION_DATE_UUID);
+            latestObservations, ConceptUuids.ADMISSION_DATE_UUID);
         LocalDate firstSymptomsDate = getObservedDate(
-            conceptsToLatestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
+            latestObservations, ConceptUuids.FIRST_SYMPTOM_DATE_UUID);
         mUi.updateLastObsTimeUi(mLastObsTime);
-        mUi.updatePatientVitalsUi(
-            conceptsToLatestObservations, admissionDate, firstSymptomsDate);
+        mUi.updateAdmissionDateAndFirstSymptomsDateUi(admissionDate, firstSymptomsDate);
+        mUi.updateEbolaPcrTestResultUi(latestObservations);
+        mUi.updatePregnancyAndIvStatusUi(latestObservations);
         mUi.updateTilesAndGrid(
             mChartHelper.getChart(AppModel.CHART_UUID),
-            conceptsToLatestObservations, mObservations, orders,
+            latestObservations, mObservations, orders,
             admissionDate, firstSymptomsDate);
     }
 

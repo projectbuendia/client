@@ -77,17 +77,21 @@ import de.greenrobot.event.EventBus;
 /** Activity displaying a patient's vitals and chart history. */
 public final class PatientChartActivity extends BaseLoggedInActivity {
     private static final Logger LOG = Logger.create();
+
+    // TODO/cleanup: We don't need this anymore.  See updateEbolaPcrTestResultUi below.
     // Minimum PCR Np or L value to be considered negative (displayed as "NEG").
     // 39.95 is chosen as the threshold as it would be displayed as 40.0
     // (and values slightly below 40.0 may be the result of rounding errors).
     private static final double PCR_NEGATIVE_THRESHOLD = 39.95;
+
     private static final String KEY_CONTROLLER_STATE = "controllerState";
     private static final String PATIENT_UUIDS_BUNDLE_KEY = "PATIENT_UUIDS_ARRAY";
+
     private PatientChartController mController;
-    // TODO: Refactor.
     private boolean mIsFetchingXform = false;
     private ProgressDialog mFormLoadingDialog;
     private ProgressDialog mFormSubmissionDialog;
+
     @Inject AppModel mAppModel;
     @Inject EventBus mEventBus;
     @Inject Provider<CrudEventBus> mCrudEventBusProvider;
@@ -96,9 +100,8 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
     @Inject AppSettings mSettings;
     @InjectView(R.id.patient_chart_root) ViewGroup mRootView;
     @InjectView(R.id.attribute_location) PatientAttributeView mPatientLocationView;
-    @InjectView(R.id.attribute_admission_days) PatientAttributeView mPatientAdmissionDaysView;
-    @InjectView(R.id.attribute_symptoms_onset_days)
-    PatientAttributeView mPatientSymptomOnsetDaysView;
+    @InjectView(R.id.attribute_admission_days) PatientAttributeView mAdmissionDaysView;
+    @InjectView(R.id.attribute_symptoms_onset_days) PatientAttributeView mSymptomOnsetDaysView;
     @InjectView(R.id.attribute_pcr) PatientAttributeView mPcr;
     @InjectView(R.id.patient_chart_last_observation_date_time) TextView mLastObservationTimeView;
     @InjectView(R.id.patient_chart_last_observation_label) TextView mLastObservationLabel;
@@ -336,16 +339,29 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
             }
         }
 
-        @Override public void updatePatientVitalsUi(Map<String, ObsValue> observations,
-                                          LocalDate admissionDate, LocalDate firstSymptomsDate) {
+        // TODO/cleanup: As soon as we implement an ObsFormat formatter that displays
+        // a date as a count of days (Utils.dayNumberSince), we can replace this logic
+        // with a format defined in the profile, decide how to arrange the tiles for
+        // admission date, first symptoms date, pregnancy status, IV status, and Ebola
+        // PCR test results, and delete this method.
+        @Override public void updateAdmissionDateAndFirstSymptomsDateUi(
+            LocalDate admissionDate, LocalDate firstSymptomsDate) {
             // TODO: Localize strings in this function.
             int day = Utils.dayNumberSince(admissionDate, LocalDate.now());
-            mPatientAdmissionDaysView.setValue(
+            mAdmissionDaysView.setValue(
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
             day = Utils.dayNumberSince(firstSymptomsDate, LocalDate.now());
-            mPatientSymptomOnsetDaysView.setValue(
+            mSymptomOnsetDaysView.setValue(
                 day >= 1 ? getResources().getString(R.string.day_n, day) : "–");
+        }
 
+        // TODO/cleanup: We don't need this special logic for the Ebola PCR test results
+        // any more, because the two-number format with a "NEG" displayed for numbers
+        // greater than 39.95 can be implemented using a format configured in the profile
+        // (e.g. the format "{1,select,>39.95:NEG;#} / {2,select,>39.95:NEG;#}" with the
+        // concepts "162826,162827").  The only reason we haven't deleted this code is
+        // that we need to do the other tiles like Admission Date to complete the layout.
+        @Override public void updateEbolaPcrTestResultUi(Map<String, ObsValue> observations) {
             // PCR
             ObsValue pcrLObservation = observations.get(ConceptUuids.PCR_L_UUID);
             ObsValue pcrNpObservation = observations.get(ConceptUuids.PCR_NP_UUID);
@@ -394,7 +410,15 @@ public final class PatientChartActivity extends BaseLoggedInActivity {
                         R.string.latest_pcr_label_with_date, dateText));
                 }
             }
+        }
 
+        // TODO/cleanup: We don't need this special logic for the pregnancy and IV fields
+        // anymore, because it can be implemented using a format configured in the profile
+        // (e.g. the format "{1,yes_no,Pregnant} / {2,yes_no,IV fitted}" with the concepts
+        // concepts "5272,f50c9c63-3ff9-4c26-9d18-12bfc58a3d07").  The only reason we haven't
+        // deleted this code is that we need to do the other tiles like Admission Date to
+        // complete the layout.
+        @Override public void updatePregnancyAndIvStatusUi(Map<String, ObsValue> observations) {
             // Pregnancy & IV status
             List<String> specialLabels = new ArrayList<>();
             ObsValue obs;
