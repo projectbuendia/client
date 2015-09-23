@@ -29,6 +29,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.Matchers;
 
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static org.hamcrest.Matchers.allOf;
@@ -221,7 +222,7 @@ public class TestCaseWithMatcherMethods<T extends Activity> extends ActivityInst
     }
 
     public static Matcher<View> hasTextContaining(String text) {
-        return new MatcherWithDescription<>(ViewMatchers.withText(text),
+        return new MatcherWithDescription<>(ViewMatchers.withText(Matchers.containsString(text)),
             "has text containing \"" + text + "\"");
     }
 
